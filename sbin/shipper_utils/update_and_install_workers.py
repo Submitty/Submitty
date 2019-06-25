@@ -33,13 +33,13 @@ def install_worker(user, host):
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user)
+            ssh.connect(hostname = host, username = user, timeout=5)
         except Exception as e:
             print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
             return False
         try:
             command = "sudo {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "INSTALL_SUBMITTY.sh"))
-            (stdin, stdout, stderr) = ssh.exec_command(command)
+            (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
             status = int(stdout.channel.recv_exit_status())
             if status == 0:
                 success = True
@@ -83,18 +83,17 @@ if __name__ == "__main__":
 
       exit_code = run_systemctl_command(worker, 'status')
       if exit_code == 1:
-        print("ERROR: {0}'s worker daemon was active when before rsynching began. Attempting to turn off.".format(worker))
+        print("ERROR: {0}'s worker daemon was active when before rsyncing began. Attempting to turn off.".format(worker))
         exit_code = run_systemctl_command(worker, 'stop')
         if exit_code != 0:
-          print("Could not turn off {0}'s daemon. Please allow rsynching to continue and then attempt another install.".format(worker))
+          print("Could not turn off {0}'s daemon. Please allow rsyncing to continue and then attempt another install.".format(worker))
 
       local_directory = submitty_repository
       remote_host = '{0}@{1}'.format(user, host)
       foreign_directory = submitty_repository
 
-
-      # rsynch the file
-      print("performing rsynch to {0}...".format(worker))
+      # rsync the file
+      print("performing rsync to {0}...".format(worker))
       # If this becomes too slow, we can exculde directories using --exclude.
       # e.g. --exclude=.git --exclude=.setup/data --exclude=site
       command = "rsync -a --no-perms --no-o --omit-dir-times --no-g {0}/ {1}:{2}".format(local_directory, remote_host, foreign_directory)
@@ -104,7 +103,7 @@ if __name__ == "__main__":
       success = install_worker(user, host)
       if success == True:
         print("Installed Submitty on {0}".format(worker))
-        print("Rebooting {0}...".format(worker))
+        print("Restart workers {0}...".format(worker))
         exit_code = run_systemctl_command(worker, 'start')
       else:
         print("Failed to update {0}. This likely indicates an error when installing submitty on the worker. Please attempt an install locally on the worker and inspect for errors.".format(worker))

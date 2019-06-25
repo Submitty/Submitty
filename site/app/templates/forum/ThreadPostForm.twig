@@ -4,13 +4,14 @@
     {% endif %}
 >
 <div class="form-group row" style="position: relative;">
+    <input type="hidden" id="csrf_token" name="csrf_token" value="{{ core.getCsrfToken() }}" data-ays-ignore="true"/>
     {% if show_title %}
     <span class="edit_thread">
         Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
     </span>
     {% endif %}
 
-    {% if show_editcat and core.getUser().getGroup() <= 2 %}
+    {% if show_editcat and core.getUser().accessGrading() %}
         <span style="position:absolute;right: 0px;display:inline-block;">
         <a class="btn btn-primary btn-sm" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
         </span>
@@ -19,20 +20,36 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;position: relative;" class="form-group row">
-        <button type="button" title="Insert a link" onclick="addBBCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fa fa-link fa-1x"></i></button>
-        <button title="Insert a code segment" type="button" onclick="addBBCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fa fa-code fa-1x"></i></button>
-    {% if show_merge_thread_button and core.getUser().getGroup() <= 2 %}
+        <button id="link_btn" type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fas fa-link fa-1x"></i></button>
+        <button id="code_btn" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fas fa-code fa-1x"></i></button>
+    {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary" style="position:absolute;right: 0px;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+    {% endif %}
+    {% if show_lock_date and core.getUser().getGroup() <= 2 %}
+        <label id="label_lock_thread" for="lock_thread_date" style="position:absolute;right: 0px;display:inline-block;margin: 0 2px"> Lock Thread Date
+            <input class="date_picker" placeholder="Lock Thread Date" name="lock_thread_date" id="lock_thread_date" type="text">
+        </label>
+        <script>
+            $(document).ready(function () {
+                flatpickr(".date_picker", {
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                });
+            })
+        </script>
+
     {% endif %}
     </div>
     <div class="form-group row">
-        {% set min_height = (post_textarea_large?"40vmin":"100px") %} 
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};overflow:hidden;" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required></textarea>
+        {% set min_height = (post_textarea_large?"40vmin":"100px") %}
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required></textarea>
     </div>
 <br/>
 {% endif %}
 {% if show_categories %}
-    {% set categories = core.getQueries().getCategories() %}
     <div id="category-selection-container" style="margin-bottom:10px;display: inline-block;" class="form-group row">
         <label for="cat" id="cat_label">Categories</label> <br>
         {% if categories | length == 0 %}
@@ -41,8 +58,9 @@
             </span>
         {% endif %}
         <div id='categories-pick-list'>
-        {% for category in core.getQueries().getCategories() %}
-            <a class="btn cat-buttons" cat-color="{{ category.color }}" style="background-color: {{ category.color }}; color: white;">{{ category.category_desc }}
+
+        {% for category in categories %}
+            <a class="btn cat-buttons" cat-color="{{ category.color }}" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
                 <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
             </a>
         {% endfor %}
@@ -110,8 +128,11 @@
             <option value="1">Resolved</option>
         </select>
         {% endif %}
-        {% if show_announcement and core.getUser().getGroup() <= 2 %}
+        {% if show_announcement and core.getUser().accessFullGrading() %}
             <label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+        {% endif %}
+        {% if show_announcement and core.getUser().accessFullGrading() %}
+            <label style="display:inline-block;" for="EmailAnnouncement">Send Email?</label> <input type="checkbox" style="margin-right:18px;display:inline-block;" name="EmailAnnouncement" value="EmailAnnouncement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
@@ -125,3 +146,10 @@
 </div>
 <br>
 </div>
+<script>
+    $(function(){
+        $("input[name='title']").change(function () {
+            $(this).val($.trim($(this).val()));
+        });
+    });
+</script>

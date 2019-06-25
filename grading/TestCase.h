@@ -45,6 +45,7 @@ public:
 
   int getID() const { return test_case_id; }
   std::string getTitle() const;
+  std::string getTestcaseLabel() const;
   std::string getDetails () const { return _json.value("details",""); }
 
   int getPoints() const { return _json.value("points", 0); }
@@ -95,7 +96,7 @@ public:
 
   // -------------------------------
   // GRADING & GRADERS
-  TestResultsFixedSize do_the_grading (int j) const;
+  TestResultsFixedSize do_the_grading (int j, nlohmann::json complete_config) const;
 
   int numFileGraders() const {
     const nlohmann::json::const_iterator itr = _json.find("validation");
@@ -118,7 +119,7 @@ private:
 
   // -------------------------------
   // PRIVATE HELPER FUNCTIONS
-  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number) const;
+  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json complete_config) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
   // -------------------------------

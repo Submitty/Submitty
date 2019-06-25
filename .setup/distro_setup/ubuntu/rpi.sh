@@ -9,7 +9,7 @@ fi
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../../../config
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../../../config
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
@@ -27,7 +27,6 @@ sudo apt-get install -qqy clisp emacs
 echo "Getting pylint..."
 
 # install pylint for python3 using pip
-apt install -qqy python3-pip
 pip3 install pylint
 pip3 install pillow
 
@@ -39,7 +38,7 @@ echo "Getting mono..."
 # this package allows us to run windows .net executables on linux
 
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-echo "deb http://download.mono-project.com/repo/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/mono-official.list
+echo "deb http://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official.list
 sudo apt-get -qqy update
 
 sudo apt-get -qqy install mono-devel
@@ -55,8 +54,8 @@ if [ ! -d "${SUBMITTY_INSTALL_DIR}/Dafny" ]; then
     chmod 751 ${SUBMITTY_INSTALL_DIR}/Dafny
     pushd ${SUBMITTY_INSTALL_DIR}/Dafny > /dev/null
 
-    DAFNY_VER=v2.1.0
-    DAFNY_FILE=dafny-2.1.0.10108-x64-ubuntu-14.04.zip
+    DAFNY_VER=v2.3.0
+    DAFNY_FILE=dafny-2.3.0.10506-x64-ubuntu-16.04.zip
 
     wget https://github.com/Microsoft/dafny/releases/download/${DAFNY_VER}/${DAFNY_FILE} -o /dev/null > /dev/null 2>&1
     unzip ${DAFNY_FILE} > /dev/null
@@ -84,10 +83,33 @@ apt-get install -qqy swi-prolog > /dev/null 2>&1
 ##################################################
 # Used by Principles of Program Analysis
 
-# TODO: add download & install for soot-develop.jar & rt.jar
-# target:  /usr/local/submity/tools/soot/
+
+# Soot is a Java Bytecode Analysis and Transformation Framework
+
+echo "Getting Soot... "
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/soot
+
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/soot > /dev/null
+rm -rf soot*jar
+# older, requested version:
+curl http://www.cs.rpi.edu/~milanova/soot-develop.jar > soot-develop.jar
+curl http://www.cs.rpi.edu/~milanova/rt.jar > rt.jar
+# most recent libraries:
+curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk.jar > sootclasses-trunk.jar
+curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-develop/build/sootclasses-trunk-jar-with-dependencies.jar > sootclasses-trunk-jar-with-dependencies.jar
+
+#
+-o /dev/null > /dev/null 2>&1
+popd > /dev/null
+
+# fix all java_tools permissions
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+
 
 # install haskell
+echo "Getting Haskell... "
 apt-get install -qqy haskell-platform
 apt-get install -qqy ocaml
 
@@ -99,6 +121,7 @@ apt-get install -qqy ocaml
 
 ##################################################
 # Used by Network Programming class
+echo "Getting tools for NetProg... "
 apt-get install -qqy libssl-dev
 
 # don't install these...
@@ -143,19 +166,14 @@ rm glfw-3.2.1.zip
 
 ##################################################
 # Used by Computational Vision course
+echo "installing vision libraries"
 apt-get install -qqy python3-tk
 
-pip3 install -U pip numpy
+pip3 install numpy
 pip3 install matplotlib
 pip3 install opencv-python
-
-
-##################################################
-# Fixup the permissions
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
+pip3 install scipy
+pip3 install scikit-image
 
 ##################################################
 #install some pdflatex packages
@@ -169,3 +187,15 @@ apt-get install -qqy wamerican
 
 # attempt to correct a system with broken dependencies in place
 apt-get -f -qqy install
+
+
+### Fix Python Package Permissions (should always run at the end of this)
+# Setting the permissions are necessary as pip uses the umask of the user/system, which
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
+find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+
+echo "done with RPI specific installs"

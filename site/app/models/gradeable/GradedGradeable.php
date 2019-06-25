@@ -2,10 +2,13 @@
 
 namespace app\models\gradeable;
 
+use app\exceptions\AuthorizationException;
 use app\libraries\Core;
-use app\libraries\DateUtils;
 use \app\models\AbstractModel;
 use app\models\User;
+use app\libraries\FileUtils;
+use app\exceptions\FileNotFoundException;
+use app\exceptions\IOException;
 
 /**
  * Class GradedGradeable
@@ -30,7 +33,7 @@ class GradedGradeable extends AbstractModel {
     protected $ta_graded_gradeable = null;
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @property @var RegradeRequest|null The regrade request for this submitter/gradeable  */
+    /** @property @var RegradeRequest|null The grade inquiry for this submitter/gradeable  */
     protected $regrade_request = null;
 
     /** @property @var array The late day exceptions indexed by user id */
@@ -117,7 +120,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Sets the regrade request for this graded gradeable
+     * Sets the grade inquiry for this graded gradeable
      * @param RegradeRequest $regrade_request
      */
     public function setRegradeRequest(RegradeRequest $regrade_request) {
@@ -125,7 +128,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter has a regrade request
+     * Gets if the submitter has a grade inquiry
      * @return bool
      */
     public function hasRegradeRequest() {
@@ -133,7 +136,7 @@ class GradedGradeable extends AbstractModel {
     }
 
     /**
-     * Gets if the submitter has an active regrade request
+     * Gets if the submitter has an active grade inquiry
      * @return bool
      */
     public function hasActiveRegradeRequest() {
@@ -153,6 +156,177 @@ class GradedGradeable extends AbstractModel {
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
         }
         return $this->late_day_exceptions[$user->getId()] ?? 0;
+    }
+
+    /**
+     * Gets the auto grading score for the active version, or 0 if none
+     * @return int
+     */
+    public function getAutoGradingScore() {
+        if ($this->getAutoGradedGradeable()->hasActiveVersion()) {
+            return $this->getAutoGradedGradeable()->getActiveVersionInstance()->getTotalPoints();
+        }
+        return 0;
+    }
+
+    /**
+     * Gets the ta grading score
+     * Note: This does not check any consistency with submission version
+     *  and graded version
+     * @return float
+     */
+    public function getTaGradingScore() {
+        if ($this->hasTaGradingInfo()) {
+            return $this->getTaGradedGradeable()->getTotalScore();
+        }
+        return 0.0;
+    }
+
+    /**
+     * Gets the total score for this student's active submission
+     * Note: This does not check that the graded version matches
+     *      the active version or any other consistency checking
+     * @return float max(0.0, auto_score + ta_score)
+     */
+    public function getTotalScore() {
+        return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
+    }
+
+    /**
+     * Gets a new 'notebook' which contains information about most recent submissions
+     *
+     * @return array An updated 'notebook' which has the most recent submission data entered into the
+     * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
+     * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
+     * blank.
+     */
+    public function getUpdatedNotebook() {
+
+        // Get notebook
+        $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
+
+        foreach ($newNotebook as $notebookKey => $notebookVal) {
+
+            // Handle if the notebook cell type is short_answer
+            if(isset($notebookVal['type']) &&
+               $notebookVal['type'] == "short_answer") {
+
+                // If no previous submissions set string to default initial_value
+                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
+                {
+                    $recentSubmission = $notebookVal['initial_value'];
+                }
+                // Else there has been a previous submission try to get it
+                else
+                {
+                    try
+                    {
+                        // Try to get the most recent submission
+                        $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+                    }
+                    catch (AuthorizationException $e)
+                    {
+                        // If the user lacked permission then just set to default instructor provided string
+                        $recentSubmission = $notebookVal['initial_value'];
+                    }
+                }
+
+                // Add field to the array
+                $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+            }
+
+            // Handle if notebook cell type is multiple_choice
+            else if(isset($notebookVal['type']) &&
+                    $notebookVal['type'] == "multiple_choice")
+            {
+
+                // If no previous submissions do nothing
+                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
+                {
+                    continue;
+                }
+                // Else there has been a previous submission try to get it
+                else
+                {
+                    try
+                    {
+                        // Try to get the most recent submission
+                        $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+
+                        // Add field to the array
+                        $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                    }
+                    catch (AuthorizationException $e)
+                    {
+                        // If failed to get the most recent submission then skip
+                        continue;
+                    }
+                }
+            }
+        }
+
+        // Operate on notebook to add prev_submission field to inputs
+        return $newNotebook;
+    }
+
+    /**
+     * Get the data from the student's most recent submission
+     *
+     * @param $filename Name of the file to collect the data out of
+     * @throws AuthorizationException if the user lacks permissions to read the submissions file
+     * @throws FileNotFoundException if file with passed filename could not be found
+     * @throws IOException if there was an error reading contents from the file
+     * @return string if successful returns the contents of a students most recent submission
+     */
+    private function getRecentSubmissionContents($filename) {
+
+        // Get items in path to student's submission folder
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $gradable_dir = $this->getGradeableId();
+        $student_id = $this->core->getUser()->getId();
+        $version = $this->getAutoGradedGradeable()->getHighestVersion();
+
+        // Join path items
+        $complete_file_path = FileUtils::joinPaths(
+            $course_path,
+            'submissions',
+            $gradable_dir,
+            $student_id,
+            $version,
+            $filename);
+
+        // Check if the user has permission to access this submission
+        $isAuthorized = $this->core->getAccess()->canI('path.read', ["dir" => "submissions", "path" => $complete_file_path]);
+
+        // If user lacks permission to get the submission contents throw Auth exception
+        if(!$isAuthorized)
+        {
+            throw new AuthorizationException("The user lacks permissions to access this data.");
+        }
+
+        // If desired file does not exist in the most recent submission directory throw exception
+        if(!file_exists($complete_file_path))
+        {
+            throw new FileNotFoundException("Unable to locate submission file.");
+        }
+
+        // Read file contents into string
+        $file_contents = file_get_contents($complete_file_path);
+
+        // If file_contents is False an error has occured
+        if($file_contents === False)
+        {
+            throw new IOException("An error occurred retrieving submission contents.");
+        }
+
+        // Remove trailing newline
+        $file_contents = rtrim($file_contents, "\n");
+
+        return $file_contents;
+    }
+
+    public function hasSubmission() {
+        return $this->gradeable->hasSubmission($this->submitter);
     }
 
     /* Intentionally Unimplemented accessor methods */

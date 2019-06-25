@@ -284,9 +284,14 @@ class TestcaseWrapper:
 
                 copy_contents_into(tmp_data_folder, testcase_folder)
 
-                return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "compile.out"),
-                    "testassignment", "testuser", "1", "0", str(testcase_num)], \
-                            cwd=testcase_folder, stdout=log, stderr=log)
+                return_code = subprocess.call(
+                    [os.path.join(self.testcase_path, "bin", "compile.out"),
+                    "testassignment", 
+                    "testuser", 
+                    "1", 
+                    "0", 
+                    '--testcase', str(testcase_num)],
+                    cwd=testcase_folder, stdout=log, stderr=log)
                 
                 if return_code != 0:
                     raise RuntimeError("Compile exited with exit code " + str(return_code))
@@ -354,7 +359,11 @@ class TestcaseWrapper:
                 copy_contents_into(compiled_files_directory, testcase_folder)
 
                 return_code = subprocess.call([os.path.join(self.testcase_path, "bin", "run.out"),
-                                            "testassignment", "testuser", "1", "0",str(testcase_num)], \
+                                            "testassignment", 
+                                            "testuser", 
+                                            "1", 
+                                            "0",
+                                            '--testcase', str(testcase_num)],
                                              cwd=testcase_folder, stdout=log, stderr=log)
                 if return_code != 0:
                     raise RuntimeError("run.out exited with exit code " + str(return_code))
@@ -395,7 +404,7 @@ class TestcaseWrapper:
             f2 = f1
 
         f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(f2):
+        if not 'data' in os.path.split(os.path.split(f2)[0]):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -494,8 +503,9 @@ class TestcaseWrapper:
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-
-        f1 = os.path.join("data", f1)
+            f1 = os.path.join('validation', f1)
+        else:
+            f1 = os.path.join("data", f1)
         if not 'data' in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 

@@ -13,7 +13,7 @@ Required Parameters:
         <strong id="autograding_total" class="badge {{ functions.getBadgeStyle(auto_grading_earned, auto_grading_total, auto_grading_complete) }}">
             {{ auto_grading_earned is defined ? auto_grading_earned|round(decimal_precision) : '&minus;' }} / {{ auto_grading_total|round(decimal_precision) }}
         </strong>
-        <strong>Auto-Grading Total</strong>
+        <strong>Autograding Total</strong>
     </div>
 {% endif %}
 {% if ta_grading_total is defined %}

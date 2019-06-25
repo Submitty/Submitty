@@ -102,6 +102,45 @@ class Component extends AbstractModel {
     }
 
     /**
+     * Creates a component with marks from a nested array (from JSON typically)
+     * @param Core $core
+     * @param Gradeable $gradeable
+     * @param array $arr
+     * @return Component
+     */
+    public static function import(Core $core, Gradeable $gradeable, array $arr) {
+        $component = new Component($core, $gradeable, $arr);
+
+        $marks_arr = $arr['marks'] ?? [];
+        foreach ($marks_arr as $mark_arr) {
+            $component->importMark($mark_arr);
+        }
+        return $component;
+    }
+
+    /**
+     * Exports the component and its marks to an array
+     * @return array
+     */
+    public function export() {
+        $arr = parent::toArray();
+        unset($arr['any_grades']);
+        unset($arr['id']);
+        unset($arr['modified']);
+        unset($arr['order']);
+        $marks = [];
+        foreach ($arr['marks'] as $mark) {
+            unset($mark['any_receivers']);
+            unset($mark['id']);
+            unset($mark['order']);
+            unset($mark['modified']);
+            $marks[] = $mark;
+        }
+        $arr['marks'] = $marks;
+        return $arr;
+    }
+
+    /**
      * Gets the component's gradeable
      * @return Gradeable The component's gradeable
      */
@@ -198,7 +237,7 @@ class Component extends AbstractModel {
     /**
      * Asserts that the point values are valid.  See `setPoints` docs for details
      *
-     * @param array $points An complete array of floats (or nulls) indexed by component point property
+     * @param array $points A complete array of floats (or nulls) indexed by component point property
      */
     private function assertPoints(array $points) {
         $errors = array();
@@ -308,6 +347,20 @@ class Component extends AbstractModel {
         $this->marks[] = $mark;
         return $mark;
     }
+
+    /**
+     * Imports a mark into the component via array
+     * @param $details
+     * @return Mark
+     */
+    public function importMark($details) {
+        $details['id'] = 0;
+        $details['order'] = count($this->getMarks());
+        $mark = new Mark($this->core, $this, $details);
+        $this->marks[] = $mark;
+        return $mark;
+    }
+
 
     /**
      * Base method for deleting marks.  This isn't exposed as public so

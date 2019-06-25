@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 
+# Fail the script if any command fails. If we need to capture the
+# exit code of a particular command, wrap it as so:
+# set +e
+# some_command
+# exit_code=$?
+# set -e
+set -e
+
 ########################################################################################################################
 ########################################################################################################################
 
@@ -16,11 +24,15 @@
 
 # We assume a relative path from this repository to the installation
 # directory and configuration directory.
-CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
+THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+CONF_DIR=${THIS_DIR}/../../../config
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
 
+source ${THIS_DIR}/bin/versions.sh
+
+DAEMONS=( submitty_autograding_shipper submitty_autograding_worker submitty_daemon_jobs_handler )
 
 ########################################################################################################################
 ########################################################################################################################
@@ -51,6 +63,7 @@ fi
 ########################################################################################################################
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 
+set +e
 /bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then
@@ -58,20 +71,20 @@ if [ $? -eq 1 ]; then
     echo -e "Exiting INSTALL_SUBMITTY_HELPER.sh\n"
     exit 1
 fi
+set -e
 
 
 ################################################################################################################
 ################################################################################################################
-# REMEMBER IF THE SHIPPER & WORKER ARE ACTIVE BEFORE INSTALLATION BEGINS
-# Note: We will stop & restart the shipper & worker at the end of this script.
-#       But it may be necessary to stop the the shipper & worker as part of the migration.
-systemctl is-active --quiet submitty_autograding_shipper
-is_shipper_active_before=$?
-systemctl is-active --quiet submitty_autograding_worker
-is_worker_active_before=$?
-systemctl is-active --quiet submitty_daemon_jobs_handler
-is_jobs_handler_active_before=$?
-
+# REMEMBER IF THE ANY OF OUR DAEMONS ARE ACTIVE BEFORE INSTALLATION BEGINS
+# Note: We will stop & restart the daemons at the end of this script.
+#       But it may be necessary to stop the the daemons as part of the migration.
+set +e
+for i in "${DAEMONS[@]}"; do
+    systemctl is-active --quiet ${i}
+    declare is_${i}_active_before=$?
+done
+set -e
 
 ################################################################################################################
 ################################################################################################################
@@ -82,12 +95,30 @@ if [ ${WORKER} == 0 ]; then
 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
 
-    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrations ${SUBMITTY_INSTALL_DIR}
+    rsync -rtz ${SUBMITTY_REPOSITORY}/migration/migrator/migrations ${SUBMITTY_INSTALL_DIR}
     chown root:root ${SUBMITTY_INSTALL_DIR}/migrations
     chmod 550 -R ${SUBMITTY_INSTALL_DIR}/migrations
 
-    python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py migrate
+    python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e system -e master -e course migrate
 fi
+
+################################################################################################################
+################################################################################################################
+# INSTALL PYTHON SUBMITTY UTILS AND SET PYTHON PACKAGE PERMISSIONS
+
+echo -e "Install python_submitty_utils"
+
+pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
+pip3 install .
+# Setting the permissions are necessary as pip uses the umask of the user/system, which
+# affects the other permissions (which ideally should be o+rx, but Submitty sets it to o-rwx).
+# This gets run here in case we make any python package changes.
+find /usr/local/lib/python*/dist-packages -type d -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -exec chmod 755 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.py*' -exec chmod 644 {} +
+find /usr/local/lib/python*/dist-packages -type f -name '*.pth' -exec chmod 644 {} +
+
+popd > /dev/null
 
 
 #############################################################
@@ -222,11 +253,15 @@ fi
 
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
 
 # set the permissions of these directories
@@ -254,6 +289,12 @@ fi
 
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
+
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emails
+
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -312,11 +353,13 @@ done
 mkdir -p ${SUBMITTY_INSTALL_DIR}/src/grading/lib
 pushd ${SUBMITTY_INSTALL_DIR}/src/grading/lib
 cmake ..
+set +e
 make
 if [ $? -ne 0 ] ; then
     echo "ERROR BUILDING AUTOGRADING LIBRARY"
     exit 1
 fi
+set -e
 popd > /dev/null
 
 # root will be owner & group of these files
@@ -325,6 +368,9 @@ chown -R  root:root ${SUBMITTY_INSTALL_DIR}/src
 find ${SUBMITTY_INSTALL_DIR}/src -type d -exec chmod 555 {} \;
 # "other" can read all files
 find ${SUBMITTY_INSTALL_DIR}/src -type f -exec chmod 444 {} \;
+
+chgrp submitty_daemon ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
+chmod g+wrx ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
 
 
 #Set up sample files if not in worker mode.
@@ -351,22 +397,28 @@ fi
 echo -e "Build the junit test runner"
 
 # copy the file from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/JUnit/TestRunner.java
+rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
 
-pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
 # root will be owner & group of the source file
 chown  root:root  TestRunner.java
 # everyone can read this file
 chmod  444 TestRunner.java
 
-# compile the executable
-javac -cp ./junit-4.12.jar TestRunner.java
+# compile the executable using the javac we use in the execute.cpp whitelist
+/usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
 
 # everyone can read the compiled file
 chown root:root TestRunner.class
 chmod 444 TestRunner.class
 
 popd > /dev/null
+
+
+# fix all java_tools permissions
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
+
 
 ########################################################################################################################
 ########################################################################################################################
@@ -442,20 +494,17 @@ fi
 
 echo -e "Compile and install analysis tools"
 
-ST_VERSION=v.18.06.00
 mkdir -p ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
-#if [ "1" == "0" ]; then
 pushd ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-if [[ ! -f VERSION || $(< VERSION) != "${ST_VERSION}" ]]; then
+if [[ ! -f VERSION || $(< VERSION) != "${AnalysisTools_Version}" ]]; then
     for b in count plagiarism diagnostics;
-        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${ST_VERSION}/${b}" -O ${b}
+        do wget -nv "https://github.com/Submitty/AnalysisTools/releases/download/${AnalysisTools_Version}/${b}" -O ${b}
     done
 
-    echo ${ST_VERSION} > VERSION
+    echo ${AnalysisTools_Version} > VERSION
 fi
 popd > /dev/null
-#fi
 
 # change permissions
 chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
@@ -469,36 +518,25 @@ clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
 
 ANALYSIS_TOOLS_REPO=${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/AnalysisTools
 
-#copying commonAST scripts 
+# copying commonAST scripts
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 mkdir -p ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/astMatcher.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/commonast.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+
+array=( astMatcher.py commonast.py unionToolRunner.py jsonDiff.py utils.py refMaps.py match.py eqTag.py context.py \
+        removeTokens.py jsonDiffSubmittyRunner.py jsonDiffRunner.py jsonDiffRunnerRunner.py createAllJson.py )
+for i in "${array[@]}"; do
+    rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/${i} ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
+done
+
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionTool.cpp ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeLists.txt ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/ASTMatcher.cpp ${clangsrc}/llvm/tools/clang/tools/extra/ASTMatcher/
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/CMakeListsUnion.txt ${clangsrc}/llvm/tools/clang/tools/extra/UnionTool/CMakeLists.txt
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/unionToolRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #copying tree visualization scrips
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/make_tree_interactive.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate1.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 rsync -rtz ${ANALYSIS_TOOLS_REPO}/treeTool/treeTemplate2.txt ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-
-#copying jsonDiff files
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiff.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/utils.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/refMaps.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/match.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/eqTag.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/context.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/removeTokens.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-
-#copying runners for jsonDiffs
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffSubmittyRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/jsonDiffRunnerRunner.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
-rsync -rtz ${ANALYSIS_TOOLS_REPO}/commonAST/createAllJson.py ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools
 
 #building commonAST excecutable
 pushd ${ANALYSIS_TOOLS_REPO}
@@ -506,20 +544,21 @@ g++ commonAST/parser.cpp commonAST/traversal.cpp -o ${SUBMITTY_INSTALL_DIR}/Subm
 g++ commonAST/parserUnion.cpp commonAST/traversalUnion.cpp -o ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/unionCount.out
 popd > /dev/null
 
-# building clang ASTMatcher.cpp
-mkdir -p ${clanginstall}
-mkdir -p ${clangbuild}
-pushd ${clangbuild}
-# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
-cmake .
-# FIXME: skipping this step until we actually use it, since it's expensive
-#ninja ASTMatcher UnionTool
-popd > /dev/null
+# FIXME: skipping this step as it has errors, and we don't use the output of it yet
 
-cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
-cp ${clangbuild}/bin/UnionTool ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
-chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/ASTMatcher
-chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
+# building clang ASTMatcher.cpp
+# mkdir -p ${clanginstall}
+# mkdir -p ${clangbuild}
+# pushd ${clangbuild}
+# TODO: this cmake only needs to be done the first time...  could optimize commands later if slow?
+# cmake .
+#ninja ASTMatcher UnionTool
+# popd > /dev/null
+
+# cp ${clangbuild}/bin/ASTMatcher ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
+# cp ${clangbuild}/bin/UnionTool ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/
+# chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/ASTMatcher
+# chmod o+rx ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools/UnionTool
 
 
 # change permissions
@@ -545,70 +584,45 @@ fi
 
 ################################################################################################################
 ################################################################################################################
-# INSTALL PYTHON SUBMITTY UTILS
 
-echo -e "Install python_submitty_utils"
-
-pushd ${SUBMITTY_REPOSITORY}/python_submitty_utils
-pip3 install .
-
-# fix permissions
-chmod -R 555 /usr/local/lib/python*/*
-chmod 555 /usr/lib/python*/dist-packages
-
-#Set up pam if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
-    sudo chmod 500   /usr/local/lib/python*/dist-packages/pam.py*
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-sudo chmod o+r /usr/local/lib/python*/dist-packages/submitty_utils*.egg
-sudo chmod o+r /usr/local/lib/python*/dist-packages/easy-install.pth
-
-popd > /dev/null
-
-
-################################################################################################################
-################################################################################################################
+# Obtains the current git hash and tag and stores them in the appropriate jsons.
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
+chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
 
 installed_commit=$(jq '.installed_commit' /usr/local/submitty/config/version.json)
 most_recent_git_tag=$(jq '.most_recent_git_tag' /usr/local/submitty/config/version.json)
 echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\"/}, commit ${installed_commit//\"/}\n"
 
+################################################################################################################
+################################################################################################################
+# INSTALL SUBMITTY CRONTAB
+#############################################################
+
+cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
 
 ################################################################################################################
 ################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 #############################################################
-# stop the shipper daemon (if it's running)
-systemctl is-active --quiet submitty_autograding_shipper
-is_shipper_active_now=$?
-if [[ "$is_shipper_active_now" == "0" ]]; then
-    systemctl stop submitty_autograding_shipper
-    echo -e "Stopped Submitty Grading Shipper Daemon"
-fi
-systemctl is-active --quiet submitty_autograding_shipper
-is_active_tmp=$?
-if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading shipper daemon\n"
-    exit 1
-fi
-
-
-#############################################################
-# stop the worker daemon (if it's running)
-systemctl is-active --quiet submitty_autograding_worker
-is_worker_active_now=$?
-if [[ "$is_worker_active_now" == "0" ]]; then
-    systemctl stop submitty_autograding_worker
-    echo -e "Stopped Submitty Grading Worker Daemon"
-fi
-systemctl is-active --quiet submitty_autograding_worker
-is_active_tmp=$?
-if [[ "$is_active_tmp" == "0" ]]; then
-    echo -e "ERROR: did not successfully stop submitty grading worker daemon\n"
-    exit 1
-fi
-
+# stop the any of the submitty daemons (if they're running)
+for i in "${DAEMONS[@]}"; do
+    set +e
+    systemctl is-active --quiet ${i}
+    is_active_now=$?
+    set -e
+    if [[ "${is_active_now}" == "0" ]]; then
+        systemctl stop ${i}
+        echo -e "Stopped ${i}"
+    fi
+    set +e
+    systemctl is-active --quiet ${i}
+    is_active_tmp=$?
+    set -e
+    if [[ "$is_active_tmp" == "0" ]]; then
+        echo -e "ERROR: did not successfully stop {$i}\n"
+        exit 1
+    fi
+done
 
 if [ "${WORKER}" == 0 ]; then
     # Stop all foreign worker daemons
@@ -616,7 +630,6 @@ if [ "${WORKER}" == 0 ]; then
     sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
     echo -e "done"
 fi
-
 
 #############################################################
 # cleanup the TODO and DONE folders
@@ -627,19 +640,13 @@ if [ -f $original_autograding_workers ]; then
     mv ${original_autograding_workers} ${temp_autograding_workers}
 fi
 
-rm -rf $SUBMITTY_DATA_DIR/autograding_TODO
-rm -rf $SUBMITTY_DATA_DIR/autograding_DONE
-
-
-
-
-# recreate the TODO and DONE folders
-mkdir -p $SUBMITTY_DATA_DIR/autograding_TODO
-mkdir -p $SUBMITTY_DATA_DIR/autograding_DONE
-chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_TODO
-chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/autograding_DONE
-chmod 770 ${SUBMITTY_DATA_DIR}/autograding_TODO
-chmod 770 ${SUBMITTY_DATA_DIR}/autograding_DONE
+array=( autograding_TODO autograding_DONE )
+for i in "${array[@]}"; do
+    rm -rf ${SUBMITTY_DATA_DIR}/${i}
+    mkdir -p ${SUBMITTY_DATA_DIR}/${i}
+    chown -R ${DAEMON_USER}:${DAEMON_GID} ${SUBMITTY_DATA_DIR}/${i}
+    chmod 770 ${SUBMITTY_DATA_DIR}/${i}
+done
 
 # return the autograding_workers json
 if [ -f "$temp_autograding_workers" ]; then
@@ -648,19 +655,14 @@ if [ -f "$temp_autograding_workers" ]; then
 fi
 
 #############################################################
+# update the various daemons
 
-# update the autograding shipper & worker daemons
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_shipper.service   /etc/systemd/system/submitty_autograding_shipper.service
-chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_shipper.service
-chmod 444 /etc/systemd/system/submitty_autograding_shipper.service
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_autograding_worker.service   /etc/systemd/system/submitty_autograding_worker.service
-chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_autograding_worker.service
-chmod 444 /etc/systemd/system/submitty_autograding_worker.service
-# update the daemon jobs handler daemon
-rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/submitty_daemon_jobs_handler.service   /etc/systemd/system/submitty_daemon_jobs_handler.service
-chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/submitty_daemon_jobs_handler.service
-chmod 444 /etc/systemd/system/submitty_daemon_jobs_handler.service
-
+for i in "${DAEMONS[@]}"; do
+    # update the autograding shipper & worker daemons
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/${i}.service  /etc/systemd/system/${i}.service
+    chown -R ${DAEMON_USER}:${DAEMON_GROUP} /etc/systemd/system/${i}.service
+    chmod 444 /etc/systemd/system/${i}.service
+done
 
 # delete the autograding tmp directories
 rm -rf /var/local/submitty/autograding_tmp
@@ -680,11 +682,6 @@ do
     chmod 770 $mydir
 done
 
-#Obtains the current git hash and tag and stores them in the appropriate jsons.
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
-chmod o+r ${SUBMITTY_INSTALL_DIR}/config/version.json
-
-
 
 #############################################################################
 # If the migrations have indicated that it is necessary to rebuild all
@@ -699,8 +696,6 @@ if [ -f $REBUILD_ALL_FILENAME ]; then
     echo -e "\n\nDone rebuilding ALL GRADEABLES for ALL COURSES\n\n"
     rm $REBUILD_ALL_FILENAME
 fi
-
-
 
 #############################################################################
 
@@ -718,54 +713,28 @@ if [ "${WORKER}" == 0 ]; then
 fi
 
 
-# If the submitty_autograding_shipper.service,
-# submitty_autograding_worker.service, or
-# submitty_daemon_jobs_handler.service files have changed, we should
-# reload the units:
+# If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload
 
 # start the shipper daemon (if it was running)
-if [[ "$is_shipper_active_before" == "0" ]]; then
-    systemctl start submitty_autograding_shipper
-    systemctl is-active --quiet submitty_autograding_shipper
-    is_shipper_active_after=$?
-    if [[ "$is_shipper_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Grading Shipper Daemon\n"
-    fi
-    echo -e "Restarted Submitty Grading Shipper Daemon"
-else
-    is_worker_active_before="1"
-    echo -e "\nNOTE: Submitty Grading Shipper Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_shipper\n"
-fi
 
-# start the worker daemon (if it was running)
-if [[ "$is_worker_active_before" == "0" ]]; then
-    systemctl start submitty_autograding_worker
-    systemctl is-active --quiet submitty_autograding_worker
-    is_worker_active_after=$?
-    if [[ "$is_worker_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Grading Worker Daemon\n"
+for i in "${DAEMONS[@]}"; do
+    is_active=is_${i}_active_before
+    if [[ "${!is_active}" == "0" ]]; then
+        systemctl start ${i}
+        set +e
+        systemctl is-active --quiet ${i}
+        is_active_after=$?
+        set -e
+        if [[ "$is_active_after" != "0" ]]; then
+            echo -e "\nERROR!  Failed to restart ${i}\n"
+        fi
+        echo -e "Restarted ${i}"
+    else
+        echo -e "\nNOTE: ${i} is not currently running\n"
+        echo -e "To start the daemon, run:\n   sudo systemctl start ${i}\n"
     fi
-    echo -e "Restarted Submitty Grading Worker Daemon"
-else
-    echo -e "\nNOTE: Submitty Grading Worker Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_autograding_worker\n"
-fi
-
-# start the jobs handler daemon (if it was running)
-if [[ "$is_jobs_handler_active_before" == "0" ]]; then
-    systemctl start submitty_daemon_jobs_handler
-    systemctl is-active --quiet submitty_daemon_jobs_handler
-    is_jobs_handler_active_after=$?
-    if [[ "$is_jobs_handler_active_after" != "0" ]]; then
-        echo -e "\nERROR!  Failed to restart Submitty Jobs Handler Daemon\n"
-    fi
-    echo -e "Restarted Submitty Jobs Handler Daemon"
-else
-    echo -e "\nNOTE: Submitty Jobs Handler Daemon is not currently running\n"
-    echo -e "To start the daemon, run:\n   sudo systemctl start submitty_daemon_jobs_handler\n"
-fi
+done
 
 ################################################################################################################
 ################################################################################################################
@@ -818,6 +787,7 @@ if [ "${WORKER}" == 0 ]; then
         shift
         # pass any additional command line arguments to the run test suite
         rainbow_total=$((rainbow_total+1))
+        set +e
         python3 ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py  "$@"
         
         if [[ $? -ne 0 ]]; then
@@ -826,6 +796,7 @@ if [ "${WORKER}" == 0 ]; then
             rainbow_counter=$((rainbow_counter+1))
             echo -e "\n[ SUCCEEDED ] sample test\n"
         fi
+        set -e
 
         echo -e "\nCompleted Rainbow Grades Test Suite. $rainbow_counter of $rainbow_total tests succeeded.\n"
     fi
@@ -849,7 +820,7 @@ else
         chmod -R g+r ${SUBMITTY_REPOSITORY}
 
         # Update any foreign worker machines
-        echo -e Updating worker machines
+        echo -e -n "Updating worker machines\n\n"
         sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/update_and_install_workers.py
     fi
 fi

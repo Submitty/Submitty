@@ -1,18 +1,18 @@
 {% import _self as self %}
 {% if btn_type == "request" %}
     <div>
-        <h3>Regrade Request</h3>
+        <h3>Grade Inquiry</h3>
     </div>
     <div>
         <p>"{{ regrade_message }}"</p>
     </div>
-    {% set message = "Request Regrade" %}
+    {% set message = "Submit Grade Inquiry" %}
 {% elseif btn_type == "admin_open" %}
     <div>
-        <h3>Regrade Request
+        <h3>Grade Inquiry
             <span>
-                <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
-                <span class="red-message">Regrade Request Awaiting Review</span>
+                <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
+                <span class="red-message">Unresolved Grade Inquiry</span>
             </span> 
         </h3>
     </div>
@@ -20,10 +20,10 @@
     {% set button_message = "Respond and Resolve request" %}
 {% elseif btn_type == "admin_closed" %}
     <div>
-        <h3>Regrade Request
+        <h3>Grade Inquiry
             <span>
-                <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
-                <span class="green-message">Regrade Request Has Been Reviewed</span>
+                <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>  
+                <span class="green-message">Grade Inquiry Has Been Resolved</span>
             </span>
         </h3>
     </div>
@@ -31,14 +31,14 @@
     {% set button_message = "Post Message" %}
 {% elseif btn_type == "pending" %}
     <div>
-        <h3>Regrade Request
+        <h3>Grade Inquiry
             <script type="text/javascript">
                 toggleRegradeRequests();
                 document.getElementById("ShowRegradeRequestButton").style.display = 'none';
             </script>
         <span>
-            <span class="fa fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
-            <span class="red-message">Regrade Request Being Reviewed</span>
+            <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
+            <span class="red-message">Grade Inquiry Under Review</span>
         </span> 
         </h3>
     </div>
@@ -49,14 +49,14 @@
     {% set button_message = "Submit Additional Information" %}
 {% elseif btn_type == "completed" %}
     <div>
-        <h3>Regrade Request
+        <h3>Grade Inquiry
             <script type="text/javascript">
                 toggleRegradeRequests();
                 document.getElementById("ShowRegradeRequestButton").style.display = 'none';
             </script>
         <span>
-            <span class="fa fa-check" style="font-size: 16px; color: #008800"></span>  
-            <span class="green-message">Regrade Request Has Been Reviewed</span>
+            <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>  
+            <span class="green-message">Grade Inquiry has been Resolved</span>
         </span>
         </h3>
     </div>
@@ -64,7 +64,7 @@
         <p>"{{ regrade_message }}"</p>
     </div>
     {% set message = "Request Reviewed" %}
-    {% set button_message = "Send Information Without Reopening Regrade Request" %}
+    {% set button_message = "Send Information Without Reopening Grade Inquiry" %}
 {% endif %}
 {% for post in posts %}
     <div style="margin-top: 20px;">
@@ -85,32 +85,33 @@
         <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
         <input type="hidden" id="status" name="status" value="0">
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" required></textarea>
-        {% if btn_type == 'pending' %}
-            {# Request pending, we can submit new posts #}
-            <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id }}', '{{ submitter_id }}', 0);">
-            {{ self.bbcode_buttons() }}
-        {% elseif btn_type == 'completed' %}
-            {# Request closed #}
-            <input type="button" class="btn btn-primary" id="cancelRegrade" value="Reopen Regrade Request Without Responding" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
-            <input type="submit" value="{{ button_message }}" class="btn btn-default" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
-            {{ self.bbcode_buttons() }}
-        {% elseif btn_type == 'admin_open' %}
-            {# Admin, request is open #}
-            <input type="submit" value="Respond and Resolve Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
-            {{ self.bbcode_buttons() }}
-            <input type="submit" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Regrade Request Without Response" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', 0);">
-        {% elseif btn_type == 'admin_closed' %}
-            {# Admin, request is closed #}
-            <input type="submit" value="Post" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Open Regrade Request" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
-            {{ self.bbcode_buttons() }}
-        {% else %}
-            {# No request yet #}
-            <input type="submit" value="Submit Regrade Request" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
-            {{ self.bbcode_buttons() }}
-        {% endif %}
+        <div class="row" style="justify-content: flex-end">
+        <div style="margin-right: auto">
+        {{ self.bbcode_buttons() }}
+        </div>
+            {% if btn_type == 'pending' %}
+                {# Request pending, we can submit new posts #}
+                <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(-1);">
+                <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Grade Inquiry" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id }}', '{{ submitter_id }}', 0);">
+            {% elseif btn_type == 'completed' %}
+                {# Request closed #}
+                <input type="button" class="btn btn-primary" id="cancelRegrade" value="Reopen Grade Inquiry Without Responding" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
+                <input type="submit" value="{{ button_message }}" class="btn btn-default" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(0);">
+            {% elseif btn_type == 'admin_open' %}
+                {# Admin, request is open #}
+                <input type="submit" value="Respond and Resolve Grade Inquiry" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="closeAllComponents();$('#status').val(0);">
+                <input type="submit" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(-1);">
+                <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Grade Inquiry Without Response" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', 0);">
+            {% elseif btn_type == 'admin_closed' %}
+                {# Admin, request is closed #}
+                <input type="submit" value="Post" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(0);">
+                <input type="submit" class="btn btn-default" value="Submit Grade Inquiry" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
+            {% else %}
+                {# No request yet #}
+                {% set disabled = not has_submission ? "disabled" : ""  %}
+                <input type="submit" value="Submit Grade Inquiry" class="btn btn-primary {{ disabled }}" style="float: right" onclick="$('#status').val(-1);" {{ disabled }}>
+            {% endif %}
+        </div>
     </form>
 </div>
 <script type="text/javascript">
@@ -129,9 +130,9 @@
 
 {% macro bbcode_buttons() %}
     <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
-        Link <i class="fa fa-link fa-1x"></i>
+        Link <i class="fas fa-link fa-1x"></i>
     </button>
     <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">
-        Code <i class="fa fa-code fa-1x"></i>
+        Code <i class="fas fa-code fa-1x"></i>
     </button>
 {% endmacro %}

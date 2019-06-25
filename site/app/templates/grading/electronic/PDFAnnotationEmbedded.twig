@@ -1,34 +1,15 @@
-<script src="js/pdf/pdf.min.js"></script>
-<script src="js/pdf/pdf_viewer.js"></script>
-<script src="js/pdf/pdf-annotate.min.js"></script>
+<script src="vendor/jquery/jquery.min.js"></script>
+<script src="vendor/pdfjs/pdf.min.js"></script>
+<script src="vendor/pdfjs/pdf_viewer.js"></script>
+<script src="vendor/pdf-annotate.js/pdf-annotate.min.js"></script>
 <script src="js/pdf/PDFAnnotateEmbedded.js"></script>
 {% if student_popup is not defined or student_popup == false %}
     {#This initializes the toolbar and activates annotation mode#}
     <script src="js/pdf/PDFInitToolbar.js"></script>
-{% else %}
-    {#Jquery is needed if a new window is popping up#}
-    <script src="js/jquery.min.js"></script>
 {% endif %}
 
-<link rel="stylesheet" type="text/css" href="css/pdf/pdf_viewer.css"/>
-<style>
-    .annotationLayer {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        cursor: url('https://www.bg-wiki.com/imagevags/d/d3/Demon_Pen_icon.png'), auto;
-        cursor: default;
-    }
-
-    .pdfViewer .canvasWrapper {
-        box-shadow: 0 0 3px #bbb;
-    }
-    .pdfViewer .page {
-        margin-bottom: 10px;
-    }
-</style>
+<link rel="stylesheet" type="text/css" href="vendor/pdfjs/pdf_viewer.css"/>
+<link rel="stylesheet" type="text/css" href="css/pdf/pdf_embedded.css"/>
 
 <div id="content-wrapper">
     <div id="viewer" class="pdfViewer"></div>
@@ -51,9 +32,9 @@
     } catch {
         alert("Can't fetch annotations");
     }
-    {% if student_popup is defined and student_popup == true %}
-    render_student("{{ gradeable_id }}", "{{ user_id }}", '{{ filename }}', '{{ pdf_url_base | raw}}');
+    {% if student_popup %}
+    render_student("{{ gradeable_id }}", "{{ user_id }}", "{{ filename }}", "{{ pdf_url_base | raw}}");
     {% else %}
-    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}');
+    render("{{ gradeable_id }}", "{{ user_id }}", "{{ grader_id }}", '{{ filename }}', {{ page_num }});
     {% endif %}
 </script>

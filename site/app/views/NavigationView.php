@@ -2,6 +2,7 @@
 namespace app\views;
 use app\models\Button;
 use \app\libraries\GradeableType;
+use app\models\User;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -84,14 +85,27 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
+        // note: in the future this could be extended to take other options, but right now it's
+        //       for displaying a link to provided materials
         // ======================================================================================
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
-        $message_file_contents = "";
+        $message_file_details = null;
+		//Course settings have enabled displaying custom (banner) message
         if($display_custom_message) {
-            $message_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "summary_html", $this->core->getUser()->getId() . "_message.html");
+            $message_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "summary_html", $this->core->getUser()->getId() . ".json");
             $display_custom_message = is_file($message_file_path);
-            if ($display_custom_message) {
-                $message_file_contents = file_get_contents($message_file_path);
+			//If statement seems redundant, but will help in case we ever decouple the is_file check from $display_custom_message
+            if ($display_custom_message && is_file($message_file_path)) {
+				$message_json = json_decode(file_get_contents($message_file_path));
+				if(property_exists($message_json, 'special_message')){
+					$message_file_details = $message_json->special_message;
+
+					//If any fields are missing, treat this as though we just didn't have a message for this user.
+					if(!property_exists($message_file_details,'title') || !property_exists($message_file_details,'description') || !property_exists($message_file_details,'filename') ){
+						$display_custom_message = false;
+						$messsage_file_details = null;
+					}
+				}
             }
         }
 
@@ -99,7 +113,13 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
-        $display_room_seating = $this->core->getConfig()->displayRoomSeating();
+	$seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
+        if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
+            $display_room_seating = false;
+        }
+        else {
+            $display_room_seating = $this->core->getConfig()->displayRoomSeating();
+        }
         $user_seating_details = null;
         $gradeable_title = null;
         $seating_config = null;
@@ -176,10 +196,11 @@ class NavigationView extends AbstractView {
             "course_name" => $this->core->getConfig()->getCourseName(),
             "course_id" => $this->core->getConfig()->getCourse(),
             "sections" => $render_sections,
-            "message_file_contents" => $message_file_contents,
+            "message_file_details" => $message_file_details,
             "display_custom_message" => $display_custom_message,
             "user_seating_details" => $user_seating_details,
             "display_room_seating" => $display_room_seating,
+            "seating_only_for_instructor" => $this->core->getConfig()->isSeatingOnlyForInstructor(),
             "gradeable_title" => $gradeable_title,
             "seating_config" => $seating_config
         ]);
@@ -250,13 +271,13 @@ class NavigationView extends AbstractView {
      */
     private function hasGradeButton(Gradeable $gradeable): bool {
         // full access graders & instructors are allowed to view submissions of assignments with no manual grading
-        $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->getGroup() <= 2;
+        $im_allowed_to_view_submissions = $this->core->getUser()->accessGrading() && !$gradeable->isTaGrading() && $this->core->getUser()->accessFullGrading();
 
         // limited access graders and full access graders can preview/view the grading interface only if they are allowed by the min grading group
         $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === 4 && $gradeable->isPeerGrading();
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading();
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;
@@ -343,7 +364,7 @@ class NavigationView extends AbstractView {
             "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
         $points_percent = NAN;
 
-        $href = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
+        $href = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
         $progress = null;
         $disabled = false;
 
@@ -404,8 +425,12 @@ class NavigationView extends AbstractView {
                 }
             }
 
+            // Due date passed with at least 50 percent points in autograding or gradable with no autograding points
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
-                $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5 &&
+                (
+                    !$gradeable->getAutogradingConfig()->anyPoints() ||
+                    $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit() != 0 && $points_percent >= 0.5
+                ) &&
                 $list_section == GradeableList::CLOSED) {
                 $class = "btn-default";
             }
@@ -414,16 +439,41 @@ class NavigationView extends AbstractView {
                 ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 $display_date = "";
             }
-
-            if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
+            if (!$gradeable->hasDueDate()) {
+                $display_date = "";
+            }
+            if (!$gradeable->isStudentSubmit() && $this->core->getUser()->accessFullGrading()) {
+                // Student isn't submitting
+                $title = "BULK UPLOAD";
+                $class = "btn-primary";
+                $display_date = "";
+            } else if ($gradeable->isStudentSubmit() && !$gradeable->hasDueDate() && $list_section != GradeableList::OPEN) {
+                $title = "SUBMIT";
+                $class = "btn-default";
+            } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::OPEN) {
                 //if the user submitted something on time
                 $title = "RESUBMIT";
             } else if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && $list_section == GradeableList::CLOSED) {
                 //if the user submitted something past time
-                $title = "LATE RESUBMIT";
+                if ($gradeable->isLateSubmissionAllowed()) {
+                    $title = "LATE RESUBMIT";
+                } else {
+                    $title = "VIEW SUBMISSION";
+                    $class = 'btn-default';
+                    $display_date = "";
+                }
+            } else if (!$graded_gradeable->getAutoGradedGradeable()->hasSubmission() && !$gradeable->isLateSubmissionAllowed() && $list_section == GradeableList::CLOSED) {
+                $title = "NO SUBMISSION";
+                $class = "btn-danger";
+                $display_date = "";
             } else if (!$graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() && ($list_section == GradeableList::GRADED || $list_section == GradeableList::GRADING)) {
                 //to change the text to overdue submission if nothing was submitted on time
-                $title = "OVERDUE SUBMISSION";
+                if ($gradeable->isStudentSubmit()) {
+                    $title = "OVERDUE SUBMISSION";
+                } else {
+                    $title = "NO SUBMISSION";
+                    $display_date = "";
+                }
             } else if ($gradeable->isTaGrading() && !$graded_gradeable->isTaGradingComplete() && $list_section == GradeableList::GRADED) {
                 //when there is no TA grade and due date passed
                 $title = "TA GRADE NOT AVAILABLE";
@@ -502,7 +552,7 @@ class NavigationView extends AbstractView {
             }
 
             if ($gradeable->anyActiveRegradeRequests()) {
-                //Open regrade requests
+                //Open grade inquiries
                 $button = new Button($this->core, [
                     "title" => "REGRADE",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",
@@ -514,10 +564,17 @@ class NavigationView extends AbstractView {
         }
 
         if ($list_section === GradeableList::GRADING || $list_section === GradeableList::GRADED) {
-            if ($list_section === GradeableList::GRADING) {
+            $date = $this->core->getDateTimeNow();
+            $grades_due = $gradeable->getGradeDueDate();
+            $grades_released = $gradeable->getGradeReleasedDate();
+            if ($list_section === GradeableList::GRADING && $date < $grades_due ) {
                 $title = 'GRADE';
-                $date_text = '(grades due ' . $gradeable->getGradeReleasedDate()->format(self::DATE_FORMAT) . ')';
-            } else {
+                $date_text = '(grades due ' . $gradeable->getGradeDueDate()->format(self::DATE_FORMAT) . ')';
+            } else if($list_section === GradeableList::GRADING && $date < $grades_released){
+                $title = 'GRADE';
+                $date_text = '(grades will be released ' . $grades_released->format(self::DATE_FORMAT) . ')';
+            }
+            else {
                 $title = 'REGRADE';
             }
 
@@ -532,6 +589,9 @@ class NavigationView extends AbstractView {
                     } else {
                         if (!is_nan($TA_percent) && $list_section === GradeableList::GRADED) {
                             //You forgot somebody
+                            $class = 'btn-danger';
+                            $title = 'GRADE';
+                        } else if(!is_nan($TA_percent) && $list_section === GradeableList::GRADING && $grades_due < $date && $date < $grades_released){
                             $class = 'btn-danger';
                             $title = 'GRADE';
                         }
@@ -579,9 +639,9 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Edit Gradeable Configuration",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
-            "class" => "fa fa-pencil",
+            "class" => "fas fa-pencil-alt",
             "title_on_hover" => true,
-            "aria_label" => "edit gradeable {$gradeable->getId()}"
+            "aria_label" => "edit gradeable {$gradeable->getTitle()}"
         ]);
         return $button;
     }
@@ -655,6 +715,20 @@ class NavigationView extends AbstractView {
                 "class" => "btn btn-primary btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);
+        } else if ($list_section === GradeableList::OPEN) {
+            $url = $this->core->buildUrl([
+                'component' => 'admin',
+                'page' => 'admin_gradeable',
+                'action' => 'quick_link',
+                'id' => $gradeable->getId(),
+                'quick_link_action' => 'close_submissions']);
+
+            $button = new Button($this->core, [
+                "subtitle" => "CLOSE SUBMISSIONS NOW",
+                "onclick" => "displayCloseSubmissionsWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
+                "class" => "btn btn-default btn-nav btn-nav-open",
+                "name" => "quick-link-btn"
+            ]);
         }
 
         if ($button !== null) {
@@ -666,5 +740,9 @@ class NavigationView extends AbstractView {
 
     public function deleteGradeableForm() {
         return $this->core->getOutput()->renderTwigTemplate("navigation/DeleteGradeableForm.twig");
+    }
+
+    public function closeSubmissionsWarning() {
+        return $this->core->getOutput()->renderTwigTemplate("navigation/CloseSubmissionsWarning.twig");
     }
 }

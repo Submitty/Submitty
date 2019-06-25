@@ -1,8 +1,8 @@
 <div class="content">
+    <h1>Course Settings</h1>
     <span class="pull-right">
         <a href="{{ theme_url }}" class="btn btn-default">Customize Website Theme</a>
     </span>
-    <h1>Course Settings</h1>
     <div id="config">
         <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
 
@@ -149,17 +149,17 @@
             <div class="option-desc col-md-8">
                 <label for="course_email">
                     <div class="option-title">Grades Returned Message</div>
-                    <div class="option-alt">Input the message shown on grades returned to students. Recommended to include directions for regrade requests or the course's email.</div>
+                    <div class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="text" name="course_email" id="course_email" value="{{ fields['course_email'] }}" /></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']|raw  }}</textarea></div>
         </div>
 
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="regrade_enabled">
-                    <div class="option-title">Regrade Requests Allowed</div>
-                    <div class="option-alt">Allow students to submit regrade requests for assignments.</div>
+                    <div class="option-title">Grade Inquiries Allowed</div>
+                    <div class="option-alt">Allow students to submit grade inquiries for assignments.</div>
                 </label>
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="regrade_enabled" id="regrade_enabled" value="true" {{ fields['regrade_enabled'] ?
@@ -169,11 +169,11 @@
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="regrade_message">
-                    <div class="option-title">Regrade Request Warning Message</div>
-                    <div class="option-alt">Input the warning message show to students while submitting a regrade request.</div>
+                    <div class="option-title">Grade Inquiry Warning Message</div>
+                    <div class="option-alt">Input the warning message show to students while submitting a grade inquiry.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="text" name="regrade_message" id="regrade_message" value="{{ fields['regrade_message'] }}" /></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message']|raw}}</textarea></div>
         </div>
 
         {# TODO: Not sure what this is
@@ -198,7 +198,11 @@
             <div class="option-desc col-md-8">
                 <label for="display_rainbow_grades_summary">
                     <div class="option-title">Display Rainbow Grades Summary</div>
-                    <div class="option-alt">Show Rainbow Grades summaries to students. <strong>Note:</strong> You must manually run rainbow grades, <a href="http://submitty.org/instructor/rainbow_grades">see here for instructions.</a></div>
+                    <div class="option-alt">Show Rainbow Grades summaries to students.
+                    <strong>Note:</strong>
+                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/overview">
+                    You must manually run rainbow grades. <i style="font-style:normal;" class="helpicon"></i></a>
+                    </div>
                 </label>
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="display_rainbow_grades_summary" id="display_rainbow_grades_summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} /></div>
@@ -209,6 +213,8 @@
                 <label for="room_seating_gradeable_id">
                     <div class="option-title">Display Room Seating Guide</div>
                     <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
+                     <div class="option-alt" style="margin-top: 15px" id="email_seating_assignment_label">Customize an email to send to each students.</div>
+                     <div class ="option-alt"> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a> </div>
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -219,7 +225,11 @@
                         </option>
                     {% endfor %}
                 </select>
+                <br>
+                <p style = "display: inline;" class="option-alt">Visible only to Instructors? </p>
+                <input type="checkbox" name="seating_only_for_instructor" id="seating_only_for_instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
             </div>
+
         </div>
 
         <div class="option row">
@@ -243,3 +253,40 @@
 
     </div>
 </div>
+
+<script type="text/javascript">
+
+
+    function showEmailSeatingOption() {
+        $('#email_seating_assignment').show();
+        $('#email_seating_assignment_label').show();
+    }
+
+    function hideEmailSeatingOption() {
+        $('#email_seating_assignment').hide();
+        $('#email_seating_assignment_label').hide();
+    }
+
+
+
+    var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
+    if(!selected_seating_gradeable) {
+       hideEmailSeatingOption();
+    }
+
+    $(document).ready(function() {
+
+         $(document).on('change', '#room_seating_gradeable_id', function(){
+             var selected_seating_gradeable = $('#room_seating_gradeable_id').val();
+
+             if(!selected_seating_gradeable){
+                 hideEmailSeatingOption();
+             }
+             else{
+                showEmailSeatingOption();
+            }
+        });
+
+     });
+
+</script>

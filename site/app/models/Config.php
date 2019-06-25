@@ -6,7 +6,6 @@ use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\IniParser;
 use app\libraries\Utils;
 
 /**
@@ -24,6 +23,7 @@ use app\libraries\Utils;
  * @method string getCgiUrl()
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
+ * @method string getCgiTmpPath()
  * @method string getCoursePath()
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
@@ -37,7 +37,7 @@ use app\libraries\Utils;
  * @method \DateTimeZone getTimezone()
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
- * @method string getCourseIniPath()
+ * @method string getCourseJsonPath()
  * @method bool isCourseLoaded()
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
@@ -51,11 +51,10 @@ use app\libraries\Utils;
  * @method string getVcsType()
  * @method string getPrivateRepository()
  * @method string getRoomSeatingGradeableId()
-<<<<<<< HEAD
+ * @method bool isSeatingOnlyForInstructor()
+ * @method array getCourseJson()
+ * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
-=======
- * @method array getCourseIni()
->>>>>>> 14b37fcf3af673ad67a65f069bb61c90c3d703f1
  */
 
 class Config extends AbstractModel {
@@ -76,11 +75,11 @@ class Config extends AbstractModel {
 
     /** @property @var string path on the filesystem that points to the course data directory */
     protected $config_path;
-    /** @property @var string path to the ini file that contains all the course specific settings */
-    protected $course_ini_path;
+    /** @property @var string path to the json file that contains all the course specific settings */
+    protected $course_json_path;
 
     /** @property @var array */
-    protected $course_ini;
+    protected $course_json;
 
     /**
     * Indicates whether a course config has been successfully loaded.
@@ -110,6 +109,8 @@ class Config extends AbstractModel {
     protected $submitty_log_path;
     /** @property @var bool */
     protected $log_exceptions;
+    /** @property @var string */
+    protected $cgi_tmp_path;
 
     /** @property @var string */
     protected $database_driver = "pgsql";
@@ -134,6 +135,9 @@ class Config extends AbstractModel {
      * @property
      */
     protected $username_change_text = "";
+
+    /** @property @var string Text shown to all users for system announcement */
+    protected $system_message = '';
 
     /** @property @var array */
     protected $submitty_database_params = array();
@@ -179,10 +183,14 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @property @var string */
     protected $regrade_message;
+    /** @property @var bool*/
+    protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
     /** @property @var bool */
     protected $auto_rainbow_grades;
+    /** @property @var string */
+    protected $secret_session;
 
     /**
      * Config constructor.
@@ -254,10 +262,19 @@ class Config extends AbstractModel {
             $this->username_change_text = $submitty_json['username_change_text'];
         }
 
-        $this->timezone = new \DateTimeZone($this->timezone);
+        if (isset($submitty_json['system_message'])) {
+            $this->system_message = strval($submitty_json['system_message']);
+        }
 
+        $this->timezone = new \DateTimeZone($this->timezone);
         $this->base_url = rtrim($this->base_url, "/")."/";
-        $this->cgi_url = $this->base_url."cgi-bin/";
+
+        if (!empty($submitty_json['cgi_url'])){
+            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/")."/";
+        }
+        else {
+            $this->cgi_url = $this->base_url."cgi-bin/";
+        }
 
         if (empty($submitty_json['vcs_url'])) {
             $this->vcs_url = $this->base_url . '{$vcs_type}/';
@@ -265,6 +282,8 @@ class Config extends AbstractModel {
         else {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
         }
+
+        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
@@ -274,7 +293,7 @@ class Config extends AbstractModel {
             $this->$path = rtrim($this->$path, "/");
         }
 
-        foreach(array('site_errors', 'access') as $path) {
+        foreach(array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
@@ -284,28 +303,50 @@ class Config extends AbstractModel {
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
+
+        $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
+        if (!$secrets_json) {
+            throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
+        }
+
+        foreach(['session'] as $key) {
+            $var = "secret_{$key}";
+            $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
+            if (empty($secrets_json[$key])) {
+                throw new ConfigException("Missing secret var: {$key}");
+            }
+            else if (strlen($secrets_json[$key]) < 32) {
+                // enforce a minimum 32 bytes for the secrets
+                throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
+            }
+            $this->$var = $secrets_json[$key];
+        }
     }
 
-    public function loadCourseIni($course_ini) {
-        if (!file_exists($course_ini)) {
-            throw new ConfigException("Could not find course config file: ".$course_ini, true);
+    public function loadCourseJson($course_json_path) {
+        if (!file_exists($course_json_path)) {
+            throw new ConfigException("Could not find course config file: ".$course_json_path, true);
         }
-        $this->course_ini_path = $course_ini;
-        $this->course_ini = IniParser::readFile($this->course_ini_path);
-
-        if (!isset($this->course_ini['database_details']) || !is_array($this->course_ini['database_details'])) {
-            throw new ConfigException("Missing config section 'database_details' in ini file");
+        $this->course_json_path = $course_json_path;
+        $this->course_json = json_decode(file_get_contents($course_json_path), true);
+        if ($this->course_json === null) {
+            throw new ConfigException("Error parsing the config file: ".json_last_error_msg());
         }
 
-        $this->course_database_params = array_merge($this->submitty_database_params, $this->course_ini['database_details']);
+        if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
+            throw new ConfigException("Missing config section 'database_details' in json file");
+        }
+
+        $this->course_database_params = array_merge($this->submitty_database_params, $this->course_json['database_details']);
 
         $array = [
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'regrade_enabled', 'regrade_message', 'auto_rainbow_grades'
+            'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message',
+            'auto_rainbow_grades'
         ];
-        $this->setConfigValues($this->course_ini, 'course_details', $array);
+        $this->setConfigValues($this->course_json, 'course_details', $array);
 
         if (empty($this->vcs_base_url)) {
             $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
@@ -313,21 +354,19 @@ class Config extends AbstractModel {
 
         $this->vcs_base_url = rtrim($this->vcs_base_url, "/")."/";
 
-        if (isset($this->course_ini['hidden_details'])) {
-            $this->hidden_details = $this->course_ini['hidden_details'];
-            if (isset($this->course_ini['hidden_details']['course_url'])) {
-                $this->base_url = rtrim($this->course_ini['hidden_details']['course_url'], "/")."/";
+        if (isset($this->course_json['hidden_details'])) {
+            $this->hidden_details = $this->course_json['hidden_details'];
+            if (isset($this->course_json['hidden_details']['course_url'])) {
+                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/")."/";
             }
         }
-
-        $this->upload_message = Utils::prepareHtmlString($this->upload_message);
 
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor');
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -348,12 +387,12 @@ class Config extends AbstractModel {
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
-            throw new ConfigException("Missing config section '{$section}' in ini file");
+            throw new ConfigException("Missing config section '{$section}' in json file");
         }
 
         foreach ($keys as $key) {
             if (!isset($config[$section][$key])) {
-              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration ini file");
+              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration json file");
             }
             $this->$key = $config[$section][$key];
         }
@@ -413,12 +452,13 @@ class Config extends AbstractModel {
         return $this->room_seating_gradeable_id !== "";
     }
 
+
     public function getLogPath() {
         return $this->submitty_log_path;
     }
 
-    public function saveCourseIni($save) {
-        IniParser::writeFile($this->course_ini_path, array_merge($this->course_ini, $save));
+    public function saveCourseJson($save) {
+        FileUtils::writeJsonFile($this->course_json_path, array_merge($this->course_json, $save));
     }
 
     public function wrapperEnabled() {

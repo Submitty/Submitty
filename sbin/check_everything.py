@@ -135,13 +135,14 @@ def main():
             global_success &= CheckItemBits(course_path+"/ASSIGNMENTS.txt",False,c_instructor,c_group,0o660)
 
             global_success &= CheckItemBits(course_path+"/config",True,c_instructor,c_group,0o770)
-            global_success &= CheckItemBits(course_path+"/config/config.ini",False,PHP_USER,c_group,0o660)
+            global_success &= CheckItemBits(course_path+"/config/config.json",False,PHP_USER,c_group,0o660)
             global_success &= CheckItemBits(course_path+"/config/build",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/config/complete_config",True,c_instructor,c_group,0o770,must_exist=False)
             global_success &= CheckItemBits(course_path+"/config/form",True,c_instructor,c_group,0o770)
 
             global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/provided_code",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/instructor_solution",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)

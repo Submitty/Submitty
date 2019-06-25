@@ -16,7 +16,7 @@
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
             <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
             {% if allow_regrade == true %}
-                <i>Any regrade requests are due by {{ regrade_date }}</i>
+                <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
             <p>
                 {% if gradeable.getOverallComment()|length != 0 %}
@@ -59,14 +59,15 @@
                     <div style="float:left; word-break: break-word;">
                         <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
                         <p>
+                            {# This is a layout table #}
                             <table class="gradeable_comment">
                                 {% for mark in component.getMarks() if mark.getHasMark() or mark.getPublish() == 't' %}
                                     <tr>
                                         <td>
                                             {% if mark.getHasMark() %}
-                                                <i class="fa fa-check-square-o fa-1g"></i>
+                                                <i class="far fa-check-square fa-1g"></i>
                                             {% else %}
-                                                <i class="fa fa-square-o fa-1g"></i>
+                                                <i class="far fa-square fa-1g"></i>
                                             {% endif %}
                                         </td>
                                         <td class="mark-score">
@@ -80,7 +81,7 @@
                                 {% if component.getScore() != 0 or component.getComment() != '' %}
                                     <tr>
                                         <td>
-                                            <i class="fa fa-check-square-o fa-1g"></i>
+                                            <i class="far fa-check-square fa-1g"></i>
                                         </td>
                                         <td class="mark-score">
                                             {{ component.getScore()|number_format(num_decimals) }}
@@ -111,7 +112,7 @@
     </div>
     {% if allow_regrade == true %}
     <div id="ShowRegradeRequestButton">
-        <button type="button" title="Show Regrade Requests" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default"> Show Regrade Request </button>
+        <button type="button" title="Submit Grade Inquiry" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default">Submit Grade Inquiry</button>
     </div>
     {% endif %}
 {% endif %}

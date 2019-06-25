@@ -34,8 +34,7 @@ fi
 #################
 
 # PATHS
-SOURCE="${BASH_SOURCE[0]}"
-CURRENT_DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -51,6 +50,9 @@ CGI_GROUP=submitty_cgi
 
 DAEMONPHP_GROUP=submitty_daemonphp
 DAEMONCGI_GROUP=submitty_daemoncgi
+
+# VERSIONS
+source ${CURRENT_DIR}/bin/versions.sh
 
 #################################################################
 # PROVISION SETUP
@@ -95,16 +97,54 @@ if [ ${VAGRANT} == 1 ]; then
     sed -i -e "s/PermitRootLogin prohibit-password/PermitRootLogin yes/g" /etc/ssh/sshd_config
 
     # Set up some convinence stuff for the root user on ssh
-     echo -e "
+
+    INSTALL_HELP=$(cat <<'EOF'
+The vagrant box comes with some handy aliases:
+    submitty_help                - show this message
+    submitty_install             - runs INSTALL_SUBMITTY.sh
+    submitty_install_site        - runs .setup/INSTALL_SUBMITTY_HELPER_SITE.sh
+    submitty_install_bin         - runs .setup/INSTALL_SUBMITTY_HELPER_BIN.sh
+    submitty_code_watcher        - runs .setup/bin/code_watcher.py
+    submitty_restart_autograding - restart systemctl for autograding
+    submitty_restart_services    - restarts all Submitty related systemctl
+    migrator                     - run the migrator tool
+    vagrant_info                 - print out the MotD again
+    ntp_sync                     - Re-syncs NTP in case of time drift
+
+Saved variables:
+    SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
+    DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP, CGI_USER,
+    CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
+EOF
+)
+
+echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
+export DAEMON_USER=${DAEMON_USER}
+export DAEMON_GROUP=${DAEMON_GROUP}
+export PHP_USER=${PHP_USER}
+export PHP_GROUP=${PHP_GROUP}
+export CGI_USER=${CGI_USER}
+export CGI_GROUP=${CGI_GROUP}
+export DAEMONPHP_GROUP=${DAEMONPHP_GROUP}
+export DAEMONCGI_GROUP=${DAEMONCGI_GROUP}
+alias submitty_help=\"echo -e '${INSTALL_HELP}'\"
 alias install_submitty='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
+alias submitty_install='/usr/local/submitty/.setup/INSTALL_SUBMITTY.sh'
 alias install_submitty_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
+alias submitty_install_site='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_SITE.sh'
 alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
+alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
+alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
+alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
+alias vagrant_info='cat /etc/motd'
+alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
@@ -127,6 +167,55 @@ DATABASE_PASSWORD=submitty_dbuser
 #################
 
 source ${CURRENT_DIR}/distro_setup/setup_distro.sh
+
+#################################################################
+# PYTHON PACKAGE SETUP
+#########################
+
+pip3 install -U pip
+pip3 install python-pam
+pip3 install PyYAML
+pip3 install psycopg2-binary
+pip3 install sqlalchemy
+pip3 install pylint
+pip3 install psutil
+pip3 install python-dateutil
+pip3 install watchdog
+pip3 install xlsx2csv
+pip3 install pause
+pip3 install paramiko
+pip3 install tzlocal
+pip3 install PyPDF2
+pip3 install distro
+
+# for Lichen / Plagiarism Detection
+pip3 install parso
+
+# Python3 implementation of python-clang bindings (may not work < 6.0)
+pip3 install clang
+
+#libraries for QR code processing:
+#install DLL for zbar
+apt-get install libzbar0 --yes
+
+#python libraries for QR bulk upload
+pip3 install pyzbar
+pip3 install pdf2image
+pip3 install opencv-python
+pip3 install numpy
+
+# Install an email catcher
+if [ ${VAGRANT} == 1 ]; then
+    pip3 install nullsmtpd
+fi
+
+#################################################################
+# Node Package Setup
+####################
+# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
+# (this happens if we re-run install_system on an existing installation).
+# So let's manually set the umask just for this call.
+(umask 0022 && npm install -g npm)
 
 #################################################################
 # STACK SETUP
@@ -177,7 +266,7 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
+	usermod -aG sudo vagrant
 fi
 
 # change the default user umask (was 002)
@@ -187,16 +276,16 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
@@ -209,7 +298,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
@@ -229,97 +318,69 @@ fi
 
 usermod -a -G docker "${DAEMON_USER}"
 
-pip3 install -U pip
-pip3 install python-pam
-pip3 install PyYAML
-pip3 install psycopg2-binary
-pip3 install sqlalchemy
-pip3 install pylint
-pip3 install psutil
-pip3 install python-dateutil
-pip3 install watchdog
-pip3 install xlsx2csv
-pip3 install pause
-pip3 install paramiko
-pip3 install tzlocal
-pip3 install PyPDF2
-pip3 install distro
-
-# for Lichen / Plagiarism Detection
-pip3 install parso
-
-# Python3 implementation of python-clang bindings (may not work < 6.0)
-pip3 install clang
-
-sudo chmod -R 555 /usr/local/lib/python*/*
-sudo chmod 555 /usr/lib/python*/dist-packages
-sudo chmod 500 /usr/local/lib/python*/dist-packages/pam.py*
-
-if [ ${WORKER} == 0 ]; then
-    sudo chown ${CGI_USER} /usr/local/lib/python*/dist-packages/pam.py*
-fi
-
 #################################################################
 # JAR SETUP
 #################
 
-pushd /tmp > /dev/null
-
 # -----------------------------------------
 echo "Getting JUnit & Hamcrest..."
-JUNIT_VER=4.12
-HAMCREST_VER=1.3
-mkdir -p ${SUBMITTY_INSTALL_DIR}/JUnit
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
 if [ ${WORKER} == 0 ]; then
-    chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/JUnit
+    chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
 fi
+chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
 
-chmod 751 ${SUBMITTY_INSTALL_DIR}/JUnit
-cd ${SUBMITTY_INSTALL_DIR}/JUnit
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+rm -rf junit*jar
+wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+popd > /dev/null
 
-wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar -o /dev/null > /dev/null 2>&1
-wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar -o /dev/null > /dev/null 2>&1
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
+rm -rf hamcrest*.jar
+wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+popd > /dev/null
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
 
 
-popd > /dev/null
-
-
 # EMMA is a tool for computing code coverage of Java programs
 echo "Getting emma..."
 
-pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
 
-EMMA_VER=2.0.5312
-wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip -o /dev/null > /dev/null 2>&1
-unzip emma-${EMMA_VER}.zip > /dev/null
-mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}*
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma > /dev/null
+wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
+unzip emma-${EMMA_VERSION}.zip > /dev/null
+mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
+rm -rf emma-${EMMA_VERSION}*
 chmod o+r . *.jar
-
 popd > /dev/null
 
-# JaCoCo is a potential replacement for EMMA
+
+# JaCoCo is a replacement for EMMA
 
 echo "Getting JaCoCo..."
 
-pushd ${SUBMITTY_INSTALL_DIR}/JUnit > /dev/null
-
-JACOCO_VER=0.8.0
-wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip -o /dev/null > /dev/null 2>&1
-mkdir jacoco-${JACOCO_VER}
-unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
-mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
-mv jacoco-${JACOCO_VER}/lib/jacocoagent.jar jacocoagent.jar
-rm -rf jacoco-${JACOCO_VER}
-rm -f jacoco-${JACOCO_VER}.zip
-
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco > /dev/null
+wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VERSION}/jacoco-${JACOCO_VERSION}.zip -o /dev/null > /dev/null 2>&1
+mkdir jacoco-${JACOCO_VERSION}
+unzip jacoco-${JACOCO_VERSION}.zip -d jacoco-${JACOCO_VERSION} > /dev/null
+mv jacoco-${JACOCO_VERSION}/lib/jacococli.jar jacococli.jar
+mv jacoco-${JACOCO_VERSION}/lib/jacocoagent.jar jacocoagent.jar
+rm -rf jacoco-${JACOCO_VERSION}
+rm -f jacoco-${JACOCO_VERSION}.zip
 chmod o+r . *.jar
-
 popd > /dev/null
+
+
+# fix all java_tools permissions
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 #################################################################
@@ -332,15 +393,32 @@ pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
-DRMEM_TAG=release_2.0.1
-DRMEM_VER=2.0.1-2
-wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz -o /dev/null > /dev/null 2>&1
-tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz
-rsync --delete -a /tmp/DrMemory-Linux-${DRMEM_VER}/ ${SUBMITTY_INSTALL_DIR}/drmemory
+wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
+rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory
 rm -rf /tmp/DrMemory*
 
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/drmemory
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/drmemory
+
+popd > /dev/null
+
+#################################################################
+# TCLAPP SETUP
+#################
+pushd /tmp > /dev/null
+
+echo "Getting TCLAPP"
+wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+tar -xpzf tclap-1.2.2.tar.gz
+rm /tmp/tclap-1.2.2.tar.gz
+cd tclap-1.2.2/
+sed -i 's/SUBDIRS = include examples docs tests msc config/SUBDIRS = include docs msc config/' Makefile.in
+bash configure
+make
+make install
+cd /tmp
+rm -rf /tmp/tclap-1.2.2
 
 popd > /dev/null
 
@@ -357,7 +435,7 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -373,7 +451,6 @@ if [ ${WORKER} == 0 ]; then
         # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
 
         sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
-        # sed -i -e "s/GIT_URL/${GIT_URL:7}/g" /etc/apache2/sites-available/git.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
@@ -475,7 +552,11 @@ if [ ${WORKER} == 0 ]; then
         su postgres -c "source ${SUBMITTY_REPOSITORY}/.setup/vagrant/db_users.sh";
         echo "Finished creating PostgreSQL users"
 
-        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" "/etc/postgresql/${PG_VERSION}/main/postgresql.conf"
+        # Set timezone to UTC instead of using localtime (which is probably ET)
+        sed -i "s/timezone = 'localtime'/timezone = 'UTC'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+
+        # Set the listen address to be global so that we can access the guest DB from the host
+        sed -i "s/#listen_addresses = 'localhost'/listen_addresses = '*'/" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
         service postgresql restart
     fi
 fi
@@ -504,7 +585,7 @@ clangsrc=${SUBMITTY_INSTALL_DIR}/clang-llvm/src
 clangbuild=${SUBMITTY_INSTALL_DIR}/clang-llvm/build
 # note, we are not running 'ninja install', so this path is unused.
 clanginstall=${SUBMITTY_INSTALL_DIR}/clang-llvm/install
- 
+
 # skip if this is a re-run
 if [ ! -d "${clangsrc}" ]; then
     echo 'GOING TO PREPARE CLANG INSTALLATION FOR STATIC ANALYSIS'
@@ -528,7 +609,7 @@ if [ ! -d "${clangsrc}" ]; then
 
     echo 'DONE PREPARING CLANG INSTALLATION'
 fi
-    
+
 #################################################################
 # SUBMITTY SETUP
 #################
@@ -575,21 +656,21 @@ fi
 if [ ${WORKER} == 0 ]; then
     dbuser_password=`cat ${SUBMITTY_INSTALL_DIR}/.setup/submitty_conf.json | jq .database_password | tr -d '"'`
 
-    # create the submitty_dbuser role in postgres (if it does not yet exist
-    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN  CREATE ROLE ${DB_USER} LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
+    # create the submitty_dbuser role in postgres (if it does not yet exist)
+    # SUPERUSER privilege is required to use dblink extension (needed for data sync between master and course DBs).
+    su postgres -c "psql -c \"DO \\\$do\\\$ BEGIN IF NOT EXISTS ( SELECT FROM  pg_catalog.pg_roles WHERE  rolname = '${DB_USER}') THEN CREATE ROLE ${DB_USER} SUPERUSER LOGIN PASSWORD '${dbuser_password}'; END IF; END \\\$do\\\$;\""
 
     # check to see if a submitty master database exists
     DB_EXISTS=`su -c 'psql -lqt | cut -d \| -f 1 | grep -w submitty || true' postgres`
 
     if [ "$DB_EXISTS" == "" ]; then
-	echo "Submitty master database does not yet exist"
-	PGPASSWORD=${dbuser_password} psql -d postgres -h localhost -U ${DB_USER} -c "CREATE DATABASE submitty;"
-	python3 ${SUBMITTY_REPOSITORY}/migration/migrator.py -e master -e system migrate --initial
+        echo "Creating submitty master database"
+        su postgres -c "psql -c \"CREATE DATABASE submitty WITH OWNER ${DB_USER}\""
+        su postgres -c "psql submitty -c \"ALTER SCHEMA public OWNER TO ${DB_USER}\""
+        python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -e master -e system migrate --initial
     else
-	echo "Submitty master database already exists"
+        echo "Submitty master database already exists"
     fi
-
-
 fi
 
 echo Beginning Install Submitty Script
@@ -633,20 +714,32 @@ if [ ${WORKER} == 0 ]; then
         rm -rf ${SUBMITTY_DATA_DIR}/logs/*
         rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
+
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
-        chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/site_errors
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
@@ -654,16 +747,26 @@ if [ ${WORKER} == 0 ]; then
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
-        #################################################################
-        # SET CSV FIELDS (for classlist upload data)
-        #################
-        # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-        # of Science 2015-2016.
-
-        # Other Universities will need to rerun /bin/setcsvfields to match their
-        # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
+fi
+
+if [[ ${VAGRANT} == 1 ]]; then
+    if [[ ! -f ${SUBMITTY_INSTALL_DIR}/config/email.json ]]; then
+        # add email configuration stuff to email.json
+        echo "{}" > ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+        jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
+    fi
+    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
+    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
+    rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
+    chown -R root:root /etc/systemd/system/nullsmtpd.service
+    chmod 444 /etc/systemd/system/nullsmtpd.service
+    systemctl restart nullsmtpd
+    # also, set it to automatically start on boot
+    systemctl enable nullsmtpd
 fi
 
 #################################################################
@@ -671,7 +774,7 @@ fi
 #################
 
 # WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security 
+# CAUTION: needs users/groups for security
 # These commands should be run manually if testing Docker integration
 
 rm -rf /tmp/docker

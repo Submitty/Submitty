@@ -1,12 +1,4 @@
-@import url("https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300,300italic,700");
-@import url("https://fonts.googleapis.com/css?family=Inconsolata");
-
-@font-face {
-    font-family: 'Grand Hotel';
-    src: url('../fonts/grand-hotel/GrandHotel-Regular.otf') format('opentype');
-    font-weight: normal;
-    font-style: normal;
-}
+@import url("google/inconsolata.css");
 
 .diff-container {
     background-color: #F8F8F8;
@@ -64,7 +56,7 @@
     vertical-align: top;
     max-height: 20px !important;
     height: 20px !important;
-    font-family: 'Inconsolata', monospace !important;
+    font-family: "Courier New", Courier, monospace;
     font-size: 16px;
     line-height: 20px !important;
     padding: 0 5px 0 5px;

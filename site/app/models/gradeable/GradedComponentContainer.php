@@ -216,7 +216,8 @@ class GradedComponentContainer extends AbstractModel {
             $points_earned += $graded_component->getTotalScore();
         }
         // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
-        $points_earned = Utils::safeCalcPercent($points_earned, count($this->graded_components));
+        // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
+        $points_earned = Utils::safeCalcPercent($points_earned, max(1, count($this->graded_components)));
         return $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->roundPointValue($points_earned);
     }
 
@@ -315,12 +316,20 @@ class GradedComponentContainer extends AbstractModel {
 
     /**
      * Gets all user-visible graders for this component
+     * If a verifier exists for a limited access grader, gets that instead
      * @return User[] indexed by user id
      */
     public function getVisibleGraders() {
-        return array_filter($this->getGraders(), function (User $grader) {
-            return $grader->accessFullGrading();
-        });
+        $visible_graders = [];
+        foreach ($this->graded_components as $graded_component) {
+            $grader = $graded_component->getGrader();
+            $verifier_id = $graded_component->getVerifierId();
+            if($grader->accessFullGrading())
+                $visible_graders[$grader->getId()] = $grader;
+            else if($verifier_id != '')
+                $visible_graders[$verifier_id] = $graded_component->getVerifier();
+        }
+        return $visible_graders;
     }
 
     /**

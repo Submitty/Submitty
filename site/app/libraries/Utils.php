@@ -168,7 +168,8 @@ class Utils {
     public static function isImage($filename) {
         return (substr($filename,strlen($filename)-4,4) == ".png") ||
             (substr($filename,strlen($filename)-4,4) == ".jpg") ||
-            (substr($filename,strlen($filename)-4,4) == ".jpeg");
+            (substr($filename,strlen($filename)-4,4) == ".jpeg")||
+            (substr($filename,strlen($filename)-4,4) == ".gif");
     }
 
     public static function checkUploadedImageFile($id){
@@ -182,34 +183,6 @@ class Utils {
                 }
             } return true;
         } return false;
-    }
-
-    /**
-     * Generates a unique identifier v4 based on the RFC 4122 - Section 4.4 document.
-     * TODO: when we move to Composer inside of site, we should replace usage of this
-     * function with ramsey/uuid package.
-     *
-     * If for whatever reason random_bytes fails, we fall back to uniqid which has a
-     * worse guarantee of being actually unique, but it's more important to not
-     * crash out here.
-     *
-     * @see http://tools.ietf.org/html/rfc4122#section-4.4
-     *
-     * @return string
-     */
-    public static function guidv4() {
-        try {
-            $data = random_bytes(16);
-
-            $data[6] = chr(ord($data[6]) & 0x0f | 0x40); // set version to 0100
-            $data[8] = chr(ord($data[8]) & 0x3f | 0x80); // set bits 6-7 to 10
-
-            return vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
-        }
-        catch (\Exception $exc) {
-            return uniqid('', true);
-        }
-
     }
 
     /**
@@ -257,4 +230,60 @@ class Utils {
             return strcmp(spl_object_hash($a), spl_object_hash($b));
         };
     }
+
+    /*
+     * Given an array of students, returns a json object of formated student names in the form:
+     * First_Name Last_Name <student_id>
+     * Students in the null section are at the bottom of the list in the form:
+     * (In null section) First_Name Last_Name <student_id>
+     * Optional param to show previous submission count
+     * students_version is an array of user and their highest submitted version
+     */
+
+    public static function getAutoFillData($students, $students_version = null) {
+        $students_full = array();
+        $null_section = array();
+        foreach ($students as $student) {
+            $student_entry = array('value' => $student->getId(),
+                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+
+            if($students_version !== null) {
+                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)) {
+                    if ($students_version[$student->getId()] !== 0) {
+                        $student_entry['label'] .= ' (' .
+                        $students_version[$student->getId()] . ' Prev Submission)';
+                    }
+                }
+            } 
+            $students_full[] = $student_entry;
+            if($students_version === null){
+                $null_entry = array('value' => $student->getId(),
+                'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
+
+                $in_null_section = false;
+                foreach ($null_section as $null_student) {
+                    if($null_student['value'] === $student->getId()) $in_null_section = true;
+                }
+                if(!$in_null_section && $student->getRegistrationSection() == null) {
+                    $null_section[] = $null_entry; 
+                    $students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
+                } 
+            }
+        }
+        $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
+        return json_encode($students_full);
+    }
+    
+    /*
+     * Given a multidimensional array of students, key, and id, removeStudentWithId deletes matching student row(s).
+     */
+
+    public static function removeStudentWithId($students, $key, $id) {
+        foreach($students as $subKey => $student) {
+             if($student[$key] === $id) {
+                  unset($students[$subKey]);
+             }
+        }
+        return $students;
+   }
 }

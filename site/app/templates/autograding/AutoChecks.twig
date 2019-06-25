@@ -5,7 +5,7 @@
         <div class="clear"></div>
     {% endif %}
     {% if check.pdf %}
-        <iframe src="{{ core.buildUrl({"component": "misc", "page": "display_file", "dir": "results", "file": check.name, "path": check.path}) }}" width="95%" height="1200px" style="border: 0"></iframe>
+        <iframe src="{{ check.url }}" width="95%" height="1200px" style="border: 0"></iframe>
     {% else %}
         <br>
         {% if check.actual %}
@@ -45,7 +45,7 @@
             {{ element.title }}
             {% if element.show_popup %}
                 <span onclick="openPopUp('{{ popup_css_file }}', '{{ element.title }}', {{ index }}, {{ check_index }}, {{ side }});">
-                    <i class="fa fa-window-restore" style="cursor: pointer;"></i>
+                    <i class="fas fa-window-restore" style="cursor: pointer;"></i>
                 </span>
             {% endif %}
         </h4>
@@ -68,7 +68,7 @@
             {% if element.type == "image" %}
                 <img src="{{ element.src }}" style="border:2px solid black">
             {% elseif element.type == "text" %}
-                <div id=div_{{ index }}_{{ check_index }}>
+                <div id="div_{{ index }}_{{ check_index }}">
                     {{ element.src|raw }}
                 </div>
             {% endif %}

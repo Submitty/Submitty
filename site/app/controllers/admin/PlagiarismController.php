@@ -28,7 +28,7 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'edit_plagiarism_saved_config':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
-                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName());
+                $this->core->getOutput()->addBreadcrumb('Configure '.($this->core->getQueries()->getGradeableConfig($_REQUEST['gradeable_id']))->getTitle());
                 $this->editPlagiarismSavedConfig();
                 break;
             case 're_run_plagiarism':
@@ -45,7 +45,6 @@ class PlagiarismController extends AbstractController {
                 break;
             case 'show_plagiarism_result':
                 $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildUrl(array('component' => 'admin', 'semester' => $_REQUEST['semester'] , 'course'=> $_REQUEST['course'],'page' => 'plagiarism')));
-                $this->core->getOutput()->addBreadcrumb(($this->core->getQueries()->getGradeable($_REQUEST['gradeable_id']))->getName().' Results');
                 $this->showPlagiarismResult();
                 break;
             default:
@@ -124,7 +123,7 @@ class PlagiarismController extends AbstractController {
         $semester = $_REQUEST['semester'];
         $course = $_REQUEST['course'];
         $gradeable_id= $_REQUEST['gradeable_id'];
-        $gradeable_title= ($this->core->getQueries()->getGradeable($gradeable_id))->getName();
+        $gradeable_title= ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
         $return_url= $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course,'page' => 'plagiarism'));
         if(!$this->core->getUser()->accessAdmin()) {
             die("Don't have permission to access page.");
@@ -205,18 +204,18 @@ class PlagiarismController extends AbstractController {
         }
 
         $file_option = $_POST['file_option'];
-        if ($file_option == "regrex_matching_files") {
-            $file_option = "matching_regrex";
+        if ($file_option == "regex_matching_files") {
+            $file_option = "matching_regex";
         }
         else {
             $file_option = "all";
         }
-        if($file_option == "matching_regrex") {
-            if( isset($_POST['regrex_to_select_files']) && $_POST['regrex_to_select_files'] !== '') {
-                $regrex_for_selecting_files = $_POST['regrex_to_select_files'];
+        if($file_option == "matching_regex") {
+            if( isset($_POST['regex_to_select_files']) && $_POST['regex_to_select_files'] !== '') {
+                $regex_for_selecting_files = $_POST['regex_to_select_files'];
             }
             else {
-                $this->core->addErrorMessage("No regrex provided for selecting files");
+                $this->core->addErrorMessage("No regex provided for selecting files");
                 $this->core->redirect($return_url);
             }
         }
@@ -325,8 +324,8 @@ class PlagiarismController extends AbstractController {
                             "instructor_provided_code" =>   $instructor_provided_code,
                                         );
 
-        if($file_option == "matching_regrex") {
-            $json_data["regrex"] = $regrex_for_selecting_files;
+        if($file_option == "matching_regex") {
+            $json_data["regex"] = $regex_for_selecting_files;
         }
         if($instructor_provided_code == true) {
             $json_data["instructor_provided_code_path"] = $instructor_provided_code_path;
@@ -494,8 +493,17 @@ class PlagiarismController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
+        $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
+        if($gradeable === false) {
+            return;
+        }
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id_1);
+        if ($graded_gradeable === false) {
+            return;
+        }
+
         $return="";
-        $active_version_user_1 = (string)$this->core->getQueries()->getGradeable($gradeable_id, $user_id_1)->getActiveVersion();
+        $active_version_user_1 =  (string)$graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
 			$return = array('error' => 'Ranking file not exists.');
@@ -526,7 +534,7 @@ class PlagiarismController extends AbstractController {
     		else {
     			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
     		}
-    		$data= array('display_code1'=> htmlentities($this->getDisplayForCode($file_name, $color_info)), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
+    		$data= array('display_code1'=> $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
         }
         else {
         	$return = array('error' => 'User 1 submission.concatenated for specified version not found.');
@@ -539,7 +547,7 @@ class PlagiarismController extends AbstractController {
 
 	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
 	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $_REQUEST['user_id_2'], $_REQUEST['version_user_2'], '2');
-	  			$data['display_code2'] = htmlentities($this->getDisplayForCode($file_name, $color_info));
+	  			$data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
 	        }
 	        else {
 	        	$return = array('error' => 'User 2 submission.concatenated for matching version not found.');
@@ -548,13 +556,17 @@ class PlagiarismController extends AbstractController {
 		    	return;
 	        }
         }
-
+        $data['ci'] = $color_info;
        	$return= json_encode($data);
     	echo($return);
     }
 
     public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
     	$color_info = array();
+
+        //Represents left and right display users
+        $color_info[1] = array();
+        $color_info[2] = array();
 
 		$file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
         if (!file_exists($file_path)) {
@@ -569,156 +581,77 @@ class PlagiarismController extends AbstractController {
         		$tokens_user_2 = json_decode(file_get_contents($file_path), true);
         	}
 	    	foreach($matches as $match) {
-	    		$start_pos =$tokens_user_1[$match["start"]-1]["char"];
-	    		$start_line= $tokens_user_1[$match["start"]-1]["line"];
-	    		$end_pos =$tokens_user_1[$match["end"]-1]["char"];
-	    		$end_line= $tokens_user_1[$match["end"]-1]["line"];
+	    		$start_pos =$tokens_user_1[$match["start"]-1]["char"]-1;
+	    		$start_line= $tokens_user_1[$match["start"]-1]["line"]-1;
+	    		$end_pos =$tokens_user_1[$match["end"]-1]["char"]-1; //!!!!!
+	    		$end_line= $tokens_user_1[$match["end"]-1]["line"]-1;
+                $start_value = $tokens_user_1[$match["start"]-1]["value"];
 	    		$end_value =$tokens_user_1[$match["end"]-1]["value"];
+                $userMatchesStarts = array();
+                $userMatchesEnds = array();
 	    		if($match["type"] == "match") {
 	    			$orange_color = false;
 	    			if($user_id_2 != "") {
 		    			foreach($match['others'] as $i=>$other) {
 	    					if($other["username"] == $user_id_2) {
-	    						$orange_color =true;
+	    						$orange_color = true;
                                 $user_2_index_in_others=$i;
 	    					}
 	    				}
 	    			}
-	    			if($codebox == "1" && $orange_color) {
-                        $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_1","orange",this);';
-                        $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
-	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-			    		}
-			    		else {
-			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-			    		}
-			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-			    		}
-			    		else {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}
+                    
+	    			if($orange_color) {
+                        //Color is orange -- general match from selected match
+                        $color = '#ffa500';
 	    			}
-	    			else if($codebox == "1" && !$orange_color) {
-                        $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_1","yellow",this);';
-                        $name = '{"start":'.$match["start"].', "end":'.$match["end"].'}';
-	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
-			    		}
-			    		else {
-			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffff00;cursor: pointer;'>";
-			    		}
-			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-			    		}
-			    		else {
-			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-			    		}
-	    			}
-	    			else if($codebox == "2" && $user_id_2 !="" && $orange_color) {
-                        foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
-    	    				$start_pos =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"];
-    			    		$start_line= $tokens_user_2[$user_2_matchingposition["start"]-1]["line"];
-    			    		$end_pos =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"];
-    			    		$end_line= $tokens_user_2[$user_2_matchingposition["end"]-1]["line"];
-    			    		$end_value =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
-                            $onclick_function = 'getMatchesForClickedMatch("'.$gradeable_id.'", event,'.$match["start"].','.$match["end"].',"code_box_2","orange", this);';
-                            $name = '{"start":'.$user_2_matchingposition["start"].', "end":'.$user_2_matchingposition["end"].'}';
-    	    				if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-    			    			$color_info[$start_line][$start_pos] .= "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-    			    		}
-    			    		else {
-    			    			$color_info[$start_line][$start_pos] = "<span name='{$name}' onclick='{$onclick_function}' style='background-color:#ffa500;cursor: pointer;'>";
-    			    		}
-    			    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-    			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-    			    		}
-    			    		else {
-    			    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-    			    		}
-                        }
+	    			else if(!$orange_color) {
+                        //Color is yellow -- matches other students...
+                        $color = '#ffff00';
 	    			}
 
-	    		}
-	    		else if($match["type"] == "common" && $codebox == "1") {
-	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#cccccc'>";
-		    		}
-		    		else {
-		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#cccccc'>";
-		    		}
-		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-		    		}
-		    		else {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-		    		}
-	    		}
-	    		else if($match["type"] == "provided"  && $codebox == "1") {
-	    			if(array_key_exists($start_line, $color_info) && array_key_exists($start_pos, $color_info[$start_line])) {
-		    			$color_info[$start_line][$start_pos] .= "<span style='background-color:#b5e3b5'>";
-		    		}
-		    		else {
-		    			$color_info[$start_line][$start_pos] = "<span style='background-color:#b5e3b5'>";
-		    		}
-		    		if(array_key_exists($end_line, $color_info) && array_key_exists($end_pos+strlen(strval($end_value)), $color_info[$end_line])) {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>".$color_info[$end_line][$end_pos+strlen(strval($end_value))];
-		    		}
-		    		else {
-		    			$color_info[$end_line][$end_pos+strlen(strval($end_value))] = "</span>";
-		    		}
-	    		}
-	    	}
-        }
-    	foreach($color_info as $i=>$color_info_for_line) {
-	    	krsort($color_info[$i]);
-    	}
+                    if($codebox == "2" && $user_id_2 !="" && $orange_color) {
+                         foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
+                            $start_pos_2 =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"]-1;
+                            $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["line"]-1;
+                            $end_pos_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"]-1; //!!!!
+                            $end_line_2 = $tokens_user_2[$user_2_matchingposition["end"]-1]["line"]-1;
+                            $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["value"];
+                            $end_value_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
+                            $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
+                            
+                            $userMatchesStarts[] = $user_2_matchingposition["start"];
+                            $userMatchesEnds[] = $user_2_matchingposition["end"];
+
+                }
+                
+              
+            }
+	    	
+            } else if($match["type"] == "common") {
+                //Color is grey -- common matches among all students
+                $color = '#cccccc';
+            }
+            else if($match["type"] == "provided") {
+                //Color is green -- instructor provided code #b5e3b5
+                $color = '#b5e3b5';
+            }
+
+             
+
+            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
+            
+        
+    	// foreach($color_info as $i=>$color_info_for_line) {
+	    // 	ksort($color_info[$i]);
+    	// }
+    }
+}
     	return $color_info;
     }
 
     public function getDisplayForCode($file_name , $color_info){
-    	$lines= file($file_name);
-    	foreach($lines as $i=>$line) {
-    		$lines[$i] = rtrim($line, "\n");
-    	}
-	    $html = "<div style='background:white;border:none;' class='diff-container'><div class='diff-code'>";
-	    $last_line_unmatched_span="";
-	    $present_line_unmatched_span="";
-
-	    for ($i = 0; $i < count($lines); $i++) {
-	        $j = $i + 1;
-	        $html .= "<div style='white-space: nowrap;'>";
-	        $html .= "<span class='line_number'>". $j ."</span>";
-	        $html .= "<span class='line_code'>";
-
-	        if(array_key_exists($i+1, $color_info)) {
-		        if($color_info[$i+1][max(array_keys($color_info[$i+1]))] != "</span>") {
-	    			$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
-	    			$present_line_unmatched_span = str_replace("</span>", "", $color_info[$i+1][max(array_keys($color_info[$i+1]))]);
-	    		}
-	    		else {
-	    			$present_line_unmatched_span = "";
-	    		}
-		        foreach ($color_info[$i+1] as $c => $color_info_for_position) {
-		    		$lines[$i] = substr_replace($lines[$i], $color_info_for_position, $c-1, 0);
-		    	}
-
-	    		if((strpos($color_info[$i+1][min(array_keys($color_info[$i+1]))],"</span>") == 0)) {
-	    			$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);
-	    		}
-		    }
-		    else if($last_line_unmatched_span != "") {
-	    		$lines[$i] = substr_replace($lines[$i], "</span>", strlen($lines[$i]), 0);
-	    		$lines[$i] = substr_replace($lines[$i], $last_line_unmatched_span, 0, 0);
-	    	}
-	    	$last_line_unmatched_span = $present_line_unmatched_span;
-	        $html .= $lines[$i];
-	        $html .= "</span></div>";
-	    }
-	    $j++;
-	    $html .= "</div></div>";
-	    return $html;
+    	$content= file_get_contents($file_name);
+	    return $content;
 	}
 
     public function ajaxGetMatchingUsers() {
@@ -779,6 +712,10 @@ class PlagiarismController extends AbstractController {
         $user_id_1 =$_REQUEST['user_id_1'];
         $version_user_1 = $_REQUEST['version_user_1'];
         $course_path = $this->core->getConfig()->getCoursePath();
+
+        $token_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
+        $tokens_user_1 = json_decode(file_get_contents($token_path), true);
+
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
@@ -791,11 +728,15 @@ class PlagiarismController extends AbstractController {
         else {
             $content = json_decode(file_get_contents($file_path), true);
             foreach($content as $match) {
-                if($match["start"] == $_REQUEST['start'] && $match["end"] == $_REQUEST['end']) {
+                if($tokens_user_1[$match["start"]-1]["line"]-1 == $_REQUEST['start'] && $tokens_user_1[$match["end"]-1]["line"]-1 == $_REQUEST['end']) { //also do char place
                     foreach ($match["others"] as $match_info) {
                         $matchingpositions= array();
+                        $token_path_2= $course_path."/lichen/tokenized/".$gradeable_id."/".$match_info['username']."/".$match_info['version']."/tokens.json";
+                        $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
                         foreach($match_info['matchingpositions'] as $matchingpos) {
-                            array_push($matchingpositions, array("start"=> $matchingpos["start"] , "end"=>$matchingpos["end"]));
+                            
+                            array_push($matchingpositions, array("start_line"=> $tokens_user_2[$matchingpos["start"]-1]["line"]-1 , "start_ch" => $tokens_user_2[$matchingpos["start"]-1]["char"]-1,
+                                 "end_line"=> $tokens_user_2[$matchingpos["end"]-1]["line"]-1, "end_ch" => $tokens_user_2[$matchingpos["end"]-1]["char"]-1 ));
                         }
                         $first_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedFirstName();
                         $last_name= $this->core->getQueries()->getUserById($match_info["username"])->getDisplayedLastName();

@@ -10,21 +10,20 @@ selenium*.jar
 *~
 *.o
 
+__pycache__/
 *.pyc
 *.aux
 *.log
 *.out
 *.synctex.gz
+.coverage
 
+/site/vendor/
+/site/node_modules/
+/site/public/vendor/
 /site/config/*
-!/site/config/master_template.ini
-!/site/config/course_template.ini
+!/site/config/course_template.json
 
-vendor/
-# Because we're supporting both PHP 5.5 and 7.0 which requires two different PHPUnit versions, we end up with having
-# to then have two different composer.json files depending on the version. This means that that we don't want to
-# necessarily lock the composer dependencies as it'll break the CI for the other version.
-composer.lock
 
 db_update.php
 .setup/data/random_users.txt
@@ -34,3 +33,5 @@ composer.phar
 
 Pipfile
 Pipfile.lock
+composer.lock
+.phpunit.result.cache

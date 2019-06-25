@@ -1,7 +1,7 @@
 #bar_wrapper {
      position: absolute;
      height: 41px;
-     width: 600px;
+     width: 650px;
      top: -90px;
      left: 45%;
      background-color: #edf6f6;
@@ -61,7 +61,7 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.fa-list-alt {
+.icon-selected.fa-list {
     box-shadow: 0px 0px 3px 3px #fd4472;
     background-color: #fd4472;
 }
@@ -73,9 +73,14 @@
     width: 22px;
     margin: 5px;
 }
-.icon-selected.fa-pencil-square-o {
+.icon-selected.fa-edit {
     box-shadow: 0px 0px 3px 3px #00e08e;
     background-color: #00e08e;
+}
+
+.icon-selected.fa-comment-alt {
+    box-shadow: 0px 0px 3px 3px #72518a;
+    background-color: #72518a;
 }
 
 .icon-files {
@@ -101,10 +106,11 @@
     box-shadow: 0px 0px 3px 3px rgba(0, 0, 0, 0.4);
     background-color: rgba(0, 0, 0, 0.4);
 }
-.icon-selected.fa-hand-paper-o {
+.icon-selected.grade_inquiry_icon{
     box-shadow: 0px 0px 3px 3px #ffa500;
     background-color: #ffa500;
 }
+
 .icon-header {
     text-align: center;
     width: 1em;
@@ -300,6 +306,11 @@ progress::-webkit-progress-value {
 
 #overall-comment-collapsed {
     padding: 0 0 0 20px;
+    max-height: 100px;
+    overflow-x: hidden;
+    overlfow-y: scroll;
+    width: 100%;
+    overflow-wrap: break-word;
 }
 
 .ta-rubric-table {
@@ -523,16 +534,6 @@ tr.is_publish {
 .gradeable .component .content-block {
 }
 
-/* Save tools */
-
-.save-tools-cancel:hover {
-    background-color: #FCC;
-}
-
-.save-tools-save:hover {
-    background-color: #CFC;
-}
-
 .gradeable .ta-rubric-table,
 .gradeable .received-marks-list {
     padding: 8px 0px;
@@ -586,7 +587,6 @@ tr.is_publish {
     border-radius: 4px;
     color: #888;
     font-size: 14px;
-    font-family: 'Source Sans Pro', sans-serif;
     text-align: center;
 }
 
@@ -626,7 +626,7 @@ tr.is_publish {
 
 .gradeable .mark-container span.mark-title textarea {
     width: 100%;
-    resize: vertical;
+    resize: none;
     min-height: 20px;
 }
 
@@ -768,6 +768,18 @@ tr.is_publish {
     width:48%;
     height:30%;
     overflow: hidden;
+}
+
+#discussion_browser {
+    left:15px;
+    bottom:40px;
+    width:48%;
+    height:30%;
+    overflow: hidden;
+}
+
+#discussion_browser.rubric_panel {
+    border:5px solid #72518a;
 }
 
 #directory_view {

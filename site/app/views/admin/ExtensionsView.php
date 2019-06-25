@@ -3,19 +3,15 @@
 namespace app\views\admin;
 
 use app\views\AbstractView;
+use app\libraries\Utils;
 
 class ExtensionsView extends AbstractView {
-    public function displayExtensions($gradeable_ids) {
+    public function displayExtensions($gradeables) {
         $students = $this->core->getQueries()->getAllUsers();
-        $student_full = array();
-        foreach ($students as $student) {
-            $student_full[] = array('value' => $student->getId(),
-                                    'label' => $student->getDisplayedFirstName().' '.$student->getDisplayedLastName().' <'.$student->getId().'>');
-        }
-        $student_full = json_encode($student_full);
+        $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
-            "gradeable_ids" => $gradeable_ids,
+            "gradeables" => $gradeables,
             "student_full" => $student_full
         ]);
     }

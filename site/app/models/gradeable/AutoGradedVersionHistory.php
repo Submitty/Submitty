@@ -18,6 +18,7 @@ use app\models\AbstractModel;
  * @method \DateTime getGradingFinished()
  * @method int getGradeTime()
  * @method string getVcsRevision()
+ * @method \DateTime getSubmissionTimestamp()
  */
 class AutoGradedVersionHistory extends AbstractModel {
 
@@ -35,6 +36,8 @@ class AutoGradedVersionHistory extends AbstractModel {
     protected $grade_time = 0;
     /** @property @var string VCS revision id (i.e. git commit hash) */
     protected $vcs_revision = '';
+    /** @property @var \DateTime The time of the most recent submission */
+    protected $submission_time = null;
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -46,6 +49,7 @@ class AutoGradedVersionHistory extends AbstractModel {
         $this->batch_regrade = $details['batch_regrade'] === true;
         $this->wait_time = $details['wait_time'];
         $this->grade_time = $details['grade_time'];
+        $this->submission_time = DateUtils::parseDateTime($details['submission_time'], $timezone);
         $this->vcs_revision = $details['revision'] ?? '';
     }
 

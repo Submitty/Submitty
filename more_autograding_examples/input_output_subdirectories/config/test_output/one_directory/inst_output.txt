@@ -1,0 +1,4 @@
+LINE   1: just a small
+LINE   2: file with
+LINE   3: some
+LINE   4: words

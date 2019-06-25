@@ -14,7 +14,7 @@ if [[ "$UID" -ne "0" ]] ; then
 fi
 
 # get the repository name from the location of this script
-MY_PATH="`dirname \"$0\"`"
+MY_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 SUBMITTY_REPOSITORY=${MY_PATH}/../..
 
 # FIXME: should read this from a config file
@@ -25,11 +25,7 @@ SUBMITTY_INSTALL_DIR=/usr/local/submitty
 # These variables specify the minimum version necessary for
 # dependencies between versions.
 
-min_AnalysisTools_version=v.18.06.00
-min_Lichen_version=v.18.09.00
-min_RainbowGrades_version=v.18.07.00
-min_Tutorial_version=v.18.09.00
-min_pdf_annotate_js_version=v.18.10.00
+source ${MY_PATH}/versions.sh
 
 ########################################################################
 # Helper function requires 2 args, the short name of the repository,
@@ -97,8 +93,8 @@ function clone_or_update_repo {
 
 ########################################################################
 
-clone_or_update_repo  AnalysisTools  ${min_AnalysisTools_version}
-clone_or_update_repo  Lichen  ${min_Lichen_version}
-clone_or_update_repo  RainbowGrades  ${min_RainbowGrades_version}
-clone_or_update_repo  Tutorial  ${min_Tutorial_version}
-clone_or_update_repo  pdf-annotate.js  ${min_pdf_annotate_js_version}
+clone_or_update_repo  AnalysisTools  ${AnalysisTools_Version}
+clone_or_update_repo  Lichen  ${Lichen_Version}
+clone_or_update_repo  RainbowGrades  ${RainbowGrades_Version}
+clone_or_update_repo  Tutorial  ${Tutorial_Version}
+clone_or_update_repo  pdf-annotate.js  ${Pdf_Annotate_Js_Version}

@@ -127,6 +127,7 @@ abstract class AbstractModel {
                     case 'bool':
                     case 'boolean':
                         $value = $value === true;
+                        break;
                 }
                 if ($this->$property_name !== $value) {
                     $this->modified = true;

@@ -1,5 +1,4 @@
 {% import _self as self %}
-
 <div id="submission_browser" class="draggable rubric_panel">
     <div id="directory_view">
         <div class="draggable_content">
@@ -19,12 +18,7 @@
                     //is intended to allow open and close to change dynamically on click
                     //the problem is currently if you click the submissions folder then the text won't change b/c it's being double clicked effectively.
                     $(".expand-button").on('click', function(){
-                        // $(this).attr('clicked-state', "clicked");
-                        // updateValue($(this), "Open", "Close");
                         openAll( 'openable-element-', $(this).data('linked-type'))
-                        // $.when(openAll( 'openable-element-', $(this).data('linked-type'))).then(function(){
-                        //     console.log('HELLLO');
-                        // });
                     })
 
                     var currentCodeStyle = localStorage.getItem('codeDisplayStyle');
@@ -35,7 +29,7 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}')">Download Zip File</button>
+                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
             {% endif %}
 
             <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
@@ -55,6 +49,7 @@
                     {{ self.display_files(self, checkout, "c", 0, "checkout") }}
                 {% endif %}
                 {{ self.display_files(self, results, "r", 0, "results") }}
+                {{ self.display_files(self, results_public, "rp", 0, "results_public") }}
             </div>
             {# /Files #}
             <script type="text/javascript">
@@ -75,7 +70,7 @@
         <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30; display: none">No changes</strong>
         <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
         <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
-        <a onclick='collapseFile()'><i class="fa fa-mail-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
+        <a onclick='collapseFile()'><i class="fas fa-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
         {% include "grading/electronic/PDFAnnotationBar.twig" %}
         <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
 
@@ -92,6 +87,9 @@
             if (url_file.includes("submissions")) {
                 directory = "submissions";
             }
+            else if (url_file.includes("results_public")) {
+                directory = "results_public";
+            }
             else if (url_file.includes("results")) {
                 directory = "results";
             }
@@ -103,7 +101,7 @@
                 expandFile(html_file, url_file);
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
                 if(iframe.hasClass("full_panel")){
                     $('#'+iframeId).attr("height", "1200px");
                 }
@@ -130,6 +128,9 @@
         if (url_file.includes("submissions")) {
             directory = "submissions";
         }
+        else if (url_file.includes("results_public")) {
+            directory = "results_public";
+        }
         else if (url_file.includes("results")) {
             directory = "results";
         }
@@ -139,15 +140,16 @@
         else if (url_file.includes("split_pdf")) {
             directory = "split_pdf";
         }
-        window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + directory + "&file=" + html_file + "&path=" + url_file + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
     //TODO: Name better
-    function expandFile(name, path) {
+    function expandFile(name, path, page_num = 0) {
+        // debugger;
         if($('#viewer').length != 0){
             $('#viewer').remove();
         }
-        let promise = loadFile(name, path);
+        let promise = loadFile(name, path, page_num);
         $('#file_view').show();
         $("#grading_file_name").html(name);
         let precision = $("#submission_browser").width()-$("#directory_view").width();
@@ -158,7 +160,7 @@
         return promise;
     }
 
-    function loadFile(name, path){
+    function loadFile(name, path, page_num = 0){
         let extension = name.split('.').pop();
         if(extension == "pdf"){
             $('#pdf_annotation_bar').show();
@@ -169,7 +171,8 @@
                 data: {
                     'gradeable_id': '{{ gradeable_id }}',
                     'user_id': '{{ submitter_id }}',
-                    'filename': name
+                    'filename': name,
+                    'page_num': page_num
                 },
                 success: function(data){
                     $('#file_content').append(data);
@@ -177,13 +180,14 @@
             });
         } else {
             $('#save_status').hide();
-            $('#file_view').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
+            $('#file_content').append("<div id=\"file_viewer_full_panel\" class=\"full_panel\" data-file_name=\"\" data-file_url=\"\"></div>");
             $("#file_viewer_full_panel").empty();
             $("#file_viewer_full_panel").attr("data-file_name", "");
             $("#file_viewer_full_panel").attr("data-file_url", "");
             $("#file_viewer_full_panel").attr("data-file_name", name);
             $("#file_viewer_full_panel").attr("data-file_url", path);
             openFrame(name, path, "full_panel");
+            $("#file_viewer_full_panel_iframe").height("100%");
         }
     }
 
@@ -222,11 +226,11 @@
     <div>
         <div class="file-viewer">
             <a class='openAllFile{{ title }} openable-element-{{ title }}' file-url="{{ path }}" onclick='openFrame("{{ dir }}", "{{ path }}", "{{ id }}"); updateCookies();'>
-                <span class="fa fa-plus-circle" style='vertical-align:text-bottom;'></span>
+                <span class="fas fa-plus-circle" style='vertical-align:text-bottom;'></span>
                 {{ dir }}</a> &nbsp;
-            <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fa fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
-            <a onclick='expandFile("{{ dir }}", "{{ path }}", "{{ id }}")'><i class="fa fa-mail-forward" aria-hidden="true" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fa fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+            <a onclick='expandFile("{{ dir }}", "{{ path }}")'><i class="fas fa-share" aria-hidden="true" title="Show file in full panel"></i></a>
+            <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
@@ -236,7 +240,7 @@
     <div>
         <div class="div-viewer">
             <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDiv("{{ id }}"); updateCookies();'>
-                <span class="fa fa-folder open-all-folder" style='vertical-align:text-top;'></span>
+                <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;'></span>
                 {{ dir }}
             </a>
         </div>

@@ -1,5 +1,9 @@
 {
     "assignment_message" : "To better accomodate students for the upcoming exam, please let us know if you are left-handed or right-handed.<br>We will use this information to make the seating assignments.",
+    "autograding": {
+        "submission_to_validation" : [ "left_right.txt" ],
+        "work_to_details" : [ "left_right.txt" ]
+    },
     "textboxes" :
     [
 	{

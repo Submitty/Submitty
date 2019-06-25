@@ -1,5 +1,4 @@
 #include <sys/time.h>
-#include <sys/resource.h>
 #include <sys/wait.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -57,10 +56,13 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "cat",                     "/bin/cat" },
     { "compare",                 "/usr/bin/compare" }, //image magick!
     { "mogrify",                 "/usr/bin/mogrify" }, //image magick!
+    { "convert",                 "/usr/bin/convert" }, //image magick!
     { "cut",                     "/usr/bin/cut" },
     { "sort",                    "/usr/bin/sort" },
     { "grep",                    "/bin/grep" },
     { "sed",                     "/bin/sed" },
+    { "pwd",                     "/bin/pwd" },
+    { "env",                     "/usr/bin/env" },
     { "pdftotext",               "/usr/bin/pdftotext" },
     { "pdflatex",                "/usr/bin/pdflatex" },
     { "wc",                      "/usr/bin/wc" },
@@ -78,6 +80,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     { "python2.7",               "/usr/bin/python2.7" },
     { "python3",                 "/usr/bin/python3" },
     { "python3.5",               "/usr/bin/python3.5" },
+    { "python3.6",               "/usr/bin/python3.6" },
     { "pylint",                  "/usr/local/bin/pylint" },
 
     // for Data Structures
@@ -146,6 +149,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
 
   if(running_in_docker){
     allowed_system_programs.insert({"bash", "/bin/bash"});
+    allowed_system_programs.insert({"php",  "/usr/bin/php"});
   }
   // find full path name
   std::map<std::string,std::string>::const_iterator itr = allowed_system_programs.find(program);
@@ -191,6 +195,7 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
+
   if (executables.find(program.substr(2,program.size())) != executables.end()) {
     return true;
   }
@@ -221,7 +226,8 @@ std::string validate_program(const std::string &program, const nlohmann::json &w
     std::cerr << message << std::endl;
     exit(1);
   } else {
-    bool running_in_docker = whole_config.value("docker_enabled", false);
+    std::string mode = whole_config.value("autograding_method", "");
+    bool running_in_docker = (mode == "docker") ? true : false;
     if (system_program(program,full_path_executable,running_in_docker)) {
       return full_path_executable;
     }
@@ -248,35 +254,37 @@ void validate_filename(const std::string &filename) {
 
 std::string validate_option(const std::string &program, const std::string &option) {
 
-  // TODO: update this with the option to junit5
-
-  //{ "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
-  //{ "submitty_junit_5.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-5xx.jar" },
-  //{ "submitty_junit_4.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4xx.jar" },
-
-  // also for hamcrest 2.0
-
   const std::map<std::string,std::map<std::string,std::string> > option_replacements = {
     { "/usr/bin/javac",
-      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
-        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
-        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
-        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
-        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
-        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
+        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+        { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
+        { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
+        // older, requested version:
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
+        // most recent libraries:
+        //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
+        //{ "submitty_soot_dependencies.jar",   SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk-jar-with-dependencies.jar" },
+        //{ "submitty_rt.jar",                  "/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar" }
       }
     },
     { "/usr/bin/java",
-      { { "submitty_emma.jar",      SUBMITTY_INSTALL_DIRECTORY+"/JUnit/emma.jar" },
-        { "submitty_jacocoagent.jar", SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacocoagent.jar" },
-        { "submitty_jacococli.jar",   SUBMITTY_INSTALL_DIRECTORY+"/JUnit/jacococli.jar" },
-        { "submitty_junit.jar",     SUBMITTY_INSTALL_DIRECTORY+"/JUnit/junit-4.12.jar" },
-        { "submitty_hamcrest.jar",  SUBMITTY_INSTALL_DIRECTORY+"/JUnit/hamcrest-core-1.3.jar" },
-        { "submitty_junit/",        SUBMITTY_INSTALL_DIRECTORY+"/JUnit/" },
-        { "submitty_soot.jar",      SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/soot-develop.jar" },
-        { "submitty_rt.jar",        SUBMITTY_INSTALL_DIRECTORY+"/tools/soot/rt.jar" }
+      { { "submitty_emma.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/emma/emma.jar" },
+        { "submitty_jacocoagent.jar",         SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacocoagent.jar" },
+        { "submitty_jacococli.jar",           SUBMITTY_INSTALL_DIRECTORY+"/java_tools/jacoco/jacococli.jar" },
+        { "submitty_junit.jar",               SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/junit-4.12.jar" },
+        { "submitty_hamcrest.jar",            SUBMITTY_INSTALL_DIRECTORY+"/java_tools/hamcrest/hamcrest-core-1.3.jar" },
+        { "submitty_junit/",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/JUnit/" },
+        // older, requested version:
+        { "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/soot-develop.jar" },
+        { "submitty_rt.jar",                  SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/rt.jar" }
+        // most recent libraries:
+        //{ "submitty_soot.jar",                SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk.jar" },
+        //{ "submitty_soot_dependencies.jar",   SUBMITTY_INSTALL_DIRECTORY+"/java_tools/soot/sootclasses-trunk-jar-with-dependencies.jar" },
+        //{ "submitty_rt.jar",                  "/usr/lib/jvm/java-8-oracle/jre/lib/rt.jar" }
       }
     },
     { "/usr/bin/mono",
@@ -928,13 +936,15 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stdinfd, stdinfd);
   }
   if (my_stdout != "") {
-    int new_stdoutfd = creat(my_stdout.c_str(), everyone_read );
+    int new_stdoutfd = open(my_stdout.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
+                     //creat(my_stdout.c_str(), everyone_read );
     int stdoutfd = fileno(stdout);
     close(stdoutfd);
     dup2(new_stdoutfd, stdoutfd);
   }
   if (my_stderr != "") {
-    int new_stderrfd = creat(my_stderr.c_str(), everyone_read );
+    int new_stderrfd = open(my_stderr.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
+                     //creat(my_stderr.c_str(), everyone_read );
     int stderrfd = fileno(stderr);
     close(stderrfd);
     dup2(new_stderrfd, stderrfd);
@@ -1030,9 +1040,7 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
 
       if (ret > 0){
         std::getline (std::cin,my_string);
-        std::cout << "Cin recieved: " << my_string << std::endl;
-        std::cout << "Appending a newline" << std::endl;
-        my_string += "\n";
+        std::cout << "Cin received: " << my_string << std::endl;
 
         lock->lock();
         input_queue->push(my_string);
@@ -1058,11 +1066,18 @@ int execute(const std::string &cmd,
       const nlohmann::json &test_case_limits,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
-      const bool windowed) {
+      const bool windowed,
+      const std::string display_variable2) {
+
+  
+  std::string display_variable = display_variable2;
+  if (display_variable == "NO_DISPLAY_SET") {
+    display_variable = ":1";
+  }
+
 
   std::set<std::string> invalid_windows;
   bool window_mode = windowed; //Tells us if the process is expected to spawn a window. (additional support later) 
-  
 
   int num_dispatched_actions = dispatcher_actions.size();
 
@@ -1080,24 +1095,25 @@ int execute(const std::string &cmd,
         break;
       }
     }
-
   }
-
-  if(window_mode){
-    std::cout <<"Window mode activated." << std::endl;
-    char* my_display = getenv("DISPLAY"); //The display environment variable is unset. This sets it for child and parent.
-    if (my_display == NULL) {
-      setenv("DISPLAY", ":0", 1);
-    }
-    window_mode = true;
-    invalid_windows = snapshotOfActiveWindows();
-  }
-
 
   std::cout << "IN EXECUTE:  '" << cmd << "'" << std::endl;
   std::cout << "identified " << dispatcher_actions.size() << " dispatcher actions" << std::endl;
 
   std::ofstream logfile(execute_logfile.c_str(), std::ofstream::out | std::ofstream::app);
+
+  //If we want windowed mode, but there is no display set.
+  if(window_mode && display_variable == "NO_DISPLAY_SET"){
+    std::cout << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    logfile << "ERROR: Attempting to grade a windowed gradeable with no display variable set." << std::endl;
+    return -1;
+  }
+
+  if(window_mode){
+    std::cout <<"Window mode activated." << std::endl;
+    setenv("DISPLAY", display_variable.c_str(), 1);
+    invalid_windows = snapshotOfActiveWindows();
+  }
 
   // Forking to allow the setting of limits of RLIMITS on the command
   int result = -1;
@@ -1140,12 +1156,17 @@ int execute(const std::string &cmd,
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
     exit(child_result);
-    }
-    else {
+  }
+  else {
       // PARENT PROCESS
       std::thread cin_thread;
       bool CHILD_NOT_TERMINATED = true;
+
+      bool dispatcher_actions_ended = true;
+      bool allowed_to_die = false;
+      bool override = false;
       if(num_dispatched_actions > 0){
+        dispatcher_actions_ended = false;
         close(dispatcherpipe[0]); // close the read end of the pipe
         cin_thread = std::thread(cin_reader, &lock, &input_queue, &CHILD_NOT_TERMINATED);
       }
@@ -1164,26 +1185,80 @@ int execute(const std::string &cmd,
       std::string windowName; 
       int rss_memory = 0;
       int actions_taken = 0;   
-      int number_of_screenshots = 0;
-
       do {
           //dispatcher actions
           if(!input_queue.empty()){
             lock.lock();
             std::string popped = input_queue.front();
+            std::string popped_nl = popped + "\n";
             input_queue.pop();
             lock.unlock();
 
-            char piped_message[popped.length()];
-            strncpy(piped_message, popped.c_str(),popped.length()); //ignore the null byte
+            char piped_message[popped_nl.length()];
+            strncpy(piped_message, popped_nl.c_str(),popped_nl.length()); //ignore the null byte
 
-            write(dispatcherpipe[1], piped_message, strlen(popped.c_str()));
-            std::cout << "Writing to student stdin: " << popped;
+            if(popped == "SUBMITTY_SIGNAL:STOP"){
+              std::cout << "Sending interrupt to student process." << std::endl;
+              kill(childPID, SIGINT);
+              kill(-childPID, SIGINT);
+              close(dispatcherpipe[1]);
+            }else if(popped == "SUBMITTY_SIGNAL:START"){
+              //If the child is still alive, terminate it.
+              if(wpid == 0){
+                kill(childPID, SIGINT);
+                kill(-childPID, SIGINT);
+                close(dispatcherpipe[1]);
+              }
+              pipe(dispatcherpipe);
+              childPID = fork();
+              // ensure fork was successful
+              assert (childPID >= 0);
+
+              if (childPID == 0) {
+                // CHILD PROCESS
+                enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
+
+                // Student's shouldn't be forking & making threads/processes...
+                // but if they do, let's set them in the same process group
+                int pgrp = setpgid(getpid(), 0);
+                assert(pgrp == 0);
+
+                if(num_dispatched_actions > 0){
+                  close(dispatcherpipe[1]); //close write end of the pipe
+                  close(0); //close stdin
+                  dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
+                  close(dispatcherpipe[0]); // close read end of the pipe
+                }
+                int child_result;
+                child_result = exec_this_command(cmd,logfile,whole_config);
+
+                // send the system status code back to the parent process
+                //std::cout << "    child_result = " << child_result << std::endl;
+                exit(child_result);
+              }else{
+                close(dispatcherpipe[0]);
+              }
+            }else if(popped == "SUBMITTY_SIGNAL:KILL"){
+              std::cout << "Sending SIGKILL to student process" << std::endl;
+              int k  = kill(childPID, SIGKILL);
+              int k2 = kill(-childPID, SIGKILL);
+              close(dispatcherpipe[1]);
+            }
+            else if(popped == "SUBMITTY_SIGNAL:FINALMESSAGE"){
+              std::cout << "The dispatcher actions are complete." << std::endl;
+              dispatcher_actions_ended = true;
+            }else{
+              write(dispatcherpipe[1], piped_message, strlen(popped_nl.c_str()));
+              std::cout << "Writing to student stdin: " << popped << std::endl;
+            }
           }
 
           if(window_mode && windowName == ""){ //if we are expecting a window, but know nothing about it
             initializeWindow(windowName, childPID, invalid_windows, elapsed); //attempt to get information about the window
             if(windowName != ""){ //if we found information about the window
+              delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run,
+                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+              moveMouseToOrigin(windowName);
               centerMouse(windowName); //center our mouse on its screen
             }
           }
@@ -1195,29 +1270,39 @@ int execute(const std::string &cmd,
           // sleep 1/10 of a second
           wpid = waitpid(childPID, &status, WNOHANG);
           
+          //if the student process is alive.
           if (wpid == 0){
             // monitor time & memory usage
             if (!time_kill && !memory_kill){
               //if we expect a window, and the window exists, and we still have actions to take
               if(window_mode && windowName != "" && windowExists(windowName) && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //If we do not expect a window and we still have actions to take
               else if(!window_mode && actions_taken < actions.size()){ 
-                takeAction(actions, actions_taken, number_of_screenshots, windowName, 
+                takeAction(actions, actions_taken, windowName, 
                   childPID, elapsed, next_checkpoint, seconds_to_run, rss_memory, allowed_rss_memory, 
                   memory_kill, time_kill, logfile); //Takes each action on the window. Requires delay parameters to do delays.
               }
               //if we are out of actions or there were none, delay 1/10th second.
               else{ 
                 delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
-                  rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+                                    rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
               }
             }
+         }else if(!dispatcher_actions_ended){ //keep on performing checks even if we killed the child process (for dispatcher actions). 
+            delay_and_mem_check(100000, childPID, elapsed, next_checkpoint, seconds_to_run, 
+                                rss_memory, allowed_rss_memory, memory_kill, time_kill, logfile);
+            //this wpid is necessary to make sure allowed_to_die is up to date.
          }
-      } while (wpid == 0);
+         wpid = waitpid(childPID, &status, WNOHANG);
+         //If the dispatcher actions have ended and the process is dead, we can terminate.
+         allowed_to_die = dispatcher_actions_ended && wpid != 0;
+         // If we have received a time or memory kill, we must halt even if the dispatcher actions are ongoing.
+         override = time_kill || memory_kill;
+      } while (!allowed_to_die && !override);
 
       if (WIFEXITED(status)) {
         std::cout << "Child exited, status=" << WEXITSTATUS(status) << std::endl;

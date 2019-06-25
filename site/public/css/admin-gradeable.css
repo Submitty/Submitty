@@ -13,7 +13,9 @@ input[disabled] {
 
 select {
     margin-top:7px;
-    /* width: 60px; */
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width:  fill-available;
     min-width: 60px;
 }
 
@@ -53,7 +55,6 @@ select {
 
 .nav-bar {
     cursor: pointer;
-    min-width: 150px;
     vertical-align: center;
     padding-right: 10px;
     padding-left: 10px;
@@ -69,11 +70,13 @@ input[type="radio"],input[type="checkbox"] {
 }
 
 fieldset {
-    margin: 8px;
-    border: 1px solid silver;
     padding: 8px;
     border-radius: 4px;
     display: block;
+}
+
+#electronic_file {
+    padding-left: 20px;
 }
 
 legend{
@@ -120,6 +123,35 @@ div.btn-container {
     margin-bottom: 5px;
 }
 
-#team-settings-container {
-    margin-top: 10px
+#regrade_request_enable_container {
+    margin-top: 10px;
 }
+
+#discussion_grading_enable_container {
+    margin-top: 10px;
+}
+
+#team-settings-container {
+    margin-top: 10px;
+}
+
+.disabled-btn{
+    background-color:#d4d4d4 ;
+    color: #5a5a5a ;
+    cursor: default;
+}
+.normal-btn{
+    background-color: #d0d0d0 ;
+    color: #111111 ;
+    border:solid 1px rgba(0,0,0,0.75);
+}
+.normal-btn:hover{
+    border: none;
+}
+
+.active-btn{
+    background-color: #008000;
+    color: #ffffff;
+    border: none;
+}
+

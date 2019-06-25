@@ -172,7 +172,7 @@ def main():
     with open(list_of_courses_file, "w") as courses_file:
         courses_file.write("")
         for course_id in courses.keys():
-            courses_file.write('<a href="'+args.submission_url+'/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
+            courses_file.write('<a href="'+args.submission_url+'/'+get_current_semester()+'/'+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
     for course_id in sorted(courses.keys()):
@@ -369,7 +369,7 @@ def create_group(group):
     :param group: name of the group to create
     """
     if not group_exists(group):
-        os.system("addgroup {}".format(group))
+        os.system("groupadd {}".format(group))
 
     if group == "sudo":
         return
@@ -382,7 +382,7 @@ def add_to_group(group, user_id):
     :param user_id:
     """
     create_group(group)
-    os.system("adduser {} {}".format(user_id, group))
+    os.system("usermod -a -G {} {}".format(group, user_id))
 
 
 def get_php_db_password(password):
@@ -445,9 +445,8 @@ def parse_args():
 def create_user(user_id):
     if not user_exists(id):
         print("Creating user {}...".format(user_id))
-        os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
-                  "--no-create-home --disabled-password --shell "
-                  "/usr/sbin/nologin".format(user_id))
+        os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                  "-M --shell /bin/false {}".format(user_id))
         print("Setting password for user {}...".format(user_id))
         os.system("echo {}:{} | chpasswd".format(user_id, user_id))
 
@@ -572,16 +571,14 @@ class User(object):
     def _create_ssh(self):
         if not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("adduser {} --gecos 'First Last,RoomNumber,WorkPhone,HomePhone' "
-                      "--disabled-password".format(self.id))
+            os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
             self.set_password()
 
     def _create_non_ssh(self):
         if not DB_ONLY and not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
-                      "--no-create-home --disabled-password --shell "
-                      "/usr/sbin/nologin".format(self.id))
+            os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                      "-M --shell /bin/false {}".format(self.id))
             self.set_password()
 
     def set_password(self):
@@ -843,7 +840,14 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
-                            active_version = random.choice(range(1, versions_to_submit+1))
+                            # Reduce the propability to get a canceled submission (active_version = 0)
+                            # This is done my making other possibilities three times more likely
+                            version_population = []
+                            for version in range(1, versions_to_submit+1):
+                                version_population.append((version, 3))
+                            version_population = [(0,1)] + version_population
+                            version_population = [ver for ver, freq in version_population for i in range(freq)]
+                            active_version = random.choice(version_population)
                             if team_id is not None:
                                 json_history = {"active_version": active_version, "history": [], "team_history": []}
                             else:
@@ -1065,11 +1069,14 @@ class Course(object):
 
     def add_sample_forum_data(self):
         #set sample course to have forum enabled by default
-        config = configparser.ConfigParser()
-        config.read(os.path.join(self.course_path, "config", "config.ini"))
-        config.set("course_details", "forum_enabled", "true")
-        with open(os.path.join(self.course_path, "config", "config.ini"), 'w') as configfile:
-            config.write(configfile)
+        course_json_file = os.path.join(self.course_path, 'config', 'config.json')
+        with open(course_json_file, 'r+') as open_file:
+            course_json = json.load(open_file)
+            course_json['course_details']['forum_enabled'] = True
+            open_file.seek(0)
+            open_file.truncate()
+            json.dump(course_json, open_file, indent=2)
+
         f_data = (self.getForumDataFromFile('posts.txt'), self.getForumDataFromFile('threads.txt'), self.getForumDataFromFile('categories.txt'))
         forum_threads = Table("threads", self.metadata, autoload=True)
         forum_posts = Table("posts", self.metadata, autoload=True)
@@ -1388,8 +1395,6 @@ class Gradeable(object):
             self.regrade_request_date = dateutils.parse_datetime(gradeable['eg_regrade_request_date'])
             self.student_view = True
             self.student_submit = True
-            self.student_download = False
-            self.student_any_version = True
             if 'eg_is_repository' in gradeable:
                 self.is_repository = gradeable['eg_is_repository'] is True
             if self.is_repository and 'eg_subdirectory' in gradeable:
@@ -1402,10 +1407,6 @@ class Gradeable(object):
                 self.student_view = gradeable['eg_student_view'] is True
             if 'eg_student_submit' in gradeable:
                 self.student_submit = gradeable['eg_student_submit'] is True
-            if 'eg_student_download' in gradeable:
-                self.student_download = gradeable['eg_student_download'] is True
-            if 'eg_student_any_version' in gradeable:
-                self.student_any_version = gradeable['eg_student_any_version'] is True
             if 'eg_late_days' in gradeable:
                 self.late_days = max(0, int(gradeable['eg_late_days']))
             else:
@@ -1497,8 +1498,8 @@ class Gradeable(object):
                          eg_team_lock_date=self.team_lock_date,
                          eg_use_ta_grading=self.use_ta_grading,
                          eg_student_view=self.student_view,
-                         eg_student_submit=self.student_submit, eg_student_download=self.student_download,
-                         eg_student_any_version=self.student_any_version, eg_config_path=self.config_path,
+                         eg_student_submit=self.student_submit,
+                         eg_config_path=self.config_path,
                          eg_late_days=self.late_days, eg_precision=self.precision, eg_peer_grading=self.peer_grading,
                          eg_regrade_request_date=self.regrade_request_date)
 

@@ -2,7 +2,7 @@
 
 {% macro show_mark_info(mark) %}
     <span class="col">
-        ({{ mark.points }}) {{ mark.title }} {{ mark.publish ? '-- <i>Show mark to all students</i>' : '' }}
+        ({{ mark.points }}) {{ mark.title|escape }} {{ mark.publish ? '-- <i>Show mark to all students</i>' : '' }}
     </span>
 {% endmacro %}
 

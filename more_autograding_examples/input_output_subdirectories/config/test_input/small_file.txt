@@ -1,0 +1,2 @@
+BREED: Balinese LIFE_SPAN: 9-15 years WEIGHT: 5-10 lbs INTERESTING: named for the dancers on the Indonesian island of Bali
+BREED: Singapura LIFE_SPAN: 11-15 years WEIGHT: 4-8 lbs INTERESTING: in 1990 became Singapore's travel mascot

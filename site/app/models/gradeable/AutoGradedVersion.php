@@ -60,7 +60,9 @@ class AutoGradedVersion extends AbstractModel {
     private $files = null;
     /** @property @var array[] An array of all the autograded results files  */
     private $results_files = null;
-    
+    /** @property @var array[] An array of all the autograded results public files  */
+    private $results_public_files = null;
+
     /** @property @var int The position of the submission in the queue (0 if being graded, -1 if not in queue)
      *      Note: null default value used to indicate that no queue status data has been loaded
      */
@@ -115,34 +117,77 @@ class AutoGradedVersion extends AbstractModel {
         $config = $gradeable->getAutogradingConfig();
 
         // Get the path to load files from (based on submission type)
-        $dir = $gradeable->isVcs() ? 'checkout' : 'submissions';
-        $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
+        $dirs = $gradeable->isVcs() ? ['submissions', 'checkout'] : ['submissions'];
 
-        // Now load all files in the directory, flattening the results
-        $submitted_files = FileUtils::getAllFiles($path, array(), true);
-        foreach ($submitted_files as $file => $details) {
-            if (substr(basename($file), 0, 1) === '.') {
-                $this->meta_files[$file] = $details;
-            } else {
-                $this->files[0][$file] = $details;
-            }
-        }
 
-        // If there is only one part (no separation of upload files),
-        //  be sure to set the "Part 1" files to the "all" files
-        if($config->getNumParts() === 1) {
-            $this->files[1] = $this->files[0];
-        }
+        foreach($dirs as $dir) {
 
-        // A second time, look through the folder, but now split up based on part number
-        foreach ($config->getPartNames() as $i => $name) {
+            $this->meta_files[$dir] = [];
+            $this->files[$dir][0] = [];
+
+            $path = FileUtils::joinPaths($course_path, $dir, $gradeable->getId(), $submitter_id, $this->version);
+
+            // Now load all files in the directory, flattening the results
+            $submitted_files = FileUtils::getAllFiles($path, array(), true);
             foreach ($submitted_files as $file => $details) {
-                $dir_name = "part{$i}/";
-                if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
-                    $this->files[$i][substr($file, strlen($dir_name), null)] = $details;
+                if (substr(basename($file), 0, 1) === '.') {
+                    $this->meta_files[$dir][$file] = $details;
+                } else {
+                    $this->files[$dir][0][$file] = $details;
+                }
+            }
+            // If there is only one part (no separation of upload files),
+            //  be sure to set the "Part 1" files to the "all" files
+            if($config->getNumParts() === 1) {
+                $this->files[$dir][1] = $this->files[$dir][0];
+            }
+
+            // A second time, look through the folder, but now split up based on part number
+            foreach ($config->getPartNames() as $i => $name) {
+                foreach ($submitted_files as $file => $details) {
+                    $dir_name = "part{$i}/";
+                    if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
+                        $this->files[$dir][$i][substr($file, strlen($dir_name), null)] = $details;
+                    }
+                }
+            }
+
+        }
+    }
+
+    public function getTestcaseMessages()
+    {
+        $this->loadTestcases();
+
+        $output = array();
+
+        // If results were found then append message arrays to output array
+        // where key is the testcase_label
+        if(!is_null($this->graded_testcases))
+        {
+            foreach ($this->graded_testcases as $graded_testcase)
+            {
+                $testcase_label = $graded_testcase->getTestcase()->getTestcaseLabel();
+
+                // If a testcase_label exists then get the auto grading messages
+                if($testcase_label != "")
+                {
+                    $output[$testcase_label] = array();
+
+                    $autochecks = $graded_testcase->getAutochecks();
+
+                    foreach ($autochecks as $autocheck)
+                    {
+                      foreach ($autocheck->getMessages() as $msg)
+                        {
+                        array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
+                        }
+                    }
                 }
             }
         }
+
+        return $output;
     }
 
     /**
@@ -154,18 +199,22 @@ class AutoGradedVersion extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
         $config = $gradeable->getAutogradingConfig();
 
-        $path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_path = FileUtils::joinPaths($course_path, 'results', $gradeable->getId(), $submitter_id, $this->version);
+        $results_public_path = FileUtils::joinPaths($course_path, 'results_public', $gradeable->getId(), $submitter_id, $this->version);
 
         // Load files produced by autograding
-        $result_files = FileUtils::getAllFiles($path, [], true);
-        $result_file_info = [];
+        $result_files = FileUtils::getAllFiles($results_path, [], true);
         foreach ($result_files as $file => $details) {
-            $result_file_info[$file] = $details;
             $this->results_files[$file] = $details;
         }
 
+        $result_public_files = FileUtils::getAllFiles($results_public_path, [], true);
+        foreach ($result_public_files as $file => $details) {
+            $this->results_public_files[$file] = $details;
+        }
+
         // Load file that contains numeric results
-        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'results.json'));
+        $result_details = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'results.json'));
         if ($result_details === false) {
             // Couldn't find the file, so grading hasn't happened yet...
             $this->graded_testcases = [];
@@ -173,7 +222,7 @@ class AutoGradedVersion extends AbstractModel {
         }
 
         // Load the historical results (for early submission incentive)
-        $history = FileUtils::readJsonFile(FileUtils::joinPaths($path, 'history.json'));
+        $history = FileUtils::readJsonFile(FileUtils::joinPaths($results_path, 'history.json'));
         if ($history !== false) {
             $this->history = array_map(function ($data) {
                 return new AutoGradedVersionHistory($this->core, $data);
@@ -190,7 +239,7 @@ class AutoGradedVersion extends AbstractModel {
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
               $graded_testcase = new AutoGradedTestcase
-                ($this->core, $testcase, $path, $result_details['testcases'][$testcase->getIndex()]);
+                ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
               $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
               if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                 $this->early_incentive_points += $graded_testcase->getPoints();
@@ -238,7 +287,8 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return $this->files[$part];
+        return array('submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [], 
+            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []);
     }
 
     /**
@@ -249,9 +299,9 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return $this->meta_files;
+        return array('submissions' => $this->meta_files['submissions'], 'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->meta_files['checkout'] : []);
     }
-    
+
     /**
      * Gets an array of file details (indexed by file name) for all autograded results files
      * @return array
@@ -261,6 +311,17 @@ class AutoGradedVersion extends AbstractModel {
             $this->loadTestcases();
         }
         return $this->results_files;
+    }
+
+    /**
+     * Gets an array of file details (indexed by file name) for all autograded results public files
+     * @return array
+     */
+    public function getResultsPublicFiles() {
+        if($this->results_public_files === null) {
+            $this->loadTestcases();
+        }
+        return $this->results_public_files;
     }
 
     /**
@@ -292,7 +353,7 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getQueuePosition() {
         if($this->queue_position === null) {
-            $this->loadQueueStatus();
+            return $this->loadQueueStatus();
         }
         return $this->queue_position;
     }
@@ -374,8 +435,8 @@ class AutoGradedVersion extends AbstractModel {
      * @return int result clamped to be >= 0
      */
     public function getDaysLate() {
-        return max(0, DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time));
+        return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, DateUtils::calculateDayDiff(
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
     }
 
     /**
@@ -383,8 +444,8 @@ class AutoGradedVersion extends AbstractModel {
      * @return int result clamped to be >= 0
      */
     public function getDaysEarly() {
-        return max(0, -DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time));
+        return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, -DateUtils::calculateDayDiff(
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
     }
 
     /**

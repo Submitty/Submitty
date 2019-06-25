@@ -209,6 +209,7 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
 #               drwxr-s---       instructor   ta_www_group    custom_validation_code/
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/bin
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/provided_code
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/instructor_solution
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_input
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_output
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custom_validation_code
@@ -219,13 +220,14 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $PHP_USER        ta_www_group    config_upload/
 #               drwxr-s---       $PHP_USER        ta_www_group    site/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    results/
+#               drwxr-s---       $DAEMON_USER     ta_www_group    results_public/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    checkout/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    uploads/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/bulk_pdf/
-#               drwxr-s---       $CGI_USER        ta_www_group    uploads/split_pdf/
+#               drwxrws---       $DAEMON_USER     ta_www_group    uploads/split_pdf/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/tmp
-#               drwxr-s---       $PHP_USER        ta_www_group    uploads/seating
+#               drwxrws---       $PHP_USER        ta_www_group    uploads/seating
 #               drwxrws---       $DAEMON_USER     ta_www_group    lichen/
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/config
 #               drwxrws---       $PHP_USER        ta_www_group    lichen/provided_code
@@ -235,15 +237,16 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/an
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/config_upload
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/site
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/results
+create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/results_public
 create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/checkout
-create_and_set  u=rwx,g=rxs,o=   $DAEMON_USER     $ta_www_group   $course_dir/uploads
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/bulk_pdf
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images/tmp
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
+create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/uploads/split_pdf
+create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/uploads/seating
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/rainbow_grades
-create_and_set  u=rwx,g=rxs,o=   $CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
-create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/seating
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code
@@ -271,10 +274,10 @@ replace_fillin_variables $course_dir/BUILD_${course}.sh
 
 
 # copy the config file for TA grading & replace the variables
-cp ${SUBMITTY_INSTALL_DIR}/site/config/course_template.ini ${course_dir}/config/config.ini
-chown ${PHP_USER}:${ta_www_group} ${course_dir}/config/config.ini
-chmod 660 ${course_dir}/config/config.ini
-replace_fillin_variables ${course_dir}/config/config.ini
+cp ${SUBMITTY_INSTALL_DIR}/site/config/course_template.json ${course_dir}/config/config.json
+chown ${PHP_USER}:${ta_www_group} ${course_dir}/config/config.json
+chmod 660 ${course_dir}/config/config.json
+replace_fillin_variables ${course_dir}/config/config.json
 
 
 echo -e "Creating database ${DATABASE_NAME}\n"
@@ -284,7 +287,7 @@ if [[ $? -ne "0" ]] ; then
     exit
 fi
 
-python3 ${SUBMITTY_REPOSITORY_DIR}/migration/migrator.py -e course --course ${semester} ${course} migrate --initial
+python3 ${SUBMITTY_REPOSITORY_DIR}/migration/run_migrator.py -e course --course ${semester} ${course} migrate --initial
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Failed to create tables within database ${DATABASE_NAME}"
     exit

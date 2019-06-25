@@ -8,7 +8,9 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\routers\ClassicRouter;
 use app\models\Config;
+use app\models\forum\Forum;
 use app\models\User;
 
 /**
@@ -53,6 +55,13 @@ class Core {
     /** @var Access $access */
     private $access = null;
 
+    /** @var Forum $forum */
+    private $forum  = null;
+
+    /** @var ClassicRouter */
+    private $router;
+
+
     /**
      * Core constructor.
      *
@@ -84,7 +93,7 @@ class Core {
 
     /**
      * Load the config details for the application. This takes in a file from the ../../../config as well as
-     * then a config.ini contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
+     * then a config.json contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
      *
      * Config model will throw exceptions if we cannot find a given $semester or $course on the filesystem.
@@ -100,12 +109,12 @@ class Core {
         $this->config->loadMasterConfigs($conf_path);
 
         if (!empty($semester) && !empty($course)) {
-            $course_ini_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.ini");
-            if (file_exists($course_ini_path) && is_readable ($course_ini_path)) {
-                $this->config->loadCourseIni($course_ini_path);
+            $course_json_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.json");
+            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
+                $this->config->loadCourseJson($course_json_path);
             }
             else{
-              $message = "Unable to access configuration file " . $course_ini_path . " for " . $semester . " " . $course . " please contact your system administrator.";
+                $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
                 $this->addErrorMessage($message);
             }
         }
@@ -143,6 +152,14 @@ class Core {
             $this->course_db->connect();
         }
         $this->database_queries = $database_factory->getQueries($this);
+    }
+
+    public function loadForum() {
+        if ($this->config === null) {
+            throw new \Exception("Need to load the config before we can create a forum instance.");
+        }
+
+        $this->forum = new Forum($this);
     }
 
     /**
@@ -201,7 +218,7 @@ class Core {
     /**
      * @return Config
      */
-    public function getConfig() {
+    public function getConfig(): ?Config {
         return $this->config;
     }
 
@@ -224,6 +241,13 @@ class Core {
      */
     public function getQueries() {
         return $this->database_queries;
+    }
+
+    /**
+     * @return Forum
+     */
+    public function getForum() {
+        return $this->forum;
     }
 
     /**
@@ -286,16 +310,18 @@ class Core {
 
     /**
      * Given a session id (which should be coming from a cookie or request header), the database is queried to find
-     * a session that matches the string, then returns the user that matches that row (if it exists). If no session
-     * is found that matches the given id, return false, otherwise return true and load the user.
+     * a session that matches the string, returning the user_id associated with it. The user_id is then checked to
+     * make sure it matches our expected one from our session token, and if that all passes, then we load the
+     * user into the core and returns true, else return false.
      *
-     * @param $session_id
+     * @param string $session_id
+     * @param string $expected_user_id
      *
      * @return bool
      */
-    public function getSession($session_id) {
+    public function getSession(string $session_id, string $expected_user_id): bool {
         $user_id = $this->session_manager->getSession($session_id);
-        if ($user_id === false) {
+        if ($user_id === false || $user_id !== $expected_user_id) {
             return false;
         }
         $this->loadUser($user_id);
@@ -320,20 +346,19 @@ class Core {
      *
      * @throws AuthenticationException
      */
-    public function authenticate($persistent_cookie = true) {
-        $auth = false;
+    public function authenticate(bool $persistent_cookie = true): bool {
         $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
-                $auth = true;
-                $session_id = $this->session_manager->newSession($user_id);
-                $cookie_id = 'submitty_session_id';
                 // Set the cookie to last for 7 days
-                $cookie_data = array('session_id' => $session_id);
-                $cookie_data['expire_time'] = ($persistent_cookie === true) ? time() + (7 * 24 * 60 * 60) : 0;
-                if (Utils::setCookie($cookie_id, $cookie_data, $cookie_data['expire_time']) === false) {
-                    return false;
-                }
+                $token = TokenManager::generateSessionToken(
+                    $this->session_manager->newSession($user_id),
+                    $user_id,
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession(),
+                    $persistent_cookie
+                );
+                return Utils::setCookie('submitty_session', (string) $token, $token->getClaim('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -344,7 +369,7 @@ class Core {
             }
             throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
-        return $auth;
+        return false;
     }
 
     /**
@@ -378,6 +403,33 @@ class Core {
             $url .= "#".$hash;
         }
         return $url;
+    }
+
+    /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewUrl($parts=array()) {
+        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        return $url;
+    }
+
+    /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     * This function will add the semester and course to the beginning of the new URL by default,
+     * if you do not prepend this part (e.g. for authentication-related URLs), please set
+     * $prepend_course_info to false.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewCourseUrl($parts=array()) {
+        array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        return $this->buildNewUrl($parts);
     }
 
     /**
@@ -506,6 +558,14 @@ class Core {
         finally {
             curl_close($ch);
         }
+    }
+
+    public function setRouter(ClassicRouter $router) {
+        $this->router = $router;
+    }
+
+    public function getRouter(): ClassicRouter {
+        return $this->router;
     }
 
     /**

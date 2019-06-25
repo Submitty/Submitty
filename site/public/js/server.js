@@ -7,6 +7,8 @@ window.addEventListener("load", function() {
   }
 });
 
+window.addEventListener("resize", checkSidebarCollapse);
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  * so that we do not have to pass in fully built URL to JS functions, but rather
@@ -107,19 +109,25 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
 }
 
 function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = ''){
-    orig_div_name = div_name
+    let orig_div_name = div_name;
     div_name = "#" + div_name;
-    var isVisible = $( div_name ).is( " :visible" );
 
-    if(isVisible){
-        toggleDiv(orig_div_name);
+    let loadingTools = $("#tc_" + index).find(".loading-tools");
+
+    if($(div_name).is(":visible")){
         $("#show_char_"+index).toggle();
         $(div_name).empty();
+        toggleDiv(orig_div_name);
+
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
         var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
             'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
 
+        loadingTools.find("span").hide();
+        loadingTools.find(".loading-tools-in-progress").show();
         $.getJSON({
             url: url,
             success: function(response) {
@@ -130,6 +138,9 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
                 $(div_name).empty();
                 $(div_name).html(response.data);
                 toggleDiv(orig_div_name);
+
+                loadingTools.find("span").hide();
+                loadingTools.find(".loading-tools-hide").show();
             },
             error: function(e) {
                 alert("Could not load diff, please refresh the page and try again.");
@@ -149,7 +160,7 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            var json = JSON.parse(data);
+            var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
             $('[name="edit_user"]', form).val("true");
@@ -159,6 +170,7 @@ function editUserForm(user_id) {
             if (!user.hasClass('readonly')) {
                 user.addClass('readonly');
             }
+            $('[name="user_numeric_id"]', form).val(json['user_numeric_id']);
             $('[name="user_firstname"]', form).val(json['user_firstname']);
             if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
@@ -219,7 +231,8 @@ function newUserForm() {
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
+    $('[name="user_numeric_id"]', form).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -274,6 +287,15 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('[name="delete-gradeable-message"]', form).html('');
     $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
+function displayCloseSubmissionsWarning(form_action,gradeable_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#close-submissions-form");
+    $('[name="close-submissions-message"]', form).html('');
+    $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
 }
 
@@ -415,7 +437,10 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 $.ajax({
                     url: url,
                     success: function(data) {
+
                         data = JSON.parse(data);
+                        console.log(data.ci);
+
                         if(data.error){
                             alert(data.error);
                             return;
@@ -437,7 +462,17 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             }
                         });
                         $('[name="version_user_1"]', form).find('option').remove().end().append(append_options).val(data.code_version_user_1);
-                        $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+
+                        $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                        for(var users_color in data.ci) {
+                            //console.log(data.ci[users_color]);
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});
+                            }
+                        }
+                        $('.CodeMirror')[0].CodeMirror.refresh();
+                        //$('[name="code_box_1"]').empty().append(data.display_code1);
                     },
                     error: function(e) {
                         alert("Could not load submitted code, please refresh the page and try again.");
@@ -485,7 +520,16 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
+                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                            for(var users_color in data.ci) {
+                            //console.log(data.ci[users_color]);
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
+                            }
+                        }
+                        	$('.CodeMirror')[0].CodeMirror.refresh();
+                            //$('[name="code_box_1"]').empty().append(data.display_code1);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -506,8 +550,21 @@ function setUserSubmittedCode(gradeable_id, changed) {
                                 alert(data.error);
                                 return;
                             }
-                            $('[name="code_box_1"]').empty().append($('<textarea/>').html(data.display_code1).text());
-                            $('[name="code_box_2"]').empty().append($('<textarea/>').html(data.display_code2).text());
+                            $('.CodeMirror')[0].CodeMirror.getDoc().setValue(data.display_code1);
+                            $('.CodeMirror')[1].CodeMirror.getDoc().setValue(data.display_code2);
+                            var code_mirror = 0;
+                            console.log(data.ci);
+                            for(var users_color in data.ci) {
+                            for(var pos in data.ci[users_color]) {
+                                var element = data.ci[users_color][pos];
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
+                            }
+                        }
+                        	$('.CodeMirror')[0].CodeMirror.refresh();
+
+                        	$('.CodeMirror')[1].CodeMirror.refresh();
+                            // $('[name="code_box_1"]').empty().append(data.display_code1);
+                            // $('[name="code_box_2"]').empty().append(data.display_code2);
                         },
                         error: function(e) {
                             alert("Could not load submitted code, please refresh the page and try again.");
@@ -521,6 +578,8 @@ function setUserSubmittedCode(gradeable_id, changed) {
 }
 
 function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user_1_match_end, where, color , span_clicked, popup_user_2, popup_version_user_2) {
+    //console.log(user_1_match_start);
+    //console.log(user_1_match_end);
     var form = $("#users_with_plagiarism");
     var user_id_1 = $('[name="user_id_1"]', form).val();
     var version_user_1 = $('[name="version_user_1"]', form).val();
@@ -530,23 +589,16 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
-    $('[name="code_box_1"]').find('span').each(function(){
-        var attr = $(this).css('background-color');
-        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");
-        }
-    });
-    $('[name="code_box_2"]').find('span').each(function(){
-        var attr = $(this).css('background-color');
-        if (typeof attr !== typeof undefined && attr !== false && attr == "rgb(255, 0, 0)") {
-            $(this).css('background-color',"#ffa500");
-        }
-    });
+
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start, 'end': user_1_match_end});
+                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
+
+    //console.log(user_1_match_start.line);
+
     $.ajax({
         url: url,
         success: function(data) {
+            //console.log(data);
             data = JSON.parse(data);
             if(data.error){
                 alert(data.error);
@@ -584,8 +636,10 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
 
             else if(where == 'code_box_1') {
                 var to_append='';
+
                 $.each(data, function(i,match){
-                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start+','+ user_1_match_end+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
+                    //console.log(match);
+                    to_append += '<li class="ui-menu-item"><div tabindex="-1" class="ui-menu-item-wrapper" onclick=getMatchesForClickedMatch("'+gradeable_id+'",event,'+user_1_match_start.line+','+ user_1_match_end.line+',"popup","'+ color+ '","","'+match[0]+'",'+match[1]+');>'+ match[3]+' '+match[4]+' &lt;'+match[0]+'&gt; (version:'+match[1]+')</div></li>';
                 });
                 to_append = $.parseHTML(to_append);
                 $("#popup_to_show_matches_id").empty().append(to_append);
@@ -856,7 +910,7 @@ function downloadCSV(code) {
     $('#downloadlink').remove();
 }
 
-function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, max_members) {
+function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignment_setting_json, members, pending_members, max_members) {
     $('.popup-form').css('display', 'none');
     var form = $("#admin-team-form");
     form.css("display", "block");
@@ -868,7 +922,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         $('[name="num_users"]', form).val(3);
     }
     else if (!new_team) {
-        $('[name="num_users"]', form).val(members.length+2);
+        $('[name="num_users"]', form).val(members.length+pending_members.length+2);
     }
 
     var title_div = $("#admin-team-title");
@@ -905,9 +959,15 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <i id="remove_member_'+i+'" class="fa fa-times" onclick="removeTeamMemberInput('+i+');" style="color:red; cursor:pointer;" aria-hidden="true"></i><br />');
+                <input id="remove_member_'+i+'" class = "btn btn-danger" type="submit" value="Remove" onclick="removeTeamMemberInput('+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
-        for (var i = members.length; i < (members.length+2); i++) {
+        for (var i = members.length; i < members.length+pending_members.length; i++) {
+            members_div.append('<input class="readonly" type="text" style= "font-style: italic; color:grey;" name="pending_user_id_' + i + '" readonly="readonly" value="Pending: ' + pending_members[i-members.length] + '" />\
+                <input id="approve_member_'+i+'" class = "btn btn-success" type="submit" value="Accept" onclick="approveTeamMemberInput(this,'+i+');" \
+                style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
+        }
+        for (var i = members.length+pending_members.length; i < (members.length+pending_members.length+2); i++) {
             members_div.append('<input type="text" name="user_id_' + i + '" /><br />');
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
@@ -919,32 +979,50 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
-        for (var i = 0; i < members.length; i++) {
-            for (var j = team_history_len-1; j >= 0; j--) {
-                if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
-                    if(user_assignment_setting_json.team_history[j].added_user == members[i]){
-                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
-                    }
-                }
-                else if(user_assignment_setting_json.team_history[j].action == "admin_create"){
-                    if(user_assignment_setting_json.team_history[j].first_user == members[i]){
+        for (var j = 0; j <=team_history_len-1; j++) {
+            if(user_assignment_setting_json.team_history[j].action == "admin_create"){
+                for (var i = 0; i < members.length; i++) {
+                    if(user_assignment_setting_json.team_history[j].first_user == members[i] || user_assignment_setting_json.team_history[j].added_user == members[i]){
                         team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
                         team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
                     }
                 }
             }
+            if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
+                for (var i = 0; i < members.length; i++) {
+                    if(user_assignment_setting_json.team_history[j].added_user == members[i]){
+                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
+                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                    }
+                }
+            }
+            if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
+                team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
+                team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+            }
         }
+
     }
     var param = (new_team ? 3 : members.length+2);
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
 }
 
 function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
     $("#remove_member_"+i).remove();
+    var student_full = JSON.parse($('#student_full_id').val());
+    $('[name="user_id_'+i+'"]', form).autocomplete({
+        source: student_full
+    });
+}
+
+function approveTeamMemberInput(old, i) {
+    var form = $("#admin-team-form");
+    $("#approve_member_"+i).remove();
+    $('[name="pending_user_id_'+i+'"]', form).attr("name", "user_id_"+i);
+    $('[name="user_id_'+i+'"]', form).attr("style", "font-style: normal;");
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
         source: student_full
@@ -957,7 +1035,7 @@ function addTeamMemberInput(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -971,7 +1049,7 @@ function addCategory(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fa fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -985,6 +1063,14 @@ function importTeamForm() {
     form.css("display", "block");
     $('[name="upload_team"]', form).val(null);
 }
+
+
+function randomizeRotatingGroupsButton() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#randomize-button-warning");
+    form.css("display", "block");
+}
+
 
 /**
  * Toggles the page details box of the page, showing or not showing various information
@@ -1138,6 +1224,10 @@ function downloadFileWithAnyRole(file_name, path) {
     window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
+function downloadCourseMaterialZip(dir_name, path) {
+    window.location = buildUrl({'component': 'misc', 'page': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
+}
+
 function checkColorActivated() {
     var pos = 0;
     var seq = "&&((%'%'BA\r";
@@ -1188,6 +1278,35 @@ function openDivForCourseMaterials(num) {
 function openUrl(url) {
     window.open(url, "_blank", "toolbar=no, scrollbars=yes, resizable=yes, width=700, height=600");
     return false;
+}
+
+function changeName(element, user, visible_username, anon){
+    var new_element = element.getElementsByTagName("strong")[0];
+    anon = (anon == 'true');
+    icon = element.getElementsByClassName("fas fa-eye")[0];
+    if(icon == undefined){
+        icon = element.getElementsByClassName("fas fa-eye-slash")[0];
+        if(anon) {
+            new_element.style.color = "black";
+            new_element.style.fontStyle = "normal";
+        }
+        new_element.innerHTML = visible_username;
+        icon.className = "fas fa-eye";
+        icon.title = "Show full user information";
+    } else {
+        if(anon) {
+            new_element.style.color = "grey";
+            new_element.style.fontStyle = "italic";
+        }
+        new_element.innerHTML = user;
+        icon.className = "fas fa-eye-slash";
+        icon.title = "Hide full user information";
+    }
+}
+
+function openFileForum(directory, file, path ){
+    var url = buildUrl({'component': 'misc', 'page': 'display_file', 'dir': directory, 'file': file, 'path': path});
+    window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
 }
 
 function openFrame(url, id, filename) {
@@ -1282,7 +1401,7 @@ $(function() {
     }
 
     setTimeout(function() {
-        $('.inner-message').fadeOut();
+        $('.alert-success').fadeOut();
     }, 5000);
 });
 
@@ -1311,7 +1430,7 @@ function checkForumFileExtensions(files){
 }
 
 function displayError(message){
-    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + message + '</div>';
+    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + message + '</div>';
     $('#messages').append(message);
     $('#messages').fadeIn("slow");
 }
@@ -1383,7 +1502,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
         return false;
     }
     if(test_category) {
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -1409,15 +1529,24 @@ function publishFormWithAttachments(form, test_category, error_message) {
         success: function(data){
             try {
                 var json = JSON.parse(data);
+
+                if(json["error"]) {
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["error"] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+
             } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
                 return;
             }
             window.location.href = json['next_page'];
         },
         error: function(){
-            window.alert(error_message);
+            var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + error_message + '</div>';
+            $('#messages').append(message);
+            return;
         }
     });
     return false;
@@ -1443,17 +1572,17 @@ function changeThreadStatus(thread_id) {
 				try {
 					var json = JSON.parse(data);
 				} catch(err) {
-					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
 					$('#messages').append(message);
 					return;
 				}
 				if(json['error']) {
-					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+					var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
 					$('#messages').append(message);
 					return;
 				}
 				window.location.reload();
-				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Thread marked as resolved.</div>';
+				var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Thread marked as resolved.</div>';
 					$('#messages').append(message);
 			},
 			error: function() {
@@ -1462,7 +1591,7 @@ function changeThreadStatus(thread_id) {
 	});
 }
 
-function editPost(post_id, thread_id, shouldEditThread) {
+function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
@@ -1471,24 +1600,27 @@ function editPost(post_id, thread_id, shouldEditThread) {
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
-                var user_id = escape(json.user);
                 var post_content = json.post;
+                var lines = post_content.split(/\r|\r\n|\n/).length;
                 var anon = json.anon;
+                var change_anon = json.change_anon;
+                var user_id = escapeSpecialChars(json.user);
                 var time = Date.parse(json.post_time);
                 if(!time) {
                     // Timezone suffix ":00" might be missing
@@ -1499,23 +1631,32 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
                 var contentBox = form.find("[name=thread_post_content]")[0];
+                contentBox.style.height = lines*14;
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
                 document.getElementById('edit_post_id').value = post_id;
                 document.getElementById('edit_thread_id').value = thread_id;
-                $('#thread_post_anon_edit').prop('checked', anon);
+                if(change_anon) {
+                    $('#thread_post_anon_edit').prop('checked', anon);
+                } else {
+                    $('label[for=Anon]').remove();
+                    $('#thread_post_anon_edit').remove();
+                }
                 $('#edit-user-post').css('display', 'block');
 
                 $(".cat-buttons input").prop('checked', false);
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_lock_date =  json.lock_thread_date;
                     var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
+                    $('#label_lock_thread').show();
                     $("#title").val(thread_title);
                     $("#thread_status").val(thread_status);
+                    $('#lock_thread_date').val(thread_lock_date);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1530,6 +1671,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
+                    $('#label_lock_thread').hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
                     $("#thread_status").hide();
@@ -1541,14 +1683,32 @@ function editPost(post_id, thread_id, shouldEditThread) {
         });
 }
 
-function enableTabsInTextArea(jQuerySelector){
+/**
+ * Enables the use of TAB key to indent within a textarea control.
+ *
+ * VPAT requires that keyboard navigation through all controls is always available.
+ * Since TAB is being redefined to indent code/text, ESC will be defined, in place
+ * of TAB, to proceed to the next control element.  SHIFT+TAB  shall be preserved
+ * with its default behavior of returning to the previous control element.
+ *
+ * @param string jQuerySelector
+ */
+function enableTabsInTextArea(jQuerySelector) {
     var t = $(jQuerySelector);
     t.on('input', function() {
         $(this).outerHeight(38).outerHeight(this.scrollHeight);
     });
     t.trigger('input');
-    t.keydown(function(t){
-        if(t.keyCode == 9){
+    t.keydown(function(t) {
+        if (t.which == 27) {  //ESC was pressed, proceed to next control element.
+            // Next control element may not be a sibling, so .next().focus() is not guaranteed
+            // to work.  There is also no guarantee that controls are properly wrapped within
+            // a <form>.  Therefore, retrieve a master list of all visible controls and switch
+            // focus to the next control in the list.
+            var controls = $(":input").filter(":visible");
+            controls.eq(controls.index(this) + 1).focus();
+            return false;
+        } else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1556,6 +1716,7 @@ function enableTabsInTextArea(jQuerySelector){
             this.selectionStart = this.selectionEnd = beforeCurse+1;
             return false;
         }
+        // No need to test for SHIFT+TAB as it is not being redefined.
     });
 }
 
@@ -1631,6 +1792,7 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     $.ajax({
@@ -1639,6 +1801,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1676,7 +1839,7 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
     dynamicScrollLoadIfScrollVisible(jElement);
     $(jElement).scroll(function(){
         var element = $(this)[0];
-        var sensitivity = 3;
+        var sensitivity = 2;
         var isTop = element.scrollTop < sensitivity;
         var isBottom = (element.scrollHeight - element.offsetHeight - element.scrollTop) < sensitivity;
         if(isTop) {
@@ -1735,10 +1898,12 @@ function alterShowMergeThreadStatus(newStatus, course) {
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = $("#thread_category").val();
     var thread_status_value = $("#thread_status_select").val();
+    var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
+    document.cookie = "unread_select_value=" + unread_select_value + ";";
     var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
     $.ajax({
             url: url,
@@ -1746,6 +1911,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             data: {
                 thread_categories: categories_value,
                 thread_status: thread_status_value,
+                unread_select: unread_select_value,
                 currentThreadId: currentThreadId,
                 currentCategoriesId: currentCategoriesId,
             },
@@ -1755,7 +1921,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                x = x.html;
                x = `${x}`;
                var jElement = $("#thread_list");
-               jElement.children(":not(.fa)").remove();
+               jElement.children(":not(.fas)").remove();
                $("#thread_list .fa-caret-up").after(x);
                jElement.attr("prev_page", page_number - 1);
                jElement.attr("next_page", page_number + 1);
@@ -1799,15 +1965,19 @@ function generateCodeMirrorBlocks(container_element) {
         cursorHeight: 0.0,
         lineWrapping: true
     });
+
     var lineCount = editor0.lineCount();
     if (lineCount == 1) {
         editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
+    } else {
+        //Default height for CodeMirror is 300px... 500px looks good
+        var h = (editor0.defaultTextHeight()) * lineCount + 15;
+        editor0.setSize("100%", (h > 500 ? 500 : h) + "px");
     }
-    else {
-        editor0.setSize("100%", "auto");
-    }
+
     editor0.setOption("theme", "eclipse");
     editor0.refresh();
+
     }
 }
 
@@ -1823,17 +1993,18 @@ function showHistory(post_id) {
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
                 $("#popup-post-history").show();
                 $("#popup-post-history .post_box.history_box").remove();
+                $("#popup-post-history .form-body").css("padding", "5px");
                 var dummy_box = $($("#popup-post-history .post_box")[0]);
                 for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
                     var post = json[i];
@@ -1848,11 +2019,11 @@ function showHistory(post_id) {
                     var first_name = post['user_info']['first_name'].trim();
                     var last_name = post['user_info']['last_name'].trim();
                     var author_user_id = post['user'];
-                    var visible_username = first_name + " " + last_name.substr(0 , 1) + ".";
+                    var visible_username = first_name + " " + ((last_name.length == 0) ? '' : (last_name.substr(0 , 1) + "."));
                     var info_name = first_name + " " + last_name + " (" + author_user_id + ")";
                     var visible_user_json = JSON.stringify(visible_username);
                     info_name = JSON.stringify(info_name);
-                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fa fa-eye' aria-hidden='true'></i></a>&nbsp;";
+                    var user_button_code = "<a style='margin-right:2px;display:inline-block; color:black;' onClick='changeName(this.parentNode, " + info_name + ", " + visible_user_json + ", false)' title='Show full user information'><i class='fas fa-eye' aria-hidden='true'></i></a>&nbsp;";
                     box.find("h7").html("<strong>"+visible_username+"</strong> "+post['post_time']);
                     box.find("h7").before(user_button_code);
                     $("#popup-post-history .form-body").prepend(box);
@@ -1865,29 +2036,30 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(){
+function addNewCategory(csrf_token){
     var newCategory = $("#new_category_text").val();
     var url = buildUrl({'component': 'forum', 'page': 'add_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                newCategory: newCategory
+                newCategory: newCategory,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully created category "'+ escapeSpecialChars(newCategory) +'".</div>';
                 $('#messages').append(message);
                 $('#new_category_text').val("");
                 // Create new item in #ui-category-list using dummy category
@@ -1913,28 +2085,29 @@ function addNewCategory(){
     })
 }
 
-function deleteCategory(category_id, category_desc){
+function deleteCategory(category_id, category_desc, csrf_token){
     var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                deleteCategory: category_id
+                deleteCategory: category_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully deleted category "'+ escapeSpecialChars(category_desc) +'"</div>';
                 $('#messages').append(message);
                 $('#categorylistitem-'+category_id).remove();
                 refreshCategories();
@@ -1945,11 +2118,11 @@ function deleteCategory(category_id, category_desc){
     })
 }
 
-function editCategory(category_id, category_desc, category_color) {
+function editCategory(category_id, category_desc, category_color, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
-    var data = {category_id: category_id};
+    var data = {category_id: category_id, csrf_token: csrf_token};
     if(category_desc !== null) {
         data['category_desc'] = category_desc;
     }
@@ -1965,16 +2138,16 @@ function editCategory(category_id, category_desc, category_color) {
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully updated!</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully updated!</div>';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
                 if(category_color !== null) {
@@ -2082,16 +2255,16 @@ function reorderCategories(){
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Successfully reordered categories.';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Successfully reordered categories.';
                 $('#messages').append(message);
                 setTimeout(function() {removeMessagePopup('theid');}, 1000);
                 refreshCategories();
@@ -2157,7 +2330,7 @@ function hidePosts(text, id) {
 
 }
 
-function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
     if(!checkAreYouSureForm()) return;
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
@@ -2170,18 +2343,19 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
                     var json = JSON.parse(data);
                 } catch (err){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                     $('#messages').append(message);
                     return;
                 }
                 if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
@@ -2205,7 +2379,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, url){
+function alterAnnouncement(thread_id, confirmString, url, csrf_token){
     var confirm = window.confirm(confirmString);
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': url});
@@ -2213,7 +2387,9 @@ function alterAnnouncement(thread_id, confirmString, url){
             url: url,
             type: "POST",
             data: {
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
+
             },
             success: function(data){
                 window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
@@ -2256,34 +2432,34 @@ function updateHomeworkExtensions(data) {
             try {
                 var json = JSON.parse(data);
             } catch(err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
-            if(json['is_team']){
+            if(json['data']['is_team']){
                 extensionPopup(json);
                 return;
             }
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            if(json['users'].length === 0){
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2293,7 +2469,7 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
-function loadHomeworkExtensions(g_id) {
+function loadHomeworkExtensions(g_id, due_date) {
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
         url: url,
@@ -2301,12 +2477,13 @@ function loadHomeworkExtensions(g_id) {
             var json = JSON.parse(data);
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            if(json['users'].length === 0){
+            $('#due_date').text(due_date);
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
@@ -2317,25 +2494,26 @@ function loadHomeworkExtensions(g_id) {
     });
 }
 
-function addBBCode(type, divTitle){
+function addMarkdownCode(type, divTitle){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
     if(type == 1) {
-        insert = "[url=http://example.com]display text[/url]";
+        insert = "[display text](url)";
     } else if(type == 0){
-        insert = "[code][/code]";
+        insert = "```language" +
+            "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function refreshOnResponseLateDays(json) {
     $('#late_day_table tr:gt(0)').remove();
-    if(json['users'].length === 0){
+    if(json['data']['users'].length === 0){
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
-    json['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fa fa-close'></i></a>";
+    json['data']['users'].forEach(function(elem){
+        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
     });
@@ -2353,8 +2531,8 @@ function updateLateDays(data) {
         contentType: false,
         success: function(data) {
             var json = JSON.parse(data);
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -2367,7 +2545,7 @@ function updateLateDays(data) {
             $('#csv_upload').val(this.defaultValue);
             $('#csv_option_overwrite_all').prop('checked',true);
             //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days have been updated.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2393,13 +2571,13 @@ function deleteLateDays(user_id, datestamp) {
             },
             success: function(data) {
                 var json = JSON.parse(data);
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>' + json['error'] + '</div>';
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
                 refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fa fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fa fa-times-circle"></i>Late days entry removed.</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
                 $('#messages').append(message);
             },
             error: function() {
@@ -2494,6 +2672,9 @@ function checkSidebarCollapse() {
     if (size < 1000) {
         $("#sidebar").toggleClass("collapsed", true);
     }
+    else{
+        $("#sidebar").toggleClass("collapsed", false);
+    }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -2508,11 +2689,21 @@ function toggleSidebar() {
 }
 
 $(document).ready(function() {
-    //Collapsed sidebar tooltips
+    //Collapsed sidebar tooltips with content depending on state of sidebar
     $('[data-toggle="tooltip"]').tooltip({
-        position: { my: "right+0 bottom+0" }
+        position: { my: "right+0 bottom+0" },
+        content: function () {
+            if($("#sidebar").hasClass("collapsed")) {
+                if ($(this).attr("title") === "Collapse Sidebar") {
+                    return "Expand Sidebar";
+                }
+                return $(this).attr("title")
+            }
+            else {
+                return ""
+            }
+        }
     });
-    $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {
@@ -2526,3 +2717,38 @@ $(document).ready(function() {
     });
     checkSidebarCollapse();
 });
+
+function checkBulkProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
+    $.ajax({
+        url: url,
+        data: {
+            gradeable_id : gradeable_id
+        },
+        type: "POST",
+        success: function(data) {
+            data = JSON.parse(data);
+            var result = {};
+            updateBulkProgress(data['job_data'], data['count']);
+        },
+        error: function(e) {
+            console.log("Failed to check job queue");
+        }
+    })
+}
+// Credit to https://stackoverflow.com/a/24676492/2972004
+//      Solution to autoexpand the height of a textarea
+function auto_grow(element) {
+    element.style.height = "5px";
+    element.style.height = (element.scrollHeight + 5)+"px";
+}
+
+/**
+ * Sets the 'noscroll' textareas to have the correct height
+ */
+function resizeNoScrollTextareas() {
+    // Make sure textareas resize correctly
+    $('textarea.noscroll').each(function() {
+        auto_grow(this);
+    })
+}

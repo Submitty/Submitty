@@ -63,11 +63,28 @@ class PamAuthenticationTester extends BaseUnitTest {
         $this->assertFalse($pam->authenticate());
     }
 
+    public function testEmptyUserId() {
+        $core = $this->createMock(Core::class);
+        /** @noinspection PhpParamsInspection */
+        $pam = new PamAuthentication($core);
+        $pam->setUserId('');
+        $this->assertFalse($pam->authenticate());
+    }
+
     public function testNoPassword() {
         $core = $this->createMock(Core::class);
         /** @noinspection PhpParamsInspection */
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
+        $this->assertFalse($pam->authenticate());
+    }
+
+    public function testEmptyPassword() {
+        $core = $this->createMock(Core::class);
+        /** @noinspection PhpParamsInspection */
+        $pam = new PamAuthentication($core);
+        $pam->setUserId('test');
+        $pam->setPassword('');
         $this->assertFalse($pam->authenticate());
     }
 
@@ -83,10 +100,6 @@ class PamAuthenticationTester extends BaseUnitTest {
         $this->assertFalse($pam->authenticate());
     }
 
-    /**
-     * @expectedException \app\exceptions\AuthenticationException
-     * @expectedExceptionMessage Error attempting to authenticate against PAM: Invalid HTTP Code 0.
-     */
     public function testCurlThrow() {
         $config = $this->createMockModel(Config::class);
         $queries = $this->createMock(DatabaseQueries::class);
@@ -100,13 +113,11 @@ class PamAuthenticationTester extends BaseUnitTest {
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
         $pam->setPassword('test');
+        $this->expectException(\app\exceptions\AuthenticationException::class);
+        $this->expectExceptionMessage('Error attempting to authenticate against PAM: Invalid HTTP Code 0.');
         $pam->authenticate();
     }
 
-    /**
-     * @expectedException \app\exceptions\AuthenticationException
-     * @expectedExceptionMessage Error JSON response for PAM: Syntax error
-     */
     public function testInvalidJsonResponse() {
         $core = $this->getMockCore('{invalid_json: true}');
 
@@ -114,13 +125,11 @@ class PamAuthenticationTester extends BaseUnitTest {
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
         $pam->setPassword('test');
+        $this->expectException(\app\exceptions\AuthenticationException::class);
+        $this->expectExceptionMessage('Error JSON response for PAM: Syntax error');
         $pam->authenticate();
     }
 
-    /**
-     * @expectedException \app\exceptions\AuthenticationException
-     * @expectedExceptionMessage Missing response in JSON for PAM
-     */
     public function testNoAuthenticatedKey() {
         $core = $this->getMockCore('{"key": true}');
 
@@ -128,6 +137,8 @@ class PamAuthenticationTester extends BaseUnitTest {
         $pam = new PamAuthentication($core);
         $pam->setUserId('test');
         $pam->setPassword('test');
+        $this->expectException(\app\exceptions\AuthenticationException::class);
+        $this->expectExceptionMessage('Missing response in JSON for PAM');
         $pam->authenticate();
     }
 }

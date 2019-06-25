@@ -187,15 +187,44 @@ class Logger {
      * @param $action
      */
     public static function logAccess($user_id, $token, $action) {
-        $filename = static::getFilename();
-        $log_message[] = static::getTimestamp();
         $log_message[] = $user_id;
         $log_message[] = $token;
         $log_message[] = $_SERVER['REMOTE_ADDR'];
         $log_message[] = $action;
         //$log_message[] = $_SERVER['REQUEST_URI'];
+        static::logMessage('access', $log_message);
+    }
+
+
+    /**
+     * This logs the grading activity of any graders when they
+     * 1. Open the student's page to grade
+     * 2. Opening a component
+     * 3. Saving a component
+     * The log is in the format of
+     * Timestamp | Gradeable_id | Grader ID | Student ID | Component_ID (-1 if is case 1) | Action | User Agent
+     *
+     * where action is defined broadly as the page they're accessing and any other relevant information
+     * (so gradeable id for when they're submitting).
+     *
+     * @param $params All the params in a key-value array
+     */
+    public static function logTAGrading($params){
+        $log_message[] = $params['course_semester'];
+        $log_message[] = $params['course_name'];
+        $log_message[] = $params['gradeable_id'];
+        $log_message[] = $params['grader_id'];
+        $log_message[] = $params['submitter_id'];
+        $log_message[] = array_key_exists('component_id', $params) ? $params['component_id'] : "-1";
+        $log_message[] = $params['action'];
+        static::logMessage('ta_grading', $log_message);
+    }
+
+    private static function logMessage($folder, $log_message) {
+        $filename = static::getFilename();
+        array_unshift($log_message, static::getTimestamp());
         $log_message[] = $_SERVER['HTTP_USER_AGENT'];
         $log_message = implode(" | ", $log_message)."\n";
-        @file_put_contents(FileUtils::joinPaths(static::$log_path, 'access', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
+        @file_put_contents(FileUtils::joinPaths(static::$log_path, $folder, "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 }

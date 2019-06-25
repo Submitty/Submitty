@@ -9,7 +9,6 @@ new files which should be structured:
     ...
 }
 where the job is the name of a class within submitty_daemon_jobs.submitty_daemon_jobs
-
 """
 import json
 import os
@@ -26,6 +25,10 @@ from watchdog.events import FileCreatedEvent, FileSystemEventHandler
 
 
 class NewFileHandler(FileSystemEventHandler):
+    """
+    Watchdog handler for watching for creation of new files inside
+    of a directory
+    """
     def __init__(self, queue):
         """
 
@@ -48,7 +51,19 @@ def process_queue(queue):
     """
     while True:
         job = queue.get(True)
-        process_job(job)
+        print('Got job off queue:', job)
+        try:
+            process_job(job)
+        except Exception as e:
+            print('Error processing job:', job)
+            print('  Exception:', e)
+        finally:
+            job_file = Path(QUEUE_DIR, job)
+            if job_file.exists():
+                job_file.unlink()
+            processing_file = QUEUE_DIR / ('PROCESSING_' + job)
+            if processing_file.exists():
+                processing_file.unlink()
 
 
 def process_job(job):
@@ -57,20 +72,27 @@ def process_job(job):
     :param str job:
     """
 
-    print ("START JOB ",job)
+    print("START JOB ", job)
     with open(os.path.join(str(QUEUE_DIR), job)) as job_file:
         job_details = json.load(job_file)
+
     processing_job = QUEUE_DIR / ('PROCESSING_' + job)
 
     Path(QUEUE_DIR, job).rename(processing_job)
     try:
         job_class = getattr(jobs, job_details['job'])(job_details)
+        if not job_class.has_required_keys():
+            print("Missing some details for job:", job)
+            return
+        if not  job_class.validate_job_details():
+            print("Failed to validate details for job:", job)
+            return
         job_class.run_job()
     except NameError:
         # function does not exist
         pass
-    processing_job.unlink()
-    print ("finished job ", job)
+    print("finished job:", job)
+
 
 def cleanup_job(job):
     """
@@ -83,7 +105,7 @@ def cleanup_job(job):
     with Path(QUEUE_DIR, job).open() as job_file:
         job_details = json.load(job_file)
     try:
-        print ("\ncleanup job (will need to re-run) ",job)
+        print("\ncleanup job (will need to re-run):", job)
         job_class = getattr(jobs, job_details['job'])(job_details)
         job_class.cleanup_job()
     except NameError:
@@ -93,6 +115,11 @@ def cleanup_job(job):
 
 
 def main():
+    """
+    Main runner function for the daemon process. It sets up our queue for incoming jobs
+    (processing any json files that were saved while the daemon wasn't running), and then
+    kicks off WatchDog to monitor for new files in the queue directory.
+    """
     if pwd.getpwuid(os.getuid()).pw_name != DAEMON_USER:
         raise SystemExit('ERROR! This script must be run by the submitty daemon user!')
 
@@ -116,7 +143,7 @@ def main():
     pool = multiprocessing.Pool(5, process_queue, (queue, ))
     try:
         while True:
-            print ("current queue size ", queue.qsize())
+            #print("current queue size ", queue.qsize())
             time.sleep(1)
     finally:
         pool.terminate()

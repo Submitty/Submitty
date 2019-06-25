@@ -48,8 +48,17 @@ class HomePageView extends AbstractView {
         }
 
 
+        $autofill_preferred_name = [$user->getLegalFirstName(),$user->getLegalLastName()];
+        if ($user->getPreferredFirstName() != "") {
+            $autofill_preferred_name[0] = $user->getPreferredFirstName();
+        }
+        if ($user->getPreferredLastName() != "") {
+            $autofill_preferred_name[1] = $user->getPreferredLastName();
+        }
         return $this->core->getOutput()->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
+            "user_first" => $autofill_preferred_name[0],
+            "user_last" => $autofill_preferred_name[1],
             "statuses" => $statuses,
             "change_name_text" => $changeNameText,
             "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication

@@ -9,9 +9,9 @@ Required Input:
 <div id="component-{{ component.id }}"
      class="box component"
      data-component_id="{{ component.id }}"
-     data-title="{{ component.title }}"
-     data-ta_comment="{{ component.ta_comment }}"
-     data-student_comment="{{ component.student_comment }}"
+     data-title="{{ component.title|escape }}"
+     data-ta_comment="{{ component.ta_comment|escape }}"
+     data-student_comment="{{ component.student_comment|escape }}"
      data-page="{{ component.page }}"
      data-lower_clamp="{{ component.lower_clamp }}"
      data-default="{{ component.default }}"
@@ -33,7 +33,7 @@ Required Input:
 
     {# Marks table #}
     <div class="ta-rubric-table" data-component_id="{{ component.id }}" {{ mark_list_visibility }}>
-        {# twig.js doens't support blocks inside of for loops ... ANNOYING #}
+        {# twig.js doesn't support blocks inside of for loops ... ANNOYING #}
         {% block marks_block %}
         {% endblock %}
         {% if edit_marks_enabled %}

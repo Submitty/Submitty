@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
@@ -45,6 +46,8 @@ use app\models\User;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method int getVcsHostType()
+ * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
@@ -57,10 +60,6 @@ use app\models\User;
  * @method void setStudentViewAfterGrades($can_student_view_after_grades)
  * @method bool isStudentSubmit()
  * @method void setStudentSubmit($can_student_submit)
- * @method bool isStudentDownload()
- * @method void setStudentDownload($can_student_download)
- * @method bool isStudentDownloadAnyVersion()
- * @method void setStudentDownloadAnyVersion($student_download_any_version)
  * @method bool isPeerGrading()
  * @method void setPeerGrading($use_peer_grading)
  * @method int getPeerGradeSet()
@@ -73,7 +72,12 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method bool isDiscussionBased()
+ * @method void setDiscussionBased($discussion_based)
+ * @method string  getDiscussionThreadId()
+ * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
+ * @method void setHasDueDate($has_due_date)
  */
 class Gradeable extends AbstractModel {
     /* Properties for all types of gradeables */
@@ -97,7 +101,7 @@ class Gradeable extends AbstractModel {
     /** @property @var Component[] An array of all gradeable components loaded from the database */
     private $db_components = [];
 
-    /** @property @var bool If any submitters have active regrade requests */
+    /** @property @var bool If any submitters have active grade inquiries */
     protected $active_regrade_request_count = 0;
 
     /* (private) Lazy-loaded Properties */
@@ -135,6 +139,8 @@ class Gradeable extends AbstractModel {
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @property @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
+    protected $vcs_host_type = -1;
     /** @property @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
     /** @property @var int The maximum team size (if the gradeable is a team assignment) */
@@ -149,10 +155,6 @@ class Gradeable extends AbstractModel {
     protected $student_view_after_grades = false;
     /** @property @var bool If students can make submissions */
     protected $student_submit = false;
-    /** @property @var bool If students can download submitted files */
-    protected $student_download = false;
-    /** @property @var bool If students can view/download any version of the submitted files, or just the active version */
-    protected $student_download_any_version = false;
     /** @property @var bool If the gradeable uses peer grading */
     protected $peer_grading = false;
     /** @property @var int The number of peers each student will be graded by */
@@ -163,6 +165,8 @@ class Gradeable extends AbstractModel {
     protected $late_submission_allowed = true;
     /** @property @var float The point precision for manual grading */
     protected $precision = 0.0;
+    /** @property @var bool If this gradeable has a due date or not */
+    protected $has_due_date = false;
 
     /* Dates for all types of gradeables */
 
@@ -187,10 +191,16 @@ class Gradeable extends AbstractModel {
     protected $submission_due_date = null;
     /** @property @var int The number of late days allowed */
     protected $late_days = 0;
-    /** @property @var \DateTime The deadline for submitting a regrade request */
+    /** @property @var \DateTime The deadline for submitting a grade inquiry */
     protected $regrade_request_date = null;
-    /** @property @var boolean are regrade requests enabled for this assignment*/
+    /** @property @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
+    /** @property @var bool does this assignmennt have a discussion component*/
+    protected $discussion_based = false;
+    /** @property @var string thread id for cooresponding to discussion forum thread*/
+    protected $discussion_thread_id = '';
+
+
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -214,6 +224,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
@@ -221,13 +232,14 @@ class Gradeable extends AbstractModel {
             $this->setStudentView($details['student_view']);
             $this->setStudentViewAfterGrades($details['student_view_after_grades']);
             $this->setStudentSubmit($details['student_submit']);
-            $this->setStudentDownload($details['student_download']);
-            $this->setStudentDownloadAnyVersion($details['student_download_any_version']);
+            $this->setHasDueDate($details['has_due_date']);
             $this->setPeerGrading($details['peer_grading']);
             $this->setPeerGradeSet($details['peer_grade_set']);
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setDiscussionBased((boolean)$details['discussion_based']);
+            $this->setDiscussionThreadId($details['discussion_thread_ids']);
         }
 
         $this->setActiveRegradeRequestCount($details['active_regrade_request_count'] ?? 0);
@@ -235,6 +247,19 @@ class Gradeable extends AbstractModel {
         // Set dates last
         $this->setDates($details);
         $this->modified = false;
+    }
+
+    /**
+     * Exports all of the components so they can be saved to a json
+     * @return array
+     */
+    public function exportComponents() {
+        $component_arrays = [];
+        foreach ($this->components as $component) {
+            /** @var Component $component */
+            $component_arrays[] = $component->export();
+        }
+        return $component_arrays;
     }
 
     /**
@@ -265,7 +290,7 @@ class Gradeable extends AbstractModel {
         'grade_locked_date' => 'Grades Locked',
         'team_lock_date' => 'Teams Locked',
         'late_days' => 'Late Days',
-        'regrade_request_date' => 'Regrade Requests\' Due'
+        'regrade_request_date' => 'Grade Inquiries Due'
     ];
 
     /**
@@ -300,7 +325,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'submission_due_date',
         'grade_start_date',
         'grade_due_date',
         'grade_released_date'
@@ -313,7 +337,6 @@ class Gradeable extends AbstractModel {
     const date_properties_elec_no_ta = [
         'ta_view_start_date',
         'submission_open_date',
-        'submission_due_date',
         'grade_released_date'
     ];
 
@@ -478,8 +501,14 @@ class Gradeable extends AbstractModel {
                 $result = self::date_properties_elec_no_ta;
             }
 
-            // Only add in regrade request date if its allowed & enabled
-            if($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
+            // Only add in submission due date if student submission is enabled
+            if ($this->isStudentSubmit() && $this->hasDueDate()) {
+                // Make sure we insert the due date into the correct location (after the open date)
+                array_splice($result, array_search('submission_open_date', $result)+1, 0, 'submission_due_date');
+            }
+
+            // Only add in grade inquiry date if its allowed & enabled
+            if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
                 $result[] = 'regrade_request_date';
             }
         } else {
@@ -610,6 +639,10 @@ class Gradeable extends AbstractModel {
         return $dates;
     }
 
+    public function getStringThreadIds() {
+        return $this->isDiscussionBased() ? implode(',', json_decode($this->getDiscussionThreadId())) : '';
+    }
+
     /**
      * Gets all of the gradeable's date values as strings indexed by property name (including late_days)
      * @param bool $add_utc_offset True to add the UTC offset to the output strings
@@ -623,6 +656,14 @@ class Gradeable extends AbstractModel {
         }
         $date_strings['late_days'] = strval($this->late_days);
         return $date_strings;
+    }
+
+    /**
+     * Gets if this gradeable has a due date or not for electronic gradeables
+     * @return bool
+     */
+    public function hasDueDate() {
+        return $this->has_due_date;
     }
 
     /**
@@ -702,7 +743,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Sets the number of active regrade requests
+     * Sets the number of active grade inquiries
      * @param int $count
      * @internal
      */
@@ -867,6 +908,19 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Adds a new component to this gradeable with the provided properties in array form
+     * @param array $details
+     * @return Component the created component
+     */
+    public function importComponent(array $details) {
+        $details['id'] = 0;
+        $details['order'] = count($this->components);
+        $component = Component::import($this->core, $this, $details);
+        $this->components[] = $component;
+        return $component;
+    }
+
+    /**
      * Base method for deleting components.  This isn't exposed as public so
      *  its make very clear that a delete component operation is being forceful.
      * @param Component $component
@@ -940,7 +994,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-    
+
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
@@ -979,7 +1033,7 @@ class Gradeable extends AbstractModel {
     /**
      * Sets whether regrades are allowed for this gradeable
      * @param bool $regrade_allowed
-     * @throws ValidationException If date validation fails in this new regrade request configuration
+     * @throws ValidationException If date validation fails in this new grade inquiry configuration
      */
     public function setRegradeAllowed(bool $regrade_allowed) {
         $old = $this->regrade_allowed;
@@ -1071,7 +1125,7 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets if this gradeable has any regrade requests active
+     * Gets if this gradeable has any active grade inquiries
      * @return bool
      */
     public function anyActiveRegradeRequests() {
@@ -1333,11 +1387,36 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if tas can view the gradeable now
+     * @return bool
+     */
+    public function isTaViewOpen() {
+        return $this->ta_view_start_date < $this->core->getDateTimeNow();
+    }
+
+    /**
      * Gets if the submission open date has passed yet
      * @return bool
      */
     public function isSubmissionOpen() {
         return $this->submission_open_date < $this->core->getDateTimeNow();
+    }
+
+    /**
+     * Gets if the submission due date has passed yet
+     * @return bool
+     */
+    public function isSubmissionClosed() {
+        return $this->submission_due_date < $this->core->getDateTimeNow();
+    }
+
+    /**
+     * Gets if students can make submissions at this time
+     * @return bool
+     */
+    public function canStudentSubmit() {
+        return $this->isStudentSubmit() && $this->isSubmissionOpen() &&
+            (!$this->isSubmissionClosed() || $this->isLateSubmissionAllowed());
     }
 
     /**
@@ -1485,7 +1564,7 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-  
+
     /**
      * return true if students can currently submit regrades for this assignment, false otherwise
      * @return bool
@@ -1589,5 +1668,32 @@ class Gradeable extends AbstractModel {
             $repo = str_replace('{$team_id}', $team->getId(), $repo);
         }
         return $repo;
+    }
+
+    /**
+     * Gets if a user or team has a submission for this gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function hasSubmission(Submitter $submitter) {
+        if ($submitter->isTeam() && !$this->isTeamAssignment()) {
+           return false;
+        }
+        if (!$submitter->isTeam() && $this->isTeamAssignment()) {
+            $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $submitter->getId());
+            if ($team === null) {
+                return false;
+            }
+            $submitter = new Submitter($this->core, $team);
+        }
+        return $this->core->getQueries()->getHasSubmission($this, $submitter);
+    }
+
+    /**
+     * Gets the number of days late this gradeable would be if submitted now
+     * @return int
+     */
+    public function getWouldBeDaysLate() {
+        return max(0, DateUtils::calculateDayDiff($this->getSubmissionDueDate(), null));
     }
 }

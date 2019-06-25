@@ -1,12 +1,23 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# Usage:
+#   vagrant up
+#       or
+#   NO_SUBMISSIONS=1 vagrant up
+#       or
+#   EXTRA=rpi vagrant up
+#
+#
 # If you want to install extra packages (such as rpi or matlab), you need to have the environment
 # variable EXTRA set. The easiest way to do this is doing:
 #
 # EXTRA=rpi vagrant up
 #   or
 # EXTRA=rpi,matlab vagrant up
+#
+# If you don't want any submissions to be automatically generated for the courses created
+# by vagrant, you'll want to specify NO_SUBMISSIONS flag.
 
 extra_command = ''
 if ENV.has_key?('NO_SUBMISSIONS')
@@ -42,20 +53,6 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.network 'private_network', ip: '192.168.56.112'
   end
 
-  config.vm.define 'ubuntu-16.04', autostart: false do |ubuntu|
-    ubuntu.vm.box = 'bento/ubuntu-16.04'
-    ubuntu.vm.network 'forwarded_port', guest: 5432, host: 15432
-    ubuntu.vm.network 'private_network', ip: '192.168.56.101'
-    ubuntu.vm.network 'private_network', ip: '192.168.56.102'
-  end
-
-  config.vm.define 'debian', autostart: false do |debian|
-    debian.vm.box = 'bento/debian-8'
-    debian.vm.network 'forwarded_port', guest: 5432, host: 25432
-    debian.vm.network 'private_network', ip: '192.168.56.201'
-    debian.vm.network 'private_network', ip: '192.168.56.202'
-  end
-
   config.vm.provider 'virtualbox' do |vb|
 
     vb.memory = 2048
@@ -67,6 +64,13 @@ Vagrant.configure(2) do |config|
     # times are important for late day calculations and building so we set the maximum time the VM and host can drift
     # to be 10 seconds at most which should make things work generally ideally
     vb.customize ['guestproperty', 'set', :id, '/VirtualBox/GuestAdd/VBoxService/--timesync-set-threshold', 10000 ]
+
+    # VirtualBox sometimes has isseus with getting the DNS to work inside of itself for whatever reason.
+    # While it will sometimes randomly work, we can just set VirtualBox to use a DNS proxy from the host,
+    # which seems to be far more reliable in having the DNS work, rather than leaving it to VirtualBox.
+    # See https://serverfault.com/a/453260 for more info.
+    # vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+    vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
   end
 
   config.vm.provision :shell, :inline => " sudo timedatectl set-timezone America/New_York", run: "once"
@@ -80,7 +84,7 @@ Vagrant.configure(2) do |config|
   mount_options = %w(dmode=775 fmode=664)
   config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
 
-  optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial)
+  optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial CrashCourseCPPSyntax)
   optional_repos.each {|repo|
     repo_path = File.expand_path("../" + repo)
     if File.directory?(repo_path)

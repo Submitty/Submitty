@@ -107,7 +107,7 @@ def main():
         if repo_path.exists():
             shutil.rmtree(str(repo_path))
         repo_path.mkdir()
-        for folder in ['autograding', 'access', 'site_errors']:
+        for folder in ['autograding', 'access', 'site_errors', 'ta_grading']:
             repo_log_path = repo_path / folder
             data_log_path = data_path / folder
             repo_log_path.mkdir()
@@ -123,7 +123,7 @@ def main():
     os.system("psql -U "+db_user+" --list | grep submitty* | awk '{print $1}' | "
               "xargs -I \"@@\" dropdb -h localhost -U "+db_user+" \"@@\"")
     os.system('psql -d postgres -U '+db_user+' -c "CREATE DATABASE submitty"')
-    migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'migrator.py')
+    migrator_script = str(SUBMITTY_REPOSITORY / 'migration' / 'run_migrator.py')
     subprocess.check_call(['python3', migrator_script, '-e', 'system', '-e', 'master', 'migrate', '--initial'])
     del os.environ['PGPASSWORD']
 

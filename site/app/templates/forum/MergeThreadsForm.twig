@@ -4,23 +4,19 @@
 {% block body %}
         Merge current thread into
         <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
-        <input type="text" size="50" placeholder="e.g. (thread_id) title" class="ui-autocomplete-input" autocomplete="off" name="merge_thread_parent" id="merge_thread_parent" data-ays-ignore="true">
+        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ core.getCsrfToken() }}" data-ays-ignore="true"/>
+        <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" style="width:200px;" data-ays-ignore="true">
+            {% for threads in possibleMerges %}
+                <option value=({{ threads['id'] }})>({{ threads['id'] }}) {{ threads['title'] }}</option>
+            {% endfor %}
+        </select>
         <script>
-            //Override JQuery autocomplete to ensure valid display of entities
-            $.ui.autocomplete.prototype._renderItem = function (ul, item) {
-                    return $( "<li style='padding:5px;'></li>" )
-                    .data( "item.autocomplete", item )
-                    .append( $( "<a></a>" ).html( item.label ) )
-                    .appendTo( ul );
-            };
-            $("#merge_thread_parent").autocomplete({
-                source: {{ possibleMerges|raw }},
-                //Override JQuery autocomplete to ensure valid selection of entities
-                select: function (event, ui) {
-                    event.preventDefault();
-                    this.value = $('<div />').html(ui.item.label).text();
-                }
+            $(document).ready(function(){
+                $(".chosen-select").chosen({ width: "210px" });
+                $("#merge-threads .form-body").css("min-height", "inherit");
+                $("#merge-threads .form-body").css('overflow-y', 'initial');
             });
+
         </script>
 {% endblock %}
 {% block form %}
@@ -30,5 +26,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" value="Merge Thread" />
 {% endblock %}

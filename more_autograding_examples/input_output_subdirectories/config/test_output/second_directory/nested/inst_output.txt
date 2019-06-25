@@ -1,0 +1,3 @@
+LINE   1: hi
+LINE   2: this is
+LINE   3: another file

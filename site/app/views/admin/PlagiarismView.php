@@ -113,11 +113,11 @@ HTML;
                 }
                 
                 $return .= <<<HTML
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fa fa-pencil" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
             </td>
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fa fa-refresh" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fas fa-sync" aria-hidden="true"></i></a>
             </td>
-            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fa fa-trash" aria-hidden="true"></i></a>
+            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-hidden="true"></i></a>
             </td>
             <td>
                 Last run: $timestamp
@@ -163,24 +163,151 @@ HTML;
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
         $return = "";
         $return .= <<<HTML
-<div class="content">
-<h1>Plagiarism Detection -- WORK IN PROGRESS</h1>
-<br>
+        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.js"></script>
+        <script>
+
+            $(document).ready(function() {
+                var editor0 = $('.CodeMirror')[0].CodeMirror;
+                var editor1 = $('.CodeMirror')[1].CodeMirror;
+
+                //console.log('hello');
+
+                editor0.getWrapperElement().onmousedown = function(e) {
+                    var lineCh = editor0.coordsChar({ left: e.clientX, top: e.clientY });
+                    //console.log(lineCh);
+                    var markers = editor0.findMarksAt(lineCh);
+                    if (markers.length === 0) { return; }
+                    var lineData = markers[0].find();
+                    var clickedMark = markers[0];
+                    
+                    if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
+
+                        // var redSegments = document.getElementsByClassName("red_plag");
+
+                        //console.log($(".red_plag")[0]);
+
+                        var allMarks = editor0.getAllMarks();
+
+                        allMarks.forEach(m => {
+                            if(m.className === "red_plag") {
+                                m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
+                                m.className = "";
+                            }
+                        });
+
+                        //console.log($($(redSegments[0]).parent().parent().parent())(".CodeMirror-linenumber").html());
+
+                        // if(redSegments.length > 0) {
+                        //     var r = redSegments[0];
+                        //     console.log($(r).parent());
+                        //     var position = r.
+                        //     var rLineCh = editor0.coordsChar( {left: position.left, top: position.top} );
+                        //     //console.log(rLineCh);
+                        //     var redMarkers = editor0.findMarksAt(lineCh);
+                        //     //console.log(redMarkers);
+                        //     var redClickedMark = redMarkers[0];
+
+                        //     redClickedMark.css = "border: 1px solid black; background:" + redClickedMark.attributes["data_prev_color"];
+                        //     //redClickedMark.className = "";
+                        //     console.log(redClickedMark);
+                        // }
+
+                        
+
+
+                        // redSegments.forEach(e => {
+                        //     console.log(e);
+                        // });
+
+                        setTimeout(function() {
+                            //your code to be executed after 1 second
+                            clickedMark.css = "border: 1px solid black; background:#FF0000";
+                            clickedMark.className = "red_plag";
+                            clickedMark.attributes = {"data_prev_color": "#ffff00"};
+                            editor0.refresh();
+                        }, 250);
+
+                            getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_1", "orange", null, "", "");
+
+
+                        //editor0.markText(lineData.from, lineData.to, {attributes: {"data_color_prev": "#ffff00"}, 'className': 'red_plag', 'css': 'background: #FF0000;'});
+
+                        //Use jquery to modify all classesWith red_plag back to prev_color
+
+                    }
+                    if(markers[0].css.toLowerCase().indexOf("#ffa500") != -1) { //Can be used to determine click
+
+
+                        var redSegments = document.getElementsByClassName("red_plag");
+
+                        //console.log(redSegments);
+
+                        
+                        // redSegments.forEach(e => {
+                        //     console.log(e);
+                        // });
+
+
+                        //editor0.markText(lineData.from, lineData.to, {attributes: {"data_color_prev": "#ffa500"}, 'className': 'red_plag', 'css': 'background: #FF0000;'});
+                        var marks_editor2 = editor1.getAllMarks();
+                        marks_editor2.forEach(mark => {
+                            if(mark.attributes.data_start == markers[0].attributes.data_start && mark.attributes.data_end == markers[0].attributes.data_end) {
+                                //mark.className = 'red_plag';
+                                var marker_linedata = mark.find();
+                                //mark.css = "border: 1px solid black; border-right:1px solid red;background: #FF0000";
+                                //console.log(mark);
+                                //console.log(marker_linedata);
+
+                                var allMarks = editor0.getAllMarks();
+
+                                // allMarks.forEach(m => {
+                                //     if(m.className === "red_plag") {
+                                //         m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
+                                //         m.className = "";
+                                //     }
+                                // });
+
+                                // allMarks = marks_editor2;
+
+                                // allMarks.forEach(m => {
+                                //     if(m.className === "red_plag") {
+                                //         m.css = "border: 1px solid black; background: " + m.attributes["data_prev_color"];
+                                //         m.className = "";
+                                //     }
+                                // });
+
+                                clickedMark.css = "border: 1px solid black; background:#FF0000";
+                                clickedMark.className = "red_plag";
+                                clickedMark.attributes = {"data_prev_color": "#ffff00"};
+                                editor0.refresh();
+
+                                mark.css = "border: 1px solid black; background: #FF0000";
+                                mark.className = 'red_plag';
+                                mark.attributes = {"data_color_prev": "#ffa500"};
+                                editor1.refresh();
+
+                                //var top = editor1.charCoords(marker_linedata.from.line).top;
+
+                                editor1.scrollIntoView(marker_linedata.to);
+                                // 
+                                
+                            }
+                        });
+                        //getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_2", "orange", markers[0].attributes, "", "");
+                    }
+                }
+            });
+
+        </script>
+        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.css" />
+<div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
 
+        $return .= $this->core->getOutput()->renderTwigTemplate("admin/PlagiarismHighlightingKey.twig");
+
         $return .= <<<HTML
-        <div class="sub">
-        <div style="float:right;">
-            <i style="color:white;" class="fa fa-square" aria-hidden="true"></i> Unique <br />
-            <i style="color:#cccccc;" class="fa fa-square" aria-hidden="true"></i> Common (matches many/all students) <br />
-            <i style="color:#b5e3b5;" class="fa fa-square" aria-hidden="true"></i> Matches instructor provided file <br />
-            <i style="color:yellow;" class="fa fa-square" aria-hidden="true"></i> Matches other student(s) <br />
-            <i style="color:#ffa500;" class="fa fa-square" aria-hidden="true"></i> General match between selected users <br />
-            <i style="color:red;" class="fa fa-square" aria-hidden="true"></i> Specific match between selected users <br />
-        </div>
-        <br><br><br><br><br><br><br>
-        Gradeable: <b>$gradeable_title</b><br />
-        <br>
+        <span style="line-height: 2">Gradeable: <b>$gradeable_title</b> <a style="float:right;" class="btn btn-primary" title="View Key" onclick="$('#Plagiarism-Highlighting-Key').css('display', 'block');">View Key</a></span>
+        <hr style="margin-top: 10px;margin-bottom: 10px;" />
         <form id="users_with_plagiarism">
             User 1 (sorted by %match): 
             <select name="user_id_1">
@@ -205,16 +332,37 @@ HTML;
                 <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
             </span>   
         </form><br />
-        <div name="code_box_1" style="float:left;width:48%;height:1000px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
+        <div style="max-height: 100%; width:100%;" class="sub">
+        <div style="float:left;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <textarea id="code_box_1" name="code_box_1"></textarea>
         </div>
-        <div name="code_box_2" style="float:right;width:48%;height:1000px;line-height:1.5em;overflow:scroll;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <div style="float:right;width:48%;height:100%;line-height:1.5em;overflow:auto;padding:5px;border: solid 1px #555;background:white;border-width: 2px;">
+        <textarea id="code_box_2" name="code_box_2"></textarea>
         </div>
         </div>
+        </div>
+
 HTML;
         $return .= <<<HTML
 </div>
 <script>
     var form = $("#users_with_plagiarism");
+    var code_user_1 = CodeMirror.fromTextArea(document.getElementById('code_box_1'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+    var code_user_2 = CodeMirror.fromTextArea(document.getElementById('code_box_2'), {
+        lineNumbers: true,
+        readOnly: true,
+        cursorHeight: 0.0,
+        lineWrapping: true
+    });
+
+    code_user_2.setSize("100%", "100%");
+    code_user_1.setSize("100%", "100%");
     $('[name="user_id_1"]', form).change(function(){
         setUserSubmittedCode('{$gradeable_id}','user_id_1');
     });
@@ -284,16 +432,16 @@ HTML;
         $all_version="checked";
         $active_version=""; 
         $all_files="checked";
-        $regrex_matching_files="";
-        $regrex="";
+        $regex_matching_files="";
+        $regex="";
         $language =["python"=>"selected", "java"=>"", "plaintext"=>"", "cpp"=>""];
         $provided_code="";
         $no_provided_code="checked";
         $provided_code_filename="";
         $threshold="5";
         $sequence_length="10";
-        $prior_term_gradeables_number = count($saved_config['prev_term_gradeables'])+1;
-        $ignore_submission_number = count($saved_config['ignore_submissions'])+1;
+        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables'])+1 : 1;
+        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions'])+1 : 1;
         $ignore="";
         $no_ignore="checked";
 
@@ -303,10 +451,10 @@ HTML;
             $gradeable_id = $saved_config['gradeable'];
             $all_version = ($saved_config['version'] == "all_version")?"checked":"";
             $active_version = ($saved_config['version'] == "active_version")?"checked":"";
-            if($saved_config['file_option'] == "matching_regrex") {
+            if($saved_config['file_option'] == "matching_regex") {
                 $all_files="";
-                $regrex_matching_files="checked";
-                $regrex=$saved_config['regrex'];
+                $regex_matching_files="checked";
+                $regex=$saved_config['regex'];
             }
             $language[$saved_config['language']] = "selected";
 
@@ -361,7 +509,10 @@ HTML;
         }
 
         else if($new_or_edit == "edit") {
-            $title = $this->core->getQueries()->getGradeable($saved_config['gradeable'])->getName();
+            $title = '';
+            if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
+               $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
+            }
             $return .= <<<HTML
                     $title
 HTML;
@@ -409,9 +560,9 @@ HTML;
         $return .= <<<HTML
                     <input type="radio" id="all_files_id" value="all_files" name="file_option" {$all_files}>
                     <label for="all_files_id">All Files</label>
-                    <input type="radio" id="regrex_matching_files_id" value="regrex_matching_files" name="file_option" {$regrex_matching_files}>
-                    <label for="regrex_matching_files_id">Regrex matching files</label><br />
-                    <input type="text" name="regrex_to_select_files" value="{$regrex}"/>
+                    <input type="radio" id="regex_matching_files_id" value="regex_matching_files" name="file_option" {$regex_matching_files}>
+                    <label for="regex_matching_files_id">Regex matching files</label><br />
+                    <input type="text" name="regex_to_select_files" value="{$regex}"/>
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
@@ -526,7 +677,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_prev_gradeable">
-                        <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>
                 </div>
             </div><br /><br /><br /><br /><br /> 
@@ -555,7 +706,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_ignore">
-                        <i class="fa fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>     
                 </div>    
             </div><br /><br />

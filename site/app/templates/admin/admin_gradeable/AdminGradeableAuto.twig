@@ -1,14 +1,14 @@
 <div class="electronic_file">
     <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" class="config_option ignore" name="config_option" value="defaults"/> Provided autograding configurations
-        <input type="radio" class="config_option ignore" name="config_option" value="uploaded"/> Custom uploaded autograding configurations
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
         {% if repo_name != "" %}
-            <input type="radio" class="config_option ignore" name="config_option" value="repo"/> Use Private repository ({{ config_repo_name }})
+            <input type="radio" class="config_option ignore" name="config_option" id="config_option_repo" value="repo"/> <label for="config_option_repo">Use Private repository ({{ config_repo_name }})</label>
         {% endif %}
-        <input type="radio" class="config_option ignore" name="config_option" value="manual"/> Other full path
+        <input type="radio" class="config_option ignore" name="config_option" id="config_option_manual" value="manual"/> <label for="config_option_manual">Other full path</label>
         <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
-            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;">
+            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;" aria-label="configuration selection">
                 <option value=""></option>
                 {% for path in default_config_paths %}
                     {% if config_select_mode == 'defaults' and path.1 == gradeable.getAutogradingConfigPath() %}
@@ -45,7 +45,7 @@
             </select>
         </div>
         <br />
-        <p>Current selection for full path to autograding configuration:</p>
+        <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
     </fieldset>
@@ -60,7 +60,7 @@
                 What are students allowed to do?
             </div>
             <div>
-                View the gradeable on the course home page?
+                View the gradeable on the course home page and download submitted files?
                 <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                         {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
                 <input type="radio" id="no_student_view" name="student_view" value="false"
@@ -72,27 +72,13 @@
                         {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
             </div>
 
-            <div id="student_submit_download_view">
+            <div id="student_submit_view">
                 <div>
-                    Make new submissions?
+                    Make new submissions and access all prior versions?
                     <input type="radio" id="yes_student_submit" name="student_submit" value="true"
                             {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
                     <input type="radio" id="no_student_submit" name="student_submit" value="false"
                             {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
-                </div>
-
-                <div>
-                    Download submission files?
-                    <input type="radio" id="yes_student_any_version" name="student_download_any_version" value="true"
-                            {{ gradeable.isStudentDownload() and gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Any version
-                    <input type="radio" id="no_student_any_version" name="student_download_any_version" value="false"
-                            {{ gradeable.isStudentDownload() and not gradeable.isStudentDownloadAnyVersion() ? 'checked' : '' }}/> Active version only
-                    <input type="radio" id="no_student_download" name="student_download" value="false"
-                            {{ not gradeable.isStudentDownload() ? 'checked' : '' }}/> None
-
-
-                    <input type="radio" id="yes_student_download" name="student_download" value="true"
-                            {{ gradeable.isStudentDownload() ? 'checked' : '' }} hidden/>
                 </div>
             </div>
         </fieldset>
@@ -191,24 +177,31 @@
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
             //$('#student_submit_download_view').show();
-            disableElementChildren('#student_submit_download_view', false);
+            disableElementChildren('#student_submit_view', !$('#no_student_view_after_grades').is(':checked'));
         }
         else {
             // $('#student_submit_download_view').hide();
-            disableElementChildren('#student_submit_download_view', true);
+            disableElementChildren('#student_submit_view', true);
             let studentSubmit = $('#no_student_submit');
-            let studentDownload =$('#no_student_download');
 
             studentSubmit.prop('checked', true);
-            studentDownload.prop('checked',true);
-
-            studentDownload.change();
             studentSubmit.change();
 
-            $('input[name=student_download_any_version]').prop('checked', false);
             $('input[name=student_view_after_grades]').prop('checked', false);
-            $('#student_submit_download_view').hide();
         }
+    }
+
+    function onStudentSubmitChange() {
+        let cont = $('#due_date_options_container');
+
+        let no_due_date = $('#has_due_date_no');
+        if($('#yes_student_submit').is(':checked')) {
+            cont.show();
+        } else {
+            no_due_date.prop('checked', true);
+            cont.hide();
+        }
+        no_due_date.change();
     }
 
     function showAdvancedStudentPermissions() {
@@ -236,6 +229,10 @@
         onStudentViewChange();
         $('[name="student_view"]').change(onStudentViewChange);
 
+        // Only show the dates if the setting is enabled
+        onStudentSubmitChange();
+        $('[name=student_submit]').change(onStudentSubmitChange);
+
         // Update the page when the radio buttons change
         $('input:radio[name=config_option][value="{{ config_select_mode }}"]').prop('checked', true);
         onConfigChange();
@@ -244,22 +241,13 @@
         // Update the text box when the path config changes
         $('.select_config_path').change(onConfigPathChange);
 
-        $('#no_student_download').change(function() {
-            if ($(this).is(':checked')) {
-                $('input[name=student_download_any_version]').prop('checked', false);
-            }
-        });
-
-        $('input[name=student_download_any_version]').change(function() {
-            let elem = $('#yes_student_download');
-            elem.prop('checked', true);
-            elem.change();
-        });
-
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
             elem.prop('checked', true);
             elem.change();
+            let sub = $('#no_student_submit');
+            sub.prop('checked', true);
+            sub.change();
         });
 
         {% if is_in_rebuild_queue %}

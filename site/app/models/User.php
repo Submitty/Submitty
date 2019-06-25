@@ -3,12 +3,15 @@
 namespace app\models;
 
 use app\libraries\Core;
+use app\exceptions\ValidationException;
 
 /**
  * Class User
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
+ * @method void getNumericId()
+ * @method void setNumericId(string $id)
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
@@ -54,6 +57,8 @@ class User extends AbstractModel {
 
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
+    /** @property @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    protected $numeric_id = null;
     /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
     protected $anon_id;
     /**
@@ -111,6 +116,9 @@ class User extends AbstractModel {
     /** @property @var array */
     protected $grading_registration_sections = array();
 
+    /** @property @var array */
+    protected $notification_settings = array();
+
     /**
      * User constructor.
      *
@@ -127,6 +135,10 @@ class User extends AbstractModel {
         $this->setId($details['user_id']);
         if (isset($details['user_password'])) {
             $this->setPassword($details['user_password']);
+        }
+
+        if (isset($details['user_numeric_id'])) {
+            $this->setNumericId($details['user_numeric_id']);
         }
 
         if (!empty($details['anon_id'])) {
@@ -151,6 +163,18 @@ class User extends AbstractModel {
 
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
+
+        //Other call to get notification settings??
+        $this->notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
+        $this->notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
+        $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
+        $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
+        $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
+        $this->notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
+        $this->notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
+        $this->notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
+        $this->notification_settings['all_new_posts_email'] = !empty($details['all_new_posts_email']) ? $details['all_new_posts_email'] : false;
+        $this->notification_settings['all_modifications_forum_email'] = !empty($details['all_modifications_forum_email']) ? $details['all_modifications_forum_email'] : false;
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -206,6 +230,18 @@ class User extends AbstractModel {
         $this->setDisplayedLastName();
     }
 
+    public function getNotificationSettings() {
+        return $this->notification_settings; //either receives it or not
+    }
+
+    public function getNotificationSetting($type){
+        return $this->notification_settings[$type];
+    }
+
+    public function updateUserNotificationSettings($key, $value) {
+        $this->notification_settings[$key] = $value;
+    }
+
     /**
      * Set the preferred first name of the loaded user (does not affect db. call updateUser.)
      * @param string $name
@@ -228,6 +264,10 @@ class User extends AbstractModel {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
+    public function getDisplayFullName() {
+        return $this->getDisplayedFirstName() . ' ' . $this->getDisplayedLastName();
+    }
+
     public function setRegistrationSection($section) {
         $this->registration_section = ($section !== null) ? $section : null;
     }
@@ -237,7 +277,7 @@ class User extends AbstractModel {
     }
 
     public function setGradingRegistrationSections($sections) {
-        if ($this->getGroup() < 4) {
+        if ($this->accessGrading()) {
             $this->grading_registration_sections = $sections;
         }
     }
@@ -285,23 +325,37 @@ class User extends AbstractModel {
    		    //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
    		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
 		case 'user_email':
-			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+                    // emails are allowed to be the empty string...
+                    if ($data === "") return true;
+                    // -- or ---
+                    // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+                    return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
 		case 'user_group':
             //user_group check is a digit between 1 - 4.
 			return preg_match("~^[1-4]{1}$~", $data) === 1;
 		case 'registration_section':
 			//Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
-			//"NULL" is reserved, so section must not contain any alpha-case variation of "null".  e.g. "null", "NULL", "Null", etc.
-			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1;
+			//"NULL" registration section should be validated as a datatype, not as a string.
+			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
 		case 'user_password':
 	        //Database password cannot be blank, no check on format
 			return $data !== "";
 		default:
-			//$data can't be validated since $field is unknown.  Notify developer with a stop error (also protectes data record integrity).
-			$field = var_export(htmlentities($field), true);
-			$data = var_export(htmlentities($data), true);
-			trigger_error('User::validateUserData() called with unknown $field '.$field.' and $data '.$data, E_USER_ERROR);
+			//$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
+			$ex_field = '$field: ' . var_export(htmlentities($field), true);
+			$ex_data = '$data:  ' . var_export(htmlentities($data), true);
+			throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
     	}
+    }
+
+    /**
+     * Checks if the user is on ANY team for the given assignment
+     *
+     * @param string gradable_id
+     * @return bool
+     */
+    public function onTeam($gradeable_id) {
+        $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
+        return $team !== NULL;
     }
 }

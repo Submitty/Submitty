@@ -1,7 +1,10 @@
 import tempfile
 import os
 import urllib.request
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
 
@@ -136,6 +139,11 @@ class TestForum(BaseTestCase):
         text_area.send_keys(newcontent)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
+
+        x = submit_button.location['x'] + (submit_button.size['width']/2)
+        y = submit_button.location['y'] + (submit_button.size['height']/2)
+
+        hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
         # Test existence only
@@ -166,11 +174,9 @@ class TestForum(BaseTestCase):
             cancel_button.click()
             assert merge_threads_div.value_of_css_property("display") == "none"
         else:
-            submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Submit']")
-            possible_parents = self.driver.find_element_by_name("merge_thread_parent")
-            possible_parents.send_keys(parent_thread_title)
-            time.sleep(.5)
-            self.driver.find_elements_by_partial_link_text(parent_thread_title)[-1].click()
+            submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Merge Thread']")
+            possible_parents = merge_threads_div.find_element(By.XPATH, ".//a[@class='chosen-single']").click()
+            self.driver.find_element(By.XPATH, ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
             if press_cancel:
                 cancel_button.click()
             else:
