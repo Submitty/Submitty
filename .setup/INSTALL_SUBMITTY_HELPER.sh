@@ -390,35 +390,6 @@ if [ "${WORKER}" == 0 ]; then
     find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type d -exec chmod 555 {} \;
     find ${SUBMITTY_INSTALL_DIR}/more_autograding_examples -type f -exec chmod 444 {} \;
 fi
-########################################################################################################################
-########################################################################################################################
-# BUILD JUNIT TEST RUNNER (.java file)
-
-echo -e "Build the junit test runner"
-
-# copy the file from the repo
-rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
-# root will be owner & group of the source file
-chown  root:root  TestRunner.java
-# everyone can read this file
-chmod  444 TestRunner.java
-
-# compile the executable using the javac we use in the execute.cpp whitelist
-/usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
-
-# everyone can read the compiled file
-chown root:root TestRunner.class
-chmod 444 TestRunner.class
-
-popd > /dev/null
-
-
-# fix all java_tools permissions
-chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
-chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
-
 
 ########################################################################################################################
 ########################################################################################################################
@@ -524,9 +495,13 @@ cat <<< "$(jq ".most_recent_git_tag = \"${most_recent_git_tag}\"" < ${tmp_versio
 # INSTALL 3RD PARTY PROJECTS
 #############################################################
 
+
+
 #################################################################
 # JAR SETUP
 #################
+
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools
 
 # -----------------------------------------
 echo "Checking JUnit..."
@@ -586,6 +561,30 @@ if [ "$(jq -r '.jacoco_version' ${VERSION_FILE})" != "${JACOCO_VERSION}" ]; then
     popd > /dev/null
     cat <<< "$(jq ".jacoco_version = \"${JACOCO_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
 fi
+
+########################################################################################################################
+########################################################################################################################
+# BUILD JUNIT TEST RUNNER (.java file)
+
+echo -e "Build the junit test runner"
+
+# copy the file from the repo
+rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
+
+pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
+# root will be owner & group of the source file
+chown  root:root  TestRunner.java
+# everyone can read this file
+chmod  444 TestRunner.java
+
+# compile the executable using the javac we use in the execute.cpp whitelist
+/usr/bin/javac -cp ./junit-4.12.jar TestRunner.java
+
+# everyone can read the compiled file
+chown root:root TestRunner.class
+chmod 444 TestRunner.class
+
+popd > /dev/null
 
 # fix all java_tools permissions
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
