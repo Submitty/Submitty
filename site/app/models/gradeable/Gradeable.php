@@ -28,8 +28,8 @@ use app\models\User;
  * @method string getInstructionsUrl()
  * @method void setInstructionsUrl($url)
  * @method int getType()
- * @method bool isGradeByRegistration()
- * @method void setGradeByRegistration($grade_by_reg)
+ * @method int getGraderAssignmentMethod()
+ * @method void setGraderAssignmentMethod($method)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
@@ -80,6 +80,11 @@ use app\models\User;
  * @method void setHasDueDate($has_due_date)
  */
 class Gradeable extends AbstractModel {
+    /* Enum range for grader_assignment_method */
+    const ROTATING_SECTION = 0;
+    const REGISTRATION_SECTION = 1;
+    const ALL_ACCESS = 2;
+
     /* Properties for all types of gradeables */
 
     /** @property @var string The course-wide unique gradeable id */
@@ -90,8 +95,8 @@ class Gradeable extends AbstractModel {
     protected $instructions_url = "";
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
-    /** @property @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
-    protected $grade_by_registration = true;
+    /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
+    protected $grader_assignment_method = Gradeable::REGISTRATION_SECTION;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
@@ -215,7 +220,7 @@ class Gradeable extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
         $this->setTypeInternal($details['type']);
-        $this->setGradeByRegistration($details['grade_by_registration']);
+        $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
@@ -793,6 +798,17 @@ class Gradeable extends AbstractModel {
     /** @internal */
     public function setType($type) {
         throw new \BadFunctionCallException('Cannot change gradeable type');
+    }
+
+    /**
+     * gets bool representing if gradeable is set to grade by registration
+     * @return boolean
+     */
+    public function isGradeByRegistration() {
+        if ($this->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
+            return true;
+        }
+        return false;
     }
 
     /**
