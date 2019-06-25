@@ -216,7 +216,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         this_testcase["containers"][container_num]["server"] = false;
       }
 
-      if(this_testcase["containers"][container_num]["server"] == true){
+      if(this_testcase["containers"][container_num]["server"].get<bool>() == true){
         assert(!this_testcase["containers"][container_num]["commands"].size() > 0);
       }else{
         found_non_server = true;
@@ -342,10 +342,10 @@ void validate_integer(nlohmann::json& action, std::string field, bool populate_d
     }
     assert(action[field].is_number_integer());
 
-    if(action[field] < min_val){
+    if(action[field].get<int>() < min_val){
       std::cout << "ERROR: For the " << action_name << " action, " << field << " must be greater than " << min_val << "." << std::endl;
     }
-    assert(action[field] >= min_val);
+    assert(action[field].get<int>() >= min_val);
   } else{
     if(populate_default){
       action[field] = default_value;
@@ -491,10 +491,10 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         validate_integer(action, "end_x",   true,  0, 0);
         validate_integer(action, "end_y",   true,  0, 0);
 
-        if(action["end_x"] == 0 && action["end_y"] == 0){
+        if(action["end_x"].get<int>() == 0 && action["end_y"].get<int>() == 0){
           std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
         }
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
+        assert(action["end_x"].get<int>() != 0 || action["end_y"].get<int>() != 0);
 
       }
       //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
@@ -505,11 +505,11 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         validate_integer(action, "end_x",   true,  0, 0);
         validate_integer(action, "end_y",   true,  0, 0);
 
-        if(action["end_x"] == 0 && action["end_y"] == 0){
+        if(action["end_x"].get<int>() == 0 && action["end_y"].get<int>() == 0){
           std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;
         }
 
-        assert(action["end_x"] != 0 || action["end_y"] != 0);
+        assert(action["end_x"].get<int>() != 0 || action["end_y"].get<int>() != 0);
 
       }
       //Click has an optional mouse button.
@@ -560,9 +560,9 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         //minimum frames_per_second is 1, default is 10.
         validate_integer(action, "frames_per_second", true, 1, 10);
 
-        if(action["frames_per_second"] > 30){
+        if(action["frames_per_second"].get<int>() > 30){
           std::cout << "ERROR: Submitty does not allow gifs with an fps greater than 30." << std::endl;
-          assert(action["frames_per_second"] <= 30);
+          assert(action["frames_per_second"].get<int>() <= 30);
         }
 
         number_of_gifs++;
@@ -906,7 +906,7 @@ void AddDefaultGraders(const std::vector<nlohmann::json> &containers,
   //For every container, for every command, we want to add default graders for the appropriate files.
   for (int i = 0; i < containers.size(); i++) {
 
-    if(containers[i]["server"] == true){
+    if(containers[i]["server"].get<bool>() == true){
       continue;
     }
 
@@ -1036,7 +1036,7 @@ void FileCheck_Helper(nlohmann::json &single_testcase) {
       single_testcase["penalty"] = -0.1;
     } else {
       assert (itr->is_number());
-      assert ((*itr) <= 0);
+      assert ((*itr).get<int>() <= 0);
     }
     itr = single_testcase.find("title");
     if (itr == single_testcase.end()) {
