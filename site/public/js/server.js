@@ -1392,7 +1392,7 @@ $(function() {
     }
 
     setTimeout(function() {
-        $('.inner-message').fadeOut();
+        $('.alert-success').fadeOut();
     }, 5000);
 });
 
