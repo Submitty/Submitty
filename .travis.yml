@@ -266,7 +266,9 @@ jobs:
         - sudo ln -s $(which clang) /usr/bin/clang
         - sudo ln -s $(which clang++) /usr/bin/clang++
         - export CC=/usr/bin/clang
+        - export CC_FOR_BUILD=/usr/bin/clang
         - export CXX=/usr/bin/clang++
+        - export CXX_FOR_BUILD=/usr/bin/clang++
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
