@@ -629,7 +629,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="OUTPUT GENERATION FAILURE")
         add_all_permissions(tmp_work)
         add_all_permissions(tmp_compilation)
-        
+
     # return to the main tmp directory
     os.chdir(tmp_work)
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
@@ -746,13 +746,16 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # loop over the test case directories, and remove any files that are also in the test_input folder
     for testcase_num in range(1, len(my_testcases)+1):
         testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
+        random_input_path = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
         remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
+        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_path,testcase_folder)
 
     # loop over the random output test case directories, and remove any files that are also in the test_input folder
     for testcase_num in range(1, len(my_testcases)+1):
         testcase_folder = os.path.join(tmp_work,"random_output", "test{:02}".format(testcase_num))
+        random_input_path = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
         remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
-
+        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_path,testcase_folder)
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
