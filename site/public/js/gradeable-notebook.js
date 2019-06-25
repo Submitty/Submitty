@@ -26,6 +26,21 @@ function setMultipleChoices(mc_field_id)
 }
 
 /**
+ * Sets all checks or radio buttons in a multiple choice question to unchecked
+ *
+ * @param mc_field_id The id of the multiple choice fieldset
+ */
+function clearMultipleChoices(mc_field_id)
+{
+    // For each input inside the fieldset remove the 'checked' attribute
+    $("#" + mc_field_id + " :input").each(function(index,element) {
+
+        $(element).prop("checked", false);
+
+    });
+}
+
+/**
  * Sets the contents of the codebox
  *
  * @param codebox_id The id of the codebox div
@@ -51,6 +66,17 @@ function setCodeBox(codebox_id, state)
 }
 
 $(document).ready(function () {
+
+    // If any button inside the notebook has been clicked then enable the submission button
+    $(".notebook button").click(function() {
+
+        // Set global javascript variable to allow submission for notebook
+        window.is_notebook = true;
+
+        // Enable submit button
+        $("#submit").attr("disabled", false);
+
+    });
 
     // Register click handler for codebox clear and recent buttons
     $(".codebox_clear_reset").click(function() {
@@ -86,16 +112,27 @@ $(document).ready(function () {
         $("#codebox_" + index + "_recent_button").attr("disabled", false);
     });
 
-    // Register click handler for multiple choice recent submission button
-    $(".mc_recent").click(function() {
+    // Register click handler for multiple choice buttons
+    $(".mc_clear, .mc_recent").click(function() {
 
         // Collect the id of the button and split it apart to find out which field it is bound to
         var items = this.id.split("_");
         var index = items[1];
+        var action = items[2];
         var field_set_id = "mc_field_" + index;
 
-        setMultipleChoices(field_set_id);
-        $(this).attr("disabled", true);
+        if(action == "clear")
+        {
+            clearMultipleChoices(field_set_id);
+            $("#mc_" + index + "_clear_button").attr("disabled", true);
+            $("#mc_" + index + "_recent_button").attr("disabled", false);
+        }
+        else if(action == "recent")
+        {
+            setMultipleChoices(field_set_id);
+            $("#mc_" + index + "_clear_button").attr("disabled", false);
+            $("#mc_" + index + "_recent_button").attr("disabled", true);
+        }
     });
 
     // Register change handler to enable buttons when multiple choice inputs change
@@ -104,7 +141,8 @@ $(document).ready(function () {
         var items = this.id.split("_");
         var index = items[2];
 
-        // Enable reset button
+        // Enable recent button
+        $("#mc_" + index + "_clear_button").attr("disabled", false);
         $("#mc_" + index + "_recent_button").attr("disabled", false);
     });
 
@@ -125,26 +163,18 @@ $(document).ready(function () {
         if(button_action == "clear")
         {
             var data_to_set = $(field_id).attr("data-initial_value");
-        }
-        else
-        {
-            var data_to_set = $(field_id).attr("data-recent_submission");
-        }
-
-        // Set the data into the textbox
-        $(field_id).val(data_to_set);
-
-        // Set button states
-        if(button_action == "clear")
-        {
             $(field_id + "_clear_button").attr("disabled", true);
             $(field_id + "_recent_button").attr("disabled", false);
         }
         else
         {
+            var data_to_set = $(field_id).attr("data-recent_submission");
             $(field_id + "_clear_button").attr("disabled", false);
             $(field_id + "_recent_button").attr("disabled", true);
         }
+
+        // Set the data into the textbox
+        $(field_id).val(data_to_set);
     });
 
     // Setup keyup event for short answer boxes

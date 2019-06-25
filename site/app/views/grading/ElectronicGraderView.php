@@ -35,6 +35,7 @@ class ElectronicGraderView extends AbstractView {
         array $sections,
         array $component_averages,
         $autograded_average,
+        $overall_scores,
         $overall_average,
         int $total_submissions,
         int $registered_but_not_rotating,
@@ -69,6 +70,7 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+        $this->core->getOutput()->addInternalJs('plotly-1.48.3.min.js');
 
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
@@ -77,8 +79,8 @@ class ElectronicGraderView extends AbstractView {
             $graded += $section['graded_components'];
             $total += $section['total_components'];
             if ($gradeable->isTeamAssignment()) {
-               $no_team_total += $section['no_team'];
-               $team_total += $section['team'];
+                $no_team_total += $section['no_team'];
+                $team_total += $section['team'];
             }
         }
         if ($total === 0 && $no_team_total === 0){
@@ -118,7 +120,7 @@ class ElectronicGraderView extends AbstractView {
             }
 
             if($gradeable->isTeamAssignment()){
-                $team_percentage = round(($team_total/$total_students) * 100, 1);
+                $team_percentage = $total_students != 0 ? round(($team_total/$total_students) * 100, 1) : 0;
             }
             if ($peer) {
                 $peer_count = count($gradeable->getPeerComponents());
@@ -174,12 +176,12 @@ class ElectronicGraderView extends AbstractView {
                 //END OF ELSE
             }
         }
-
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and ($total_students == 0),
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -198,6 +200,7 @@ class ElectronicGraderView extends AbstractView {
             "viewed_total" => $viewed_total,
             "viewed_percent" => $viewed_percent,
             "overall_average" => $overall_average,
+            "overall_scores" => $overall_scores,
             "overall_total" => $overall_total,
             "overall_percentage" => $overall_percentage,
             "autograded_percentage" => $autograded_percentage,
@@ -212,7 +215,7 @@ class ElectronicGraderView extends AbstractView {
     }
 
     public function statPage($users) {
-        
+
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
 
         $return = <<<HTML
@@ -221,8 +224,8 @@ class ElectronicGraderView extends AbstractView {
 
 HTML;
         $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'action' => 'stat_page', 'gradeable_id' => $gradeable_id)));
-        
-		$return .= <<<HTML
+
+        $return .= <<<HTML
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
 					<tr>			
@@ -233,14 +236,14 @@ HTML;
 					</tr>
 HTML;
 
-		foreach($users as $user => $details){
-			$first_name = htmlspecialchars($details["first_name"]);
-			$last_name = htmlspecialchars($details["last_name"]);
+        foreach($users as $user => $details){
+            $first_name = htmlspecialchars($details["first_name"]);
+            $last_name = htmlspecialchars($details["last_name"]);
             $upload_timestamp = $details["upload_time"];
             $submit_timestamp = $details["submit_time"];
             $filepath = htmlspecialchars($details["file"]);
-            
-			$return .= <<<HTML
+
+            $return .= <<<HTML
 			<tbody>
 				<tr>
 					<td>{$last_name}, {$first_name}</td>
@@ -250,10 +253,10 @@ HTML;
 				</tr>
 			</tbody>
 HTML;
-			
-		}
-		
-		$return .= <<<HTML
+
+        }
+
+        $return .= <<<HTML
 				</table>
 			</div>
 			</div>
@@ -312,11 +315,11 @@ HTML;
 
 			</script>
 HTML;
-		return $return;
+        return $return;
 
-	}
+    }
 
-    
+
 
     /**
      * @param Gradeable $gradeable
@@ -330,7 +333,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $view_all) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -532,6 +535,11 @@ HTML;
             }
         }
 
+        //sorts sections numerically, NULL always at the end
+        usort($sections, function($a,$b)
+            { return ($a['title'] == 'NULL' or $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);   });
+
+
         $empty_team_info = [];
         foreach ($empty_teams as $team) {
             /* @var Team $team */
@@ -543,6 +551,7 @@ HTML;
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -553,6 +562,7 @@ HTML;
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
+            "past_grade_start_date" => $past_grade_start_date,
             "columns" => $columns,
             "peer" => $peer
         ]);
@@ -573,6 +583,13 @@ HTML;
 
     public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
+            "gradeable_id" => $gradeable->getId()
+        ]);
+    }
+
+
+    public function randomizeButtonWarning(Gradeable $gradeable) {
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
             "gradeable_id" => $gradeable->getId()
         ]);
     }
@@ -653,6 +670,7 @@ HTML;
             "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
             "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
+            'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
         ]);
     }
@@ -674,7 +692,7 @@ HTML;
         $posts_view = <<<HTML
             <span class="col grading_label">Discussion Posts</span>
 HTML;
-            
+
         $currentCourse = $this->core->getConfig()->getCourse();
 
         //Empty thread input

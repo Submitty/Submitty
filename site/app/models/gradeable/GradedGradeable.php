@@ -196,8 +196,8 @@ class GradedGradeable extends AbstractModel {
      * Gets a new 'notebook' which contains information about most recent submissions
      *
      * @return array An updated 'notebook' which has the most recent submission data entered into the
-     * 'recent_submission_string' key for each input item inside the notebook.  If there haven't been any submissions,
-     * then 'recent_submission_string' is populated with 'starter_value_string' if one exists, otherwise it will be
+     * 'recent_submission' key for each input item inside the notebook.  If there haven't been any submissions,
+     * then 'recent_submission' is populated with 'initial_value' if one exists, otherwise it will be
      * blank.
      */
     public function getUpdatedNotebook() {
@@ -323,6 +323,10 @@ class GradedGradeable extends AbstractModel {
         $file_contents = rtrim($file_contents, "\n");
 
         return $file_contents;
+    }
+
+    public function hasSubmission() {
+        return $this->gradeable->hasSubmission($this->submitter);
     }
 
     /* Intentionally Unimplemented accessor methods */
