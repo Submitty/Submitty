@@ -265,6 +265,8 @@ jobs:
         # Create symlink so that it's in expected location for whitelist
         - sudo ln -s $(which clang) /usr/bin/clang
         - sudo ln -s $(which clang++) /usr/bin/clang++
+        - export CC=/usr/bin/clang
+        - export CXX=/usr/bin/clang++
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
