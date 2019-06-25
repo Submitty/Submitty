@@ -318,6 +318,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
+            "categories" => $categories,
             "filterFormData" => $filterFormData,
             "button_params" => $button_params,
             "thread_exists" => $threadExists,
