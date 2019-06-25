@@ -32,6 +32,16 @@ class RainbowCustomization extends AbstractModel{
         'participation', 'note',
         'none'];
 
+    const display_benchmarks = [
+        'average',
+        'stddev',
+        'perfect',
+        'lowest_a-',
+        'lowest_b-',
+        'lowest_c-',
+        'lowest_d'
+    ];
+
 
     public function __construct(Core $main_core) {
         $this->core = $main_core;

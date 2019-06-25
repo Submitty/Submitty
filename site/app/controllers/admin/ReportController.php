@@ -440,7 +440,7 @@ class ReportController extends AbstractController {
         $customization->buildCustomization();
 
         //Try to read in any existing customization.json file, update the model
-        $customization_filename = $this->core->getConfig()->getCoursePath() . "/uploads/customization/customization.json";
+        $customization_filename = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/customization.json";
         if(file_exists($customization_filename)) {
             $customization_filehandle = fopen($customization_filename, "r");
             /*  TODO: Any reading of existing files goes here, might even want it slightly higher and pass the handle
@@ -453,7 +453,7 @@ class ReportController extends AbstractController {
         if(isset($_POST["save_customization"])){
             //Handle user input (the form) being submitted
             try {
-                $customization->processForm();
+//                $customization->processForm();
                 $customization_filehandle = fopen($customization_filename,"w");
                 fwrite($customization_filehandle,$customization->getCustomizationJSON());
                 fclose($customization_filehandle);
@@ -477,14 +477,14 @@ class ReportController extends AbstractController {
             ]);
 
             // TODO: For debugging only so we can see if POST changes. Remove this before PR.
-            try {
-                $customization_filehandle = fopen($customization_filename, "w");
-                fwrite($customization_filehandle,"Not-JSON");
-                fclose($customization_filehandle);
-            }
-            catch (\Exception $e) {
-                $this->core->getOutput()->renderJsonError($e->getMessage());
-            }
+//            try {
+//                $customization_filehandle = fopen($customization_filename, "w");
+//                fwrite($customization_filehandle,"Not-JSON");
+//                fclose($customization_filehandle);
+//            }
+//            catch (\Exception $e) {
+//                $this->core->getOutput()->renderJsonError($e->getMessage());
+//            }
         }
     }
 }
