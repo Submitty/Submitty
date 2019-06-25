@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
   int subnum = -1;
   std::string time_of_submission = "";
   std::string generation_type = "";
-  int testcase_to_compile = -1;
+  int testcase_to_generate = -1;
 
   TCLAP::CmdLine cmd("Submitty's main compilation program.", ' ', "0.9");
   TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
   TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
   TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<std::string> generation_type_argument("genration_type", "The type of generation", true, "output", "string" , cmd);
-  TCLAP::ValueArg<int> testcase_to_compile_argument("t", "testcase", "The testcase to compile. Pass -1 to compile all testcases.", false, -1, "int", cmd);
+  TCLAP::ValueArg<int> testcase_to_generate_argument("t", "testcase", "The testcase to compile. Pass -1 to compile all testcases.", false, -1, "int", cmd);
 
   //parse arguments.
   try {
@@ -42,15 +42,8 @@ int main(int argc, char *argv[]) {
     rcsid = student_id_argument.getValue();
     subnum = submission_number_argument.getValue();
     time_of_submission = submission_time_argument.getValue();
-    testcase_to_compile = testcase_to_compile_argument.getValue();
+    testcase_to_generate = testcase_to_generate_argument.getValue();
     generation_type = generation_type_argument.getValue();
-
-    std::cout << "hw_id " << hw_id << std::endl;
-    std::cout << "rcsid " << rcsid << std::endl;
-    std::cout << "subnum " << subnum << std::endl;
-    std::cout << "time_of_submission " << time_of_submission << std::endl;
-    std::cout << "Type of generation " << generation_type <<std::endl;
-    std::cout << "testcase_to_compile " << testcase_to_compile << std::endl;
   }
   catch (TCLAP::ArgException &e)  // catch any exceptions
   { 
@@ -59,53 +52,86 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-
+  if (testcase_to_generate == 1) {
+    std::cout << "hw_id " << hw_id << std::endl;
+    std::cout << "rcsid " << rcsid << std::endl;
+    std::cout << "subnum " << subnum << std::endl;
+    std::cout << "time_of_submission " << time_of_submission << std::endl;
+    
+    std::cout << "SOLUTION RUNNER" << std::endl;
+  }
   // LOAD HW CONFIGURATION JSON
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
-  std::cout << "SOLUTION RUNNER" << std::endl;
   std::vector<nlohmann::json> actions;
   std::vector<nlohmann::json> dispatcher_actions;
 
-  std::cout << "Running Solution Code..." << std::endl;
-
-  system("find . -type f -exec ls -sh {} +");
-   
-    std::cout << "========================================================" << std::endl;
-    TestCase my_testcase(config_json,testcase_to_compile - 1,"");
+  
+  TestCase my_testcase(config_json,testcase_to_generate - 1,"");
   if ( generation_type == "output" ) {
+    
     for (int i = 0; i < my_testcase.numFileGraders(); i++ ){
+      
       std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(i), "command");
-      for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
-        int exit_no = execute(outputGeneratorCommandsForValidation[j],
-                              true,
-                              actions,
-                              dispatcher_actions,
-                              "execute_logfile.txt",
-                              my_testcase.get_test_case_limits(),
-                              config_json.value("resource_limits",nlohmann::json()),
-                              config_json,
-                              false,
-                              "");
+      
+      if ( outputGeneratorCommandsForValidation.size() > 0 ) {
+        
+        std::cout << "Running Solution Code For Output Generation..." << std::endl;
+
+        system("find . -type f -exec ls -sh {} +");
+   
+        std::cout << "========================================================" << std::endl;
+
+        std::cout << "TEST #" << testcase_to_generate << std::endl;
+        std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+      
+        for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
+          int exit_no = execute(outputGeneratorCommandsForValidation[j],
+                                true,
+                                actions,
+                                dispatcher_actions,
+                                "execute_logfile.txt",
+                                my_testcase.get_test_case_limits(),
+                                config_json.value("resource_limits",nlohmann::json()),
+                                config_json,
+                                false,
+                                "");
+        }
+        std::cout << "========================================================" << std::endl;
+        std::cout << "FINISHED TEST #" << testcase_to_generate << std::endl;
       }
     }
   } else if ( generation_type == "input" ) {
     std::vector <std::string> inputGeneratorCommands = my_testcase.getInputGeneratorCommands();
-    for (int i = 0; i < inputGeneratorCommands.size(); i++ ) {
-      int exit_no = execute(inputGeneratorCommands[i],
-                              true,
-                              actions,
-                              dispatcher_actions,
-                              "execute_logfile.txt",
-                              my_testcase.get_test_case_limits(),
-                              config_json.value("resource_limits",nlohmann::json()),
-                              config_json,
-                              false,
-                              "");
+    if ( inputGeneratorCommands.size() > 0 ) {
+        
+      std::cout << "Running Solution Code For Input Generation..." << std::endl;
+
+      system("find . -type f -exec ls -sh {} +");
+  
+      std::cout << "========================================================" << std::endl;
+
+      std::cout << "TEST #" << testcase_to_generate << std::endl;
+      std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+       
+      for (int i = 0; i < inputGeneratorCommands.size(); i++ ) {
+        int exit_no = execute(inputGeneratorCommands[i],
+                                true,
+                                actions,
+                                dispatcher_actions,
+                                "execute_logfile.txt",
+                                my_testcase.get_test_case_limits(),
+                                config_json.value("resource_limits",nlohmann::json()),
+                                config_json,
+                                false,
+                                "");
+      }
+
+      std::cout << "========================================================" << std::endl;
+      std::cout << "FINISHED TEST #" << testcase_to_generate << std::endl;
+
     }
   }
-  system("find . -type f -exec ls -sh {} +");
-  std::cout << "========================================================" << std::endl;
 
   return 0;
 }
