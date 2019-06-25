@@ -2,17 +2,46 @@
 import sys
 import os
 import shutil
+import pwd
 
 # Constants
 RAINBOW_GRADES_PATH = '/usr/local/submitty/GIT_CHECKOUT/RainbowGrades'
 COURSES_PATH = '/var/local/submitty/courses'
+PERMISSIONS = 0o770                             # Linux style octal file permissions
+GROUP = 'sample_tas_www'                        # Group to get ownership of newly copied/generated files
+
+# Verify correct number of command line arguments
+if len(sys.argv) != 4:
+    raise Exception('You must pass 3 command line arguments')
 
 # Collect path information
 semester = sys.argv[1]
 course = sys.argv[2]
 user = sys.argv[3]
 
-# TODO: Validate passed in parameters
+# Verify course semester folder exists
+semesters = os.listdir(COURSES_PATH)
+
+if semester not in semesters:
+    raise Exception('Unable to locate the semester {} folder'.format(semester))
+
+# Verify course name folder exists
+courses = os.listdir(COURSES_PATH + '/' + semester)
+
+if course not in courses:
+    raise Exception('Unable to locate the course {} folder'.format((course)))
+
+# Verify user exists
+users = pwd.getpwall()
+
+user_found = False
+
+for item in users:
+    if user in item:
+        user_found = True
+
+if user_found is False:
+    raise Exception('Unable to locate the specified user {}'.format(user))
 
 # Generate path information
 rg_course_path = os.path.join(COURSES_PATH, semester, course, 'rainbow_grades')
@@ -22,7 +51,7 @@ if not os.path.exists(rg_course_path):
 
     # Create the rainbow grades directory for the course
     print('Creating new directory: {}'.format(rg_course_path))
-    os.mkdir(rg_course_path, 0o770)
+    os.mkdir(rg_course_path, PERMISSIONS)
 
     # Set folder owner
     print('Setting ownership to {}'.format(user))
@@ -67,7 +96,8 @@ print('Exporting to summary_html')
 cmd_output = os.popen('make push_test').read()
 
 # Change more file permissions
-print('Setting ownership of all rainbow grades files to {}'.format(user))
+print('Setting ownership of all rainbow grades files to {}:{}'.format(user, GROUP))
 os.chdir('..')
-cmd_output = os.popen('chown {}:sample_tas_www rainbow_grades/ -R'.format(user)).read()
+cmd_output = os.popen('chown {}:{} rainbow_grades/ -R'.format(user, GROUP)).read()
 
+print('Done')
