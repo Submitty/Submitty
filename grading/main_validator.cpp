@@ -153,7 +153,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         }
         expected = tcg.value("expected_file", "");
         if (expected != "") {
-          std::string expectedWithFolder = getPathForInstructor(my_testcase, expected) + expected;
+          std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
           fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
           if (!expectedFileExists) {
             BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";

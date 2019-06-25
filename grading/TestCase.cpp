@@ -102,7 +102,7 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
   }
 }
 
-std::string getPathForInstructor(const TestCase &tc, std::string &filename){
+std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filename){
   struct stat st;
   std::string expectedFolder;
   std::string test_output_path = "test_output/";
@@ -116,7 +116,7 @@ std::string getPathForInstructor(const TestCase &tc, std::string &filename){
 }
 
 std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std::string &id){
-  std::string expectedPath = getPathForInstructor(tc, filename);
+  std::string expectedPath = getOutputContainingFolderPath(tc, filename);
   std::string requiredPath ;
   if (expectedPath.substr(0,11) == "test_output"){
     requiredPath = expectedPath + id + "/"; 
@@ -185,7 +185,7 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
   std::string filename = j.value("expected_file","");
-  filename = getPathForInstructor(tc, filename) + filename;
+  filename = getOutputContainingFolderPath(tc, filename) + filename;
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;
