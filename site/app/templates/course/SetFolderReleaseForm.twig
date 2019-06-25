@@ -17,38 +17,89 @@
 
             // pass filename to server to record the new date and time of the file to be released
             var newDateTime = $(me).val();
-
+            //set the value to the new date and time
             releaseDate.value = newDateTime;
 
+        }
+        function determineRelease(nDT) {
+            //get current date and time to determine what color the box is based
+            //on time you want released and the current date
+            var today = new Date();
+            //in order to compare correctly, need to add a zero to all single digits
+            if (today.getMonth() + 1 < 10) {
+                var month = '0' + (today.getMonth() + 1);
+            } else {
+                var month = (today.getMonth() + 1);
+            }
+            if (today.getDate() < 10) {
+                var day = '0' + today.getDate();
+            } else {
+                var day = today.getDate();
+            }
+            if (today.getHours() < 10) {
+                var hours = "0" + today.getHours();
+            } else {
+                var hours = today.getHours();
+            }
+            if (today.getMinutes() < 10) {
+                var mins = "0" + today.getMinutes();
+            } else {
+                var mins = today.getMinutes();
+            }
+            if (today.getSeconds() < 10) {
+                var secs = "0" + today.getSeconds();
+            } else {
+                var secs = today.getSeconds();
+            }
+            var date = today.getFullYear() + '-' + month + '-' + day;
 
-           // changeNewDateTime(folderPath, newDateTime);
+            var time = hours + ":" + mins + ":" + secs;
+            var currentDT = date + ' ' + time;
+
+            //will add a thrid color for never
+            //custom colors for the input box not on sheet for readability
+            if (nDT <= currentDT) {
+                console.log(currentDT);
+                console.log(nDT);
+                console.log("released");
+                return "#87db88";
+            } else {
+                console.log(currentDT);
+                console.log(nDT);
+                console.log("unreleased");
+                return "#ffeb54";
+            }
         }
         function confirm( ){
-            var directory = document.getElementById("submit");
+            //get information passed in
+            var directory = document.getElementById("submit_time");
+            //parse back to JS
             var dirArr = JSON.parse(directory.dataset.indir);
+            //get id for files
             var ID = directory.dataset.iden;
-            console.log(ID);
-            var releaseDate = document.getElementById("date_to_release");
 
+            var releaseDate = document.getElementById("date_to_release");
+            //for all files passed in
             dirArr.forEach(function (element) {
-                console.log(element, releaseDate.value);
+                //store the new date and time for the files
                 setChildNewDateTime(element,releaseDate.value);
-                //changeNewDateTime(element, releaseDate.value);
+
             });
+            //get the div name needed for changing values and colors (so you don't have to releod)
+            //((you still have to reload for the color for some reason)) I'll try to come back and fix
             var selectedDiv = 'date_to_release_'+ID;
-            console.log(selectedDiv);
+            //change the release date on screen too (the previous just changed internal data)
             $("[id^="+selectedDiv+"]").val(releaseDate.value);
+            //changes background color to match time (on reload for now)
+            $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)');
 
         }
-
-
     </script>
 
 {% endblock %}
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary" id="submit" type="submit" value="Submit" data-iden=" "; data-inDir=' ' onclick="confirm()"/>
-    {# <button name="close" class="btn btn-default" id="close" type="close" value="Close" onclick="rload()"> Close </button> #}
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" "; data-inDir=' ' onclick="confirm()"/>
 {% endblock %}
 

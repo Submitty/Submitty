@@ -3,9 +3,12 @@
 <div class="content">
     {% if userGroup == 1 %}
         <div style="float: right; margin-bottom: 20px;">
-            <a onclick='openAllDivForCourseMaterials();' class="btn btn-primary">Open/Close All Folders</a>
+            {# button to open all of the subfolders and cookie it#}
+            <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary">Open/Close All Folders</a>
+            {# button to set the release dates of all files in the page/course materials #}
             <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                     [{% for key,value in inDir %}
+                    {# if the key is the full folder path 2D array with all files in it is the value#}
                     {% if key == folderPath %}
                         {% for f in value %}
                                 "{{ f }}",
@@ -56,7 +59,67 @@
 
 
                 <label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"
+                       onChange="setNewDateTime(this, '{{ path }}'), determineRelease('date_to_release_{{ id }}')"/>
+                <script>
+                    //this needs to be here so the boxes can be colored on load (will say it is not declared)
+                    function determineRelease(inputID){
+                        var today = new Date();
+                        //to properly compare dates/times they need to match in format
+                        //not getting it from the picker leaves out the zero before single digits
+                        if(today.getMonth()+1<10){
+                            var month = '0'+(today.getMonth()+1);
+                        }
+                        else{
+                            var month = (today.getMonth()+1);
+                        }
+                        if(today.getDate()<10){
+                            var day = '0'+today.getDate();
+                        }
+                        else{
+                            var day = today.getDate();
+                        }
+                        if(today.getHours()<10){
+                            var hours = "0"+today.getHours();
+                        }
+                        else{
+                            var hours = today.getHours();
+                        }
+                        if(today.getMinutes()<10){
+                            var mins = "0"+today.getMinutes();
+                        }
+                        else{
+                            var mins = today.getMinutes();
+                        }
+                        if(today.getSeconds()<10){
+                            var secs = "0"+today.getSeconds();
+                        }
+                        else {
+                            var secs = today.getSeconds();
+                        }
+
+                        var date = today.getFullYear()+'-'+month+'-'+day;
+
+                        var time = hours+":"+mins+":"+secs;
+                        var currentDT = date+' '+time;
+
+                        //get the value in each file so the color can be assigned
+                        //based on the time chosen
+                        var inputDT = document.getElementById(inputID);
+                        var fileDT = inputDT.value;
+
+                        //will add another color for never releasing
+                        //also custom colors for this page for readability
+                        if(fileDT<=currentDT){
+                            inputDT.style.backgroundColor = "#87db88"
+                        }
+                        else{
+                            inputDT.style.backgroundColor = "#ffeb54"
+                        }
+
+                    }
+                    determineRelease('date_to_release_{{ id }}')
+                </script>
 
 
             {% endif %}
@@ -72,7 +135,8 @@
     <div>
 
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
+            {# button to open each folder #}
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ dir }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")'>
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
@@ -80,9 +144,10 @@
             {% if userGroup == 1 %}
                 <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'>
                     <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-
+                {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                 [{% for key,value in inDir %}
+                        {# check that we are in correct directory and pass along the files in it#}
                     {% if value == dir %}
                             "{{ key}}",
                     {% endif %}
@@ -104,8 +169,79 @@
 
 
 <script type="text/javascript">
-
+    //set cookie for open adapted from w3schools
+    function setCookie(cName,cVal){
+        document.cookie = cName+'='+cVal;
+    }
+    //get the value for the cookie with this name
+    function getCookie(cName) {
+        var name = cName+'=';
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
     window.onload = function () {
+        //determine if folders have been left open or closed
+        var folderCookie = getCookie('foldersOpen');
+        //if the cookie says it is open
+        if(folderCookie == "open"){
+            //open all the folders
+            openAllDivForCourseMaterials();
+            //go through all key/val pairs
+            {% for key,value in inDir %}
+                //ignore the course materials directory
+                {% if key!= folderPath %}
+                    //if one of the subdirs, check if it is closed post opening all
+                    var subFolderCookie = getCookie("{{ value }}");
+                    if(subFolderCookie.indexOf("closed")==0){
+                        //if closed. close it after it has been opened by the override above
+                        closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+                    }
+                {% endif %}
+            {% endfor %}
+        }
+        else{
+            //makes sure that opened folders don't get opened multiple times
+            let trackOpens = new Map();
+            //goes through all possible directories
+            {% for key,value in inDir %}
+                //for everything not in the whole course directory (handled above)
+                {% if key!= folderPath %}
+                    //get the cookie for each dir
+                    var subFolderCookie = getCookie("{{ value }}");
+                    //if the folder is open
+                    if(subFolderCookie.indexOf("open")==0){
+                        //check if the folder has been opened already (do it it again will close it)
+                        if(trackOpens.get === undefined){
+                            //undefined means it has not been opened
+                            console.log("undef");
+                            //set the value as open so it will not be reopened
+                            trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
+                            //open the folder
+                            openDivForCourseMaterials(subFolderCookie.substr(4,subFolderCookie.length));
+                        }
+                    }
+                    else{
+                        if(subFolderCookie.indexOf("closed")==0){
+                            //if the folder should be closed, close it
+                            closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+                            //there's no way to open it in that function
+                        }
+                    }
+                {% endif %}
+            {% endfor %}
+        }
+
+
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
@@ -158,14 +294,13 @@
     function setNewDateTime(me, path) {
         // pass filename to server to record the new date and time of the file to be released
         var newDateTime = $(me).val();
-        //alert(newDateTime);
-        console.log(path, newDateTime);
+
         changeNewDateTime(path, newDateTime);
     }
 
-
     function setChildNewDateTime(path, changeDate) {
-        console.log(path, changeDate);
+        //change the date and time of the subfiles in the folder with the time chosen for the whole
+        //folder (passed in)
         changeNewDateTime(path,changeDate);
     }
 

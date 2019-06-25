@@ -1275,26 +1275,39 @@ function openDivForCourseMaterials(num) {
         elem.hide();
         elem.removeClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
     }
     return false;
 }
+function closeDivForCourseMaterials(num) {
+    var elem = $('#div_viewer_' + num);
+    console.log(elem.hasClass('open'));
+    elem.hide();
+    elem.removeClass('open');
+    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    return 'closed';
 
+
+}
 function openAllDivForCourseMaterials() {
     var elem = $("[id ^= 'div_viewer_']");
     if (elem.hasClass('open')) {
         elem.hide();
         elem.removeClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
     }
     return false;
 }
