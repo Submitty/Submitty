@@ -1154,6 +1154,15 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Student access already open for ";
                 $success = false;
             }
+        } else if ($action === "close_submissions") {
+            if ($dates['submission_due_date'] > $now) {
+                $this->shiftDates($dates, 'submission_due_date', $now);
+                $message .= "Closed assignment ";
+                $success = true;
+            } else {
+                $message .= "Grading already closed for ";
+                $success = false;
+            }
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
