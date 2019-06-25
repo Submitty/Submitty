@@ -71,35 +71,28 @@
             }
         }
         function confirm( ){
-            //get information passed in
             var directory = document.getElementById("submit_time");
-            //parse back to JS
             var dirArr = JSON.parse(directory.dataset.indir);
-            //get id for files
             var ID = directory.dataset.iden;
 
             var releaseDate = document.getElementById("date_to_release");
-            //for all files passed in
+
             dirArr.forEach(function (element) {
-                //store the new date and time for the files
                 setChildNewDateTime(element,releaseDate.value);
-
             });
-            //get the div name needed for changing values and colors (so you don't have to releod)
-            //((you still have to reload for the color for some reason)) I'll try to come back and fix
             var selectedDiv = 'date_to_release_'+ID;
-            //change the release date on screen too (the previous just changed internal data)
-            $("[id^="+selectedDiv+"]").val(releaseDate.value);
-            //changes background color to match time (on reload for now)
-            $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)');
 
+            $("[id^="+selectedDiv+"]").val(releaseDate.value);
+            $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)');
         }
+
     </script>
 
 {% endblock %}
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" "; data-inDir=' ' onclick="confirm()"/>
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm()"/>
+
 {% endblock %}
 

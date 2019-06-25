@@ -21,6 +21,7 @@
                 {% else %}
                     href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
                 {% endif %}
+
                 Index of Grading Details for All Students
             </a>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
@@ -59,8 +60,10 @@
     {% else %}
         <div class = "tab">
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Numerical Data'), this.blur()" id="defaultOpen">Numerical Data</button>
+
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Score Histogram'), this.blur()">Total Histogram</button>
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Score Histogram'), this.blur()">Autograding Histogram</button>
+
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages'), this.blur()">Component Averages</button>
             <div id = "Total Histogram" class = "tabcontent">
                 {% if overall_average == null or overall_average.getCount() == 0 %}
@@ -588,6 +591,7 @@
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
         }
+
 
         // Get all elements with class="btn btn-primary" and remove the class "active"
         tablinks = document.getElementsByClassName("btn btn-primary");

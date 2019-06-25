@@ -1002,7 +1002,6 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             GROUP BY gd_id, autograding
           )g 
       ", array($g_id));
-
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     public function getAverageForGradeable($g_id, $section_key, $is_team) {

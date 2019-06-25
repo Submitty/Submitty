@@ -9,11 +9,11 @@
             <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                     [{% for key,value in inDir %}
                     {# if the key is the full folder path 2D array with all files in it is the value#}
-                    {% if key == folderPath %}
-                        {% for f in value %}
-                                "{{ f }}",
-                        {% endfor %}
-                    {% endif %}
+                        {% if key == folderPath %}
+                            {% for f in value %}
+                                    "{{ f }}",
+                            {% endfor %}
+                        {% endif %}
                 {% endfor %}]
                     )' class="btn btn-primary">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
@@ -240,8 +240,6 @@
                 {% endif %}
             {% endfor %}
         }
-
-
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
