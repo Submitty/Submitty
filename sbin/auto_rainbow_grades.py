@@ -7,7 +7,7 @@ import pwd
 # Constants
 RAINBOW_GRADES_PATH = '/usr/local/submitty/GIT_CHECKOUT/RainbowGrades'
 COURSES_PATH = '/var/local/submitty/courses'
-PERMISSIONS = 0o770                             # Linux style octal file permissions
+PERMISSIONS = 0o640                             # Linux style octal file permissions for newly generated files
 GROUP = 'sample_tas_www'                        # Group to get ownership of newly copied/generated files
 
 # Verify correct number of command line arguments
@@ -70,7 +70,7 @@ if not os.path.exists(rg_course_path):
     with open(makefile_path, 'r') as file:
         filedata = file.read()
 
-    # Replace the target string
+    # Replace the target strings
     filedata = filedata.replace('username', user)
     filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades', RAINBOW_GRADES_PATH)
     filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
@@ -80,8 +80,11 @@ if not os.path.exists(rg_course_path):
     with open(makefile_path, 'w') as file:
         file.write(filedata)
 
+
 # Change directory to course specific directory
 os.chdir(rg_course_path)
+
+# TODO: Tell submitty to generate grade reports
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
 print('Pulling in grade reports')
@@ -98,6 +101,7 @@ cmd_output = os.popen('make push_test').read()
 # Change more file permissions
 print('Setting ownership of all rainbow grades files to {}:{}'.format(user, GROUP))
 os.chdir('..')
-cmd_output = os.popen('chown {}:{} rainbow_grades/ -R'.format(user, GROUP)).read()
+cmd_output = os.popen('chown {}:{} rainbow_grades -R'.format(user, GROUP)).read()
+cmd_output = os.popen('chown {}:{} reports/summary_html -R'.format(user, GROUP)).read()
 
 print('Done')
