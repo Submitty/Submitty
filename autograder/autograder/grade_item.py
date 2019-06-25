@@ -190,6 +190,11 @@ def remove_test_input_files(overall_log,test_input_path,testcase_folder):
                     print ("removing (likely) stale test_input file: ", my_file, file=f)
                     os.remove(my_file)
 
+def add_all_permissions(folder):
+    add_permissions_recursive(folder,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
@@ -370,10 +375,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             add_permissions(os.path.join(testcase_folder,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
             #untrusted_grant_rwx_access(which_untrusted, tmp_compilation)          
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
-            add_permissions_recursive(testcase_folder,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+            add_all_permissions(testcase_folder)
 
             if USE_DOCKER:
                 try:
@@ -431,11 +433,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     else:
         print (which_machine,which_untrusted,"COMPILATION FAILURE")
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
-    add_permissions_recursive(tmp_compilation,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
+    
+    add_all_permissions(tmp_compilation)
 
     # return to the main tmp directory
     os.chdir(tmp)
@@ -480,11 +479,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))
             add_permissions(os.path.join(testcase_folder,"my_solution_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
-            add_permissions_recursive(testcase_folder,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
+            add_all_permissions(testcase_folder)
+            
             inout_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                 which_untrusted,
                                                 os.path.join(testcase_folder,"my_solution_runner.out"),
@@ -609,10 +605,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))
             add_permissions(os.path.join(testcase_folder,"my_solution_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
-            add_permissions_recursive(testcase_folder,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+            add_all_permissions(testcase_folder)
 
             output_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                 which_untrusted,
@@ -634,15 +627,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         else:
             print (which_machine,which_untrusted,"OUTPUT GENERATION FAILURE")
             grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="OUTPUT GENERATION FAILURE")
-        add_permissions_recursive(tmp_work,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
-        add_permissions_recursive(tmp_compilation,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
+        add_all_permissions(tmp_work)
+        add_all_permissions(tmp_compilation)
+        
     # return to the main tmp directory
     os.chdir(tmp_work)
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
