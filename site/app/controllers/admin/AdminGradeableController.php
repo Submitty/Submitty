@@ -213,11 +213,10 @@ class AdminGradeableController extends AbstractController {
         $all_repository_config_paths = array();
         if ($config_repo_name !== '') {
             $repository_config_dir = $config_repo_name;
-            $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
-            foreach ($all_repository_configs as $file) {
-                $all_repository_config_paths[] = $file['path'];
-                // If this happens then select the third radio button 'Use Private Repository'
-                if ($file['path'] === $saved_config_path) {
+            $config_dir_files = FileUtils::getAllFiles($repository_config_dir);
+            $this->getValidPathsToConfigDirectories($config_dir_files,$all_repository_config_paths);
+            foreach ($all_repository_config_paths as $path) {
+                if ($path === $saved_config_path) {
                     $config_select_mode = 'repo';
                 }
             }
@@ -382,6 +381,25 @@ class AdminGradeableController extends AbstractController {
             'order' => -1,
             'page' => Component::PDF_PAGE_NONE
         ]);
+    }
+
+    private function getValidPathsToConfigDirectories($directory,&$results) {
+        $valid_file_names = array("config.json","provided_code","test_input","instructor_solution","test_output","custom_validation_code");
+        foreach ($directory as $file) {
+            if (array_key_exists("files",$file)) { //is a folder
+                if (empty(array_diff(array_keys($file['files']),$valid_file_names))) {//valid folder if it only contains valid files names
+                    $results[] = $file['path'];
+                }
+                else {
+                    $this->getValidPathsToConfigDirectories($file['files'],$results);
+                }
+            }
+            else if (array_key_exists("name",$file)) {
+                if ($file['name'] === 'config.json') { //valid file if it is a config file
+                    $results[] = $file['path'];
+                }
+            }
+        }
     }
 
     private function newMark(Component $component) {

@@ -1,7 +1,7 @@
 <div class="electronic_file">
     <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
     <fieldset>
-        <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
+ {#       <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
         <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
         {% if config_repo_name != "" %}
             <input type="radio" class="config_option ignore" name="config_option" id="config_option_repo" value="repo"/> <label for="config_option_repo">Use Private repository ({{ config_repo_name }})</label>
@@ -43,7 +43,35 @@
                     {% endif %}
                 {% endfor %}
             </select>
-        </div>
+        </div> #}
+
+            <select class="new" id="new_id" style="width: 700px;">
+                {% for path in default_config_paths %}
+                    {% if config_select_mode == 'defaults' and path.1 == gradeable.getAutogradingConfigPath() %}
+                        <option value="{{ path.1 }}" selected="selected">DEFAULT: {{ path.0 }}</option>
+                    {% else %}
+                        <option value="{{ path.1 }}">DEFAULT: {{ path.0 }}</option>
+                    {% endif %}
+                {% endfor %}
+				{% for path in all_uploaded_config_paths %}
+                    {% if config_select_mode == 'uploaded' and path == gradeable.getAutogradingConfigPath() %}
+                        <option style = "color: blue" value="{{ path }}" selected="selected">UPLOADED: {{ path }}</option>
+                    {% else %}
+                        <option style = "color: blue" value="{{ path }}">UPLOADED: {{ path }}</option>
+                    {% endif %}
+                {% endfor %}
+				{% for path in all_repository_config_paths %}
+                    {% if config_select_mode == 'repo' and path == gradeable.getAutogradingConfigPath() %}
+                        <option style = "color: green" value="{{ path }}" selected="selected">REPO: {{ path }}</option>
+                    {% else %}
+                        <option style = "color: green" value="{{ path }}">REPO: {{ path }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+			<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
+		
+		
+		
         <br />
         <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
