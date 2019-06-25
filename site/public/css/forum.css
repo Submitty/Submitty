@@ -142,12 +142,12 @@ body {min-width: 925px;}
     margin-left: 5px;
 }
 
-.active-thread-announcement-1{
+.active-thread-remove-announcement{
     display: inline-block;
     color: orange;
 }
 
-.active-thread-announcement-2{
+.active-thread-announcement{
     position: relative;
     display: inline-block;
     color: gold;
@@ -219,7 +219,7 @@ body {min-width: 925px;}
     white-space: nowrap;
 }
 
-.current-favorite i, .active-thread-announcement-1 i{
+.current-favorite i, .active-thread-remove-announcement i{
     position: relative;
     display: inline-block;
     color: gold;

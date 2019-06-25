@@ -4,11 +4,11 @@
 
             {% if userGroup <= 2 and activeThreadAnnouncement %}
 
-                <a class="active-thread-announcement-1" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement', '{{ csrf_token }}')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" aria-hidden="true"></i></a>
+                <a class="active-thread-remove-announcement" onClick="alterAnnouncement({{ activeThread.id }}, 'Are you sure you want to remove this thread as an announcement?', 'remove_announcement', '{{ csrf_token }}')" title="Remove Announcement"><i class="fas fa-star" onmouseleave="changeColor(this, 'gold')" onmouseover="changeColor(this, '#e0e0e0')" aria-hidden="true"></i></a>
 
             {% elseif activeThreadAnnouncement %}
 
-                <i class="fas fa-star active-thread-announcement-2" title = "Announcement" aria-hidden="true"></i>
+                <i class="fas fa-star active-thread-announcement" title = "Announcement" aria-hidden="true"></i>
 
             {% elseif userGroup <= 2 and not activeThreadAnnouncement %}
 
