@@ -235,18 +235,18 @@
             //allow user to retry assigning on failure
             toggleButtons(index, false);
             console.error(response);
-            displaySubmissionMessage({'success' : false, 'message' : response});
+            displaySubmissionMessage(response);
         });
     }
 
     function uploadSplitHelper(user_id,path,index = 0,merge_previous = false,clobber = false){
         submitSplitItem(CSRF, g_id, user_id, path, merge_previous, clobber)
         .then(function(submit_response){
-            displaySubmissionMessage(submit_response,index);
+            displaySubmissionMessage(submit_response);
             moveToNextSubmission(index);
         })
         .catch(function(submit_response){
-            displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+            displaySubmissionMessage(submit_response);
             console.error(submit_response);
             //allow user to retry assigning on failure
             toggleButtons(index, false);
@@ -266,12 +266,12 @@
         if(confirm("Are you sure you want to delete this submission?")){
             deleteSplitItem(CSRF,g_id,path)
             .then(function(submit_response){
-                displaySubmissionMessage(submit_response, index);
+                displaySubmissionMessage(submit_response);
                 moveToNextSubmission(index);
             })
             .catch(function(submit_response){
                 console.error(submit_response);
-                displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+                displaySubmissionMessage(submit_response);
 
                 toggleButtons(index, false);
             });
@@ -326,7 +326,7 @@
             }
         })
         .catch(function(response){
-            displaySubmissionMessage({'success' : false, 'message' : response}, index);
+            displaySubmissionMessage(response);
             console.error(response);
             return submitAll(index + 1);
         });
@@ -359,12 +359,12 @@
 
         deleteSplitItem(CSRF,g_id,path)
         .then(function(submit_response){
-            displaySubmissionMessage(submit_response, index);
+            displaySubmissionMessage(submit_response);
             return deleteAll(index + 1);
         })
         .catch(function(submit_response){
             console.error(submit_response);
-            displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+            displaySubmissionMessage(submit_response);
 
             toggleButtons(index, false);
 
