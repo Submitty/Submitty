@@ -397,9 +397,9 @@ function validateUserId(csrf_token, gradeable_id, user_id){
             success : function(response){ 
                 response = JSON.parse(response);
                 if(response['status'] === 'success'){
-                    resolve(response['data']);
+                    resolve(response);
                 }else{
-                    reject(response['message']);
+                    reject(response);
                 }
             },
             error : function(err){
@@ -413,17 +413,24 @@ function validateUserId(csrf_token, gradeable_id, user_id){
 //@param json a dictionary {success : true/false, message : string}
 //@param index used for id
 //function to display pop-up notification after bulk submission/delete
-function displaySubmissionMessage(json, index = 0){
-    var message ='<div id="bulk_message_' + String(index) + '" class="inner-message alert alert-' +
-                        (json['status'] === 'success' ? 'success' : 'error') + '">\
-                    <a class="fas fa-times message-close" onclick="removeMessagePopup(\'bulk_message_' + String(index) + '\');"></a>\
-                    <i class="' + (json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>' + json['status'] === 'success' ? json['data'] : json['message'] +
-                 '</div>';
+function displaySubmissionMessage(json){
+    //let the id be the date to prevent closing the wrong message
+    let d = new Date();
+    let t = String(d.getTime());
 
+    let class_str = 'class="inner-message alert ' + (json['status'] === 'success' ? 'alert-success' : 'alert-error') + '"' ; 
+    let close_btn = '<a class="fas fa-times message-close" onclick="removeMessagePopup(' + t + ');"></a>';
+    let fa_icon = '<i class="' + (json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>';
+    let response = (json['status'] === 'success' ? json['data'] : json['message'] )
+
+    let message = '<div id="' + t + '"' + class_str + '>' + fa_icon + response + close_btn + '</div>';
     $('#messages').append(message);
-    setTimeout(function() {
-        $("#bulk_message_" + String(index)).fadeOut().empty();
-    }, 5000);
+
+    if(json['status'] === 'success'){
+        setTimeout(function() {
+            removeMessagePopup(t);
+        }, 5000);
+    }
 }
 
 //@param callback to function when user selects an option

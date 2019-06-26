@@ -1,0 +1,21 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}close-submissions-form{% endblock %}
+{% block title %}Close Submissions Confirmation{% endblock %}
+{% block body %}
+    <p>Note: Closing this gradeable will cause all future submissions to be marked as late.
+    </p>
+    <br />
+    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    Are you sure you want to close student submissions for gradeable:
+    <div name="close-submissions-message">
+    </div>
+{% endblock %}
+{% block form %}
+    <form name="close-submissions-confirmation" method="post" action="">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Close Submissions">
+{% endblock %}

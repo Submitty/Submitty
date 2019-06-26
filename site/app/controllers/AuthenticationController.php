@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\Utils;
+use app\libraries\Logger;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -58,6 +59,7 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/logout")
      */
     public function logout() {
+        Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
         Utils::setCookie('submitty_session', '', time() - 3600);
         $this->core->removeCurrentSession();
         $this->core->redirect($this->core->buildNewUrl(['authentication', 'login']));
@@ -109,6 +111,7 @@ class AuthenticationController extends AbstractController {
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
+            Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
             $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
             $this->core->addSuccessMessage($msg);
 
