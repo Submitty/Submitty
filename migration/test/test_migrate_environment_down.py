@@ -184,6 +184,65 @@ DONE
             down_file = expected_rows[i] + '.py.down.txt'
             self.assertEqual(i == 1, Path(self.dir, down_file).exists())
 
+    def test_missing_migration_not_up(self):
+        environment = 'master'
+        self.setup_test(environment)
+        args = Namespace()
+        args.direction = 'down'
+        args.config = SimpleNamespace()
+        install_path = Path(self.dir, 'install')
+        Path(install_path, 'migrations', environment).mkdir(parents=True)
+        args.config.submitty = {
+            'submitty_install_dir': str(install_path)
+        }
+
+        missing_migration = Path(install_path, 'migrations', environment, '02_test4.py')
+        with missing_migration.open('w') as open_file:
+            open_file.write("""
+# pragma: no cover
+from pathlib import Path
+INSTALL_PATH = "{}"
+
+def down(*_):
+    with Path(INSTALL_PATH, 'test.txt').open('w') as open_file:
+        open_file.write('test')
+""".format(install_path))
+
+        create_migration(self.database, self.dir, environment, '01_test4.py')
+        create_migration(self.database, self.dir, environment, '02_test4.py', 0, False)
+        create_migration(self.database, self.dir, environment, '03_test4.py')
+        create_migration(self.database, self.dir, environment, '04_test4.py', 0)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 1)
+        self.assertEqual("""Running down migrations for master...
+Removing 1 missing migrations:
+  02_test4
+
+  03_test4
+DONE
+
+""", sys.stdout.getvalue())
+        self.assertEqual(list(missing_migrations)[0], missing_migration)
+        rows = self.database.session.query(self.database.migration_table).all()
+        expected_rows = ['01_test4', '03_test4', '04_test4']
+        self.assertEqual(len(rows), len(expected_rows))
+        for i in range(len(rows)):
+            row = rows[i]
+            self.assertEqual(expected_rows[i], row.id)
+            self.assertEqual(1 if i < 1 else 0, row.status)
+            self.assertIsNotNone(row.commit_time)
+            down_file = expected_rows[i] + '.py.down.txt'
+            self.assertEqual(i == 1, Path(self.dir, down_file).exists())
+
+        self.assertTrue(missing_migration.exists())
+        self.assertFalse(Path(install_path, 'test.txt').exists())
+
     def test_missing_migration_no_file(self):
         environment = 'master'
         self.setup_test(environment)
