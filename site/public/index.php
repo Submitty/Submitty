@@ -238,32 +238,8 @@ else if ($core->getConfig()->isCourseLoaded()
     $_REQUEST['page'] = 'no_access';
 }
 
-// Log the user action if they were logging in, logging out, or uploading something
-if ($core->getUser() !== null) {
-    if (empty($_COOKIE['submitty_token'])) {
-        Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
-    }
-    $log = false;
-    $action = "";
-    if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
-        $log = true;
-        $action = "logout";
-    }
-    else if (in_array($_REQUEST['component'], array('student', 'submission')) && $_REQUEST['page'] === "submission" &&
-        $_REQUEST['action'] === "upload") {
-        $log = true;
-        $action = "submission:{$_REQUEST['gradeable_id']}";
-    }
-    else if (isset($_REQUEST['success_login']) && $_REQUEST['success_login'] === "true") {
-        $log = true;
-        $action = "login";
-    }
-    if ($log && $action !== "") {
-        if ($core->getConfig()->isCourseLoaded()) {
-            $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
-        }
-        Logger::logAccess($core->getUser()->getId(), $_COOKIE['submitty_token'], $action);
-    }
+if (empty($_COOKIE['submitty_token'])) {
+    Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
 if(!$core->getConfig()->isCourseLoaded()) {

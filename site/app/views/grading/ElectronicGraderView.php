@@ -176,12 +176,28 @@ class ElectronicGraderView extends AbstractView {
                 //END OF ELSE
             }
         }
+
+        //determines if there are any valid rotating sections
+        $no_rotating_sections = false;
+        if (count($sections) === 0) {
+            $no_rotating_sections = true;
+        }
+        else {
+            if ($gradeable->isTeamAssignment()) {
+                $valid_teams_or_students = 0;
+                foreach ($sections as $section) {
+                    $valid_teams_or_students+= $section['no_team']+$section['team'];
+                }
+                $no_rotating_sections = $valid_teams_or_students === 0;
+            }
+        }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and ($total_students == 0),
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
+                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -425,12 +441,22 @@ HTML;
             }
 
             if (isset($graders[$section_title]) && count($graders[$section_title]) > 0) {
-                $section_graders = implode(", ", array_map(function (User $user) {
-                    return $user->getId();
-                }, $graders[$section_title]));
-            } else {
+                $section_grader_ids = [];
+                foreach ($graders[$section_title] as $user) {
+                    if ($user->getGroup() <= $gradeable->getMinGradingGroup()) {
+                        $section_grader_ids[] = $user->getId();
+                    }
+                }
+                if (count($section_grader_ids) > 0) {
+                    $section_graders = implode(", ", $section_grader_ids);
+                } else {
+                    $section_graders = "Nobody";
+                }
+            }
+            else {
                 $section_graders = "Nobody";
             }
+
             if ($peer) {
                 $section_graders = $this->core->getUser()->getId();
             }

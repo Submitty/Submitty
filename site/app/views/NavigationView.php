@@ -715,6 +715,20 @@ class NavigationView extends AbstractView {
                 "class" => "btn btn-primary btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);
+        } else if ($list_section === GradeableList::OPEN) {
+            $url = $this->core->buildUrl([
+                'component' => 'admin',
+                'page' => 'admin_gradeable',
+                'action' => 'quick_link',
+                'id' => $gradeable->getId(),
+                'quick_link_action' => 'close_submissions']);
+
+            $button = new Button($this->core, [
+                "subtitle" => "CLOSE SUBMISSIONS NOW",
+                "onclick" => "displayCloseSubmissionsWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
+                "class" => "btn btn-default btn-nav btn-nav-open",
+                "name" => "quick-link-btn"
+            ]);
         }
 
         if ($button !== null) {
@@ -729,5 +743,9 @@ class NavigationView extends AbstractView {
             "navigation/DeleteGradeableForm.twig",
             ['csrf_token' => $this->core->getCsrfToken()]
         );
+    }
+
+    public function closeSubmissionsWarning() {
+        return $this->core->getOutput()->renderTwigTemplate("navigation/CloseSubmissionsWarning.twig");
     }
 }

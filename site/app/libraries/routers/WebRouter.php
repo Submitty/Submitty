@@ -119,8 +119,6 @@ class WebRouter {
             $this->parameters = $this->matcher->matchRequest($this->request);
         }
 
-        // TODO: log
-
         if(!$this->core->getConfig()->isCourseLoaded()) {
             if ($this->logged_in){
                 if (isset($this->parameters['_method']) && $this->parameters['_method'] === 'logout'){
