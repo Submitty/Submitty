@@ -8,6 +8,7 @@ use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
 use app\libraries\routers\ClassicRouter;
+use app\libraries\response\Response;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -313,7 +314,14 @@ if (!$supported_by_new_router) {
 }
 else {
     $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
-    $router->run();
+    $response = $router->run();
+}
+
+// for API
+// $core->getOutput()->disableRender();
+
+if ($response instanceof Response) {
+    $response->render($core);
 }
 
 $core->getOutput()->displayOutput();
