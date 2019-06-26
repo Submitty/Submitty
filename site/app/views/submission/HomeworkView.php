@@ -515,7 +515,6 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes,
             'csrf_token' => $this->core->getCsrfToken()
         ]);
     }
