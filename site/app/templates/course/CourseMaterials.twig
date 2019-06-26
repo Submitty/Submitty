@@ -43,9 +43,8 @@
                 <i aria-hidden="true" class="fas fa-download" title="Download the file"></i>
             </a>
             {% if userGroup == 1 %}
-                <a component': ' course_materials', ' delete_course_material_file', ' dir': ' file': dir, ' misc', ' onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({' page': ' path': path }) }}", "{{ dir }}");'>
-                    <i aria-hidden="true" class="fas fa-trash" style="font-size: 16px; margin: 5px;"></i>
-                </a>
+                <a  onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'
+                > <i aria-hidden="true" class="fas fa-trash" style="font-size: 16px; margin: 5px;"></i> </a>
                 <input id="share_checkbox_{{ id }}" type="checkbox" {% if ( (fileShares[path] == "1") )%} checked="true" {% endif %} onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onchange="setNewDateTime(this, '{{ path }}')"/>
             {% endif %}
@@ -68,7 +67,7 @@
                     <i aria-hidden="true" class="fas fa-download" title="Download the folder"></i>
                 </a>
                 {% if userGroup == 1 %}
-                    <a component': ' course_materials', ' delete_course_material_folder', ' dir': ' file': dir, ' misc', ' onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({' page': ' path': folderpath }) }}", "{{ dir }}");'>
+                    <a  onclick='newDeleteCourseMaterialForm({{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'>
                         <i aria-hidden="true" class="fas fa-trash" style="font-size: 16px; margin: 5px;"></i>
                     </a>
                 {% endif %}
