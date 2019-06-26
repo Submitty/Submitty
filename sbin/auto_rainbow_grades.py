@@ -1,3 +1,8 @@
+"""
+This script will automatically setup and run rainbow grades given a semester, course,
+and instructor.
+"""
+
 # Imports
 import sys
 import os
@@ -7,8 +12,8 @@ import pwd
 # Constants
 RAINBOW_GRADES_PATH = '/usr/local/submitty/GIT_CHECKOUT/RainbowGrades'
 COURSES_PATH = '/var/local/submitty/courses'
-PERMISSIONS = 0o640                             # Linux style octal file permissions for newly generated files
-GROUP = 'sample_tas_www'                        # Group to get ownership of newly copied/generated files
+PERMISSIONS = 0o640       # Linux style octal file permissions for newly generated files
+GROUP = 'sample_tas_www'  # Group to get ownership of newly copied/generated files
 
 # Verify correct number of command line arguments
 if len(sys.argv) != 4:
@@ -57,10 +62,13 @@ if not os.path.exists(rg_course_path):
     print('Setting ownership to {}'.format(user))
     shutil.chown(rg_course_path, user)
 
-    # Copy Makefile and customization.json file from master rainbow grades directory to course specific directory
+    # Copy Makefile and customization.json file from master rainbow grades directory
+    # to course specific directory
     print('Copying initial files')
-    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_Makefile', rg_course_path + '/Makefile')
-    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_customization.json', rg_course_path + '/customization.json')
+    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_Makefile',
+                    rg_course_path + '/Makefile')
+    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_customization.json',
+                    rg_course_path + '/customization.json')
 
     # Setup Makefile
     print('Configuring Makefile')
@@ -72,7 +80,8 @@ if not os.path.exists(rg_course_path):
 
     # Replace the target strings
     filedata = filedata.replace('username', user)
-    filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades', RAINBOW_GRADES_PATH)
+    filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades',
+                                RAINBOW_GRADES_PATH)
     filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
     filedata = filedata.replace('<SEMESTER>/<COURSE>', '{}/{}'.format(semester, course))
 
