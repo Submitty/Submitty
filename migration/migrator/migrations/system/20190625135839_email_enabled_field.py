@@ -12,7 +12,7 @@ def up(config):
     # read json and add email_enabled field
     with open(email_filename,'r') as open_file:
         email_json = json.load(open_file)
-        email_json['email_enabled'] = 'true'
+        email_json['email_enabled'] = True
     # remove file
     os.remove(email_filename) 
     # write file again with new json

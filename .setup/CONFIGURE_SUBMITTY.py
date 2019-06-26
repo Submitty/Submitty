@@ -251,7 +251,7 @@ else:
     while True:
         is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y').lower()
         if (is_email_enabled == 'y') :
-            EMAIL_ENABLED = 'true';
+            EMAIL_ENABLED = True
             EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
             EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
             EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
@@ -264,7 +264,7 @@ else:
             break;
             
         elif (is_email_enabled == 'n') :
-            EMAIL_ENABLED = 'false'
+            EMAIL_ENABLED = False
             EMAIL_USER = defaults['email_user']
             EMAIL_PASSWORD = defaults['email_password']
             EMAIL_SENDER = defaults['email_sender']
