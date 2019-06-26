@@ -5,6 +5,10 @@ use app\views\AbstractView;
 
 class ReportView extends AbstractView {
     public function showReportUpdates() {
-        return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig");
+        $this->core->getOutput()->addBreadcrumb('Grade Reports');
+        return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig", [
+            'summaries_url' => $this->core->buildNewCourseUrl(['reports', 'summaries']),
+            'csv_url' => $this->core->buildNewCourseUrl(['reports', 'csv'])
+        ]);
     }
 }
