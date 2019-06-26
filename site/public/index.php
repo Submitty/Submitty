@@ -211,7 +211,7 @@ if (!empty($jwt)) {
             $core->getConfig()->getSecretSession()
         );
         $api_key = $token->getClaim('api_key');
-        $api_logged_in = $core->getApiUser($api_key);
+        $api_logged_in = $core->loadApiUser($api_key);
     }
     catch (\InvalidArgumentException $exc) {
         $core->getOutput()->renderJsonFail("Invalid token.");

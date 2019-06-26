@@ -346,7 +346,7 @@ class Core {
      *
      * @return bool
      */
-    public function getApiUser(string $api_key): bool {
+    public function loadApiUser(string $api_key): bool {
         $user_id = $this->database_queries->getSubmittyUserByApiKey($api_key);
         if ($user_id === null) {
             return false;
@@ -410,7 +410,6 @@ class Core {
         $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
-                // Set the cookie to last for 7 days
                 $token = (string) TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id),
                     $this->getConfig()->getBaseUrl(),
