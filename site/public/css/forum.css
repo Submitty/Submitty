@@ -140,6 +140,7 @@ body {min-width: 925px;}
     word-wrap: break-word;
     margin-top: 10px;
     margin-left: 5px;
+    font-size: 1.17em;
 }
 
 .active-thread-remove-announcement{
@@ -260,7 +261,8 @@ body {min-width: 925px;}
 .thread-date{
     float: right;
     font-weight: normal;
-    margin-top: 5px
+    margin-top: 5px;
+    font-size: smaller;
 }
 
 .thread-status{
