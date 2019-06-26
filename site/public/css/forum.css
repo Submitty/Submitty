@@ -169,8 +169,8 @@ body {min-width: 925px;}
     -webkit-text-stroke-color: black;
 }
 
-.not-active-thread-announcement i, .pinned-thread i{
-    color: #e0e0e0 !important;
+.not-active-thread-announcement i.fas, .pinned-thread i.fas{
+    color: #e0e0e0;
     -webkit-text-stroke: 1px black;
 }
 
@@ -219,7 +219,7 @@ body {min-width: 925px;}
     white-space: nowrap;
 }
 
-.current-favorite i, .active-thread-remove-announcement i{
+.current-favorite i.fas, .active-thread-remove-announcement i.fas{
     position: relative;
     display: inline-block;
     color: gold;
@@ -423,4 +423,15 @@ body {min-width: 925px;}
 #hidden-forum-header{
     font-size:1px;
     color: #f6fbfe;
+}
+
+.thread-list-item{
+    font-weight: bold;
+    display: block;
+    margin-bottom: 0.5em;
+}
+
+.thread-content{
+    display: block;
+    margin-bottom: 0.25em;
 }

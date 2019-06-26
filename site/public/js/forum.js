@@ -1,4 +1,4 @@
-$(function(){
+function categoriesFormEvents(){
     $("#ui-category-list").sortable({
         items : '.category-sortable',
         handle: ".handle",
@@ -27,7 +27,7 @@ $(function(){
     $(".category-color-picker").each(function(){
         refresh_color_select($(this));
     });
-});
+}
 
 function openFileForum(directory, file, path ){
     var url = buildUrl({'component': 'misc', 'page': 'display_file', 'dir': directory, 'file': file, 'path': path});

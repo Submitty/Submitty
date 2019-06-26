@@ -19,11 +19,11 @@
                 <i class="fas fa-lock thread-locked" title="Locked" aria-hidden="true"></i>
             {% endif %}
 
-            <h4>{% if thread.current_user_posted %}
+            <span class="thread-list-item">{% if thread.current_user_posted %}
                     <i class="fas fa-comments" title="You have contributed"></i>
                 {% endif %}
-                {{ thread.title }}</h4>
-            <h5 class="thread-content">{{ thread.content }}</h5>
+                {{ thread.title }}</span>
+            <span class="thread-content">{{ thread.content }}</span>
 
             {% for category in thread.categories %}
                 <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>

@@ -46,6 +46,8 @@
     <script type="text/javascript">
         $(function() {
 
+            categoriesFormEvents();
+
             $("#ui-category-list").find(".fa-trash").click(function() {
                 var item = $(this).parent().parent().parent();
                 var category_id = parseInt(item.attr('id').split("-")[1]);

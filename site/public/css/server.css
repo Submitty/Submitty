@@ -1415,6 +1415,10 @@ div.full_height {
     filter: alpha(opacity=100);
 }
 
+.cat-buttons{
+    margin-top: 5px;
+}
+
 .cat-buttons:hover {
     opacity: 0.8;
     filter: alpha(opacity=80);
