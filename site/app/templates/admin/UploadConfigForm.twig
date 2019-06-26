@@ -5,8 +5,8 @@
     <br><br>
     <p>
         Following the assignment configuration specifications:<br>
-        <a href="http://submitty.org/instructor/Assignment-Configuration">
-            http://submitty.org/instructor/Assignment-Configuration</a><br>
+        <a href="http://submitty.org/instructor/assignment_configuration">
+            http://submitty.org/instructor/assignment_configuration</a><br>
         and examples:<br>
         <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
         <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
@@ -43,7 +43,7 @@
             $.ajax({
                 url : url,
                 success(data){
-                    var gradeable_ids = JSON.parse(data);
+                    var gradeable_ids = JSON.parse(data)['data'];
                     if(gradeable_ids.length > 0){
                         $('#alert_in_use').html("Note: Currently these gradeables are using this config, rename at your own risk");
                         for(var i = 0; i < gradeable_ids.length; i++){

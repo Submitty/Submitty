@@ -180,7 +180,7 @@ if (isset($_COOKIE[$cookie_key])) {
             Utils::setCookie($cookie_key, "", time() - 3600);
         }
         else {
-            if ($expire_time > 0 || $reset_cookie) {
+            if ($expire_time > 0) {
                 Utils::setCookie(
                     $cookie_key,
                     (string) TokenManager::generateSessionToken(
@@ -238,32 +238,8 @@ else if ($core->getConfig()->isCourseLoaded()
     $_REQUEST['page'] = 'no_access';
 }
 
-// Log the user action if they were logging in, logging out, or uploading something
-if ($core->getUser() !== null) {
-    if (empty($_COOKIE['submitty_token'])) {
-        Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
-    }
-    $log = false;
-    $action = "";
-    if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
-        $log = true;
-        $action = "logout";
-    }
-    else if (in_array($_REQUEST['component'], array('student', 'submission')) && $_REQUEST['page'] === "submission" &&
-        $_REQUEST['action'] === "upload") {
-        $log = true;
-        $action = "submission:{$_REQUEST['gradeable_id']}";
-    }
-    else if (isset($_REQUEST['success_login']) && $_REQUEST['success_login'] === "true") {
-        $log = true;
-        $action = "login";
-    }
-    if ($log && $action !== "") {
-        if ($core->getConfig()->isCourseLoaded()) {
-            $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
-        }
-        Logger::logAccess($core->getUser()->getId(), $_COOKIE['submitty_token'], $action);
-    }
+if (empty($_COOKIE['submitty_token'])) {
+    Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
 if(!$core->getConfig()->isCourseLoaded()) {
@@ -293,8 +269,7 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 * END LOGIN CODE
 *********************************************/
 
-$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home']) ||
-    ($_REQUEST['component'] == 'navigation' && !in_array($_REQUEST['page'], ['notifications', 'notification_settings']));
+$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
 
 if (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
@@ -316,10 +291,6 @@ if (!$supported_by_new_router) {
             break;
         case 'submission':
             $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'navigation':
-            $control = new app\controllers\NavigationController($core);
             $control->run();
             break;
         case 'forum':

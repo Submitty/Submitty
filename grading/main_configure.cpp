@@ -18,6 +18,7 @@
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
   j["title"] = "Test " + std::to_string(test.getID()) + " " + test.getTitle();
+  j["testcase_label"] = test.getTestcaseLabel();
   j["details"] = test.getDetails();
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
@@ -183,6 +184,13 @@ int main(int argc, char *argv[]) {
       std::string type = in_notebook_cell.value("type", "");
       assert(type != "");
       out_notebook_cell["type"] = type;
+
+      // Get testcase_ref if it exists
+      std::string testcase_ref = in_notebook_cell.value("testcase_ref", "");
+      if(testcase_ref != "")
+      {
+        out_notebook_cell["testcase_ref"] = testcase_ref;
+      }
 
       // Handle each specific note book cell type
       // Handle markdown data
