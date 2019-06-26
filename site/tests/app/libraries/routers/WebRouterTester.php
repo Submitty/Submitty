@@ -47,30 +47,28 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals("loginForm", $router->parameters['_method']);
     }
 
-    public function testRedirectToLoginFromEverywhere() {
-        $everywhere = ["/everywhere", "/s19", "/sample", "/s19/../../sample", "/../../s19/sample"];
+    /**
+     * @param string $url a url that is not accessible to the user
+     * @dataProvider randomUrlProvider
+     */
+    public function testRedirectToLoginFromRandomUrl($url) {
         $core = $this->createMockCore();
-        foreach ($everywhere as $uri) {
-            $request = Request::create(
-                $uri
-            );
-            $router = new WebRouter($request, $core, false);
-            $this->assertEquals("app\controllers\AuthenticationController", $router->parameters['_controller']);
-            $this->assertEquals("loginForm", $router->parameters['_method']);
-        }
+        $request = Request::create($url);
+        $router = new WebRouter($request, $core, false);
+        $this->assertEquals("app\controllers\AuthenticationController", $router->parameters['_controller']);
+        $this->assertEquals("loginForm", $router->parameters['_method']);
     }
 
-    public function testRedirectToHomeFromEverywhere() {
-        $everywhere = ["/everywhere", "/s19", "/sample", "/s19/../../sample", "/../../s19/sample", "/authentication/login"];
+    /**
+     * @param string $url a url that is not accessible to the user
+     * @dataProvider randomUrlProvider
+     */
+    public function testRedirectToHomeFromRandomUrl($url) {
         $core = $this->createMockCore();
-        foreach ($everywhere as $uri) {
-            $request = Request::create(
-                $uri
-            );
-            $router = new WebRouter($request, $core, true);
-            $this->assertEquals("app\controllers\HomePageController", $router->parameters['_controller']);
-            $this->assertEquals("showHomepage", $router->parameters['_method']);
-        }
+        $request = Request::create($url);
+        $router = new WebRouter($request, $core, true);
+        $this->assertEquals("app\controllers\HomePageController", $router->parameters['_controller']);
+        $this->assertEquals("showHomepage", $router->parameters['_method']);
     }
 
     public function testNoUser() {
@@ -124,5 +122,16 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals("otherMethod", $router->parameters['_method']);
         $this->assertEquals("app\controllers\HomePageController", $router->controller_name);
         $this->assertEquals("showHomepage", $router->method_name);
+    }
+
+    public function randomUrlProvider() {
+        return [
+            ["/everywhere"],
+            ["/s19"],
+            ["/sample"],
+            ["/s19/../../sample"],
+            ["/../../s19/sample"],
+            ["/authentication/login"]
+        ];
     }
 }
