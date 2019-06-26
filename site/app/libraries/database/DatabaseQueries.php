@@ -1241,16 +1241,17 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      * @return array
      */
     public function getRotatingSectionsGradeableIDS() {
-        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grade_by_registration = {$this->course_db->convertBoolean(false)} ORDER BY g_grade_start_date ASC");
+        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grader_assignment_method = {0} ORDER BY g_grade_start_date ASC");
         return $this->course_db->rows();
     }
 
     /**
-     * Get gradeables graded by rotating section in the past and the sections each grader graded
-     *
+     * Gets gradeables for all graders with the sections they were assigned to grade
+     * Only includes gradeables that are set to be graded by rotating section or all access, and were in the past
+     * With the exception of $gradeable_id, which will always be included
      * @return array
      */
-    public function getGradeablesPastAndSection() {
+    public function getGradeablesRotatingGraderHistory($gradeable_id) {
         throw new NotImplementedException();
     }
 
@@ -3177,7 +3178,7 @@ AND gc_id IN (
             $gradeable->getInstructionsUrl(),
             $gradeable->getTaInstructions(),
             $gradeable->getType(),
-            $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
+            $gradeable->getGraderAssignmentMethod(),
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
@@ -3194,7 +3195,7 @@ AND gc_id IN (
               g_instructions_url,
               g_overall_ta_instructions,
               g_gradeable_type,
-              g_grade_by_registration,
+              g_grader_assignment_method,
               g_ta_view_start_date,
               g_grade_start_date,
               g_grade_due_date,
@@ -3313,7 +3314,7 @@ AND gc_id IN (
                 $gradeable->getInstructionsUrl(),
                 $gradeable->getTaInstructions(),
                 $gradeable->getType(),
-                $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
+                $gradeable->getGraderAssignmentMethod(),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
@@ -3330,7 +3331,7 @@ AND gc_id IN (
                   g_instructions_url=?,
                   g_overall_ta_instructions=?,
                   g_gradeable_type=?,
-                  g_grade_by_registration=?,
+                  g_grader_assignment_method=?,
                   g_ta_view_start_date=?,
                   g_grade_start_date=?,
                   g_grade_due_date=?,
