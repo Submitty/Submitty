@@ -55,8 +55,9 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
+                $navigation_url = $this->core->buildNewCourseUrl();
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation')),
+                    "href" => $navigation_url,
                     "title" => "Gradeables",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-submitty",
@@ -66,7 +67,7 @@ class GlobalController extends AbstractController {
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
+                    "href" => $this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')),
                     "title" => "Notifications",
                     "badge" => $unread_notifications_count,
                     "class" => "nav-row",
@@ -237,7 +238,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-exclamation-triangle"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                    "href" => $this->core->buildNewCourseUrl(['reports']),
                     "title" => "Grade Reports",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-reports",
@@ -285,7 +286,7 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout')),
+                "href" => $this->core->buildNewUrl(['authentication', 'logout']),
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",

@@ -4,16 +4,15 @@
 
 import os
 import PyPDF2
-import sys
 import traceback
 from PyPDF2 import PdfFileWriter
+from . import write_to_log as logger
 
 try:
     from pdf2image import convert_from_bytes
 except ImportError:
-    print("One or more required python modules not installed correctly")
     traceback.print_exc()
-    sys.exit(1)
+    raise ImportError("One or more required python modules not installed correctly")
 
 
 def main(args):
@@ -21,14 +20,21 @@ def main(args):
     filename = args[0]
     split_path = args[1]
     num = int(args[2])
+    log_file_path = args[3]
+
+    json_file = os.path.join(split_path, "decoded.json")
+    log_msg = "Process " + str(os.getpid()) + ": "
+
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
         total_pages = pdfReader.numPages
         if (total_pages % num != 0):
-            print(filename + " not divisible by " + str(num))
-            sys.exit(1)
+            msg = filename + " not divisible by " + str(num)
+            print(msg)
+            logger.write_to_log(log_file_path, log_msg + msg)
+            return
 
         # recalculate the total # of pages for each file
         pdfFileObj = open(filename, 'rb')
@@ -36,8 +42,12 @@ def main(args):
         total_pages = pdfReader.numPages
         max_length = len(str(total_pages - num))
 
+        output = {"filename": filename, "is_qr": False, "page_count": num}
+        logger.write_to_json(json_file, output)
+
         i = 0
         os.chdir(split_path)
+        buff = log_msg
         while i < total_pages:
             cover_writer = PdfFileWriter()
             cover_writer.addPage(pdfReader.getPage(i))
@@ -61,12 +71,20 @@ def main(args):
             with open(cover_filename, 'wb') as out:
                 cover_writer.write(out)
 
+            buff += "Splitting PDF at page " + str(i) + ", "
+
             # save cover as image
             pdf_images = convert_from_bytes(open(cover_filename, 'rb').read())
             pdf_images[0].save('{}.jpg'.format(cover_filename[:-4]),
                                "JPEG", quality=100)
-    except Exception:
+
+        buff += "Finished splitting into " + str(int(total_pages/num)) + " files"
+        logger.write_to_log(log_file_path, buff)
+    except Exception as err:
+        print(err)
         traceback.print_exc()
+        logger.write_to_log(log_file_path, buff)
+        logger.write_to_log(log_file_path, traceback.format_exc())
 
 
 if __name__ == "__main__":

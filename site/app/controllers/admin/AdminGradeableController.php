@@ -161,13 +161,21 @@ class AdminGradeableController extends AbstractController {
 
         // Construct a list of rotating gradeables
         $rotating_gradeables = [];
-        foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
+        foreach ($this->core->getQueries()->getGradeablesRotatingGraderHistory($gradeable->getId()) as $row) {
             $gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
 
             // Use the keys to remove duplicates
             $rotating_gradeables[$row['g_id']] = 1;
         }
         $rotating_gradeables = array_keys($rotating_gradeables);
+
+        // The current gradeable will always load its grader history,
+        // but if it is grade by registration it should not be in $rotating_gradeables array
+        if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
+            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            unset($rotating_gradeables[$current_g_id_key]);
+            $rotating_gradeables = array_values($rotating_gradeables);
+        }
 
         // Get some global configuration data
         $num_rotating_sections = $this->core->getQueries()->getNumberRotatingSections();
@@ -639,11 +647,12 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
-        if (!isset($details['graders'])) {
-            throw new \InvalidArgumentException('Missing "graders" parameter');
+        $new_graders = array();
+        if (isset($details['graders'])) {
+            $new_graders = $details['graders'];
         }
 
-        $gradeable->setRotatingGraderSections($details['graders']);
+        $gradeable->setRotatingGraderSections($new_graders);
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
@@ -660,7 +669,7 @@ class AdminGradeableController extends AbstractController {
             $this->redirectToEdit($gradeable_id);
         } catch (\Exception $e) {
             $this->core->addErrorMessage($e);
-            $this->core->redirect($this->core->buildUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
     }
 
@@ -670,18 +679,19 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException('Gradeable already exists');
         }
 
+        $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         // Create the gradeable with good default information
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grade_by_registration' => true,
+            'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
             'min_grading_group' => 1,
         ];
 
         $template_property_names = [
             'min_grading_group',
-            'grade_by_registration',
+            'grader_assignment_method',
             'ta_instructions',
             'autograding_config_path',
             'student_view',
@@ -708,13 +718,13 @@ class AdminGradeableController extends AbstractController {
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
-                'grade_by_registration' => true,
+                'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
-                'late_days' => 0,
+                'late_days' => $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -890,7 +900,6 @@ class AdminGradeableController extends AbstractController {
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
-            'grade_by_registration',
             'ta_grading',
             'scanned_exam',
             'student_view',
@@ -907,7 +916,8 @@ class AdminGradeableController extends AbstractController {
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
-            'precision'
+            'precision',
+            'grader_assignment_method'
         ];
 
         // Date properties all need to be set at once
@@ -968,7 +978,6 @@ class AdminGradeableController extends AbstractController {
                 $errors[$prop] = $e->getMessage();
             }
         }
-
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
         if ($date_set) {
@@ -1010,8 +1019,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->deleteGradeable($g_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
 
         $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $g_id . ".json");
         if ((file_exists($file)) && (!unlink($file))) {
@@ -1021,7 +1028,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($g_id);
 
-        $this->returnToNav();
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1155,6 +1162,15 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Student access already open for ";
                 $success = false;
             }
+        } else if ($action === "close_submissions") {
+            if ($dates['submission_due_date'] > $now) {
+                $this->shiftDates($dates, 'submission_due_date', $now);
+                $message .= "Closed assignment ";
+                $success = true;
+            } else {
+                $message .= "Grading already closed for ";
+                $success = false;
+            }
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
@@ -1165,8 +1181,8 @@ class AdminGradeableController extends AbstractController {
         } else {
             $this->core->addErrorMessage("Failed to update status of ".$g_id);
         }
-        $this->returnToNav();
 
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function checkRefresh() {
@@ -1184,11 +1200,6 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
-    }
-
-    //return to the navigation page
-    private function returnToNav() {
-        $this->core->redirect($this->core->buildUrl(array()));
     }
 
     private function redirectToEdit($gradeable_id) {
@@ -1212,7 +1223,7 @@ class AdminGradeableController extends AbstractController {
      * Exports components to json and downloads for user
      */
     private function exportComponentsRequest() {
-        $url = $this->core->buildUrl([]);
+        $url = $this->core->buildNewCourseUrl();
 
         $gradeable_id = $_GET['gradeable_id'] ?? '';
 

@@ -197,7 +197,7 @@ CREATE TABLE gradeable (
     g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
-    g_grade_by_registration boolean NOT NULL,
+    g_grader_assignment_method integer NOT NULL,
     g_ta_view_start_date timestamp(6) with time zone NOT NULL,
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
@@ -502,7 +502,7 @@ CREATE TABLE teams (
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
     g_id VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
     status INTEGER DEFAULT 0 NOT NULL
@@ -529,7 +529,7 @@ CREATE TABLE notification_settings (
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
     regrade_id INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL

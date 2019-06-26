@@ -50,11 +50,13 @@ CREATE TABLE courses (
 
 CREATE TABLE emails (
     id serial NOT NULL,
+    user_id character varying NOT NULL,
     recipient  varchar(255) NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
     created TIMESTAMP WITHOUT TIME zone NOT NULL,
-    sent TIMESTAMP WITHOUT TIME zone
+    sent TIMESTAMP WITHOUT TIME zone,
+    error character varying NOT NULL default ''
 );
 
 
@@ -199,6 +201,11 @@ ALTER TABLE ONLY courses_users
 
 ALTER TABLE ONLY courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+
+ALTER TABLE ONLY emails
+    ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
 --

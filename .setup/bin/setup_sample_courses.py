@@ -172,7 +172,7 @@ def main():
     with open(list_of_courses_file, "w") as courses_file:
         courses_file.write("")
         for course_id in courses.keys():
-            courses_file.write('<a href="'+args.submission_url+'/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
+            courses_file.write('<a href="'+args.submission_url+'/'+get_current_semester()+'/'+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
             courses_file.write('<br />')
 
     for course_id in sorted(courses.keys()):
@@ -840,7 +840,14 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
-                            active_version = random.choice(range(1, versions_to_submit+1))
+                            # Reduce the propability to get a canceled submission (active_version = 0)
+                            # This is done my making other possibilities three times more likely
+                            version_population = []
+                            for version in range(1, versions_to_submit+1):
+                                version_population.append((version, 3))
+                            version_population = [(0,1)] + version_population
+                            version_population = [ver for ver, freq in version_population for i in range(freq)]
+                            active_version = random.choice(version_population)
                             if team_id is not None:
                                 json_history = {"active_version": active_version, "history": [], "team_history": []}
                             else:
@@ -1291,6 +1298,7 @@ class Gradeable(object):
         self.overall_ta_instructions = ""
         self.peer_grading = False
         self.grade_by_registration = True
+        self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
         self.use_ta_grading = True
@@ -1371,8 +1379,9 @@ class Gradeable(object):
         else:
             self.title = self.id.replace("_", " ").title()
 
-        if 'g_grade_by_registration' in gradeable:
-            self.grade_by_registration = gradeable['g_grade_by_registration'] is True
+        if 'g_grader_assignment_method' in gradeable:
+            self.grade_by_registration = gradeable['g_grader_assignment_method'] is 1
+            self.grader_assignment_method = gradeable['g_grader_assignment_method']
 
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
@@ -1466,7 +1475,7 @@ class Gradeable(object):
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
                      g_gradeable_type=self.type,
-                     g_grade_by_registration=self.grade_by_registration,
+                     g_grader_assignment_method=self.grader_assignment_method,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
                      g_grade_due_date=self.grade_due_date,
