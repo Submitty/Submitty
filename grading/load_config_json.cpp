@@ -217,7 +217,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
 
       if(this_testcase["containers"][container_num]["server"] == true){
-        assert(!this_testcase["containers"][container_num]["commands"].size() > 0);
+        assert(this_testcase["containers"][container_num]["commands"].size() == 0);
       }else{
         found_non_server = true;
       }
