@@ -1,7 +1,10 @@
 <div class="electronic_file">
-    <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
+    <b>
+		<h3>Choose an autograding configuration:</h3>
+		<p> Default configurations are provided, and custom configurations can be uploaded or stored within a local repository. </p>
+	</b>
+	
     <fieldset>
-
 		<select class="config_path_dropdown ignore" id="config_path_dropdown" style="width: 700px;">
 			{%for path in all_config_paths %}
 				{% if path.1 == gradeable.getAutogradingConfigPath() %}
@@ -13,9 +16,8 @@
         </select>
 		
 		<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
-		
-		<br />
-        <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
+		<br><br>
+        <p><label for="input_provide_full_path">Full path to autograding configuration for current selection:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{'disabled'}}/>
     </fieldset>
