@@ -2606,7 +2606,15 @@ AND gc_id IN (
     public function getAllUsersIds() {
         $query = "SELECT user_id FROM users";
         $this->course_db->query($query);
-        return $this->rowsToArrayUserIds($this->course_db->rows());
+        return $this->rowsToArray($this->course_db->rows());
+    }
+
+    public function getAllPreferences() {
+        $query = "SELECT COLUMN_NAME
+                  FROM INFORMATION_SCHEMA.COLUMNS
+                  WHERE TABLE_NAME = 'notification_settings' AND COLUMN_NAME <> 'user_id'";
+        $this->course_db->query($query);
+        return $this->rowsToArray($this->course_db->rows());
     }
 
     /**
@@ -2615,9 +2623,13 @@ AND gc_id IN (
      * @return array
      */
     public function getAllUsersWithPreference(string $column) {
+        $preferences = $this->getAllPreferences();
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
-        return $this->rowsToArrayUserIds($this->course_db->rows());
+        if (!in_array($column,$preferences)) {
+            throw new DatabaseException("Given column, {$column}, is not a valid column", $query);
+        }
+        return $this->rowsToArray($this->course_db->rows());
     }
 
     /**
@@ -2627,11 +2639,12 @@ AND gc_id IN (
 
      */
     public function getAllParentAuthors(string $post_author_id, string $post_id) {
+        $params = [$post_id, $post_author_id];
         $query = "SELECT * FROM
                   (WITH RECURSIVE parents AS (
                   SELECT
                     author_user_id, parent_id, id FROM  posts
-                  WHERE id = {$post_id}
+                  WHERE id = ?
                   UNION SELECT
                     p.author_user_id, p.parent_id, p.id
                   FROM
@@ -2641,9 +2654,9 @@ AND gc_id IN (
                     author_user_id AS user_id
                   FROM
                     parents
-                  WHERE author_user_id <> '{$post_author_id}') AS parents;";
-        $this->course_db->query($query);
-        return $this->rowsToArrayUserIds($this->course_db->rows());
+                  WHERE author_user_id <> ?) AS parents;";
+        $this->course_db->query($query,$params);
+        return $this->rowsToArray($this->course_db->rows());
     }
 
     /**
@@ -2653,12 +2666,17 @@ AND gc_id IN (
      * @return array
      */
     public function getAllThreadAuthors($thread_id, $column) {
-        $query = "SELECT author_user_id AS user_id FROM posts WHERE thread_id = {$thread_id} AND
+        $params = [$thread_id];
+        $preferences = $this->getAllPreferences();
+        $query = "SELECT author_user_id AS user_id FROM posts WHERE thread_id = ? AND
                   EXISTS (
                   SELECT user_id FROM notification_settings WHERE
                   user_id = author_user_id AND {$column} = 'true');";
-        $this->course_db->query($query);
-        return $this->rowsToArrayUserIds($this->course_db->rows());
+        if (!in_array($column,$preferences)) {
+            throw new DatabaseException("Given column, {$column}, is not a valid column", $query, $params);
+        }
+        $this->course_db->query($query,$params);
+        return $this->rowsToArray($this->course_db->rows());
 
     }
 
@@ -2666,22 +2684,23 @@ AND gc_id IN (
      * helper function to convert rows array to one dimensional array of user ids
      *
      */
-    protected function rowsToArrayUserIds($rows) {
+    protected function rowsToArray($rows) {
         $result = array();
         foreach ($rows as $row) {
-            $result[] = $row['user_id'];
+            foreach ($row as $key => $value) {
+                $result[] = $value;
+            }
         }
         return $result;
     }
 
     /*
-     * formats array of recipients to a string ie. [aphacker, aufded, bauchg] = 'aphacker','aufded','bauchg'
-     * @param array $recipients
+     * Creates the query that has the right amount of ?'s for PDO to insert array of recipients
+     * @param int $recipient_count
      */
-    private function formatRecipients(array $recipients) {
-        $formatted_recipients = implode("','",$recipients);
-        $formatted_recipients = "'{$formatted_recipients}'";
-        return $formatted_recipients;
+
+    private function createRecipientArray(int $recipient_count) {
+        return implode(', ', array_fill(0, $recipient_count,'?'));
     }
 
     /**
@@ -2691,10 +2710,10 @@ AND gc_id IN (
      */
     public function pushNotifications($notification, $recipients){
         $params = array($notification->getComponent(), $notification->getNotifyMetadata(), $notification->getNotifyContent(), $notification->getNotifySource());
-        $formatted_recipients = $this->formatRecipients($recipients);
+        $params = array_merge($params,$recipients);
+        $recipient_array = $this->createRecipientArray(count($recipients));
         $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                    SELECT ?, ?, ?, current_timestamp, ?, recipient 
-                    FROM unnest(ARRAY[{$formatted_recipients}]) recipient", $params);
+                    SELECT ?, ?, ?, current_timestamp, ?, recipient FROM unnest(ARRAY[{$recipient_array}]) recipient", $params);
 
 
     }
@@ -2705,11 +2724,12 @@ AND gc_id IN (
      * @param string $recipients
      */
     public function pushEmails(Email $email, array $recipients){
-        $parameters = array($email->getSubject(), $email->getBody());
-        $formatted_recipients = $this->formatRecipients($recipients);
+        $params = array($email->getSubject(), $email->getBody());
+        $params = array_merge($params,$recipients);
+        $recipient_array = $this->createRecipientArray(count($recipients));
         $this->submitty_db->query("
             INSERT INTO emails(recipient, subject, body, created, user_id)
-            SELECT 'BLANK_EMAIL', ?, ?, NOW(),recipient FROM unnest(ARRAY[{$formatted_recipients}]) recipient", $parameters);
+            SELECT 'BLANK_EMAIL', ?, ?, current_timestamp, recipient FROM unnest(ARRAY[{$recipient_array}]) recipient", $params);
     }
 
     /**
