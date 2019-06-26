@@ -15,6 +15,7 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
+use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\GradeSummary;
@@ -477,10 +478,8 @@ class ReportController extends AbstractController {
         if(isset($_POST["save_customization"])){
             //Handle user input (the form) being submitted
             try {
-//                $customization->processForm();
-                $customization_filehandle = fopen($customization_filename,"w");
-                fwrite($customization_filehandle,$customization->getCustomizationJSON());
-                fclose($customization_filehandle);
+
+                $customization->processForm();
 
                 // Finally, send the requester back the information
                 $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
@@ -497,7 +496,9 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
                 "customization_data_print" => print_r($customization->getCustomizationData(),true),
                 "customization_data" => $customization->getCustomizationData(),
-                "available_buckets" => $customization->getAvailableBuckets()
+                "available_buckets" => $customization->getAvailableBuckets(),
+                "used_buckets" => $customization->getUsedBuckets(),
+                'allowed_display_benchmarks' => RainbowCustomizationJSON::allowed_display_benchmarks
             ]);
 
             // TODO: For debugging only so we can see if POST changes. Remove this before PR.

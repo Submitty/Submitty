@@ -17,10 +17,10 @@ use app\libraries\GradeableType;
 class RainbowCustomization extends AbstractModel{
     /**/
     protected $core;
-    private $customization_data;
+    private $customization_data = [];
     private $has_error;
     private $error_messages;
-    private $used_buckets;
+    private $used_buckets = [];
     private $available_buckets;
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
@@ -39,16 +39,6 @@ class RainbowCustomization extends AbstractModel{
         'participation', 'note',
         'none'];
 
-    const display_benchmarks = [
-        'average',
-        'stddev',
-        'perfect',
-        'lowest_a-',
-        'lowest_b-',
-        'lowest_c-',
-        'lowest_d'
-    ];
-
 
     public function __construct(Core $main_core) {
         $this->core = $main_core;
@@ -58,12 +48,7 @@ class RainbowCustomization extends AbstractModel{
 
     public function buildCustomization(){
 
-        $json = new RainbowCustomizationJSON($this->core);
-        $json->loadFromJsonFile();
-
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
-        $this->customization_data = [];
-
         foreach (self::syllabus_buckets as $bucket){
             $this->customization_data[$bucket] = [];
         }
@@ -97,11 +82,6 @@ class RainbowCustomization extends AbstractModel{
         }
 
         //XXX: Assuming that the contents of these buckets will be lowercase
-        $this->used_buckets = [];
-
-        /* TODO: Read in used_buckets according to the customization.json if it exists and remove those from the
-         * available_buckets array.
-         */
         $this->available_buckets = array_diff(self::syllabus_buckets,$this->used_buckets);
     }
 
@@ -124,12 +104,32 @@ class RainbowCustomization extends AbstractModel{
         return json_encode($json_data);
     }
 
+    // This function handles processing the incoming post data
     public function processForm(){
-        $this->has_error = "true";
-        foreach($_POST as $field => $value){
-            $this->error_messages[] = "$field: $value";
+
+        // Get a new customization file
+        $json = new RainbowCustomizationJSON($this->core);
+
+        $form_json = (object)$_POST['customization'];
+
+        if(isset($form_json->display_benchmark))
+        {
+            foreach($form_json->display_benchmark as $benchmark)
+            {
+                $json->addDisplayBenchmarks($benchmark);
+            }
         }
-        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
+
+        // Write to customization file
+        $json->saveToJsonFile();
+
+        print("");
+
+//        $this->has_error = "true";
+//        foreach($_POST as $field => $value){
+//            $this->error_messages[] = "$field: $value";
+//        }
+//        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
     }
 
     public function error(){

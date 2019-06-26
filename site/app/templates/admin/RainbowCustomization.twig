@@ -84,10 +84,22 @@
 
     //This function constructs a JSON representation of all the form input
     function buildJSON(){
-        //TODO: Finish implementation
+
+        // Collect display benchmarks
+        var display_benchmarks = [];
+
+        $.each($("input[name='display_benchmarks']:checked"), function(){
+            display_benchmarks.push($(this).val());
+        });
+
+        // Build the overall json
         let ret = {
-            'save_customization': true
+            'save_customization': true,
+            'customization': {
+                'display_benchmark': display_benchmarks
+            }
         };
+
         return ret;
     }
 
@@ -136,7 +148,17 @@
 {#        Fake text box: <input type="text" name="demo_text" value="" /><br />#}
 {#        <input type="submit" name="generate_json2" value="Submit" onclick="ExtractBuckets();"/>#}
 {#    </form>#}
+
     <div id="list_wrapper">
+        <div id="display_benchmarks">
+            <h3>Display benchmarks</h3>
+            {% for benchmark in allowed_display_benchmarks %}
+                <p>
+                    <input type="checkbox" id="display_benchmarks_{{ benchmark }}" name="display_benchmarks" value="{{ benchmark }}">
+                    <label for="display_benchmarks_{{ benchmark }}">{{ benchmark }}</label>
+                </p>
+            {% endfor %}
+        </div>
         <div style="width:45%;float:left;" id="buckets_used">
             <h3>Assigned Buckets</h3>
             <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
