@@ -161,13 +161,21 @@ class AdminGradeableController extends AbstractController {
 
         // Construct a list of rotating gradeables
         $rotating_gradeables = [];
-        foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
+        foreach ($this->core->getQueries()->getGradeablesRotatingGraderHistory($gradeable->getId()) as $row) {
             $gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
 
             // Use the keys to remove duplicates
             $rotating_gradeables[$row['g_id']] = 1;
         }
         $rotating_gradeables = array_keys($rotating_gradeables);
+
+        // The current gradeable will always load its grader history,
+        // but if it is grade by registration it should not be in $rotating_gradeables array
+        if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
+            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            unset($rotating_gradeables[$current_g_id_key]);
+            $rotating_gradeables = array_values($rotating_gradeables);
+        }
 
         // Get some global configuration data
         $num_rotating_sections = $this->core->getQueries()->getNumberRotatingSections();
@@ -639,11 +647,12 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
-        if (!isset($details['graders'])) {
-            throw new \InvalidArgumentException('Missing "graders" parameter');
+        $new_graders = array();
+        if (isset($details['graders'])) {
+            $new_graders = $details['graders'];
         }
 
-        $gradeable->setRotatingGraderSections($details['graders']);
+        $gradeable->setRotatingGraderSections($new_graders);
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
@@ -676,13 +685,13 @@ class AdminGradeableController extends AbstractController {
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grade_by_registration' => true,
+            'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
             'min_grading_group' => 1,
         ];
 
         $template_property_names = [
             'min_grading_group',
-            'grade_by_registration',
+            'grader_assignment_method',
             'ta_instructions',
             'autograding_config_path',
             'student_view',
@@ -709,7 +718,7 @@ class AdminGradeableController extends AbstractController {
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
-                'grade_by_registration' => true,
+                'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
@@ -891,7 +900,6 @@ class AdminGradeableController extends AbstractController {
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
-            'grade_by_registration',
             'ta_grading',
             'scanned_exam',
             'student_view',
@@ -908,7 +916,8 @@ class AdminGradeableController extends AbstractController {
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
-            'precision'
+            'precision',
+            'grader_assignment_method'
         ];
 
         // Date properties all need to be set at once
@@ -969,7 +978,6 @@ class AdminGradeableController extends AbstractController {
                 $errors[$prop] = $e->getMessage();
             }
         }
-
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
         if ($date_set) {

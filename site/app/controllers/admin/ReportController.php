@@ -16,6 +16,7 @@ use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class ReportController
@@ -38,8 +39,82 @@ class ReportController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/reports")
+     */
     public function showReportPage() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+    }
+
+    /**
+     * Generates grade summary files for every user
+     *
+     * @Route("/{_semester}/{_course}/reports/summaries")
+     */
+    public function generateGradeSummaries() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+        $g_sort_keys = [
+            'type',
+            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'user_id',
+        ];
+
+        // Generate the reports
+        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
+            $this->saveUserToFile($base_path, $a, $b, $c);
+            return null;
+        });
+        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+    }
+
+    /**
+     * Generates and offers download of CSV grade report
+     *
+     * @Route("/{_semester}/{_course}/reports/csv")
+     */
+    public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $g_sort_keys = [
+            'syllabus_bucket',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'registration_section',
+            'user_id',
+        ];
+
+        // Generate the reports
+        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
+            return $this->generateCSVRow($a, $b, $c);
+        });
+
+        // Concatenate the CSV
+        $csv = '';
+        if (count($rows) > 0) {
+            // Header row
+            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
+            // Content rows
+            foreach ($rows as $row) {
+                $csv .= implode(',', $row) . PHP_EOL;
+            }
+        }
+        //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
+        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
     /**
@@ -172,36 +247,6 @@ class ReportController extends AbstractController {
         return $results;
     }
 
-    /** Generates and offers download of CSV grade report */
-    public function generateCSVReport() {
-        $g_sort_keys = [
-            'syllabus_bucket',
-            'g_id',
-        ];
-        $gg_sort_keys = [
-            'registration_section',
-            'user_id',
-        ];
-
-        // Generate the reports
-        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
-            return $this->generateCSVRow($a, $b, $c);
-        });
-
-        // Concatenate the CSV
-        $csv = '';
-        if (count($rows) > 0) {
-            // Header row
-            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
-            // Content rows
-            foreach ($rows as $row) {
-                $csv .= implode(',', $row) . PHP_EOL;
-            }
-        }
-        //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
-        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
-    }
-
     /**
      * Generates a CSV row for a user
      * @param User $user The user the grades are for
@@ -234,27 +279,6 @@ class ReportController extends AbstractController {
             }
         }
         return $row;
-    }
-
-    /** Generates grade summary files for every user */
-    public function generateGradeSummaries() {
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
-        $g_sort_keys = [
-            'type',
-            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
-            'g_id',
-        ];
-        $gg_sort_keys = [
-            'user_id',
-        ];
-
-        // Generate the reports
-        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
-            $this->saveUserToFile($base_path, $a, $b, $c);
-            return null;
-        });
-        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
     /**

@@ -42,7 +42,6 @@ class AdminController extends AbstractController {
                 $controller = new AdminGradeableController($this->core);
                 break;
             case 'reports':
-                $this->core->getOutput()->addBreadcrumb('Grade Reports');
                 $controller = new ReportController($this->core);
                 break;
             case 'plagiarism':
