@@ -1458,6 +1458,12 @@ class SubmissionController extends AbstractController {
           }
         }
 
+        Logger::logAccess(
+            $this->core->getUser()->getId(),
+            $_COOKIE['submitty_token'],
+            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+        );
+
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
         }

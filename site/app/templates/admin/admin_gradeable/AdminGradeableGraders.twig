@@ -47,12 +47,15 @@ What is the lowest privileged user group that can grade this?
         <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
         <br />
     </legend>
-    <input type="radio" name="grade_by_registration" value="true" id="registration_section"
-        {{ (gradeable.isGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
+	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
+        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> All Access Grading
+	
+    <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
+        {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> Registration Section
 
-    <input type='radio' name="grade_by_registration" value="false" id="rotating_section"
-        {{ gradeable.isGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
-
+    <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
+        {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> Rotating Section
+		
     <div id="rotating_data">
         {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
             <br />
@@ -149,11 +152,9 @@ What is the lowest privileged user group that can grade this?
 
     function onSectionTypeChange() {
         if($('#rotating_section').is(':checked')) {
-            // $('#rotating_data').show();
             disableElementChildren('#rotating_data', false);
         }
         else {
-            // $('#rotating_data').hide();
             disableElementChildren('#rotating_data', true);
         }
     }
@@ -183,7 +184,7 @@ What is the lowest privileged user group that can grade this?
     $(document).ready(function() {
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
-        $('[name="grade_by_registration"]').change(onSectionTypeChange);
+        $('[name="grader_assignment_method"]').change(onSectionTypeChange);
 
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();
