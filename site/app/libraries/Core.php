@@ -340,7 +340,7 @@ class Core {
 
     /**
      * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
-     * a user id that matches the api key, and returning the user_id.
+     * a user id that matches the api key, and let the core load the user.
      *
      * @param string $api_key
      *
