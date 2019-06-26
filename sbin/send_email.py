@@ -151,7 +151,7 @@ def send_email():
     db = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
-    if !EMAIL_ENABLED or len(queued_emails) == 0:
+    if not EMAIL_ENABLED or len(queued_emails) == 0:
         return
 
     success_count = 0
