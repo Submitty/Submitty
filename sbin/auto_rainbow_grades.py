@@ -1,6 +1,8 @@
 """
 This script will automatically setup and run rainbow grades given a semester, course,
 and instructor.
+
+usage: python3 auto_rainbow_grades.py <semester> <course> <instructor username>
 """
 
 # Imports
@@ -12,7 +14,7 @@ import pwd
 # Constants
 RAINBOW_GRADES_PATH = '/usr/local/submitty/GIT_CHECKOUT/RainbowGrades'
 COURSES_PATH = '/var/local/submitty/courses'
-PERMISSIONS = 0o640       # Linux style octal file permissions for newly generated files
+PERMISSIONS = 0o754       # Linux style octal file permissions for newly generated files
 GROUP = 'sample_tas_www'  # Group to get ownership of newly copied/generated files
 
 # Verify correct number of command line arguments

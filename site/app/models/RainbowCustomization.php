@@ -7,6 +7,13 @@ use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 
+/**
+ * Class RainbowCustomization
+ * @package app\models
+ *
+ * This class is a RainbowGrades Customization.  It may contain the data found in customization.json but it also
+ * contains additional data that is used by the web user interface to aid in generation/customization.
+ */
 class RainbowCustomization extends AbstractModel{
     /**/
     protected $core;
@@ -50,6 +57,10 @@ class RainbowCustomization extends AbstractModel{
     }
 
     public function buildCustomization(){
+
+        $json = new RainbowCustomizationJSON($this->core);
+        $json->loadFromJsonFile();
+
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
         $this->customization_data = [];
 
