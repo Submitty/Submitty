@@ -104,6 +104,9 @@ $(document).ready(function () {
             saveGraders();
             return;
         }
+        if ($('#all_access').is(':checked')) {
+            saveGraders();
+        }
         // Don't save if it we're ignoring it
         if ($(this).hasClass('ignore')) {
             return;
@@ -352,13 +355,21 @@ function serializeGraders() {
 
     $('#grader_assignment').find('input').each(function () {
         let parts = this.name.split('_');
+        // Ignore if we aren't at the right access level
+        let level = parts[0]=='grader'? parts[1].substr(1) : parts[0].substr(1);
+        if (level > minLevel) {
+            if ($('#all_access').is(':checked')) {
+                $(this).prop('checked', false);
+            }
+            return;
+        }
+        //check all boxes with right access level for all access
+        if ($('#all_access').is(':checked')) {
+            $(this).prop('checked', true);
+        }
 
         // Ignore everything but checkboxes ('grader' prefix)
         if (parts[0] !== 'grader') return;
-
-        // Ignore if we aren't at the right access level
-        let level = parts[1].substr(1);
-        if (level > minLevel) return;
 
         if ($(this).is(':checked')) {
             if (!(parts[3] in graders)) {
