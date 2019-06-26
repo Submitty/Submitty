@@ -40,7 +40,14 @@ class TestMigrateEnvironmentDown(unittest.TestCase):
 
         create_migration(self.database, self.dir, environment, '01_test1.py')
         create_migration(self.database, self.dir, environment, '02_test1.py')
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 0)
         self.assertEqual("""Running down migrations for system...  02_test1
 DONE
 """, sys.stdout.getvalue())
@@ -64,7 +71,14 @@ DONE
 
         create_migration(self.database, self.dir, environment, '01_test2.py')
         create_migration(self.database, self.dir, environment, '02_test2.py')
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 0)
         self.assertEqual("""Running down migrations for master...  02_test2
 DONE
 """, sys.stdout.getvalue())
@@ -90,7 +104,14 @@ DONE
 
         create_migration(self.database, self.dir, environment, '01_test3.py')
         create_migration(self.database, self.dir, environment, '02_test3.py')
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 0)
         self.assertEqual("""Running down migrations for f18.csci1100...  02_test3
 DONE
 """, sys.stdout.getvalue())
@@ -133,7 +154,14 @@ def down(*_):
         create_migration(self.database, self.dir, environment, '02_test4.py', 1, False)
         create_migration(self.database, self.dir, environment, '03_test4.py')
         create_migration(self.database, self.dir, environment, '04_test4.py', 0)
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 1)
         self.assertEqual("""Running down migrations for master...
 Removing 1 missing migrations:
   02_test4
@@ -142,7 +170,8 @@ Removing 1 missing migrations:
 DONE
 
 """, sys.stdout.getvalue())
-        self.assertFalse(missing_migration.exists())
+        self.assertTrue(missing_migration.exists())
+        self.assertEqual(list(missing_migrations)[0], missing_migration)
         self.assertTrue(Path(install_path, 'test.txt').exists())
         rows = self.database.session.query(self.database.migration_table).all()
         expected_rows = ['01_test4', '03_test4', '04_test4']
@@ -171,7 +200,14 @@ DONE
         create_migration(self.database, self.dir, environment, '02_test6.py', 1, False)
         create_migration(self.database, self.dir, environment, '03_test6.py')
         create_migration(self.database, self.dir, environment, '04_test6.py', 0)
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 1)
         self.assertEqual("""Running down migrations for master...
 Removing 1 missing migrations:
   02_test6
@@ -199,7 +235,14 @@ DONE
         args.config = None
 
         create_migration(self.database, self.dir, environment, '01_test5.py')
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 0)
         self.assertEqual("""Running down migrations for master...  Cannot rollback 01_test5
 DONE
 """, sys.stdout.getvalue())
@@ -224,7 +267,14 @@ DONE
 
         create_migration(self.database, self.dir, environment, '01_test1.py')
         create_migration(self.database, self.dir, environment, '02_test1.py')
-        migrator.main.migrate_environment(self.database, environment, args)
+        missing_migrations = set()
+        migrator.main.migrate_environment(
+            self.database,
+            environment,
+            args,
+            missing_migrations
+        )
+        self.assertEqual(len(missing_migrations), 0)
         self.assertEqual("""Running down migrations for system...  02_test1 (FAKE)
 DONE
 """, sys.stdout.getvalue())
