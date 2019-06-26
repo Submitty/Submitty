@@ -4,48 +4,9 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\controllers\forum\ForumController;
+use app\libraries\ForumUtils;
 
 class ConfigurationController extends AbstractController {
-
-    private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
-        $rows = $this->core->getQueries()->getCategories();
-        if(is_array($inputCategoriesIds)) {
-            if(count($inputCategoriesIds) < 1) {
-                return false;
-            }
-            foreach ($inputCategoriesIds as $category_id) {
-                $match_found = false;
-                foreach($rows as $index => $values){
-                    if($values["category_id"] === $category_id) {
-                        $match_found = true;
-                        break;
-                    }
-                }
-                if(!$match_found) {
-                    return false;
-                }
-            }
-        }
-        if(is_array($inputCategoriesName)) {
-            if(count($inputCategoriesName) < 1) {
-                return false;
-            }
-            foreach ($inputCategoriesName as $category_name) {
-                $match_found = false;
-                foreach($rows as $index => $values){
-                    if($values["category_desc"] === $category_name) {
-                        $match_found = true;
-                        break;
-                    }
-                }
-                if(!$match_found) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
 
     public function run() {
         switch ($_REQUEST['action']) {
@@ -156,10 +117,10 @@ class ConfigurationController extends AbstractController {
         if($name === 'forum_enabled') {
             if($entry == 1){
                 if($this->core->getAccess()->canI("forum.modify_category")) {
-                    $categories = ["General Questions 2", "Homework Help 2", "Quizzes 2" , "Tests 2"];
+                    $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
 
                     foreach ($categories as $category) {
-                        if (!$this->isValidCategories(-1, array($category))) {
+                        if (ForumUtils::isValidCategories(-1, array($category))) {
                             $this->core->getQueries()->addNewCategory($category);
                         }
                     }
