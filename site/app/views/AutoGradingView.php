@@ -169,12 +169,21 @@ class AutoGradingView extends AbstractView {
                         "src" => $this->autoGetImageSrc($actual_image),
                     ];
                 } else if ($diff_viewer->hasDisplayActual()) {
-                    $check["actual"] = [
-                        "type" => "text",
-                        "title" => $actual_title,
-                        "show_popup" => $this->autoShouldDisplayPopup($actual_display),
-                        "src" => $actual_display,
-                    ];
+                    if($autocheck->isDisplayAsSequenceDiagram()){
+                        $check["actual"] = [
+                            "type" => "sequence_diagram",
+                            "title" => $actual_title,
+                            "show_popup" => $this->autoShouldDisplayPopup($actual_display),
+                            "src" => file_get_contents($diff_viewer->getActualFilename())
+                        ];
+                    }else{
+                        $check["actual"] = [
+                            "type" => "text",
+                            "title" => $actual_title,
+                            "show_popup" => $this->autoShouldDisplayPopup($actual_display),
+                            "src" => $actual_display,
+                        ];
+                    }
                 }
 
                 $expected_image = $diff_viewer->getExpectedImageFilename();
