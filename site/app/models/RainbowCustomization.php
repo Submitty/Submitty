@@ -115,15 +115,26 @@ class RainbowCustomization extends AbstractModel{
         return $this->used_buckets;
     }
 
+    /**
+     * Get display benchmarks
+     *
+     * Get a multidimensional array that contains not only a list of usable display benchmarks but also which ones
+     * are in use (in the customization.json)
+     *
+     * @return array multidimensional array of display benchmark data
+     */
     public function getDisplayBenchmarks()
     {
+        // Get allowed benchmarks
         $displayBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
         $retArray = [];
 
+        // If json file available then collect used benchmarks from that, else get empty array
         !is_null($this->RCJSON) ?
             $usedDisplayBenchmarks = $this->RCJSON->getDisplayBenchmarks() :
             $usedDisplayBenchmarks = [];
 
+        // Add data into retArray
         foreach ($displayBenchmarks as $displayBenchmark)
         {
             in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = True : $isUsed = False;
@@ -135,6 +146,16 @@ class RainbowCustomization extends AbstractModel{
         return $retArray;
     }
 
+    /**
+     * Get section ids and labels
+     *
+     * If no customization.json file exists then this function will generate defaults
+     * by examining what sections are registered in the database.  If a file does exist then sections and labels will
+     * be read out of that.  If it turns out that new sections have been registered in the database that
+     * dont yet exist in the file, those new sections will be added with default values.
+     *
+     * @return object The object mapping section ids to labels
+     */
     public function getSectionsAndLabels()
     {
         // Get sections from db
@@ -186,6 +207,7 @@ class RainbowCustomization extends AbstractModel{
         // Get a new customization file
         $json = new RainbowCustomizationJSON($this->core);
 
+        // TODO: Figure out how to handle this as a json
         $form_json = (object)$_POST['customization'];
 
         if(isset($form_json->display_benchmark))

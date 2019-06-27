@@ -106,7 +106,7 @@ class RainbowCustomizationJSON extends AbstractModel
     }
 
     /**
-     * Loads the data from the courses rainbow grades customization.json into this php object
+     * Loads the data from the course's rainbow grades customization.json into this php object
      *
      * @throws FileReadException Failure to read the contents of the file
      * @throws MalformedDataException Failure to decode the contents of the JSON string
