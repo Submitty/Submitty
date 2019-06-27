@@ -112,7 +112,7 @@ class ConfigurationController extends AbstractController {
             $entry = nl2br($entry);
         }
         else if($name == "course_home_url") {
-            if(!filter_var($entry, FILTER_VALIDATE_URL)){
+            if(!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)){
                 return $this->core->getOutput()->renderJsonFail($entry . ' is not a valid URL');
             }
         }
