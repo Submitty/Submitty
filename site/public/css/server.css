@@ -14,7 +14,7 @@ body {
     position: relative;
 }
 :root {
-    --viewed_content: #e8f1f8;
+    --viewed_content: #e8f0f7;
 }
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
@@ -324,7 +324,7 @@ table tr.table-header {
     width: 100%;
     left: 0;
     top: 0;
-    z-index: 9999;
+    z-index: 999;
     font-size: 15px;
     font-weight: 600;
     margin-left:-1px;
@@ -597,7 +597,7 @@ table tr.table-header {
 }
 
 #alerts {
-
+    z-index: 9999;
 }
 
 #messages {
@@ -742,12 +742,11 @@ table tr.table-header {
 
 /* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #A9A9A9;
-    color: #4a4a4a;
+    background-color: #dcdcdc;
 }
 
 .deleted.active {
-    background-color: #505050;
+    background-color: #dcdcdc;
 }
 
 .new_post {
@@ -1178,10 +1177,6 @@ fieldset[disabled] .btn-primary.focus {
 .btn-primary .badge {
   color: #337ab7;
   background-color: #fff;
-}
-
-.btn-push-down {
-    margin-top: 5px
 }
 
 .panel-heading > .dropdown .dropdown-toggle {
@@ -2097,9 +2092,4 @@ end of styles used in the admin gradeable page
     background-color: #00000000;
     border: 0px;
     padding: 0px;
-}
-
-/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
-.mc > label > *:first-child {
-    display: inline;
 }

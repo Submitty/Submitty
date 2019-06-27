@@ -37,31 +37,55 @@ class TokenManager {
             ->getToken(new Sha256(), new Key($secret));
     }
 
+    public static function generateApiToken(
+        string $api_key,
+        string $issuer,
+        string $secret
+    ): Token {
+        return (new Builder())->issuedBy($issuer)
+            ->issuedAt(time())
+            ->withClaim('api_key', $api_key)
+            ->getToken(new Sha256(), new Key($secret));
+    }
+
     public static function parseSessionToken(string $token, string $issuer, string $secret): Token {
+        $token = self::parseToken($token, $issuer, $secret);
+        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
+            throw new \InvalidArgumentException('Missing claims in session token');
+        }
+        return $token;
+    }
+
+    public static function parseApiToken(string $token, string $issuer, string $secret): Token {
+        $token = self::parseToken($token, $issuer, $secret);
+        if (!$token->hasClaim('api_key')) {
+            throw new \InvalidArgumentException('Missing claims in api token');
+        }
+        return $token;
+    }
+
+    private static function parseToken(string $token, string $issuer, string $secret): Token {
         $token = (new Parser())->parse($token);
         if (!$token->verify(new Sha256(), $secret)) {
-            throw new \RuntimeException("Invalid signature for token");
+            throw new \InvalidArgumentException("Invalid signature for token");
         }
-        
+
         $headers = [
             'alg' => 'HS256',
             'typ' => 'JWT'
         ];
         foreach ($headers as $key => $value) {
             if ($token->getHeader($key) !== $value) {
-                throw new \RuntimeException("Invalid value for ${key}: ${value}");
+                throw new \InvalidArgumentException("Invalid value for ${key}: ${value}");
             }
         }
 
         $data = new ValidationData();
         $data->setIssuer($issuer);
         if (!$token->validate($data)) {
-            throw new \RuntimeException('Invalid claims in token');
+            throw new \InvalidArgumentException('Invalid claims in token');
         }
 
-        if (!$token->hasClaim('session_id') || !$token->hasClaim('expire_time') || !$token->hasClaim('sub')) {
-            throw new \RuntimeException('Missing claims in session token');
-        }
         return $token;
     }
 }

@@ -68,7 +68,7 @@
             {% if element.type == "image" %}
                 <img src="{{ element.src }}" style="border:2px solid black">
             {% elseif element.type == "text" %}
-                <div id=div_{{ index }}_{{ check_index }}>
+                <div id="div_{{ index }}_{{ check_index }}">
                     {{ element.src|raw }}
                 </div>
             {% endif %}

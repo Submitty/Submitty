@@ -9,10 +9,14 @@ import shutil
 import subprocess
 import json
 import stat
+import traceback
+import datetime
+import fcntl
 from urllib.parse import unquote
 from . import bulk_qr_split
 from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
+from . import write_to_log as logger
 
 
 class AbstractJob(ABC):
@@ -171,10 +175,10 @@ class BulkUpload(CourseJob):
     def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
         for root, dirs, files in os.walk(top_dir):
             self.add_permissions(root,root_perms)
-        for d in dirs:
-            self.add_permissions(os.path.join(root, d),dir_perms)
-        for f in files:
-            self.add_permissions(os.path.join(root, f),file_perms)
+            for d in dirs:
+                self.add_permissions(os.path.join(root, d),dir_perms)
+            for f in files:
+                self.add_permissions(os.path.join(root, f),file_perms)
 
     def run_job(self):
         semester = self.job_details['semester']
@@ -185,22 +189,34 @@ class BulkUpload(CourseJob):
         is_qr = self.job_details['is_qr']
 
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
-            print("did not pass in qr prefix or suffix")
-            sys.exit(1)
+            msg = "did not pass in qr prefix or suffix"
+            print(msg)
+            return 
 
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
             qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
-
-        script = ''
-        if is_qr:
-            script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
         else:
             if 'num' not in self.job_details:
-                print("did not pass in the number to divide " + filename + " by")
-                sys.exit(1)
+                msg = "Did not pass in the number to divide " + filename + " by"
+                print(msg)
+                return
             num  = self.job_details['num']
-            script = Path(INSTALL_DIR, 'sbin', 'bulk_upload_split.py')
+
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
+        log_file_path = os.path.join(log_path, 
+                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
+                                today.day))
+
+        pid = os.getpid()
+        log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
+        if is_qr:
+            log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
+        else:
+            log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
+        
+        logger.write_to_log(log_file_path, log_msg)
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -210,16 +226,20 @@ class BulkUpload(CourseJob):
             uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
             bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
             split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
-            root_split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf")
-        except Exception as err:
-            print("Failed while parsing args and creating paths")
-            print(err)
-            sys.exit(1)
+        except Exception:
+            msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
 
         #copy file over to correct folders
         try:
             if not os.path.exists(split_path):
-                os.makedirs(split_path)
+                #if the directory has been made by another job continue as normal
+                try:
+                    os.makedirs(split_path)
+                except Exception:
+                    pass
 
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
@@ -227,28 +247,38 @@ class BulkUpload(CourseJob):
 
             # move to copy folder
             os.chdir(split_path)
-        except Exception as err:
-            print("Failed while copying files")
-            print(err)
-            sys.exit(1)
+        except Exception:
+            msg = "Process " + str(pid) + ": Failed while copying files"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
+            return
 
         try:
             if is_qr:
-                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix])
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
             else: 
-                bulk_upload_split.main([filename, split_path, num])
+                bulk_upload_split.main([filename, split_path, num, log_file_path])
+        except Exception:
+            msg = "Failed to launch bulk_split subprocess!"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
+            return
 
+        os.chdir(split_path)
+        #if the original file has been deleted, continue as normal
+        try:
             os.remove(filename)
-            os.chdir(current_path)
-        except Exception as err:
-            print("Failed to launch bulk_split subprocess!")
-            print(err)
-            sys.exit(1)
+        except Exception:
+            pass
+
+        os.chdir(current_path)
 
         # reset permissions just in case, group needs read/write
         # access so submitty_php can view & delete pdfs when they are
         # assigned to a student and/or deleted
-        self.add_permissions_recursive(root_split_path,
+        self.add_permissions_recursive(split_path,
                                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
                                        stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
                                        stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )

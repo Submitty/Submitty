@@ -8,6 +8,7 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
@@ -57,8 +58,11 @@ class Core {
     /** @var Forum $forum */
     private $forum  = null;
 
-    /** @var Router */
+    /** @var ClassicRouter */
     private $router;
+
+    /** @var bool */
+    private $redirect = true;
 
 
     /**
@@ -91,6 +95,13 @@ class Core {
     }
 
     /**
+     * Disable all redirects for API calls.
+     */
+    public function disableRedirects() {
+        $this->redirect = false;
+    }
+
+    /**
      * Load the config details for the application. This takes in a file from the ../../../config as well as
      * then a config.json contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
@@ -113,7 +124,7 @@ class Core {
                 $this->config->loadCourseJson($course_json_path);
             }
             else{
-              $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
+                $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
                 $this->addErrorMessage($message);
             }
         }
@@ -328,6 +339,23 @@ class Core {
     }
 
     /**
+     * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
+     * a user id that matches the api key, and let the core load the user.
+     *
+     * @param string $api_key
+     *
+     * @return bool
+     */
+    public function loadApiUser(string $api_key): bool {
+        $user_id = $this->database_queries->getSubmittyUserByApiKey($api_key);
+        if ($user_id === null) {
+            return false;
+        }
+        $this->loadUser($user_id);
+        return true;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager
      */
     public function removeCurrentSession() {
@@ -372,6 +400,36 @@ class Core {
     }
 
     /**
+     * Authenticates the user against user's api key. Returns the json web token generated for the user.
+     *
+     * @return string | null
+     *
+     * @throws AuthenticationException
+     */
+    public function authenticateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                $token = (string) TokenManager::generateApiToken(
+                    $this->database_queries->getSubmittyUserApiKey($user_id),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                return $token;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return null;
+    }
+
+    /**
      * Checks the inputted $csrf_token against the one that is loaded from the session table for the particular
      * signed in user.
      *
@@ -405,10 +463,40 @@ class Core {
     }
 
     /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewUrl($parts=array()) {
+        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        return $url;
+    }
+
+    /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     * This function will add the semester and course to the beginning of the new URL by default,
+     * if you do not prepend this part (e.g. for authentication-related URLs), please set
+     * $prepend_course_info to false.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewCourseUrl($parts=array()) {
+        array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        return $this->buildNewUrl($parts);
+    }
+
+    /**
      * @param     $url
      * @param int $status_code
      */
     public function redirect($url, $status_code = 302) {
+        if (!$this->redirect) {
+            return;
+        }
         header('Location: ' . $url, true, $status_code);
         die();
     }
@@ -532,11 +620,11 @@ class Core {
         }
     }
 
-    public function setRouter(Router $router) {
+    public function setRouter(ClassicRouter $router) {
         $this->router = $router;
     }
 
-    public function getRouter(): Router {
+    public function getRouter(): ClassicRouter {
         return $this->router;
     }
 

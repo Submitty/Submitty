@@ -155,6 +155,41 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
+    public function getTestcaseMessages()
+    {
+        $this->loadTestcases();
+
+        $output = array();
+
+        // If results were found then append message arrays to output array
+        // where key is the testcase_label
+        if(!is_null($this->graded_testcases))
+        {
+            foreach ($this->graded_testcases as $graded_testcase)
+            {
+                $testcase_label = $graded_testcase->getTestcase()->getTestcaseLabel();
+
+                // If a testcase_label exists then get the auto grading messages
+                if($testcase_label != "")
+                {
+                    $output[$testcase_label] = array();
+
+                    $autochecks = $graded_testcase->getAutochecks();
+
+                    foreach ($autochecks as $autocheck)
+                    {
+                      foreach ($autocheck->getMessages() as $msg)
+                        {
+                        array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $output;
+    }
+
     /**
      * Loads AutoGradedTestcase instances for all testcases in this Gradeable from the disk
      */

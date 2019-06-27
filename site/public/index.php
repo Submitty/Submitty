@@ -7,7 +7,10 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
-use app\libraries\Router;
+use app\libraries\routers\ClassicRouter;
+
+use Doctrine\Common\Annotations\AnnotationRegistry;
+use Symfony\Component\HttpFoundation\Request;
 
 /*
  * The user's umask is ignored for the user running php, so we need
@@ -25,10 +28,13 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-require_once(__DIR__.'/../vendor/autoload.php');
+$loader = require_once(__DIR__.'/../vendor/autoload.php');
+AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+
+$request = Request::createFromGlobals();
 
 $core = new Core();
-$core->setRouter(new Router($_GET['url'] ?? ''));
+$core->setRouter(new ClassicRouter($_GET['url'] ?? ''));
 
 /**
  * Register custom expection and error handlers that will get run anytime our application
@@ -65,10 +71,14 @@ register_shutdown_function("error_handler");
 
 $semester = '';
 $course = '';
+$is_api = False;
 
 if ($core->getRouter()->hasNext()) {
     $first = $core->getRouter()->getNext();
-    if (in_array($first, ['authentication', 'home'])) {
+    if ($first === 'api') {
+        $is_api = True;
+    }
+    elseif (in_array($first, ['authentication', 'home'])) {
         $_REQUEST['component'] = $first;
     }
     else {
@@ -123,7 +133,7 @@ if($core->getConfig()->getInstitutionName() !== ""){
 }
 $core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
 if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildUrl(), $core->getConfig()->getCourseHomeUrl());
+    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildNewCourseUrl(), $core->getConfig()->getCourseHomeUrl());
 }
 
 date_default_timezone_set($core->getConfig()->getTimezone()->getName());
@@ -170,7 +180,7 @@ if (isset($_COOKIE[$cookie_key])) {
             Utils::setCookie($cookie_key, "", time() - 3600);
         }
         else {
-            if ($expire_time > 0 || $reset_cookie) {
+            if ($expire_time > 0) {
                 Utils::setCookie(
                     $cookie_key,
                     (string) TokenManager::generateSessionToken(
@@ -184,9 +194,29 @@ if (isset($_COOKIE[$cookie_key])) {
             }
         }
     }
-    catch (Exception $exc) {
+    catch (\InvalidArgumentException $exc) {
         // Invalid cookie data, delete it
         Utils::setCookie($cookie_key, "", time() - 3600);
+    }
+}
+
+// check if the user has a valid jwt in the header
+$api_logged_in = false;
+$jwt = $request->headers->get("authorization");
+if (!empty($jwt)) {
+    try {
+        $token = TokenManager::parseApiToken(
+            $request->headers->get("authorization"),
+            $core->getConfig()->getBaseUrl(),
+            $core->getConfig()->getSecretSession()
+        );
+        $api_key = $token->getClaim('api_key');
+        $api_logged_in = $core->loadApiUser($api_key);
+    }
+    catch (\InvalidArgumentException $exc) {
+        $core->getOutput()->renderJsonFail("Invalid token.");
+        $core->getOutput()->displayOutput();
+        return;
     }
 }
 
@@ -228,32 +258,8 @@ else if ($core->getConfig()->isCourseLoaded()
     $_REQUEST['page'] = 'no_access';
 }
 
-// Log the user action if they were logging in, logging out, or uploading something
-if ($core->getUser() !== null) {
-    if (empty($_COOKIE['submitty_token'])) {
-        Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
-    }
-    $log = false;
-    $action = "";
-    if ($_REQUEST['component'] === "authentication" && $_REQUEST['page'] === "logout") {
-        $log = true;
-        $action = "logout";
-    }
-    else if (in_array($_REQUEST['component'], array('student', 'submission')) && $_REQUEST['page'] === "submission" &&
-        $_REQUEST['action'] === "upload") {
-        $log = true;
-        $action = "submission:{$_REQUEST['gradeable_id']}";
-    }
-    else if (isset($_REQUEST['success_login']) && $_REQUEST['success_login'] === "true") {
-        $log = true;
-        $action = "login";
-    }
-    if ($log && $action !== "") {
-        if ($core->getConfig()->isCourseLoaded()) {
-            $action = $core->getConfig()->getSemester().':'.$core->getConfig()->getCourse().':'.$action;
-        }
-        Logger::logAccess($core->getUser()->getId(), $_COOKIE['submitty_token'], $action);
-    }
+if (empty($_COOKIE['submitty_token'])) {
+    Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
 if(!$core->getConfig()->isCourseLoaded()) {
@@ -282,55 +288,59 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 /********************************************
 * END LOGIN CODE
 *********************************************/
-switch($_REQUEST['component']) {
-    case 'admin':
-        $control = new app\controllers\AdminController($core);
-        $control->run();
-        break;
-    case 'authentication':
-        $control = new app\controllers\AuthenticationController($core, $logged_in);
-        $control->run();
-        break;
-    case 'grading':
-        $control = new app\controllers\GradingController($core);
-        $control->run();
-        break;
-    case 'home':
-        $control = new app\controllers\HomePageController($core);
-        $control->run();
-        break;
-    case 'misc':
-        $control = new app\controllers\MiscController($core);
-        $control->run();
-        break;
-    case 'student':
-        $control = new app\controllers\StudentController($core);
-        $control->run();
-        break;
-    case 'submission':
-        $control = new app\controllers\StudentController($core);
-        $control->run();
-        break;
-    case 'navigation':
-        $control = new app\controllers\NavigationController($core);
-        $control->run();
-        break;
-    case 'forum':
-        $control = new app\controllers\forum\ForumController($core);
-        $control->run();
-        break;
-    case 'notification_settings':
-        $control = new app\controllers\NotificationSettings($core);
-        $control->run();
-        break;
-    case 'pdf':
-        $control = new app\controllers\pdf\PDFController($core);
-        $control->run();
-        break;
-    default:
-        $control = new app\controllers\AuthenticationController($core, $logged_in);
-        $control->run();
-        break;
+
+$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
+
+if ($is_api) {
+    $core->getOutput()->disableRender();
+    $core->disableRedirects();
+
+    $router = new app\libraries\routers\WebRouter($request, $core, $api_logged_in, true);
+    $router->run();
+}
+elseif (!$supported_by_new_router) {
+    switch($_REQUEST['component']) {
+        case 'admin':
+            $control = new app\controllers\AdminController($core);
+            $control->run();
+            break;
+        case 'grading':
+            $control = new app\controllers\GradingController($core);
+            $control->run();
+            break;
+        case 'misc':
+            $control = new app\controllers\MiscController($core);
+            $control->run();
+            break;
+        case 'student':
+            $control = new app\controllers\StudentController($core);
+            $control->run();
+            break;
+        case 'submission':
+            $control = new app\controllers\StudentController($core);
+            $control->run();
+            break;
+        case 'forum':
+            $control = new app\controllers\forum\ForumController($core);
+            $control->run();
+            break;
+        case 'notification':
+            $control = new app\controllers\NotificationController($core);
+            $control->run();
+            break;
+        case 'pdf':
+            $control = new app\controllers\pdf\PDFController($core);
+            $control->run();
+            break;
+        default:
+            $control = new app\controllers\AuthenticationController($core, $logged_in);
+            $control->run();
+            break;
+    }
+}
+else {
+    $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
+    $router->run();
 }
 
 $core->getOutput()->displayOutput();
