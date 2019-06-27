@@ -2650,21 +2650,24 @@ AND gc_id IN (
         return $this->rowsToArray($this->course_db->rows());
     }
 
-    public function getAllPreferences() {
-        $query = "SELECT COLUMN_NAME
-                  FROM INFORMATION_SCHEMA.COLUMNS
-                  WHERE TABLE_NAME = 'notification_settings' AND COLUMN_NAME <> 'user_id'";
-        $this->course_db->query($query);
-        return $this->rowsToArray($this->course_db->rows());
-    }
-
     /**
      * Get all users with a preference
      * @param string $column
      * @return array
      */
     public function getAllUsersWithPreference(string $column) {
-        $preferences = $this->getAllPreferences();
+        $preferences = [
+            'merge_threads',
+            'all_new_threads',
+            'all_new_posts',
+            'all_modifications_forum',
+            'reply_in_post_thread',
+            'merge_threads_email',
+            'all_new_threads_email',
+            'all_new_posts_email',
+            'all_modifications_forum_email',
+            'reply_in_post_thread_email'
+        ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
         if (!in_array($column,$preferences)) {

@@ -64,14 +64,11 @@ class Core {
     /** @var ClassicRouter */
     private $router;
 
-<<<<<<< HEAD
     /** @var NotificationFactory */
     private $notification_factory;
-=======
     /** @var bool */
     private $redirect = true;
 
->>>>>>> 6d670ca6d6f08bf1c2348efdedb8ee759ac31e7f
 
     /**
      * Core constructor.
@@ -87,14 +84,14 @@ class Core {
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
-    
+
         // initialize our alert types if one of them doesn't exist
         foreach (array('error', 'notice', 'success') as $key) {
             if(!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
         }
-    
+
         // we cast each of our controller markers to lower to normalize our controller switches
         // and prevent any unexpected page failures for users in entering a capitalized controller
         foreach (array('component', 'page', 'action') as $key) {
@@ -561,7 +558,7 @@ class Core {
         }
         return $semester;
     }
-    
+
     /**
      * @return Output
      */
