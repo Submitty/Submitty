@@ -321,6 +321,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
+            "categories" => $categories,
             "filterFormData" => $filterFormData,
             "button_params" => $button_params,
             "thread_exists" => $threadExists,
@@ -881,14 +882,14 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addInternalCss('forum.css');
 
         $categories = "";
+
         $category_colors;
 
-        if($this->core->getUser()->accessGrading()){
-            $categories = $this->core->getQueries()->getCategories();
+        $categories = $this->core->getQueries()->getCategories();
 
-            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-            array_unshift($categories, $dummy_category);
-        }
+        $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+        array_unshift($categories, $dummy_category);
+
 
         $buttons = array(
             array(

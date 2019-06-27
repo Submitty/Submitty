@@ -4,7 +4,6 @@
 
 import os
 import PyPDF2
-import sys
 import traceback
 from PyPDF2 import PdfFileWriter
 from . import write_to_log as logger
@@ -12,9 +11,8 @@ from . import write_to_log as logger
 try:
     from pdf2image import convert_from_bytes
 except ImportError:
-    print("One or more required python modules not installed correctly")
     traceback.print_exc()
-    sys.exit(1)
+    raise ImportError("One or more required python modules not installed correctly")
 
 
 def main(args):
@@ -24,7 +22,9 @@ def main(args):
     num = int(args[2])
     log_file_path = args[3]
 
+    json_file = os.path.join(split_path, "decoded.json")
     log_msg = "Process " + str(os.getpid()) + ": "
+
     try:
         # check that all pages are divisible
         pdfFileObj = open(filename, 'rb')
@@ -34,13 +34,16 @@ def main(args):
             msg = filename + " not divisible by " + str(num)
             print(msg)
             logger.write_to_log(log_file_path, log_msg + msg)
-            sys.exit(1)
+            return
 
         # recalculate the total # of pages for each file
         pdfFileObj = open(filename, 'rb')
         pdfReader = PyPDF2.PdfFileReader(pdfFileObj)
         total_pages = pdfReader.numPages
         max_length = len(str(total_pages - num))
+
+        output = {"filename": filename, "is_qr": False, "page_count": num}
+        logger.write_to_json(json_file, output)
 
         i = 0
         os.chdir(split_path)

@@ -348,6 +348,7 @@ class HomeworkView extends AbstractView {
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
         $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
+        $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
         // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
@@ -387,6 +388,7 @@ class HomeworkView extends AbstractView {
             'old_files' => $old_files,
             'inputs' => $input_data,
             'notebook' => $notebook_data,
+            'testcase_messages' => $testcase_messages,
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage()
@@ -404,14 +406,12 @@ class HomeworkView extends AbstractView {
         $cover_images = [];
         $count = 1;
         $count_array = array();
-        $use_qr_codes = false;
-        $qr_file = [];
+        $bulk_upload_data = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $qr_file +=  FileUtils::readJsonFile($details['path']);
-                    $use_qr_codes = true;
+                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -476,18 +476,33 @@ class HomeworkView extends AbstractView {
                 $count++;
             }
         }
-        if($use_qr_codes){
-            for ($i = 0; $i < count($files); $i++) {
-                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
-                    continue;
-                $data = $qr_file[$files[$i]['filename_full']];
-                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
-                $files[$i] += ['page_count' => $data['page_count'],
-                               'id' => $data['id'],
-                               'valid' => $is_valid
-                              ];
+
+        for ($i = 0; $i < count($files); $i++) {
+            if($bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+                continue;
+            }else if($bulk_upload_data['is_qr']){
+                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
+
+            $page_count = 0;
+            $is_valid = true;
+            $id = '';
+
+            if($bulk_upload_data['is_qr']){
+                $id = $data['id'];
+                $is_valid = $this->core->getQueries()->getUserById($id);
+                $page_count = $data['page_count'];
+            }else{
+                $is_valid = true;
+                $id = '';
+                $page_count = $bulk_upload_data['page_count'];
+            }
+
+            $files[$i] += ['page_count' => $page_count, 
+                           'id' => $id, 
+                           'valid' => $is_valid ];
         }
+
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -499,7 +514,6 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes
         ]);
     }
 

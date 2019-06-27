@@ -238,7 +238,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-exclamation-triangle"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                    "href" => $this->core->buildNewCourseUrl(['reports']),
                     "title" => "Grade Reports",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-reports",

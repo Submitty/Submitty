@@ -191,7 +191,7 @@ class BulkUpload(CourseJob):
         if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
             msg = "did not pass in qr prefix or suffix"
             print(msg)
-            sys.exit(1)
+            return 
 
         if is_qr:
             qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
@@ -200,7 +200,7 @@ class BulkUpload(CourseJob):
             if 'num' not in self.job_details:
                 msg = "Did not pass in the number to divide " + filename + " by"
                 print(msg)
-                sys.exit(1)
+                return
             num  = self.job_details['num']
 
         today = datetime.datetime.now()
@@ -216,13 +216,7 @@ class BulkUpload(CourseJob):
         else:
             log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
         
-        try:
-            logger.write_to_log(log_file_path, log_msg)
-        except Exception as err:
-            print(err)
-            traceback.print_exc()
-            sys.exit(1)
-
+        logger.write_to_log(log_file_path, log_msg)
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -237,12 +231,6 @@ class BulkUpload(CourseJob):
             print(msg)
             traceback.print_exc()
             logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
-        except Exception as err:
-            msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
-            print(msg)
-            traceback.print_exc()
-            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
-            sys.exit(1)
 
         #copy file over to correct folders
         try:
@@ -264,27 +252,28 @@ class BulkUpload(CourseJob):
             print(msg)
             traceback.print_exc()
             logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
-            sys.exit(1)
+            return
 
         try:
             if is_qr:
                 bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
             else: 
                 bulk_upload_split.main([filename, split_path, num, log_file_path])
-
-            os.chdir(split_path)
-            #if the original file has been deleted, continue as normal
-            try:
-                os.remove(filename)
-            except Exception:
-                pass
-
-            os.chdir(current_path)
         except Exception:
             msg = "Failed to launch bulk_split subprocess!"
             print(msg)
             traceback.print_exc()
-            sys.exit(1)
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
+            return
+
+        os.chdir(split_path)
+        #if the original file has been deleted, continue as normal
+        try:
+            os.remove(filename)
+        except Exception:
+            pass
+
+        os.chdir(current_path)
 
         # reset permissions just in case, group needs read/write
         # access so submitty_php can view & delete pdfs when they are
