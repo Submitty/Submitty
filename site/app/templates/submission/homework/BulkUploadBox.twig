@@ -45,7 +45,7 @@
 			            </a>
                     </td>
                     <td id="input_area">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                         <div id="users_{{ loop.index }}">
                             <input type="text" id="bulk_user_id_{{ loop.index }}" aria-label = "Enter User ID to assign" 
                                 value ="{{ file["id"] }}"
@@ -91,7 +91,7 @@
 <script type="text/javascript">
     var path_list = {{ count_array|json_encode|raw }};
     var num_submissions = {{ files|length }};
-    var CSRF = "{{ core.getCsrfToken() }}";
+    var CSRF = "{{ csrf_token }}";
     var g_id = "{{ gradeable_id }}";
     var max_team_size = {{ max_team_size }};
     //team_assignment may either be 1 or not given so convert to a string to handle either case
