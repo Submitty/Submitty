@@ -958,16 +958,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.3.1",
+            "version": "v4.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "9b31cd24f6ad2cebde6845f6daa9c6d69efe2465"
+                "reference": "2ef809021d72071c611b218c47a3bf3b17b7325e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/9b31cd24f6ad2cebde6845f6daa9c6d69efe2465",
-                "reference": "9b31cd24f6ad2cebde6845f6daa9c6d69efe2465",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/2ef809021d72071c611b218c47a3bf3b17b7325e",
+                "reference": "2ef809021d72071c611b218c47a3bf3b17b7325e",
                 "shasum": ""
             },
             "require": {
@@ -1030,7 +1030,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-06-05T09:16:20+00:00"
+            "time": "2019-06-26T13:54:39+00:00"
         },
         {
             "name": "twig/twig",
