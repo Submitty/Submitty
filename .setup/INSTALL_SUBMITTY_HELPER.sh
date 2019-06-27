@@ -501,8 +501,6 @@ cat <<< "$(jq ".most_recent_git_tag = \"${most_recent_git_tag}\"" < ${tmp_versio
 # JAR SETUP
 #################
 
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools
-
 # -----------------------------------------
 echo "Checking JUnit..."
 if [ "$(jq -r '.junit_version' ${VERSION_FILE})" != "${JUNIT_VERSION}" ]; then
@@ -567,6 +565,9 @@ fi
 # BUILD JUNIT TEST RUNNER (.java file)
 
 echo -e "Build the junit test runner"
+
+# make sure folder exists here, though should be created above
+mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
 
 # copy the file from the repo
 rsync -rtz ${SUBMITTY_REPOSITORY}/junit_test_runner/TestRunner.java ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit/TestRunner.java
