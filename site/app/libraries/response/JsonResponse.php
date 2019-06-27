@@ -17,10 +17,29 @@ class JsonResponse extends AbstractResponse {
 
     /**
      * JsonResponse constructor.
-     * @param array $json
+     * Returns a Jsend format json response
+     * (see http://submitty.org/developer/json_responses)
+     * @param $type
+     * @param mixed|null $data
+     * @param string|null $message
+     * @param int|null $code
      */
-    public function __construct($json) {
-        $this->json = $json;
+    private function __construct($type, $data = null, $message = null, $code = null) {
+        $this->json = [
+            'status' => $type
+        ];
+
+        if ($data || $type === 'success') {
+            $this->json['data'] = $data;
+        }
+
+        if ($message || $type !== 'success') {
+            $this->json['message'] = $message;
+        }
+
+        if ($code) {
+            $this->json['message'] = $code;
+        }
     }
 
     /**
@@ -32,61 +51,32 @@ class JsonResponse extends AbstractResponse {
     }
 
     /**
-     * Returns a json response for the "success" case
-     *  (see http://submitty.org/developer/json_responses)
-     * @param mixed|null $data Response data
-     * @return array the unencoded response
+     * Returns a success JsonResponse.
+     * @param mixed|null $data
+     * @return JsonResponse
      */
-    static public function success($data = null) {
-        $response = [
-            'status' => 'success',
-            'data' => $data
-        ];
-
-        return $response;
+    public static function getSuccessResponse($data) {
+        return new self('success', $data);
     }
 
     /**
-     * Returns a json response for the "fail" case
-     *  (see http://submitty.org/developer/json_responses)
-     * @param string $message A non-blank failure message
-     * @param mixed|null $data Response data
-     * @return array the unencoded response
+     * Returns a fail JsonResponse.
+     * @param string $message
+     * @param mixed|null $data
+     * @return JsonResponse
      */
-    static public function fail($message, $data = null) {
-        $response = [
-            'status' => 'fail',
-            'message' => $message,
-        ];
-
-        if ($data !== null) {
-            $response['data'] = $data;
-        }
-
-        return $response;
+    public static function getFailResponse($message, $data = null) {
+        return new self('fail', $data, $message);
     }
 
     /**
-     * Returns a json response for the "error" case
-     *  (see http://submitty.org/developer/json_responses)
-     * @param string $message A non-blank error message
-     * @param mixed|null $data Response data
-     * @param int $code Code to identify error case
-     * @return array the unencoded response
+     * Returns an error JsonResponse.
+     * @param string $message
+     * @param mixed|null $data
+     * @param int $code
+     * @return JsonResponse
      */
-    static public function error($message, $data = null, $code = null) {
-        $response = [
-            'status' => 'error',
-            'message' => $message,
-        ];
-
-        if ($data !== null) {
-            $response['data'] = $data;
-        }
-        if ($code !== null) {
-            $response['code'] = $code;
-        }
-
-        return $response;
+    public static function getErrorResponse($message, $data = null, $code = null) {
+        return new self('error', $data, $message, $code);
     }
 }

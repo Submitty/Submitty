@@ -344,9 +344,6 @@ else {
     $response = $router->run();
 }
 
-// for API
-// $core->getOutput()->disableRender();
-
 if ($response instanceof Response) {
     $response->render($core);
 }

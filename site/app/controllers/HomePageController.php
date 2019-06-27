@@ -105,10 +105,7 @@ class HomePageController extends AbstractController {
 
         $response = new Response();
         $web_response = new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText);
-        // no data yet. only for testing.
-        $json_response = new JsonResponse(JsonResponse::success("TODO: add real data"));
         $response->setWebResponse($web_response);
-        $response->setJsonResponse($json_response);
 
         return $response;
     }
