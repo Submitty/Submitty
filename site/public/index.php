@@ -200,6 +200,26 @@ if (isset($_COOKIE[$cookie_key])) {
     }
 }
 
+// check if the user has a valid jwt in the header
+$api_logged_in = false;
+$jwt = $request->headers->get("authorization");
+if (!empty($jwt)) {
+    try {
+        $token = TokenManager::parseApiToken(
+            $request->headers->get("authorization"),
+            $core->getConfig()->getBaseUrl(),
+            $core->getConfig()->getSecretSession()
+        );
+        $api_key = $token->getClaim('api_key');
+        $api_logged_in = $core->loadApiUser($api_key);
+    }
+    catch (\InvalidArgumentException $exc) {
+        $core->getOutput()->renderJsonFail("Invalid token.");
+        $core->getOutput()->displayOutput();
+        return;
+    }
+}
+
 // Prevent anyone who isn't logged in from going to any other controller than authentication
 if (!$logged_in) {
     if ($_REQUEST['component'] != 'authentication') {
@@ -271,7 +291,14 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 
 $supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
 
-if (!$supported_by_new_router) {
+if ($is_api) {
+    $core->getOutput()->disableRender();
+    $core->disableRedirects();
+
+    $router = new app\libraries\routers\WebRouter($request, $core, $api_logged_in, true);
+    $router->run();
+}
+elseif (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
         case 'admin':
             $control = new app\controllers\AdminController($core);

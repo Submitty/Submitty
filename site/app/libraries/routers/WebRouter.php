@@ -27,6 +27,9 @@ class WebRouter {
     /** @var UrlMatcher  */
     protected $matcher;
 
+    /** @var bool */
+    protected $api_authorized = true;
+
     /** @var array */
     public $parameters;
 
@@ -36,7 +39,7 @@ class WebRouter {
     /** @var string the method to call */
     public $method_name;
 
-    public function __construct(Request $request, Core $core, $logged_in) {
+    public function __construct(Request $request, Core $core, $logged_in, $is_api = false) {
         $this->core = $core;
         $this->request = $request;
         $this->logged_in = $logged_in;
@@ -46,21 +49,48 @@ class WebRouter {
         $annotationLoader = new AnnotatedRouteLoader(new AnnotationReader());
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
+        $context = new RequestContext();
 
-        $this->matcher = new UrlMatcher($collection, new RequestContext());
-
-        try {
-            $this->parameters = $this->matcher->matchRequest($this->request);
-            $this->loadCourses();
-            $this->loginCheck();
+        $this->matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
+        if ($is_api) {
+            try {
+                $this->parameters = $this->matcher->matchRequest($this->request);
+                // prevent /api/something from being matched to /{_semester}/{_course}
+                if ($this->parameters['_method'] === 'navigationPage') {
+                    throw new ResourceNotFoundException;
+                }
+                // prevent user that is not logged in from going anywhere except AuthenticationController
+                if (!$this->logged_in &&
+                    !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+                    $this->api_authorized = false;
+                }
+            }
+            catch (ResourceNotFoundException $e) {
+                $this->parameters = null;
+            }
         }
-        catch (ResourceNotFoundException $e) {
-            // redirect to login page or home page
-            $this->loginCheck();
+        else {
+            try {
+                $this->parameters = $this->matcher->matchRequest($this->request);
+                $this->loadCourses();
+                $this->loginCheck();
+            }
+            catch (ResourceNotFoundException $e) {
+                // redirect to login page or home page
+                $this->loginCheck();
+            }
         }
     }
 
     public function run() {
+        if (is_null($this->parameters)) {
+            return $this->core->getOutput()->renderJsonFail("Endpoint not found.");
+        }
+
+        if (!$this->api_authorized) {
+            return $this->core->getOutput()->renderJsonFail("Unauthorized access. Please log in.");
+        }
+
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
