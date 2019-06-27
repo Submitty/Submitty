@@ -81,6 +81,29 @@ class DatabaseQueries {
     }
 
     /**
+     * Gets some user's api key from the submitty database given a user_id.
+     * @param $user_id
+     *
+     * @return string | null
+     */
+    public function getSubmittyUserApiKey($user_id) {
+        $this->submitty_db->query("SELECT api_key FROM users WHERE user_id=?", array($user_id));
+        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['api_key'] : null;
+    }
+
+    /**
+     * Gets a user from their api key.
+     * @param $api_key
+     *
+     * @return string | null
+     */
+    public function getSubmittyUserByApiKey($api_key) {
+        $this->submitty_db->query("SELECT user_id FROM users WHERE api_key=?", array($api_key));
+        return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : null;
+    }
+
+
+    /**
      * Gets a user from the database given a user_id.
      * @param string $user_id
      *
@@ -1241,16 +1264,17 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      * @return array
      */
     public function getRotatingSectionsGradeableIDS() {
-        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grade_by_registration = {$this->course_db->convertBoolean(false)} ORDER BY g_grade_start_date ASC");
+        $this->course_db->query("SELECT g_id FROM gradeable WHERE g_grader_assignment_method = {0} ORDER BY g_grade_start_date ASC");
         return $this->course_db->rows();
     }
 
     /**
-     * Get gradeables graded by rotating section in the past and the sections each grader graded
-     *
+     * Gets gradeables for all graders with the sections they were assigned to grade
+     * Only includes gradeables that are set to be graded by rotating section or all access, and were in the past
+     * With the exception of $gradeable_id, which will always be included
      * @return array
      */
-    public function getGradeablesPastAndSection() {
+    public function getGradeablesRotatingGraderHistory($gradeable_id) {
         throw new NotImplementedException();
     }
 
@@ -1424,6 +1448,24 @@ ORDER BY user_id ASC");
         $update_array = array_merge(array($section), $users);
         $update_string = $this->createParamaterList(count($users));
         $this->course_db->query("UPDATE users SET rotating_section=? WHERE user_id IN {$update_string}", $update_array);
+    }
+
+    /**
+     * Gets all user_ids that are on a team for a given gradeable
+     *
+     * @param $gradeable
+     * @returns string[]
+     */
+    public function getUsersOnTeamsForGradeable($gradeable) {
+        $params = array($gradeable->getId());
+        $this->course_db->query("SELECT user_id FROM teams WHERE 
+                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
+
+        $users = [];
+        foreach ($this->course_db->rows() as $row){
+            $users[] = $row['user_id'];
+        }
+        return $users;
     }
 
     /**
@@ -3177,7 +3219,7 @@ AND gc_id IN (
             $gradeable->getInstructionsUrl(),
             $gradeable->getTaInstructions(),
             $gradeable->getType(),
-            $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
+            $gradeable->getGraderAssignmentMethod(),
             DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
             DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
@@ -3194,7 +3236,7 @@ AND gc_id IN (
               g_instructions_url,
               g_overall_ta_instructions,
               g_gradeable_type,
-              g_grade_by_registration,
+              g_grader_assignment_method,
               g_ta_view_start_date,
               g_grade_start_date,
               g_grade_due_date,
@@ -3313,7 +3355,7 @@ AND gc_id IN (
                 $gradeable->getInstructionsUrl(),
                 $gradeable->getTaInstructions(),
                 $gradeable->getType(),
-                $this->course_db->convertBoolean($gradeable->isGradeByRegistration()),
+                $gradeable->getGraderAssignmentMethod(),
                 DateUtils::dateTimeToString($gradeable->getTaViewStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeStartDate()),
                 DateUtils::dateTimeToString($gradeable->getGradeDueDate()),
@@ -3330,7 +3372,7 @@ AND gc_id IN (
                   g_instructions_url=?,
                   g_overall_ta_instructions=?,
                   g_gradeable_type=?,
-                  g_grade_by_registration=?,
+                  g_grader_assignment_method=?,
                   g_ta_view_start_date=?,
                   g_grade_start_date=?,
                   g_grade_due_date=?,

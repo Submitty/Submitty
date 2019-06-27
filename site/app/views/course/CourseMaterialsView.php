@@ -97,7 +97,7 @@ class CourseMaterialsView extends AbstractView {
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
             $this->core->addErrorMessage("You have no permission to access this page");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return;
         }
 

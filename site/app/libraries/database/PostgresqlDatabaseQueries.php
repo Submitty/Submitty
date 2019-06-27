@@ -373,7 +373,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-    public function getGradeablesPastAndSection() {
+    public function getGradeablesRotatingGraderHistory($gradeable_id) {
+        $params = [$gradeable_id];
         $this->course_db->query("
   SELECT
     gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
@@ -387,7 +388,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       FROM gradeable AS g
       LEFT JOIN
         grading_rotating AS gr ON g.g_id = gr.g_id
-      WHERE g_grade_by_registration = 'f'
+      WHERE g_grader_assignment_method = 0 OR g.g_id = ?
     ) AS g
   ) as gu
   LEFT JOIN (
@@ -397,7 +398,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       grading_rotating
     GROUP BY g_id, user_id
   ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
-  ORDER BY user_group, user_id, g_grade_start_date");
+  ORDER BY user_group, user_id, g_grade_start_date",$params);
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach($rows as $row) {
@@ -1362,7 +1363,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               g_instructions_url AS instructions_url,
               g_overall_ta_instructions AS ta_instructions,
               g_gradeable_type AS type,
-              g_grade_by_registration AS grade_by_registration,
+              g_grader_assignment_method AS grader_assignment_method,
               g_ta_view_start_date AS ta_view_start_date,
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,

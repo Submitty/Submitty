@@ -274,7 +274,7 @@ class MiscController extends AbstractController {
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $_REQUEST['user_id'], null);
@@ -282,7 +282,7 @@ class MiscController extends AbstractController {
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $gradeable_version = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($_REQUEST["version"]);
@@ -290,7 +290,7 @@ class MiscController extends AbstractController {
         if ($gradeable_version === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $folder_names = array();
@@ -310,7 +310,7 @@ class MiscController extends AbstractController {
         if (count($folder_names) === 0) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $zip_file_name = $_REQUEST['gradeable_id'] . "_" . $_REQUEST['user_id'] . "_" . date("m-d-Y") . ".zip";
@@ -368,7 +368,7 @@ class MiscController extends AbstractController {
         if (!($this->core->getUser()->accessGrading())) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $zip_file_name = $_REQUEST['gradeable_id'] . "_section_students_" . date("m-d-Y") . ".zip";
@@ -380,7 +380,7 @@ class MiscController extends AbstractController {
             if (!($this->core->getUser()->accessFullGrading())) {
                 $message = "You do not have access to that page.";
                 $this->core->addErrorMessage($message);
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                $this->core->redirect($this->core->buildNewCourseUrl());
             }
         }
         else
@@ -412,7 +412,7 @@ class MiscController extends AbstractController {
                     if (!is_dir($gradeable_path)) { //if dir is already present, but it's a file
                         $message = "Oops! That page is not available.";
                         $this->core->addErrorMessage($message);
-                        $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                        $this->core->redirect($this->core->buildNewCourseUrl());
                     }
                     else{
                         $files = new \RecursiveIteratorIterator(
@@ -435,7 +435,7 @@ class MiscController extends AbstractController {
                 } else { //no dir exists with this name
                     $message = "Oops! That page is not available.";
                     $this->core->addErrorMessage($message);
-                    $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                    $this->core->redirect($this->core->buildNewCourseUrl());
                 }
 
             } else {

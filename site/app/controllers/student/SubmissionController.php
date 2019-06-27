@@ -314,7 +314,7 @@ class SubmissionController extends AbstractController {
         }
         else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage('Must be on a team to access submission');
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
@@ -1458,6 +1458,12 @@ class SubmissionController extends AbstractController {
           }
         }
 
+        Logger::logAccess(
+            $this->core->getUser()->getId(),
+            $_COOKIE['submitty_token'],
+            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+        );
+
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
         }
@@ -1529,7 +1535,7 @@ class SubmissionController extends AbstractController {
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
+                $this->core->redirect($this->core->buildNewCourseUrl());
                 return $this->core->getOutput()->renderJsonFail($msg);
             }
             $ta = true;
@@ -1558,7 +1564,7 @@ class SubmissionController extends AbstractController {
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
