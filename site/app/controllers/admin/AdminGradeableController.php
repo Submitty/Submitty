@@ -181,12 +181,12 @@ class AdminGradeableController extends AbstractController {
         $config_select_mode = 'manual';
 
         // These are hard coded default config options.
-        $default_config_paths = [ ['DEFAULT: upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
-                                  ['DEFAULT: pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
-                                  ['DEFAULT: iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
-                                  ['DEFAULT: left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
-                                  ['DEFAULT: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
-                                  ['DEFAULT: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
+        $default_config_paths = [ ['PROVIDED: upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
+                                  ['PROVIDED: pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
+                                  ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
+                                  ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
+                                  ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
+                                  ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
 
 
         // Configs uploaded to the 'Upload Gradeable Config' page
@@ -194,11 +194,7 @@ class AdminGradeableController extends AbstractController {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = ['UPLOADED: '.$file['path'],$file['path']];
-            // If this happens then select the second radio button 'Using Uploaded'
-            if ($file['path'] === $saved_config_path) {
-                $config_select_mode = 'uploaded';
-            }
+            $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
         }
 
         // Configs stored in a private repository (specified in course config)
@@ -206,14 +202,14 @@ class AdminGradeableController extends AbstractController {
         $all_repository_config_paths = array();
         if ($config_repo_name !== '') {
             $repository_config_dir = $config_repo_name;
+
             $config_dir_files = FileUtils::getAllFiles($repository_config_dir);
+
             $this->getValidPathsToConfigDirectories($config_dir_files,$all_repository_config_paths);
-            foreach ($all_repository_config_paths as $path) {
-                if ($path === $saved_config_path) {
-                    $config_select_mode = 'repo';
-                }
+            foreach ($all_repository_config_paths as $key => $path) {
+                $all_repository_config_paths[$key][0]="DIRECTORY: ".substr($path[1],strlen($config_repo_name)+1);
             }
-        }
+    }
 
         // Load output from build of config file
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
@@ -373,19 +369,14 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function getValidPathsToConfigDirectories($directory,&$results) {
-        $valid_file_names = array("config.json","provided_code","test_input","instructor_solution","test_output","custom_validation_code");
         foreach ($directory as $file) {
             if (array_key_exists("files",$file)) { //is a folder
-                if (empty(array_diff(array_keys($file['files']),$valid_file_names))) {//valid folder if it only contains valid files names
-                    $results[] = ['REPOSITORY: '.$file['path'],$file['path']];
-                }
-                else {
-                    $this->getValidPathsToConfigDirectories($file['files'],$results);
-                }
+                $this->getValidPathsToConfigDirectories($file['files'],$results);
             }
             else if (array_key_exists("name",$file)) {
                 if ($file['name'] === 'config.json') { //valid file if it is a config file
-                    $results[] = ['REPOSITORY: '.$file['path'],$file['path']];
+                    $config_path = substr($file['path'],0,-strlen("/config.json"));//remove /config.json from path
+                    $results[] = ["",$config_path];
                 }
             }
         }
