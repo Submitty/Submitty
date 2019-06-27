@@ -492,13 +492,17 @@ class ReportController extends AbstractController {
             }
         }
         else{
+
+            $benchamrks = $customization->getDisplayBenchmarks();
+
             //Print the form, since the user hasn't provided us with any data
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
                 "customization_data_print" => print_r($customization->getCustomizationData(),true),
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 "used_buckets" => $customization->getUsedBuckets(),
-                'allowed_display_benchmarks' => RainbowCustomizationJSON::allowed_display_benchmarks
+                'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'sections_and_labels' => (array)$customization->getSectionsAndLabels()
             ]);
 
             // TODO: For debugging only so we can see if POST changes. Remove this before PR.

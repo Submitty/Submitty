@@ -69,8 +69,8 @@ if not os.path.exists(rg_course_path):
     print('Copying initial files')
     shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_Makefile',
                     rg_course_path + '/Makefile')
-    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_customization.json',
-                    rg_course_path + '/customization.json')
+#    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_customization.json',
+#                    rg_course_path + '/customization.json')
 
     # Setup Makefile
     print('Configuring Makefile')
@@ -100,14 +100,17 @@ os.chdir(rg_course_path)
 # Run make pull_test (command outputs capture in cmd_output for debugging)
 print('Pulling in grade reports')
 cmd_output = os.popen('make pull_test').read()
+# print(cmd_output)
 
 # Run make
 print('Compiling rainbow grades')
 cmd_output = os.popen('make').read()
+# print(cmd_output)
 
 # Run make push_test
 print('Exporting to summary_html')
 cmd_output = os.popen('make push_test').read()
+# print(cmd_output)
 
 # Change more file permissions
 print('Setting ownership of all rainbow grades files to {}:{}'.format(user, GROUP))

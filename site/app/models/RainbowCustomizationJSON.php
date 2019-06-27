@@ -5,10 +5,10 @@ namespace app\models;
 
 use app\exceptions\BadArgumentException;
 use app\exceptions\FileReadException;
-use app\exceptions\FileWriteException;
 use app\exceptions\MalformedDataException;
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\FileUtils;
 
 /**
@@ -17,16 +17,18 @@ use app\libraries\FileUtils;
  *
  * This class is a PHP representation of a customization.json file as used in RainbowGrades and provides means
  * to update its fields.
+ *
+ * When adding to data to any property, the appropriate setting must be used as they preform additional validation.
  */
 class RainbowCustomizationJSON extends AbstractModel
 {
     protected $core;
 
-    private $section;
+    private $section;                   // Init in constructor
     private $display_benchmark = [];
     private $messages = [];
     private $display = [];
-    private $benchmark_percent;
+    private $benchmark_percent;         // Init in constructor
     private $gradeables = [];
 
     const allowed_display = ['instructor_notes', 'grade_summary', 'grade_details', 'iclicker', 'final_grade',
@@ -40,6 +42,8 @@ class RainbowCustomizationJSON extends AbstractModel
     public function __construct(Core $main_core) {
         $this->core = $main_core;
 
+        // Items that must be initialized as objects
+        // This is done so json_encode will properly encode the item when converting to json
         $this->section = (object)[];
         $this->benchmark_percent = (object)[];
     }
@@ -112,6 +116,12 @@ class RainbowCustomizationJSON extends AbstractModel
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization_no_comments.json');
+
+        if(!file_exists($course_path))
+        {
+            throw new FileReadException('Unable to locate the file to read');
+        }
+
         $file_contents = file_get_contents($course_path);
 
         // Validate file read
@@ -159,9 +169,33 @@ class RainbowCustomizationJSON extends AbstractModel
         }
     }
 
-    public function loadFromRainbowCustomization(RainbowCustomization $customization)
+    /**
+     * Add an item to the 'display' array
+     *
+     * @param $display The item to add
+     * @throws BadArgumentException The passed in argument is not allowed.
+     */
+    public function addDisplay($display)
     {
-        throw new NotImplementedException('');
+        if(!in_array($display, self::allowed_display))
+        {
+            throw new BadArgumentException('Passed in display not found in the list of allowed display items');
+        }
+
+        if(!in_array($display, $this->display))
+        {
+            $this->display[] = $display;
+        }
+    }
+
+    public function addSection($sectionID, $label)
+    {
+        $this->section->$sectionID = $label;
+    }
+
+    public function getSection()
+    {
+        return $this->section;
     }
 
     public function saveToJsonFile()
@@ -170,25 +204,30 @@ class RainbowCustomizationJSON extends AbstractModel
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
 
-        $json = (object)[];
-
+        // If display was empty then just add defaults
         if(empty($this->display))
         {
-            $json->display[] = 'grade_summary';
-            $json->display[] = 'grade_details';
-        }
-        else
-        {
-            $json->display = $this->display;
+            $this->addDisplay('grade_summary');
+            $this->addDisplay('grade_details');
         }
 
-        if(!empty($this->display_benchmark))
+        // Create object that will be written to file after collecting non-empty items
+        $json = (object)[];
+
+        // Copy each property from $this over to $json
+        foreach($this as $key => $value)
         {
-            $json->display_benchmark = $this->display_benchmark;
+            // Dont include $core
+            if($key != 'core')
+            {
+                $json->$key = $value;
+            }
         }
 
+        // Encode
         $json = json_encode($json, JSON_PRETTY_PRINT);
 
+        // Write to file
         file_put_contents($course_path, $json);
     }
 

@@ -3,6 +3,7 @@ namespace app\models;
 
 use app\exceptions\ValidationException;
 use app\libraries\Core;
+use app\libraries\database\DatabaseQueries;
 use app\libraries\DatabaseUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
@@ -22,6 +23,8 @@ class RainbowCustomization extends AbstractModel{
     private $error_messages;
     private $used_buckets = [];
     private $available_buckets;
+    private $RCJSON;                           // This is the customization.json php object, or null if it wasn't found
+    private $sections;                         // Contains section ids mapped to labels
 
     /*XXX: This is duplicated from AdminGradeableController.php, we really shouldn't have multiple copies lying around.
      * On top of that, Rainbow Grades has its own enum internally. Since that's a separate repo it's probably
@@ -44,6 +47,21 @@ class RainbowCustomization extends AbstractModel{
         $this->core = $main_core;
         $this->has_error = "false";
         $this->error_messages = [];
+
+        $this->sections = (object)[];
+
+        // Attempt to load json from customization file
+        // If it fails then set to null, will be used to load defaults later
+        $this->RCJSON = new RainbowCustomizationJSON($this->core);
+
+        try
+        {
+            $this->RCJSON->loadFromJsonFile();
+        }
+        catch(\Exception $e)
+        {
+            $this->RCJSON = null;
+        }
     }
 
     public function buildCustomization(){
@@ -97,11 +115,69 @@ class RainbowCustomization extends AbstractModel{
         return $this->used_buckets;
     }
 
-    //TODO: Implement the real version of this function
-    public function getCustomizationJSON(){
-        //Logic to trim down the customization data to just what's shown
-        $json_data = ["Yes-POST"];
-        return json_encode($json_data);
+    public function getDisplayBenchmarks()
+    {
+        $displayBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
+        $retArray = [];
+
+        !is_null($this->RCJSON) ?
+            $usedDisplayBenchmarks = $this->RCJSON->getDisplayBenchmarks() :
+            $usedDisplayBenchmarks = [];
+
+        foreach ($displayBenchmarks as $displayBenchmark)
+        {
+            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = True : $isUsed = False;
+
+            // Add benchmark to return array
+            $retArray[] = ['id' => $displayBenchmark, 'isUsed' => $isUsed];
+        }
+
+        return $retArray;
+    }
+
+    public function getSectionsAndLabels()
+    {
+        // Get sections from db
+        $db = new DatabaseQueries($this->core);
+        $db_sections = $db->getRegistrationSections();
+
+        $sections = [];
+
+        // Configure sections
+        foreach($db_sections as $section)
+        {
+            $key = $section['sections_registration_id'];
+
+            $sections[$key] = $key;
+        }
+
+        // If RCJSON is not null then load it
+        if(!is_null($this->RCJSON))
+        {
+            // Get sections from the file
+            $sectionsFromFile = (array)$this->RCJSON->getSection();
+
+            // If sections from database is larger than sections from file then there must be a new section in
+            // in the database, add new fields into sections from file with defaults
+            $sectionsFromFileCount = count($sectionsFromFile);
+            $sectionsCount = count($sections);
+
+            if($sectionsFromFileCount != $sectionsCount)
+            {
+                for($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++)
+                {
+                    $sectionsFromFile[$i] = (string)$i;
+                }
+            }
+
+            return (object)$sectionsFromFile;
+        }
+        // RCJSON was null so return database sections as default
+        else
+        {
+            // Collect sections out of the database
+            return (object)$sections;
+        }
     }
 
     // This function handles processing the incoming post data
@@ -117,6 +193,14 @@ class RainbowCustomization extends AbstractModel{
             foreach($form_json->display_benchmark as $benchmark)
             {
                 $json->addDisplayBenchmarks($benchmark);
+            }
+        }
+
+        if(isset($form_json->section))
+        {
+            foreach($form_json->section as $key => $value)
+            {
+                $json->addSection((string)$key, $value);
             }
         }
 

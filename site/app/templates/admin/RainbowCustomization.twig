@@ -92,11 +92,25 @@
             display_benchmarks.push($(this).val());
         });
 
+        // Collect sections and labels
+        var sections = {};
+
+        $.each($("input[class='sections_and_labels']"), function(){
+
+            // Get data
+            var section = this.getAttribute('data-section').toString();
+            var label = this.value;
+
+            // Add to sections
+            sections[section] = label;
+        });
+
         // Build the overall json
         let ret = {
             'save_customization': true,
             'customization': {
-                'display_benchmark': display_benchmarks
+                'display_benchmark': display_benchmarks,
+                'section' : sections
             }
         };
 
@@ -152,10 +166,23 @@
     <div id="list_wrapper">
         <div id="display_benchmarks">
             <h3>Display benchmarks</h3>
-            {% for benchmark in allowed_display_benchmarks %}
+            {% for benchmark in display_benchmarks %}
                 <p>
-                    <input type="checkbox" id="display_benchmarks_{{ benchmark }}" name="display_benchmarks" value="{{ benchmark }}">
-                    <label for="display_benchmarks_{{ benchmark }}">{{ benchmark }}</label>
+                    <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
+                    {% if benchmark.isUsed == true %}checked{% endif %}
+                    >
+                    <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
+                </p>
+            {% endfor %}
+        </div>
+        <div>
+            <h3>Section Labels</h3>
+            <p>You may use this area to assign a label to each section number, for example the name of the TA or TAs
+            handling the section.  You may also leave it as the default but it may not be blank.</p>
+            {% for section, label in sections_and_labels %}
+                <p>
+                    <label for="section_and_labels_{{ section }}">{{ section }}</label>
+                    <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
                 </p>
             {% endfor %}
         </div>
