@@ -103,10 +103,9 @@ class HomePageController extends AbstractController {
 
         $changeNameText = $this->core->getConfig()->getUsernameChangeText();
 
-        $response = new Response();
-        $web_response = new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText);
-        $response->setWebResponse($web_response);
-
-        return $response;
+        return new Response(
+            null,
+            new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText)
+        );
     }
 }
