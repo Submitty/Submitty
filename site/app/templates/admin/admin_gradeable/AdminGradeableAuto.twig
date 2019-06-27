@@ -6,6 +6,7 @@
 	
     <fieldset>
 		<select class="config_path_dropdown ignore" id="config_path_dropdown" style="width: 700px;">
+			<option value="" {{ config_select_mode == 'manual' ? "selected" : ""}} >Manually Type in Path </option>
 			{%for path in all_config_paths %}
 				{% if path.1 == gradeable.getAutogradingConfigPath() %}
                     <option value="{{ path.1 }}" selected="selected">{{ path.0 }}</option>
@@ -105,6 +106,13 @@
 
     function onConfigPathChange() {
         let manual_input = $('#input_provide_full_path');
+		if ($('#config_path_dropdown').val() == "") {
+			manual_input.prop('disabled', false);
+			return;
+		}
+		else {
+			manual_input.prop('disabled', true);
+		}
 		manual_input.val($('#config_path_dropdown').val());
 		manual_input.change();
     }
@@ -169,6 +177,7 @@
         $('[name=student_submit]').change(onStudentSubmitChange);
 
         // Update the text box when the path config changes
+		onConfigPathChange();
         $('#config_path_dropdown').change(onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {

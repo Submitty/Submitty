@@ -196,6 +196,14 @@ class AdminGradeableController extends AbstractController {
                                   ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
                                   ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
 
+        foreach ($default_config_paths as $default_config_path) {
+            $path = $default_config_path[1];
+            // If this happens then select the first radio button 'Using Default'
+            if ($path === $saved_config_path) {
+                $config_select_mode = 'dropdown';
+                break;
+            }
+        }
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
@@ -203,6 +211,9 @@ class AdminGradeableController extends AbstractController {
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
             $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
+            if ($file['path'] === $saved_config_path) {
+                $config_select_mode = 'dropdown';
+            }
         }
 
         // Configs stored in a private repository (specified in course config)
@@ -216,8 +227,11 @@ class AdminGradeableController extends AbstractController {
             $this->getValidPathsToConfigDirectories($config_dir_files,$all_repository_config_paths);
             foreach ($all_repository_config_paths as $key => $path) {
                 $all_repository_config_paths[$key][0]="DIRECTORY: ".substr($path[1],strlen($config_repo_name)+1);
+                if ($path[1] === $saved_config_path) {
+                    $config_select_mode = 'dropdown';
+                }
             }
-    }
+        }
 
         // Load output from build of config file
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
@@ -295,6 +309,7 @@ class AdminGradeableController extends AbstractController {
 
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
+            'config_select_mode' => $config_select_mode,
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
