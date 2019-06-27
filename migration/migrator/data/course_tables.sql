@@ -197,7 +197,7 @@ CREATE TABLE gradeable (
     g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
-    g_grade_by_registration boolean NOT NULL,
+    g_grader_assignment_method integer NOT NULL,
     g_ta_view_start_date timestamp(6) with time zone NOT NULL,
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
