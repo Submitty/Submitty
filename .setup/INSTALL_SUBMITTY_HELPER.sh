@@ -519,7 +519,7 @@ if [ "$(jq -r '.hamcrest_version' ${VERSION_FILE})" != "${HAMCREST_VERSION}" ]; 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
     pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
     rm -rf hamcrest*.jar
-    wgethttps://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    wget https://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
     popd > /dev/null
     cat <<< "$(jq ".hamcrest_version = \"${HAMCREST_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
 fi
