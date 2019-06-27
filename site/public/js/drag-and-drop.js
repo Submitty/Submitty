@@ -954,7 +954,7 @@ function handleDownloadImages(csrf_token) {
  */
 
 function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
+    var submit_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'upload_course_materials_files'});
     var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
     var formData = new FormData();
 

@@ -61,6 +61,9 @@ class Core {
     /** @var ClassicRouter */
     private $router;
 
+    /** @var bool */
+    private $redirect = true;
+
 
     /**
      * Core constructor.
@@ -89,6 +92,13 @@ class Core {
         foreach (array('component', 'page', 'action') as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
+    }
+
+    /**
+     * Disable all redirects for API calls.
+     */
+    public function disableRedirects() {
+        $this->redirect = false;
     }
 
     /**
@@ -329,6 +339,23 @@ class Core {
     }
 
     /**
+     * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
+     * a user id that matches the api key, and let the core load the user.
+     *
+     * @param string $api_key
+     *
+     * @return bool
+     */
+    public function loadApiUser(string $api_key): bool {
+        $user_id = $this->database_queries->getSubmittyUserByApiKey($api_key);
+        if ($user_id === null) {
+            return false;
+        }
+        $this->loadUser($user_id);
+        return true;
+    }
+
+    /**
      * Remove the currently loaded session within the session manager
      */
     public function removeCurrentSession() {
@@ -370,6 +397,36 @@ class Core {
             throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
         return false;
+    }
+
+    /**
+     * Authenticates the user against user's api key. Returns the json web token generated for the user.
+     *
+     * @return string | null
+     *
+     * @throws AuthenticationException
+     */
+    public function authenticateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                $token = (string) TokenManager::generateApiToken(
+                    $this->database_queries->getSubmittyUserApiKey($user_id),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                return $token;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return null;
     }
 
     /**
@@ -437,6 +494,9 @@ class Core {
      * @param int $status_code
      */
     public function redirect($url, $status_code = 302) {
+        if (!$this->redirect) {
+            return;
+        }
         header('Location: ' . $url, true, $status_code);
         die();
     }

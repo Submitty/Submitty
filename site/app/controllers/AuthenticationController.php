@@ -85,7 +85,7 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/check_login")
      *
      * @var string $old the url to redirect to after login
-     * @return bool | array depending on the truth value of $no_direct
+     * @return array
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
@@ -94,45 +94,52 @@ class AuthenticationController extends AbstractController {
         if ($this->logged_in) {
             $this->core->redirect($old);
         }
-        $no_redirect = !empty($_POST['no_redirect']) ? $_POST['no_redirect'] == 'true' : false;
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
 
-            if ($no_redirect) {
-                return $this->core->getOutput()->renderJsonFail($msg);
-            }
-            else {
-                $this->core->addErrorMessage($msg);
-                $this->core->redirect($old);
-            }
-            return false;
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($old);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
             Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
             $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
-            $this->core->addSuccessMessage($msg);
 
-            if ($no_redirect) {
-                return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
-            }
-            else {
-                $this->core->redirect($old);
-            }
-            return true;
+            $this->core->addSuccessMessage($msg);
+            $this->core->redirect($old);
+            return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
         }
         else {
             $msg = "Could not login using that user id or password";
+
             $this->core->addErrorMessage($msg);
-            if ($no_redirect) {
-                return $this->core->getOutput()->renderJsonFail($msg);
-            }
-            else {
-                $this->core->redirect($old);
-            }
-            return false;
+            $this->core->redirect($old);
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+    }
+
+    /**
+     * @Route("/api/token", methods={"POST"})
+     *
+     * @return array
+     */
+    public function getToken() {
+        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+            $msg = 'Cannot leave user id or password blank';
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        $token = $this->core->authenticateJwt();
+        if ($token) {
+            return $this->core->getOutput()->renderJsonSuccess(['token' => $token]);
+        }
+        else {
+            $msg = "Could not login using that user id or password";
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
     }
 

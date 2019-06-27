@@ -391,7 +391,8 @@ class HomeworkView extends AbstractView {
             'testcase_messages' => $testcase_messages,
             'image_data' => $image_data,
             'component_names' => $component_names,
-            'upload_message' => $this->core->getConfig()->getUploadMessage()
+            'upload_message' => $this->core->getConfig()->getUploadMessage(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -514,6 +515,7 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
+            'csrf_token' => $this->core->getCsrfToken()
         ]);
     }
 
@@ -646,6 +648,7 @@ class HomeworkView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'gradeable_version' => $display_version
         ]);
+        // $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
@@ -671,7 +674,8 @@ class HomeworkView extends AbstractView {
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'show_testcases' => $show_testcases,
             'active_same_as_graded' => $active_same_as_graded,
-            'show_incentive_message' => $show_incentive_message
+            'show_incentive_message' => $show_incentive_message,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionBox.twig', $param);
