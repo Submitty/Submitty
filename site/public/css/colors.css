@@ -1,6 +1,6 @@
 :root{
     /*master color*/
-    --submitty-blue: #316498;
+    --submitty-logo-blue: #316498;
     /*might wanna change blue borders/hover text/sidebar text to submitty blue*/
 
     /*buttons, primarily but also can be used for notifications/anything
@@ -36,8 +36,8 @@
     --hover-footer-text-blue: #405E90; /*replace with submitty blue?*/
 
     /*discussion forum*/
-    --viewed-discussion-post-blue: #;
-    --deleted-discussion-post: #dcdcdc;
+    --viewed-discussion-post-blue: #e8f0f7;
+    --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /*is also for star color*/
 
     /*instructor setting options*/
@@ -53,6 +53,7 @@
     --hover-post-label-orange: #ec971f;
     --post-label-red: #d9534f;
     --hover-post-label-red: #c9302c;
+
         /*these differ from the colors on the posts for some reason?
         so I will put them here for reference
         green-message: #008800

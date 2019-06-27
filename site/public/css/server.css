@@ -1,5 +1,7 @@
 @import url("reset.css");
 @import url("google/inconsolata.css");
+@import "colors.css";
+
 
 html {
     height: 100%;
@@ -18,8 +20,8 @@ body {
     /* OLD SEAFOAM GREEN COLOR */
     /* background-color: #B6CECE; */
 
-    /* Submitty Logo blue */
-    background-color: #f6fbfe;
+    /* site background */
+    background-color: var(--background-blue);
 
     width: 100%;
     /* A lighter shade of blue grey */
@@ -76,36 +78,36 @@ a.external:active {
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
-    color: #ffffff;
+    color: var(--default-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: #ffffff;
+    color: var(--default-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
-    color: #ffffff;
+    color: var(--default-white);
 }
 
 a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
-    color: #000000;
+    color: var(--text-black);
 }
 a.btn-default,
 a.fas.btn-default,
 a.fas,
 a > i.fas {
-    color: #000000;
+    color: var(--text-black);
 }
 a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: #000000;
+    color: var(--text-black);
 }
 
 a.btn {
