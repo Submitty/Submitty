@@ -7,24 +7,15 @@ use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\models\gradeable\LateDays;
 use app\models\User;
+use Symfony\Component\Routing\Annotation\Route;
 
 class LateDaysTableController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'plugin_table':
-                $this->showLateTable();
-                break;
             default:
-                $this->showLateTablePage($this->core->getUser());
+                $this->showLateTablePage();
                 break;
         }
-    }
-
-    private function showLateTable() {
-        $user_id = $_REQUEST['user_id'] ?? '';
-        $highlight_id = $_REQUEST['g_id'] ?? '';
-        $user = $this->core->getQueries()->getUserById($user_id);
-        $this->core->getOutput()->renderString(self::renderLateTable($this->core, $user, $highlight_id));
     }
 
     /**
@@ -40,10 +31,10 @@ class LateDaysTableController extends AbstractController {
 
     /**
      * Renders the 'my late days' page
-     * @param User $user
+     * @Route("/{_semester}/{_course}/late_table")
      */
-    private function showLateTablePage(User $user) {
-        $this->core->getOutput()->renderOutput(array('LateDaysTable'), 'showLateTablePage', LateDays::fromUser($this->core, $user));
+    public function showLateTablePage() {
+        $this->core->getOutput()->renderOutput(array('LateDaysTable'), 'showLateTablePage', LateDays::fromUser($this->core, $this->core->getUser()));
     }
 
 }

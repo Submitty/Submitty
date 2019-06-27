@@ -270,85 +270,12 @@ class AutoGradingView extends AbstractView {
     }
 
     /**
-     * @param Gradeable $gradeable
-     * @return string
-     */
-    public function showTAResults(Gradeable $gradeable) {
-        $grading_complete = true;
-        $active_same_as_graded = true;
-        foreach ($gradeable->getComponents() as $component) {
-            if (!$component->getGrader()) {
-                $grading_complete = false;
-            }
-            if ($component->getGradedVersion() !== $gradeable->getActiveVersion() && $component->getGradedVersion() !== -1) {
-                $active_same_as_graded = false;
-            }
-        }
-        $grader_names = array();
-        //find all names of instructors who graded part(s) of this assignment that are full access grader_names
-        if (!$gradeable->getPeerGrading()) {
-            foreach ($gradeable->getComponents() as $component) {
-                if ($component->getGrader() === NULL) {
-                    continue;
-                }
-                $name = $component->getGrader()->getDisplayedFirstName() . " " . $component->getGrader()->getDisplayedLastName();
-                if (!in_array($name, $grader_names) && $component->getGrader()->accessFullGrading()) {
-                    $grader_names[] = $name;
-                }
-            }
-        } else {
-            $grader_names = "Graded by Peer(s)";
-        }
-        //get total score and max possible score
-        $graded_score = $gradeable->getGradedTAPoints();
-        $graded_max = $gradeable->getTotalTAPoints();
-        //change title if autograding exists or not
-        //display a sum of autograding and instructor points if both exist
-        $has_autograding = false;
-        foreach ($gradeable->getTestcases() as $testcase) {
-            if ($testcase->viewTestcase()) {
-                $has_autograding = true;
-                break;
-            }
-        }
-        // Todo: this is a lot of math for the view
-        //add total points if both autograding and instructor grading exist
-        $current = $gradeable->getCurrentVersion() === NULL ? $gradeable->getVersions()[1] : $gradeable->getCurrentVersion();
-        $total_score = $current->getNonHiddenTotal() + $current->getHiddenTotal() + $graded_score;
-        $total_max = $gradeable->getTotalAutograderNonExtraCreditPoints() + $graded_max;
-        $regrade_enabled = $this->core->getConfig()->isRegradeEnabled();
-        $regrade_message = $this->core->getConfig()->getRegradeMessage();
-        //Clamp full gradeable score to zero
-        $total_score = max($total_score, 0);
-        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
-        $num_decimals = strlen(substr(strrchr((string)$gradeable->getPointPrecision(), "."), 1));
-        $allow_regrade= $gradeable->isRegradeOpen();
-        $uploaded_files = $gradeable->getSubmittedFiles();
-        return $this->core->getOutput()->renderTwigTemplate("autograding/TAResults.twig", [
-            "gradeable" => $gradeable,
-            "grader_names" => $grader_names,
-            "grading_complete" => $grading_complete,
-            "has_autograding" => $has_autograding,
-            "graded_score" => $graded_score,
-            "graded_max" => $graded_max,
-            "total_score" => $total_score,
-            "total_max" => $total_max,
-            "active_same_as_graded" => $active_same_as_graded,
-            "allow_regrade" => $allow_regrade,
-            "regrade_date" => $regrade_date,
-            "regrade_message" => $regrade_message,
-            "num_decimals" => $num_decimals,
-            "uploaded_files" => $uploaded_files
-        ]);
-    }
-
-    /**
      * @param TaGradedGradeable $ta_graded_gradeable
      * @param bool $regrade_available
      * @param array $uploaded_files
      * @return string
      */
-    public function showTAResultsNew(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
+    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -398,11 +325,7 @@ class AutoGradingView extends AbstractView {
         $total_score = max($total_score, 0);
         $total_score = $gradeable->roundPointValue($total_score);
 
-        $late_days_url = $this->core->buildUrl([
-            'component' => 'student',
-            'page' => 'view_late_table',
-            'g_id' => $gradeable->getId()
-        ]);
+        $late_days_url = $this->core->buildNewCourseUrl(['late_table']);
         $regrade_allowed = $gradeable->isRegradeAllowed();
         $regrade_date = $gradeable->getRegradeRequestDate();
         $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
@@ -451,7 +374,7 @@ class AutoGradingView extends AbstractView {
                 $uploaded_pdfs[] = $file;
             }
         }
-        return $this->core->getOutput()->renderTwigTemplate('autograding/TAResultsNew.twig', [
+        return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
