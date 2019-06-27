@@ -9,7 +9,17 @@ use app\models\User;
 use app\models\gradeable\Gradeable;
 use tests\BaseUnitTest;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class AuthenticationControllerTester extends BaseUnitTest {
+
+    public function setUp(): void {
+        // set up variables that logger needs
+        $_COOKIE['submitty_token'] = 'test';
+        $_SERVER['REMOTE_ADDR'] = 'test';
+        $_SERVER['HTTP_USER_AGENT'] = 'test';
+    }
 
     private function getAuthenticationCore($authenticate=false, $queries=[]) {
         $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $queries);
