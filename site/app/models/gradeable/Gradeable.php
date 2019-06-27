@@ -10,6 +10,7 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
@@ -27,8 +28,8 @@ use app\models\User;
  * @method string getInstructionsUrl()
  * @method void setInstructionsUrl($url)
  * @method int getType()
- * @method bool isGradeByRegistration()
- * @method void setGradeByRegistration($grade_by_reg)
+ * @method int getGraderAssignmentMethod()
+ * @method void setGraderAssignmentMethod($method)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
@@ -45,6 +46,8 @@ use app\models\User;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method int getVcsHostType()
+ * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
@@ -77,6 +80,11 @@ use app\models\User;
  * @method void setHasDueDate($has_due_date)
  */
 class Gradeable extends AbstractModel {
+    /* Enum range for grader_assignment_method */
+    const ROTATING_SECTION = 0;
+    const REGISTRATION_SECTION = 1;
+    const ALL_ACCESS = 2;
+
     /* Properties for all types of gradeables */
 
     /** @property @var string The course-wide unique gradeable id */
@@ -87,8 +95,8 @@ class Gradeable extends AbstractModel {
     protected $instructions_url = "";
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
-    /** @property @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
-    protected $grade_by_registration = true;
+    /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
+    protected $grader_assignment_method = Gradeable::REGISTRATION_SECTION;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
@@ -136,6 +144,8 @@ class Gradeable extends AbstractModel {
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @property @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
+    protected $vcs_host_type = -1;
     /** @property @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
     /** @property @var int The maximum team size (if the gradeable is a team assignment) */
@@ -210,7 +220,7 @@ class Gradeable extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
         $this->setTypeInternal($details['type']);
-        $this->setGradeByRegistration($details['grade_by_registration']);
+        $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
@@ -219,6 +229,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
@@ -790,6 +801,17 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * gets bool representing if gradeable is set to grade by registration
+     * @return boolean
+     */
+    public function isGradeByRegistration() {
+        if ($this->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Sets the minimum user level that can grade an assignment.
      * @param int $group Must be at least 1 and no more than 4
      */
@@ -988,7 +1010,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-    
+
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
@@ -1558,7 +1580,7 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-  
+
     /**
      * return true if students can currently submit regrades for this assignment, false otherwise
      * @return bool

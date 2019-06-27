@@ -84,7 +84,7 @@ fieldset[disabled] a.btn {
 .btn-default.active,
 .open > .dropdown-toggle.btn-default {
     color: #333;
-    background-color: #d8eef6;
+    background-color: #e8f0f7;
 }
 .btn-default:active:hover,
 .btn-default.active:hover,
@@ -526,7 +526,8 @@ input[type="button"].btn-block {
   line-height: 2.5;
   color: #fff;
   text-align: center;
-  white-space: nowrap;
+  /*white-space: nowrap;*/
+  word-wrap: break-word;
   vertical-align: baseline;
   border-radius: .25em;
 }

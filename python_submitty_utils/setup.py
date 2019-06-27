@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='submitty_utils',
     author='Submitty',
-    version='0.5.0',
+    version='0.6.0',
     packages=find_packages(exclude=('tests',)),
     license='BSD',
     description='Python Submitty Utils',

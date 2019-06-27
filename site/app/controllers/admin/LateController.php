@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
 
 class LateController extends AbstractController {
     public function run() {
@@ -40,16 +41,17 @@ class LateController extends AbstractController {
     }
 
     public function viewExtensions() {
-        $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $g_ids);
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $e_gradeables = $this->core->getQueries()->getAllElectronicGradeablesIds();
+        $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $e_gradeables);
     }
 
     public function update($type, $delete) {
         if ($delete) {
             if ($type != 'late') {
                 $error = "Deletion implemented only for Late Days";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
         }
         //Check to see if a CSV file was submitted.
@@ -58,8 +60,7 @@ class LateController extends AbstractController {
             //Validate
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, $type))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
             else {
                 //Validate OK.  Process CSV.
@@ -84,29 +85,25 @@ class LateController extends AbstractController {
         else{ // not CSV, it's an individual
             if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
                 $error = "Invalid CSRF token. Try again.";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
             if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" ) && $type == 'extension') {
                 $error = "Please choose a gradeable_id";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
             $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
-            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || empty($user) || $user->getId() !== $_POST['user_id']) {
+            $isUserNotInCourse = empty($this->core->getQueries()->getUsersById(array($_POST['user_id'])));
+            if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
                 $error = "Invalid Student ID";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
             if ((!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp'])) && $type == 'late') {
                 $error = "Datestamp must be mm/dd/yy";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
             if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days']))) && !$delete) {
                 $error = "Late Days must be a nonnegative integer";
-                $this->core->getOutput()->renderJson(array('error' => $error));
-                return;
+                return $this->core->getOutput()->renderJsonFail($error);
             }
             if($type == "late"){
                 if ($delete) {
@@ -160,7 +157,7 @@ class LateController extends AbstractController {
         foreach($users as $user){
             $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
-        $this->core->getOutput()->renderJson(array(
+        return $this->core->getOutput()->renderJsonSuccess(array(
             'users' => $user_table
         ));
     }
@@ -171,7 +168,7 @@ class LateController extends AbstractController {
         foreach($users as $user) {
             $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
-        $this->core->getOutput()->renderJson(array(
+        return $this->core->getOutput()->renderJsonSuccess(array(
             'gradeable_id' => $g_id,
             'users' => $user_table
         ));

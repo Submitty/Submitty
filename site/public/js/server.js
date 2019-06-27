@@ -7,6 +7,8 @@ window.addEventListener("load", function() {
   }
 });
 
+window.addEventListener("resize", checkSidebarCollapse);
+
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
  * so that we do not have to pass in fully built URL to JS functions, but rather
@@ -24,6 +26,27 @@ function buildUrl(parts) {
         }
     }
     return document.body.dataset.siteUrl + constructed;
+}
+
+/**
+ * Acts in a similar fashion to Core->buildNewUrl() function within the PHP code
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildNewUrl(parts = []) {
+    return document.body.dataset.baseUrl + parts.join('/');
+}
+
+/**
+ * Acts in a similar fashion to Core->buildNewCourseUrl() function within the PHP code
+ * Course information is prepended to the URL constructed.
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildNewCourseUrl(parts = []) {
+    return document.body.dataset.courseUrl + '/' + parts.join('/');
 }
 
 function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
@@ -158,7 +181,7 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            var json = JSON.parse(data);
+            var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
             $('[name="edit_user"]', form).val("true");
@@ -168,6 +191,7 @@ function editUserForm(user_id) {
             if (!user.hasClass('readonly')) {
                 user.addClass('readonly');
             }
+            $('[name="user_numeric_id"]', form).val(json['user_numeric_id']);
             $('[name="user_firstname"]', form).val(json['user_firstname']);
             if (json['user_preferred_firstname'] === null) {
                 json['user_preferred_firstname'] = "";
@@ -228,7 +252,8 @@ function newUserForm() {
     var form = $("#edit-user-form");
     form.css("display", "block");
     $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
+    $('[name="user_numeric_id"]', form).val("");
     $('[name="user_firstname"]', form).val("");
     $('[name="user_preferred_firstname"]', form).val("");
     $('[name="user_lastname"]', form).val("");
@@ -283,6 +308,15 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('[name="delete-gradeable-message"]', form).html('');
     $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
+function displayCloseSubmissionsWarning(form_action,gradeable_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#close-submissions-form");
+    $('[name="close-submissions-message"]', form).html('');
+    $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
 }
 
@@ -455,7 +489,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_prev_color": element[4], "data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; background: " + element[4]});
                             }
                         }
                         $('.CodeMirror')[0].CodeMirror.refresh();
@@ -512,7 +546,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             //console.log(data.ci[users_color]);
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -544,7 +578,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                             for(var users_color in data.ci) {
                             for(var pos in data.ci[users_color]) {
                                 var element = data.ci[users_color][pos];
-                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});   
+                                $('.CodeMirror')[users_color-1].CodeMirror.markText({line:element[1],ch:element[0]}, {line:element[3],ch:element[2]}, {attributes: {"data_start": element[7], "data_end": element[8]}, css: "border: 1px solid black; border-right:1px solid red;background: " + element[4]});
                             }
                         }
                         	$('.CodeMirror')[0].CodeMirror.refresh();
@@ -576,7 +610,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
-    
+
     var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
                         'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
 
@@ -997,7 +1031,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
 
 function removeTeamMemberInput(i) {
     var form = $("#admin-team-form");
-    $('[name="user_id_'+i+'"]', form).removeClass('readonly').removeAttr('readonly').val("");
+    $('[name="user_id_'+i+'"]', form).removeClass('readonly').prop('readonly', false).val("");
     $("#remove_member_"+i).remove();
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -1050,6 +1084,14 @@ function importTeamForm() {
     form.css("display", "block");
     $('[name="upload_team"]', form).val(null);
 }
+
+
+function randomizeRotatingGroupsButton() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#randomize-button-warning");
+    form.css("display", "block");
+}
+
 
 /**
  * Toggles the page details box of the page, showing or not showing various information
@@ -1201,6 +1243,10 @@ function downloadFileWithAnyRole(file_name, path) {
         file = file.substring(file.lastIndexOf('/')+1);
     }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
+}
+
+function downloadCourseMaterialZip(dir_name, path) {
+    window.location = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
 }
 
 function checkColorActivated() {
@@ -1376,7 +1422,7 @@ $(function() {
     }
 
     setTimeout(function() {
-        $('.inner-message').fadeOut();
+        $('.alert-success').fadeOut();
     }, 5000);
 });
 
@@ -1477,7 +1523,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
         return false;
     }
     if(test_category) {
-        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0) {
+
+        if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;
         }
@@ -1503,6 +1550,13 @@ function publishFormWithAttachments(form, test_category, error_message) {
         success: function(data){
             try {
                 var json = JSON.parse(data);
+
+                if(json["error"]) {
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["error"] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+
             } catch (err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
@@ -1558,7 +1612,7 @@ function changeThreadStatus(thread_id) {
 	});
 }
 
-function editPost(post_id, thread_id, shouldEditThread) {
+function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
@@ -1567,7 +1621,8 @@ function editPost(post_id, thread_id, shouldEditThread) {
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -1583,6 +1638,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                     return;
                 }
                 var post_content = json.post;
+                var lines = post_content.split(/\r|\r\n|\n/).length;
                 var anon = json.anon;
                 var change_anon = json.change_anon;
                 var user_id = escapeSpecialChars(json.user);
@@ -1596,6 +1652,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 var date = time.toLocaleDateString();
                 time = time.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
                 var contentBox = form.find("[name=thread_post_content]")[0];
+                contentBox.style.height = lines*14;
                 var editUserPrompt = document.getElementById('edit_user_prompt');
                 editUserPrompt.innerHTML = 'Editing a post by: ' + user_id + ' on ' + date + ' at ' + time;
                 contentBox.value = post_content;
@@ -1613,11 +1670,14 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 // If first post of thread
                 if(shouldEditThread) {
                     var thread_title = json.title;
+                    var thread_lock_date =  json.lock_thread_date;
                     var thread_status = json.thread_status;
                     $("#title").prop('disabled', false);
                     $(".edit_thread").show();
+                    $('#label_lock_thread').show();
                     $("#title").val(thread_title);
                     $("#thread_status").val(thread_status);
+                    $('#lock_thread_date').val(thread_lock_date);
                     // Categories
                     $(".cat-buttons").removeClass('cat-selected');
                     $.each(categories_ids, function(index, category_id) {
@@ -1632,6 +1692,7 @@ function editPost(post_id, thread_id, shouldEditThread) {
                 } else {
                     $("#title").prop('disabled', true);
                     $(".edit_thread").hide();
+                    $('#label_lock_thread').hide();
                     $("#thread_form").prop("ignore-cat",true);
                     $("#category-selection-container").hide();
                     $("#thread_status").hide();
@@ -1996,14 +2057,15 @@ function showHistory(post_id) {
     });
 }
 
-function addNewCategory(){
+function addNewCategory(csrf_token){
     var newCategory = $("#new_category_text").val();
     var url = buildUrl({'component': 'forum', 'page': 'add_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                newCategory: newCategory
+                newCategory: newCategory,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2044,13 +2106,14 @@ function addNewCategory(){
     })
 }
 
-function deleteCategory(category_id, category_desc){
+function deleteCategory(category_id, category_desc, csrf_token){
     var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
     $.ajax({
             url: url,
             type: "POST",
             data: {
-                deleteCategory: category_id
+                deleteCategory: category_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2076,11 +2139,11 @@ function deleteCategory(category_id, category_desc){
     })
 }
 
-function editCategory(category_id, category_desc, category_color) {
+function editCategory(category_id, category_desc, category_color, csrf_token) {
     if(category_desc === null && category_color === null) {
         return;
     }
-    var data = {category_id: category_id};
+    var data = {category_id: category_id, csrf_token: csrf_token};
     if(category_desc !== null) {
         data['category_desc'] = category_desc;
     }
@@ -2288,7 +2351,7 @@ function hidePosts(text, id) {
 
 }
 
-function deletePostToggle(isDeletion, thread_id, post_id, author, time){
+function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
     if(!checkAreYouSureForm()) return;
     var page = (isDeletion?"delete_post":"undelete_post");
     var message = (isDeletion?"delete":"undelete");
@@ -2301,7 +2364,8 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
             type: "POST",
             data: {
                 post_id: post_id,
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
             },
             success: function(data){
                 try {
@@ -2336,7 +2400,7 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time){
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, url){
+function alterAnnouncement(thread_id, confirmString, url, csrf_token){
     var confirm = window.confirm(confirmString);
     if(confirm){
         var url = buildUrl({'component': 'forum', 'page': url});
@@ -2344,7 +2408,9 @@ function alterAnnouncement(thread_id, confirmString, url){
             url: url,
             type: "POST",
             data: {
-                thread_id: thread_id
+                thread_id: thread_id,
+                csrf_token: csrf_token
+
             },
             success: function(data){
                 window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
@@ -2391,30 +2457,30 @@ function updateHomeworkExtensions(data) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
-            if(json['is_team']){
+            if(json['data']['is_team']){
                 extensionPopup(json);
                 return;
             }
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            if(json['users'].length === 0){
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
             $('#user_id').val(this.defaultValue);
             $('#late_days').val(this.defaultValue);
             $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -2424,7 +2490,7 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
-function loadHomeworkExtensions(g_id) {
+function loadHomeworkExtensions(g_id, due_date) {
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
         url: url,
@@ -2432,12 +2498,13 @@ function loadHomeworkExtensions(g_id) {
             var json = JSON.parse(data);
             var form = $("#load-homework-extensions");
             $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['gradeable_id'] + '</div>';
+            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
             $('#title').replaceWith(title);
-            if(json['users'].length === 0){
+            $('#due_date').text(due_date);
+            if(json['data']['users'].length === 0){
                 $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
             }
-            json['users'].forEach(function(elem){
+            json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
@@ -2448,24 +2515,25 @@ function loadHomeworkExtensions(g_id) {
     });
 }
 
-function addBBCode(type, divTitle){
+function addMarkdownCode(type, divTitle){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
     if(type == 1) {
-        insert = "[url=http://example.com]display text[/url]";
+        insert = "[display text](url)";
     } else if(type == 0){
-        insert = "[code][/code]";
+        insert = "```language" +
+            "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
 
 function refreshOnResponseLateDays(json) {
     $('#late_day_table tr:gt(0)').remove();
-    if(json['users'].length === 0){
+    if(json['data']['users'].length === 0){
         $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
     }
-    json['users'].forEach(function(elem){
+    json['data']['users'].forEach(function(elem){
         elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
@@ -2484,8 +2552,8 @@ function updateLateDays(data) {
         contentType: false,
         success: function(data) {
             var json = JSON.parse(data);
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -2524,8 +2592,8 @@ function deleteLateDays(user_id, datestamp) {
             },
             success: function(data) {
                 var json = JSON.parse(data);
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
@@ -2583,7 +2651,7 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
 
     $.ajax({
         url: url,
@@ -2596,7 +2664,7 @@ function changePermission(filename, checked) {
 
 function changeNewDateTime(filename, newdatatime) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
 
     $.ajax({
         url: url,
@@ -2625,6 +2693,9 @@ function checkSidebarCollapse() {
     if (size < 1000) {
         $("#sidebar").toggleClass("collapsed", true);
     }
+    else{
+        $("#sidebar").toggleClass("collapsed", false);
+    }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
@@ -2644,6 +2715,9 @@ $(document).ready(function() {
         position: { my: "right+0 bottom+0" },
         content: function () {
             if($("#sidebar").hasClass("collapsed")) {
+                if ($(this).attr("title") === "Collapse Sidebar") {
+                    return "Expand Sidebar";
+                }
                 return $(this).attr("title")
             }
             else {
@@ -2651,7 +2725,6 @@ $(document).ready(function() {
             }
         }
     });
-    $("#nav-sidebar-collapse.collapse-icon").attr("title", "Expand Sidebar");
 
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {
@@ -2666,8 +2739,8 @@ $(document).ready(function() {
     checkSidebarCollapse();
 });
 
-function checkQRProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_qr_upload_progress'});
+function checkBulkProgress(gradeable_id){
+    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
     $.ajax({
         url: url,
         data: {
@@ -2677,7 +2750,7 @@ function checkQRProgress(gradeable_id){
         success: function(data) {
             data = JSON.parse(data);
             var result = {};
-            updateQRProgress(data['job_data'], data['count']);
+            updateBulkProgress(data['job_data'], data['count']);
         },
         error: function(e) {
             console.log("Failed to check job queue");

@@ -1,5 +1,5 @@
 @import url("reset.css");
-@import url("../vendor/google/inconsolata.css");
+@import url("google/inconsolata.css");
 
 html {
     height: 100%;
@@ -12,7 +12,7 @@ body {
     position: relative;
 }
 :root {
-    --viewed_content: #e8f1f8;
+    --viewed_content: #e8f0f7;
 }
 #site-body {
     /* OLD SEAFOAM GREEN COLOR */
@@ -197,11 +197,6 @@ input[type="checkbox"]:checked:before {
   display: inline-block;
 }
 
-input[type="checkbox"]:focus{
-    outline: 0 none;
-    box-shadow: none;
-}
-
 select.disabled,
 textarea.disabled,
 input.disabled {
@@ -254,7 +249,7 @@ table tr.table-header {
 }
 
 .table>thead>tr {
-    background: #E1E1E1;
+    background: #ededed;
 }
 
 .table>tbody>tr.info {
@@ -276,6 +271,33 @@ table tr.table-header {
 
 .tr-vertically-centered > td {
     vertical-align: middle;
+}
+
+.table-text-left {
+    text-align: center;
+}
+
+.table-text-left td {
+    border: none;
+}
+
+.table-text-left > tbody > tr > td:nth-child(3),
+.table-text-left > tbody > tr > td:nth-child(4),
+.table-text-left > tbody > tr > td:nth-child(5),
+.table-text-left > thead > tr > th:nth-child(3),
+.table-text-left > thead > tr > th:nth-child(4),
+.table-text-left > thead > tr > th:nth-child(5)  {
+    text-align: left;
+}
+
+/* layout table classes  */
+/* Layout tables do not have <caption>, <thead>, and <th> tags */
+
+/* styling used in a <th> cell, except this is for a layout table */
+.layout_th_cell {
+    font-weight: bold;
+    text-align: center;
+    display: table-cell;
 }
 
 /**********************************************************/
@@ -300,7 +322,7 @@ table tr.table-header {
     width: 100%;
     left: 0;
     top: 0;
-    z-index: 9999;
+    z-index: 999;
     font-size: 15px;
     font-weight: 600;
     margin-left:-1px;
@@ -573,7 +595,7 @@ table tr.table-header {
 }
 
 #alerts {
-
+    z-index: 9999;
 }
 
 #messages {
@@ -596,7 +618,7 @@ table tr.table-header {
 }
 
 .option {
-    margin-bottom: 40px;
+    margin-bottom: 20px;
 }
 
 .option-title {
@@ -609,7 +631,6 @@ table tr.table-header {
 }
 
 .option-input {
-    margin-top: 10px;
 }
 
 .option-input > textarea,
@@ -712,21 +733,23 @@ table tr.table-header {
     /*    color: #4a4a4a;*/
     border: 4px solid #276394;
 }
+
+.viewed_post{
+    background-color: white;
+}
+
 /* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #A9A9A9;
-    color: #4a4a4a;
+    background-color: #dcdcdc;
 }
 
 .deleted.active {
-    background-color: #505050;
+    background-color: #dcdcdc;
 }
+
 .new_post {
     background-color: var(--viewed_content);
     /*background-color: #d4e1f2;*/
-}
-.viewed_post{
-    background-color: white;
 }
 
 .important {
@@ -1007,6 +1030,8 @@ tbody.collapse.in {
   background-image: none;
   filter: progid:DXImageTransform.Microsoft.gradient(enabled = false);
 }
+
+.show > .dropdown-menu,
 .open > .dropdown-menu {
   display: block;
 }
@@ -1060,6 +1085,7 @@ tbody.collapse.in {
     border-radius: 6px 0 6px 6px;
 }
 
+.show > a,
 .open > a {
   outline: 0;
 }
@@ -1106,6 +1132,7 @@ tbody.collapse.in {
 }
 .btn-primary:active,
 .btn-primary.active,
+.show > .dropdown-toggle.btn-primary,
 .open > .dropdown-toggle.btn-primary {
   color: #fff;
   background-color: #286090;
@@ -1113,12 +1140,15 @@ tbody.collapse.in {
 }
 .btn-primary:active:hover,
 .btn-primary.active:hover,
+.show > .dropdown-toggle.btn-primary:hover,
 .open > .dropdown-toggle.btn-primary:hover,
 .btn-primary:active:focus,
 .btn-primary.active:focus,
+.show > .dropdown-toggle.btn-primary:focus,
 .open > .dropdown-toggle.btn-primary:focus,
 .btn-primary:active.focus,
 .btn-primary.active.focus,
+.show > .dropdown-toggle.btn-primary.focus,
 .open > .dropdown-toggle.btn-primary.focus {
   color: #fff;
   background-color: #204d74;
@@ -1126,6 +1156,7 @@ tbody.collapse.in {
 }
 .btn-primary:active,
 .btn-primary.active,
+.show > .dropdown-toggle.btn-primary,
 .open > .dropdown-toggle.btn-primary {
   background-image: none;
 }
@@ -1370,32 +1401,11 @@ div.full_height {
     padding: 2px 0px;
 }
 
-
-#sidebar.collapsed #nav-buttons ul li .collapse-icon {
-    display: inline-block;
-    width: 60px;
-    padding: 8px 6px;
-    text-align: center;
-}
-
 #sidebar.collapsed #nav-buttons ul li .nav-row .notification_badge {
     font-size: 12px;
     margin-top: -12px;
     text-align: right;
     position: relative; /* So it goes on top */
-}
-
-#nav-buttons ul li .nav-row.collapse-icon i.fa {
-    margin-left: 0;
-    width: 48px;
-}
-#nav-buttons ul li .nav-row.collapse-icon i.fas {
-    margin-left: 0;
-    width: 48px;
-}
-#nav-buttons ul li .nav-row.collapse-icon i.far {
-    margin-left: 0;
-    width: 48px;
 }
 
 #nav-buttons ul li a.nav-row {
@@ -1419,36 +1429,6 @@ div.full_height {
 }
 #nav-buttons ul li a.nav-row i.far {
     color: #000000;
-}
-
-#nav-buttons ul li a.collapse-icon i.fa {
-    color: #000000;
-}
-#nav-buttons ul li a.collapse-icon i.fas {
-    color: #000000;
-}
-#nav-buttons ul li a.collapse-icon i.far {
-    color: #000000;
-}
-
-#nav-buttons ul li a.collapse-icon:hover i.fa {
-    color: #006398;
-}
-#nav-buttons ul li a.collapse-icon:hover i.fas {
-    color: #006398;
-}
-#nav-buttons ul li a.collapse-icon:hover i.far {
-    color: #006398;
-}
-
-#nav-buttons ul li a.collapse-icon:active i.fa {
-    color: #790000;
-}
-#nav-buttons ul li a.collapse-icon:active i.fas {
-    color: #790000;
-}
-#nav-buttons ul li a.collapse-icon:active i.far {
-    color: #790000;
 }
 
 #nav-buttons ul li .nav-row i.fa {
@@ -1538,7 +1518,7 @@ div.full_height {
     list-style-type: none;
     margin: 0;
     padding: 0;
-    width: 60%;
+    width: 100%;
 }
 
 #ui-category-list li {
@@ -1788,6 +1768,18 @@ textarea.comment_display {
     width: 75%;
 }
 
+.rubric_layout_body {
+    background: #f9f9f9;
+}
+
+/* <tr> tag styling to replace <thead> and <tfoot> in rubric tables*/
+.rubric_layout_header,
+.rubric_layout_footer {
+    background: #e1e1e1;
+}
+
+
+
 /*
 end of styles used in the admin gradeable page
 */
@@ -1984,13 +1976,14 @@ end of styles used in the admin gradeable page
 .wrapper-bottom {
     background-color: #99ccff;
 }
-.wrapper-upload th {
-    background-color: #f4f4f4;
-}
 
-.wrapper-upload td, .wrapper-upload th {
+.wrapper-upload td {
     padding: 4px;
     border: 1px solid #000;
+}
+
+.wrapper-upload .wrapper_layout_header {
+    background-color: #f4f4f4;
 }
 
 .query-list {
@@ -2011,6 +2004,10 @@ end of styles used in the admin gradeable page
 
 .courses-table .btn {
     margin-bottom: 3px;
+}
+
+.editor {
+    width: 75%;
 }
 
 .noscript,
@@ -2043,6 +2040,7 @@ end of styles used in the admin gradeable page
     width: 100%;
     max-height: 300px;
 }
+
 #details-legend > li{
     list-style: none;
     padding-left: 15px;
@@ -2053,4 +2051,43 @@ end of styles used in the admin gradeable page
     max-height: 300px;
     overflow-y: scroll;
     overflow-x: hidden;
+}
+
+/* Override the -15px that bootstrap-grid.css sets for these */
+.row {
+    margin-right: 0px;
+    margin-left: 0px;
+}
+
+/* Data table captions that replace <h3> and <h5> for VPAT */
+.caption_h3 {
+    font-size: 1.17em;
+    font-weight: bold;
+    text-align: left;
+    caption-side: top;
+    border: 0;
+}
+
+.caption_h5 {
+    font-size: 0.83em;
+    font-weight: bold;
+    text-align: left;
+    caption-side: top;
+    border: 0;
+}
+
+/* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
+#upload-boxes > div:focus {
+    outline: 2px solid cornflowerblue;
+}
+
+/* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
+.fa-trash:focus {
+    outline: 2px solid cornflowerblue;
+}
+
+.invisible-btn{
+    background-color: #00000000;
+    border: 0px;
+    padding: 0px;
 }

@@ -6,10 +6,11 @@ use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\libraries\Output;
 use app\libraries\FileUtils;
+use app\models\Email;
 
 
 class EmailRoomSeatingController extends AbstractController {
-    const DEFAULT_EMAIL_SUBJECT = '[Submitty {$course_name}]: Seating Assignment for {$gradeable_id}';
+    const DEFAULT_EMAIL_SUBJECT = 'Seating Assignment for {$gradeable_id}';
     const DEFAULT_EMAIL_BODY =
 'Hello,
 
@@ -51,11 +52,13 @@ Please email your instructor with any questions or concerns.';
         $course =  $this->core->getConfig()->getCourse();
         $seating_assignments_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "seating", $gradeable_id);
 
-        $classList = $this->core->getQueries()->getClassEmailListWithIds();
+        $classList = $this->core->getQueries()->getEmailListWithIds();
 
         foreach($classList as $user) {
             $user_id = $user['user_id'];
             $user_email = $user['user_email'];
+            $user_group = $user['user_group'];
+            $registration_section = $user['registration_section'];
 
             $room_seating_file = FileUtils::joinPaths($seating_assignments_path, "$user_id.json");
             $room_seating_json = FileUtils::readJsonFile($room_seating_file);
@@ -66,18 +69,19 @@ Please email your instructor with any questions or concerns.';
 
             $email_data = [
                 "subject" => $this->replacePlaceholders($seating_assignment_subject, $room_seating_json),
-                "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json)
+                "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json),
+                "recipient" => $user_email
             ];
 
-            $this->core->getQueries()->createEmail($email_data, $user_email);
+            $seating_assignment_email = new Email($this->core, $email_data);
+            $this->core->getQueries()->createEmail($seating_assignment_email);
         }
 
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
-        return $this->core->redirect($this->core->buildUrl());
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function replacePlaceholders($message, $data) {
-
         $replaces = [
             'gradeable' => 'gradeable_id',
             'date' => 'exam_date',
@@ -95,8 +99,8 @@ Please email your instructor with any questions or concerns.';
         	}
         }
 
-				$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
-        return $message; 
+		$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+        return $message;
     }
 
 }

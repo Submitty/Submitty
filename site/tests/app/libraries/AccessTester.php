@@ -25,7 +25,7 @@ class AccessTester extends BaseUnitTest {
      */
     private $access;
 
-    protected function setUp() {
+    protected function setUp(): void {
         $this->core = $this->createMockCore();
         $this->access = new Access($this->core);
     }

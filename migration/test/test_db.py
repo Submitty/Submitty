@@ -73,7 +73,3 @@ class TestDb(unittest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             migrator.db.Database.get_connection_string({'database_driver': 'invalid'})
         self.assertEqual('Invalid driver: invalid', str(cm.exception))
-
-
-if __name__ == '__main__':
-    unittest.main()

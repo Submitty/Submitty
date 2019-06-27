@@ -28,7 +28,9 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
         $this->course_db->query("
 SELECT u.*, ns.merge_threads, ns.all_new_threads,
         ns.all_new_posts, ns.all_modifications_forum,
-        ns.reply_in_post_thread, sr.grading_registration_sections
+        ns.reply_in_post_thread, ns.merge_threads_email, ns.all_new_threads_email,
+        ns.all_new_posts_email, ns.all_modifications_forum_email,
+        ns.reply_in_post_thread_email, sr.grading_registration_sections
 FROM users u
 LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
 LEFT JOIN (
@@ -111,13 +113,14 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
 
 
     public function insertSubmittyUser(User $user) {
-        $array = array($user->getId(), $user->getPassword(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
+        $array = array($user->getId(), $user->getPassword(), $user->getNumericId(),
+                       $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
 
-        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
-                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
+        $this->submitty_db->query("INSERT INTO users (user_id, user_password, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", $array);
     }
 
     public function insertCourseUser(User $user, $semester, $course) {
@@ -133,7 +136,7 @@ VALUES (?,?,?,?,?,?)", $params);
     }
 
     public function updateUser(User $user, $semester=null, $course=null) {
-        $params = array($user->getLegalFirstName(), $user->getPreferredFirstName(),
+        $params = array($user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
                        $this->submitty_db->convertBoolean($user->isInstructorUpdated()));
@@ -147,7 +150,8 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->submitty_db->query("
 UPDATE users
 SET
-  user_firstname=?, user_preferred_firstname=?, user_lastname=?, user_preferred_lastname=?,
+  user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
+  user_lastname=?, user_preferred_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?", $params);
 
@@ -369,7 +373,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
-    public function getGradeablesPastAndSection() {
+    public function getGradeablesRotatingGraderHistory($gradeable_id) {
+        $params = [$gradeable_id];
         $this->course_db->query("
   SELECT
     gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
@@ -383,7 +388,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       FROM gradeable AS g
       LEFT JOIN
         grading_rotating AS gr ON g.g_id = gr.g_id
-      WHERE g_grade_by_registration = 'f'
+      WHERE g_grader_assignment_method = 0 OR g.g_id = ?
     ) AS g
   ) as gu
   LEFT JOIN (
@@ -393,7 +398,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       grading_rotating
     GROUP BY g_id, user_id
   ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
-  ORDER BY user_group, user_id, g_grade_start_date");
+  ORDER BY user_group, user_id, g_grade_start_date",$params);
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach($rows as $row) {
@@ -1135,7 +1140,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
               /* Join grade inquiry */
-              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}=gd.gd_{$submitter_type} AND rr.g_id=g.g_id
+              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}={$submitter_type_ext} AND rr.g_id=g.g_id
             WHERE $selector
             $order";
 
@@ -1358,7 +1363,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               g_instructions_url AS instructions_url,
               g_overall_ta_instructions AS ta_instructions,
               g_gradeable_type AS type,
-              g_grade_by_registration AS grade_by_registration,
+              g_grader_assignment_method AS grader_assignment_method,
               g_ta_view_start_date AS ta_view_start_date,
               g_grade_start_date AS grade_start_date,
               g_grade_due_date AS grade_due_date,
@@ -1376,6 +1381,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_config_path AS autograding_config_path,
                   eg_is_repository AS vcs,
                   eg_subdirectory AS vcs_subdirectory,
+                  eg_vcs_host_type AS vcs_host_type,
                   eg_team_assignment AS team_assignment,
                   eg_max_team_size AS team_size_max,
                   eg_team_lock_date AS team_lock_date,

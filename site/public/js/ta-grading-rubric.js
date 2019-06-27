@@ -60,9 +60,6 @@ COUNT_DIRECTION_DOWN = -1;
 PDF_PAGE_NONE = 0;
 PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
-PDF_PAGE_HEIGHT = 841.89;
-PDF_BORDER_HEIGHT = 0;
-PDF_OFFSET = 0;
 
 /**
  * Whether ajax requests will be asynchronous or synchronous.  This
@@ -2530,9 +2527,21 @@ function openComponentGrading(component_id) {
 function scrollToPage(page_num){
     let files = $('.openable-element-submissions');
     for(let i = 0; i < files.length; i++){
-        let zoom = localStorage.getItem('scale') || 1;
+        let zoom = parseInt(localStorage.getItem('scale')) || 1;
         if(files[i].innerText.trim() == "upload.pdf"){
-            let scrollY = zoom*(page_num-1)*(PDF_PAGE_HEIGHT+PDF_OFFSET)+PDF_BORDER_HEIGHT;
+            let page1 = $(".page").filter(":first");
+            // default to 0 if no pages
+            let page_height = 0;
+            let page_margin_top = 0;
+            let page_margin_bot = 0;
+            if (page1.length) {
+                //get css attr, remove 'px' : 
+                page_height = parseInt(page1.css("height").slice(0, -2));
+                page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
+                page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
+            }
+            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
+            let scrollY = zoom*(page_num-1)*(page_height+page_margin_bot)+page_margin_top;
             if($("#file_view").is(":visible")){
                 $('#file_content').animate({scrollTop: scrollY}, 500);
             } else {
