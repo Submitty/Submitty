@@ -1428,6 +1428,24 @@ ORDER BY user_id ASC");
     }
 
     /**
+     * Gets all user_ids that are on a team for a given gradeable
+     *
+     * @param $gradeable
+     * @returns string[]
+     */
+    public function getUsersOnTeamsForGradeable($gradeable) {
+        $params = array($gradeable->getId());
+        $this->course_db->query("SELECT user_id FROM teams WHERE 
+                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
+
+        $users = [];
+        foreach ($this->course_db->rows() as $row){
+            $users[] = $row['user_id'];
+        }
+        return $users;
+    }
+
+    /**
      * This inserts an row in the electronic_gradeable_data table for a given gradeable/user/version combination.
      * The values for the row are set to defaults (0 for numerics and NOW() for the timestamp) with the actual values
      * to be later filled in by the submitty_autograding_shipper.py and insert_database_version_data.py scripts.
