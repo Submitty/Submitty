@@ -7,7 +7,6 @@ use app\libraries\DateUtils;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
 
 
 class CourseMaterialsView extends AbstractView {
@@ -16,15 +15,12 @@ class CourseMaterialsView extends AbstractView {
      * @return string
      */
     public function listCourseMaterials($user_group) {
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
             $files[$start_dir_name] = array();
-            $working_dirRoot = &$files[$start_dir_name];
-
             $student_access = ($user_group === 4);
-
-            $arrlength = count($course_materials_array);
-
             $now_date_time = $core->getDateTimeNow();
 
             foreach($course_materials_array as $file) {
@@ -76,8 +72,6 @@ class CourseMaterialsView extends AbstractView {
         $submissions = array();
         $file_shares = array();
         $file_release_dates = array();
-
-        $course_materials_array = array();
 
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
