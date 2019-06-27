@@ -10,7 +10,7 @@
                 </td>
                 <td width="5%"> </td>
                 <td width="45%" style="position:relative">
-                    <button onclick="location.href='{{ core.buildUrl({'component': 'admin', 'page': 'reports', 'action': 'summary' }) }}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Grade Summaries</button>
+                    <button onclick="location.href='{{ summaries_url }}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate Grade Summaries</button>
                 </td>
             </tr>
             <tr class="bar"></tr>
@@ -21,7 +21,7 @@
                 </td>
                 <td width="5%"> </td>
                 <td width="45%" style="position:relative">
-                    <button onclick="location.href='{{ core.buildUrl({'component': 'admin', 'page': 'reports', 'action': 'csv' }) }}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate CSV Report</button>
+                    <button onclick="location.href='{{ csv_url }}'" class="btn btn-primary" style="width:100%;position:absolute;top:50%;transform:translate(0,-50%);">Generate CSV Report</button>
                 </td>
             </tr>
             <tbody>
