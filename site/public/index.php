@@ -297,7 +297,7 @@ if ($is_api) {
     $core->disableRedirects();
 
     $router = new app\libraries\routers\WebRouter($request, $core, $api_logged_in, true);
-    $router->run();
+    $response = $router->run();
 }
 elseif (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
