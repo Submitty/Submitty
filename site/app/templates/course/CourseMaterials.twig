@@ -54,8 +54,8 @@
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'>
-                    <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> 
+                <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
 
                 <label for="latest-events">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"
@@ -120,8 +120,6 @@
                     }
                     determineRelease('date_to_release_{{ id }}')
                 </script>
-
-
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
@@ -142,8 +140,8 @@
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'misc', 'page': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'>
-                    <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> 
+                  <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                 [{% for key,value in inDir %}
@@ -153,6 +151,7 @@
                     {% endif %}
                 {% endfor %}]
                         )' class="btn btn-primary">Set Folder Release Date</a>
+
 
             {% endif %}
         </div>
