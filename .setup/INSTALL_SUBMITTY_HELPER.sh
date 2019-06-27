@@ -508,7 +508,7 @@ if [ "$(jq -r '.junit_version' ${VERSION_FILE})" != "${JUNIT_VERSION}" ]; then
     mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
     pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
     rm -rf junit*jar
-    wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    wget https://maven-central.storage-download.googleapis.com/repos/central/data/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
     popd > /dev/null
     cat <<< "$(jq ".junit_version = \"${JUNIT_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
 fi
@@ -519,7 +519,7 @@ if [ "$(jq -r '.hamcrest_version' ${VERSION_FILE})" != "${HAMCREST_VERSION}" ]; 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
     pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
     rm -rf hamcrest*.jar
-    wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+    wgethttps://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
     popd > /dev/null
     cat <<< "$(jq ".hamcrest_version = \"${HAMCREST_VERSION}\"" < ${tmp_version_file})" > ${tmp_version_file}
 fi
