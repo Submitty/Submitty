@@ -1,23 +1,20 @@
 <div class="electronic_file">
     <b>
-		<h3>Choose an autograding configuration:</h3>
-		<p> Simple configurations are provided, and custom configurations can be uploaded or stored within a local repository. </p>
+		<div class="option-title">Choose an autograding configuration:</div>
+		<p> Type in the full path to a configuration file, or select from the list below. </p>
 	</b>
 	
     <fieldset>
-		<select class="config_path_dropdown ignore" id="config_path_dropdown" style="width: 700px;">
-			<option value="" {{ config_select_mode == 'manual' ? "selected" : ""}} >Manually Type in Path </option>
-			{%for path in all_config_paths %}
-				{% if path.1 == gradeable.getAutogradingConfigPath() %}
-                    <option value="{{ path.1 }}" selected="selected">{{ path.0 }}</option>
-                {% else %}
-                    <option value="{{ path.1 }}">{{ path.0 }}</option>
-                {% endif %}
-			{% endfor %}
-        </select>
+		{# data for config_textbox autofill #}
+		{% for path in all_config_paths %}
+		<div name = "data" data-entry-name = "{{path.0}}" data-entry-path = "{{path.1}}" </div>
+		{% endfor %}
+		
+		<input class="config_search ignore" type="text" id="config_search" name="dropdown_search" 
+			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
 		
 		<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
-		<br><br>
+		<br /><br />
         <p><label for="input_provide_full_path">Full path to autograding configuration for current selection:</label></p>
         <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
                 {{'disabled'}}/>
@@ -60,7 +57,7 @@
         <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     </div>
     <div class="log-container">
-        <h3>Build log:</h3>
+        <div class="option-title">Build log:</div>
         {% if build_script_output is null or build_script_output is empty %}
             <pre>There is currently no build output.</pre>
         {% else %}
@@ -69,7 +66,7 @@
     </div>
 
     <div class="log-container">
-        <h3>CMake output:</h3>
+        <div class="option-title">CMake output:</div>
         {% if cmake_output is null or cmake_output is empty %}
             <pre>There is currently no cmake output.</pre>
         {% else %}
@@ -78,7 +75,7 @@
     </div>
 
     <div class="log-container">
-        <h3>Make output:</h3>
+        <div class="option-title">Make output:</div>
         {% if make_output is null or make_output is empty %}
             <pre>There is currently no make output.</pre>
         {% else %}
@@ -104,17 +101,47 @@
         }
     }
 
+	function getConfigData() {
+		var names = [];
+		var paths = [];
+		
+		$("[name='data']").each(function() {
+			names.push($(this).attr("data-entry-name"));
+			paths.push($(this).attr("data-entry-path"));
+		});
+		
+		return [names,paths];
+	}
+	
+	
     function onConfigPathChange() {
-        let manual_input = $('#input_provide_full_path');
-		if ($('#config_path_dropdown').val() == "") {
-			manual_input.prop('disabled', false);
-			return;
+		let data = getConfigData();
+	
+        let full_path = $('#input_provide_full_path');
+		
+		let current_val = $('#config_search').val();
+		if (current_val != ""){
+			let index = -1;
+			for (i=0; i<data[0].length; i++) {
+				if (current_val == data[0][i]) {
+					index = i;
+				}
+			}
+			if (index != -1) {
+				current_val = data[1][index];
+			}
+
+			full_path.val(current_val);
+			full_path.change();
 		}
-		else {
-			manual_input.prop('disabled', true);
+		
+		for (i=0; i<data[1].length; i++) {
+			if (full_path.val() == data[1][i]) {
+				$('#config_search').val(data[0][i]);
+				return;
+			}
 		}
-		manual_input.val($('#config_path_dropdown').val());
-		manual_input.change();
+		$('#config_search').val(full_path.val());
     }
 
     function onStudentViewChange() {
@@ -161,6 +188,10 @@
 
     $(document).ready(function() {
 
+		$("[name='dropdown_search']").autocomplete({
+			source: getConfigData()[0]
+		});
+	
         // Hide PDF settings if not in use
         onPdfChange();
         $('[name="pdf_page"]').change(onPdfChange);
@@ -178,7 +209,7 @@
 
         // Update the text box when the path config changes
 		onConfigPathChange();
-        $('#config_path_dropdown').change(onConfigPathChange);
+        $('#config_search').change(onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
