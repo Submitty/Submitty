@@ -338,6 +338,7 @@ elseif (!$supported_by_new_router) {
             $control->run();
             break;
     }
+    $response = null;
 }
 else {
     $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
