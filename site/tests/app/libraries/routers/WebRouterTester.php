@@ -132,7 +132,8 @@ class WebRouterTester extends BaseUnitTest {
             ["/s19/../../sample"],
             ["/../../s19/sample"],
             ["/authentication/login"],
-            ["/index.php?semester=s19&course=sample"]
+            ["/index.php?semester=s19&course=sample"],
+            ["/s19/sample/random/invalid/endpoint"]
         ];
     }
 }
