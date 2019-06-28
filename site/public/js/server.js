@@ -1246,7 +1246,7 @@ function downloadFileWithAnyRole(file_name, path) {
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
+    window.location = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
 }
 
 function checkColorActivated() {
@@ -2651,7 +2651,7 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
 
     $.ajax({
         url: url,
@@ -2664,7 +2664,7 @@ function changePermission(filename, checked) {
 
 function changeNewDateTime(filename, newdatatime) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
 
     $.ajax({
         url: url,

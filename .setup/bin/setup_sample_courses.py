@@ -220,17 +220,26 @@ def main():
     # queue up all of the newly created submissions to grade!
     os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
 
-def generate_random_user_id(length=15):
-    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
-
-def generate_random_ta_comment():
+def get_random_text_from_file(filename):
     line = ""
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'TAComment.txt')) as comment:
+    with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
         for num, aline in enumerate(comment):
             if random.randrange(num + 2): continue
             line = aline
     return line.strip()
+
+def generate_random_user_id(length=15):
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
+
+def generate_random_ta_comment():
+    return get_random_text_from_file('TAComment.txt')
+    
+def generate_random_ta_note():
+    return get_random_text_from_file('TANote.txt')
+
+def generate_random_student_note():
+    return get_random_text_from_file('StudentNote.txt')
 
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
@@ -1455,18 +1464,17 @@ class Gradeable(object):
         self.components = []
         for i in range(len(gradeable['components'])):
             component = gradeable['components'][i]
-            if self.type < 2:
-                component['gc_is_text'] = False
-            elif self.type > 0:
-                component['gc_ta_comment'] = ""
-                component['gc_student_comment'] = ""
+            if self.type >= 0:
+                component['gc_ta_comment'] = generate_random_ta_note()
+                component['gc_student_comment'] = generate_random_student_note()
                 component['gc_page'] = 0
-
             if self.type == 1:
                 component['gc_lower_clamp'] = 0
                 component['gc_default'] = 0
                 component['gc_max_value'] = 1
                 component['gc_upper_clamp'] = 1
+            if self.type != 2:
+                component['gc_is_text'] = False
             i-=1;
             self.components.append(Component(component, i+1))
 

@@ -329,7 +329,8 @@ class ForumThreadView extends AbstractView {
             "currentThread" => $currentThread,
             "currentCourse" => $currentCourse,
             "generate_post_content" => $generatePostContent,
-            "display_option" => $display_option
+            "display_option" => $display_option,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
         return $return;
     }
@@ -958,6 +959,7 @@ class ForumThreadView extends AbstractView {
             "categories" => $categories,
             "category_colors" => $category_colors,
             "forumBarData" => $forumBarData,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
 
         return $return;

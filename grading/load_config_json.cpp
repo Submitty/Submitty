@@ -189,7 +189,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       assert(whole_config["autograding_method"] == "docker");
     }
 
-    bool found_router = false;
+    int router_container = -1;
     bool found_non_server = false;
 
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
@@ -209,7 +209,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
 
       if (this_testcase["containers"][container_num]["container_name"] == "router"){
-        found_router = true;
+        assert(router_container == -1);
+        router_container = container_num;
       }
 
       if(!this_testcase["containers"][container_num]["server"].is_boolean()){
@@ -236,7 +237,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
     }
 
-    if(this_testcase["use_router"] && !found_router){
+    if(this_testcase["use_router"] && router_container == -1){
       nlohmann::json insert_router = nlohmann::json::object();
       insert_router["outgoing_connections"] = nlohmann::json::array();
       insert_router["commands"] = nlohmann::json::array();
@@ -244,8 +245,14 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       insert_router["container_name"] = "router";
       insert_router["import_default_router"] = true;
       insert_router["container_image"] = "ubuntu:custom";
+      insert_router["server"] = false;
       this_testcase["containers"].push_back(insert_router);
     }
+    //We now always add the default router in case of instructor overriding
+    else if(this_testcase["use_router"] && router_container != -1){
+      this_testcase["containers"][router_container]["import_default_router"] = true;
+    }
+
     assert(found_non_server == true);
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
