@@ -12,8 +12,6 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
-use app\libraries\response\Response;
-use app\libraries\response\JsonResponse;
 
 
 class WebRouter {
@@ -84,16 +82,13 @@ class WebRouter {
         }
     }
 
-    /**
-     * @return Response
-     */
     public function run() {
         if (is_null($this->parameters)) {
-            return new Response(JsonResponse::getFailResponse("Endpoint not found."));
+            return $this->core->getOutput()->renderJsonFail("Endpoint not found.");
         }
 
         if (!$this->api_authorized) {
-            return new Response(JsonResponse::getFailResponse("Unauthorized access. Please log in."));
+            return $this->core->getOutput()->renderJsonFail("Unauthorized access. Please log in.");
         }
 
         $this->controller_name = $this->parameters['_controller'];
