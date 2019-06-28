@@ -493,8 +493,6 @@ class ReportController extends AbstractController {
         }
         else{
 
-            $benchamrks = $customization->getDisplayBenchmarks();
-
             //Print the form, since the user hasn't provided us with any data
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
                 "customization_data_print" => print_r($customization->getCustomizationData(),true),
@@ -505,15 +503,6 @@ class ReportController extends AbstractController {
                 'sections_and_labels' => (array)$customization->getSectionsAndLabels()
             ]);
 
-            // TODO: For debugging only so we can see if POST changes. Remove this before PR.
-//            try {
-//                $customization_filehandle = fopen($customization_filename, "w");
-//                fwrite($customization_filehandle,"Not-JSON");
-//                fclose($customization_filehandle);
-//            }
-//            catch (\Exception $e) {
-//                $this->core->getOutput()->renderJsonError($e->getMessage());
-//            }
         }
     }
 }
