@@ -246,6 +246,30 @@ HTML;
         // Because sometimes the controllers want to return the response array
         return $response;
     }
+
+    /**
+     * Renders success/error messages and/or JSON responses.
+     * @param $message
+     * @param bool $success
+     * @param bool $show_msg
+     * @return array
+     */
+    public function renderResultMessage($message, $success = true, $show_msg = true) {
+        if ($show_msg == true) {
+            if ($success) {
+                $this->core->addSuccessMessage($message);
+            }
+            else {
+                $this->core->addErrorMessage($message);
+            }
+        }
+
+        if ($success == true) {
+            return $this->core->getOutput()->renderJsonSuccess($message);
+        } else {
+            return $this->core->getOutput()->renderJsonFail($message);
+        }
+    }
     
     public function renderString($string) {
         $this->output_buffer .= $string;
