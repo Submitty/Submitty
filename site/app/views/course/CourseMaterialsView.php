@@ -114,7 +114,8 @@ class CourseMaterialsView extends AbstractView {
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
-            "inDir" => $in_Dir
+            "inDir" => $in_Dir,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

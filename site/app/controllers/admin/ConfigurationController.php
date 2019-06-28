@@ -111,6 +111,11 @@ class ConfigurationController extends AbstractController {
         else if($name === 'upload_message') {
             $entry = nl2br($entry);
         }
+        else if($name == "course_home_url") {
+            if(!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)){
+                return $this->core->getOutput()->renderJsonFail($entry . ' is not a valid URL');
+            }
+        }
 
         $config_ini = $this->core->getConfig()->getCourseJson();
         if(!isset($config_ini['course_details'][$name])) {
