@@ -33,7 +33,8 @@ class GlobalView extends AbstractView {
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
-            "system_message" => $this->core->getConfig()->getSystemMessage()
+            "system_message" => $this->core->getConfig()->getSystemMessage(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
      }
 

@@ -50,7 +50,7 @@
                     Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
                 </div>
                 <div class="sub">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <label for="user_id"> user_id: </label>
 		    <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
@@ -501,7 +501,7 @@
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
+            submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
 
         // otherwise, this is a regular submission of the uploaded files
@@ -510,7 +510,7 @@
                 {{ allowed_late_days }},
                 {{ highest_version }},
                 {{ max_submissions }},
-                "{{ core.getCsrfToken() }}",
+                "{{ csrf_token }}",
                 {{ is_vcs ? "true" : "false" }},
                 {{ num_inputs }},
                 "{{ gradeable_id }}",
@@ -528,7 +528,7 @@
                 {{ allowed_late_days }},
                 highest_version,
                 {{ max_submissions }},
-                "{{ core.getCsrfToken() }}",
+                "{{ csrf_token }}",
                 {{ is_vcs ? "true" : "false" }},
                 {{ num_inputs }},
                 "{{ gradeable_id }}",
@@ -578,7 +578,7 @@
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id)
+                validateUserId("{{ csrf_token }}", "{{ gradeable_id }}", user_id)
                 .then(function(response){
                     if(response['highest_version']){
                         var option = displayPreviousSubmissionOptions(getSubmissionOption);

@@ -11,7 +11,8 @@ class ConfigurationView extends AbstractView {
             "fields" => $fields,
             "gradeable_seating_options" => $gradeable_seating_options,
             "theme_url" => $theme_url,
-            "email_room_seating_url" => $email_room_seating_url
+            "email_room_seating_url" => $email_room_seating_url,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }
