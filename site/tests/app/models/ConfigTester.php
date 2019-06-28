@@ -140,7 +140,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
         $this->assertEquals("http://example.com/index.php?", $config->getSiteUrl());
-        $this->assertEquals("http://example.com/index.php?", $config->getHomepageUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
