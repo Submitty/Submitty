@@ -903,7 +903,8 @@ class ForumThreadView extends AbstractView {
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
             "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
-            "manage_categories_url" => $manage_categories_url
+            "manage_categories_url" => $manage_categories_url,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
 
         return $return;
