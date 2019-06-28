@@ -422,6 +422,7 @@ HTML;
     public function showError($error = "", $die = true) {
         /** @noinspection PhpUndefinedMethodInspection */
         $errorPage = static::getView("Error")->errorPage($error);
+        $errorPage = $this->renderHeader() . $errorPage . $this->renderFooter();
         // @codeCoverageIgnore
         if ($die) {
             die($errorPage);

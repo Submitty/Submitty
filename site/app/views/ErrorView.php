@@ -61,59 +61,10 @@ HTML;
     }
 
     public function errorPage($error_message) {
-        $error_message = nl2br(str_replace(" ", "&nbsp;", $error_message));
-	$return = <<<HTML
-<html>
-<head>
-    <title>Submitty - Forbidden</title>
-</head>
-<body>
-<h1 style="margin-left: 20px; margin-top: 10px;">Forbidden</h1>
-<div style="position: absolute; top: 218px; left: 203px; border: 1px dashed black; padding: 10px; font-family: monospace">
-It does not look like you're allowed to access this page.<br /><br />
-Reason: {$error_message}<br /><br />
-Please contact system administrators if you believe this is a mistake.
-HTML;
-
-
-	if (file_exists("/usr/local/submitty/site/app/views/current_courses.php")) {
-	   $courselist = file_get_contents("/usr/local/submitty/site/app/views/current_courses.php");
-           $return .= <<<HTML
-<br /><br />
-Perhaps you are looking for one of these courses:<br /><br />
-$courselist
-HTML;
-	}
-
-
-        $return .= <<<HTML
-</div>
-
-<pre>
-   /\/\/\/\/\/\  
-  <            >
-   |          |
-   |          |
-   |   _  _   |
-  -|_ / \/ \_ |-
- |I|  \_/\_/  |I|
-  -|   /  \   |-
-   |   \__/   |      ____
-   |          |        \ \
-   |          |         \
-   |__________|
-  /___/\__/\___\
- /     | \|     \
-   /\  |\ | _@|#_
-  / /\ | \| |   |
-  \/  / \ / |   |
-   \_/___/   \_/ 
-</pre>
-
-</body>
-</html>
-HTML;
-return $return;
+        return $this->core->getOutput()->renderTwigTemplate("error/ErrorPage.twig", [
+            "error_message" => $error_message,
+            "main_url" => $this->core->getConfig()->getBaseUrl()
+        ]);
     }
 
     public function noGradeable($gradeable_id = null) {
