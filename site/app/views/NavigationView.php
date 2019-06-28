@@ -77,7 +77,7 @@ class NavigationView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
             "course_name" => $this->core->getDisplayedCourseName(),
             "semester" => $this->core->getFullSemester(),
-            "main_url" => $this->core->getConfig()->getHomepageUrl()
+            "main_url" => $this->core->getConfig()->getBaseUrl()
         ]);
     }
 
