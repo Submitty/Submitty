@@ -394,11 +394,6 @@ class Config extends AbstractModel {
         }
     }
 
-    public function getHomepageUrl()
-    {
-        return $this->base_url."index.php?";
-    }
-
     /**
      * @return boolean
      */

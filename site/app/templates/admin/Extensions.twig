@@ -1,9 +1,9 @@
 <div id="message" type="hidden"></div>
 <div class="content">
     <h1>Excused Absence Extensions</h1>
-    <form action="" enctype="multipart/form-data" id="excusedAbsenceForm" method="post" onsubmit="return updateHomeworkExtensions($(this));">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
-        <input name="option" type="hidden" value="-1"/>
+    <form id="excusedAbsenceForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="option" value="-1" />
         <div class="option">
             <p>
                 Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
@@ -22,7 +22,7 @@
                 </p>
             </div>
         </div>
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}"/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="option-title">Single Student Entry<br></div>
         <div class="option" style="width:25%; display:inline-block;">
             <label for="user_id">Student ID:</label><br>

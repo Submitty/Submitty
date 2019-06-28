@@ -41,7 +41,7 @@
     </p>
     <br />
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_registration_sections'}) }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
             <div class="box col-md-6">
                 <h2>Current Registration Section Counts</h2>
@@ -126,7 +126,7 @@
     <br />
 
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_rotating_sections'}) }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
             <div class="box col-md-6" id="left_box">
                 <h2>Current Rotating Section Counts</h2>
