@@ -420,15 +420,13 @@ HTML;
      * @return string
      */
     public function showError($error = "", $die = true) {
-        /** @noinspection PhpUndefinedMethodInspection */
-        $errorPage = static::getView("Error")->errorPage($error);
-        $errorPage = $this->renderHeader() . $errorPage . $this->renderFooter();
+        $this->renderOutput("Error", "errorPage", $error);
         // @codeCoverageIgnore
         if ($die) {
-            die($errorPage);
+            die($this->getOutput());
         }
 
-        return $errorPage;
+        return $this->getOutput();
     }
     
     public function addInternalCss($file, $folder='css') {
