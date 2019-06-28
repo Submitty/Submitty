@@ -3,21 +3,21 @@
 		<div class="option-title">Choose an autograding configuration:</div>
 		<p> Type in the full path to a configuration file, or select from the list below. </p>
 	</b>
-	
+
     <fieldset>
-		{# data for config_textbox autofill #}
-		{% for path in all_config_paths %}
-		<div name = "data" data-entry-name = "{{path.0}}" data-entry-path = "{{path.1}}" </div>
-		{% endfor %}
-		
-		<input class="config_search ignore" type="text" id="config_search" name="dropdown_search" 
+		<input class="config_search ignore" type="text" id="config_search" list="path_data"
 			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
+			
+		<datalist id="path_data">
+		{% for path in all_config_paths %}
+			<option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}">{{path.0}}</option>
+		{% endfor %}
+		</datalist>
 		
 		<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
 		<br /><br />
         <p><label for="input_provide_full_path">Full path to autograding configuration for current selection:</label></p>
-        <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
-                {{'disabled'}}/>
+			<input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </fieldset>
 
     <div class="btn-container">
@@ -100,28 +100,27 @@
             disableElementChildren('.pdf_page_input', true);
         }
     }
-
+	
 	function getConfigData() {
 		var names = [];
 		var paths = [];
 		
-		$("[name='data']").each(function() {
-			names.push($(this).attr("data-entry-name"));
-			paths.push($(this).attr("data-entry-path"));
+		$("[name='path_autofill_option']").each(function() {
+			names.push($(this).attr("id"));
+			paths.push($(this).attr("data-value"));
 		});
 		
 		return [names,paths];
 	}
-	
-	
+
     function onConfigPathChange() {
-		let data = getConfigData();
-	
-        let full_path = $('#input_provide_full_path');
-		
+		data=getConfigData();
+	    let full_path_obj = $('#input_provide_full_path');
 		let current_val = $('#config_search').val();
+		
+		//if a name is entered change to the path
 		if (current_val != ""){
-			let index = -1;
+			let index=-1;
 			for (i=0; i<data[0].length; i++) {
 				if (current_val == data[0][i]) {
 					index = i;
@@ -130,18 +129,18 @@
 			if (index != -1) {
 				current_val = data[1][index];
 			}
-
-			full_path.val(current_val);
-			full_path.change();
+ 			full_path_obj.val(current_val);
+			full_path_obj.change();
 		}
 		
+		//if path matches display the name
 		for (i=0; i<data[1].length; i++) {
-			if (full_path.val() == data[1][i]) {
+			if (full_path_obj.val() == data[1][i]) {
 				$('#config_search').val(data[0][i]);
 				return;
 			}
 		}
-		$('#config_search').val(full_path.val());
+		$('#config_search').val(full_path_obj.val());
     }
 
     function onStudentViewChange() {
@@ -188,10 +187,6 @@
 
     $(document).ready(function() {
 
-		$("[name='dropdown_search']").autocomplete({
-			source: getConfigData()[0]
-		});
-	
         // Hide PDF settings if not in use
         onPdfChange();
         $('[name="pdf_page"]').change(onPdfChange);
