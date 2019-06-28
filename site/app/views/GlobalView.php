@@ -49,10 +49,4 @@ class GlobalView extends AbstractView {
             "footer_links" => $footer_links
         ]);
     }
-
-    public function invalidPage($page) {
-        return $this->core->getOutput()->renderTwigTemplate("error/InvalidPage.twig", [
-            "page" => $page
-        ]);
-    }
 }

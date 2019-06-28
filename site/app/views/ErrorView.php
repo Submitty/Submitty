@@ -9,12 +9,6 @@ class ErrorView extends AbstractView {
         ]);
     }
 
-    public function invalidPage($page) {
-        return $this->core->getOutput()->renderTwigTemplate("error/InvalidPage.twig", [
-            "page" => $page
-        ]);
-    }
-
     public function errorPage($error_message) {
         return $this->core->getOutput()->renderTwigTemplate("error/ErrorPage.twig", [
             "error_message" => $error_message,
