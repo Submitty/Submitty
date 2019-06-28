@@ -205,16 +205,16 @@ class RainbowCustomization extends AbstractModel{
     public function processForm(){
 
         // Get a new customization file
-        $json = new RainbowCustomizationJSON($this->core);
+        $this->RCJSON = new RainbowCustomizationJSON($this->core);
 
-        // TODO: Figure out how to handle this as a json
-        $form_json = (object)$_POST['customization'];
+        $form_json = $_POST['json_string'];
+        $form_json = json_decode($form_json);
 
         if(isset($form_json->display_benchmark))
         {
             foreach($form_json->display_benchmark as $benchmark)
             {
-                $json->addDisplayBenchmarks($benchmark);
+                $this->RCJSON->addDisplayBenchmarks($benchmark);
             }
         }
 
@@ -222,12 +222,20 @@ class RainbowCustomization extends AbstractModel{
         {
             foreach($form_json->section as $key => $value)
             {
-                $json->addSection((string)$key, $value);
+                $this->RCJSON->addSection((string)$key, $value);
+            }
+        }
+
+        if(isset($form_json->gradeables))
+        {
+            foreach ($form_json->gradeables as $gradeable)
+            {
+                $this->RCJSON->addGradeable($gradeable);
             }
         }
 
         // Write to customization file
-        $json->saveToJsonFile();
+        $this->RCJSON->saveToJsonFile();
 
         print("");
 

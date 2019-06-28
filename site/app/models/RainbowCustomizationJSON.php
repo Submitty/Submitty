@@ -84,28 +84,6 @@ class RainbowCustomizationJSON extends AbstractModel
     }
 
     /**
-     * Removes a benchmark from display_benchmarks
-     * If the benchmark was not found, then no changes are made
-     *
-     * @param string $benchmark
-     * @throws BadArgumentException The passed in argument is not allowed
-     */
-    public function removeDisplayBenchmark(string $benchmark)
-    {
-        if(!in_array($benchmark, self::allowed_display_benchmarks))
-        {
-            throw new BadArgumentException('Passed in benchmark not found in the list of allowed benchmarks');
-        }
-
-        $key = array_search($benchmark, $this->display_benchmark);
-
-        if($key != False)
-        {
-            unset($this->display_benchmark[$key]);
-        }
-    }
-
-    /**
      * Loads the data from the course's rainbow grades customization.json into this php object
      *
      * @throws FileReadException Failure to read the contents of the file
@@ -115,7 +93,7 @@ class RainbowCustomizationJSON extends AbstractModel
     {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
-        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization_no_comments.json');
+        $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
 
         if(!file_exists($course_path))
         {
@@ -188,6 +166,7 @@ class RainbowCustomizationJSON extends AbstractModel
         }
     }
 
+    // TODO: Validate section data
     public function addSection($sectionID, $label)
     {
         $this->section->$sectionID = $label;
@@ -196,6 +175,12 @@ class RainbowCustomizationJSON extends AbstractModel
     public function getSection()
     {
         return $this->section;
+    }
+
+    // TODO: Validate gradeable data
+    public function addGradeable(object $gradeable)
+    {
+        $this->gradeables[] = $gradeable;
     }
 
     public function saveToJsonFile()
@@ -218,7 +203,7 @@ class RainbowCustomizationJSON extends AbstractModel
         foreach($this as $key => $value)
         {
             // Dont include $core
-            if($key != 'core')
+            if($key != 'core' AND $key != 'modified')
             {
                 $json->$key = $value;
             }

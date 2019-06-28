@@ -475,7 +475,7 @@ class ReportController extends AbstractController {
             fclose($customization_filehandle);
         }
 
-        if(isset($_POST["save_customization"])){
+        if(isset($_POST["json_string"])){
             //Handle user input (the form) being submitted
             try {
 

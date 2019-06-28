@@ -127,12 +127,12 @@
 
             // Extract count
             var count = $('#config-count-' + type).val();
-            bucket.count = count;
+            bucket.count = parseInt(count);
 
             // Extract percent
             var percent = $('#percent-' + type).val();
             percent = percent / 100;
-            bucket.percent = percent.toString();
+            bucket.percent = percent;
 
             // Extract each independent gradeable in the bucket
             var ids = [];
@@ -144,7 +144,7 @@
                 var children = $(this).children();
 
                 // Get max points
-                gradeable.max = children[0].value;
+                gradeable.max = parseFloat(children[0].value);
 
                 // Get gradeable id
                 gradeable.id = children[1].innerHTML;
@@ -167,13 +167,12 @@
 
         // Build the overall json
         let ret = {
-            'save_customization': true,
-            'customization': {
-                'display_benchmark': getDisplayBenchmark(),
-                'section' : getSection(),
-                'gradeables' : getGradeableBuckets()
-            }
+            'display_benchmark': getDisplayBenchmark(),
+            'section' : getSection(),
+            'gradeables' : getGradeableBuckets()
         };
+
+        ret = JSON.stringify(ret);
 
         return ret;
     }
@@ -188,7 +187,7 @@
                 'page': 'reports',
                 'action': 'customization'
             }),
-            data: buildJSON(),
+            data: {json_string: buildJSON()},
             success: function (response) {
                 if (response.status === 'success') {
                     $('#save_status').html('Saved successfully');
