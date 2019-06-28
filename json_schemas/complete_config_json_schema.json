@@ -1,5 +1,4 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
   "description" : "The config.json schema for Submitty",
   "additionalProperties" : false,
   "type": "object",
@@ -865,272 +864,272 @@
       "type": "object",
       "description" : "The definition for each type of validation object.",
       "anyOf" : [
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["MultipleJUnitTestGrader"]
-                  }
-                }  
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "instruction_coverage_threshold", "package"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["JaCoCoCoverageReportGrader"]
-                  },
-                  "exclude_class" : {
-                    "type" : "string"
-                  },
-                  "instruction_coverage_threshold" : {
-                    "type" : "number"
-                  },
-                  "package" : {
-                    "type" : "string"
-                  },
-                  "branch_coverage_threshold" : {
-                    "type" : "number"
-                  },
-                  "line_coverage_threshold" : {
-                    "type" : "number"
-                  },
-                  "complexity_coverage_threshold" : {
-                    "type" : "number"
-                  },
-                  "method_coverage_threshold" : {
-                    "type" : "number"
-                  },
-                  "class" : {
-                    "type" : "string"
-                  },
-                  "exclude_package" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "num_tests"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["JUnitTestGrader"]
-                  },
-                  "num_tests" : {
-                    "type" : "integer",
-                    "minimum" : 1
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["EmmaInstrumentationGrader"]
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "coverage_threshold"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["EmmaCoverageReportGrader_doit"]
-                  },
-                  "coverage_threshold" : {
-                    "type" : "number",
-                    "minimum" : 0
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["DrMemoryGrader"]
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "num_tests"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["PacmanGrader"]
-                  }, 
-                  "num_tests" : {
-                    "type" : "integer",
-                    "minimum" : 1
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "data"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["searchToken"]
-                  }, 
-                  "data" : {
-                    "type" : "array",
-                    "items" : {
-                      "type" : "string"
-                    }
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "term", "comparison"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["intComparison"]
-                  }, 
-                  "term" : {
-                    "type" : "number"
-                  }, 
-                  "comparison" : {
-                    "type" : "string"
-                  },
-                  "description" : {
-                    "type" : "string"
-                  },
-                  "failure_message" : {
-                    "type" : "string"
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["diff"]
-                  }, 
-                  "comparison" : {
-                    "type" : "string"
-                  },
-                  "ignoreWhitespace" : {
-                    "type" : "boolean"
-                  },
-                  "lineSwapOk" : {
-                    "type" : "boolean"
-                  },
-                  "extra_student_output" : {
-                    "type" : "boolean"
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["fileExists"]
-                  }, 
-                  "one_of" : {
-                    "type" : "boolean"
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["warnIfNotEmpty"]
-                  }, 
-                  "jvm_memory" : {
-                    "type" : "boolean"
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["warnIfEmpty"]
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["errorIfNotEmpty"]
-                  },
-                  "jvm_memory" : {
-                    "type" : "boolean"
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["errorIfEmpty"]
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method", "acceptable_threshold"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["ImageDiff"]
-                  }
-                },
-                "acceptable_threshold" : {
-                  "type" : "string"
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "enum" : ["custom_validator"]
-                  }
-                }
-              },
-              {
-                "type" : "object",
-                "required" : ["method"],
-                "properties" : {
-                  "method" : {
-                    "type" : "string",
-                    "not" : {"enum":["JUnitTestGrader", "EmmaInstrumentationGrader", "MultipleJUnitTestGrader",
-                             "EmmaCoverageReportGrader", "JaCoCoCoverageReportGrader", "DrMemoryGrader",
-                             "PacmanGrader", "searchToken", "intComparison", "diff", "fileExists",
-                             "warnIfNotEmpty", "warnIfEmpty", "errorIfNotEmpty", "errorIfEmpty", "ImageDiff",
-                             "custom_validator"]}
-                  }
-                }
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["MultipleJUnitTestGrader"]
+            }
+          }  
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "instruction_coverage_threshold", "package"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["JaCoCoCoverageReportGrader"]
+            },
+            "exclude_class" : {
+              "type" : "string"
+            },
+            "instruction_coverage_threshold" : {
+              "type" : "number"
+            },
+            "package" : {
+              "type" : "string"
+            },
+            "branch_coverage_threshold" : {
+              "type" : "number"
+            },
+            "line_coverage_threshold" : {
+              "type" : "number"
+            },
+            "complexity_coverage_threshold" : {
+              "type" : "number"
+            },
+            "method_coverage_threshold" : {
+              "type" : "number"
+            },
+            "class" : {
+              "type" : "string"
+            },
+            "exclude_package" : {
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "num_tests"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["JUnitTestGrader"]
+            },
+            "num_tests" : {
+              "type" : "integer",
+              "minimum" : 1
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["EmmaInstrumentationGrader"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "coverage_threshold"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["EmmaCoverageReportGrader_doit"]
+            },
+            "coverage_threshold" : {
+              "type" : "number",
+              "minimum" : 0
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["DrMemoryGrader"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "num_tests"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["PacmanGrader"]
+            }, 
+            "num_tests" : {
+              "type" : "integer",
+              "minimum" : 1
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "data"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["searchToken"]
+            }, 
+            "data" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
               }
-            ]       
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "term", "comparison"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["intComparison"]
+            }, 
+            "term" : {
+              "type" : "number"
+            }, 
+            "comparison" : {
+              "type" : "string"
+            },
+            "description" : {
+              "type" : "string"
+            },
+            "failure_message" : {
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["diff"]
+            }, 
+            "comparison" : {
+              "type" : "string"
+            },
+            "ignoreWhitespace" : {
+              "type" : "boolean"
+            },
+            "lineSwapOk" : {
+              "type" : "boolean"
+            },
+            "extra_student_output" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["fileExists"]
+            }, 
+            "one_of" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["warnIfNotEmpty"]
+            }, 
+            "jvm_memory" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["warnIfEmpty"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["errorIfNotEmpty"]
+            },
+            "jvm_memory" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["errorIfEmpty"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "acceptable_threshold"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["ImageDiff"]
+            }
+          },
+          "acceptable_threshold" : {
+            "type" : "string"
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["custom_validator"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "not" : {"enum":["JUnitTestGrader", "EmmaInstrumentationGrader", "MultipleJUnitTestGrader",
+                       "EmmaCoverageReportGrader", "JaCoCoCoverageReportGrader", "DrMemoryGrader",
+                       "PacmanGrader", "searchToken", "intComparison", "diff", "fileExists",
+                       "warnIfNotEmpty", "warnIfEmpty", "errorIfNotEmpty", "errorIfEmpty", "ImageDiff",
+                       "custom_validator"]}
+            }
+          }
+        }
+      ]       
     }
   }
 }

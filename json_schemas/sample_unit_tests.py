@@ -3,8 +3,11 @@ import schema_validator
 import json
 import os
 
-with open('complete_config_json_schema.json','r') as infile:
-  SCHEMA = json.load(infile)
+# TODO: ADD pip3 install jsonschema migration!
+
+
+with open('complete_config_json_schema.json', 'r') as infile:
+    SCHEMA = json.load(infile)
 
 test_files = [
     'complete_config_01_simple_python',
@@ -22,14 +25,19 @@ test_files = [
     'complete_config_13_cmake_compilation'
 ]
 
+
 class TestSchema(unittest.TestCase):
     def test_validate_schema(self):
         for test_file in test_files:
-            with self.subTest(msg='Testing validation of test_file', test_file=test_file):
-                with open(os.path.join('tutorial_configs', '{0}.json'.format(test_file)), 'r') as infile:
+            with self.subTest(msg='Testing {0}'.format(test_file),
+                              test_file=test_file):
+                p = os.path.join('tutorial_configs',
+                                 '{0}.json'.format(test_file))
+                with open(p, 'r') as infile:
                     config_json = json.load(infile)
                 try:
-                    schema_validator.submitty_validate_schemas(config_json, SCHEMA)
+                    schema_validator.complete_config_validator(config_json,
+                                                               SCHEMA)
                     success = True
                 except Exception as e:
                     print(e)
