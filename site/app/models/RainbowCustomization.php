@@ -237,6 +237,25 @@ class RainbowCustomization extends AbstractModel{
         // Write to customization file
         $this->RCJSON->saveToJsonFile();
 
+        // Configure json to go into jobs queue
+        $job_json = (object)[];
+        $job_json->job = 'RunAutoRainbowGrades';
+        $job_json->semester = $this->core->getConfig()->getSemester();
+        $job_json->course = $this->core->getConfig()->getCourse();
+
+        // Encode
+        $job_json = json_encode($job_json, JSON_PRETTY_PRINT);
+
+        // Create path to new jobs queue json
+        $path = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Place in queue
+        file_put_contents($path, $job_json);
+
         print("");
 
 //        $this->has_error = "true";

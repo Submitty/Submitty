@@ -464,17 +464,6 @@ class ReportController extends AbstractController {
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
-        //Try to read in any existing customization.json file, update the model
-        $customization_filename = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/customization.json";
-        if(file_exists($customization_filename)) {
-            $customization_filehandle = fopen($customization_filename, "r");
-            /*  TODO: Any reading of existing files goes here, might even want it slightly higher and pass the handle
-             *  or null to RainbowCustomization::buildCustomization($fh);
-             *  Alternately call a new RainbowCustomization::loadCustomization();
-             */
-            fclose($customization_filehandle);
-        }
-
         if(isset($_POST["json_string"])){
             //Handle user input (the form) being submitted
             try {

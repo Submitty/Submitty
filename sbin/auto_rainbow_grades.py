@@ -31,16 +31,16 @@ course = sys.argv[2]
 user = DEFAULT_USER
 
 # Verify course semester folder exists
-semesters = os.listdir(COURSES_PATH)
-
-if semester not in semesters:
-    raise Exception('Unable to locate the semester {} folder'.format(semester))
+# semesters = os.listdir(COURSES_PATH)
+#
+# if semester not in semesters:
+#     raise Exception('Unable to locate the semester {} folder'.format(semester))
 
 # Verify course name folder exists
-courses = os.listdir(COURSES_PATH + '/' + semester)
-
-if course not in courses:
-    raise Exception('Unable to locate the course {} folder'.format(course))
+# courses = os.listdir(COURSES_PATH + '/' + semester)
+#
+# if course not in courses:
+#     raise Exception('Unable to locate the course {} folder'.format(course))
 
 # Verify user exists
 users = pwd.getpwall()
