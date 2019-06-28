@@ -79,9 +79,11 @@
                         onClick: (index, fp) => {
                             let date;
                             switch (index) {
-                                case 0: date = new Date();
+                                case 0: 
+                                    date = new Date();
                                     break;
-                                case 1: date = new Date("9999-01-01 00:00:00");
+                                case 1: 
+                                    date = new Date("9999-01-01 00:00:00");
                                     break;
                             }
                             fp.setDate(date);
