@@ -318,8 +318,8 @@ class SubmissionController extends AbstractController {
             $url = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
-                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'unbuiltGradeable', $gradeable);
+                $this->core->getOutput()->renderOutput('Error',
+                                                       'unbuiltGradeable', $gradeable->getTitle());
                 $error = true;
             }
             else {

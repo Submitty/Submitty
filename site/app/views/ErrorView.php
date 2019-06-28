@@ -21,4 +21,18 @@ class ErrorView extends AbstractView {
             "gradeable_id" => $gradeable_id
         ]);
     }
+
+    public function noAccessCourse() {
+        return $this->core->getOutput()->renderTwigTemplate("error/NoAccessCourse.twig", [
+            "course_name" => $this->core->getDisplayedCourseName(),
+            "semester" => $this->core->getFullSemester(),
+            "main_url" => $this->core->getConfig()->getHomepageUrl()
+        ]);
+    }
+
+    public function unbuiltGradeable($gradeable_title) {
+        return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
+            'title' => $gradeable_title
+        ]);
+    }
 }
