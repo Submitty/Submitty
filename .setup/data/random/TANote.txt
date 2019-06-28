@@ -1,0 +1,10 @@
+Code should include descriptive comments.
+Code should be organized into logical and intuitive functions.
+Deduct points if the student uses global variables.
+Deduct points if student makes use of tabs.
+Students may use OOP or procedural approach, no restrictions have been made.
+Deduct points if student makes use of builtin functions.
+Code should be properly indented and readable.
+Reward student for properly using divide and conquer in code.
+Reward student for including docstrings.
+Deduct points if student makes use of iteration and not recursion.

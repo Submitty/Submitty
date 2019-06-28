@@ -80,12 +80,12 @@ JUNIT_VER=4.12
 HAMCREST_VER=1.3
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-travis_retry wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar
+travis_retry wget https://maven-central.storage-download.googleapis.com/repos/central/data/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar
 chmod o+r . *.jar
 popd
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-travis_retry wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar
+travis_retry wget https://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar
 chmod o+r . *.jar
 popd
 
