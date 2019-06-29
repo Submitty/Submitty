@@ -741,7 +741,6 @@ class ForumThreadView extends AbstractView {
 
         $offset = min(($reply_level - 1) * 30, 180);
 
-//        $post_content = ($this->filter_post_content($post['content']));
         $post_content = $post['content'];
 
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
@@ -829,6 +828,7 @@ class ForumThreadView extends AbstractView {
             }
         }
 
+        $post_box_id = 1;
         if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
