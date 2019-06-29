@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\ErrorMessages;
+use Symfony\Component\Routing\Annotation\Route;
 
 class CourseMaterialsController extends AbstractController {
     public function run() {
@@ -20,19 +21,19 @@ class CourseMaterialsController extends AbstractController {
                 $this->viewCourseMaterialsPage();
                 break;
             case 'delete_course_material_file':
-                $this->deleteCourseMaterialFile();
+                $this->deleteCourseMaterialFile($_REQUEST["path"]);
                 break;
             case 'delete_course_material_folder':
-                $this->deleteCourseMaterialFolder();
+                $this->deleteCourseMaterialFolder($_REQUEST["path"]);
                 break;
             case 'download_course_material_zip':
-                $this->downloadCourseMaterialZip();
+                $this->downloadCourseMaterialZip($_REQUEST["dir_name"], $_REQUEST['path']);
                 break;
             case 'modify_course_materials_file_permission':
-                $this->modifyCourseMaterialsFilePermission();
+                $this->modifyCourseMaterialsFilePermission($_REQUEST['filename'], $_REQUEST['checked']);
                 break;
             case 'modify_course_materials_file_time_stamp':
-                $this->modifyCourseMaterialsFileTimeStamp();
+                $this->modifyCourseMaterialsFileTimeStamp($_REQUEST["dir_name"], $_REQUEST['newdatatime']);
                 break;
             case 'upload_course_materials_files':
                 $this->ajaxUploadCourseMaterialsFiles();
@@ -43,6 +44,9 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/course_materials")
+     */
     public function viewCourseMaterialsPage() {
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
@@ -51,16 +55,17 @@ class CourseMaterialsController extends AbstractController {
         );
     }
 
-    public function deleteCourseMaterialFile() {
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/delete")
+     */
+    public function deleteCourseMaterialFile($path) {
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
 
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                'page' => 'course_materials',
-                'action' => 'view_course_materials_page')));
+            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
         }
 
         if (unlink($path)) {
@@ -84,22 +89,21 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //refresh course materials page
-        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-            'page' => 'course_materials',
-            'action' => 'view_course_materials_page')));
+        $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
     }
 
-    public function deleteCourseMaterialFolder() {
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/delete_folder")
+     */
+    public function deleteCourseMaterialFolder($path) {
         // security check
         $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
 
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                'page' => 'course_materials',
-                'action' => 'view_course_materials_page')));
+            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
         }
 
         // remove entry from json file
@@ -124,14 +128,14 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //refresh course materials page
-        $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-            'page' => 'course_materials',
-            'action' => 'view_course_materials_page')));
+        $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
     }
 
-    public function downloadCourseMaterialZip() {
-        $dir_name = $_REQUEST["dir_name"];
-        $root_path = realpath($_REQUEST["path"]);
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/download_zip")
+     */
+    public function downloadCourseMaterialZip($dir_name, $path) {
+        $root_path = realpath(htmlspecialchars_decode(urldecode($path)));
 
         // check if the user has access to course materials
         if (!$this->core->getAccess()->canI("path.read", ["dir" => 'course_materials', "path" => $root_path])) {
@@ -193,26 +197,24 @@ class CourseMaterialsController extends AbstractController {
         unlink($zip_name); //deletes the random zip file
     }
 
-    public function modifyCourseMaterialsFilePermission() {
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/modify_permission")
+     */
+    public function modifyCourseMaterialsFilePermission($filename, $checked) {
 
         // security check
         if(!$this->core->getUser()->accessAdmin()) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                'page' => 'course_materials',
-                'action' => 'view_course_materials_page')));
+            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
         }
 
-        if (!isset($_REQUEST['filename']) ||
-            !isset($_REQUEST['checked'])) {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                'page' => 'course_materials',
-                'action' => 'view_course_materials_page')));
+        if (!isset($filename) ||
+            !isset($checked)) {
+            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
         }
 
-        $file_name = htmlspecialchars($_REQUEST['filename']);
-        $checked =  $_REQUEST['checked'];
+        $file_name = htmlspecialchars($filename);
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
@@ -233,25 +235,24 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
-    public function modifyCourseMaterialsFileTimeStamp() {
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/modify_timestamp")
+     */
+    public function modifyCourseMaterialsFileTimeStamp($filename, $newdatatime) {
 
         if(!$this->core->getUser()->accessAdmin()) {
             $message = "You do not have access to that page. ";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                'page' => 'course_materials',
-                'action' => 'view_course_materials_page')));
+            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
         }
 
-        if (!isset($_REQUEST['filename']) ||
-            !isset($_REQUEST['newdatatime'])) {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading',
-                'page' => 'course_materials',
-                'action' => 'view_course_materials_page')));
+        if (!isset($filename) ||
+            !isset($newdatatime)) {
+            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
         }
 
-        $file_name = htmlspecialchars($_REQUEST['filename']);
-        $new_data_time = htmlspecialchars($_REQUEST['newdatatime']);
+        $file_name = htmlspecialchars($filename);
+        $new_data_time = htmlspecialchars($newdatatime);
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
@@ -268,6 +269,9 @@ class CourseMaterialsController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/course_materials/upload", methods={"POST"})
+     */
     public function ajaxUploadCourseMaterialsFiles() {
         if(!$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);

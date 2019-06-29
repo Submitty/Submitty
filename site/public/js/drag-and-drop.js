@@ -954,8 +954,8 @@ function handleDownloadImages(csrf_token) {
  */
 
 function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
-    var submit_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'upload_course_materials_files'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+    var submit_url = buildNewCourseUrl(['course_materials', 'upload']);
+    var return_url = buildNewCourseUrl(['course_materials']);
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
@@ -1040,7 +1040,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             }
         },
         error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+            window.location.href = buildNewCourseUrl(['course_materials']);
         }
     });
 }
