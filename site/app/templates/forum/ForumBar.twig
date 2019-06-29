@@ -44,13 +44,21 @@
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 		  				Search
 					</button>
+
 					{% for button in forum_bar_buttons_left %}
 						{% if user_group <= button.required_rank %}
 							{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 							{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-							<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
-								{{ button.display_text|raw }}
-							</a>
+							{% if link | length > 0 %}
+								<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} role="button" >
+									{{ button.display_text|raw }}
+								</a>
+							{% else %}
+								<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" title="{{ button.title }}" {{ onclick }} >
+									{{ button.display_text|raw }}
+								</button>
+							{% endif %}
+
 						{% endif %}
 					{% endfor %}
 				</div>
@@ -59,42 +67,48 @@
 		{% endif %}
 		
 		</div>
-		
-	<div style="padding:0px;" class="col-5">
+
+	<div style="padding:0px;display: flex; flex-direction: row; justify-content: flex-end;" class="col-5">
+
+		{% if show_more %}
+			<div class="dropdown" style="top:3px;margin-right:5px;">
+				<a title="More option" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
+					More <span class="caret"></span>
+				</a>
+				<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+				{% for more in more_data|slice(1) %}
+					{% if user_group <= more.required_rank %}
+						{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
+						{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
+						<li class='dropdown-item'><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
+					{% endif %}
+				{% endfor %}
+				  <li class="dropdown-divider"></li>
+					  <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
+					  <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
+					  <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
+					  {% if user_group <= core.getUser().accessGrading() %}
+						<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
+					  {% endif %}
+				</ul>
+			</div>
+		{% endif %}
 
 		{% for button in forum_bar_buttons_right %}
 			{% if user_group <= button.required_rank %}
 				{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 				{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-				<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
-					{{ button.display_text|raw }}
-				</a>
+				{% if link | length > 0 %}
+					<a role="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+						{{ button.display_text | raw }}
+					</a>
+				{% else %}
+					<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" title="{{ button.title }}" {{ onclick }} >
+						{{ button.display_text | raw }}
+					</button>
+				{% endif %}
 			{% endif %}
 		{% endfor %}
-
-	{% if show_more %}
-	    <div class="dropdown" style="float:right;top:3px;margin-right:5px;">
-	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
-	            More <span class="caret"></span>
-	        </a>
-			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
-			{% for more in more_data|slice(1) %}
-				{% if user_group <= more.required_rank %}
-					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
-					{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-	          		<li class='dropdown-item'><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
-	          	{% endif %}
-	        {% endfor %}
-	          <li class="dropdown-divider"></li>
-	              <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
-				  <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
-	              {% if user_group <= core.getUser().accessGrading() %}
-	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
-	              {% endif %}
-	        </ul>
-	    </div>
-	{% endif %}
 
 	</div>
 </div>
