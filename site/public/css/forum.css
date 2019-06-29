@@ -20,6 +20,10 @@ body {min-width: 925px;}
     max-width: 70vw;
 }
 
+.content h2 {
+    margin-bottom: 10px;
+}
+
 #forum_bar {
     margin-right: 10px;
     padding-left:15px;
@@ -37,7 +41,6 @@ body {min-width: 925px;}
 }
 
 .first_post .post_content{
-    padding-left:20px;
     margin-top: 10px;
 }
 
