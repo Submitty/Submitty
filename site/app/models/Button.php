@@ -9,6 +9,7 @@ use app\libraries\Core;
  * @method string getTitle()
  * @method string|null getSubtitle()
  * @method string|null getHref()
+ * @method string|null getOnclick()
  * @method string getClass()
  * @method string|null getId()
  * @method bool isDisabled()
@@ -21,6 +22,7 @@ use app\libraries\Core;
  * @method void setTitle(string $title)
  * @method void setSubtitle(string|null $subtitle)
  * @method void setHref(string|null $href)
+ * @method void setOnclick(string|null $on_click)
  * @method void setClass(string $class)
  * @method void setId(string|null $id)
  * @method void setDisabled(bool $disabled)
@@ -37,6 +39,8 @@ class Button extends AbstractModel {
     protected $subtitle;
     /** @property @var string|null $href */
     protected $href;
+    /** @property @var string|null $onclick */
+    protected $onclick;
     /** @property @var string $class */
     protected $class;
     /** @property @var string|null $id */
@@ -63,6 +67,7 @@ class Button extends AbstractModel {
         $this->title    = $details["title"] ?? null;
         $this->subtitle = $details["subtitle"] ?? null;
         $this->href     = $details["href"] ?? null;
+        $this->onclick  = $details["onclick"] ?? null;
         $this->class    = $details["class"] ?? "btn";
         $this->id       = $details["id"] ?? null;
         $this->disabled = $details["disabled"] ?? false;
@@ -74,6 +79,14 @@ class Button extends AbstractModel {
         $this->aria_label = $details["aria_label"] ?? null;
         $this->badge = $details["badge"] ?? null;
         $this->icon = $details["icon"] ?? null;
+    }
+
+    /**
+     * checks whether a button has on onclick affect
+     * @return bool
+     */
+    public function hasOnclick() {
+        return !($this->getOnclick() == null);
     }
 
 }

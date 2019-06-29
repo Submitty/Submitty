@@ -29,10 +29,12 @@ class GlobalView extends AbstractView {
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
             "site_url" => $this->core->getConfig()->getSiteUrl(),
+            "course_url" => $this->core->buildNewCourseUrl(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
-            "system_message" => $this->core->getConfig()->getSystemMessage()
+            "system_message" => $this->core->getConfig()->getSystemMessage(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
      }
 

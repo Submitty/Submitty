@@ -28,6 +28,27 @@ function buildUrl(parts) {
     return document.body.dataset.siteUrl + constructed;
 }
 
+/**
+ * Acts in a similar fashion to Core->buildNewUrl() function within the PHP code
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildNewUrl(parts = []) {
+    return document.body.dataset.baseUrl + parts.join('/');
+}
+
+/**
+ * Acts in a similar fashion to Core->buildNewCourseUrl() function within the PHP code
+ * Course information is prepended to the URL constructed.
+ *
+ * @param {object} parts - Object representing URL parts to append to the URL
+ * @returns {string} - Built up URL to use
+ */
+function buildNewCourseUrl(parts = []) {
+    return document.body.dataset.courseUrl + '/' + parts.join('/');
+}
+
 function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";
@@ -160,7 +181,7 @@ function editUserForm(user_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            var json = JSON.parse(data);
+            var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
             $('[name="edit_user"]', form).val("true");
@@ -287,6 +308,15 @@ function newDeleteGradeableForm(form_action, gradeable_name) {
     $('[name="delete-gradeable-message"]', form).html('');
     $('[name="delete-gradeable-message"]', form).append('<b>'+gradeable_name+'</b>');
     $('[name="delete-confirmation"]', form).attr('action', form_action);
+    form.css("display", "block");
+}
+
+function displayCloseSubmissionsWarning(form_action,gradeable_name) {
+    $('.popup-form').css('display', 'none');
+    var form = $("#close-submissions-form");
+    $('[name="close-submissions-message"]', form).html('');
+    $('[name="close-submissions-message"]', form).append('<b>'+gradeable_name+'</b>');
+    $('[name="close-submissions-confirmation"]', form).attr('action', form_action);
     form.css("display", "block");
 }
 
@@ -1216,7 +1246,7 @@ function downloadFileWithAnyRole(file_name, path) {
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildUrl({'component': 'misc', 'page': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
+    window.location = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
 }
 
 function checkColorActivated() {
@@ -1392,7 +1422,7 @@ $(function() {
     }
 
     setTimeout(function() {
-        $('.inner-message').fadeOut();
+        $('.alert-success').fadeOut();
     }, 5000);
 });
 
@@ -2485,14 +2515,15 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function addBBCode(type, divTitle){
+function addMarkdownCode(type, divTitle){
     var cursor = $(divTitle).prop('selectionStart');
     var text = $(divTitle).val();
     var insert = "";
     if(type == 1) {
-        insert = "[url=http://example.com]display text[/url]";
+        insert = "[display text](url)";
     } else if(type == 0){
-        insert = "[code][/code]";
+        insert = "```language" +
+            "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
 }
@@ -2620,7 +2651,7 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
 
     $.ajax({
         url: url,
@@ -2633,7 +2664,7 @@ function changePermission(filename, checked) {
 
 function changeNewDateTime(filename, newdatatime) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'misc', 'page': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
 
     $.ajax({
         url: url,

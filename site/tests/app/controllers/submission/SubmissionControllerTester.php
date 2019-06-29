@@ -18,6 +18,9 @@ use app\models\gradeable\Gradeable;
 use tests\BaseUnitTest;
 use app\models\User;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class SubmissionControllerTester extends BaseUnitTest {
 
     /**
@@ -30,6 +33,11 @@ class SubmissionControllerTester extends BaseUnitTest {
     private $core;
 
     public function setUp(): void {
+        // set up variables that logger needs
+        $_COOKIE['submitty_token'] = 'test';
+        $_SERVER['REMOTE_ADDR'] = 'test';
+        $_SERVER['HTTP_USER_AGENT'] = 'test';
+
         $_REQUEST['action'] = 'upload';
         $_REQUEST['gradeable_id'] = 'test';
         $_REQUEST['vcs_checkout'] = false;

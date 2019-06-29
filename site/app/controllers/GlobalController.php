@@ -55,7 +55,7 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
-                $navigation_url = $this->core->buildNewUrl([$this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse()]);
+                $navigation_url = $this->core->buildNewCourseUrl();
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $navigation_url,
                     "title" => "Gradeables",
@@ -238,7 +238,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-exclamation-triangle"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                    "href" => $this->core->buildNewCourseUrl(['reports']),
                     "title" => "Grade Reports",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-reports",
@@ -262,7 +262,7 @@ class GlobalController extends AbstractController {
             }
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+                "href" => $this->core->buildNewCourseUrl(['late_table']),
                 "title" => "My Late Days/Extensions",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-late-days",

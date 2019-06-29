@@ -265,14 +265,15 @@ function setupNumericTextCells() {
             elem = $(this);
             if (elem.data("num")) {
                 total += parseFloat(elem.val());
-                // ensure value is string (might not be on initial load from twig)
-                old_scores[elem.data("id")] = elem.data("origval") + "";
-                scores[elem.data("id")] = elem.val();
-    
-                // save old value so we can verify data is not stale
-                elem.data('origval', elem.val());
-                elem.attr('data-origval', elem.val());  
             }
+
+            // ensure value is string (might not be on initial load from twig)
+            old_scores[elem.data("id")] = elem.data("origval") + "";
+            scores[elem.data("id")] = elem.val();
+
+            // save old value so we can verify data is not stale
+            elem.data('origval', elem.val());
+            elem.attr('data-origval', elem.val());  
         });
 
         row_el.find(".cell-total").each(function() {

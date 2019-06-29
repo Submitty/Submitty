@@ -103,16 +103,16 @@ cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
 cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
 cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
 cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
+cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
+
+# mkdir ${VENDOR_FOLDER}/mermaid
+# cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
+
 # pdf-annotate.js
 cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
 # twig.js
 mkdir ${VENDOR_FOLDER}/twigjs
 cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
-
-# TEMPORARY (until we have generalized code for generating charts in html)
-# copy the zone chart images
-mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/
-cp ${SUBMITTY_INSTALL_DIR}/zone_images/* ${SUBMITTY_INSTALL_DIR}/site/public/zone_images/ 2>/dev/null
 
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
@@ -126,18 +126,12 @@ for i in "${array[@]}"; do
     find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
 done
 
-#Setup Email Cron Job
-crontab -u submitty_daemon -l > /tmp/cron_jobs
-grep "python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py" /tmp/cron_jobs || echo "* * * * * python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py" >> /tmp/cron_jobs
-crontab -u submitty_daemon -r
-crontab -u submitty_daemon /tmp/cron_jobs
-rm -f /tmp/cron_jobs
-
 # Set permissions of files
 # set special user $PHP_USER as owner & group of all website files
 find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_GROUP} {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
 # "other" can read & execute these files
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.bcmap -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.ttf -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.eot -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.svg -exec chmod o+rx {} \;

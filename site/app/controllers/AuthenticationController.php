@@ -5,6 +5,7 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\Utils;
+use app\libraries\Logger;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -49,15 +50,6 @@ class AuthenticationController extends AbstractController {
                 break;
         }
     }
-
-    /**
-     * @param string $old the url to redirect to after login
-     */
-    private function isLoggedIn($old = null) {
-        if ($this->logged_in) {
-            $this->core->redirect($old);
-        }
-    }
     
     /**
      * Logs out the current user from the system. This is done by both deleting the current going
@@ -67,24 +59,20 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/logout")
      */
     public function logout() {
-        $cookie_id = 'submitty_session_id';
-        Utils::setCookie($cookie_id, '', time() - 3600);
-        $redirect = array();
-        $redirect['page'] = 'login';
+        Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
+        Utils::setCookie('submitty_session', '', time() - 3600);
         $this->core->removeCurrentSession();
-        $this->core->redirect($this->core->buildUrl($redirect));
+        $this->core->redirect($this->core->buildNewUrl(['authentication', 'login']));
     }
     
     /**
      * Display the login form to the user
      *
      * @Route("/authentication/login")
-     * @Route("/authentication/login/{old}")
      *
      * @var string $old the url to redirect to after login
      */
     public function loginForm($old = null) {
-        $this->isLoggedIn(base64_decode($old));
         $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
     }
     
@@ -95,60 +83,75 @@ class AuthenticationController extends AbstractController {
      * to maintain that old request data passing it back into the login form.
      *
      * @Route("/authentication/check_login")
-     * @Route("/authentication/check_login/{old}")
      *
      * @var string $old the url to redirect to after login
+     * @return array
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
-            $old = base64_decode($old);
+            $old = urldecode($old);
         }
-        $this->isLoggedIn($old);
-        $redirect = array();
-        $no_redirect = !empty($_POST['no_redirect']) ? $_POST['no_redirect'] == 'true' : false;
+        if ($this->logged_in) {
+            $this->core->redirect($old);
+        }
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
 
-            if ($no_redirect) {
-                $this->core->getOutput()->renderJsonFail($msg);
-            }
-            else {
-                $this->core->addErrorMessage("Cannot leave user id or password blank");
-                $this->core->redirect($old);
-            }
-            return false;
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($old);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
+            Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
             $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
-            $this->core->addSuccessMessage($msg);
-            $redirect['success_login'] = "true";
 
-            if ($no_redirect) {
-                $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
-            }
-            else {
-                $this->core->redirect($old);
-            }
-            return true;
+            $this->core->addSuccessMessage($msg);
+            $this->core->redirect($old);
+            return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
         }
         else {
             $msg = "Could not login using that user id or password";
+
             $this->core->addErrorMessage($msg);
-            if ($no_redirect) {
-                $this->core->getOutput()->renderJsonFail($msg);
-            }
-            else {
-                $this->core->redirect($old);
-            }
-            return false;
+            $this->core->redirect($old);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
     }
 
     /**
-     * @Route("/authentication/vcs_login")
+     * @Route("/api/token", methods={"POST"})
+     *
+     * @return array
+     */
+    public function getToken() {
+        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+            $msg = 'Cannot leave user id or password blank';
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        $token = $this->core->authenticateJwt();
+        if ($token) {
+            return $this->core->getOutput()->renderJsonSuccess(['token' => $token]);
+        }
+        else {
+            $msg = "Could not login using that user id or password";
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+    }
+
+    /**
+     * Handle stateless authentication for the VCS endpoints.
+     *
+     * This endpoint is unique from the other authentication methods in
+     * that this requires a specific course so that we can check a user's
+     * status, as well as potentially information about a particular
+     * gradeable in that course.
+     *
+     * @Route("{_semester}/{_course}/authentication/vcs_login")
      */
     public function vcsLogin() {
         if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
@@ -173,7 +176,13 @@ class AuthenticationController extends AbstractController {
             return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
         }
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        try {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($_POST['gradeable_id']);
+        }
+        catch (\InvalidArgumentException $exc) {
+            $gradeable = null;
+        }
+
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";

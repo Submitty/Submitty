@@ -35,6 +35,7 @@ class ElectronicGraderView extends AbstractView {
         array $sections,
         array $component_averages,
         $autograded_average,
+        $overall_scores,
         $overall_average,
         int $total_submissions,
         int $registered_but_not_rotating,
@@ -69,6 +70,7 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
+        $this->core->getOutput()->addInternalJs('plotly-1.48.3.min.js');
 
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
@@ -175,12 +177,27 @@ class ElectronicGraderView extends AbstractView {
             }
         }
 
+        //determines if there are any valid rotating sections
+        $no_rotating_sections = false;
+        if (count($sections) === 0) {
+            $no_rotating_sections = true;
+        }
+        else {
+            if ($gradeable->isTeamAssignment()) {
+                $valid_teams_or_students = 0;
+                foreach ($sections as $section) {
+                    $valid_teams_or_students+= $section['no_team']+$section['team'];
+                }
+                $no_rotating_sections = $valid_teams_or_students === 0;
+            }
+        }
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and ($total_students == 0),
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
+                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -199,6 +216,7 @@ class ElectronicGraderView extends AbstractView {
             "viewed_total" => $viewed_total,
             "viewed_percent" => $viewed_percent,
             "overall_average" => $overall_average,
+            "overall_scores" => $overall_scores,
             "overall_total" => $overall_total,
             "overall_percentage" => $overall_percentage,
             "autograded_percentage" => $autograded_percentage,
@@ -423,12 +441,22 @@ HTML;
             }
 
             if (isset($graders[$section_title]) && count($graders[$section_title]) > 0) {
-                $section_graders = implode(", ", array_map(function (User $user) {
-                    return $user->getId();
-                }, $graders[$section_title]));
-            } else {
+                $section_grader_ids = [];
+                foreach ($graders[$section_title] as $user) {
+                    if ($user->getGroup() <= $gradeable->getMinGradingGroup()) {
+                        $section_grader_ids[] = $user->getId();
+                    }
+                }
+                if (count($section_grader_ids) > 0) {
+                    $section_graders = implode(", ", $section_grader_ids);
+                } else {
+                    $section_graders = "Nobody";
+                }
+            }
+            else {
                 $section_graders = "Nobody";
             }
+
             if ($peer) {
                 $section_graders = $this->core->getUser()->getId();
             }
@@ -549,6 +577,7 @@ HTML;
                 "team_edit_onclick" => "adminTeamForm(false, '{$team->getId()}', '{$reg_section}', '{$rot_section}', {$user_assignment_setting_json}, [], [],{$gradeable->getTeamSizeMax()});"
             ];
         }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -575,12 +604,14 @@ HTML;
             "view" => isset($_REQUEST["view"]) ? $_REQUEST["view"] : null,
             "all_reg_sections" => $all_reg_sections,
             "all_rot_sections" => $all_rot_sections,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
     public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
-            "gradeable_id" => $gradeable->getId()
+            "gradeable_id" => $gradeable->getId(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -835,6 +866,7 @@ HTML;
 
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
