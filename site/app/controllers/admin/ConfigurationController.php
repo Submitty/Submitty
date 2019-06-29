@@ -4,8 +4,10 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\ForumUtils;
 
 class ConfigurationController extends AbstractController {
+
     public function run() {
         switch ($_REQUEST['action']) {
             case 'view':
@@ -114,6 +116,21 @@ class ConfigurationController extends AbstractController {
         else if($name == "course_home_url") {
             if(!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)){
                 return $this->core->getOutput()->renderJsonFail($entry . ' is not a valid URL');
+            }
+        }
+
+        if($name === 'forum_enabled') {
+            if($entry == 1){
+                if($this->core->getAccess()->canI("forum.modify_category")) {
+                    $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
+                    $rows = $this->core->getQueries()->getCategories();
+
+                    foreach ($categories as $category) {
+                        if (ForumUtils::isValidCategories($rows, -1, array($category))) {
+                            $this->core->getQueries()->addNewCategory($category);
+                        }
+                    }
+                }
             }
         }
 
