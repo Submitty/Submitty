@@ -118,6 +118,9 @@ class WebRouter {
         // This is a workaround for backward compatibility
         // Should be removed after ClassicRouter is killed completely
         if ($this->core->getConfig()->isCourseLoaded() && !$this->course_loaded) {
+            if ($this->core->getConfig()->isDebug()) {
+                throw new \RuntimeException("Attempted to use router for invalid URL. Please report the sequence of pages/actions you took to get to this exception to API developers.");
+            }
             $this->core->redirect($this->core->getConfig()->getBaseUrl());
         }
 
