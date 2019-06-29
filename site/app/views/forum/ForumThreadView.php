@@ -895,6 +895,7 @@ class ForumThreadView extends AbstractView {
         );
 
         $thread_exists = $this->core->getQueries()->threadExists();
+        $manage_categories_url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories'));
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
@@ -902,6 +903,63 @@ class ForumThreadView extends AbstractView {
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
             "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+            "manage_categories_url" => $manage_categories_url,
+            "csrf_token" => $this->core->getCsrfToken()
+        ]);
+
+        return $return;
+    }
+
+    public function showCategories($category_colors){
+
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            return;
+        }
+
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories')));
+
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+
+        $categories = "";
+        $category_colors;
+
+        if($this->core->getUser()->accessGrading()){
+            $categories = $this->core->getQueries()->getCategories();
+
+            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+            array_unshift($categories, $dummy_category);
+        }
+
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;float:right;top:3px;',
+                "link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
+        $thread_exists = $this->core->getQueries()->threadExists();
+
+        $forumBarData = [
+            "forum_bar_buttons_right" => $buttons,
+            "forum_bar_buttons_left" => [],
+            "show_threads" => false,
+            "thread_exists" => $thread_exists
+        ];
+
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowCategories.twig", [
+            "categories" => $categories,
+            "category_colors" => $category_colors,
+            "forumBarData" => $forumBarData,
             "csrf_token" => $this->core->getCsrfToken()
         ]);
 

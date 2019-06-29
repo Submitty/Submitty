@@ -13,7 +13,7 @@
 
     {% if show_editcat and core.getUser().accessGrading() %}
         <span style="position:absolute;right: 0px;display:inline-block;">
-        <a class="btn btn-primary btn-sm" title="Edit Categories" onclick="$('#category-list').css('display', 'block');">Edit Categories</a>
+        <a class="btn btn-primary btn-sm" href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
         </span>
     {% endif %}
 </div>
