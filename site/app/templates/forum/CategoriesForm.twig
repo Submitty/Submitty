@@ -2,13 +2,11 @@
 {% block popup_id %}category-list{% endblock %}
 {% block title %}Categories{% endblock %}
 {% block body %}
-
   {% include "forum/ShowCategories.twig" %}
-
 {% endblock %}
 {% block form %}
     {{ parent() }}
 {% endblock %}
 {% block buttons %}
-    <a style="float: right;" onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="btn btn-default close-button">Close</a>
+    <a onclick="$('#ui-category-list').find('.fa-times').click();$('#category-list').css('display', 'none');" class="float-right btn btn-default close-button">Close</a>
 {% endblock %}

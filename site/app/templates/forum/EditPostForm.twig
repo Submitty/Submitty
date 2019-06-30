@@ -4,6 +4,7 @@
 {% block body %}
     <input type="hidden" id="edit_thread_id" name="edit_thread_id" value="" data-ays-ignore="true"/>
     <input type="hidden" id="edit_post_id" name="edit_post_id" value="" data-ays-ignore="true"/>
+
     {% include 'forum/ThreadPostForm.twig' with {
         "show_title": true,
         "show_post": true,
@@ -15,6 +16,7 @@
         "show_cancel_edit_form": true,
         "show_lock_date": true,
         "submit_label": "Update Post",
+        "categories" : categories
     } %}
     <script type="text/javascript">
         $("#thread_form").submit(function() {
@@ -23,6 +25,7 @@
                 return false;
             }
         });
+
     </script>
 {% endblock %}
 {% block form %}

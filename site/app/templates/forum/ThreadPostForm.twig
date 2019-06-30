@@ -3,8 +3,10 @@
         post_box_id="{{ post_box_id }}"
     {% endif %}
 >
-<div class="form-group row" style="position: relative;">
+
+<div class="form-group row position-relative">
     <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
+
     {% if show_title %}
     <span class="edit_thread">
         Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
@@ -12,21 +14,21 @@
     {% endif %}
 
     {% if show_editcat and core.getUser().accessGrading() %}
-        <span style="position:absolute;right: 0px;display:inline-block;">
-        <a class="btn btn-primary btn-sm" href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
+        <span class="position-absolute right-zero inline-block">
+          <a class="btn btn-primary btn-sm" href ="{{ manage_categories_url }}" title="Edit Categories" target="_blank" >Edit Categories</a>
         </span>
     {% endif %}
 </div>
 <br/>
 {% if show_post %}
-    <div style="margin-bottom:10px;position: relative;" class="form-group row">
+    <div style="margin-bottom:10px;" class="form-group row position-relative">
         <button id="link_btn" type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fas fa-link fa-1x"></i></button>
         <button id="code_btn" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fas fa-code fa-1x"></i></button>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
-        <a class="btn btn-primary" style="position:absolute;right: 0px;top:3px;display:inline-block;" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
+        <a class="btn btn-primary" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
     {% if show_lock_date and core.getUser().getGroup() <= 2 %}
-        <label id="label_lock_thread" for="lock_thread_date" style="position:absolute;right: 0px;display:inline-block;margin: 0 2px"> Lock Thread Date
+        <label id="label_lock_thread" for="lock_thread_date"> Lock Thread Date
             <input class="date_picker" placeholder="Lock Thread Date" name="lock_thread_date" id="lock_thread_date" type="text">
         </label>
         <script>
@@ -49,11 +51,15 @@
     </div>
 <br/>
 {% endif %}
+
 {% if show_categories %}
-    <div id="category-selection-container" style="margin-bottom:10px;display: inline-block;" class="form-group row">
-        <label for="cat" id="cat_label">Categories</label> <br>
+
+    <div id="category-selection-container" class="form-group row thread-category-container inline-block">
+        <label for="cat" id="cat_label">Categories</label>
+        <br />
+
         {% if categories | length == 0 %}
-            <span class='category-list-no-element' style="margin-left: 1em;" >
+            <span class='category-list-no-element' >
                 No categories exists please create one.
             </span>
         {% endif %}
@@ -72,10 +78,10 @@
     </script>
     </div>
 {% endif %}
-<div style="margin-bottom:10px;position: relative;" class="form-group row">
+<div class="form-group row thread-attachment-container">
     {% if post_box_id %}
-        <span style="display:inline-block;">
-            <div class="upload_attachment_box" id="upload{{ post_box_id }}" style="cursor: pointer;">
+        <span class="inline-block">
+            <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
                 <input type="file" accept="image/*" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
@@ -117,22 +123,22 @@
             </script>
         {% endif %}
     {% endif %}
-    <span style="display:inline-block;right: 0px;position: absolute;">
+    <span class="inline-block right-zero position-absolute">
         {% if show_anon %}
-            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" style="margin-right:15px;display:inline-block;" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" class="thread-anon-checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" name="Anon" value="Anon" data-ays-ignore="true"/>
         {% endif %}
         {% if show_thread_status %}
-        <select id="thread_status" name="thread_status" style="margin-right:15px;display:inline-block;" data-ays-ignore="true">
+        <select id="thread_status" name="thread_status" data-ays-ignore="true">
             <option value="0">Comment</option>
             <option value="-1" selected="selected">Unresolved</option>
             <option value="1">Resolved</option>
         </select>
         {% endif %}
         {% if show_announcement and core.getUser().accessFullGrading() %}
-            <label style="display:inline-block;" for="Announcement">Announcement?</label> <input type="checkbox" style="margin-right:15px;display:inline-block;" name="Announcement" value="Announcement" data-ays-ignore="true"/>
+            <label class="inline-block" for="Announcement">Announcement?</label> <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_announcement and core.getUser().accessFullGrading() %}
-            <label style="display:inline-block;" for="EmailAnnouncement">Send Email?</label> <input type="checkbox" style="margin-right:18px;display:inline-block;" name="EmailAnnouncement" value="EmailAnnouncement" data-ays-ignore="true"/>
+            <label class="inline-block" for="EmailAnnouncement">Send Email?</label> <input type="checkbox" class="email-announcement-checkbox" name="EmailAnnouncement" value="EmailAnnouncement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
@@ -141,7 +147,7 @@
                  $(this).closest('form').trigger('reinitialize.areYouSure');"
                      class="btn btn-default close-button">Cancel</a>
         {% endif %}
-        <input type="submit" style="display:inline-block;" name="post" value="{{ submit_label }}" class="btn btn-primary" />
+        <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
     </span>
 </div>
 <br>
@@ -151,5 +157,7 @@
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
         });
+
+
     });
 </script>
