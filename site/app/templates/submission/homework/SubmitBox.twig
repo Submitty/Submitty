@@ -27,11 +27,13 @@
         </div>
     {% endif %}
 
+    <br/>
+
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submissionForm" method="post" style="width: 100%; ">
 	    <fieldset>
-            <legend> Select either normal, upload for a student or bulk upload </legend>	
+            <legend> Select submission mode: </legend>
             <div style="clear:both;">
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 <label for="radio_normal">Normal Submission</label>
@@ -41,7 +43,11 @@
                 {% if part_names|length == 1 and not is_vcs %}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='radio' id="radio_bulk" name="submission_type">
-                    <label for="radio_bulk">Bulk Upload</label>
+                    <label for="radio_bulk">Bulk PDF Upload
+                    <a style="text-decoration:none;" aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
+	                    <i aria-hidden="true" title="Bulk PDF Upload Help" class="far fa-question-circle helpicon"></i>
+                    </a>
+                    </label>
                 {% endif %}
             </div>
             <div id="user_id_input" style="display: none">
@@ -63,8 +69,8 @@
                     <br />
                     <label id="pages_prompt" for="num_pages"># of page(s) per PDF:</label>
                     <span id="prefix_prompt">QR code prefix/suffix:
-                    <a style="text-decoration:none;" aria-label="Help with QR bulk uploads" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
-	                    <i aria-hidden="true" title="Bulk Upload QR Help" class="far fa-question-circle helpicon"></i>
+                    <a style="text-decoration:none;" aria-label="Split by QR Code Help" href = "https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
+	                    <i aria-hidden="true" title="Split by QR Code Help" class="far fa-question-circle helpicon"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
