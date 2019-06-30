@@ -404,7 +404,7 @@ function validateUserId(csrf_token, gradeable_id, user_id){
             },
             error : function(err){
                 console.log("Error while trying to validate user id" + user_id);
-                reject(new Error(err));
+                reject({'status' : 'failed', 'message' : err});
             }
         });
     });
@@ -572,7 +572,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             },
             error: function(err) {
                 console.log("Failed while submiting split item");
-                reject(new Error(err));
+                reject({'status' : 'failed', 'message' : err});
             }
         });
     });
@@ -605,8 +605,8 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
                 }
             },
             error: function(err) {
-                console.log("Failed while deleting split item");
-                reject(new Error(err));
+                console.error("Failed while deleting split item");
+                reject({'status' : 'failed', 'message' : err});
             }
         });
     });

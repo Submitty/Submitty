@@ -313,7 +313,7 @@
 
         validateUserId(CSRF,g_id,user_id)
         .then(function(response){
-            if(response['previous_submission'] === false){
+            if(response['data']['previous_submission'] === false){
                 var submit_btn = document.getElementById("bulk_submit_" + String(index));
                 var delete_btn = document.getElementById("bulk_delete_" + String(index));
                 var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
@@ -335,13 +335,15 @@
     function confirmDeleteAll(){
         if(confirm("Are you sure you want to delete " + String(num_submissions) + " submissions?")){
             deleteAll(1);
+            //all done, refresh the page
+            window.location.reload();
         }
     }
 
     function deleteAll(index){
-
-        if(index > path_list.length || index > num_submissions)
+        if(index > Object.keys(path_list).length || index > num_submissions){
             return;
+        }
 
         var submit_btn = document.getElementById("bulk_submit_" + String(index));
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
@@ -360,6 +362,7 @@
         deleteSplitItem(CSRF,g_id,path)
         .then(function(submit_response){
             displaySubmissionMessage(submit_response);
+            num_submissions -= 1;
             return deleteAll(index + 1);
         })
         .catch(function(submit_response){
@@ -367,7 +370,6 @@
             displaySubmissionMessage(submit_response);
 
             toggleButtons(index, false);
-
             return deleteAll(index + 1);
         });
     }
