@@ -38,7 +38,10 @@
                     <div class="option-alt">Choose whether to enable a forum for this course.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} /></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
+                <span id="forum_enabled_message" style="display: {% if fields['forum_enabled'] %} inline-block; {% else %} none; {% endif %}"><a href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a></span>
+            </div>
+
         </div>
 
         <div class="heading">
@@ -275,6 +278,17 @@
              }
              else{
                 showEmailSeatingOption();
+            }
+        });
+
+        $(document).on('change', '#forum_enabled', function(){
+            var forum_enabled = $('#forum_enabled').is(":checked");
+
+            if(!forum_enabled){
+                $('#forum_enabled_message').hide();
+            }
+            else{
+                $('#forum_enabled_message').show();
             }
         });
 
