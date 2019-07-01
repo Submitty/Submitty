@@ -67,11 +67,11 @@ http://localhost
 ${AUTH_METHOD}
 y
 
+
 submitty@vagrant
 do-not-reply@vagrant
 localhost
-25
-" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.profile"
 bash -c "echo 'export PATH=${PATH}' >> /home/${PHP_USER}/.bashrc"
