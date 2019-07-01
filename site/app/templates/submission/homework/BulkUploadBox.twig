@@ -196,7 +196,7 @@
         //verify user id is valid, then assign
         validateUserId(CSRF, g_id, user_id)
         .then(function(response){
-            if(response['previous_submission'] === false){
+            if(response['data']['previous_submission'] === false){
                 //no previous submission, submit split item normally
                 uploadSplitHelper(user_id,path, index);
             }else{
