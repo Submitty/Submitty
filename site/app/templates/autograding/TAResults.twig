@@ -1,7 +1,7 @@
 {% import 'functions/Badge.twig' as Badge %}
 {% import _self as self %}
 
-{% if not gradeable.beenTAgraded() %}
+{% if not been_ta_graded %}
     <br>
     <h3>This assignment has not been graded yet</h3>
 {% elseif not active_same_as_graded %}
@@ -14,20 +14,31 @@
     <div class="sub">
         {# Overview #}
         <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
-            <p>Version #{{ gradeable.getActiveVersion() }} graded by: {{ grader_names|join(", ") }}</p>
-            {% if allow_regrade == true %}
+            <p>Version #{{ ta_graded_version }} graded by: {{ grader_names|join(", ") }}</p>
+            {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
             {% endif %}
             <p>
-                {% if gradeable.getOverallComment()|length != 0 %}
-                    <hr>
-                    Overall note from Grader:
-                    <span class='gradeable_comment'>{{ gradeable.getOverallComment() }}</span>
-                {% endif %}
+                {% if overall_comment|length != 0 %}
+            <hr>
+            Overall note from Grader:
+            <span class='gradeable_comment'>{{ overall_comment|nl2br }}</span>
+            {% endif %}
             </p>
         </div>
-        {% if gradeable.getLateDays() > 0 %}
-            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ core.buildUrl({'component': 'student', 'page': 'view_late_table', 'g_id': gradeable.getId()}) }}">Show my late days information</a>
+        {% if any_late_days_used %}
+            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ late_days_url }}">Show my late days information</a>
+        {% endif %}
+        {% if uploaded_pdfs|length >= 1 %}
+        <div class="box half" style="float: right; width: 25%; word-break: break-word">
+            View/Download submission with feedback:
+            <br />
+            {% for file in uploaded_pdfs %}
+                {{ file.name }}
+                {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
+                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'pdf', 'page':'student_pdf_view', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fas fa-window-restore"></i></a>
+            {% endfor %}
+        </div>
         {% endif %}
         {# /Overview #}
 
@@ -41,57 +52,53 @@
         {# /Manual total #}
 
         {# Component boxes #}
-        {% for component in gradeable.getComponents() %}
-            {# Todo: This is heinous #}
-            {% set extra_credit = component.getTitle()|lower|trim == "extra credit" %}
-
+        {% for component in components %}
             <div class="box grade-results">
                 <div class="box-badge">
-                    {{ Badge.render(component.getGradedTAPoints(), component.getMaxValue(), extra_credit) }}
+                    {{ Badge.render(component.total_score, component.points_possible, component.extra_credit) }}
                 </div>
                 <div class="box-info">
-                    <h4>{{ component.getTitle() }}
-                        {# Grader only shows up if they are not peer and full access #}
-                        {% if not gradeable.getPeerGrading() and component.getGrader().accessFullGrading() %}
-                            <i>(Graded by: {{ component.getGrader().getDisplayedLastName() }})</i>
+                    <h4>{{ component.title|escape }}
+                        {% if not is_peer and component.graders|length != 0 %}
+                            <i>(Graded by: {{ component.graders|join(' / ') }})</i>
                         {% endif %}
                     </h4>
                     <div style="float:left; word-break: break-word;">
-                        <p style="padding-bottom: 10px;">{{ component.getStudentComment() }}</p>
+                        <p style="padding-bottom: 10px;">{{ component.student_comment|nl2br }}</p>
                         <p>
-                            {# This is a layout table #}
-                            <table class="gradeable_comment">
-                                {% for mark in component.getMarks() if mark.getHasMark() or mark.getPublish() == 't' %}
-                                    <tr>
-                                        <td>
-                                            {% if mark.getHasMark() %}
-                                                <i class="far fa-check-square fa-1g"></i>
-                                            {% else %}
-                                                <i class="far fa-square fa-1g"></i>
-                                            {% endif %}
-                                        </td>
-                                        <td class="mark-score">
-                                            {{ mark.getPoints()|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ mark.getNote() }}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                {% if component.getScore() != 0 or component.getComment() != '' %}
-                                    <tr>
-                                        <td>
+                        {# This is a layout table #}
+                        <table class="gradeable_comment">
+                            {% for mark in component.marks if mark.show_mark %}
+                                <tr>
+                                    <td>
+                                        {% if mark.earned %}
                                             <i class="far fa-check-square fa-1g"></i>
-                                        </td>
-                                        <td class="mark-score">
-                                            {{ component.getScore()|number_format(num_decimals) }}
-                                        </td>
-                                        <td>
-                                            {{ component.getComment() }}
-                                        </td>
-                                    </tr>
-                                {% endif %}
-                            </table>
+                                        {% else %}
+                                            <i class="far fa-square fa-1g"></i>
+                                        {% endif %}
+                                    </td>
+                                    <td class="mark-score">
+                                        {{ mark.points|number_format(num_decimals) }}
+                                    </td>
+                                    <td>
+                                        {{ mark.title|nl2br }}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            {% if component.custom_mark_score != 0 or component.comment != '' %}
+                                <tr>
+                                    <td>
+                                        <i class="far fa-check-square fa-1g"></i>
+                                    </td>
+                                    <td class="mark-score">
+                                        {{ component.custom_mark_score|number_format(num_decimals) }}
+                                    </td>
+                                    <td>
+                                        {{ component.comment|nl2br }}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </table>
                         </p>
                     </div>
                 </div>
@@ -110,9 +117,9 @@
         {% endif %}
         {# /Total auto + manual #}
     </div>
-    {% if allow_regrade == true %}
-    <div id="ShowRegradeRequestButton">
-        <button type="button" title="Submit Grade Inquiry" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default">Submit Grade Inquiry</button>
-    </div>
+    {% if regrade_available %}
+        <div id="ShowRegradeRequestButton">
+            <button type="button" title="Submit Grade Inquiry" onclick="toggleRegradeRequests()" style="margin-right:10px;" class="btn btn-default">Submit Grade Inquiry</button>
+        </div>
     {% endif %}
 {% endif %}

@@ -77,7 +77,7 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return;
         }
 
@@ -85,7 +85,7 @@ class SimpleGraderController extends GradingController  {
 
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return;
         }
 
@@ -106,7 +106,7 @@ class SimpleGraderController extends GradingController  {
         }
         else{
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
             return;
         }
 
@@ -132,7 +132,7 @@ class SimpleGraderController extends GradingController  {
         //If you can see the page, you can grade the page
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
@@ -268,7 +268,7 @@ class SimpleGraderController extends GradingController  {
         //FIXME: returning html error message in a json-returning route
         if (!$this->core->getAccess()->canI("grading.simple.upload_csv", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
         $num_numeric = $_POST['num_numeric'];

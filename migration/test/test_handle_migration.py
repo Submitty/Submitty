@@ -27,7 +27,7 @@ class TestHandleMigration(unittest.TestCase):
         shutil.rmtree(self.dir)
         migrator.MIGRATIONS_PATH = self.old_migrations_path
 
-    def setup_test(self, environment, create=True):
+    def setup_test(self, environment):
         Path(self.dir, environment).mkdir()
 
     def create_database(self, environment, create=True):
@@ -279,3 +279,47 @@ Submitty Database Migration Warning:  Database does not exist for semester=f19 c
         self.assertEqual(expected_args.semester, 'f19')
         self.assertEqual(expected_args.course, 'csci1200')
         self.assertFalse(database_3.open)
+
+    @patch('migrator.main.migrate_environment')
+    def test_migration_multiple_courses_missing_migration(self, mock_method):
+        args = Namespace()
+        self.setup_test('course')
+        database_1 = self.create_database('course')
+        database_2 = self.create_database('course')
+        database_3 = self.create_database('course')
+        args.environments = ['course']
+        args.choose_course = None
+        args.config = SimpleNamespace()
+        args.config.database = dict()
+        args.config.submitty = dict()
+        args.config.submitty['submitty_data_dir'] = Path(self.dir)
+
+        Path(self.dir, 'courses', 'f18', 'csci1100').mkdir(parents=True)
+        Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
+        Path(self.dir, 'courses', 'f19', 'csci1200').mkdir(parents=True)
+        
+        missing_migration = Path(self.dir, 'test.txt')
+        missing_migration.touch()
+        mock_method.side_effect = lambda *args: args[-1].add(missing_migration)
+        self.assertTrue(missing_migration.exists())
+
+        with patch.object(migrator.db, 'Database') as mock_class:
+            mock_class.side_effect = [database_1, database_2, database_3]
+            main.handle_migration(args)
+        self.assertFalse(missing_migration.exists())
+        self.assertTrue(mock_class.called)
+        self.assertEqual(3, mock_class.call_count)
+        self.assertTrue(
+            ({'dbname': 'submitty_f18_csci1100'}, 'course'),
+            mock_class.call_args_list[0][0]
+        )
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1100'}, 'course'),
+            mock_class.call_args_list[1][0]
+        )
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1200'}, 'course'),
+            mock_class.call_args_list[2][0]
+        )
+        self.assertTrue(mock_method.called)
+        self.assertEqual(3, mock_method.call_count)

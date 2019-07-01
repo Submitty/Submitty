@@ -60,6 +60,13 @@ class Output {
         $this->render = false;
     }
 
+    /**
+     * @return bool
+     */
+    public function getRender() {
+        return $this->render;
+    }
+
     public function loadTwig() {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
@@ -246,6 +253,30 @@ HTML;
         // Because sometimes the controllers want to return the response array
         return $response;
     }
+
+    /**
+     * Renders success/error messages and/or JSON responses.
+     * @param $message
+     * @param bool $success
+     * @param bool $show_msg
+     * @return array
+     */
+    public function renderResultMessage($message, $success = true, $show_msg = true) {
+        if ($show_msg == true) {
+            if ($success) {
+                $this->core->addSuccessMessage($message);
+            }
+            else {
+                $this->core->addErrorMessage($message);
+            }
+        }
+
+        if ($success == true) {
+            return $this->core->getOutput()->renderJsonSuccess($message);
+        } else {
+            return $this->core->getOutput()->renderJsonFail($message);
+        }
+    }
     
     public function renderString($string) {
         $this->output_buffer .= $string;
@@ -396,14 +427,13 @@ HTML;
      * @return string
      */
     public function showError($error = "", $die = true) {
-        /** @noinspection PhpUndefinedMethodInspection */
-        $errorPage = static::getView("Error")->errorPage($error);
+        $this->renderOutput("Error", "errorPage", $error);
         // @codeCoverageIgnore
         if ($die) {
-            die($errorPage);
+            die($this->getOutput());
         }
 
-        return $errorPage;
+        return $this->getOutput();
     }
     
     public function addInternalCss($file, $folder='css') {

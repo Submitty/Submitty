@@ -2,7 +2,7 @@
 {% block popup_id %}delete-course-material-form{% endblock %}
 {% block title %}Delete Course Materials{% endblock %}
 {% block body %}
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     Are you sure you want to delete
     <div name="delete-course-material-message">
     </div><br />

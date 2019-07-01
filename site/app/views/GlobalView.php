@@ -33,7 +33,8 @@ class GlobalView extends AbstractView {
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,
-            "system_message" => $this->core->getConfig()->getSystemMessage()
+            "system_message" => $this->core->getConfig()->getSystemMessage(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
      }
 
@@ -46,12 +47,6 @@ class GlobalView extends AbstractView {
             "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
             "wrapper_urls" => $wrapper_urls,
             "footer_links" => $footer_links
-        ]);
-    }
-
-    public function invalidPage($page) {
-        return $this->core->getOutput()->renderTwigTemplate("error/InvalidPage.twig", [
-            "page" => $page
         ]);
     }
 }

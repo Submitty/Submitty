@@ -37,9 +37,9 @@
 
 {% if (isThreadLocked != 1 or accessFullGrading) and includeReply %}
 
-    <hr style="border-top:1px solid #999;margin-bottom: 5px;" />
+    <hr id="post-hr" />
 
-    <form style="margin-right:17px;" class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{{ form_action_link }}" enctype="multipart/form-data">
+    <form class="post_reply_from" method="POST" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" action="{{ form_action_link }}" enctype="multipart/form-data">
         <input type="hidden" name="thread_id" value="{{ thread_id }}" />
         <input type="hidden" name="parent_id" value="{{ first_post_id }}" />
         <input type="hidden" name="display_option" value="{{ display_option }}" />

@@ -2,7 +2,7 @@
 {% block popup_id %}admin-team-form{% endblock %}
 {% block title_tag %}<h1 id="admin-team-title"></h1>{% endblock %}
 {% block body %}
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="new_team" />
     <input type="hidden" name="new_team_user_id" />
     <input type="hidden" name="edit_team_team_id" />

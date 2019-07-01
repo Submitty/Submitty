@@ -19,7 +19,7 @@
         Preferred first and last names are optional.<br>
         Do not use a header row.<br>
     </p>
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div>
         <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
     </div>
