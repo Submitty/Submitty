@@ -2,7 +2,7 @@
 {% block popup_id %}edit-user-form{% endblock %}
 {% block title %}Edit User{% endblock %}
 {% block body %}
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="edit_user" value="false" />
     <div style="display: inline-block">
         <label for="user_id">User ID:</label><br />

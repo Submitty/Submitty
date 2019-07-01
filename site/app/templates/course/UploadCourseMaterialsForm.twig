@@ -17,7 +17,7 @@
         <br><input id="expand_zip_checkbox" type="checkbox" value="off"/><label>Unzip zip files (Note: If checked, will replace all folders/files)</label>
     </fieldset>
     <br /> <br />
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
         <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
             <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
@@ -26,7 +26,7 @@
     </div>
     <script type="text/javascript">
         function makeSubmission(expandZip,cmPath, requestedPath) {
-            handleUploadCourseMaterials("{{ core.getCsrfToken() }}", expandZip, cmPath, requestedPath);
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath);
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button

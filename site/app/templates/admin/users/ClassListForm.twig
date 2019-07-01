@@ -12,7 +12,7 @@
         Registration section can be null.<br>
         Do not use a header row.<br>
     </p>
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <label for="move_missing">Move students missing from the classlist to NULL section?</label><input type="checkbox" name="move_missing" id="move_missing" /><br>
     <br />
     <div>

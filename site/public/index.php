@@ -131,7 +131,7 @@ $core->loadGradingQueue();
 if($core->getConfig()->getInstitutionName() !== ""){
     $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), null, $core->getConfig()->getInstitutionHomepage());
 }
-$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
+$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getBaseUrl());
 if($core->getConfig()->isCourseLoaded()){
     $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildNewCourseUrl(), $core->getConfig()->getCourseHomeUrl());
 }

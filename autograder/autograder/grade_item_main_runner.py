@@ -400,7 +400,8 @@ def insert_default_router(tmp_work):
   tmp_work_test_input = os.path.join(tmp_work, "test_input")
   router_path = os.path.join(SUBMITTY_INSTALL_DIR, "src", 'grading','python','submitty_router.py')
   print("COPYING:\n\t{0}\n\t{1}".format(router_path, tmp_work_test_input))
-  shutil.copy(router_path, tmp_work_test_input)
+  if not os.path.exists(os.path.join(tmp_work_test_input, 'submitty_router.py')):
+    shutil.copy(router_path, tmp_work_test_input)
 
 
 #Create the subdirectories needed for the containers and specify permissions.

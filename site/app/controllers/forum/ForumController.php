@@ -64,6 +64,9 @@ class ForumController extends AbstractController{
             case 'get_history':
                 $this->getHistory();
                 break;
+            case 'show_categories':
+                $this->showCategories();
+                break;
             case 'add_category':
                 $this->addNewCategory();
                 break;
@@ -197,7 +200,7 @@ class ForumController extends AbstractController{
         return false;
     }
 
-    public function addNewCategory(){
+    public function addNewCategory($category = []){
         $result = array();
         if($this->core->getAccess()->canI("forum.modify_category")){
             if(!empty($_REQUEST["newCategory"])) {
@@ -213,7 +216,16 @@ class ForumController extends AbstractController{
                         $result["new_id"] = $newCategoryId["category_id"];
                     }
                 }
-            } else {
+            } elseif (count($category) > 0){
+                $result["new_ids"] = [];
+                foreach ($category as $categoryName){
+                    if(!$this->isValidCategories(-1, array($categoryName))) {
+                        $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName);
+                        $result["new_ids"][] = $newCategoryId;
+                    }
+                }
+            }
+            else {
                 $result["error"] = "No category data submitted. Please try again.";
             }
         } else {
@@ -838,6 +850,10 @@ class ForumController extends AbstractController{
 
     public function showCreateThread(){
          $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+    }
+
+    public function showCategories(){
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
     }
 
     public function getHistory(){
