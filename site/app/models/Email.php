@@ -9,7 +9,7 @@ use app\libraries\Utils;
  *
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
- * @method void     setSenderId($sid)
+ * @method void     setUserId($uid)
  * @method void     setRecipient($recip)
 
  * @method string   getSubject()
@@ -22,8 +22,8 @@ class Email extends AbstractModel {
     protected $subject;
     /** @property @var string Body of email */
     protected $body;
-    /** @property @var string sender's user id */
-    protected $sender_id;
+    /** @property @var string user name */
+    protected $user_id;
 
     /** @property @var string Intended receiver of email */
     // NOTE: THIS IS ESSENTIALLY A DEPRECATED / LEGACY FIELD
@@ -37,14 +37,15 @@ class Email extends AbstractModel {
    * @param array $details
    */
 
-    public function __construct(Core $core,array $event) {
+    public function __construct(Core $core, $details=array()) {
         parent::__construct($core);
-        if (count($event) == 0) {
+        if (count($details) == 0) {
             return;
         }
-        $this->setSenderId($event["sender_id"]);
-        $this->setSubject($this->formatSubject($event["subject"]));
-        $this->setBody($this->formatBody($event["content"]));
+        $this->setUserId($details["user_id"]);
+        $this->setRecipient($details["recipient"]);
+        $this->setSubject($this->formatSubject($details["subject"]));
+        $this->setBody($this->formatBody($details["body"]));
     }
 
     //inject course label into subject
