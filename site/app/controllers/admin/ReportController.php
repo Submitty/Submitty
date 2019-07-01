@@ -60,6 +60,7 @@ class ReportController extends AbstractController {
      * Generates grade summary files for every user
      *
      * @Route("/{_semester}/{_course}/reports/summaries")
+     * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
         if (!$this->core->getUser()->accessAdmin()) {
@@ -82,7 +83,8 @@ class ReportController extends AbstractController {
             return null;
         });
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+        $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**

@@ -46,7 +46,7 @@
         <td id="type_{{ aria_labelledby_id }}">{{ type }}</td>
         <td>
             <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
-                <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                 <input type="hidden" name="location" value="{{ file }}">
                 <input type="file" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}">
                 <input type="submit" class="btn btn-default" value="Upload" />
@@ -56,7 +56,7 @@
             {% if wrapper_files[file] != null %}
                 <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
                     <input type="hidden" name="location" value="{{ file }}">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
                     {{ wrapper_files[file] }}
                 </form>

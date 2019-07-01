@@ -25,7 +25,8 @@ class UsersView extends AbstractView {
             "sections" => $sections,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
-            "use_database" => $use_database
+            "use_database" => $use_database,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -169,7 +170,8 @@ class UsersView extends AbstractView {
             "reg_sections_count" => $reg_sections_count,
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
-            "max_section" => $max_section
+            "max_section" => $max_section,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

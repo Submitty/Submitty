@@ -35,6 +35,9 @@ class GradeableAutocheck extends AbstractModel {
     /** @property @var boolean If this check's file is in results_public */
     protected $public;
 
+    /** @property @var boolean If this check's file should be displayed as a sequence diagram */
+    protected $display_as_sequence_diagram;
+
     /**
      * GradeableAutocheck constructor.
      *
@@ -60,6 +63,12 @@ class GradeableAutocheck extends AbstractModel {
             }
         }
         
+        if(isset($details["display_as_sequence_diagram"])){
+            $this->display_as_sequence_diagram = $details["display_as_sequence_diagram"];
+        }else{
+            $this->display_as_sequence_diagram = FALSE;
+        }
+
         $actual_file = $expected_file = $difference_file = $image_difference ="";
 
         if(isset($details["actual_file"])) {

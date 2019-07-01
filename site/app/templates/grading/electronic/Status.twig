@@ -59,10 +59,10 @@
     {% else %}
         <div class = "tab">
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Numerical Data'), this.blur()" id="defaultOpen">Numerical Data</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Score Histogram'), this.blur()">Total Histogram</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Score Histogram'), this.blur()">Autograding Histogram</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Score Histogram'), this.blur()">Total Score Histogram</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Score Histogram'), this.blur()">Autograding Score Histogram</button>
             <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages'), this.blur()">Component Averages</button>
-            <div id = "Total Histogram" class = "tabcontent">
+            <div id = "Total Score Histogram" class = "tabcontent">
                 {% if overall_average == null or overall_average.getCount() == 0 %}
                     <br/>
                     No assignments have been completely graded yet.
@@ -316,7 +316,7 @@
                 {% endif %}
             </div>
             {# Graph Setup for Autograding #}
-            <div id="Autograding Histogram" class="tabcontent">
+            <div id="Autograding Score Histogram" class="tabcontent">
                 {% if autograding_non_extra_credit != 0 %}
                     {# Only show autograder if we have autograding points #}
                 {% if autograded_average == null or autograded_average.getCount() == 0 %}

@@ -1,8 +1,8 @@
-<style>body {min-width: 925px;}</style>
+<h1 id="hidden-forum-header">Discussion Forum</h1>
 
 <script>
 
-    $( document ).ready(function() {
+    $( document ).ready(function(){
         enableTabsInTextArea('.post_content_reply');
         saveScrollLocationOnRefresh('posts_list');
         addCollapsable();
@@ -17,7 +17,9 @@
 
 </script>
 
-{%  include "forum/EditPostForm.twig" %}
+{%  include "forum/EditPostForm.twig" with {
+    "categories" : filterFormData.categories,
+} %}
 
 {%  include "forum/HistoryForm.twig" %}
 
@@ -46,7 +48,7 @@
             "thread_exists" : button_params.thread_exists
         } %}
 
-        <h4 style="text-align:center;">A thread hasn't been created yet. Be the first to do so!</h4>
+        <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
 
     {% else %}
 
@@ -60,9 +62,9 @@
             "forum_bar_buttons_left" : button_params.forum_bar_buttons_left
         } %}
 
-        <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
+        <div id="thread-container" class="row">
 
-            <div id="thread_list" style="overflow-y: auto; height:81vh;" class="col-3" prev_page="{{ prev_page }}" next_page="{{ next_page }}">
+            <div id="thread_list" class="col-3" prev_page="{{ prev_page }}" next_page="{{ next_page }}">
                 <i class="fas fa-spinner fa-spin fa-2x fa-fw fill-available" style="color:gray;display: none;" aria-hidden="true"></i>
                 <i class="fas fa-caret-up fa-2x fa-fw fill-available" style="color:gray; {{ arrowup_visibility }}" aria-hidden="true"></i>
 

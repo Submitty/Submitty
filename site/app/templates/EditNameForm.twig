@@ -8,7 +8,7 @@
        a preferred name if it contains inappropriate or offensive language,
        or is being used for misrepresentation.</p>
     <p>&emsp;</p>
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div>
     	<label for="user_firstname_change">Preferred First Name:&emsp;</label>
         <input type="text" name="user_firstname_change" value="{{ user_first }}" id="user_firstname_change" /><br /><br />
