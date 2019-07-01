@@ -23,8 +23,6 @@ def up(config, conn, semester, course):
     os.system("chmod -R g+rwxs "+str(course_customization_dir))
     os.system("chmod -R o-rwx  "+str(course_customization_dir))
 
-    pass
-
 
 def down(config, conn, semester, course):
     pass

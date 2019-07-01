@@ -67,6 +67,10 @@ find ${SUBMITTY_INSTALL_DIR}/sbin -type f -exec chmod 500 {} \;
 chown root:www-data ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 
+# Set permissions for auto_rainbow_grades.py
+chown root:submitty_daemon ${SUBMITTY_INSTALL_DIR}/sbin/auto_rainbow_grades.py
+chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/auto_rainbow_grades.py
+
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
