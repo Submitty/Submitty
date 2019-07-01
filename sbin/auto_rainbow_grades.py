@@ -1,6 +1,5 @@
 """
-This script will automatically setup and run rainbow grades given a semester, course,
-and instructor.
+Automatically generate rainbow grades.
 
 usage: python3 auto_rainbow_grades.py <semester> <course>
 
@@ -58,7 +57,8 @@ if user_found is False:
 rg_course_path = os.path.join(COURSES_PATH, semester, course, 'rainbow_grades')
 
 # Verify that customization.json or custom_customization.json exist
-if os.path.exists(rg_course_path + '/customization.json') or os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
+if os.path.exists(rg_course_path + '/customization.json') or \
+        os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
     pass
 
 else:
