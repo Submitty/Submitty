@@ -1,4 +1,6 @@
 """
+Automatically generate rainbow grades.
+
 This script will automatically setup and run rainbow grades given a semester, course,
 and instructor.
 """
