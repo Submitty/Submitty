@@ -8,16 +8,18 @@
 		<input class="config_search ignore" type="text" id="config_search" list="path_data"
 			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
 			
-		<datalist id="path_data">
+		<datalist id="path_data" style="display:none" >
 		{% for path in all_config_paths %}
-			<option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}">{{path.0}}</option>
+			<option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
 		{% endfor %}
 		</datalist>
 		
 		<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
-		<br /><br />
-        <p><label for="input_provide_full_path">Full path to autograding configuration for current selection:</label></p>
-			<input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
+		<br />
+			
+		{# text box with the path to the current config file, hidden but still used in js #}
+		<input style='width: 83%' type='hidden' id='input_provide_full_path' name='autograding_config_path' 
+			value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </fieldset>
 
     <div class="btn-container">

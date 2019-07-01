@@ -203,15 +203,10 @@ class AdminGradeableController extends AbstractController {
         // Configs stored in a private repository (specified in course config)
         $config_repo_name = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
+        $repository_error_message = "";
         if ($config_repo_name !== '') {
             $repository_config_dir = $config_repo_name;
-
-            $config_dir_files = FileUtils::getAllFiles($repository_config_dir);
-
-            $this->getValidPathsToConfigDirectories($config_dir_files,$all_repository_config_paths);
-            foreach ($all_repository_config_paths as $key => $path) {
-                $all_repository_config_paths[$key][0]="DIRECTORY: ".substr($path[1],strlen($config_repo_name)+1);
-            }
+            $repository_error_message = $this->getValidPathsToConfigDirectories($repository_config_dir,$all_repository_config_paths);
         }
 
         // Load output from build of config file
@@ -371,18 +366,36 @@ class AdminGradeableController extends AbstractController {
         ]);
     }
 
-    private function getValidPathsToConfigDirectories($directory,&$results) {
-        foreach ($directory as $file) {
-            if (array_key_exists("files",$file)) { //is a folder
-                $this->getValidPathsToConfigDirectories($file['files'],$results);
+    private function getValidPathsToConfigDirectories($dir,&$results) {
+        if (!file_exists($dir)) {
+            return "The repository entered on the \"Course Settings\" page does not exist.";
+        }
+        try {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::SELF_FIRST,
+                \RecursiveIteratorIterator::CATCH_GET_CHILD);
+        } catch(\Exception $e) {
+            return "An error occured when parsing the repository entered on the \"Course Settings\" page.";
+        }
+
+        $counter = 0;
+        foreach ($files as $file) {
+            if ($counter >= 1000) {
+                $results = array();
+                return "The repository entered on the \"Course Settings\" page was too large.";
             }
-            else if (array_key_exists("name",$file)) {
-                if ($file['name'] === 'config.json') { //valid file if it is a config file
-                    $config_path = substr($file['path'],0,-strlen("/config.json"));//remove /config.json from path
-                    $results[] = ["",$config_path];
+
+            if (!$file->isDir()) {
+                if ($file->getFilename() === 'config.json') {
+                    $config_path = substr($file->getPathname(),0,-strlen("/config.json")); //remove /config.json from path
+                    $results[] = ["DIRECTORY: ".substr($config_path,strlen($this->core->getConfig()->getPrivateRepository())+1),$config_path];
                 }
             }
+
+            $counter++;
         }
+        return "";
     }
 
     private function newMark(Component $component) {
