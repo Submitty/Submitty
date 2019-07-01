@@ -6,78 +6,140 @@
     /*buttons, primarily but also can be used for notifications/anything
     that requires this color scheme*/
     --danger-red: #e84848;
-    --hover-danger-red: #ff6655;
+    --focus-danger-red: #ff5555;
+    --hover-active-danger-red: #ff6661;
+    --disabled-danger-red: #ad3937;
 
     --good-green: #5fb760;
     --hover-good-green: #66cc77;
     --disabled-good-green: #5cb85c;
 
-    --actionable-blue: #006392;
-    --hover-actionable-blue: #286090;
-    --disabled-actionable-blue: #368aae;
+    --actionable-blue: #006398;
+    --focus-actionable-blue: #368aae;
+    --hover-actionable-blue:#00729E;
+    --hover-light-border-actionable-blue: #2e6da4;
+    --hover-border-actionable-blue: #204d74;
+    --hover-dark-border-actionable-blue: #122b40;
+
+    --info-blue: #5bc0de;
+    --hover-focus-info-blue: #31b0d5;
+    --hover-active-all-info-blue: #269abc;
 
     --default-white: #ffffff;
-    --hover-default-white: #f6fbfe;
+
+    --badge-backgroud-red: #ff0000;
+    --dark-badge-background-red: #ad3937;
+    --error-alert-dark-red: #cc0000;
+    --gray-red: #b94a48;
+
+    --alert-background-bronze: #fcf8e3;
+    --alert-border-bronze: #fbeed5;
+    --alert-bronze: #c09853;
+    --alert-success-green: #468847;
+    --alert-background-success-green: #dff0d8;
+    --alert-border-success-green: #d6e9c6;
+    --alert-danger-red: #b94a48;
+    --alert-border-danger-red: #f2dede;
+    --alert-background-danger-red: #eed3d7;
+    --alert-info-blue: #3a87ad;
+    --alert-background-blue: #d9edf7;
+    --alert-border-blue: #bce8f1;
+
+    --standard-pale-blue-gray: #e8f0f7;
+    --standard-light-blue-gray: #ddddff;
+    --standard-pale-gray: #f5f5f5;
+    --standard-hover-light-gray: #e5e5e5;
+    --standard-light-gray: #d3d3d3;
+    --standard-light-medium-gray: #bbbbbb;
+    --standard-medium-gray: #888888;
+    --standard-dark-gray: #5555555;
+    --standard-deep-dark-gray: #2e2e2e;
+
+    --standard-gray-black: #111111;
+
+    --standard-pale-blue: #d8eef6;
+    --standard-focus-cornflowe-blue: #6495ed;
+    --standard-medium-blue: #337ab7;
+    --standard-medium-vibrant-blue: #1e90ff;
+    --standard-aqua: #00b3fa;
+    --standard-dark-blue: #23527c;
+    --standard-medium-dark-blue: #286090;
+    --standard-deep-blue: #0000ff;
+    --standard-gray-blue: #0088bf;
+
+    --standard-light-red:  #d9534f;
+    --standard-medium-red: #c9302c;
+
+    --standard-light-orange: #f0ad4e;
+    --standard-medium-orange: #ec971f;
+    --standard-vibrant-orange: #ffa500;
+
+    --standard-vibrant-yellow: #ffff00;
+
+    --standard-vibrant-purple: #cc66ff;
+    --standard-plum-purple: #72518a;
+    --standard-vibrant-pink: #fd4472;
+    --standard-vibrant-pink-red: #c40233;
+
+    --standard-vibrant-green: #33cc33;
+    --standard-medium-green: #449d44;
+    --standard-dark-green: #008000;
+    --standard-deep-dark-green: #006600;
+
+    --standard-mint-green: #00e08e;
+    --standard-dark-mint-green: #00a368;
+
+    --standard-vibrant-dark-blue: #006699;
+    --standard-bronze: #856404;
+    --standard-light-pink: #ff9999;
+    --standard-pale-yellow: #ffff99;
+    --standard-light-yellow: #ffff66;
+    --standard-light-yellow-brown: #eac73d;
+    --standard-light-gold: #fff3cd;
+    --standard-light-green: #99ff99;
+    --standard-light-blue: #99ccff;
 
     /*the look of the webpage itself*/
     --background-blue: #f6fbfe;
     --main-body-white: #ffffff;
-    --drop-shadow: #888888;
-    --subheading-underscore-grey: #aaaaaa;
+    --subheading-underscore-grey: #888888;
 
     /*dropdown buttons*/
-    --hover-dropdown: #d1d1d1;
-    --divider-dropdown: #e5e5e5;
-    --disabled-dropdown: #777;
+    --hover-dropdown: #f5f5f5;
+    --disabled-dropdown: #888888;
+    --focus-dropdown: #f5f5f5;
 
     /*text and fonts*/
     --text-black: #000000; /*use only on white/background-blue*/
     --text-white: #ffffff; /*use on all colors*/
-    --hover-footer-text-blue: #405E90; /*replace with submitty blue?*/
 
     /*discussion forum*/
     --viewed-discussion-post-blue: #e8f0f7;
     --deleted-discussion-post-grey: #dcdcdc;
     --important-post: #ffd700; /*is also for star color*/
 
-    /*instructor setting options*/
-    --post-label-grey: #777;
-    --hover-post-label-grey: #5e5e5e;
-    --post-label-blue: #337ab7;
-    --hover-post-label-blue: #286090;
-    --post-label-green: #5cb85c;
-    --hover-post-label-green: #449d44;
-    --post-label-teal: #5bc0de;
-    --hover-post-label-teal: #31b0d5;
-    --post-label-orange: #f0ad4e;
-    --hover-post-label-orange: #ec971f;
-    --post-label-red: #d9534f;
-    --hover-post-label-red: #c9302c;
 
         /*these differ from the colors on the posts for some reason?
         so I will put them here for reference
         green-message: #008800
         blue-message: #0a6496
-        red-message: #af0000
+        red-message99: #af0000
         yellow-message: #ff9900
         black-message: #000000*/
 
     /*links*/
-    --external-link: #337ab7;
-    --external-link-hover: #23527c;
-    --external-link-disabled: #777;
+    --external-link-blue: #2627ee;
+    --external-link-hover: #131399;
+    --external-link-disabled: #888888;
     --external-link-active: #991313;
-
-    /*checkboxes, radio buttons*/
-    --unchecked-checkbox: #ffffff;
-    --checked-checkbox: #316498;
 
     /*sidebar*/
     --selected-nav-sidebar: #d9e1e2;
     --selected-nav-sidebar-text: #000000;
     --nav-sidebar-text: #006398;
 
-    /*extra stuff*/
-    --help-icon-blue: #1E90FF; /*maybe change this to submitty blue??*/
-    --disabled-text-area: #d3d3d3;
+
+    /*tables*/
+    --table-info: #d9edf7;
+
 }
