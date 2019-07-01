@@ -8,8 +8,8 @@
 
     <div id="list_wrapper">
         <div id="display_benchmarks" class="customization_item">
-            <h2>Display benchmarks</h2>
-            <div id="display_benchmarks_collapse">
+            <h2>Display Benchmarks</h2>
+            <div id="display_benchmarks_collapse" class="collapsible_area">
             {% for benchmark in display_benchmarks %}
                 <p>
                     <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
@@ -20,9 +20,16 @@
             {% endfor %}
             </div>
         </div>
+        <div id="cust_messages" class="customization_item">
+            <h2>Messages</h2>
+            <div id="cust_messages_collapse" class="collapsible_area">
+                <p>You may enter a message that will appear above the student's rainbow grades.</p>
+                <textarea id="cust_messages_textarea">{{ messages[0] }}</textarea>
+            </div>
+        </div>
         <div id="section_labels" class="customization_item">
             <h2>Section Labels</h2>
-            <div id="section_labels_collapse">
+            <div id="section_labels_collapse" class="collapsible_area">
                 <p>You may use this area to assign a label to each section number, for example the name of the TA or TAs
                     handling the section.  You may also leave it as the default but it may not be blank.</p>
                 {% for section, label in sections_and_labels %}
@@ -35,7 +42,7 @@
         </div>
         <div id="gradeables" class="customization_item">
             <h2>Gradeables</h2>
-            <div id="gradeables_collapse">
+            <div id="gradeables_collapse" class="collapsible_area">
                 <div style="width:45%;float:left;" id="buckets_used">
                     <h3>Assigned Buckets</h3>
                     <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
@@ -100,26 +107,6 @@
         </div>
     </div>
 </div>
-
-<style type="text/css">
-    #buckets_available_list li{
-        font-weight: bold;
-        list-style-type: none;
-    }
-
-    #buckets_used_list li{
-        font-style: italic;
-        list-style-type: none;
-    }
-
-    .bucket_detail_div:nth-child(2n){
-        background-color: mediumorchid;
-    }
-
-    .bucket_detail_div:nth-child(2n+1){
-        background-color: lightskyblue;
-    }
-</style>
 
 <script type="text/javascript">
     var old_index;

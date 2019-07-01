@@ -183,6 +183,17 @@ class RainbowCustomizationJSON extends AbstractModel
         $this->gradeables[] = $gradeable;
     }
 
+    public function getMessages()
+    {
+        return $this->messages;
+    }
+
+    // TODO: Validate message
+    public function addMessage(string $message)
+    {
+        $this->messages[] = $message;
+    }
+
     public function saveToJsonFile()
     {
         // Get path of where to save file
@@ -202,7 +213,7 @@ class RainbowCustomizationJSON extends AbstractModel
         // Copy each property from $this over to $json
         foreach($this as $key => $value)
         {
-            // Dont include $core
+            // Dont include $core or $modified
             if($key != 'core' AND $key != 'modified')
             {
                 $json->$key = $value;

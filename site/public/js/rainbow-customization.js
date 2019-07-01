@@ -165,6 +165,17 @@ function getGradeableBuckets()
     return gradeables
 }
 
+function getMessages()
+{
+    var messages = [];
+
+    var message = $('#cust_messages_textarea').val();
+
+    messages.push(message);
+
+    return messages;
+}
+
 // This function constructs a JSON representation of all the form input
 function buildJSON(){
 
@@ -172,7 +183,8 @@ function buildJSON(){
     let ret = {
         'display_benchmark': getDisplayBenchmark(),
         'section' : getSection(),
-        'gradeables' : getGradeableBuckets()
+        'gradeables' : getGradeableBuckets(),
+        'messages' : getMessages()
     };
 
     ret = JSON.stringify(ret);
@@ -222,6 +234,10 @@ $(document).ready(function () {
 
     $('#gradeables h2').click(function() {
         $('#gradeables_collapse').toggle();
+    });
+
+    $('#cust_messages h2').click(function() {
+        $('#cust_messages_collapse').toggle();
     });
 
 });

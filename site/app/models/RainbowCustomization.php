@@ -166,6 +166,13 @@ class RainbowCustomization extends AbstractModel{
         return $this->used_buckets;
     }
 
+    public function getMessages()
+    {
+        $messages = !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
+
+        return $messages;
+    }
+
     /**
      * Get display benchmarks
      *
@@ -282,6 +289,14 @@ class RainbowCustomization extends AbstractModel{
             foreach ($form_json->gradeables as $gradeable)
             {
                 $this->RCJSON->addGradeable($gradeable);
+            }
+        }
+
+        if(isset($form_json->messages))
+        {
+            foreach ($form_json->messages as $message)
+            {
+                $this->RCJSON->addMessage($message);
             }
         }
 
