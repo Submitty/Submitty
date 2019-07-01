@@ -78,6 +78,8 @@ if ($core->getRouter()->hasNext()) {
     $first = $core->getRouter()->getNext();
     if ($first === 'api') {
         $is_api = True;
+        $semester = $core->getRouter()->getNext() ?? '';
+        $course = $core->getRouter()->getNext() ?? '';
     }
     elseif (in_array($first, ['authentication', 'home'])) {
         $_REQUEST['component'] = $first;
