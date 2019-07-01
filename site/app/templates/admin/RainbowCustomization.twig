@@ -252,13 +252,13 @@
                 {%  for bucket in used_buckets %}
                     <li>
                         <div class="bucket-percent" style="display: inline;">
-                            <input type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                            <input type="text" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
                         </div>
                         {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
                     </li>
                 {% endfor %}
             </ol>
-            Total: <span id="used_percentage">0%</span>
+            Total: <span id="used_percentage">{{ bucket_percentages['used_percentage'] }}%</span>
         </div>
         <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
             <h3>Available Buckets</h3>

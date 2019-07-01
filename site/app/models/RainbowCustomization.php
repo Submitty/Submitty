@@ -99,8 +99,59 @@ class RainbowCustomization extends AbstractModel{
             ];
         }
 
+        // Determine which 'buckets' exist in the customization.json
+        if(!is_null($this->RCJSON))
+        {
+            $json_gradeables = $this->RCJSON->getGradeables();
+
+            // Place those buckets in $this->used_buckets
+            foreach ($json_gradeables as $json_gradeable)
+            {
+                $this->used_buckets[] = $json_gradeable->type;
+            }
+        }
+
         //XXX: Assuming that the contents of these buckets will be lowercase
         $this->available_buckets = array_diff(self::syllabus_buckets,$this->used_buckets);
+    }
+
+    /**
+     * Get an array containing what percentage of the grade the bucket counts toward.  The key is the name of the
+     * bucket and the value is the percentage which has been cast back to a whole number integer.  This differs
+     * from the customization.json in that in the json file the percentage is represented as a decimal between 0 and 1.
+     * This value is represented as an integer between 0 and 100.
+     *
+     * ex.  key => value
+     *     'test' => 50
+     *     'lab' => 25
+     *     'homework' => 25
+     *
+     * @return array
+     */
+    public function getBucketPercentages()
+    {
+        $retArray = [];
+
+        if(!is_null($this->RCJSON))
+        {
+            $json_gradeables = $this->RCJSON->getGradeables();
+
+            $sum = 0;
+
+            foreach ($json_gradeables as $json_gradeable)
+            {
+                // Get percentage, cast back to whole number integer
+                $retArray[$json_gradeable->type] = (int)($json_gradeable->percent * 100);
+
+                // Keep track of the sum
+                $sum += $retArray[$json_gradeable->type];
+            }
+
+            // Save the sum of used percentages to special key in array
+            $retArray['used_percentage'] = $sum;
+        }
+
+        return $retArray;
     }
 
     public function getCustomizationData(){
