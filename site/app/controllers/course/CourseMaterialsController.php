@@ -21,10 +21,10 @@ class CourseMaterialsController extends AbstractController {
                 $this->viewCourseMaterialsPage();
                 break;
             case 'delete_course_material_file':
-                $this->deleteCourseMaterialFile($_REQUEST["path"]);
+                $this->deleteCourseMaterial($_REQUEST["path"]);
                 break;
             case 'delete_course_material_folder':
-                $this->deleteCourseMaterialFolder($_REQUEST["path"]);
+                $this->deleteCourseMaterial($_REQUEST["path"]);
                 break;
             case 'download_course_material_zip':
                 $this->downloadCourseMaterialZip($_REQUEST["dir_name"], $_REQUEST['path']);
@@ -58,44 +58,7 @@ class CourseMaterialsController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/course_materials/delete")
      */
-    public function deleteCourseMaterialFile($path) {
-        $dir = "course_materials";
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
-
-        if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
-            $message = "You do not have access to that page. ";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
-        }
-
-        if (unlink($path)) {
-            $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
-        }
-        else {
-            $this->core->addErrorMessage("Failed to remove " . basename($path));
-        }
-
-        // remove entry from json file
-        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-
-        $json = FileUtils::readJsonFile($fp);
-        if ($json != false)
-        {
-            unset($json[$path]);
-
-            if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
-                return "Failed to write to file {$fp}";
-            }
-        }
-
-        //refresh course materials page
-        $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
-    }
-
-    /**
-     * @Route("/{_semester}/{_course}/course_materials/delete_folder")
-     */
-    public function deleteCourseMaterialFolder($path) {
+    public function deleteCourseMaterial($path) {
         // security check
         $dir = "course_materials";
         $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
@@ -111,7 +74,7 @@ class CourseMaterialsController extends AbstractController {
         $json = FileUtils::readJsonFile($fp);
 
         if ($json != false) {
-            $all_files = FileUtils::getAllFiles($path);
+            $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
             foreach($all_files as $file) {
                 $filename = $file['path'];
                 unset($json[$filename]);
@@ -120,7 +83,14 @@ class CourseMaterialsController extends AbstractController {
             file_put_contents($fp, FileUtils::encodeJson($json));
         }
 
-        if (FileUtils::recursiveRmdir($path)) {
+        if (is_dir($path)) {
+            $success = FileUtils::recursiveRmdir($path);
+        }
+        else {
+            $success = unlink($path);
+        }
+
+        if ($success) {
             $this->core->addSuccessMessage(basename($path) . " has been successfully removed.");
         }
         else {

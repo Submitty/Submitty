@@ -320,11 +320,8 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.css("display", "block");
 }
 
-function newDeleteCourseMaterialForm(path, file_name, is_folder) {
-    console.log(is_folder);
-    let url = is_folder ?
-        buildNewCourseUrl(["course_materials", "delete_folder"]) + "?path=" + path :
-        buildNewCourseUrl(["course_materials", "delete"]) + "?path=" + path;
+function newDeleteCourseMaterialForm(path, file_name) {
+    let url = buildNewCourseUrl(["course_materials", "delete"]) + "?path=" + path;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
 
