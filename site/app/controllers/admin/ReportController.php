@@ -482,9 +482,11 @@ class ReportController extends AbstractController {
         }
         else{
 
+            $this->core->getOutput()->addInternalJs('rainbow-customization.js');
+            $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+
             //Print the form, since the user hasn't provided us with any data
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
-                "customization_data_print" => print_r($customization->getCustomizationData(),true),
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 "used_buckets" => $customization->getUsedBuckets(),

@@ -1,0 +1,21 @@
+.customization_item
+{
+    border: 2px solid lightblue;
+    padding: 5px;
+    padding-left: 20px;
+    margin-top: 5px;
+    border-radius: 25px;
+}
+
+.customization_item h2
+{
+    margin-top: 3px;
+    margin-bottom: 3px;
+    font-size: 1.2em;
+    font-style: italic;
+}
+
+.customization_item h3
+{
+    font-size: 1.1em;
+}
