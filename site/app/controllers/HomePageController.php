@@ -5,6 +5,9 @@ namespace app\controllers;
 use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\Utils;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -99,6 +102,10 @@ class HomePageController extends AbstractController {
         });
 
         $changeNameText = $this->core->getConfig()->getUsernameChangeText();
-        $this->core->getOutput()->renderOutput('HomePage', 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText);
+
+        return new Response(
+            null,
+            new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText)
+        );
     }
 }

@@ -60,6 +60,13 @@ class Output {
         $this->render = false;
     }
 
+    /**
+     * @return bool
+     */
+    public function getRender() {
+        return $this->render;
+    }
+
     public function loadTwig() {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
