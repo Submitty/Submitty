@@ -147,8 +147,7 @@ defaults = {'database_host': 'localhost',
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : '',
-            'timezone' : tzlocal.get_localzone().zone,
-            'email_enabled': 'true',
+            'email_enabled': True,
             'email_user': '',
             'email_password': '',
             'email_sender': 'submitty@myuniversity.edu',
@@ -204,9 +203,6 @@ else:
         DATABASE_PASS = defaults['database_password']
     print()
 
-    TIMEZONE = get_input('What timezone should Submitty use? (for a full list of supported timezones see http://php.net/manual/en/timezones.php)', defaults['timezone'])
-    print()
-
     SUBMISSION_URL = get_input('What is the url for submission? (ex: http://192.168.56.101 or '
                                'https://submitty.cs.rpi.edu)', defaults['submission_url']).rstrip('/')
     print()
@@ -247,10 +243,9 @@ else:
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
-    print("NOTE: Emails can be set up at a later time in the config/email.json file")
     while True:
-        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y').lower()
-        if (is_email_enabled == 'y') :
+        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
+        if (is_email_enabled.lower() in ['yes', 'y']) :
             EMAIL_ENABLED = True
             EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
             EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
@@ -263,7 +258,7 @@ else:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
             break;
             
-        elif (is_email_enabled == 'n') :
+        elif (is_email_enabled.lower() in ['no', 'n']) :
             EMAIL_ENABLED = False
             EMAIL_USER = defaults['email_user']
             EMAIL_PASSWORD = defaults['email_password']
@@ -320,7 +315,6 @@ else:
     config['database_host'] = DATABASE_HOST
     config['database_user'] = DATABASE_USER
     config['database_password'] = DATABASE_PASS
-    config['timezone'] = TIMEZONE
 
     config['authentication_method'] = AUTHENTICATION_METHOD
     config['vcs_url'] = VCS_URL
@@ -461,7 +455,6 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['timezone'] = TIMEZONE
 
 if not args.worker:
     config['site_log_path'] = TAGRADING_LOG_PATH
