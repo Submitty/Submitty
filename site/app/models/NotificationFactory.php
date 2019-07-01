@@ -104,9 +104,9 @@ class NotificationFactory {
         if (empty($recipients)) {
             return;
         }
-        $event['user_id'] = $this->core->getUser()->getId();
+        $event['sender_id'] = $this->core->getUser()->getId();
         $notification = Notification::createNotification($this->core,$event);
-        $this->core->getQueries()->pushNotifications($notification,$recipients);
+        $this->core->getQueries()->insertNotifications($notification,$recipients);
     }
 
     /**
@@ -117,9 +117,9 @@ class NotificationFactory {
         if (empty($recipients)) {
             return;
         }
-        $event["user_id"] = $this->core->getUser()->getId();
+        $event["sender_id"] = $this->core->getUser()->getId();
         $email = new Email($this->core,$event);
-        $this->core->getQueries()->pushEmails($email,$recipients);
+        $this->core->getQueries()->insertEmails($email,$recipients);
 
 
     }

@@ -82,7 +82,7 @@ class Notification extends AbstractModel {
         $instance->setComponent($event['component']);
         $instance->setNotifyMetadata($event['metadata']);
         $instance->setNotifyContent($event['content']);
-        $instance->setNotifySource($event['user_id']);
+        $instance->setNotifySource($event['sender_id']);
         return $instance;
     }
 
@@ -91,7 +91,6 @@ class Notification extends AbstractModel {
         if (count($details) == 0) {
             return null;
         }
-        $instance->setViewOnly(true);
         $instance->setId($details['id']);
         $instance->setSeen($details['seen']);
         $instance->setComponent($details['component']);
@@ -126,13 +125,6 @@ class Notification extends AbstractModel {
         }
         $thread_id = array_key_exists('thread_id', $metadata[0]) ? $metadata[0]['thread_id'] : -1;
         return $thread_id;
-    }
-
-    private function actAsUpdatedAnnouncementNotification($thread_id, $thread_title) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("Announcement: ".$thread_title);
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget(null);
     }
 
     /**

@@ -2711,12 +2711,11 @@ AND gc_id IN (
      */
     public function getAllThreadAuthors($thread_id, $column) {
         $params = [$thread_id];
-        $preferences = $this->getAllPreferences();
         $query = "SELECT author_user_id AS user_id FROM posts WHERE thread_id = ? AND
                   EXISTS (
                   SELECT user_id FROM notification_settings WHERE
                   user_id = author_user_id AND {$column} = 'true');";
-        if (!in_array($column,$preferences)) {
+        if ($column != 'reply_in_post_thread' && $column != 'reply_in_post_thread_email') {
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query, $params);
         }
         $this->course_db->query($query,$params);
@@ -2752,7 +2751,7 @@ AND gc_id IN (
      * @param $notification
      * @param $recipients
      */
-    public function pushNotifications($notification, $recipients){
+    public function insertNotifications($notification, $recipients){
         $params = array($notification->getComponent(), $notification->getNotifyMetadata(), $notification->getNotifyContent(), $notification->getNotifySource());
         $params = array_merge($params,$recipients);
         $recipient_array = $this->createRecipientArray(count($recipients));
@@ -2767,7 +2766,7 @@ AND gc_id IN (
      * @param Email $email
      * @param string $recipients
      */
-    public function pushEmails(Email $email, array $recipients){
+    public function insertEmails(Email $email, array $recipients){
         $params = array($email->getSubject(), $email->getBody());
         $params = array_merge($params,$recipients);
         $recipient_array = $this->createRecipientArray(count($recipients));
@@ -2797,7 +2796,6 @@ AND gc_id IN (
         $results = array();
         foreach ($rows as $row) {
             $results[] = Notification::createViewOnlyNotification($this->core, array(
-                    'view_only' => true,
                     'id' => $row['id'],
                     'component' => $row['component'],
                     'metadata' => $row['metadata'],

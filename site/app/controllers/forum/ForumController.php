@@ -387,18 +387,18 @@ class ForumController extends AbstractController{
                 }
 
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                // notify on a new announcement
                 if ($announcement) {
                     $content = "New Announcement: ".$thread_title;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => 'New Announcement'];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
-                // Just a thread
+                // notify on a new thread
                 else {
                     $content = "New Thread: ".$thread_title;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => 'New Thread'];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
-
 
                 $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
             }
@@ -480,6 +480,8 @@ class ForumController extends AbstractController{
         if($this->core->getAccess()->canI("forum.modify_announcement")){
             $thread_id = $_POST["thread_id"];
             $this->core->getQueries()->setAnnouncement($thread_id, $type);
+
+            //TODO: notify on edited announcement
         } else {
             $this->core->addErrorMessage("You do not have permissions to do that.");
         }

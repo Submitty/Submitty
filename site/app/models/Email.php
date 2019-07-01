@@ -9,19 +9,25 @@ use app\libraries\Utils;
  *
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
- * @method void     setUserId($uid)
+ * @method void     setSenderId($sid)
+ * @method void     setRecipient($recip)
 
  * @method string   getSubject()
  * @method string   getBody()
  * @method string   getUserId()
+ * @method string   getRecipient()
  */
 class Email extends AbstractModel {
     /** @property @var string Subject line of email */
     protected $subject;
     /** @property @var string Body of email */
     protected $body;
-    /** @property @var string user name */
-    protected $user_id;
+    /** @property @var string sender's user id */
+    protected $sender_id;
+
+    /** @property @var string Intended receiver of email */
+    // NOTE: THIS IS ESSENTIALLY A DEPRECATED / LEGACY FIELD
+    protected $recipient;
 
 
   /**
@@ -36,7 +42,7 @@ class Email extends AbstractModel {
         if (count($event) == 0) {
             return;
         }
-        $this->setUserId($event["user_id"]);
+        $this->setSenderId($event["sender_id"]);
         $this->setSubject($this->formatSubject($event["subject"]));
         $this->setBody($this->formatBody($event["content"]));
     }
