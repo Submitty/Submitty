@@ -7,14 +7,7 @@
             <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary">Open/Close All Folders</a>
             {# button to set the release dates of all files in the page/course materials #}
             <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
-                    [{% for key,value in inDir %}
-                    {# if the key is the full folder path 2D array with all files in it is the value#}
-                        {% if key == folderPath %}
-                            {% for f in value %}
-                                    "{{ f }}",
-                            {% endfor %}
-                        {% endif %}
-                {% endfor %}]
+                    []
                     )' class="btn btn-primary">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
         </div>
@@ -146,12 +139,7 @@
                     <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
-                [{% for key,value in inDir %}
-                        {# check that we are in correct directory and pass along the files in it#}
-                    {% if value == dir %}
-                            "{{ key}}",
-                    {% endif %}
-                {% endfor %}]
+                []
                         )' class="btn btn-primary">Set Folder Release Date</a>
 
             {% endif %}
@@ -213,7 +201,8 @@
             //makes sure that opened folders don't get opened multiple times
             let trackOpens = new Map();
             //goes through all possible directories
-            {% for key,value in inDir %}
+            //FIX THIS LATER
+            {#  {% for key,value in inDir %}
                 //for everything not in the whole course directory (handled above)
                 {% if key!= folderPath %}
                     //get the cookie for each dir
@@ -237,8 +226,8 @@
                         }
                     }
                 {% endif %}
-            {% endfor %}
-        }
+            {% endfor %}#}
+    }
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {

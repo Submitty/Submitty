@@ -3,22 +3,25 @@
 {% block title %}Set Folder Release{% endblock %}
 {% block body %}
 
-    <center> <b>Choose a time to release the contents of this folder:</b>
+    <center> <b>Choose a time to release the contents of :</b>
     <br/>
     <br/>
-    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value="2019-06-24 12:00:00" data-fP=" " onChange="getNewDateTime(this)"/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime(this)"/>
 
     </center>
     <script>
+        var releaseDate = document.getElementById("date_to_release");
+        var folderPath = releaseDate.dataset.fp;
+        console.log(folderPath,"x");
 
         function getNewDateTime(me){
             var releaseDate = document.getElementById("date_to_release");
-            var folderPath = releaseDate.dataset.fP;
 
             // pass filename to server to record the new date and time of the file to be released
             var newDateTime = $(me).val();
             //set the value to the new date and time
             releaseDate.value = newDateTime;
+            console.log(newDateTime);
 
         }
         function determineRelease(nDT) {
@@ -59,18 +62,12 @@
             //will add a thrid color for never
             //custom colors for the input box not on sheet for readability
             if (nDT <= currentDT) {
-                console.log(currentDT);
-                console.log(nDT);
-                console.log("released");
                 return "#87db88";
             } else {
-                console.log(currentDT);
-                console.log(nDT);
-                console.log("unreleased");
                 return "#ffeb54";
             }
         }
-        function confirm( ){
+        function confirm(){
             var directory = document.getElementById("submit_time");
             var dirArr = JSON.parse(directory.dataset.indir);
             var ID = directory.dataset.iden;
@@ -79,11 +76,13 @@
 
             dirArr.forEach(function (element) {
                 setChildNewDateTime(element,releaseDate.value);
+                console.log(element);
             });
             var selectedDiv = 'date_to_release_'+ID;
 
             $("[id^="+selectedDiv+"]").val(releaseDate.value);
             $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)');
+
         }
 
     </script>

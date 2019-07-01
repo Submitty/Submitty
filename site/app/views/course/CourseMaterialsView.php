@@ -17,7 +17,7 @@ class CourseMaterialsView extends AbstractView {
      */
     public function listCourseMaterials($user_group) {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_Dir) {
+        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir) {
             $files[$start_dir_name] = array();
             $working_dirRoot = &$files[$start_dir_name];
 
@@ -27,13 +27,13 @@ class CourseMaterialsView extends AbstractView {
 
             $now_date_time = $core->getDateTimeNow();
 
-            $in_Dir[$expected_path] = [];
+            $in_dir[$expected_path] = [];
 
             foreach($course_materials_array as $file) {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
-                $in_Dir[$expected_path][]=$expected_file_path;
+                $in_dir[$expected_path][]=$expected_file_path;
 
                 // Check whether the file is shared to student or not
                 // If shared, will add to courseMaterialsArray
@@ -67,8 +67,15 @@ class CourseMaterialsView extends AbstractView {
                     if (!isset($working_dir[$dir])) {
                         $working_dir[$dir] = array();
                     }
+                    if(array_key_exists($dir,$in_dir)){
+                        $tmp =array($expected_file_path);
+                        $in_dir[$dir]=array_merge($in_dir[$dir],$tmp);
+                    }
+                    else{
+                        $in_dir[$dir] = array($expected_file_path);
+                    }
                     //creates key value of file path and folder within file path
-                    $in_Dir[$expected_file_path] = $dir;
+
 
                     $working_dir = &$working_dir[$dir];
 
@@ -85,7 +92,7 @@ class CourseMaterialsView extends AbstractView {
         $submissions = array();
         $file_shares = array();
         $file_release_dates = array();
-        $in_Dir = array();
+        $in_dir = array();
 
         $course_materials_array = array();
 
@@ -101,7 +108,7 @@ class CourseMaterialsView extends AbstractView {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
 
-        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_Dir);
+        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
@@ -120,7 +127,7 @@ class CourseMaterialsView extends AbstractView {
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
-            "inDir" => $in_Dir
+            "inDir" => $in_dir
         ]);
     }
 }

@@ -415,8 +415,8 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     form.css("display", "block");
 
     $('[name="release_date"]', form).val(releaseDates);
-    $('[name="release_date"]',form).attr('data-fP',changeActionVariable);
-
+    $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
+    console.log(inDir);
     inDir = JSON.stringify(inDir);
     $('[name="submit"]',form).attr('data-iden',id);
     $('[name="submit"]',form).attr('data-inDir',inDir);
