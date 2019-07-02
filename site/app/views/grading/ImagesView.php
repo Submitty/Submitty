@@ -63,7 +63,8 @@ class ImagesView extends AbstractView {
             "sections" => $sections,
             "imageData" => $image_data,
             "errorImageData" => $error_image_data,
-            "hasInstructorPermission" => $instructor_permission
+            "hasInstructorPermission" => $instructor_permission,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }
