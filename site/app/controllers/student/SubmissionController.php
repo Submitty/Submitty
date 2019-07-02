@@ -16,6 +16,7 @@ use app\controllers\grading\ElectronicGraderController;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
+use app\NotificationFactory;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -1871,39 +1872,36 @@ class SubmissionController extends AbstractController {
 
           }
 
-          // send to graders
-          $recipients = array();
+          // make graders' notifications and emails
+          $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
           foreach ($graders as $grader) {
               if ($grader->accessFullGrading() && $grader->getId() != $user_id){
-                  $recipients[] = $grader->getId();
+                  $details = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
+                  $notifications[] = Notification::createNotification($this->core, $details);
+                  $emails[] = new Email($this->core,$details);
               }
-
-          }
-          if (!empty($recipients)) {
-              $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
-              $event = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'subject' => $email_subject, 'recipients' => $recipients];
-              $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
           }
 
-          // send to students
-          $recipients = array();
+          // make students' notifications and emails
+          $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
           if($submitter->isTeam()){
               $submitting_team = $submitter->getTeam()->getMemberUsers();
               foreach($submitting_team as $submitting_user){
                   if($submitting_user->getId() != $user_id) {
-                      $recipients[] = $submitting_user->getId();
+                      $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
+                      $notifications[] = Notification::createNotification($this->core, $details);
+                      $emails[] = new Email($this->core,$details);
                   }
               }
           } else {
               if ($submitter->getUser()->getId() != $user_id) {
-                  $recipients[] = $submitter->getUser()->getId();
+                  $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
+                  $notifications[] = Notification::createNotification($this->core, $details);
+                  $emails[] = new Email($this->core,$details);
               }
           }
-          if (!empty($recipients)) {
-              $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
-              $event = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'subject' => $email_subject, 'recipients' => $recipients];
-              $this->core->getNotificationFactory()->onGradeInquiryEvent($event);
-          }
+          $this->core->getNotificationFactory()->sendNotifications($notifications);
+          $this->core->getNotificationFactory()->sendEmails($emails);
       }
     }
 

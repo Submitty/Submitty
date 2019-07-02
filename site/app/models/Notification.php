@@ -15,8 +15,10 @@ use app\libraries\Utils;
  * @method void     setSeen($isSeen)
  * @method void     setElapsedTime($duration)
  * @method void     setCreatedAt($time)
- * @method void     setNotifyMetadata()
- * @method void     setNotifyContent()
+ * @method void     setNotifyMetadata($metadata)
+ * @method void     setNotifyContent($content)
+ * @method void     setNotifySource($content)
+ * @method void     setNotifyTarget($content)
  * @method void     setType($t)
  *
  * @method bool     isViewOnly()
@@ -83,6 +85,7 @@ class Notification extends AbstractModel {
         $instance->setNotifyMetadata($event['metadata']);
         $instance->setNotifyContent($event['content']);
         $instance->setNotifySource($event['sender_id']);
+        $instance->setNotifyTarget($event['to_user_id']);
         return $instance;
     }
 
@@ -92,8 +95,8 @@ class Notification extends AbstractModel {
             return null;
         }
         $instance->setId($details['id']);
-        $instance->setSeen($details['seen']);
-        $instance->setComponent($details['component']);
+        $instance->setSeen(['seen']);
+        $instance->setComponent(['component']);
         $instance->setElapsedTime($details['elapsed_time']);
         $instance->setCreatedAt($details['created_at']);
         $instance->setNotifyMetadata($details['metadata']);

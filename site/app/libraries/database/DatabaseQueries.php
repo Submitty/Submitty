@@ -2737,42 +2737,32 @@ AND gc_id IN (
         return $result;
     }
 
-    /*
-     * Creates the query that has the right amount of ?'s for PDO to insert array of recipients
-     * @param int $recipient_count
-     */
-
-    private function createRecipientArray(int $recipient_count) {
-        return implode(', ', array_fill(0, $recipient_count,'?'));
-    }
-
     /**
      * Sends notifications to all recipients
-     * @param $notification
-     * @param $recipients
+     * @param array $notifications
      */
-    public function insertNotifications($notification, $recipients){
-        $params = array($notification->getComponent(), $notification->getNotifyMetadata(), $notification->getNotifyContent(), $notification->getNotifySource());
-        $params = array_merge($params,$recipients);
-        $recipient_array = $this->createRecipientArray(count($recipients));
-        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                    SELECT ?, ?, ?, current_timestamp, ?, recipient FROM unnest(ARRAY[{$recipient_array}]) recipient", $params);
-
+    public function insertNotifications(array $flattened_notifications, int $notification_count){
+        // PDO Placeholders
+        $row_string = "(?, ?, ?, current_timestamp, ?, ?)";
+        $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
+        $this->course_db->query("
+            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+            VALUES ".$value_param_string, $flattened_notifications);
 
     }
 
     /**
      * Queues emails for all given recipients to be sent by email job
-     * @param Email $email
-     * @param string $recipients
+     * @param array $flattened_emails array of params
+     * @param int $email_count
      */
-    public function insertEmails(Email $email, array $recipients){
-        $params = array($email->getSubject(), $email->getBody());
-        $params = array_merge($params,$recipients);
-        $recipient_array = $this->createRecipientArray(count($recipients));
+    public function insertEmails(array $flattened_emails, int $email_count){
+        // PDO Placeholders
+        $row_string = "(?, ?, ?, current_timestamp, ?)";
+        $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query("
             INSERT INTO emails(recipient, subject, body, created, user_id)
-            SELECT 'BLANK_EMAIL', ?, ?, current_timestamp, recipient FROM unnest(ARRAY[{$recipient_array}]) recipient", $params);
+            VALUES ".$value_param_string, $flattened_emails);
     }
 
     /**

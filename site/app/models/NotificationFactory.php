@@ -29,8 +29,10 @@ class NotificationFactory {
      */
     public function onNewAnnouncement(array $event) {
         $recipients = $this->core->getQueries()->getAllUsersIds();
-        $this->createAndSendNotifications($event, $recipients);
-        $this->createAndSendEmails($event, $recipients);
+        $notifications = $this->createNotificationsArray($event,$recipients);
+        $this->sendNotifications($notifications);
+        $emails =$this->createEmailsArray($event,$recipients);
+        $this->sendEmails($emails);
     }
 
     /**
@@ -38,9 +40,11 @@ class NotificationFactory {
      */
     public function onNewThread(array $event) {
         $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads");
-        $this->createAndSendNotifications($event, $recipients);
+        $notifications = $this->createNotificationsArray($event,$recipients);
+        $this->sendNotifications($notifications);
         $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
-        $this->createAndSendEmails($event,$recipients);
+        $emails =$this->createEmailsArray($event,$recipients);
+        $this->sendEmails($emails);
     }
 
     /**
@@ -56,12 +60,14 @@ class NotificationFactory {
         $users_with_notification_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts");
         $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread");
         $notification_recipients = array_unique(array_merge($parent_authors, $users_with_notification_preference, $thread_authors_notification_preference));
-        $this->createAndSendNotifications($event, $notification_recipients);
+        $notifications = $this->createNotificationsArray($event,$notification_recipients);
+        $this->sendNotifications($notifications);
 
         $users_with_email_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts_email");
         $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread_email");
         $email_recipients = array_unique(array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference));
-        $this->createAndSendEmails($event, $email_recipients);
+        $emails =$this->createEmailsArray($event,$email_recipients);
+        $this->sendEmails($emails);
 
     }
 
@@ -70,28 +76,50 @@ class NotificationFactory {
      * @param array $event
      */
     public function onPostModified(array $event) {
-        //
         $notification_recipients = $this->core->getQueries()->getAllUsersWithPreference($event['preference']);
         $notification_recipients[] = $event['recipient'];
         $notification_recipients = array_unique($notification_recipients);
-        $this->createAndSendNotifications($event,$notification_recipients);
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
+        $this->sendNotifications($notifications);
 
         $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'].'_email');
         $email_recipients[] = $event['recipient'];
         $email_recipients = array_unique($email_recipients);
-        $this->createAndSendEmails($event,$email_recipients);
+        $emails = $this->createEmailsArray($event,$email_recipients);
+        $this->sendEmails($emails);
     }
 
-    // ***********************************GRADE INQUIRY NOTIFICATIONS***********************************
+    // ***********************************HELPERS***********************************
 
     /**
-     * @param array $event
+     * @param $event
+     * @param $recipients
+     * @return array
      */
-    public function onGradeInquiryEvent(array $event) {
-        // TODO::Allow users to have preference on grade inquiry events
-        $recipients = $event['recipients'];
-        $this->createAndSendNotifications($event,$recipients);
-        $this->createAndSendEmails($event,$recipients);
+    private function createNotificationsArray($event, $recipients) {
+        $event['sender_id'] = $this->core->getUser()->getId();
+        foreach ($recipients as $recipient) {
+            $event['to_user_id'] = $recipient;
+            $notifications[] = Notification::createNotification($this->core,$event);
+        }
+        return $notifications;
+    }
+
+    /**
+     * @param $event
+     * @param $recipients
+     * @return array of email objects
+     */
+    private function createEmailsArray($event, $recipients) {
+        foreach ($recipients as $recipient) {
+            $details = [
+                'to_user_id' => $recipient,
+                'subject' => $event['subject'],
+                'body' => $event['content']
+            ];
+            $emails[] = new Email($this->core,$details);
+        }
+        return $emails;
     }
 
     // ***********************************SENDERS***********************************
@@ -99,28 +127,30 @@ class NotificationFactory {
      * @param array $event
      * @param array $recipients
      */
-    public function createAndSendNotifications(array $event, array $recipients) {
-        // if there are no recipients return
-        if (empty($recipients)) {
-            return;
+    public function sendNotifications(array $notifications) {
+        // parameterize notification array
+        foreach ($notifications as $notification) {
+            $flattened_notifications[] = $notification->getComponent();
+            $flattened_notifications[] = $notification->getNotifyMetadata();
+            $flattened_notifications[] = $notification->getNotifyContent();
+            $flattened_notifications[] = $notification->getNotifySource();
+            $flattened_notifications[] = $notification->getNotifyTarget();
         }
-        $event['sender_id'] = $this->core->getUser()->getId();
-        $notification = Notification::createNotification($this->core,$event);
-        $this->core->getQueries()->insertNotifications($notification,$recipients);
+        $this->core->getQueries()->insertNotifications($flattened_notifications,count($notifications));
     }
 
     /**
-     * @param array $event
-     * @param array $recipients
+     * prepare array of Email objects as param array
+     * @param array $emails
      */
-    public function createAndSendEmails(array $event, array $recipients) {
-        if (empty($recipients)) {
-            return;
+    public function sendEmails(array $emails) {
+        // parameterize email array
+        foreach ($emails as $email) {
+            $flattened_emails[] = $email->getRecipient();
+            $flattened_emails[] = $email->getSubject();
+            $flattened_emails[] = $email->getBody();
+            $flattened_emails[] = $email->getUserId();
         }
-        $event["sender_id"] = $this->core->getUser()->getId();
-        $email = new Email($this->core,$event);
-        $this->core->getQueries()->insertEmails($email,$recipients);
-
-
+        $this->core->getQueries()->insertEmails($flattened_emails,count($emails));
     }
 }
