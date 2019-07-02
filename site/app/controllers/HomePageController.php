@@ -2,9 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\Course;
 use app\libraries\Core;
-use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -85,6 +84,7 @@ class HomePageController extends AbstractController {
      * Display the HomePageView to the student.
      *
      * @Route("/home")
+     * @Route("/api/courses")
      */
     public function showHomepage() {
         $user = $this->core->getUser();
@@ -94,18 +94,33 @@ class HomePageController extends AbstractController {
         //Filter out any courses a student has dropped so they do not appear on the homepage.
         //Do not filter courses for non-students.
 
-        $unarchived_courses = array_filter($unarchived_courses, function($course) use($user) {
+        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user) {
             return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
         });
-        $archived_courses = array_filter($archived_courses, function($course) use($user) {
+        $archived_courses = array_filter($archived_courses, function(Course $course) use($user) {
             return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
         });
 
-        $changeNameText = $this->core->getConfig()->getUsernameChangeText();
+        $change_name_text = $this->core->getConfig()->getUsernameChangeText();
+
+        $json_response = JsonResponse::getSuccessResponse([
+            "unarchived_courses" => array_map(
+                function(Course $course) {
+                    return $course->getCourseInfo();
+                },
+                $unarchived_courses
+            ),
+            "archived_courses" => array_map(
+                function(Course $course) {
+                    return $course->getCourseInfo();
+                },
+                $archived_courses
+            )
+        ]);
 
         return new Response(
-            null,
-            new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText)
+            $json_response,
+            new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $change_name_text)
         );
     }
 }
