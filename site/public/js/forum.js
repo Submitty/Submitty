@@ -1,7 +1,3 @@
-$(function(){
-   $('#header-text div a')[0].focus();
-});
-
 function categoriesFormEvents(){
     $("#ui-category-list").sortable({
         items : '.category-sortable',
