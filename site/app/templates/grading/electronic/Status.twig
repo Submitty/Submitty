@@ -58,11 +58,11 @@
         </div>
     {% else %}
         <div class = "tab">
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Numerical Data'), this.blur()" id="defaultOpen">Numerical Data</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Total Score Histogram'), this.blur()">Total Score Histogram</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Autograding Score Histogram'), this.blur()">Autograding Score Histogram</button>
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'Component Averages'), this.blur()">Component Averages</button>
-            <div id = "Total Score Histogram" class = "tabcontent">
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'numerical-data'), this.blur()" id="defaultOpen">Numerical Data</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'total-score-histogram'), this.blur()">Total Histogram</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'autograding-score-histogram'), this.blur()">Autograding Histogram</button>
+            <button class="btn btn-primary" type="button" onclick="openStat(event, 'component-averages'), this.blur()">Component Averages</button>
+            <div id = "total-score-histogram" class = "tabcontent">
                 {% if overall_average == null or overall_average.getCount() == 0 %}
                     <br/>
                     No assignments have been completely graded yet.
@@ -233,13 +233,16 @@
                     Grade Inquiries: {{ GradeInq }}
                     {{ "\n"|nl2br }}
                     Incomplete Grading: {{ IncompGrading }}
+                    <br/>
+                    <br/>
+                    Double-click on the chart to zoom out
                 {% endif %}
 
 
             </div>
 
             {# Setup for Component Average Graphs#}
-            <div id="Component Averages" class="tabcontent">
+            <div id="component-averages" class="tabcontent">
 
                 {% if component_averages|length == 0 %}
                     <br/>
@@ -313,10 +316,13 @@
 
                         Plotly.newPlot('myDiv2', data, layout, {displayModeBar: false,displaylogo: false});
                     </script>
+                     <br/>
+                    <br/>
+                    Double-click on the chart to zoom out
                 {% endif %}
             </div>
             {# Graph Setup for Autograding #}
-            <div id="Autograding Score Histogram" class="tabcontent">
+            <div id="autograding-score-histogram" class="tabcontent">
                 {% if autograding_non_extra_credit != 0 %}
                     {# Only show autograder if we have autograding points #}
                 {% if autograded_average == null or autograded_average.getCount() == 0 %}
@@ -430,6 +436,9 @@
                     Grade Inquiries: {{ GradeInq }}
                     {{ "\n"|nl2br }}
                     Incomplete Grading: {{ IncompGrading }}
+                     <br/>
+                    <br/>
+                    Double-click on the chart to zoom out
                 {% endif %}
                 {% else %}
                 <br/>
@@ -437,7 +446,7 @@
                 {% endif %}
 
             </div>
-            <div id="Numerical Data" class="tabcontent">
+            <div id="numerical-data" class="tabcontent">
                 <div class = "row">
                     <div class = "box col-md-6">
                         {# LEFT CHUNK#}
@@ -451,24 +460,24 @@
                         {% endif %}
 
                         {% if team_assignment %}
-                            <br />
+                            <br/>
                             <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
-                            <br />
-                            <br />
+                            <br/>
+                            <br/>
                             <b>Number of teams:</b> {{ total_submissions }}
-                            <br />
-                            <br />
+                            <br/>
+                            <br/>
                             <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
                         {% else %}
-                            <br />
+                            <br/>
                             <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                            <br />
-                            <br />
+                            <br/>
+                            <br/>
                             <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
                         {% endif %}
 
-                        <br />
-                        <br />
+                        <br/>
+                        <br/>
                         {% if peer %}
                             <b>Current percentage of students grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                         {% else %}
@@ -478,7 +487,7 @@
                                     Section {{ key }}: {{ section.graded }} / {{ section.total }} ({{ section.percentage }}%)<br />
                                 {% endfor %}
                             </div>
-                            <br />
+                            <br/>
                             <b>Graders:</b>
                             <div style="margin-left: 20px">
                                 {% for key, section in sections %}
@@ -488,24 +497,24 @@
                                     {% else %}
                                         {{ section.valid_graders | join(", ") }}
                                     {% endif %}
-                                    <br />
+                                    <br/>
                                 {% endfor %}
                             </div>
                         {% endif %}
 
                         {% if ta_grades_released %}
                             {% if team_assignment %}
-                                <br />
+                                <br/>
                                 <b>Number of teams who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% else %}
-                                <br />
+                                <br/>
                                 <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
                             {% endif %}
                         {% endif %}
 
                         {% if core.getConfig().isRegradeEnabled() and not peer %}
-                            <br />
-                            <br />
+                            <br/>
+                            <br/>
                             <b>Number of students who have unresolved grade inquiries:</b> {{ regrade_requests }}
                         {% endif %}
                         {# LEFT CHUNK #}
