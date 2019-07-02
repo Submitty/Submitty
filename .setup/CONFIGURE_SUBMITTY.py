@@ -135,6 +135,8 @@ SETUP_REPOSITORY_DIR = os.path.join(SUBMITTY_REPOSITORY, '.setup')
 CONFIGURATION_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
+CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
+EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 
 ##############################################################################
 
@@ -159,6 +161,10 @@ loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
         loaded_defaults = json.load(conf_file)
+if os.path.isfile(EMAIL_JSON):
+    with open(EMAIL_JSON) as email_file:
+        loaded_defaults.update(json.load(email_file))
+
     #no need to authenticate on a worker machine (no website)
     if not args.worker:
         if 'authentication_method' in loaded_defaults:
@@ -331,13 +337,6 @@ else:
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
-    config['email_user'] = EMAIL_USER
-    config['email_password'] = EMAIL_PASSWORD
-    config['email_sender'] = EMAIL_SENDER
-    config['email_reply_to'] = EMAIL_REPLY_TO
-    config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
-    config['email_server_port'] = EMAIL_SERVER_PORT
-
     config['site_log_path'] = TAGRADING_LOG_PATH
 
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
@@ -381,14 +380,11 @@ os.chmod(CONFIGURATION_JSON, 0o500)
 ##############################################################################
 # Setup ${SUBMITTY_INSTALL_DIR}/config
 
-CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
-
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
-EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 
 #If the workers.json exists, rescue it from the destruction of config (move it to a temp directory).
 tmp_autograding_workers_file = ""
