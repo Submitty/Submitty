@@ -28,7 +28,7 @@ class WebRouter {
     protected $matcher;
 
     /** @var bool */
-    protected $api_authorized = true;
+    protected $course_loaded = false;
 
     /** @var array */
     public $parameters;
@@ -62,11 +62,13 @@ class WebRouter {
                 // prevent user that is not logged in from going anywhere except AuthenticationController
                 if (!$this->logged_in &&
                     !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                    $this->api_authorized = false;
+                    $this->core->getOutput()->renderJsonFail("Unauthorized access. Please log in.");
+                    die($this->core->getOutput()->getOutput());
                 }
             }
             catch (ResourceNotFoundException $e) {
-                $this->parameters = null;
+                $this->core->getOutput()->renderJsonFail("Endpoint not found.");
+                die($this->core->getOutput()->getOutput());
             }
         }
         else {
@@ -83,14 +85,6 @@ class WebRouter {
     }
 
     public function run() {
-        if (is_null($this->parameters)) {
-            return $this->core->getOutput()->renderJsonFail("Endpoint not found.");
-        }
-
-        if (!$this->api_authorized) {
-            return $this->core->getOutput()->renderJsonFail("Unauthorized access. Please log in.");
-        }
-
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
@@ -116,10 +110,20 @@ class WebRouter {
             $course = $this->parameters['_course'];
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadConfig($semester, $course);
+            $this->course_loaded = true;
         }
     }
 
     private function loginCheck() {
+        // This is a workaround for backward compatibility
+        // Should be removed after ClassicRouter is killed completely
+        if ($this->core->getConfig()->isCourseLoaded() && !$this->course_loaded) {
+            if ($this->core->getConfig()->isDebug()) {
+                throw new \RuntimeException("Attempted to use router for invalid URL. Please report the sequence of pages/actions you took to get to this exception to API developers.");
+            }
+            $this->core->redirect($this->core->getConfig()->getBaseUrl());
+        }
+
         if (!$this->logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
             $this->request = Request::create(
