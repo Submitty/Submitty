@@ -575,6 +575,16 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
 });
 
 //-----------------------------------------------------------------------------
+// Misc rubric options
+registerKeyHandler({name: "Toggle Rubric Edit Mode", code: "KeyE"}, function() {
+    let editBox = $("#edit-mode-enabled");
+    editBox.prop("checked", !editBox.prop("checked"));
+    onToggleEditMode();
+    updateCookies();
+});
+
+
+//-----------------------------------------------------------------------------
 // Selecting marks
 
 registerKeyHandler({name: "Select Full/No Credit Mark", code: 'Digit0', locked: true}, function() {
