@@ -27,13 +27,11 @@ class CourseMaterialsView extends AbstractView {
 
             $now_date_time = $core->getDateTimeNow();
 
-            $in_dir[$expected_path] = [];
-
             foreach($course_materials_array as $file) {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
-                $in_dir[$expected_path][]=$expected_file_path;
+                array_push($in_dir,$expected_file_path);
 
                 // Check whether the file is shared to student or not
                 // If shared, will add to courseMaterialsArray
@@ -67,14 +65,6 @@ class CourseMaterialsView extends AbstractView {
                     if (!isset($working_dir[$dir])) {
                         $working_dir[$dir] = array();
                     }
-                    if(array_key_exists($dir,$in_dir)){
-                        $tmp =array($expected_file_path);
-                        $in_dir[$dir]=array_merge($in_dir[$dir],$tmp);
-                    }
-                    else{
-                        $in_dir[$dir] = array($expected_file_path);
-                    }
-                    //creates key value of file path and folder within file path
 
 
                     $working_dir = &$working_dir[$dir];
@@ -85,6 +75,10 @@ class CourseMaterialsView extends AbstractView {
 
 
                 $file_datas[$expected_file_path] = $isShareToOther;
+
+                if( $releaseData == $now_date_time->format("Y-m-d H:i:sO")){
+                    $releaseData=substr_replace($releaseData,"9999",0,4);
+                }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
         }

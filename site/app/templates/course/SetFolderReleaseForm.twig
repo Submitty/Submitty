@@ -3,25 +3,33 @@
 {% block title %}Set Folder Release{% endblock %}
 {% block body %}
 
-    <center> <b>Choose a time to release the contents of :</b>
+
+
+    <center>
+        <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
+        <script>
+            window.onclick = function() {
+                var rD = document.getElementById("release_title");
+                var folderPath =rD.dataset.path;
+                document.getElementById("release_title").innerHTML = folderPath;
+            }
+        </script>
     <br/>
     <br/>
     <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime(this)"/>
 
     </center>
     <script>
-        var releaseDate = document.getElementById("date_to_release");
-        var folderPath = releaseDate.dataset.fp;
-        console.log(folderPath,"x");
 
         function getNewDateTime(me){
             var releaseDate = document.getElementById("date_to_release");
+            var folderPath =releaseDate.dataset.fp;
 
             // pass filename to server to record the new date and time of the file to be released
             var newDateTime = $(me).val();
             //set the value to the new date and time
             releaseDate.value = newDateTime;
-            console.log(newDateTime);
+            console.log(newDateTime,"ndt");
 
         }
         function determineRelease(nDT) {
@@ -58,12 +66,16 @@
 
             var time = hours + ":" + mins + ":" + secs;
             var currentDT = date + ' ' + time;
-
+            var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
             //will add a thrid color for never
             //custom colors for the input box not on sheet for readability
             if (nDT <= currentDT) {
                 return "#87db88";
-            } else {
+            }
+            else if(nDT>=neverDT){
+                return "#f76c6c";
+            }
+            else {
                 return "#ffeb54";
             }
         }
@@ -73,16 +85,22 @@
             var ID = directory.dataset.iden;
 
             var releaseDate = document.getElementById("date_to_release");
-
+            if(releaseDate.value == ""){
+                window.alert("No blank time allowed");
+                return;
+            }
             dirArr.forEach(function (element) {
                 setChildNewDateTime(element,releaseDate.value);
-                console.log(element);
+
             });
             var selectedDiv = 'date_to_release_'+ID;
 
             $("[id^="+selectedDiv+"]").val(releaseDate.value);
             $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)');
-
+            window.setTimeout(rld,1000);
+        }
+        function rld(){
+            parent.location.reload();
         }
 
     </script>
@@ -91,7 +109,7 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm()"/>
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm(),function(){parent.location.reload();},10000"/>
 
 {% endblock %}
 

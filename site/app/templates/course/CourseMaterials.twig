@@ -7,12 +7,34 @@
             <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary">Open/Close All Folders</a>
             {# button to set the release dates of all files in the page/course materials #}
             <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
-                    []
+                    [{% for file in inDir %}
+                        "{{ file }}",
+                    {% endfor %}]
                     )' class="btn btn-primary">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
+    {% if userGroup==1 %}
+        <ul style="justify-self: center" id="details-legend" class="table-bordered">
+            <li>
+                <i class="fas fa-circle grader-NULL"></i>
+                Null date
+            </li>
+            <li>
+                <i class="fas fa-circle grader-invalid"></i>
+                Never release for at LEAST 10 years
+            </li>
+            <li>
+                <i class="fas fa-circle grader-3"></i>
+                Imminent release in at MOST 10 years
+            </li>
+            <li>
+                <i class="fas fa-circle grader-1"></i>
+                Released
+            </li>
+        </ul>
+    {% endif %}
     <div class="inner-container" id="file-container">
         {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath,inDir) }}
 
@@ -55,6 +77,11 @@
                        onChange="setNewDateTime(this, '{{ path }}'), determineRelease('date_to_release_{{ id }}')"/>
                 <script>
                     //this needs to be here so the boxes can be colored on load (will say it is not declared)
+                    //this is here so the initial date from uploading files is saved as itself
+                    var iDT = document.getElementById('date_to_release_{{ id }}');
+                    var fDT = iDT.value;
+                    changeNewDateTime('{{ path }}', fDT);
+
                     changePermission('{{ path }}','1');
                     function determineRelease(inputID){
                         var today = new Date();
@@ -95,6 +122,7 @@
 
                         var time = hours+":"+mins+":"+secs;
                         var currentDT = date+' '+time;
+                        var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
 
                         //get the value in each file so the color can be assigned
                         //based on the time chosen
@@ -106,8 +134,11 @@
                         if(fileDT<=currentDT){
                             inputDT.style.backgroundColor = "#87db88";
                         }
+                        else if(fileDT>=neverDT){
+                            inputDT.style.backgroundColor = "#f76c6c";
+                        }
                         else{
-                            inputDT.style.backgroundColor = "#ffeb54"
+                            inputDT.style.backgroundColor = "#ffeb54";
                         }
 
                     }
@@ -129,7 +160,7 @@
 
         <div class="div-viewer">
             {# button to open each folder #}
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ dir }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")'>
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ folderPath }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")'>
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
@@ -139,7 +170,11 @@
                     <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
-                []
+                [{% for file in inDir %}
+                        {% if dir in file %}
+                            "{{ file }}",
+                        {% endif %}
+                {% endfor %}]
                         )' class="btn btn-primary">Set Folder Release Date</a>
 
             {% endif %}
@@ -160,9 +195,11 @@
     //set cookie for open adapted from w3schools
     function setCookie(cName,cVal){
         document.cookie = cName+'='+cVal;
+        console.log(cName," ",cVal);
     }
     //get the value for the cookie with this name
     function getCookie(cName) {
+        console.log(cName);
         var name = cName+'=';
         var decodedCookie = decodeURIComponent(document.cookie);
         var ca = decodedCookie.split(';');
@@ -171,7 +208,9 @@
             while (c.charAt(0) == ' ') {
                 c = c.substring(1);
             }
+            console.log
             if (c.indexOf(name) == 0) {
+                console.log(c.substring(name.length, c.length));
                 return c.substring(name.length, c.length);
             }
         }
@@ -185,16 +224,14 @@
             //open all the folders
             openAllDivForCourseMaterials();
             //go through all key/val pairs
-            {% for key,value in inDir %}
-                //ignore the course materials directory
-                {% if key!= folderPath %}
-                    //if one of the subdirs, check if it is closed post opening all
-                    var subFolderCookie = getCookie("{{ value }}");
-                    if(subFolderCookie.indexOf("closed")==0){
-                        //if closed. close it after it has been opened by the override above
-                        closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
-                    }
-                {% endif %}
+            {% for file in inDir %}
+                //if one of the subdirs, check if it is closed post opening all
+                var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
+                console.log(subFolderCookie);
+                if(subFolderCookie.indexOf("closed")==0){
+                    //if closed. close it after it has been opened by the override above
+                    closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+                }
             {% endfor %}
         }
         else{
@@ -202,15 +239,13 @@
             let trackOpens = new Map();
             //goes through all possible directories
             //FIX THIS LATER
-            {#  {% for key,value in inDir %}
-                //for everything not in the whole course directory (handled above)
-                {% if key!= folderPath %}
+            {% for file in inDir %}
                     //get the cookie for each dir
-                    var subFolderCookie = getCookie("{{ value }}");
+                    var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
                     //if the folder is open
                     if(subFolderCookie.indexOf("open")==0){
                         //check if the folder has been opened already (do it it again will close it)
-                        if(trackOpens.get === undefined){
+                        if(trackOpens.get(subFolderCookie.substr(4,subFolderCookie.length)) === undefined){
                             //undefined means it has not been opened
                             //set the value as open so it will not be reopened
                             trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
@@ -225,8 +260,7 @@
                             //there's no way to open it in that function
                         }
                     }
-                {% endif %}
-            {% endfor %}#}
+            {% endfor %}
     }
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");

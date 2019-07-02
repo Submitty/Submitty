@@ -1857,6 +1857,10 @@ end of styles used in the admin gradeable page
     color: #006699;  /* dark blue */
 }
 
+.grader-invalid{
+   color: #d9534f;
+}
+
 /* prevents line break in the graded questions column */
 .td-graded-questions {
     white-space: nowrap;
