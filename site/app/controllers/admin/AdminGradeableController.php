@@ -491,7 +491,7 @@ class AdminGradeableController extends AbstractController {
      * Changes $results, adds an array of form [path_label,path] for each config file found
      * @param string $dir
      * @param array $results
-     * @returns string
+     * @return string
      */
     private function getValidPathsToConfigDirectories($dir,&$results) {
         if (!file_exists($dir)) {
