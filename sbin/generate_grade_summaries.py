@@ -52,7 +52,7 @@ def main():
                     course['semester'], course['title']
                 ))
             else:
-                print("ERROR: Failed to generate rainbow grades for {}.{}.").format(
+                print("ERROR: Failed to generate rainbow grades for {}.{}.".format(
                     course['semester'], course['title'],
                 ))
                 print("Reason:{}".format(grade_generation_response["message"]))
