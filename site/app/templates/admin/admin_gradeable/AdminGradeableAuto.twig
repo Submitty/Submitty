@@ -2,6 +2,9 @@
     <b>
 		<div class="option-title">Choose an autograding configuration:</div>
 		<p> Type in the full path to a configuration file, or select from the list below. </p>
+		{% if repository_error_message != '' %}
+			<div id="repository_error">({{repository_error_message}})</div>
+		{% endif %}
 	</b>
 
     <fieldset>
