@@ -72,6 +72,7 @@ class NavigationView extends AbstractView {
     ];
 
     const DATE_FORMAT = "m/d/Y @ H:i";
+    const AMPM_FORMAT = "m/d/Y @ h:i A";
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
         // ======================================================================================
@@ -301,7 +302,7 @@ class NavigationView extends AbstractView {
         $past_lock_date = $date < $gradeable->getTeamLockDate();
 
         if ($past_lock_date) {
-            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->format(self::DATE_FORMAT)})";
+            $team_display_date = "(teams lock {$gradeable->getTeamLockDate()->format(self::AMPM_FORMAT)})";
         } else {
             $team_display_date = '';
         }
@@ -352,8 +353,8 @@ class NavigationView extends AbstractView {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
-            "(opens " . $gradeable->getSubmissionOpenDate()->format(self::DATE_FORMAT) . ")" :
-            "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
+            "(opens " . $gradeable->getSubmissionOpenDate()->format(self::AMPM_FORMAT) . ")" :
+            "(due " . $gradeable->getSubmissionDueDate()->format(self::AMPM_FORMAT) . ")";
         $points_percent = NAN;
 
         $href = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
