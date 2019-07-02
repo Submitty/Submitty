@@ -1,4 +1,5 @@
 {
+    "assignment_message": "Locate the 8 digit iClicker Remote ID near the battery access panel on the back of your iClicker.<br>Note: This number does not begin with 'T24', that's the model number.<br>If you lost your original remote and purchased a replacement, enter BOTH remote IDs in the box below, separated by a comma.",
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -33,8 +34,7 @@
             "**/README.txt",
             "input_*.txt",
             "test*/input_*.txt",
-            "test01/STDOUT.txt",
-            "test01/STDERR.txt"
+            "test01/input_0.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -47,9 +47,7 @@
         {
             "containers": [
                 {
-                    "commands": [
-                        "python *.py"
-                    ],
+                    "commands": [],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
                     "outgoing_connections": [],
@@ -57,38 +55,34 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 10,
+            "points": 0,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "Python - Simple Grading",
+            "title": "iClicker ID",
+            "type": "FileCheck",
             "use_router": false,
             "validation": [
                 {
-                    "actual_file": "STDOUT.txt",
+                    "actual_file": "input_0.txt",
                     "deduction": 1.0,
-                    "description": "Program Output",
-                    "expected_file": "output.txt",
-                    "method": "diff",
+                    "description": "input_0.txt",
+                    "method": "fileExists",
                     "show_actual": "always",
-                    "show_expected": "always",
                     "show_message": "always"
-                },
-                {
-                    "actual_file": "STDERR.txt",
-                    "deduction": 0.0,
-                    "description": "syntax error output from running python",
-                    "method": "warnIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
                 }
             ]
         },
         {
             "max_submissions": 20,
-            "penalty": -0.1,
-            "points": -5,
+            "penalty": 0,
+            "points": 0,
             "title": "Submission Limit",
             "type": "FileCheck"
+        }
+    ],
+    "textboxes": [
+        {
+            "label": "Enter your 8 digit iClicker ID:"
         }
     ]
 }

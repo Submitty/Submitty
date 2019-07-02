@@ -1,0 +1,369 @@
+{
+    "allow_system_calls": [
+        "PROCESS_CONTROL_NEW_PROCESS_THREAD",
+        "PROCESS_CONTROL_SCHEDULING"
+    ],
+    "assignment_message": "Note that during manual grading, points may be deducted from the autograded portion if homework specifications are not met.",
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
+            "test01/STDERR.txt",
+            "test01/STDOUT.txt",
+            "test02/STDOUT_0.txt",
+            "test02/STDOUT_1.txt",
+            "test02/STDOUT_2.txt",
+            "test02/STDERR_0.txt",
+            "test02/STDERR_1.txt",
+            "test02/STDERR_2.txt",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt",
+            "test04/STDOUT_0.txt",
+            "test04/STDOUT_1.txt",
+            "test04/STDERR_0.txt",
+            "test04/STDERR_1.txt",
+            "test05/STDOUT_0.txt",
+            "test05/STDOUT_1.txt",
+            "test05/STDOUT_2.txt",
+            "test05/STDERR_0.txt",
+            "test05/STDERR_1.txt",
+            "test05/STDERR_2.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "ubuntu:custom",
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "resource_limits": {
+        "RLIMIT_NPROC": 10
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "/usr/bin/gcc -Wall -Werror -o a.out *.c -lm",
+            "dispatcher_actions": [],
+            "executable_name": "a.out",
+            "points": 5,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "a.out",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out",
+                        "sort < STDOUT_0.txt",
+                        "cut -d \\  -f2-3 < STDOUT_1.txt"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./a.out",
+            "dispatcher_actions": [],
+            "points": 10,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "NORMAL GRADING:  (hiding the details)",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0,
+                    "method": "errorIfEmpty",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "deduction": 0,
+                    "method": "errorIfEmpty",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDOUT_2.txt",
+                    "deduction": 1,
+                    "expected_file": "second_third.txt",
+                    "failure_message": "Please re-read the assignment instructions.",
+                    "method": "diff",
+                    "show_actual": "never",
+                    "show_expected": "never",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_2.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_2.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./a.out",
+            "dispatcher_actions": [],
+            "points": 5,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "BEHIND THE SCENES:  raw output",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 1,
+                    "expected_file": "raw_output.txt",
+                    "failure_message": "Your raw output does not match.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out",
+                        "sort < STDOUT_0.txt"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./a.out",
+            "dispatcher_actions": [],
+            "points": 5,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "BEHIND THE SCENES:  checking the sorted output",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0,
+                    "method": "warnIfEmpty",
+                    "show_actual": "never",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "deduction": 1,
+                    "expected_file": "sorted_output.txt",
+                    "failure_message": "ERROR: Your sorted output does not match.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out",
+                        "sort < STDOUT_0.txt",
+                        "cut -d \\  -f2-3 < STDOUT_1.txt"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "details": "./a.out",
+            "dispatcher_actions": [],
+            "points": 5,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "BEHIND THE SCENES:  checking the second and third words",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0,
+                    "method": "warnIfEmpty",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "deduction": 0,
+                    "method": "warnIfEmpty",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDOUT_2.txt",
+                    "deduction": 1,
+                    "expected_file": "second_third.txt",
+                    "failure_message": "ERROR: Your second and third word output does not match.",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_2.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_2.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ]
+}

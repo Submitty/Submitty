@@ -4,6 +4,28 @@
   "type": "object",
   "required" : ["autograding", "autograding_method", "container_options", "testcases"],
   "properties" : {
+      "early_submission_incentive" : {
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "minimum_days_early" : {
+            "type" : "integer"
+          },
+          "minimum_points" : {
+            "type" : "number"
+          },
+          "test_cases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer"
+            }
+          }
+        }
+      },
+      "one_part_only" : {
+        "type" : "boolean"
+      },
       "assignment_message" : {
         "type" : "string"
       },
@@ -279,6 +301,13 @@
               "type" : "string"
             }
           },
+          "work_to_public" : {
+              "type" : "array",
+              "items" : {
+                "description" : "File paths or patterns.",
+                "type" : "string"
+              }
+          },
           "use_checkout_subdirectory" : {
             "type" : "string"
           }
@@ -326,6 +355,9 @@
             },
             {
               "$ref" : "#/definitions/submission_limit"
+            },
+            {
+              "$ref" : "#/definitions/filecheck"
             }
           ]
         },
@@ -351,6 +383,29 @@
         },
         "title" : {
           "type" : "string"
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : ["FileCheck"]
+        }
+      }
+    },
+    "filecheck": {
+      "description" : "A file existence check",
+      "additionalProperties" : false,
+      "required" : ["type", "title", "actual_file", "points"],
+      "properties" : {
+        "actual_file" : {
+          "description" : "The file whose existence is being checked.",
+          "type" : "string"
+        },
+        "points" : {
+          "type" : "number", 
+          "description" : "The number of points the student receives if actual_file exists"
+        },
+        "title" : {
+          "type" : "string",
+          "minLength" : 1
         },
         "type" : {
           "type" : "string",
@@ -708,23 +763,25 @@
                 "description" : "Copy files from one testcase to another.",
                 "type": "object",
                 "additionalProperties" : false,
-                "required" : ["action", "testcase", "source", "destination"],
+                "required" : ["command", "source", "destination", "testcase"],
                 "properties" : {
-                  "action" : {
+                  "command" : {
                     "type" : "string",
                     "enum" : ["cp"]
                   },
-                  "testcase" : {
-                    "type" : "string",
-                    "description" : "The source testcase."
-                  }, 
-                  "source" : {
-                    "type" : "string",
-                    "description" : "The source directory (under the source testcase)."
-                  },
                   "destination" : {
-                    "type" : "string",
-                    "description" : "The directory in the current testcase where the files should be copied."
+                    "type" : "string"
+                  }, 
+                  "option" : {
+                    "type" : "string"
+                  },
+                  "pattern" : {
+                  },
+                  "source" : {
+                    "type" : "string"
+                  },
+                  "testcase" : {
+                    "type" : "string"
                   }
                 }
               }
@@ -770,8 +827,7 @@
           "description" : "A list of unix commands to be run against the student code. (e.g. ./a.out or python3 *.py)",
           "items" : {
             "type" : "string"
-          },
-          "minItems" : 1
+          }
         },
         "container_image" : {
           "type" : "string",
@@ -791,6 +847,10 @@
         "server" : {
           "type" : "boolean",
           "description" : "If true, this container does not execute student code, but is instead agreed to act as a server on the student network. In such a case, it is understood that the container image is properly set up to be invoked via the run command. Primarily used for hosting databases for student programs to access."
+        },
+        "import_default_router" : {
+          "type" : "boolean",
+          "description" : "A flag that tells the system to copy the default submitty router to the router's directory. Necessary if using or extending the default router."
         }
       }
     },
@@ -1043,6 +1103,10 @@
             }, 
             "one_of" : {
               "type" : "boolean"
+            },
+            "sequence_diagram" : {
+              "description" : "(Internal) Determines whether actual_file should be displayed as a sequence diagram.",
+              "type" : "boolean"
             }
           }
         },
@@ -1066,6 +1130,10 @@
             "method" : {
               "type" : "string",
               "enum" : ["warnIfEmpty"]
+            },
+            "sequence_diagram" : {
+              "description" : "(Internal) Determines whether actual_file should be displayed as a sequence diagram.",
+              "type" : "boolean"
             }
           }
         },
@@ -1089,6 +1157,10 @@
             "method" : {
               "type" : "string",
               "enum" : ["errorIfEmpty"]
+            },
+            "sequence_diagram" : {
+              "description" : "(Internal) Determines whether actual_file should be displayed as a sequence diagram.",
+              "type" : "boolean"
             }
           }
         },

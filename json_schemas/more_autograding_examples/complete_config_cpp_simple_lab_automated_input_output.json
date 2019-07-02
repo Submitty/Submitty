@@ -1,4 +1,5 @@
 {
+    "assignment_message": "The homework submission area & autograding points for Lab 1 are just practice.<br>The only grades for Lab 1 are the 3 checkpoints recorded by your TA & mentors.",
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -36,7 +37,9 @@
             "test01/STDERR.txt",
             "test01/STDOUT.txt",
             "test02/STDOUT.txt",
-            "test02/STDERR.txt"
+            "test02/STDERR.txt",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -45,8 +48,8 @@
         "single_port_per_container": false,
         "use_router": false
     },
-    "resource_limits": {
-        "RLIMIT_CPU": 30
+    "grading_parameters": {
+        "AUTO_POINTS": 9
     },
     "testcases": [
         {
@@ -63,10 +66,10 @@
             ],
             "dispatcher_actions": [],
             "executable_name": "a.out",
-            "points": 5,
+            "points": 3,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Compilation",
+            "title": "Compilation",
             "type": "Compilation",
             "use_router": false,
             "validation": [
@@ -100,7 +103,7 @@
             "containers": [
                 {
                     "commands": [
-                        "./a.out"
+                        "./a.out < corner_case_C.txt"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -109,17 +112,65 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 4,
+            "points": 3,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Execution",
+            "title": "Random output",
             "use_router": false,
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
+                    "command": [
+                        "python3 solution.py corner_case_C.txt 1> randomoutput.txt"
+                    ],
                     "deduction": 1.0,
-                    "description": "Program Output",
-                    "expected_file": "simple_out.txt",
+                    "expected_file": "randomoutput.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out < randominput.txt"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "input_generator": {
+                "command": [
+                    "python3 generator.py 1> randominput.txt"
+                ]
+            },
+            "points": 3,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Random inputs and output",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "command": [
+                        "python3 solution.py randominput.txt 1> randomoutput.txt"
+                    ],
+                    "deduction": 1.0,
+                    "expected_file": "randomoutput.txt",
                     "method": "diff",
                     "show_actual": "always",
                     "show_expected": "always",

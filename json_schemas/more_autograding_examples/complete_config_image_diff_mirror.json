@@ -1,0 +1,355 @@
+{
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "*.txt",
+            "*.png"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "*.png",
+            "test01/STDERR.txt",
+            "test01/STDOUT.txt",
+            "test02/student1.png",
+            "test02/STDOUT.txt",
+            "test02/STDERR.txt",
+            "test03/student1.png",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt",
+            "test04/student2.png",
+            "test04/STDOUT.txt",
+            "test04/STDERR.txt",
+            "test05/student1.png",
+            "test05/STDOUT.txt",
+            "test05/STDERR.txt",
+            "test06/student2.png",
+            "test06/STDOUT.txt",
+            "test06/STDERR.txt"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "ubuntu:custom",
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "max_submission_size": 2000000,
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "g++ *.cpp"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "a.out",
+            "points": 4,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Compilation",
+            "type": "Compilation",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Compilation Errors and/or Warnings",
+                    "method": "errorIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "a.out",
+                    "deduction": 1.0,
+                    "description": "Create Executable",
+                    "method": "fileExists",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Mirror",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "student1.png",
+                    "deduction": 1.0,
+                    "description": "student_image_one",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Student 1 Professor 1",
+            "use_router": false,
+            "validation": [
+                {
+                    "acceptable_threshold": ".2",
+                    "actual_file": "student1.png",
+                    "deduction": 1.0,
+                    "description": "imageDiff",
+                    "expected_file": "professor1.png",
+                    "method": "ImageDiff",
+                    "show_actual": "always",
+                    "show_difference_image": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Student 2 Professor 2",
+            "use_router": false,
+            "validation": [
+                {
+                    "acceptable_threshold": ".2",
+                    "actual_file": "student2.png",
+                    "deduction": 1.0,
+                    "description": "imageDiff",
+                    "expected_file": "professor2.png",
+                    "method": "ImageDiff",
+                    "show_actual": "always",
+                    "show_difference_image": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Student 1 Professor 2",
+            "use_router": false,
+            "validation": [
+                {
+                    "acceptable_threshold": ".2",
+                    "actual_file": "student1.png",
+                    "deduction": 1.0,
+                    "description": "imageDiff",
+                    "expected_file": "professor2.png",
+                    "method": "ImageDiff",
+                    "show_actual": "always",
+                    "show_difference_image": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Student 2 Professor 1",
+            "use_router": false,
+            "validation": [
+                {
+                    "acceptable_threshold": ".2",
+                    "actual_file": "student2.png",
+                    "deduction": 1.0,
+                    "description": "imageDiff",
+                    "expected_file": "professor1.png",
+                    "method": "ImageDiff",
+                    "show_actual": "always",
+                    "show_difference_image": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Output (STDOUT.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ]
+}

@@ -1,4 +1,5 @@
 {
+    "assignment_message": "Please submit your assignment in one of 4 languages.  Only submit to a single bucket.",
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -28,18 +29,23 @@
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "**/*.csv",
-            "test01/STDERR.txt",
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
             "test01/STDOUT.txt",
-            "test02/STDERR.txt",
+            "test01/STDERR.txt",
             "test02/STDOUT.txt",
-            "test03/STDOUT_0.txt",
-            "test03/STDOUT_1.txt",
-            "test03/jacoco_report.csv",
-            "test03/STDERR_0.txt",
-            "test03/STDERR_1.txt",
+            "test02/STDERR.txt",
+            "test03/STDERR.txt",
+            "test03/STDOUT.txt",
             "test04/STDOUT.txt",
-            "test04/STDERR.txt"
+            "test04/STDERR.txt",
+            "test05/STDERR.txt",
+            "test05/STDOUT.txt",
+            "test06/STDOUT.txt",
+            "test06/STDERR.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -48,17 +54,19 @@
         "single_port_per_container": false,
         "use_router": false
     },
-    "resource_limits": {
-        "RLIMIT_AS": "RLIM_INFINITY",
-        "RLIMIT_CPU": 60,
-        "RLIMIT_NPROC": 100
-    },
+    "one_part_only": true,
+    "part_names": [
+        "Python 2",
+        "Python 3",
+        "C",
+        "C++"
+    ],
     "testcases": [
         {
             "containers": [
                 {
                     "commands": [
-                        "javac -cp submitty_junit.jar hw0/Factorial.java"
+                        "python2 part1/*.py"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -67,11 +75,87 @@
                 }
             ],
             "dispatcher_actions": [],
-            "executable_name": "hw0/Factorial.class",
+            "points": 5,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Python 2 Testing",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 1.0,
+                    "expected_file": "output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 part2/*.py"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 5,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Python 3 Testing",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 1.0,
+                    "expected_file": "output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "clang -Wall -o p3.out -- part3/*.c"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "p3.out",
             "points": 2,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "Class Compilation",
+            "title": "C Compilation",
             "type": "Compilation",
             "use_router": false,
             "validation": [
@@ -79,13 +163,12 @@
                     "actual_file": "STDERR.txt",
                     "deduction": 0.0,
                     "description": "Compilation Errors and/or Warnings",
-                    "jvm_memory": true,
                     "method": "errorIfNotEmpty",
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 },
                 {
-                    "actual_file": "hw0/Factorial.class",
+                    "actual_file": "p3.out",
                     "deduction": 1.0,
                     "description": "Create Executable",
                     "method": "fileExists",
@@ -106,7 +189,7 @@
             "containers": [
                 {
                     "commands": [
-                        "javac -cp submitty_junit.jar:. hw0/test/*Test.java"
+                        "./p3.out"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -115,11 +198,49 @@
                 }
             ],
             "dispatcher_actions": [],
-            "executable_name": "hw0/test/FactorialTest.class",
+            "points": 3,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "C Testing",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 1.0,
+                    "expected_file": "output.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "clang++ -Wall -o p4.out -- part4/*.cpp"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "executable_name": "p4.out",
             "points": 2,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "Student and Instructor JUnit Test Compilation",
+            "title": "C++ Compilation",
             "type": "Compilation",
             "use_router": false,
             "validation": [
@@ -127,13 +248,12 @@
                     "actual_file": "STDERR.txt",
                     "deduction": 0.0,
                     "description": "Compilation Errors and/or Warnings",
-                    "jvm_memory": true,
                     "method": "errorIfNotEmpty",
                     "show_actual": "on_failure",
                     "show_message": "on_failure"
                 },
                 {
-                    "actual_file": "hw0/test/FactorialTest.class",
+                    "actual_file": "p4.out",
                     "deduction": 1.0,
                     "description": "Create Executable",
                     "method": "fileExists",
@@ -154,8 +274,7 @@
             "containers": [
                 {
                     "commands": [
-                        "java -noverify -javaagent:submitty_jacocoagent.jar=destfile=coverage.exec -cp submitty_junit.jar:submitty_hamcrest.jar:submitty_junit/:. TestRunner hw0",
-                        "java -jar submitty_jacococli.jar report coverage.exec --classfiles hw0 --csv jacoco_report.csv"
+                        "./p4.out"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -164,91 +283,25 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 10,
+            "points": 3,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "JaCoCo - Running Student JUnit Tests in hw0/tests/ and Generating Coverage Report for Student Tests",
-            "use_router": false,
-            "validation": [
-                {
-                    "actual_file": "STDOUT_0.txt",
-                    "deduction": 0.5,
-                    "description": "TestRunner output",
-                    "method": "MultipleJUnitTestGrader",
-                    "show_actual": "always",
-                    "show_message": "always"
-                },
-                {
-                    "actual_file": "STDOUT_1.txt",
-                    "deduction": 0,
-                    "description": "JaCoCo report generation output",
-                    "method": "errorIfEmpty",
-                    "show_actual": "always",
-                    "show_message": "always"
-                },
-                {
-                    "actual_file": "jacoco_report.csv",
-                    "deduction": 0.5,
-                    "description": "JaCoCo coverage report",
-                    "instruction_coverage_threshold": 90,
-                    "method": "JaCoCoCoverageReportGrader",
-                    "package": "hw0",
-                    "show_actual": "always",
-                    "show_message": "always"
-                },
-                {
-                    "actual_file": "STDERR_0.txt",
-                    "deduction": 0.0,
-                    "description": "syntax error output from running java",
-                    "jvm_memory": true,
-                    "method": "warnIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
-                },
-                {
-                    "actual_file": "STDERR_1.txt",
-                    "deduction": 0.0,
-                    "description": "syntax error output from running java",
-                    "jvm_memory": true,
-                    "method": "warnIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
-                }
-            ]
-        },
-        {
-            "containers": [
-                {
-                    "commands": [
-                        "java -noverify -cp submitty_junit.jar:submitty_hamcrest.jar:. org.junit.runner.JUnitCore hw0.test.FactorialTest"
-                    ],
-                    "container_image": "ubuntu:custom",
-                    "container_name": "container0",
-                    "outgoing_connections": [],
-                    "server": false
-                }
-            ],
-            "dispatcher_actions": [],
-            "points": 6,
-            "pre_commands": [],
-            "single_port_per_container": false,
-            "title": "JaCoCo - Instructor JUnit Tests",
+            "title": "C++ Testing",
             "use_router": false,
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
                     "deduction": 1.0,
-                    "description": "JUnit output",
-                    "method": "JUnitTestGrader",
-                    "num_tests": 4,
+                    "expected_file": "output.txt",
+                    "method": "diff",
                     "show_actual": "always",
+                    "show_expected": "always",
                     "show_message": "always"
                 },
                 {
                     "actual_file": "STDERR.txt",
                     "deduction": 0.0,
-                    "description": "syntax error output from running java",
-                    "jvm_memory": true,
+                    "description": "Standard Error (STDERR.txt)",
                     "method": "warnIfNotEmpty",
                     "show_actual": "on_failure",
                     "show_message": "on_failure"

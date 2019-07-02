@@ -36,7 +36,13 @@
             "test01/STDERR.txt",
             "test01/STDOUT.txt",
             "test02/STDOUT.txt",
-            "test02/STDERR.txt"
+            "test02/STDERR.txt",
+            "test03/STDOUT.txt",
+            "test03/STDERR.txt",
+            "test04/STDOUT_0.txt",
+            "test04/STDOUT_1.txt",
+            "test04/STDERR_0.txt",
+            "test04/STDERR_1.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -45,15 +51,15 @@
         "single_port_per_container": false,
         "use_router": false
     },
-    "resource_limits": {
-        "RLIMIT_CPU": 30
+    "grading_parameters": {
+        "AUTO_POINTS": 20
     },
     "testcases": [
         {
             "containers": [
                 {
                     "commands": [
-                        "clang++ -Wall -o a.out -- *.cpp"
+                        "g++ -std=c++11 -Wall -o a.out *.cpp"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -63,10 +69,10 @@
             ],
             "dispatcher_actions": [],
             "executable_name": "a.out",
-            "points": 5,
+            "points": 2,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Compilation",
+            "title": "Compilation",
             "type": "Compilation",
             "use_router": false,
             "validation": [
@@ -100,7 +106,82 @@
             "containers": [
                 {
                     "commands": [
-                        "./a.out"
+                        "./a.out 5"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 8,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Sum of 5 random numbers",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "args": "5",
+                    "deduction": 1.0,
+                    "method": "custom",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out 10"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 6,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Sum of 10 random numbers",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "STDOUT.txt",
+                    "args": "10",
+                    "deduction": 1.0,
+                    "method": "custom",
+                    "show_actual": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "./a.out 5",
+                        "./a.out 5"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -112,23 +193,32 @@
             "points": 4,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Execution",
+            "title": "Is it random?  (Is it different on each run?)",
             "use_router": false,
             "validation": [
                 {
-                    "actual_file": "STDOUT.txt",
+                    "actual_file": [
+                        "STDOUT_0.txt",
+                        "STDOUT_1.txt"
+                    ],
+                    "args": "5",
                     "deduction": 1.0,
-                    "description": "Program Output",
-                    "expected_file": "simple_out.txt",
-                    "method": "diff",
+                    "method": "custom",
                     "show_actual": "always",
-                    "show_expected": "always",
                     "show_message": "always"
                 },
                 {
-                    "actual_file": "STDERR.txt",
+                    "actual_file": "STDERR_0.txt",
                     "deduction": 0.0,
-                    "description": "Standard Error (STDERR.txt)",
+                    "description": "Standard Error (STDERR_0.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (STDERR_1.txt)",
                     "method": "warnIfNotEmpty",
                     "show_actual": "on_failure",
                     "show_message": "on_failure"

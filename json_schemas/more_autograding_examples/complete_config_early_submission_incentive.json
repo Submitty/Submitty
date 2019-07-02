@@ -9,22 +9,14 @@
             "test*/STDERR*.txt"
         ],
         "submission_to_compilation": [
-            "**/*.cpp",
-            "**/*.cxx",
-            "**/*.c",
-            "**/*.h",
-            "**/*.hpp",
-            "**/*.hxx",
-            "**/*.java"
+            "*.pdf"
         ],
         "submission_to_runner": [
-            "**/*.py",
-            "**/*.pdf"
+            "*.pdf"
         ],
         "submission_to_validation": [
-            "**/README.txt",
-            "input_*.txt",
-            "**/*.pdf"
+            "*.pdf",
+            "*.txt"
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
@@ -33,10 +25,9 @@
             "**/README.txt",
             "input_*.txt",
             "test*/input_*.txt",
-            "test01/STDERR.txt",
-            "test01/STDOUT.txt",
-            "test02/STDOUT.txt",
-            "test02/STDERR.txt"
+            "test01/README.txt",
+            "test02/*.pdf",
+            "test03/output.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -45,13 +36,20 @@
         "single_port_per_container": false,
         "use_router": false
     },
+    "early_submission_incentive": {
+        "message": "Successfully reached the point minimum at least one day before the due date. You get another late day.",
+        "minimum_days_early": 1,
+        "minimum_points": 3,
+        "test_cases": [
+            2,
+            3
+        ]
+    },
     "testcases": [
         {
             "containers": [
                 {
-                    "commands": [
-                        "clang++ -Wall -o a.out -- *.cpp"
-                    ],
+                    "commands": [],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
                     "outgoing_connections": [],
@@ -59,46 +57,27 @@
                 }
             ],
             "dispatcher_actions": [],
-            "executable_name": "a.out",
-            "points": 5,
+            "points": 3,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Compilation",
-            "type": "Compilation",
+            "title": "README",
+            "type": "FileCheck",
             "use_router": false,
             "validation": [
                 {
-                    "actual_file": "STDERR.txt",
-                    "deduction": 0.0,
-                    "description": "Compilation Errors and/or Warnings",
-                    "method": "errorIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
-                },
-                {
-                    "actual_file": "a.out",
+                    "actual_file": "README.txt",
                     "deduction": 1.0,
-                    "description": "Create Executable",
+                    "description": "README.txt",
                     "method": "fileExists",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
-                },
-                {
-                    "actual_file": "STDOUT.txt",
-                    "deduction": 0.0,
-                    "description": "Standard Output (STDOUT.txt)",
-                    "method": "warnIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
+                    "show_actual": "always",
+                    "show_message": "always"
                 }
             ]
         },
         {
             "containers": [
                 {
-                    "commands": [
-                        "./a.out"
-                    ],
+                    "commands": [],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
                     "outgoing_connections": [],
@@ -106,29 +85,48 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 15,
+            "points": 2,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Execution",
+            "title": "Submitted a .pdf file",
+            "type": "FileCheck",
             "use_router": false,
             "validation": [
                 {
-                    "actual_file": "STDOUT.txt",
+                    "actual_file": "*.pdf",
                     "deduction": 1.0,
-                    "description": "Program Output",
-                    "expected_file": "test1_output.txt",
-                    "method": "diff",
+                    "description": "*.pdf",
+                    "method": "fileExists",
                     "show_actual": "always",
-                    "show_expected": "always",
                     "show_message": "always"
-                },
+                }
+            ]
+        },
+        {
+            "containers": [
                 {
-                    "actual_file": "STDERR.txt",
-                    "deduction": 0.0,
-                    "description": "Standard Error (STDERR.txt)",
-                    "method": "warnIfNotEmpty",
-                    "show_actual": "on_failure",
-                    "show_message": "on_failure"
+                    "commands": [],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Submitted a output.txt file",
+            "type": "FileCheck",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "output.txt",
+                    "deduction": 1.0,
+                    "description": "output.txt",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "always"
                 }
             ]
         },

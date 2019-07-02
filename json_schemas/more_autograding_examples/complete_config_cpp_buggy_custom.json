@@ -1,4 +1,5 @@
 {
+    "assignment_message": "This configuration has an (intentionally) broken custom grader... ",
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -45,15 +46,12 @@
         "single_port_per_container": false,
         "use_router": false
     },
-    "resource_limits": {
-        "RLIMIT_CPU": 30
-    },
     "testcases": [
         {
             "containers": [
                 {
                     "commands": [
-                        "clang++ -Wall -o a.out -- *.cpp"
+                        "g++ -std=c++11 -Wall -o a.out *.cpp"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -63,10 +61,10 @@
             ],
             "dispatcher_actions": [],
             "executable_name": "a.out",
-            "points": 5,
+            "points": 2,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Compilation",
+            "title": "Compilation",
             "type": "Compilation",
             "use_router": false,
             "validation": [
@@ -100,7 +98,7 @@
             "containers": [
                 {
                     "commands": [
-                        "./a.out"
+                        "./a.out 5"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -109,20 +107,18 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 4,
+            "points": 8,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "C++ - Execution",
+            "title": "Sum of 5 random numbers",
             "use_router": false,
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
+                    "args": "5",
                     "deduction": 1.0,
-                    "description": "Program Output",
-                    "expected_file": "simple_out.txt",
-                    "method": "diff",
+                    "method": "custom",
                     "show_actual": "always",
-                    "show_expected": "always",
                     "show_message": "always"
                 },
                 {

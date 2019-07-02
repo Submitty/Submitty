@@ -1,0 +1,216 @@
+{
+    "assignment_message": "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.<br><br>Be sure to inspect the produced sample test pdf to make sure that your notes are successfully attached to the back and that they will be legible when printed.",
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [],
+        "submission_to_runner": [
+            "*.pdf"
+        ],
+        "submission_to_validation": [],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "test01/student_file.pdf",
+            "test02/test_template.pdf",
+            "test01/student_file.pdf",
+            "test01/STDOUT.txt",
+            "test01/STDERR.txt",
+            "test01/execute_logfile.txt",
+            "test02/test_template.pdf",
+            "test02/STDOUT_0.txt",
+            "test02/STDERR_0.txt",
+            "test02/STDOUT_1.txt",
+            "test02/STDERR_1.txt",
+            "test02/STDOUT_2.txt",
+            "test02/STDERR_2.txt",
+            "test02/STDOUT_3.txt",
+            "test02/STDERR_3.txt",
+            "test02/execute_logfile.txt"
+        ],
+        "work_to_public": [
+            "test01/student_file.pdf",
+            "test02/test_template.pdf"
+        ]
+    },
+    "autograding_method": "jailed_sandbox",
+    "container_options": {
+        "container_image": "ubuntu:custom",
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "max_submission_size": 3000000,
+    "resource_limits": {
+        "RLIMIT_FSIZE": 200000000
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "mv *.pdf student_file.pdf"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Did you submit a .pdf file?",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "student_file.pdf",
+                    "deduction": 1,
+                    "description": "Student's uploaded .pdf file",
+                    "failure_message": "Looks like you either did not submit a .pdf file or you submitted multiple .pdf files. Please submit exactly one PDF file.",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT.txt",
+                    "deduction": 0.25,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.25,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "execute_logfile.txt",
+                    "deduction": 0.25,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                }
+            ]
+        },
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "mv test_template.pdf student_test_template.pdf",
+                        "pdflatex blank_page.tex",
+                        "python3 separate_pages.py 3",
+                        "pdflatex test_template.tex"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [],
+            "points": 1,
+            "pre_commands": [
+                {
+                    "command": "cp",
+                    "destination": ".",
+                    "option": "-R",
+                    "pattern": null,
+                    "source": "student_file.pdf",
+                    "testcase": "test01"
+                }
+            ],
+            "single_port_per_container": false,
+            "title": "Can we attach your notes page(s) to a sample test?",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "test_template.pdf",
+                    "deduction": 1,
+                    "description": "Test template with student notes attached at the back",
+                    "failure_message": "We failed to attach your .pdf submission to the sample test. This could be because the .pdf file you submitted was not a valid PDF.  This could happen if you renamed another file type (such as .txt, .odt, .docx, .jpg) to .pdf instead of saving/exporting a file in PDF format.",
+                    "method": "fileExists",
+                    "show_actual": "always",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "STDOUT_0.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDERR_0.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDOUT_1.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDERR_1.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDOUT_2.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDERR_2.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDOUT_3.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "STDERR_3.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                },
+                {
+                    "actual_file": "execute_logfile.txt",
+                    "deduction": 0.100000001490116,
+                    "method": "fileExists",
+                    "show_actual": "never",
+                    "show_message": "never"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ]
+}

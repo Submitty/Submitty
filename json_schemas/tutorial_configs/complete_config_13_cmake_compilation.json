@@ -17,7 +17,7 @@
         ],
         "submission_to_validation": [
             "**/README.txt",
-            "textbox_*.txt",
+            "input_*.txt",
             "**/*.pdf"
         ],
         "use_checkout_subdirectory": "",
@@ -25,8 +25,8 @@
             "test*/*.txt",
             "test*/*_diff.json",
             "**/README.txt",
-            "textbox_*.txt",
-            "test*/textbox_*.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
             "test01/STDERR_0.txt",
             "test01/STDERR_1.txt",
             "test01/STDOUT_0.txt",
