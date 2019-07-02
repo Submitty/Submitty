@@ -148,7 +148,6 @@ defaults = {'database_host': 'localhost',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : '',
             'timezone' : tzlocal.get_localzone().zone,
-            'email_enabled': 'true',
             'email_user': '',
             'email_password': '',
             'email_sender': 'submitty@myuniversity.edu',
@@ -249,8 +248,8 @@ else:
 
     print("NOTE: Emails can be set up at a later time in the config/email.json file")
     while True:
-        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y').lower()
-        if (is_email_enabled == 'y') :
+        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
+        if (is_email_enabled.lower() in ['yes', 'y']) :
             EMAIL_ENABLED = True
             EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
             EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
@@ -263,7 +262,7 @@ else:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
             break;
             
-        elif (is_email_enabled == 'n') :
+        elif (is_email_enabled.lower() in ['no', 'n']) :
             EMAIL_ENABLED = False
             EMAIL_USER = defaults['email_user']
             EMAIL_PASSWORD = defaults['email_password']
@@ -332,7 +331,6 @@ else:
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
-    config['email_enabled'] = EMAIL_ENABLED
     config['email_user'] = EMAIL_USER
     config['email_password'] = EMAIL_PASSWORD
     config['email_sender'] = EMAIL_SENDER
