@@ -17,7 +17,7 @@ class submitty_router():
   '''
   def __init__(self, seed=None, log_file='router_log.txt'):
     if seed != None:
-      random.seed( INSTRUCTOR_SEED )
+      random.seed( seed )
     # Variable to keep track of how many messages we have intercepted so far.
     self.messages_intercepted = 0
     # Initialized when run is called.

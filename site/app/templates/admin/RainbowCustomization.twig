@@ -1,224 +1,112 @@
-<script type="text/javascript">
-    function ExtractBuckets(){
-        var x = [];
-        var bucket_list = $("#buckets_used_list").find("li");
-        bucket_list.each(function(idx,li){
-            x.push($(li).text());
-        });
-
-        $("#generate_json").val(JSON.stringify(x));
-        $("#custom_form").submit();
-    }
-
-    //Forces element's value to be non-negative
-    function ClampPoints(el){
-        el.value = Math.max(0.0,el.value);
-    }
-
-    function ExtractBucketName(s,offset){
-        var tmp = s.split("-");
-        var bucket = "";
-        var i;
-        for(i=offset;i<tmp.length; i++){
-            if(i>offset){
-                bucket += "-";
-            }
-            bucket += tmp[i];
-        }
-        return bucket;
-    }
-
-    //Forces element's value to be in range [0.0,100.0]
-    function ClampPercent(el){
-        el.value = Math.min(Math.max(el.value,0.0),100.0);
-        UpdateUsedPercentage();
-        $("#config-percent-"+ExtractBucketName(el.id,1)).text(el.value + "%");
-    }
-
-    //Updates the sum of percentage points accounted for by the buckets being used
-    function UpdateUsedPercentage(){
-        var val = 0.0;
-        $("input[id^='percent']").filter(function(){
-            return $(this).parent().css("display") !== "none";
-        }).each(function(){
-            val += parseFloat($(this).val());
-        });
-        var percentage_span = $("#used_percentage");
-        percentage_span.text(val.toString() + "%");
-        if(val>100.0){
-            percentage_span.css({"color":"red","font-weight":"bold"});
-        }
-        else{
-            percentage_span.css({"color":"black","font-weight":""});
-        }
-    }
-
-    //Updates which buckets have full configuration shown (inc. each gradeable), and the ordering
-    function UpdateVisibilityBuckets(){
-        //For each bucket that isn't being used, hide it
-        $("#buckets_available_list").find("input").each(function() {
-            //Extract the bucket name
-            var bucket = ExtractBucketName($(this).attr("id"),1);
-            $("#config-"+bucket).css("display","none");
-        });
-
-        //For each bucket that IS being used, show it
-        var used_buckets = $("#buckets_used_list").find("input");
-        if(used_buckets.length === 0){
-            return;
-        }
-        var prev_bucket = ExtractBucketName(used_buckets.first().attr("id"),1);
-        $("#config-"+prev_bucket).prependTo("#config-wrapper").css("display","block");
-
-        used_buckets.each(function() {
-            //Extract the bucket name
-            var bucket = ExtractBucketName($(this).attr("id"),1);
-            console.log("prev_bucket: " + prev_bucket + " bucket: " + bucket);
-            if(bucket !== prev_bucket) {
-                $("#config-" + bucket).css("display", "block");
-                $("#config-" + prev_bucket).after($("#config-"+bucket));
-                prev_bucket = bucket;
-            }
-        });
-    }
-
-    //This function constructs a JSON representation of all the form input
-    function buildJSON(){
-        //TODO: Finish implementation
-        let ret = {
-            'save_customization': true
-        };
-        return ret;
-    }
-
-    //This function attempts to create a new customization.json server-side based on form input
-    function ajaxUpdateJSON(successCallback, errorCallback) {
-        $('#save_status').html('Saving...');
-        $.getJSON({
-            type: "POST",
-            url: buildUrl({
-                'component': 'admin',
-                'page': 'reports',
-                'action': 'customization'
-            }),
-            data: buildJSON(),
-            success: function (response) {
-                if (response.status === 'success') {
-                    $('#save_status').html('Saved successfully');
-                    //successCallback(response.data);
-                } else if (response.status === 'fail') {
-                    $('#save_status').html('Failed to save');
-                    //errorCallback(response.message, response.data);
-                } else {
-                    alert('Internal server error');
-                    console.error(response.message);
-                }
-            },
-            error: function (response) {
-                console.error('Failed to parse response from server: ' + response);
-            }
-        });
-    }
-</script>
-
 <div class="content">
+    <h2>Rainbow Grades</h2>
     <h2>WORK IN PROGRESS - DO NOT USE</h2>
     <div id="save_status">
         No changes to save
     </div>
     <input type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
-{#    Form would be printed here. Right now the data received is:<br />#}
-{#    <pre>{{ customization_data_print }}</pre>#}
-{#    <br />#}
-{#    If you'd like to try submitting something...#}
-{#    <form id="custom_form" method="post" action="">#}
-{#        <input type="hidden" id="generate_json" name="generate_json" value="true" />#}
-{#        Fake text box: <input type="text" name="demo_text" value="" /><br />#}
-{#        <input type="submit" name="generate_json2" value="Submit" onclick="ExtractBuckets();"/>#}
-{#    </form>#}
-    <div id="list_wrapper">
-        <div style="width:45%;float:left;" id="buckets_used">
-            <h3>Assigned Buckets</h3>
-            <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
-                {%  for bucket in used_buckets %}
-                    <li>
-                        <div class="bucket-percent" style="display: inline;">
-                            <input type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
-                        </div>
-                        {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
-                    </li>
-                {% endfor %}
-            </ol>
-            Total: <span id="used_percentage">0%</span>
-        </div>
-        <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
-            <h3>Available Buckets</h3>
-            <ol id="buckets_available_list" style="min-height:50px;background-color:lightgreen;">
-                {%  for bucket in available_buckets %}
-                    <li>
-                        <div class="bucket-percent" style="display: none;">
-                            <input type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
-                        </div>
-                        {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
-                    </li>
-                {% endfor %}
-            </ol>
-        </div>
-    </div>
-    <div id="gradeable_config" style="background-color:peachpuff;margin-top:50px;width:1000px;padding:5px;">
-        <h2>Category/Gradeable Configuration:</h2>
-        <div id="config-wrapper">
-        {% for bucket, gradeables in customization_data %}
 
-            <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
-                <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
-                <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
-                <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>
-                <div style="float:right">
-                    Point Distribution:<br>
-                    <input type="radio" id="curve-normalize-{{ bucket }}" name="curve-{{ bucket }}">
-                    <label for="curve-normalize-{{ bucket }}">Normalized/Equal Weight</label><br>
-                    <input type="radio" id="curve-maxpt-{{ bucket }}" name="curve-{{ bucket }}">
-                    <label for="curve-maxpt-{{ bucket }}">Max Point Based</label><br>
-                    <input type="radio" id="curve-custom-{{ bucket }}" name="curve-{{ bucket }}">
-                    <label for="curve-custom-{{ bucket }}">Custom %</label>
+    <div id="list_wrapper">
+        <div id="display_benchmarks" class="customization_item">
+            <h2>Display Benchmarks</h2>
+            <div id="display_benchmarks_collapse" class="collapsible_area">
+            {% for benchmark in display_benchmarks %}
+                <p>
+                    <input type="checkbox" id="display_benchmarks_{{ benchmark.id }}" name="display_benchmarks" value="{{ benchmark.id }}"
+                           {% if benchmark.isUsed == true %}checked{% endif %}
+                    >
+                    <label for="display_benchmarks_{{ benchmark.id }}">{{ benchmark.id }}</label>
+                </p>
+            {% endfor %}
+            </div>
+        </div>
+        <div id="cust_messages" class="customization_item">
+            <h2>Messages</h2>
+            <div id="cust_messages_collapse" class="collapsible_area">
+                <p>You may enter a message that will appear above the student's rainbow grades.</p>
+                <textarea id="cust_messages_textarea">{{ messages[0] }}</textarea>
+            </div>
+        </div>
+        <div id="section_labels" class="customization_item">
+            <h2>Section Labels</h2>
+            <div id="section_labels_collapse" class="collapsible_area">
+                <p>You may use this area to assign a label to each section number, for example the name of the TA or TAs
+                    handling the section.  You may also leave it as the default but it may not be blank.</p>
+                {% for section, label in sections_and_labels %}
+                    <p>
+                        <label for="section_and_labels_{{ section }}">{{ section }}</label>
+                        <input type="text" data-section="{{ section }}" class="sections_and_labels" id="section_and_labels_{{ section }}" name="section_and_labels_{{ section }}" value="{{ label }}">
+                    </p>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="gradeables" class="customization_item">
+            <h2>Gradeables</h2>
+            <div id="gradeables_collapse" class="collapsible_area">
+                <div style="width:45%;float:left;" id="buckets_used">
+                    <h3>Assigned Buckets</h3>
+                    <ol id="buckets_used_list" style="min-height:50px;background-color:beige;">
+                        {%  for bucket in used_buckets %}
+                            <li>
+                                <div class="bucket-percent" style="display: inline;">
+                                    <input type="text" value="{{ bucket_percentages[bucket] }}" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                </div>
+                                {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
+                            </li>
+                        {% endfor %}
+                    </ol>
+                    Total: <span id="used_percentage">{{ bucket_percentages['used_percentage'] }}%</span>
                 </div>
-                <div style="margin-top:10px">
-                    <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
-                    {% for gradeable in gradeables %}
-                        <li>
-                            <input type="text" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
-                            {{ gradeable["title"] }}
-                            <span style="font-style: italic;font-size: 0.8em;">{{ gradeable["id"] }}</span>
-                        </li>
-                    {% endfor %}
+                <div style="width:45%;display:inline-block;margin-left:50px;" id="buckets_available">
+                    <h3>Available Buckets</h3>
+                    <ol id="buckets_available_list" style="min-height:50px;background-color:lightgreen;">
+                        {%  for bucket in available_buckets %}
+                            <li>
+                                <div class="bucket-percent" style="display: none;">
+                                    <input type="text" value="0" onblur="ClampPercent(this);" id="percent-{{ bucket }}"><span style="margin-right: 10px;">%</span>
+                                </div>
+                                {{ bucket|capitalize }} ({{ customization_data[bucket]|length }} items)
+                            </li>
+                        {% endfor %}
                     </ol>
                 </div>
+                <div id="gradeable_config" style="background-color:peachpuff;margin-top:50px;width:1000px;padding:5px;">
+                    <h2>Category/Gradeable Configuration:</h2>
+                    <div id="config-wrapper">
+                        {% for bucket, gradeables in customization_data %}
+
+                            <div id="config-{{ bucket }}" style="margin-top:25px;min-height:100px;display:none;" class="bucket_detail_div">
+                                <h3 style="display:inline">{{ bucket|capitalize }}</h3>:
+                                <input type="text" value="{{ gradeables|length }}" id="config-count-{{ bucket }}" style="display:inline;"> items
+                                <span style="float:right;" id="config-percent-{{ bucket }}">0%</span>
+                                <div style="float:right">
+                                    Point Distribution:<br>
+                                    <input type="radio" id="curve-normalize-{{ bucket }}" name="curve-{{ bucket }}">
+                                    <label for="curve-normalize-{{ bucket }}">Normalized/Equal Weight</label><br>
+                                    <input type="radio" id="curve-maxpt-{{ bucket }}" name="curve-{{ bucket }}">
+                                    <label for="curve-maxpt-{{ bucket }}">Max Point Based</label><br>
+                                    <input type="radio" id="curve-custom-{{ bucket }}" name="curve-{{ bucket }}">
+                                    <label for="curve-custom-{{ bucket }}">Custom %</label>
+                                </div>
+                                <div style="margin-top:10px">
+                                    <ol style="list-style-type: none;" id="gradeables-list-{{ bucket }}">
+                                        {% for gradeable in gradeables %}
+                                            <li>
+                                                <input type="text" value="{{ gradeable["max_score"] }}" id="maxscore-{{ gradeable["id"] }}" style="margin-right: 10px;display:inline;" onblur="ClampPoints(this);">
+                                                {{ gradeable["title"] }}
+                                                <span style="font-style: italic;font-size: 0.8em;" class="gradeable-id">{{ gradeable["id"] }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-        {% endfor %}
         </div>
     </div>
 </div>
-
-<style type="text/css">
-    #buckets_available_list li{
-        font-weight: bold;
-        list-style-type: none;
-    }
-
-    #buckets_used_list li{
-        font-style: italic;
-        list-style-type: none;
-    }
-
-    .bucket_detail_div:nth-child(2n){
-        background-color: mediumorchid;
-    }
-
-    .bucket_detail_div:nth-child(2n+1){
-        background-color: lightskyblue;
-    }
-</style>
 
 <script type="text/javascript">
     var old_index;

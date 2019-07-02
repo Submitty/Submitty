@@ -15,6 +15,7 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
+use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\GradeSummary;
@@ -465,24 +466,11 @@ class ReportController extends AbstractController {
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
-        //Try to read in any existing customization.json file, update the model
-        $customization_filename = $this->core->getConfig()->getCoursePath() . "/rainbow_grades/customization.json";
-        if(file_exists($customization_filename)) {
-            $customization_filehandle = fopen($customization_filename, "r");
-            /*  TODO: Any reading of existing files goes here, might even want it slightly higher and pass the handle
-             *  or null to RainbowCustomization::buildCustomization($fh);
-             *  Alternately call a new RainbowCustomization::loadCustomization();
-             */
-            fclose($customization_filehandle);
-        }
-
-        if(isset($_POST["save_customization"])){
+        if(isset($_POST["json_string"])){
             //Handle user input (the form) being submitted
             try {
-//                $customization->processForm();
-                $customization_filehandle = fopen($customization_filename,"w");
-                fwrite($customization_filehandle,$customization->getCustomizationJSON());
-                fclose($customization_filehandle);
+
+                $customization->processForm();
 
                 // Finally, send the requester back the information
                 $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
@@ -495,22 +483,21 @@ class ReportController extends AbstractController {
             }
         }
         else{
-            //Print the form, since the user hasn't provided us with any data
+
+            $this->core->getOutput()->addInternalJs('rainbow-customization.js');
+            $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+
+            // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
-                "customization_data_print" => print_r($customization->getCustomizationData(),true),
                 "customization_data" => $customization->getCustomizationData(),
-                "available_buckets" => $customization->getAvailableBuckets()
+                "available_buckets" => $customization->getAvailableBuckets(),
+                "used_buckets" => $customization->getUsedBuckets(),
+                'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
+                'bucket_percentages' => $customization->getBucketPercentages(),
+                'messages' => $customization->getMessages()
             ]);
 
-            // TODO: For debugging only so we can see if POST changes. Remove this before PR.
-//            try {
-//                $customization_filehandle = fopen($customization_filename, "w");
-//                fwrite($customization_filehandle,"Not-JSON");
-//                fclose($customization_filehandle);
-//            }
-//            catch (\Exception $e) {
-//                $this->core->getOutput()->renderJsonError($e->getMessage());
-//            }
         }
     }
 }
