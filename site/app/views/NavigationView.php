@@ -71,7 +71,7 @@ class NavigationView extends AbstractView {
         ]
     ];
 
-    const DATE_FORMAT = "m/d/Y @ H:i";
+    const DATE_FORMAT = "m/d/Y @ h:i A";
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
         // ======================================================================================
