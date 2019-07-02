@@ -37,9 +37,10 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders, $reg_sections, $rot_sections, $use_database=false) {
+    public function listGraders($graders, $graders_from_usertypes, $reg_sections, $rot_sections, $use_database=false) {
         return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
             "graders" => $graders,
+            "graders_from_usertypes" => $graders_from_usertypes,
             "groups" => [
                 0 => [
                     "name" => "Developer",

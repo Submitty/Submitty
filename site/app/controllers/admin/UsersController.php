@@ -66,11 +66,12 @@ class UsersController extends AbstractController {
 
     public function listGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
+        $graders_from_usertypes = $this->core->getQueries()->getGradersByUserType();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $graders_from_usertypes, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
     }
 

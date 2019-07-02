@@ -1,0 +1,46 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}registration-sections-form{% endblock %}
+{% block title %}Edit Registration Sections for Graders{% endblock %}
+{% block body %}
+	
+	{% for grader_type in 1..3 %}
+		{% for grader in graders_from_usertypes[grader_type] %}
+			{{ grader[1] }}
+		{% endfor %}
+	{% endfor %}
+	
+	
+    <script>
+        function userFormChange() {
+            var user_elem = $("select[name='user_group']")[0];
+            var is_student = user_elem.options[user_elem.selectedIndex].text === "Student";
+
+            var regis_elem = $("select[name='registered_section']")[0];
+            var is_no_regis = regis_elem.options[regis_elem.selectedIndex].text === "Not Registered";
+
+            if(is_student && is_no_regis) {
+                $("#student-error-message").css("display", "block");
+            }
+            else {
+                $("user-form-#student-error-message").css("display", "none");
+            }
+            if(is_student) {
+                $("#user-form-assigned-sections").css("display", "none");
+            }
+            else {
+                $("#user-form-assigned-sections").css("display", "block");
+            }
+
+        }
+    </script>
+	
+{% endblock %}
+{% block form %}
+    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': action}) }}" onchange="userFormChange()">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}
