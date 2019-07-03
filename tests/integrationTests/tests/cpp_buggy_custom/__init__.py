@@ -5,6 +5,7 @@ import subprocess
 import os
 import glob
 import shutil
+from submitty_utils import submitty_schema_validator
 
 
 ############################################################################
@@ -52,6 +53,17 @@ def cleanup(test):
                     glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    schema = os.path.join(SUBMITTY_INSTALL_DIR, 'bin', 'json_schemas', 'complete_config_schema.json')
+    try:
+        submitty_schema_validator.validate_complete_config_schema_using_filenames(config_path, schema, show_warnings=False)
+    except submitty_schema_validator.SubmittySchemaException as s:
+        s.print_human_readable_error()
+        raise
 
 @testcase
 def correct(test):
