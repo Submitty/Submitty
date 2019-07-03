@@ -98,6 +98,7 @@ class NotificationFactory {
      */
     private function createNotificationsArray($event, $recipients) {
         $event['sender_id'] = $this->core->getUser()->getId();
+        $notifications = array();
         foreach ($recipients as $recipient) {
             $event['to_user_id'] = $recipient;
             $notifications[] = Notification::createNotification($this->core,$event);
@@ -111,6 +112,7 @@ class NotificationFactory {
      * @return array of email objects
      */
     private function createEmailsArray($event, $recipients) {
+        $emails = array();
         foreach ($recipients as $recipient) {
             $details = [
                 'to_user_id' => $recipient,
@@ -128,6 +130,10 @@ class NotificationFactory {
      * @param array $recipients
      */
     public function sendNotifications(array $notifications) {
+        if (empty($notifications)) {
+            return;
+        }
+
         // parameterize notification array
         foreach ($notifications as $notification) {
             $flattened_notifications[] = $notification->getComponent();
@@ -144,6 +150,9 @@ class NotificationFactory {
      * @param array $emails
      */
     public function sendEmails(array $emails) {
+        if (empty($emails)) {
+            return;
+        }
         // parameterize email array
         foreach ($emails as $email) {
             $flattened_emails[] = $email->getRecipient();
