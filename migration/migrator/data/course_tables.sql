@@ -543,7 +543,7 @@ CREATE TABLE grade_override (
     g_id character varying(255) NOT NULL,
     marks integer NOT NULL,
     comment character varying 
-)
+);
 
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
