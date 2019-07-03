@@ -11,9 +11,9 @@ import requests
 
 
 def main():
-    """Automatically call Generate Grade Summaries API"""
+    """Automatically call Generate Grade Summaries API."""
     parser = argparse.ArgumentParser(
-        description='Automatically call Generate Grade Summaries API'
+        description='Automatically call Generate Grade Summaries API.'
     )
     parser.add_argument('base_url')
     parser.add_argument('token')
@@ -40,22 +40,22 @@ def main():
 
     for course in courses:
         grade_generation_response = requests.post(
-            '{}/api/{}/{}/reports/summaries'.format(base_url, course['semester'], course['title']),
+            '{}/api/{}/{}/reports/summaries'.format(
+                base_url, course['semester'], course['title']
+            ),
             headers={'Authorization': token}
         )
         if grade_generation_response.status_code == 200:
             grade_generation_response = grade_generation_response.json()
             if grade_generation_response["status"] == 'success':
                 print("Successfully generated grade reports for {}.{}".format(
-                    course['semester'],
-                    course['title']
+                    course['semester'], course['title']
                 ))
             else:
-                print("ERROR: Failed to generate grade reports for {}.{}.\nReason:{}".format(
-                    course['semester'],
-                    course['title'],
-                    grade_generation_response["message"]
+                print("ERROR: Failed to generate grade reports for {}.{}.".format(
+                    course['semester'], course['title'],
                 ))
+                print("Reason:{}".format(grade_generation_response["message"]))
         else:
             print("ERROR: Submitty Service Unavailable.")
 
