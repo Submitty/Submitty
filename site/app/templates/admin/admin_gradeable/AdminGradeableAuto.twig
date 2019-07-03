@@ -1,14 +1,15 @@
 <div class="electronic_file">
     <b>
 		<div class="option-title">Choose an autograding configuration:</div>
-		<p> Type in the full path to a configuration file, or select from the list below. </p>
+		<p> Manually type the full path to a configuration file, or select from the list below. </p>
+		<p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
 		{% if repository_error_message != '' %}
 			<div id="repository_error">({{repository_error_message}})</div>
 		{% endif %}
 	</b>
 
     <fieldset>
-		<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search" value="{{ gradeable.getAutogradingConfigPath() }}"
+		<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
 			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
 		<a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
 		<datalist id="path_data" style="display:none" >
