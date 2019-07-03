@@ -140,7 +140,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/invitation/send", methods={"POST"})
+     * @Route("/{_semester}/{_course}/{gradeable_id}/team/invitation/new", methods={"POST"})
      */
     public function sendInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();

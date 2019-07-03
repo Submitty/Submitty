@@ -56,7 +56,7 @@ class TeamView extends AbstractView {
             "leave_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'leave']),
             "seek_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'seek', 'new']),
             "stop_seek_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'seek', 'stop']),
-            "send_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'send']),
+            "send_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'new']),
             "accept_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'accept']),
             "cancel_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'cancel']),
         ]);
