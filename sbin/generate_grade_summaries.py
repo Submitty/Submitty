@@ -46,12 +46,12 @@ def main():
         if grade_generation_response.status_code == 200:
             grade_generation_response = grade_generation_response.json()
             if grade_generation_response["status"] == 'success':
-                print("Successfully generated rainbow grades for {}.{}".format(
+                print("Successfully generated grade reports for {}.{}".format(
                     course['semester'],
                     course['title']
                 ))
             else:
-                print("ERROR: Failed to generate rainbow grades for {}.{}.\nReason:{}".format(
+                print("ERROR: Failed to generate grade reports for {}.{}.\nReason:{}".format(
                     course['semester'],
                     course['title'],
                     grade_generation_response["message"]
