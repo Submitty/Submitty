@@ -81,6 +81,8 @@ def update_all_foreign_autograding_workers():
         raise SystemExit("ERROR, could not locate autograding_workers_json :", e)
 
     for key, value in autograding_workers.items():
+        if value['enabled'] == False:
+            continue
         formatted_entry = {key: value}
         formatted_entry = add_fields_to_autograding_worker_json(formatted_entry, key)
         success = update_worker_json(key, formatted_entry)
@@ -129,7 +131,7 @@ def update_worker_json(name, entry):
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user)
+            ssh.connect(hostname = host, username = user, timeout=5)
         except Exception as e:
             grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
             grade_items_logging.log_message(JOB_ID, message="ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))

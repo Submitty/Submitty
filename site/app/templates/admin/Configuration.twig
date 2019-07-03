@@ -4,7 +4,7 @@
         <a href="{{ theme_url }}" class="btn btn-default">Customize Website Theme</a>
     </span>
     <div id="config">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
         <div class="heading">
             <h2>Course Info</h2>
@@ -18,7 +18,7 @@
                     <div class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="text" name="course_name" id="course_name" value="{{ fields['course_name']|raw }}" /></div>
+            <div class="option-input col-md-4"><input type="text" name="course_name" id="course_name" value="{{ fields['course_name'] }}" /></div>
         </div>
 
         <div class="option row">
@@ -38,7 +38,10 @@
                     <div class="option-alt">Choose whether to enable a forum for this course.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} /></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
+                <span id="forum_enabled_message" style="display: {% if fields['forum_enabled'] %} inline-block; {% else %} none; {% endif %}"><a href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a></span>
+            </div>
+
         </div>
 
         <div class="heading">
@@ -54,7 +57,7 @@
                         on the submission page.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><textarea style="height: 50px" name="upload_message" id="upload_message">{{ fields['upload_message']|raw }}</textarea></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="upload_message" id="upload_message">{{ fields['upload_message'] }}</textarea></div>
         </div>
 
         <div class="option row">
@@ -152,7 +155,7 @@
                     <div class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']|raw  }}</textarea></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']  }}</textarea></div>
         </div>
 
         <div class="option row">
@@ -173,7 +176,7 @@
                     <div class="option-alt">Input the warning message show to students while submitting a grade inquiry.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message']|raw}}</textarea></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message'] }}</textarea></div>
         </div>
 
         {# TODO: Not sure what this is
@@ -275,6 +278,17 @@
              }
              else{
                 showEmailSeatingOption();
+            }
+        });
+
+        $(document).on('change', '#forum_enabled', function(){
+            var forum_enabled = $('#forum_enabled').is(":checked");
+
+            if(!forum_enabled){
+                $('#forum_enabled_message').hide();
+            }
+            else{
+                $('#forum_enabled_message').show();
             }
         });
 

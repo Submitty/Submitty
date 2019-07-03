@@ -22,7 +22,7 @@
     <br><br>
 
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'process_upload_config'}) }}" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         Upload Config: <input type="file" name="config_upload" /><br />
         <input type="submit" value="Upload" />
     </form>

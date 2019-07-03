@@ -604,12 +604,14 @@ HTML;
             "view" => isset($_REQUEST["view"]) ? $_REQUEST["view"] : null,
             "all_reg_sections" => $all_reg_sections,
             "all_rot_sections" => $all_rot_sections,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
     public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
-            "gradeable_id" => $gradeable->getId()
+            "gradeable_id" => $gradeable->getId(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -864,6 +866,7 @@ HTML;
 
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 

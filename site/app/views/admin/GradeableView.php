@@ -15,7 +15,8 @@ class GradeableView extends AbstractView {
             "all_files" => $all_files,
             "target_dir" => $target_dir,
             "course" => $course,
-            "inuse_config" => $inuse_config
+            "inuse_config" => $inuse_config,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }
