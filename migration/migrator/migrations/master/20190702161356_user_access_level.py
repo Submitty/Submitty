@@ -17,7 +17,7 @@ BEGIN
     ALTER TABLE IF EXISTS ONLY users ADD CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3));
     EXCEPTION WHEN duplicate_object THEN RAISE NOTICE 'constraint users.users_user_access_level_check already exists, skipping.';
 END;
-$$ LANGUAGE plpgsql""")
+$$ LANGUAGE plpgsql;""")
 
 
 def down(config, database):
