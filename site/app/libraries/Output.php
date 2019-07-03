@@ -61,6 +61,13 @@ class Output {
         $this->render = false;
     }
 
+    /**
+     * @return bool
+     */
+    public function getRender() {
+        return $this->render;
+    }
+
     public function loadTwig() {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
@@ -421,14 +428,13 @@ HTML;
      * @return string
      */
     public function showError($error = "", $die = true) {
-        /** @noinspection PhpUndefinedMethodInspection */
-        $errorPage = static::getView("Error")->errorPage($error);
+        $this->renderOutput("Error", "errorPage", $error);
         // @codeCoverageIgnore
         if ($die) {
-            die($errorPage);
+            die($this->getOutput());
         }
 
-        return $errorPage;
+        return $this->getOutput();
     }
     
     public function addInternalCss($file, $folder='css') {
