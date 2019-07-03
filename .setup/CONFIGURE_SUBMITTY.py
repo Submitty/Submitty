@@ -252,7 +252,6 @@ else:
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
-    print("NOTE: Emails can be set up at a later time in the config/email.json file")
     while True:
         is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
         if (is_email_enabled.lower() in ['yes', 'y']) :
