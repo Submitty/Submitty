@@ -612,6 +612,16 @@ table tr.table-header {
     font-size: 18px;
 }
 
+#config_search {
+    padding-right: 20px;
+}
+
+#clear_search_button {
+    margin-left: -20px;
+    padding-right: 20px;
+    color: red;
+}
+
 .option-alt {
     font-style: italic;
 }
@@ -1994,4 +2004,26 @@ end of styles used in the admin gradeable page
     background-color: #00000000;
     border: 0px;
     padding: 0px;
+}
+
+#skip-nav:not(:focus) {
+    clip: rect(1px,1px,1px,1px);
+    overflow: hidden;
+    position: absolute;
+    padding: 0;
+}
+
+#skip-nav {
+    box-shadow: 0 2px 15px -5px #888888;
+    border-radius: 3px;
+    /* TODO on mobile, different header height */
+    margin: 90px 10px 10px; /* 80px for header */
+    padding: 10px;
+    background-color: #fff;
+    text-align: center;
+    width: 108px;
+    border: 2px solid #2627ee;
+    height: min-content;
+    position: absolute;
+    z-index: 999;
 }
