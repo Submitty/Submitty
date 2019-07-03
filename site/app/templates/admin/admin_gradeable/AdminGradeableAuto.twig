@@ -1,53 +1,31 @@
 <div class="electronic_file">
-    <b>Choose from the simple, provided autograding configurations --OR--<br>Specify the full path to the directory containing your custom autograding config.json file:</b><br>
+		<div class="option-title">Choose an autograding configuration:</div>
+		<p> Manually type the full path to a configuration file, or select from the list below. </p>
+                <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
+                    "Course Autograding Config Directory"<i style="font-style:normal;" class="helpicon"></i></a>
+                    from the Course Settings Page. </p>
+                <p> Manually type the full path to a configuration file, or select from the list below. </p>
+		<p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
+		{% if repository_error_message != '' %}
+			<div id="repository_error">({{repository_error_message}})</div>
+		{% endif %}
+
     <fieldset>
-        <input type="radio" class="config_option ignore" name="config_option" id="config_option_defaults" value="defaults"/> <label for="config_option_defaults">Provided autograding configurations</label>
-        <input type="radio" class="config_option ignore" name="config_option" id="config_option_uploaded" value="uploaded"/> <label for="config_option_uploaded">Custom uploaded autograding configurations</label>
-        {% if repo_name != "" %}
-            <input type="radio" class="config_option ignore" name="config_option" id="config_option_repo" value="repo"/> <label for="config_option_repo">Use Private repository ({{ config_repo_name }})</label>
-        {% endif %}
-        <input type="radio" class="config_option ignore" name="config_option" id="config_option_manual" value="manual"/> <label for="config_option_manual">Other full path</label>
-        <div class="div_select_config" id="div_default_configs" style="display: {{ config_select_mode == 'defaults' ? 'block' : 'none' }}">
-            <select class="select_config_path ignore" id="select_default_config" style="width: 700px;" aria-label="configuration selection">
-                <option value=""></option>
-                {% for path in default_config_paths %}
-                    {% if config_select_mode == 'defaults' and path.1 == gradeable.getAutogradingConfigPath() %}
-                        <option value="{{ path.1 }}" selected="selected">{{ path.0 }}</option>
-                    {% else %}
-                        <option value="{{ path.1 }}">{{ path.0 }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-        </div>
-        <div class="div_select_config" id="div_uploaded_configs" style="display: block">
-            <select class="select_config_path ignore" id="select_uploaded_config" style="width: 700px;">
-                <option value=""></option>
-                {% for path in all_uploaded_config_paths %}
-                    {% if config_select_mode == 'uploaded' and path == gradeable.getAutogradingConfigPath() %}
-                        <option value="{{ path }}" selected="selected">{{ path }}</option>
-                    {% else %}
-                        <option value="{{ path }}">{{ path }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-            <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
-        </div>
-        <div class="div_select_config" id="div_repository_configs" style="display: block">
-            <select class="select_config_path ignore" id="select_repository_config" style="width: 700px;">
-                <option value=""></option>
-                {% for path in all_repository_config_paths %}
-                    {% if config_select_mode == 'repo' and path == gradeable.getAutogradingConfigPath() %}
-                        <option value="{{ path }}" selected="selected">{{ path }}</option>
-                    {% else %}
-                        <option value="{{ path }}">{{ path }}</option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-        </div>
-        <br />
-        <p><label for="input_provide_full_path">Current selection for full path to autograding configuration:</label></p>
-        <input style='width: 83%' type='text' id='input_provide_full_path' name='autograding_config_path' value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)"
-                {{ config_select_mode != 'manual' ? 'disabled' : '' }}/>
+		<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
+		<a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
+		<datalist id="path_data" style="display:none" >
+		{% for path in all_config_paths %}
+			<option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
+		{% endfor %}
+		</datalist>
+		
+		<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
+		<br />
+			
+		{# text box with the path to the current config file, hidden but still used in js #}
+		<input style='width: 83%' type='hidden' id='input_provide_full_path' name='autograding_config_path' 
+			value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </fieldset>
 
     <div class="btn-container">
@@ -87,7 +65,7 @@
         <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     </div>
     <div class="log-container">
-        <h3>Build log:</h3>
+        <div class="option-title">Build log:</div>
         {% if build_script_output is null or build_script_output is empty %}
             <pre>There is currently no build output.</pre>
         {% else %}
@@ -96,7 +74,7 @@
     </div>
 
     <div class="log-container">
-        <h3>CMake output:</h3>
+        <div class="option-title">CMake output:</div>
         {% if cmake_output is null or cmake_output is empty %}
             <pre>There is currently no cmake output.</pre>
         {% else %}
@@ -105,7 +83,7 @@
     </div>
 
     <div class="log-container">
-        <h3>Make output:</h3>
+        <div class="option-title">Make output:</div>
         {% if make_output is null or make_output is empty %}
             <pre>There is currently no make output.</pre>
         {% else %}
@@ -130,49 +108,52 @@
             disableElementChildren('.pdf_page_input', true);
         }
     }
-
-    function onConfigChange(){
-        let checked_val = $('input[name=config_option]:checked').val();
-        let manual_input = $('#input_provide_full_path');
-        $('.div_select_config').hide();
-        let input = '#input_provide_full_path';
-        if(checked_val === 'defaults') {
-            $('#div_default_configs').show();
-            input = "#select_default_config";
-        } else if(checked_val === 'uploaded'){
-            $('#div_uploaded_configs').show();
-            input = "#select_uploaded_config";
-        } else if(checked_val === 'repo'){
-            $('#div_repository_configs').show();
-            input = "#select_repository_config";
-        } else {
-            manual_input.prop('disabled', false);
-            return;
-        }
-        manual_input.prop('disabled', true);
-
-        // If the select box has the value, select it
-        if($(input + ' option[value="' + manual_input.val() + '"]').length > 0) {
-            $(input).val(manual_input.val());
-        } else {
-            $(input).val('');
-        }
-    }
+	
+	function getConfigData() {
+		var names = [];
+		var paths = [];
+		
+		$("[name='path_autofill_option']").each(function() {
+			names.push($(this).attr("id"));
+			paths.push($(this).attr("data-value"));
+		});
+		
+		return [names,paths];
+	}
 
     function onConfigPathChange() {
-        let checked_val = $('input[name=config_option]:checked').val();
-        let manual_input = $('#input_provide_full_path');
-        if (checked_val === 'defaults') {
-            manual_input.val($('#select_default_config').val());
-            manual_input.change();
-        } else if (checked_val === 'uploaded') {
-            manual_input.val($('#select_uploaded_config').val());
-            manual_input.change();
-        } else if (checked_val === 'repo') {
-            manual_input.val($('#select_repository_config_config').val());
-            manual_input.change();
-        }
+		data=getConfigData();
+	    let full_path_obj = $('#input_provide_full_path');
+		let current_val = $('#config_search').val();
+		
+		//if a name is entered change to the path
+
+		let index=-1;
+		for (i=0; i<data[0].length; i++) {
+			if (current_val == data[0][i]) {
+				index = i;
+			}
+		}
+		if (index != -1) {
+			current_val = data[1][index];
+		}
+ 		full_path_obj.val(current_val);
+		full_path_obj.change();
+
+		
+		//if path matches display the name
+		for (i=0; i<data[1].length; i++) {
+			if (full_path_obj.val() == data[1][i]) {
+				$('#config_search').val(data[0][i]);
+				return;
+			}
+		}
+		$('#config_search').val(full_path_obj.val());
     }
+	
+	function clearButtonPress() {
+		$('#config_search').val('');
+	}
 
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
@@ -233,13 +214,9 @@
         onStudentSubmitChange();
         $('[name=student_submit]').change(onStudentSubmitChange);
 
-        // Update the page when the radio buttons change
-        $('input:radio[name=config_option][value="{{ config_select_mode }}"]').prop('checked', true);
-        onConfigChange();
-        $('.config_option').change(onConfigChange);
-
         // Update the text box when the path config changes
-        $('.select_config_path').change(onConfigPathChange);
+		onConfigPathChange();
+        $('#config_search').change(onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
             let elem = $('#yes_student_view');
