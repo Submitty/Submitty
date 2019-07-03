@@ -73,6 +73,10 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
     print("There is no machine with the key {0}".format(target))
     sys.exit(EXIT_CODES['bad_arguments'])
 
+  if WORKERS[target]['enabled'] == False:
+    print("Skipping {0} of {1} because worker machine {2} is disabled".format(mode, daemon, target))
+    return EXIT_CODES['inactive']
+
   user = WORKERS[target]['username']
   host = WORKERS[target]['address']
 

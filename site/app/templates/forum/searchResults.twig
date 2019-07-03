@@ -1,14 +1,3 @@
-<style>
-    .hoverable:hover {
-        -webkit-filter: brightness(85%);
-        -webkit-transition: all .5s ease;
-        -moz-transition: all .5s ease;
-        -o-transition: all .5s ease;
-        -ms-transition: all .5s ease;
-        transition: all .5s ease;
-    }
-</style>
-
 <div class="content forum_content">
 
     {%  include "forum/ForumBar.twig" with {
@@ -20,7 +9,7 @@
     } %}
 
     <div id="search_wrapper">
-        <table style="" class="table table-striped table-bordered persist-area table-hover">
+        <table class="table table-striped table-bordered persist-area table-hover">
             <thead class="persist-thead">
             <tr>
                 <td width="45%">Post Content</td>
@@ -30,12 +19,12 @@
             </thead>
             <tbody>
                 {% for thread in threads %}
-                    <tr class="info persist-header hoverable" title="Go to thread" style="cursor: pointer;" onclick="window.location = '{{ thread.thread_link }}';">
-                        <td colspan="10" style="text-align: center"><h4>{{ thread.thread_title }}</h4></td>
+                    <tr class="info persist-header hoverable cursor-pointer" title="Go to thread" onclick="window.location = '{{ thread.thread_link }}';">
+                        <td colspan="10" class="text-center"><h4>{{ thread.thread_title }}</h4></td>
                     </tr>
                     {% for post in thread.posts %}
-                        <tr title="Go to post" style="cursor: pointer;" onclick="window.location = '{{ post.post_link }}';" id="search-row-{{ post.count }}" class="hoverable">
-                            <td align="left"><pre class='pre_forum'><p class="post_content" style="white-space: pre-wrap; ">{{ post.post_content }}</p></pre></td>
+                        <tr title="Go to post" class="cursor-pointer" onclick="window.location = '{{ post.post_link }}';" id="search-row-{{ post.count }}" class="hoverable">
+                            <td align="left"><pre class='pre_forum'><p class="post_content pre-wrap">{{ post.post_content }}</p></pre></td>
                             <td>{{ post.visible_username }}</td>
                             <td>{{ post.posted_on }}</td>
                         </tr>
@@ -44,7 +33,7 @@
             </tbody>
         </table>
         {% if count_threads == 0 %}
-            <h4 style="padding-bottom:20px;text-align:center;margin-top:20px;">No threads match your search criteria.</h4>
+            <h4 id="search-hr">No threads match your search criteria.</h4>
         {% endif %}
     </div>
 
