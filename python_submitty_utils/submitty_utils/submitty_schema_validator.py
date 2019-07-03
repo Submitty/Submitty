@@ -16,6 +16,10 @@ class SubmittySchemaException(Exception):
         self.schema_message = schema_error.message
 
     def print_human_readable_error(self):
+        """
+        Prints a human readable version of this exception, complete with context
+        from from the violating json object.
+        """
         print()
         print('{0}:'.format(self.my_message))
         if self.schema_message is not None:
@@ -25,26 +29,12 @@ class SubmittySchemaException(Exception):
             print(json.dumps(self.config_json, indent=4))
 
 
-def parse_arguments():
-    """
-    Parses command-line arguments to acquire the config to be tested
-    and the config to validate it against.
-    """
-    parser = argparse.ArgumentParser(description='The Submitty config.json\
-                                                  validator.')
-    parser.add_argument('--config', required=True,
-                        help='The path to the configuration to be validated')
-    parser.add_argument('--schema', required=True,
-                        help='The path to the schema to be validated against')
-    parser.add_argument('-w', '--show_warnings', required=False,
-                        action='store_true', help='Display warnings')
-    return parser.parse_args()
-
-
 def complete_config_validator(j_, s_, show_warnings=True):
     """
     Given a complete config and a complete config schema, validate
-    the complete config piecemeal
+    the complete config one piece at a time. On error, raise a
+    SubmittySchemaException, which is capable of printing a 
+    human readable error message.
     """
     warn = show_warnings
     s_prop = s_['properties']
@@ -136,7 +126,7 @@ def complete_config_validator(j_, s_, show_warnings=True):
 
 def validate_schema(j_, s_, key='', prefix='', required=True, warn=False):
     """
-    We validate a key within a config and a schema.
+    A function which validates a key within a config and a schema.
     If no key is given, we evaluate the whole config or schema.
     """
     descriptive_title = '{0} {1}'.format(prefix, key)
@@ -156,16 +146,16 @@ def validate_schema(j_, s_, key='', prefix='', required=True, warn=False):
                                       descriptive_title,
                                       None)
     if my_json_chunk is None:
-        # if warn:
-        #     print(("WARNING: could not identify "
-        #            "{0} ({1})").format(descriptive_title, key))
+        if warn:
+            print(("WARNING: could not identify "
+                   "{0} ({1})").format(descriptive_title, key))
         return
     try:
         # validate.
         validate(instance=my_json_chunk, schema=my_schema)
     except Exception as e:
-        raise SubmittySchemaException(j_,
-                                      s_,
+        raise SubmittySchemaException(my_json_chunk,
+                                      my_schema,
                                       ('ERROR: {0} was not properly '
                                        'formatted')
                                       .format(descriptive_title),
@@ -173,24 +163,18 @@ def validate_schema(j_, s_, key='', prefix='', required=True, warn=False):
                                       e)
 
 
-def main():
-
-    args = parse_arguments()
-    with open(args.schema, 'r') as infile:
+def validate_complete_config_schema_using_filenames(config_path, 
+                                                    schema_path,
+                                                    show_warnings=True):
+    """
+    Given a path to a complete configuration and a schema, this function
+    loads both and validates the configuration against the schema. On 
+    failure, an exception is thrown, else, nothing is returned.
+    """
+    with open(schema_path, 'r') as infile:
         schema = jsonref.load(infile)
 
-    with open(args.config, 'r') as infile:
+    with open(config_path, 'r') as infile:
         config_json = jsonref.load(infile)
 
-    try:
-        complete_config_validator(config_json, schema,
-                                  show_warnings=args.show_warnings)
-        print()
-        print(("SUCCESS: your configuration conforms to the Submitty"
-               "configuration JSON schema."))
-    except SubmittySchemaException as e:
-        e.print_human_readable_error()
-
-
-if __name__ == '__main__':
-    main()
+    complete_config_validator(config_json, schema, show_warnings=show_warnings)
