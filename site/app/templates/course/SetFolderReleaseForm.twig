@@ -8,6 +8,7 @@
     <center>
         <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
         <script>
+            //inserts file path into title show what folder you are editing
             window.onclick = function() {
                 var rD = document.getElementById("release_title");
                 var folderPath =rD.dataset.path;
@@ -23,13 +24,10 @@
 
         function getNewDateTime(me){
             var releaseDate = document.getElementById("date_to_release");
-            var folderPath =releaseDate.dataset.fp;
-
             // pass filename to server to record the new date and time of the file to be released
             var newDateTime = $(me).val();
             //set the value to the new date and time
             releaseDate.value = newDateTime;
-            console.log(newDateTime,"ndt");
 
         }
         function determineRelease(nDT) {
@@ -67,7 +65,7 @@
             var time = hours + ":" + mins + ":" + secs;
             var currentDT = date + ' ' + time;
             var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
-            //will add a thrid color for never
+            //will add to colors.css
             //custom colors for the input box not on sheet for readability
             if (nDT <= currentDT) {
                 return "#87db88";
@@ -85,19 +83,21 @@
             var ID = directory.dataset.iden;
 
             var releaseDate = document.getElementById("date_to_release");
+            //makes sure you cannot set to null times
             if(releaseDate.value == ""){
                 window.alert("No blank time allowed");
                 return;
             }
+            //go through the array of folder paths and set the time to the new one
             dirArr.forEach(function (element) {
                 setChildNewDateTime(element,releaseDate.value);
-
             });
             var selectedDiv = 'date_to_release_'+ID;
-
+            //change value immediately and background color (will only appear after refresh)
             $("[id^="+selectedDiv+"]").val(releaseDate.value);
             $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)');
-            window.setTimeout(rld,1000);
+            //delay so function can finish most of the way
+            window.setTimeout(rld,1500);
         }
         function rld(){
             parent.location.reload();
@@ -109,7 +109,7 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm(),function(){parent.location.reload();},10000"/>
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm()"/>
 
 {% endblock %}
 

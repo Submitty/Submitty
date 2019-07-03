@@ -81,7 +81,9 @@
                     var iDT = document.getElementById('date_to_release_{{ id }}');
                     var fDT = iDT.value;
                     changeNewDateTime('{{ path }}', fDT);
-
+                    //because there are no checkboxes anymore, permission is on to share
+                    //but the default to never should protect the file from being seen
+                    //if it is sensitive
                     changePermission('{{ path }}','1');
                     function determineRelease(inputID){
                         var today = new Date();
@@ -128,8 +130,7 @@
                         //based on the time chosen
                         var inputDT = document.getElementById(inputID);
                         var fileDT = inputDT.value;
-
-                        //will add another color for never releasing
+                        
                         //also custom colors for this page for readability
                         if(fileDT<=currentDT){
                             inputDT.style.backgroundColor = "#87db88";
@@ -195,11 +196,9 @@
     //set cookie for open adapted from w3schools
     function setCookie(cName,cVal){
         document.cookie = cName+'='+cVal;
-        console.log(cName," ",cVal);
     }
     //get the value for the cookie with this name
     function getCookie(cName) {
-        console.log(cName);
         var name = cName+'=';
         var decodedCookie = decodeURIComponent(document.cookie);
         var ca = decodedCookie.split(';');
@@ -208,9 +207,7 @@
             while (c.charAt(0) == ' ') {
                 c = c.substring(1);
             }
-            console.log
             if (c.indexOf(name) == 0) {
-                console.log(c.substring(name.length, c.length));
                 return c.substring(name.length, c.length);
             }
         }
@@ -223,11 +220,10 @@
         if(folderCookie == "open"){
             //open all the folders
             openAllDivForCourseMaterials();
-            //go through all key/val pairs
+            //
             {% for file in inDir %}
                 //if one of the subdirs, check if it is closed post opening all
                 var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
-                console.log(subFolderCookie);
                 if(subFolderCookie.indexOf("closed")==0){
                     //if closed. close it after it has been opened by the override above
                     closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
@@ -238,7 +234,6 @@
             //makes sure that opened folders don't get opened multiple times
             let trackOpens = new Map();
             //goes through all possible directories
-            //FIX THIS LATER
             {% for file in inDir %}
                     //get the cookie for each dir
                     var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
@@ -261,7 +256,7 @@
                         }
                     }
             {% endfor %}
-    }
+        }
         // loop thru each div_viewer_xxx
         var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
         if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
