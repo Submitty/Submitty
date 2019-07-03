@@ -56,7 +56,7 @@ Macros
 	
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': action}) }}" onchange="userFormChange()">
+    <form method="post" action="{{ return_url_update_grader }}">
         {{ parent() }}
     </form>
 {% endblock %}
@@ -65,10 +65,9 @@ Macros
     <input class="btn btn-primary" type="submit" value="Submit" />
 {% endblock %}
 {% block js %}
-<script type="text/javascript">
+<script>
 
-    function updateCheckBoxes(grader_id,all_box) {
-		console.log("HERE");	
+    function updateCheckBoxes(grader_id,all_box) {	
         if(all_box) {
             //update all check boxes for that user with the "all" box state
             var value = $('#' + {{grader_id}} + '_all').is(':checked');
