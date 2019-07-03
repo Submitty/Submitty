@@ -1,15 +1,15 @@
 import unittest
 import schema_validator
 import traceback
-import json
+import jsonref
 import os
 
 # TODO: ADD pip3 install jsonschema migration!
-
-test_directories = ['tutorial_configs', 'more_autograding_examples']
+# TODO: ADD pip3 install jsonref migration!
+test_directories = ['sample', 'tutorial', 'development']
 
 with open('complete_config_json_schema.json', 'r') as infile:
-    SCHEMA = json.load(infile)
+    SCHEMA = jsonref.load(infile)
 
 
 class TestSchema(unittest.TestCase):
@@ -18,15 +18,18 @@ class TestSchema(unittest.TestCase):
             for file in os.listdir(directory):
                 test_file = os.path.join(directory, file)
                 print('{0}: '.format(test_file))
-                print()
                 with self.subTest(msg='Testing {0}'.format(test_file),
                                   test_file=test_file):
                     with open(test_file, 'r') as infile:
-                        config_json = json.load(infile)
+                        config_json = jsonref.load(infile)
                     try:
                         schema_validator.complete_config_validator(config_json,
-                                                                   SCHEMA, show_warnings=False)
+                                                                   SCHEMA,
+                                                                   show_warnings=False)
                         success = True
+                    except schema_validator.SubmittySchemaException as e:
+                        e.print_human_readable_error()
+                        success = False
                     except Exception:
                         traceback.print_exc()
                         success = False

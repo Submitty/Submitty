@@ -243,8 +243,7 @@
               }
           }
       },
-      "max_submission_size" : 
-      {
+      "max_submission_size" : {
         "type" : "integer",
         "minimum" : 1
       },
@@ -362,6 +361,14 @@
           ]
         },
         "minItems" : 1
+      },
+      "notebook" : {
+        "description" : "The definition of a notebook consisting of messages and inputs.",
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/definitions/notebook_object"
+        },
+        "minItems" : 0
       }
   },
   "definitions" : {
@@ -424,7 +431,13 @@
         "hidden" : {
           "type" : "boolean"
         },
+        "view_testcase_message" : {
+          "type" : "boolean"
+        },
         "extra_credit" : {
+          "type" : "boolean"
+        },
+        "partial_credit" : {
           "type" : "boolean"
         },
         "details" : {
@@ -483,7 +496,14 @@
               }
             ]
           }
-        }, 
+        },
+        "input_generation_commands" : {
+          "description" : "A list of commands to be run at the input generation step",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
         "executable_name" : {
           "oneOf" : [
             {
@@ -795,6 +815,10 @@
         "use_router" : {
           "type" : "boolean",
           "description" : "When grading networked containers, determines whether a centralized logging node should be injected to capture all messages."
+        },
+        "testcase_label" : {
+          "type" : "string",
+          "description" : "Used to link a testcase to a notebook element."
         },
         "title" : {
           "type" : "string",
@@ -1202,6 +1226,124 @@
           }
         }
       ]       
+    },
+    "notebook_object" : {
+      "type": "object",
+      "description" : "A notebook input or output.",
+      "anyOf" : [
+        {
+          "type" : "object",
+          "required" : ["type", "markdown_string"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["markdown"]
+            },
+            "markdown_string" : {
+              "type" : "string"
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "filename"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["short_answer"]
+            },
+            "filename" : {
+              "description" : "Filename where results of submission will be saved.",
+              "type" : "string"
+            },
+            "initial_value" : {
+              "type" : "string",
+              "description" : "A value to pre-populate into short answer box."
+            },
+            "programming_language" : {
+              "type" : "string",
+              "description" : "Programming language that will be entered into the short answer box and will be used for syntax highlighting."
+            },
+            "rows" :{
+              "description" : "Height of the short answer box in rows.",
+              "type" : "integer",
+              "minimum" : 1
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "filename", "choices"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["multiple_choice"]
+            },
+            "filename" : {
+              "description" : "Filename where results of submission will be saved.",
+              "type" : "string"
+            },
+            "choices" : {
+              "description" : "An array of JSON objects which describe a value and description for each choice.",
+              "type" : "array",
+              "items" : {
+                "type" : "object",
+                "properties" : {
+                  "value" : {
+                    "type" : "string"
+                  },
+                  "description" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "minItems" : 1
+            },
+            "allow_multiple" : {
+              "type" : "boolean",
+              "description" : "If true allows multiple values to be selected, if false only one value may be selected."
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "image"],
+          "properties" : {
+            "image" : {
+              "type" : "string",
+              "description" : "The filename of the image to display."
+            },
+            "height" : {
+              "description" : "The height in pixels the image should be displayed at.",
+              "type" : "integer"
+            },
+            "width" : {
+              "description" : "The width in pixels the image should be displayed at.",
+              "type" : "integer"
+            },
+            "alt_text" : {
+              "type" : "string",
+              "description" : "When displaying an image you should use this field to describe the contents of the image. Such a description is useful to visually impaired users who may be using screen reading software."
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        }
+      ]
     }
   }
 }

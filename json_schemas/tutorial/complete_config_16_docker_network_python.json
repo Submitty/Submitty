@@ -237,7 +237,7 @@
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "method": "errorIfEmpty"
+                    "type": "errorIfEmpty"
                 },
                 {
                     "actual_file": "server/STDERR.txt",
@@ -359,7 +359,7 @@
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "method": "errorIfEmpty"
+                    "type": "errorIfEmpty"
                 },
                 {
                     "actual_file": "server/STDERR.txt",
@@ -481,7 +481,7 @@
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "method": "errorIfEmpty"
+                    "type": "errorIfEmpty"
                 },
                 {
                     "actual_file": "server/STDERR.txt",
@@ -594,7 +594,7 @@
                     "sequence_diagram": true,
                     "show_actual": "always",
                     "show_message": "always",
-                    "method": "errorIfEmpty"
+                    "type": "errorIfEmpty"
                 },
                 {
                     "actual_file": "server/STDOUT.txt",

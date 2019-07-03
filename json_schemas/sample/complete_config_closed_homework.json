@@ -58,11 +58,6 @@
             ],
             "details": "python *.py",
             "dispatcher_actions": [],
-            "input_generator": {
-                "command": [
-                    "python generator.py 1> randominput.txt"
-                ]
-            },
             "points": 0,
             "pre_commands": [],
             "single_port_per_container": false,
@@ -71,12 +66,9 @@
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
-                    "command": [
-                        "python solution.py 1> output.txt"
-                    ],
                     "deduction": 1.0,
                     "description": "Program Output",
-                    "expected_file": "output.txt",
+                    "expected_file": "hw01part1_sol.txt",
                     "method": "diff",
                     "show_actual": "always",
                     "show_expected": "always",

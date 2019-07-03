@@ -208,6 +208,9 @@ class TestcaseWrapper:
             os.mkdir(os.path.join(self.testcase_path, "build"))
             # the bin directory will contain the autograding executables
             os.mkdir(os.path.join(self.testcase_path, "bin"))
+            # The data directory in which configure will be run. This is needed to
+            # make complete_config.json for schema testing
+            os.mkdir(os.path.join(self.testcase_path, "data"))
         except OSError as e:
             pass
         # copy the cmake file to the build directory

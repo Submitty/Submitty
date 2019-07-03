@@ -1,0 +1,138 @@
+{
+    "autograding": {
+        "compilation_to_runner": [
+            "**/*.out",
+            "**/*.class"
+        ],
+        "compilation_to_validation": [
+            "test*/STDOUT*.txt",
+            "test*/STDERR*.txt"
+        ],
+        "submission_to_compilation": [
+            "**/*.cpp",
+            "**/*.cxx",
+            "**/*.c",
+            "**/*.h",
+            "**/*.hpp",
+            "**/*.hxx",
+            "**/*.java"
+        ],
+        "submission_to_runner": [
+            "**/*.py",
+            "**/*.pdf"
+        ],
+        "submission_to_validation": [
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
+        ],
+        "use_checkout_subdirectory": "",
+        "work_to_details": [
+            "**/*.txt",
+            "test01/container0/STDOUT.txt",
+            "test01/container1/STDOUT.txt",
+            "test01/container0/STDERR.txt",
+            "test01/container1/STDERR.txt"
+        ]
+    },
+    "autograding_method": "docker",
+    "container_options": {
+        "container_image": "ubuntu:custom",
+        "single_port_per_container": false,
+        "use_router": false
+    },
+    "testcases": [
+        {
+            "containers": [
+                {
+                    "commands": [
+                        "python3 solution.py"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container0",
+                    "outgoing_connections": [],
+                    "server": false
+                },
+                {
+                    "commands": [
+                        "python3 solution.py"
+                    ],
+                    "container_image": "ubuntu:custom",
+                    "container_name": "container1",
+                    "outgoing_connections": [],
+                    "server": false
+                }
+            ],
+            "dispatcher_actions": [
+                {
+                    "action": "delay",
+                    "seconds": 2
+                },
+                {
+                    "action": "stdin",
+                    "containers": [
+                        "container0"
+                    ],
+                    "string": "Hi there! I'm container0\n"
+                },
+                {
+                    "action": "stdin",
+                    "containers": [
+                        "container1"
+                    ],
+                    "string": "Hi there! I'm container1\n"
+                }
+            ],
+            "points": 10,
+            "pre_commands": [],
+            "single_port_per_container": false,
+            "title": "Docker STDIN Test",
+            "use_router": false,
+            "validation": [
+                {
+                    "actual_file": "container0/STDOUT.txt",
+                    "deduction": 0.5,
+                    "description": "Container 0 Output",
+                    "expected_file": "expected_output_0.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "container1/STDOUT.txt",
+                    "deduction": 0.5,
+                    "description": "Container 1 Output",
+                    "expected_file": "expected_output_1.txt",
+                    "method": "diff",
+                    "show_actual": "always",
+                    "show_expected": "always",
+                    "show_message": "always"
+                },
+                {
+                    "actual_file": "container0/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (container0/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                },
+                {
+                    "actual_file": "container1/STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "Standard Error (container1/STDERR.txt)",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
+                }
+            ]
+        },
+        {
+            "max_submissions": 20,
+            "penalty": -0.1,
+            "points": -5,
+            "title": "Submission Limit",
+            "type": "FileCheck"
+        }
+    ]
+}

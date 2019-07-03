@@ -1,5 +1,8 @@
 {
-    "assignment_message": "The homework submission area & autograding points for Lab 1 are just practice.<br>The only grades for Lab 1 are the 3 checkpoints recorded by your TA & mentors.",
+    "allow_system_calls": [
+        "ALLOW_SYSTEM_CALL_CATEGORY_COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION",
+        "ALLOW_SYSTEM_CALL_CATEGORY_PROCESS_CONTROL_NEW_PROCESS_THREAD"
+    ],
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -48,15 +51,16 @@
         "single_port_per_container": false,
         "use_router": false
     },
-    "grading_parameters": {
-        "AUTO_POINTS": 9
+    "resource_limits": {
+        "RLIMIT_CPU": 10,
+        "RLIMIT_NPROC": 20
     },
     "testcases": [
         {
             "containers": [
                 {
                     "commands": [
-                        "clang++ -Wall -o a.out -- *.cpp"
+                        "/usr/bin/gcc -Wall -o a.out *.c"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -66,7 +70,7 @@
             ],
             "dispatcher_actions": [],
             "executable_name": "a.out",
-            "points": 3,
+            "points": 2,
             "pre_commands": [],
             "single_port_per_container": false,
             "title": "Compilation",
@@ -103,7 +107,7 @@
             "containers": [
                 {
                     "commands": [
-                        "./a.out < corner_case_C.txt"
+                        "./a.out 10"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -112,22 +116,21 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 3,
+            "points": 4,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "Random output",
+            "title": "./a.out 10",
             "use_router": false,
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
-                    "command": [
-                        "python3 solution.py corner_case_C.txt 1> randomoutput.txt"
+                    "data": [
+                        "ALL DONE! 10 successful forks"
                     ],
-                    "deduction": 1.0,
-                    "expected_file": "randomoutput.txt",
-                    "method": "diff",
+                    "deduction": 1,
+                    "description": "Standard Output (STDOUT)",
+                    "method": "searchToken",
                     "show_actual": "always",
-                    "show_expected": "always",
                     "show_message": "always"
                 },
                 {
@@ -144,7 +147,7 @@
             "containers": [
                 {
                     "commands": [
-                        "./a.out < randominput.txt"
+                        "./a.out 30"
                     ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
@@ -153,27 +156,21 @@
                 }
             ],
             "dispatcher_actions": [],
-            "input_generator": {
-                "command": [
-                    "python3 generator.py 1> randominput.txt"
-                ]
-            },
-            "points": 3,
+            "points": 4,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "Random inputs and output",
+            "title": "./a.out 30",
             "use_router": false,
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
-                    "command": [
-                        "python3 solution.py randominput.txt 1> randomoutput.txt"
+                    "data": [
+                        "ALL DONE! 30 successful forks"
                     ],
-                    "deduction": 1.0,
-                    "expected_file": "randomoutput.txt",
-                    "method": "diff",
+                    "deduction": 1,
+                    "description": "Standard Output (STDOUT)",
+                    "method": "searchToken",
                     "show_actual": "always",
-                    "show_expected": "always",
                     "show_message": "always"
                 },
                 {

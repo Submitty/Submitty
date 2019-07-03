@@ -1,5 +1,4 @@
 {
-    "assignment_message": "To better accomodate students for the upcoming exam, please let us know if you are left-handed or right-handed.<br>We will use this information to make the seating assignments.",
     "autograding": {
         "compilation_to_runner": [
             "**/*.out",
@@ -23,12 +22,19 @@
             "**/*.pdf"
         ],
         "submission_to_validation": [
-            "left_right.txt"
+            "**/README.txt",
+            "input_*.txt",
+            "**/*.pdf"
         ],
         "use_checkout_subdirectory": "",
         "work_to_details": [
-            "left_right.txt",
-            "test01/left_right.txt"
+            "test*/*.txt",
+            "test*/*_diff.json",
+            "**/README.txt",
+            "input_*.txt",
+            "test*/input_*.txt",
+            "test01/STDOUT.txt",
+            "test01/STDERR.txt"
         ]
     },
     "autograding_method": "jailed_sandbox",
@@ -41,7 +47,9 @@
         {
             "containers": [
                 {
-                    "commands": [],
+                    "commands": [
+                        "python *.py"
+                    ],
                     "container_image": "ubuntu:custom",
                     "container_name": "container0",
                     "outgoing_connections": [],
@@ -49,35 +57,38 @@
                 }
             ],
             "dispatcher_actions": [],
-            "points": 0,
+            "points": 10,
             "pre_commands": [],
             "single_port_per_container": false,
-            "title": "Review",
-            "type": "FileCheck",
+            "title": "Python - Simple Grading",
             "use_router": false,
             "validation": [
                 {
-                    "actual_file": "left_right.txt",
+                    "actual_file": "STDOUT.txt",
                     "deduction": 1.0,
-                    "description": "left_right.txt",
-                    "method": "fileExists",
+                    "description": "Program Output",
+                    "expected_file": "output.txt",
+                    "method": "diff",
                     "show_actual": "always",
+                    "show_expected": "always",
                     "show_message": "always"
+                },
+                {
+                    "actual_file": "STDERR.txt",
+                    "deduction": 0.0,
+                    "description": "syntax error output from running python",
+                    "method": "warnIfNotEmpty",
+                    "show_actual": "on_failure",
+                    "show_message": "on_failure"
                 }
             ]
         },
         {
             "max_submissions": 20,
-            "penalty": 0,
-            "points": 0,
+            "penalty": -0.1,
+            "points": -5,
             "title": "Submission Limit",
             "type": "FileCheck"
-        }
-    ],
-    "textboxes": [
-        {
-            "filename": "left_right.txt",
-            "label": "Write \"left-handed\" or \"right-handed\":"
         }
     ]
 }

@@ -453,7 +453,7 @@
             "validation": [
                 {
                     "actual_file": "STDOUT.txt",
-                    "deduction": 0.5,
+                    "deduction": 0.333333343267441,
                     "expected_file": "output_7.txt",
                     "method": "diff",
                     "show_actual": "always",
@@ -462,7 +462,7 @@
                 },
                 {
                     "actual_file": "STDERR.txt",
-                    "deduction": 0.5,
+                    "deduction": 0.333333343267441,
                     "expected_file": "output_7B.txt",
                     "method": "diff",
                     "show_actual": "always",
@@ -471,9 +471,10 @@
                 },
                 {
                     "actual_file": "execute_logfile.txt",
-                    "deduction": 0,
+                    "deduction": 0.333333343267441,
+                    "method": "warnIfNotEmpty",
                     "show_actual": "never",
-                    "show_message": "never"
+                    "show_message": "on_failure"
                 }
             ]
         },
