@@ -63,6 +63,7 @@ class UsersView extends AbstractView {
             "use_database" => $use_database,
             "return_url_update_grader" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'update_grader')),
             "return_url_grader_list" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'upload_grader_list')),
+            "return_url_assign_reg_sections" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'assign_reg_sections')),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

@@ -21,8 +21,9 @@ Macros
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}registration-sections-form{% endblock %}
 {% block title %}Edit Registration Sections for Graders{% endblock %}
-{% block body %}
 
+{% block body %}
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
 	<table id="registration_section_assignment">
 		{% if reg_sections|length > 0 %}
@@ -53,11 +54,11 @@ Macros
 {% else %}
 	No graders found
 {% endif %}
-	
 {% endblock %}
+
 {% block form %}
-    <form method="post" action="{{ return_url_update_grader }}">
-        {{ parent() }}
+    <form method="post" action="{{ return_url_assign_reg_sections }}">
+        {{ parent()}}
     </form>
 {% endblock %}
 {% block buttons %}

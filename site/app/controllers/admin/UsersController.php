@@ -30,6 +30,9 @@ class UsersController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb('Manage Graders');
                 $this->listGraders();
                 break;
+            case 'assign_reg_sections':
+                $this->reassignRegistrationSections();
+                break;
             case 'rotating_sections':
                 $this->core->getOutput()->addBreadcrumb('Manage Sections');
                 $this->rotatingSectionsForm();
@@ -79,6 +82,12 @@ class UsersController extends AbstractController {
 
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
+    }
+
+    private function reassignRegistrationSections() {
+        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
+            'action' => $action));
+        $this->core->redirect($return_url);
     }
 
     private function renderDownloadForm($code, $use_database) {
