@@ -42,7 +42,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/change_password")
+     * @Route("/home/change_password", methods={"POST"})
      */
     public function changePassword(){
         $user = $this->core->getUser();
@@ -59,7 +59,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/change_username")
+     * @Route("/home/change_username", methods={"POST"})
      */
     public function changeUserName(){
         $user = $this->core->getUser();

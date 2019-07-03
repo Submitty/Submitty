@@ -3,6 +3,7 @@
 
 namespace app\libraries\routers;
 
+use app\libraries\response\RedirectResponse;
 use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
 use app\exceptions\AuthenticationException;
@@ -34,6 +35,9 @@ class WebRouter {
     /** @var bool */
     protected $course_loaded = false;
 
+    /** @var bool */
+    protected $is_api = false;
+
     /** @var array */
     public $parameters;
 
@@ -47,6 +51,7 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
         $this->logged_in = $logged_in;
+        $this->is_api = $is_api;
 
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -106,6 +111,20 @@ class WebRouter {
     }
 
     public function run() {
+        if (!$this->is_api &&
+            $this->request->isMethod('POST') &&
+            !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
+            !$this->core->checkCsrfToken()
+        ) {
+            $msg = "Invalid CSRF token.";
+            $this->core->addErrorMessage($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildNewUrl())
+            );
+        }
+
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
