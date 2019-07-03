@@ -8,9 +8,9 @@
 	</b>
 
     <fieldset>
-		<input class="config_search ignore" type="text" id="config_search" list="path_data"
+		<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search" value="{{ gradeable.getAutogradingConfigPath() }}"
 			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
-			
+		<a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
 		<datalist id="path_data" style="display:none" >
 		{% for path in all_config_paths %}
 			<option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
@@ -124,19 +124,19 @@
 		let current_val = $('#config_search').val();
 		
 		//if a name is entered change to the path
-		if (current_val != ""){
-			let index=-1;
-			for (i=0; i<data[0].length; i++) {
-				if (current_val == data[0][i]) {
-					index = i;
-				}
+
+		let index=-1;
+		for (i=0; i<data[0].length; i++) {
+			if (current_val == data[0][i]) {
+				index = i;
 			}
-			if (index != -1) {
-				current_val = data[1][index];
-			}
- 			full_path_obj.val(current_val);
-			full_path_obj.change();
 		}
+		if (index != -1) {
+			current_val = data[1][index];
+		}
+ 		full_path_obj.val(current_val);
+		full_path_obj.change();
+
 		
 		//if path matches display the name
 		for (i=0; i<data[1].length; i++) {
@@ -147,6 +147,10 @@
 		}
 		$('#config_search').val(full_path_obj.val());
     }
+	
+	function clearButtonPress() {
+		$('#config_search').val('');
+	}
 
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
