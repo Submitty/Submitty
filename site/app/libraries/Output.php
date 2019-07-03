@@ -3,6 +3,7 @@
 namespace app\libraries;
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
+use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -437,31 +438,32 @@ HTML;
     }
     
     public function addInternalCss($file, $folder='css') {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        $this->addCss($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
+        $this->addCss($this->timestampResource($file, $folder));
     }
     
     public function addVendorCss($file) {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
-        $this->addCss($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
+        $this->addCss($this->timestampResource($file, "vendor"));
     }
 
-    public function addCss($url, $timestamp=0) {
-        $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
+    public function addCss($url) {
+        $this->css[] = $url;
     }
 
     public function addInternalJs($file, $folder='js') {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        $this->addJs($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
+        $this->addJs($this->timestampResource($file, $folder));
     }
 
     public function addVendorJs($file) {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
-        $this->addJs($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
+        $this->addJs($this->timestampResource($file, "vendor"));
     }
 
-    public function addJs($url, $timestamp=0) {
-        $this->js[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
+    public function addJs($url) {
+        $this->js[] = $url;
+    }
+
+    public function timestampResource($file, $folder) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
+        return $this->core->getConfig()->getBaseUrl().$folder."/".$file.(($timestamp !== 0) ? "?v={$timestamp}" : "");
     }
     
     /**
