@@ -1529,6 +1529,57 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
+function updateGradeOverride(data) {
+    var fd = new FormData($('#gradeOverrideForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'update'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['data']['is_team']){
+                extensionPopup(json);
+                return;
+            }
+            var form = $("#load-overriden-grades");
+            $('#my_table tr:gt(0)').remove();
+            var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+            $('#title').replaceWith(title);
+            if(json['data']['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['data']['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+            $('#user_id').val(this.defaultValue);
+            $('#marks').val(this.defaultValue);
+            $('#comments').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overriden Grades for ' + json['data']['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
+
 function loadHomeworkExtensions(g_id, due_date) {
     var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
     $.ajax({
@@ -1545,6 +1596,30 @@ function loadHomeworkExtensions(g_id, due_date) {
             }
             json['data']['users'].forEach(function(elem){
                 var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
+                $('#my_table').append(bits.join('</td><td>'));
+            });
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
+function loadOverridenGrades(g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'get_overriden_grades', 'g_id': g_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            var json = JSON.parse(data);
+            var form = $("#load-overriden-grades");
+            $('#my_table tr:gt(0)').remove();
+            var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+            $('#title').replaceWith(title);
+            if(json['data']['users'].length === 0){
+                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            }
+            json['data']['users'].forEach(function(elem){
+                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'] + '</td></tr>'];
                 $('#my_table').append(bits.join('</td><td>'));
             });
         },
