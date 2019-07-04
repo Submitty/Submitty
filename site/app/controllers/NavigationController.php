@@ -30,7 +30,7 @@ class NavigationController extends AbstractController {
      * @Route("/{_semester}/{_course}/no_access")
      */
     public function noAccess() {
-        $this->core->getOutput()->renderOutput('Navigation', 'noAccessCourse');
+        $this->core->getOutput()->renderOutput('Error', 'noAccessCourse');
     }
 
     /**

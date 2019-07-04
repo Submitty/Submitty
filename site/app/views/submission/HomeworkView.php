@@ -19,12 +19,6 @@ use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
 
-    public function unbuiltGradeable(Gradeable $gradeable) {
-        return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
-            'title' => $gradeable->getTitle()
-        ]);
-    }
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -356,7 +350,16 @@ class HomeworkView extends AbstractView {
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
 
-        $DATE_FORMAT = "m/d/Y @ H:i";
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
+        $DATE_FORMAT = "m/d/Y @ h:i A";
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),

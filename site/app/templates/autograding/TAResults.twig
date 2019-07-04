@@ -68,7 +68,7 @@
                         <p>
                         {# This is a layout table #}
                         <table class="gradeable_comment">
-                            {% for mark in component.marks if mark.show_mark %}
+                            {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                                 <tr>
                                     <td>
                                         {% if mark.earned %}

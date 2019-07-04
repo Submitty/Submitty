@@ -633,7 +633,14 @@ else
     ${SUBMISSION_URL}
 
 
-    1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+    1
+    y
+
+
+    submitty@vagrant
+    do-not-reply@vagrant
+    localhost
+    25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
@@ -751,14 +758,6 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if [[ ${VAGRANT} == 1 ]]; then
-    if [[ ! -f ${SUBMITTY_INSTALL_DIR}/config/email.json ]]; then
-        # add email configuration stuff to email.json
-        echo "{}" > ${SUBMITTY_INSTALL_DIR}/config/email.json
-        jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
-        jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
-        jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
-        jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/email.json > ${SUBMITTY_INSTALL_DIR}/config/email.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/email.tmp ${SUBMITTY_INSTALL_DIR}/config/email.json
-    fi
     chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
     chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
