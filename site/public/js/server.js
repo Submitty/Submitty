@@ -993,6 +993,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
+            $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
         var team_history_len=user_assignment_setting_json.team_history.length;
         team_history_title_div.append('Team History: ');
