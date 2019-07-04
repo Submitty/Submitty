@@ -79,7 +79,7 @@
             <input type="submit" value = "Invite" class="btn btn-primary" />
         </form>
         <br />
-        <button class="btn btn-danger" onclick="location.href='{{ leave_url }}'">Leave Team</button>
+        <button class="btn btn-danger" onclick="location.href='{{ leave_team_url }}'">Leave Team</button>
     </div>
 {% elseif team == null %}
     <div class="content">
@@ -99,7 +99,7 @@
 
         {# Create new team button #}
         <br />
-        <button class="btn btn-primary" onclick="location.href='{{ create_url }}'">Create New Team </button>
+        <button class="btn btn-primary" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
 
         {% if seeking_partner %}
             <button class="btn btn-danger" onclick="location.href='{{ stop_seek_url }}'">Stop Seeking Team/Partner </button>

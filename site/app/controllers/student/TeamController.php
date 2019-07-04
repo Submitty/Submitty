@@ -8,33 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'create_new_team':
-                $this->createNewTeam($_REQUEST['gradeable_id']);
-                break;
-            case 'leave_team':
-                $this->leaveTeam($_REQUEST['gradeable_id']);
-                break;
-            case 'invitation':
-                $this->sendInvitation($_REQUEST['gradeable_id']);
-                break;
-            case 'accept':
-                $this->acceptInvitation($_REQUEST['gradeable_id']);
-                break;
-            case 'cancel':
-                $this->cancelInvitation($_REQUEST['gradeable_id']);
-                break;
-            case 'seek_team':
-                $this->seekTeam($_REQUEST['gradeable_id']);
-                break;
-            case 'stop_seek_team':
-                $this->stopSeekTeam($_REQUEST['gradeable_id']);
-                break;
-            case 'show_page':
-            default:
-                $this->showPage($_REQUEST['gradeable_id']);
-                break;
-        }
+        return null;
     }
 
     /**
