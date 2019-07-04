@@ -235,7 +235,7 @@
 {% macro render_numeric_cols(self, gradeable, section, grade, index, components_numeric) %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
-        {% for component in grade.getGradeable().getComponents() if not component.isText() %}
+        {% for component in grade.getGradeable().getComponents()|filter((component) => not component.isText()) %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade.getGradedComponent(component) %}
             {% set total = total + component_grade.getScore() %}
@@ -266,7 +266,7 @@
     {% endif %}
 
     {% set text_start = components_numeric|length %}
-    {% for component in grade.getGradeable().getComponents() if component.isText() %}
+    {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
