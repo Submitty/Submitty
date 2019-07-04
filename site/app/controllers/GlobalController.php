@@ -253,7 +253,7 @@ class GlobalController extends AbstractController {
             $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
             if ($display_rainbow_grades_summary) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildNewCourseUrl(['rainbow']),
+                    "href" => $this->core->buildNewCourseUrl(['grades']),
                     "title" => "Rainbow Grades",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grades",
