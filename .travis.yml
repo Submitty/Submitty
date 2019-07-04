@@ -109,6 +109,8 @@ jobs:
         - sudo cp -f .setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
         - sudo sed -e "s?SUBMITTY_URL?*?g" --in-place /etc/apache2/sites-available/submitty.conf
         - sudo sed '54d' --in-place /etc/apache2/sites-available/submitty.conf
+        - sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+        - sudo chmod 0640 /etc/apache2/suexec/www-data
         - sudo a2ensite submitty
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
         - cat /etc/apache2/sites-available/submitty.conf
