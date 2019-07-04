@@ -170,7 +170,7 @@ gradeables:
   eg_regrade_request_date: +1015 days
   eg_max_random_submissions: 0
 
-- gradeable_config: cpp_simple_lab_automated_input_output
+- gradeable_config: cpp_random_input_output
   components:
   - gc_lower_clamp: 0
     gc_default: 5
