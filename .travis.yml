@@ -17,109 +17,6 @@ jobs:
   fast_finish: true
 
   include:
-    # Test if the name of the PR starts with [WIP] and fail at this stage if it does
-    - if: type = pull_request
-      stage: pr test for wip
-      language: python
-      python: 3.6
-      install:
-        - pip3 install requests
-      script:
-        - echo "Checking title for ${TRAVIS_REPO_SLUG}/pulls/${TRAVIS_PULL_REQUEST}"
-        - python3 ${TRAVIS_BUILD_DIR}/.setup/travis/check_wip.py ${TRAVIS_REPO_SLUG} ${TRAVIS_PULL_REQUEST}
-
-    # Warm up the pip and composer caches to use it for the rest of the build stages
-    - &00-cache
-      stage: 00 warm up cache
-      php: 7.2
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - pushd site
-        - travis_retry composer install --prefer-dist --no-interaction
-        - popd
-        - pip3 install -U pip
-        - pip3 install python-pam
-        - pip3 install PyYAML
-        - pip3 install psycopg2-binary
-        - pip3 install sqlalchemy
-        - pip3 install pylint_runner
-        - pip3 install python-dateutil
-        - pip3 install selenium
-        - pip3 install pause
-        - pip3 install tzlocal
-        - pip3 install paramiko
-        - pip3 install psutil
-      script: skip
-    - <<: *00-cache
-      php: 7.3
-      if: branch = master OR type = pull_request
-
-    - &00-python-cache
-      language: python
-      python: 3.6
-      install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings sqlalchemy psycopg2-binary
-      script: skip
-    - <<: *00-python-cache
-      python: 3.7
-      if: branch = master OR type = pull_request
-
-    # Lint the codebase to ensure that the code is compliant to our system
-    - &01-php-lint
-      stage: 01 lint
-      php: 7.2
-      script:
-        - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    - <<: *01-php-lint
-      php: 7.3
-      if: branch = master OR type = pull_request
-    
-    - &01-python-lint
-      language: python
-      python: 3.6
-      install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings
-      script:
-        - flake8
-    - <<: *01-python-lint
-      python: 3.7
-      if: branch = master OR type = pull_request
-
-    - &02-php-unit
-      stage: 02 unit test
-      php: 7.2
-      script:
-        - pushd site
-        - travis_retry composer install --prefer-dist --no-interaction
-        - vendor/bin/phpunit --version
-        - vendor/bin/phpunit --configuration tests/phpunit.xml
-        - popd
-      after_success:
-        - pushd site
-        - travis_retry php vendor/bin/php-coveralls -v -c tests/coveralls.yml
-        - popd
-    - <<: *02-php-unit
-      php: 7.3
-      if: branch = master OR type = pull_request
-
-    - &02-python-unit
-      language: python
-      python: 3.6
-      install:
-        - pip3 install -U pip
-        - pip3 install tzlocal
-        - pip3 install sqlalchemy
-      script:
-        - pushd python_submitty_utils
-        - python3 setup.py test
-        - popd
-        - pushd migration
-        - python3 -m unittest discover
-        - popd
-    - <<: *02-python-unit
-      python: 3.7
-      if: branch = master OR type = pull_request
-
     - &03-e2e
       stage: 03 e2e test
       php: 7.2
@@ -137,6 +34,10 @@ jobs:
           packages:
             - apache2
             - libapache2-mod-fastcgi
+            - apache2-suexec-custom
+            - libapache2-mod-authnz-external
+            - libapache2-mod-authz-unixgroup
+            - libapache2-mod-wsgi-py3
             - build-essential
             - automake
             - cmake
@@ -196,12 +97,15 @@ jobs:
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
         - sudo bash .setup/travis/setup_test_suite.sh
         - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
-        - sudo a2enmod include rewrite actions cgi alias headers
+        - sudo a2enmod include rewrite actions cgi alias headers fastcgi
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+        - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
         - sudo a2dissite 000-default
         - sudo rm -rf /etc/apache2/sites-available/*
         - sudo rm -rf /etc/apache2/sites-enabled/*
-        - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
+        - sudo cp -f .setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+        - sudo sed -e "s?SUBMITTY_URL?*?g" --in-place /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
         - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
         # TODO: Figure out why these chmod's are necessary and fix whatever has
@@ -214,76 +118,7 @@ jobs:
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
-    - <<: *03-e2e
-      php: 7.3
-      if: branch = master OR type = pull_request
-    - <<: *03-e2e
-      php: 7.2
-      env: AUTH_METHOD=2
-      if: branch = master OR type = pull_request
-    - <<: *03-e2e
-      php: 7.3
-      env: AUTH_METHOD=2
-      if: branch = master OR type = pull_request
 
-    # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
-    # it
-    - &04-integration
-      stage: Integration test
-      language: cpp
-      addons:
-        postgresql: "9.5"
-        apt:
-          sources:
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty multiverse"
-            - sourceline: "deb http://archive.ubuntu.com/ubuntu trusty-updates multiverse"
-          packages:
-            - build-essential
-            - automake
-            - cmake
-            - g++-multilib
-            - libseccomp2
-            - seccomp
-            - libseccomp-dev
-            - valgrind
-            - pkg-config
-            - flex
-            - bison
-            - poppler-utils
-            - libpcre3
-            - libpcre3-dev
-            - unzip
-            - libboost-all-dev
-      env: CLANG_VER="5.0.1"
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
-      install:
-        - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
-        - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
-        - mkdir ${HOME}/clang+llvm
-        - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
-        - export PATH=${HOME}/clang+llvm/bin:${PATH}
-        # Create symlink so that it's in expected location for whitelist
-        - sudo ln -s $(which clang) /usr/bin/clang
-        - sudo ln -s $(which clang++) /usr/bin/clang++
-        - pip3 install -U pip
-        - pip3 install PyYAML
-        - pip3 install python-dateutil
-        - pip3 install paramiko
-        - pip3 install psycopg2-binary
-        - pip3 install sqlalchemy
-        - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
-        - pip3 install .
-        - popd
-        - sudo bash .setup/travis/autograder.sh
-        - psql -U postgres -c "CREATE ROLE submitty_dbuser WITH SUPERUSER CREATEDB CREATEROLE LOGIN PASSWORD 'submitty_dbuser'"
-        - PGPASSWORD=submitty_dbuser psql -d postgres -h localhost -U submitty_dbuser -c "CREATE DATABASE submitty"
-        - sudo bash .setup/travis/setup.sh
-        - sudo bash .setup/travis/setup_test_suite.sh
-      script:
-        - sudo python3 /usr/local/submitty/test_suite/integrationTests/run.py
-    - <<: *04-integration
-      env: CLANG_VER="6.0.0"
-      if: branch = master OR type = pull_request
 
 notifications:
   email: false
