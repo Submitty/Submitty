@@ -72,16 +72,8 @@
                 && $('#' + grader_id + '_' + {{rs}}).is(':checked')
             {% endfor %}
             ;
-			console.log(grader_id);
             $('#' + grader_id + '_all').prop('checked', all_checked);
         }
     }
-
-    $(document).ready(function() {
-        // update "all" check boxes
-        {% for grader in graders_from_usertypes[1] %}
-			updateCheckBoxes({{grader.getId()}}, false);
-		{% endfor %}
-    });
 
 </script>

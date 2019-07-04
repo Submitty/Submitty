@@ -8,10 +8,10 @@ Macros
         <tr>
             <th>{{ grader.getDisplayedFirstName() ~ " " ~ grader.getDisplayedLastName() ~ "(" ~ grader.getId() ~ ")" }}</th>
             <td><input type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all" 
-				onclick="fixCheckBoxes('{{ grader.getId() }}', true);" /></td>
+				{{ grader.getGradingRegistrationSections()|length == num_boxes ? 'checked' : ''}} onclick="fixCheckBoxes('{{ grader.getId() }}', true);" /></td>
             {% for rs in 1..num_boxes %}
                 <td><input type="checkbox" name="{{ grader.getId() }}_{{rs}}" id="{{ grader.getId() }}_{{rs}}" 
-				onclick="fixCheckBoxes('{{ grader.getId() }}', false);"/></td>
+				{{ rs in grader.getGradingRegistrationSections() ? 'checked' : ''}} onclick="fixCheckBoxes('{{ grader.getId() }}', false);"/></td>
             {% endfor %}
         </tr>
     {% endfor %}

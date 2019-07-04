@@ -30,7 +30,7 @@ class UsersController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb('Manage Graders');
                 $this->listGraders();
                 break;
-            case 'assign_reg_sections':
+            case 'assign_registration_sections':
                 $this->reassignRegistrationSections();
                 break;
             case 'rotating_sections':
@@ -86,7 +86,30 @@ class UsersController extends AbstractController {
 
     private function reassignRegistrationSections() {
         $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
-            'action' => $action));
+            'action' => 'graders'));
+        $new_registration_information = array();
+
+        foreach ($_POST as $key => $value) {
+            $key_array = explode("_",$key);
+            if (!array_key_exists($key_array[0],$new_registration_information)) {
+                $new_registration_information[$key_array[0]] = array();
+            }
+            if ($key_array[1] != 'all') {
+                $new_registration_information[$key_array[0]][] = $key_array[1];
+            }
+        }
+
+        foreach($this->core->getQueries()->getAllGraders() as $grader) {
+            $grader_id = $grader->getId();
+            if (array_key_exists($grader_id,$new_registration_information)) {
+                $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
+            }
+            else {
+                $grader->setGradingRegistrationSections(array());
+            }
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+        }
+
         $this->core->redirect($return_url);
     }
 
