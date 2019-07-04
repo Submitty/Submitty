@@ -95,8 +95,8 @@ class Notification extends AbstractModel {
             return null;
         }
         $instance->setId($details['id']);
-        $instance->setSeen(['seen']);
-        $instance->setComponent(['component']);
+        $instance->setSeen($details['seen']);
+        $instance->setComponent($details['component']);
         $instance->setElapsedTime($details['elapsed_time']);
         $instance->setCreatedAt($details['created_at']);
         $instance->setNotifyMetadata($details['metadata']);
