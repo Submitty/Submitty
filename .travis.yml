@@ -109,7 +109,7 @@ jobs:
         - sudo rm -rf /etc/apache2/sites-enabled/*
         - sudo cp -f .setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
         - sudo sed -e "s?SUBMITTY_URL?*?g" --in-place /etc/apache2/sites-available/submitty.conf
-        - sed '54d' --in-place /etc/apache2/sites-available/submitty.conf
+        - sudo sed '54d' --in-place /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
         - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
         # TODO: Figure out why these chmod's are necessary and fix whatever has
