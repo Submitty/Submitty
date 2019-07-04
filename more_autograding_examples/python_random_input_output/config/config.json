@@ -4,11 +4,6 @@
             "title" : "Simple Test Case -- No Additional Input",
             "details" : "python *.py",
             "command" : "python *.py",
-            "input_generator" : {
-                "command" : [
-                    "python generator.py 1> randominput.txt"
-                ]
-            },
             "points" : 3,
             "validation" : [
                 {
@@ -24,11 +19,6 @@
             "title" : "Additional Input From File -- 1 2 3 4",
             "details" : "python *.py input.txt",
             "command" : "python *.py input.txt",
-            "input_generator" : {
-                "command" : [
-                    "python generator.py 1> randominput.txt"
-                ]
-            },
             "points" : 3,
             "validation" : [
                 {
@@ -43,11 +33,9 @@
         {
             "title" : "Random Input #1",
             "command" : "python *.py randominput.txt",
-            "input_generator" : {
-                "command" : [
-                    "python generator.py 1> randominput.txt"
-                ]
-            },
+            "input_generation_commands": [
+                "python generator.py 1> randominput.txt"
+            ],
             "points" : 3,
             "validation" : [
                 {
@@ -62,11 +50,9 @@
         {
             "title" : "Random Input #2",
             "command" : "python *.py randominput.txt",
-            "input_generator" : {
-                "command" : [
-                    "python generator.py 1> randominput.txt"
-                ]
-            },
+            "input_generation_commands": [
+                "python generator.py 1> randominput.txt"
+            ],
             "points" : 3,
             "validation" : [
                 {
