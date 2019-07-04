@@ -109,6 +109,7 @@ jobs:
         - sudo rm -rf /etc/apache2/sites-enabled/*
         - sudo cp -f .setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
         - sudo sed -e "s?SUBMITTY_URL?*?g" --in-place /etc/apache2/sites-available/submitty.conf
+        - sudo sed -e "s?Require ip *??g" --in-place /etc/apache2/sites-available/submitty.conf
         - sudo a2ensite submitty
         - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
         # TODO: Figure out why these chmod's are necessary and fix whatever has
@@ -118,6 +119,7 @@ jobs:
         - sudo chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
         - sudo chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+        - sudo apache2ctl -t
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
