@@ -119,6 +119,7 @@ jobs:
         - sudo chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
         - sudo chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+        - cat /etc/apache2/sites-available/submitty.conf
         - sudo apache2ctl -t
         - sudo service apache2 restart
       script:
