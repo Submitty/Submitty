@@ -279,8 +279,7 @@ std::vector<std::string> TestCase::getCommands() const {
 // ACCESSORS
 
 std::vector <std::string> TestCase::getInputGeneratorCommands() const {
-    nlohmann::json Input_generator = _json.value("input_generator", nlohmann::json());
-    std::vector <std::string> commands = stringOrArrayOfStrings(Input_generator, "command");
+    std::vector <std::string> commands = stringOrArrayOfStrings(_json, "input_generation_commands");
     return commands;
 }
 
