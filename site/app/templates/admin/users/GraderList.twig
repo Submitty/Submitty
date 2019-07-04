@@ -56,20 +56,21 @@
 {% include('admin/users/GraderListForm.twig') %}
 {% include('admin/users/RegistrationSectionsForm.twig') %}
 
-<script type="text/javascript">
+<script>
 
     function fixCheckBoxes(grader_id,all_box) {
+
         if(all_box) {
             //update all check boxes for that user with the "all" box state
             var value = $('#' + grader_id + '_all').is(':checked');
-            {% for rs in 1..reg_sections|length %}
-                $('#' + grader_id + '_' + {{rs}}).prop('checked', value);
+            {% for section in reg_sections %}
+                $('#' + grader_id + '_' + '{{section['sections_registration_id']}}').prop('checked', value);
             {% endfor %}
         }
         else { // if all boxes are checked, then check the 'all' box
-            var all_checked = true
-            {% for rs in 1..reg_sections|length %}
-                && $('#' + grader_id + '_' + {{rs}}).is(':checked')
+			var all_checked = true
+            {% for section in reg_sections %}
+                && $('#' + grader_id + '_' + '{{section['sections_registration_id']}}').is(':checked')
             {% endfor %}
             ;
             $('#' + grader_id + '_all').prop('checked', all_checked);
