@@ -53,6 +53,7 @@ use app\libraries\Utils;
  * @method string getRoomSeatingGradeableId()
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method string getSecretSession()
  */
 
 class Config extends AbstractModel {
@@ -185,6 +186,8 @@ class Config extends AbstractModel {
     protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
+    /** @property @var string */
+    protected $secret_session;
 
     /**
      * Config constructor.
@@ -297,6 +300,24 @@ class Config extends AbstractModel {
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
+
+        $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
+        if (!$secrets_json) {
+            throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
+        }
+
+        foreach(['session'] as $key) {
+            $var = "secret_{$key}";
+            $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
+            if (empty($secrets_json[$key])) {
+                throw new ConfigException("Missing secret var: {$key}");
+            }
+            else if (strlen($secrets_json[$key]) < 32) {
+                // enforce a minimum 32 bytes for the secrets
+                throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
+            }
+            $this->$var = $secrets_json[$key];
+        }
     }
 
     public function loadCourseJson($course_json_path) {
@@ -336,8 +357,6 @@ class Config extends AbstractModel {
             }
         }
 
-        $this->upload_message = Utils::prepareHtmlString($this->upload_message);
-
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
         }
@@ -373,11 +392,6 @@ class Config extends AbstractModel {
             }
             $this->$key = $config[$section][$key];
         }
-    }
-
-    public function getHomepageUrl()
-    {
-        return $this->base_url."index.php?";
     }
 
     /**

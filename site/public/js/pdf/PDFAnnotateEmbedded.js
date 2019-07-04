@@ -1,4 +1,7 @@
-const { UI } = PDFAnnotate;
+if (PDFAnnotate.default) {
+  PDFAnnotate = PDFAnnotate.default;
+}
+
 
 let currentTool;
 
@@ -18,7 +21,7 @@ window.GENERAL_INFORMATION = {
     file_name: "",
 }
 
-PDFJS.workerSrc = 'js/pdf/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
 let NUM_PAGES = 0;
 
@@ -49,8 +52,8 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
             user_id: user_id,
             filename: file_name
         },
-        success: (data)=>{
-            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(GENERAL_INFORMATION.grader_id));
+        success: (data) => {
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(GENERAL_INFORMATION.grader_id));
             // documentId = file_name;
 
             let pdfData;
@@ -60,7 +63,11 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
             } catch (err){
                 alert("Something went wrong, please try again later.");
             }
-            PDFJS.getDocument({data:pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({
+                data: pdfData,
+                cMapUrl: '../../vendor/pdfjs/cmaps/',
+                cMapPacked: true
+            }).then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
                 $(viewer).on('touchstart touchmove', function(e){
@@ -71,18 +78,24 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                 });
                 $("a[value='zoomcustom']").text(parseInt(window.RENDER_OPTIONS.scale * 100) + "%");
                 viewer.innerHTML = '';
-                NUM_PAGES = pdf.pdfInfo.numPages;
+                NUM_PAGES = pdf.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
-                    let page = UI.createPage(i+1);
+                    let page = PDFAnnotate.UI.createPage(i+1);
                     viewer.appendChild(page);
                     let page_id = i+1;
-                    UI.renderPage(page_id, window.RENDER_OPTIONS).then(([pdfPage, annotations]) => {
-                        let viewport = pdfPage.getViewport(window.RENDER_OPTIONS.scale, window.RENDER_OPTIONS.rotate);
-                        PAGE_HEIGHT = viewport.height;
-                        if(i == page_num) {
-                            $('#file_content').animate({scrollTop: page_num * PAGE_HEIGHT}, 500);
+                    PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(function(){
+                        if (i == page_num) {
+                            // scroll to page on load
+                            let zoom = parseInt(localStorage.getItem('scale')) || 1;
+                            let page1 = $(".page").filter(":first");
+                            //get css attr, remove 'px' : 
+                            let page_height = parseInt(page1.css("height").slice(0, -2));
+                            let page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
+                            let page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
+                            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
+                            let scrollY = zoom*(page_num)*(page_height+page_margin_bot)+page_margin_top;
+                            $('#file_content').animate({scrollTop: scrollY}, 500);
                         }
-                    }).then(function(){
                         document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
                             //Makes sure the panel don't move when writing on it.
                             $("#submission_browser").draggable('disable');
@@ -102,12 +115,12 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     });
 }
 
-
-//TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
-$(window).unload(function() {
-    for(let i = 0; i < localStorage.length; i++){
-        if(localStorage.key(i).includes('annotations')){
-            localStorage.removeItem(localStorage.key(i));
-        }
+// TODO: Stretch goal, find a better solution to load/unload
+// annotation. Maybe use session storage?
+$(window).on('unload', () => {
+  for (let i = 0; i < localStorage.length; i++) {
+    if (localStorage.key(i).includes('annotations')) {
+      localStorage.removeItem(localStorage.key(i));
     }
+  }
 });

@@ -15,14 +15,9 @@ use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
+use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
-
-    public function unbuiltGradeable(Gradeable $gradeable) {
-        return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
-            'title' => $gradeable->getTitle()
-        ]);
-    }
 
     /**
      * @param Gradeable $gradeable
@@ -246,7 +241,8 @@ class HomeworkView extends AbstractView {
     private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
-        $textboxes = $gradeable->getAutogradingConfig()->getTextboxes();
+        $inputs = $gradeable->getAutogradingConfig()->getInputs();
+        $notebook = $gradeable->getAutogradingConfig()->getNotebook();
         $old_files = [];
         $display_version = 0;
 
@@ -265,11 +261,17 @@ class HomeworkView extends AbstractView {
             $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
         }
 
+        $github_user_id = '';
+        $github_repo_id = '';
+
         $image_data = [];
         if (!$gradeable->isVcs()) {
-            foreach ($textboxes as $textbox) {
-                foreach ($textbox->getImages() as $image) {
-                    $image_name = $image['name'];
+
+            // Prepare notebook image data for displaying
+            foreach ($notebook as $cell) {
+                if (isset($cell['type']) && $cell['type'] == "image")
+                {
+                    $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
                         'test_input',
@@ -279,12 +281,11 @@ class HomeworkView extends AbstractView {
                     $content_type = FileUtils::getContentType($imgPath);
                     if (substr($content_type, 0, 5) === 'image') {
                         // Read image path, convert to base64 encoding
-                        $textBoxImageData = base64_encode(file_get_contents($imgPath));
+                        $inputImageData = base64_encode(file_get_contents($imgPath));
                         // Format the image SRC:  data:{mime};base64,{data};
-                        $textBoximagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $textBoxImageData;
+                        $inputimagesrc = 'data: ' . mime_content_type($imgPath) . ';charset=utf-8;base64,' . $inputImageData;
                         // insert the sample image data
-
-                        $image_data[$image_name] = $textBoximagesrc;
+                        $image_data[$image_name] = $inputimagesrc;
                     }
                 }
             }
@@ -306,30 +307,70 @@ class HomeworkView extends AbstractView {
                 }
             }
         }
+        else {
+            // Get path to VCS_CHECKOUT
+            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable->getId());
+            $who_id = $this->core->getUser()->getId();
+            $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
+            $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
+            $version_path = FileUtils::joinPaths($user_path, $highest_version);
+            $path = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+
+            // Load repo and user id
+            if (file_exists($path)) {
+                $json = json_decode(file_get_contents($path), true);
+                if (!is_null($json)) {
+                    if (isset($json["git_user_id"]))
+                        $github_user_id = $json["git_user_id"];
+                    if (isset($json["git_repo_id"]))
+                        $github_repo_id = $json["git_repo_id"];
+                }
+            }
+        }
 
         $component_names = array_map(function(Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $textbox_data = array_map(function(SubmissionTextBox $text_box) {
-            return $text_box->toArray();
-        }, $textboxes);
+        $input_data = array_map(function(AbstractGradeableInput $inp) {
+            return $inp->toArray();
+        }, $inputs);
 
         $highest_version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0;
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
         $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
+        $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
+        $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
-        $DATE_FORMAT = "m/d/Y @ H:i";
+        // Import custom stylesheet to style notebook items
+        $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
+
+        // Import custom js for notebook items
+        $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
+
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
+        $DATE_FORMAT = "m/d/Y @ h:i A";
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
+            'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
             'gradeable_name' => $gradeable->getTitle(),
             'formatted_due_date' => $gradeable->getSubmissionDueDate()->format($DATE_FORMAT),
             'part_names' => $gradeable->getAutogradingConfig()->getPartNames(),
             'is_vcs' => $gradeable->isVcs(),
             'vcs_subdirectory' => $gradeable->getVcsSubdirectory(),
+            'vcs_host_type' => $gradeable->getVcsHostType(),
+            'github_user_id' => $github_user_id,
+            'github_repo_id' => $github_repo_id,
             'has_due_date' => $gradeable->hasDueDate(),
             'repository_path' => $my_repository,
             'show_no_late_submission_warning' => !$gradeable->isLateSubmissionAllowed() && $gradeable->isSubmissionClosed(),
@@ -340,7 +381,7 @@ class HomeworkView extends AbstractView {
                && $gradeable->getAutogradingConfig()->getGradeableMessage() !== '',
             'gradeable_message' => $gradeable->getAutogradingConfig()->getGradeableMessage(),
             'allowed_late_days' => $gradeable->getLateDays(),
-            'num_text_boxes' => $gradeable->getAutogradingConfig()->getNumTextBoxes(),
+            'num_inputs' => $gradeable->getAutogradingConfig()->getNumInputs(),
             'max_submissions' => $gradeable->getAutogradingConfig()->getMaxSubmissions(),
             'display_version' => $display_version,
             'highest_version' => $highest_version,
@@ -348,10 +389,13 @@ class HomeworkView extends AbstractView {
             'students_full' => $students_full,
             'late_days_use' => $late_days_use,
             'old_files' => $old_files,
-            'textboxes' => $textbox_data,
+            'inputs' => $input_data,
+            'notebook' => $notebook_data,
+            'testcase_messages' => $testcase_messages,
             'image_data' => $image_data,
             'component_names' => $component_names,
-            'upload_message' => $this->core->getConfig()->getUploadMessage()
+            'upload_message' => $this->core->getConfig()->getUploadMessage(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -366,14 +410,12 @@ class HomeworkView extends AbstractView {
         $cover_images = [];
         $count = 1;
         $count_array = array();
-        $use_qr_codes = false;
-        $qr_file = [];
+        $bulk_upload_data = [];
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
                 if($filename === 'decoded.json'){
-                    $qr_file +=  FileUtils::readJsonFile($details['path']);
-                    $use_qr_codes = true;
+                    $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
@@ -438,18 +480,33 @@ class HomeworkView extends AbstractView {
                 $count++;
             }
         }
-        if($use_qr_codes){
-            for ($i = 0; $i < count($files); $i++) {
-                if(!array_key_exists($files[$i]['filename_full'], $qr_file))
-                    continue;
-                $data = $qr_file[$files[$i]['filename_full']];
-                $is_valid = $this->core->getQueries()->getUserById($data['id']) !== null;
-                $files[$i] += ['page_count' => $data['page_count'],
-                               'id' => $data['id'],
-                               'valid' => $is_valid
-                              ];
+
+        for ($i = 0; $i < count($files); $i++) {
+            if($bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+                continue;
+            }else if($bulk_upload_data['is_qr']){
+                $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
+
+            $page_count = 0;
+            $is_valid = true;
+            $id = '';
+
+            if($bulk_upload_data['is_qr']){
+                $id = $data['id'];
+                $is_valid = $this->core->getQueries()->getUserById($id);
+                $page_count = $data['page_count'];
+            }else{
+                $is_valid = true;
+                $id = '';
+                $page_count = $bulk_upload_data['page_count'];
+            }
+
+            $files[$i] += ['page_count' => $page_count, 
+                           'id' => $id, 
+                           'valid' => $is_valid ];
         }
+
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
@@ -461,7 +518,7 @@ class HomeworkView extends AbstractView {
             'max_team_size' => $gradeable->getTeamSizeMax(),
             'count_array' => $count_array,
             'files' => $files,
-            'use_qr_codes' => $use_qr_codes
+            'csrf_token' => $this->core->getCsrfToken()
         ]);
     }
 
@@ -594,6 +651,7 @@ class HomeworkView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'gradeable_version' => $display_version
         ]);
+        // $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
@@ -619,7 +677,8 @@ class HomeworkView extends AbstractView {
             'can_see_all_versions' => $this->core->getUser()->accessGrading() || $gradeable->isStudentSubmit(),
             'show_testcases' => $show_testcases,
             'active_same_as_graded' => $active_same_as_graded,
-            'show_incentive_message' => $show_incentive_message
+            'show_incentive_message' => $show_incentive_message,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
 
         $this->core->getOutput()->addInternalJs('confetti.js');
@@ -636,7 +695,7 @@ class HomeworkView extends AbstractView {
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
-            $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResultsNew',
+            $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults',
                 $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles());
         }
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
@@ -718,7 +777,6 @@ class HomeworkView extends AbstractView {
         }
 
         $posts = [];
-
         if ($graded_gradeable->hasRegradeRequest()) {
             $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest());
             foreach ($threads as $thread) {
@@ -736,11 +794,13 @@ class HomeworkView extends AbstractView {
 
             }
         }
+
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
             'btn_type' => $btn_type,
             'url' => $url,
             'action' => $action,
             'posts' => $posts,
+            'has_submission' => $graded_gradeable->hasSubmission(),
             'gradeable_id' => $graded_gradeable->getGradeableId(),
             'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),

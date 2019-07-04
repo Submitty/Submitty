@@ -10,6 +10,8 @@ use app\exceptions\ValidationException;
  *
  * @method string getId()
  * @method void setId(string $id) Get the id of the loaded user
+ * @method void getNumericId()
+ * @method void setNumericId(string $id)
  * @method void setAnonId(string $anon_id)
  * @method string getPassword()
  * @method string getLegalFirstName() Get the first name of the loaded user
@@ -55,6 +57,8 @@ class User extends AbstractModel {
 
     /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
+    /** @property @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    protected $numeric_id = null;
     /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
     protected $anon_id;
     /**
@@ -133,6 +137,10 @@ class User extends AbstractModel {
             $this->setPassword($details['user_password']);
         }
 
+        if (isset($details['user_numeric_id'])) {
+            $this->setNumericId($details['user_numeric_id']);
+        }
+
         if (!empty($details['anon_id'])) {
             $this->anon_id = $details['anon_id'];
         }
@@ -162,6 +170,11 @@ class User extends AbstractModel {
         $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
         $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
         $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
+        $this->notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
+        $this->notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
+        $this->notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
+        $this->notification_settings['all_new_posts_email'] = !empty($details['all_new_posts_email']) ? $details['all_new_posts_email'] : false;
+        $this->notification_settings['all_modifications_forum_email'] = !empty($details['all_modifications_forum_email']) ? $details['all_modifications_forum_email'] : false;
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -312,8 +325,11 @@ class User extends AbstractModel {
    		    //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
    		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
 		case 'user_email':
-			//Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-			return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+                    // emails are allowed to be the empty string...
+                    if ($data === "") return true;
+                    // -- or ---
+                    // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+                    return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
 		case 'user_group':
             //user_group check is a digit between 1 - 4.
 			return preg_match("~^[1-4]{1}$~", $data) === 1;

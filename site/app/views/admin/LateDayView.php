@@ -12,7 +12,8 @@ class LateDayView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("admin/LateDays.twig", [
             "users" => $users,
-            "student_full" => $student_full
+            "student_full" => $student_full,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

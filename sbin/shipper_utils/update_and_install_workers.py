@@ -33,13 +33,13 @@ def install_worker(user, host):
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user)
+            ssh.connect(hostname = host, username = user, timeout=5)
         except Exception as e:
             print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
             return False
         try:
             command = "sudo {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "INSTALL_SUBMITTY.sh"))
-            (stdin, stdout, stderr) = ssh.exec_command(command)
+            (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
             status = int(stdout.channel.recv_exit_status())
             if status == 0:
                 success = True
@@ -77,8 +77,13 @@ if __name__ == "__main__":
   for worker, stats in autograding_workers.items():
       user = stats['username']
       host = stats['address']
+      enabled = stats['enabled']
 
       if worker == 'primary' or host == 'localhost':
+          continue
+
+      if enabled == False:
+          print("Skipping rsync to {0} because it is disabled.".format(worker))
           continue
 
       exit_code = run_systemctl_command(worker, 'status')

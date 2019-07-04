@@ -110,6 +110,7 @@ def unzip_queue_file(zipfilename):
     os.rmdir(tmp_dir)
     return queue_obj
 
+
 # ==================================================================================
 # ==================================================================================
 def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade):
@@ -143,6 +144,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # --------------------------------------------------------
     # various paths
     provided_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"provided_code",obj["gradeable"])
+    instructor_solution_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"instructor_solution",obj["gradeable"])
     test_input_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_input",obj["gradeable"])
     test_output_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"test_output",obj["gradeable"])
     custom_validation_code_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"custom_validation_code",obj["gradeable"])
@@ -166,6 +168,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     os.mkdir(tmp_submission)
 
     copytree_if_exists(provided_code_path,os.path.join(tmp_autograding,"provided_code"))
+    copytree_if_exists(instructor_solution_path,os.path.join(tmp_autograding,"instructor_solution"))
     copytree_if_exists(test_input_path,os.path.join(tmp_autograding,"test_input"))
     copytree_if_exists(test_output_path,os.path.join(tmp_autograding,"test_output"))
     copytree_if_exists(custom_validation_code_path,os.path.join(tmp_autograding,"custom_validation_code"))
@@ -198,48 +201,17 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # 'touch' a file in the logs folder
     open(os.path.join(tmp_logs,"overall.txt"), 'a')
 
-    # grab the submission time
-    with open (os.path.join(submission_path,".submit.timestamp")) as submission_time_file:
-        submission_string = submission_time_file.read().rstrip()
-    submission_datetime = dateutils.read_submitty_date(submission_string)
-
     # --------------------------------------------------------------------
-    # CHECKOUT THE STUDENT's REPO
+    # CONFIRM WE HAVE A CHECKOUT OF THE STUDENT'S REPO
     if is_vcs:
-        # is vcs_subdirectory standalone or should it be combined with base_url?
-        if vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            vcs_path = vcs_subdirectory
+        # there should be a checkout log file in the results directory
+        # move that file to the tmp logs directory..
+        vcs_checkout_logfile = os.path.join(results_path,"logs","vcs_checkout.txt")
+        if os.path.isfile(vcs_checkout_logfile):
+            shutil.move(vcs_checkout_logfile,tmp_logs)
         else:
-            if '://' in vcs_base_url:
-                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
-            else:
-                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+            grade_items_logging.log_message(JOB_ID, message=str(my_name)+" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
 
-        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as f:
-            print("====================================\nVCS CHECKOUT", file=f)
-            print('vcs_base_url', vcs_base_url, file=f)
-            print('vcs_subdirectory', vcs_subdirectory, file=f)
-            print('vcs_path', vcs_path, file=f)
-            print(['/usr/bin/git', 'clone', vcs_path, checkout_path], file=f)
-
-        # cleanup the previous checkout (if it exists)
-        shutil.rmtree(checkout_path,ignore_errors=True)
-        os.makedirs(checkout_path, exist_ok=True)
-        subprocess.check_call(['/usr/bin/git', 'clone', vcs_path, checkout_path])
-        os.chdir(checkout_path)
-
-        # determine which version we need to checkout
-        what_version = subprocess.check_output(['git', 'rev-list', '-n', '1', '--before="'+submission_string+'"', 'master'])
-        what_version = str(what_version.decode('utf-8')).rstrip()
-        if what_version == "":
-            # oops, pressed the grade button before a valid commit
-            shutil.rmtree(checkout_path, ignore_errors=True)
-        else:
-            # and check out the right version
-            subprocess.call(['git', 'checkout', '-b', 'grade', what_version])
-        os.chdir(tmp)
-        subprocess.call(['ls', '-lR', checkout_path], stdout=open(tmp_logs + "/overall.txt", 'a'))
-        obj['revision'] = what_version
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
     copytree_if_exists(checkout_path,os.path.join(tmp_submission,"checkout"))

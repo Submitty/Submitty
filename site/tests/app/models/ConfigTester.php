@@ -15,11 +15,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $config_path = null;
     private $course_json_path = null;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->core = $this->createMock(Core::class);
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         if ($this->temp_dir !== null && is_dir($this->temp_dir)) {
             FileUtils::recursiveRmdir($this->temp_dir);
         }
@@ -81,6 +81,12 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "submitty.json"), $config);
 
+        $config = [
+            'session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
+        ];
+        $config = array_replace($config, $extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "secrets_submitty_php.json"), $config);
+
         $this->course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
         $config = array(
             'database_details' => array(
@@ -134,7 +140,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
         $this->assertEquals("http://example.com/index.php?", $config->getSiteUrl());
-        $this->assertEquals("http://example.com/index.php?", $config->getHomepageUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
         $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
         $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
@@ -174,6 +179,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $config->getCourseJsonPath());
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
+        $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
 
         $expected = array(
             'debug' => false,
@@ -245,7 +251,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'username_change_text' => 'Submitty welcomes all students.',
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
-            'system_message' => 'Some system message'
+            'system_message' => 'Some system message',
+            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
         );
         $actual = $config->toArray();
 
@@ -321,64 +328,52 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertTrue($config->displayRoomSeating());
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessage Could not find config directory: /invalid/path
-     */
     public function testInvalidMasterConfigPath() {
         $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessage('Could not find config directory: /invalid/path');
         $config->loadMasterConfigs('/invalid/path');
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessageRegExp /Could not find config directory: .*\/config\/database.json/
-     */
     public function testConfigPathFile() {
         $this->createConfigFile();
         $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessageRegExp('/Could not find config directory: .*\/config\/database.json/');
         $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessageRegExp /Could not find database config: .*\/config\/database.json/
-     */
     public function testMissingDatabaseJson() {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
         $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessageRegExp('/Could not find database config: .*\/config\/database.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessageRegExp /Could not find submitty config: .*\/config\/submitty.json/
-     */
     public function testMissingSubmittyJson() {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
         $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessageRegExp('/Could not find submitty config: .*\/config\/submitty.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessage Could not find course config file: /invalid/path
-     */
     public function testInvalidCourseConfigPath() {
         $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessage('Could not find course config file: /invalid/path');
         $config->loadCourseJson("/invalid/path");
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessageRegExp /Error parsing the config file: Syntax error/
-     */
     public function testInvalidCourseConfigJson() {
         $this->createConfigFile();
         $config = new Config($this->core, "s17", "csci1000");
         file_put_contents(FileUtils::joinPaths($this->temp_dir, "test.txt"), "afds{}fasdf");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessage('Error parsing the config file: Syntax error');
         $config->loadCourseJson(FileUtils::joinPaths($this->temp_dir, "test.txt"));
     }
 
@@ -450,39 +445,61 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessage Invalid Timezone identifier: invalid
-     */
     public function testInvalidTimezone() {
         $extra = ['timezone' => "invalid"];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "csci0000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessage('Invalid Timezone identifier: invalid');
         $config->loadMasterConfigs($this->config_path);
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessage Invalid path for setting submitty_path: /invalid
-     */
     public function testInvalidSubmittyPath() {
         $extra = ['submitty_data_dir' => '/invalid'];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "csci0000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessage('Invalid path for setting submitty_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
     }
 
-    /**
-     * @expectedException \app\exceptions\ConfigException
-     * @expectedExceptionMessage Invalid path for setting submitty_log_path: /invalid
-     */
     public function testInvalidLogPath() {
         $extra = ['site_log_path' => '/invalid'];
         $this->createConfigFile($extra);
 
         $config = new Config($this->core, "s17", "csci0000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessage('Invalid path for setting submitty_log_path: /invalid');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testMissingSecretsFile() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'secrets_submitty_php.json'));
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessageRegExp('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
+        $config = new Config($this->core, 's17', 'csci0000');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testNullSecret() {
+        $extra = ['session' => null];
+        $this->createConfigFile($extra);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage("Missing secret var: session");
+        $config = new Config($this->core, 's17', 'csci0000');
+        $config->loadMasterConfigs($this->config_path);
+    }
+
+    public function testWeakSecret() {
+        $extra = ['session' => 'weak'];
+        $this->createConfigFile($extra);
+        $this->expectException(ConfigException::class);
+        $this->expectExceptionMessage('Secret session is too weak. It should be at least 32 bytes.');
+
+        $config = new Config($this->core, 's17', 'csci0000');
         $config->loadMasterConfigs($this->config_path);
     }
 }

@@ -2,7 +2,7 @@
 <div class="content">
     <h1>Late Days Allowed</h1>
     <form id="lateDayForm" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <p> Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
             Students may use these additional late days for any future homeworks (after the specificed date).<br><br><br>
         </p>
@@ -21,15 +21,16 @@
     </form>
     <div id="load-late-days" align="center">
         <div class="option-title" id="late_day_title">Late Days Allowed</div>
+        {# This is a data table #}
         <table id="late_day_table" class="table table-striped table-bordered persist-area" style="width:80%">
 			<caption />
             <thead class="persist-thead">
-            <th>Student ID</th>
-            <th>First Name</th>
-            <th>Last Name</th>
-            <th>Total Allowed Late Days</th>
-            <th>Effective Date</th>
-            <th>Delete</th>
+                <th>Student ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Total Allowed Late Days</th>
+                <th>Effective Date</th>
+                <th>Delete</th>
             </thead>
             <tbody>
             {% if not users or (users|length < 1) %}

@@ -3,29 +3,29 @@
         $("[name='rotating_type']").change(function() {
             if ($(this).val() == "alphabetically") {
                 $("[name='fewest']").prop('checked', false).attr('onclick', 'return false').addClass("disabled");
-
+				
             }
             else {
                 $("[name='fewest']").attr('onclick', '').removeClass('disabled');
             }
         });
-
+		
         $("[name='sort_type']").change(function() {
             var val = $(this).val();
-            if (val == "fewest") {
-                $("[name='sections']").val({{ max_section }}).addClass('disabled').attr('readonly', 'readonly');
-                $("[name='rotating_type']").val("random").addClass('disabled').attr('disabled', 'true');
-            }
-            else if (val == "drop_null" || val == "drop_all") {
-                $("[name='sections']").addClass('disabled').attr('readonly', 'readonly');
-                $("[name='rotating_type']").addClass('disabled').attr('disabled', 'true');
-            }
+			if (val != "redo") {
+				$('#redo_data').hide();
+			}	
             else {
-                $("[name='sections']").removeClass('disabled').removeAttr('readonly');
-                $("[name='rotating_type']").removeClass('disabled').removeAttr('disabled');
+				$('#redo_data').show();
             }
         });
     });
+
+	
+    $(document).ready(function() {
+       $('#redo_data').hide();
+    });
+	
 </script>
 <div class="content">
     <h1>Manage Registration Sections</h1>
@@ -41,35 +41,45 @@
     </p>
     <br />
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_registration_sections'}) }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
             <div class="box col-md-6">
                 <h2>Current Registration Section Counts</h2>
+                {# This is a data table #}
                 <table class="table table-bordered table-striped">
-                    {% for section in reg_sections %}
-                        {% if reg_sections_count[section['sections_registration_id']] %}
+                    <caption />
+                    <thead>
                         <tr>
-                            <td>Section {{ section['sections_registration_id'] }}</td>
-                            <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                            <th>Section</th>
+                            <th>Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for section in reg_sections %}
+                            {% if reg_sections_count[section['sections_registration_id']] %}
+                            <tr>
+                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>{{ reg_sections_count[section['sections_registration_id']] }}</td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td>Section {{ section['sections_registration_id'] }}</td>
+                                <td>0</td>
+                            </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% if reg_sections_count['NULL'] %}
+                        <tr>
+                            <td>Section NULL</td>
+                            <td>{{ reg_sections_count['NULL'] }}</td>
                         </tr>
                         {% else %}
                         <tr>
-                            <td>Section {{ section['sections_registration_id'] }}</td>
+                            <td>Section NULL</td>
                             <td>0</td>
                         </tr>
                         {% endif %}
-                    {% endfor %}
-                    {% if reg_sections_count['NULL'] %}
-                    <tr>
-                        <td>Section NULL</td>
-                        <td>{{ reg_sections_count['NULL'] }}</td>
-                    </tr>
-                    {% else %}
-                    <tr>
-                        <td>Section NULL</td>
-                        <td>0</td>
-                    </tr>
-                    {% endif %}
+                    </tbody>
                 </table>
             </div>
             <div class="box col-md-6">
@@ -114,60 +124,54 @@
         The rotating assignments for each gradeable are made via the "Create/Edit Gradeable" page for the specific gradeable.<br>
     </p>
     <br />
+
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_rotating_sections'}) }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
-            <div class="box col-md-6">
+            <div class="box col-md-6" id="left_box">
                 <h2>Current Rotating Section Counts</h2>
                 <div class="row">
                     <div class="col-md-6">
-                        <h3>Registered Students<br>(non NULL registration section)</h3>
-                        <table class="table table-bordered table-striped">
-                            {% for row in not_null_counts %}
-                            <tr>
-                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                                <td>{{ row['count'] }}</td>
-                            </tr>
-                            {% endfor %}
+                        {# This is a data table #}
+                        <table class="table table-striped">
+                            <caption class="caption_h3" style="text-align: center"> Registered Students<br><div style="font-size:medium">(non-NULL registration section)</div></caption>
+                            <thead class="table-bordered">
+                                <th>Rotating Section</th>
+                                <th>Students</th>
+                            </thead>
+                            <tbody class="table-bordered">
+                                {% for row in not_null_counts %}
+                                <tr>
+                                    <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                    <td>{{ row['count'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                     <div class="col-md-6">
-                        <h3>Users with<br>Registration Section=NULL</h3>
-                        <table class="table table-bordered table-striped">
-                            {% for row in null_counts %}
-                            <tr>
-                                <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
-                                <td>{{ row['count'] }}</td>
-                            </tr>
-                            {% endfor %}
+                        {# This is a data table #}
+                        <table class="table table-striped">
+                            <caption class="caption_h3" style="text-align: center"> Unregistered Students<br><div style="font-size:medium">(NULL registration section)</div></caption>
+                             <thead class="table-bordered">
+                                <th>Rotating Section</th>
+                                <th>Students</th>
+                            </thead>
+                            <tbody class="table-bordered">
+                                {% for row in null_counts %}
+                                <tr class="table-bordered">
+                                    <td>Section {{ row['rotating_section'] ?? "NULL" }}</td>
+                                    <td>{{ row['count'] }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
                         </table>
                     </div>
                 </div>
             </div>
-            <div class="box col-md-6">
+            <div class="box col-md-6" id="right_box">
    				<fieldset>
-					<legend>
-						<label>Place students in <input type="text" name="sections" placeholder="#" style="width: 25px" /></label> <label>rotating sections
-						<select name="rotating_type">
-							<option value="random">randomly</option>
-							<option value="alphabetically">alphabetically</option>
-						</select>
-                        </label>
-                            <label>excluding students in registration </label>
-
-                        <table style="width:100%">
-                            {% for row in reg_sections %}
-                            <tr><th>
-                                <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
-                                </th></tr>
-                            {% endfor %}
-                        </table>
-
-
-
-
-                        <br /><br />
-					</legend>
+					
 					<label>
 						<input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students (registration section=NULL) from rotating sections
 					</label><br /><br />
@@ -180,8 +184,42 @@
 					<label>
 						<input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
 					</label><br />
-                </fieldset>
-                <input style="margin-top: 20px; margin-right: 20px; float:right" type="submit" class="btn btn-primary" value="Submit" />
+					
+				</fieldset>
+				<fieldset>
+					
+					<legend>
+					<br />
+					<div id="redo_data">
+						<div style="font-size:small">
+						<label>Place students in <input type="text" name="sections" placeholder="#" style="width: 30px" /></label> 
+						<label>rotating sections
+							<select name="rotating_type">
+								<option value="random">randomly</option>
+								<option value="alphabetically">alphabetically</option>
+							</select>
+                        </label>
+                        <label>excluding students in registration: </label>
+						</div>
+                        {# This is a layout table #}
+                        <table style="margin-left: auto; margin-right: auto">
+                            {% for row in reg_sections %}
+                            <tr>
+                                <td style="text-align: left; font-weight: bold">
+                                    <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br /><br />
+					</div>
+					</legend>
+					
+					<input style="margin-top: 20px; margin-right: 4.5px; float:right" type="submit" class="btn btn-primary" value="Submit" />
+					
+				</fieldset>
+				
             </div>
         </div>
     </form>
