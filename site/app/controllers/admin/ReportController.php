@@ -304,7 +304,7 @@ class ReportController extends AbstractController {
 
         foreach ($ggs as $gg) {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
-            $user_data[$bucket][] = $this->generateGradeSummary($gg, $late_days);
+            $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
@@ -315,7 +315,7 @@ class ReportController extends AbstractController {
      * @param LateDays $ld
      * @return array
      */
-    public function generateGradeSummary(GradedGradeable $gg, LateDays $ld) {
+    public function generateGradeSummary(GradedGradeable $gg,User $user, LateDays $ld) {
         $g = $gg->getGradeable();
 
         $entry = [
@@ -329,6 +329,14 @@ class ReportController extends AbstractController {
         if ($g->isTeamAssignment()) {
             $entry['team_members'] = $gg->getSubmitter()->isTeam() ? $gg->getSubmitter()->getTeam()->getMemberUserIds()
                 : $gg->getSubmitter()->getId(); // If the user isn't on a team, the only member is themselves
+        }
+
+        $userWithOverridenGrades = $this->core->getQueries()->getAUserWithOverridenGrades($g->getId(),$user->getId());
+        if ($userWithOverridenGrades !== null) {
+            $entry['status'] = 'Overridden';
+            $entry['score'] = $userWithOverridenGrades->getMarks();
+            $entry['comment'] = $userWithOverridenGrades->getComment();
+            return $entry;
         }
 
         $entry['score'] = $gg->getTotalScore();

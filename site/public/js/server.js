@@ -1552,24 +1552,10 @@ function updateGradeOverride(data) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['data']['is_team']){
-                extensionPopup(json);
-                return;
-            }
-            var form = $("#load-overriden-grades");
-            $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
-            $('#title').replaceWith(title);
-            if(json['data']['users'].length === 0){
-                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
-            }
-            json['data']['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'] + '</td></tr>'];
-                $('#my_table').append(bits.join('</td><td>'));
-            });
+            refreshOnResponseOverridenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
-            $('#comments').val(this.defaultValue);
+            $('#comment').val(this.defaultValue);
             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overriden Grades for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
@@ -1610,18 +1596,19 @@ function loadOverridenGrades(g_id) {
     $.ajax({
         url: url,
         success: function(data) {
-            var json = JSON.parse(data);
-            var form = $("#load-overriden-grades");
-            $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
-            $('#title').replaceWith(title);
-            if(json['data']['users'].length === 0){
-                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
             }
-            json['data']['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'] + '</td></tr>'];
-                $('#my_table').append(bits.join('</td><td>'));
-            });
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverridenGrades(json);
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1638,6 +1625,21 @@ function refreshOnResponseLateDays(json) {
         elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
+    });
+}
+
+function refreshOnResponseOverridenGrades(json) {
+    var form = $("#load-overriden-grades");
+    $('#my_table tr:gt(0)').remove();
+    var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+    $('#title').replaceWith(title);
+    if(json['data']['users'].length === 0){
+        $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+    }
+    json['data']['users'].forEach(function(elem){
+        var delete_button = "<a onclick=\"deleteOverridenGrades('"+elem['user_id']+"', '"+json['data']['gradeable_id']+"');\"><i class='fas fa-trash'></i></a>"
+        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+        $('#my_table').append(bits.join('</td><td>'));
     });
 }
 
@@ -1709,6 +1711,38 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+
+function deleteOverridenGrades(user_id, g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'delete_grades'});
+    var confirm = window.confirm("Are you sure you would like to delete this entry?");
+    if (confirm) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                user_id: user_id,
+                g_id: g_id
+            },
+            success: function(data) {
+                var json = JSON.parse(data);
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overriden Grades deleted .</div>';
+                $('#messages').append(message);
+                refreshOnResponseOverridenGrades(json);
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
+    return false;
+}
+
 function toggleRegradeRequests(){
     var element = document.getElementById("regradeBoxSection");
     if (element.style.display === 'block') {

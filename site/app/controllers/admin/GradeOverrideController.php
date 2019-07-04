@@ -14,7 +14,10 @@ class GradeOverrideController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb('Grades Override');
                 break;
             case 'update':
-                $this->update();
+                $this->update(false);
+                break;
+            case 'delete_grades':
+                $this->update(true);
                 break;
             case 'get_overriden_grades':
                 $this->getOverridenGrades($_REQUEST['g_id']);
@@ -41,7 +44,11 @@ class GradeOverrideController extends AbstractController {
         )); 
     }
 
-    public function update() {
+    public function update($delete) {
+        if($delete){
+            $this->core->getQueries()->deleteOverridenGrades($_POST['user_id'], $_POST['g_id']);
+            $this->getOverridenGrades($_POST['g_id']);
+        } else {
         if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $error = "Invalid CSRF token. Try again.";
             return $this->core->getOutput()->renderJsonFail($error);
@@ -57,13 +64,14 @@ class GradeOverrideController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail($error);
         }
         
-        if (((!isset($_POST['marks'])) || $_POST['marks'] == "" ) && is_int($_POST['marks'])) {
+        if (((!isset($_POST['marks'])) || $_POST['marks'] == ""  || is_int($_POST['marks'])) ) {
             $error = "Marks be a integer";
             return $this->core->getOutput()->renderJsonFail($error);
         }
         
         $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $_POST['g_id'], $_POST['marks'], $_POST['comment']);
         $this->getOverridenGrades($_POST['g_id']);
-
+        }
+    
     }
 }
