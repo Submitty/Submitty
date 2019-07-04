@@ -38,11 +38,9 @@
         },
         {
             "title" : "Random Input #1",
-            "input_generator" : {
-                "command" : [ 
+            "input_generation_commands" : [ 
                     "python3 generator.py 1> randominput.txt"
-                ]
-            },
+                ],
             "command" : "./a.out < randominput.txt",
             "points" : 3,
             "validation" : [
@@ -56,11 +54,9 @@
         },
         {
             "title" : "Random Input #2",
-            "input_generator" : {
-                "command" : [ 
+            "input_generation_commands" : [ 
                     "python3 generator.py 1> randominput.txt"
-                ]
-            },
+                ],
             "command" : "./a.out < randominput.txt",
             "points" : 3,
             "validation" : [
