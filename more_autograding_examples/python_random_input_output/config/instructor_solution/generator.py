@@ -4,4 +4,4 @@ def randomDigits(digits):
     upper = 10**digits - 1
     return random.randint(lower, upper)
 
-print (randomDigits(13))
+print ("{},{},{},{}".format(randomDigits(2),randomDigits(2),randomDigits(2),randomDigits(2)))
