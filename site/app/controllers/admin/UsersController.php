@@ -91,7 +91,7 @@ class UsersController extends AbstractController {
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
-            $key_array = explode("_",$key);
+            $key_array = explode("_",$key,2);
             if (!array_key_exists($key_array[0],$new_registration_information)) {
                 $new_registration_information[$key_array[0]] = array();
             }
