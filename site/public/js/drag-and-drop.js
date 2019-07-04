@@ -604,9 +604,9 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
                     reject(response);
                 }
             },
-            error: function(err) {
+            error: function(jqXHR, err_msg, exception) {
                 console.error("Failed while deleting split item");
-                reject({'status' : 'failed', 'message' : err});
+                reject({'status' : 'failed', 'message' : err_msg});
             }
         });
     });

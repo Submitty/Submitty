@@ -282,7 +282,7 @@
     }
 
     function submitAll(index){
-        if(index > Object.keys(path_list).length || index > num_submissions)
+        if(index > Object.keys(path_list).length)
             return;
 
         var text_area = document.getElementById("bulk_user_id_" + String(index));
@@ -318,7 +318,7 @@
                 var delete_btn = document.getElementById("bulk_delete_" + String(index));
                 var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
 
-                toggleButtons(index, true);
+                moveToNextSubmission(index);
                 uploadSplitHelper(user_id,path,index);
                 return submitAll(index + 1);
             }else{
@@ -335,13 +335,11 @@
     function confirmDeleteAll(){
         if(confirm("Are you sure you want to delete " + String(num_submissions) + " submissions?")){
             deleteAll(1);
-            //all done, refresh the page
-            window.location.reload();
         }
     }
 
     function deleteAll(index){
-        if(index > Object.keys(path_list).length || index > num_submissions){
+        if(index > Object.keys(path_list).length){
             return;
         }
 
@@ -354,15 +352,12 @@
         }else if(submit_btn.disabled === true){
             return deleteAll(index + 1);
         }
-
-        toggleButtons(index, true);
-
         var path = decodeURIComponent(path_list[index]);
 
         deleteSplitItem(CSRF,g_id,path)
         .then(function(submit_response){
             displaySubmissionMessage(submit_response);
-            num_submissions -= 1;
+            moveToNextSubmission(index);
             return deleteAll(index + 1);
         })
         .catch(function(submit_response){
