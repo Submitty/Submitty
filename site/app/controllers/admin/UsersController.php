@@ -69,6 +69,7 @@ class UsersController extends AbstractController {
 
     public function listGraders() {
         $graders_unsorted = $this->core->getQueries()->getAllGraders();
+        // graders are split into groups based on grading permissions
         $graders = array('1' => array(),
                          '2' => array(),
                          '3' => array());
