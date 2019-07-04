@@ -39,7 +39,7 @@
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'delete_course_material_file', 'dir': 'course_materials', 'file': dir, 'path': path }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <input id="share_checkbox_{{ id }}" type="checkbox"
                 {% if ( (fileShares[path] == "1") )%}
                    checked="true"
@@ -64,7 +64,7 @@
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ core.buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'delete_course_material_folder', 'dir': 'course_materials', 'file': dir, 'path': folderPath }) }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
             {% endif %}
         </div>
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
