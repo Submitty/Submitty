@@ -34,7 +34,7 @@ def main():
             ),
             headers={'Authorization': token}
         )
-    except:
+    except Exception:
         print("ERROR: Invalid arguments.", file=stderr)
         exit(-1)
 
