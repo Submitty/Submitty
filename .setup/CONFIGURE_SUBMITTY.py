@@ -11,6 +11,7 @@ import shutil
 import string
 import tzlocal
 import tempfile
+import readline
 
 
 def get_uid(user):
@@ -134,6 +135,8 @@ SETUP_REPOSITORY_DIR = os.path.join(SUBMITTY_REPOSITORY, '.setup')
 CONFIGURATION_FILE = os.path.join(SETUP_INSTALL_DIR, 'INSTALL_SUBMITTY.sh')
 CONFIGURATION_JSON = os.path.join(SETUP_INSTALL_DIR, 'submitty_conf.json')
 SITE_CONFIG_DIR = os.path.join(SUBMITTY_INSTALL_DIR, "site", "config")
+CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
+EMAIL_JSON = os.path.join(CONFIG_INSTALL_DIR, 'email.json')
 
 ##############################################################################
 
@@ -146,12 +149,22 @@ defaults = {'database_host': 'localhost',
             'institution_name' : '',
             'username_change_text' : 'Submitty welcomes individuals of all ages, backgrounds, citizenships, disabilities, sex, education, ethnicities, family statuses, genders, gender identities, geographical locations, languages, military experience, political views, races, religions, sexual orientations, socioeconomic statuses, and work experiences. In an effort to create an inclusive environment, you may specify a preferred name to be used instead of what was provided on the registration roster.',
             'institution_homepage' : '',
-            'timezone' : tzlocal.get_localzone().zone}
+            'timezone' : tzlocal.get_localzone().zone,
+            'email_user': '',
+            'email_password': '',
+            'email_sender': 'submitty@myuniversity.edu',
+            'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
+            'email_server_hostname': 'mail.myuniversity.edu',
+            'email_server_port': 25}
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
     with open(CONFIGURATION_JSON) as conf_file:
         loaded_defaults = json.load(conf_file)
+if os.path.isfile(EMAIL_JSON):
+    with open(EMAIL_JSON) as email_file:
+        loaded_defaults.update(json.load(email_file))
+
     #no need to authenticate on a worker machine (no website)
     if not args.worker:
         if 'authentication_method' in loaded_defaults:
@@ -238,6 +251,34 @@ else:
         AUTHENTICATION_METHOD = 'DatabaseAuthentication'
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
+
+    while True:
+        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
+        if (is_email_enabled.lower() in ['yes', 'y']) :
+            EMAIL_ENABLED = True
+            EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
+            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
+            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
+            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
+            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
+            try:
+                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
+            except ValueError:
+                EMAIL_SERVER_PORT = defaults['email_server_port']
+            break;
+            
+        elif (is_email_enabled.lower() in ['no', 'n']) :
+            EMAIL_ENABLED = False
+            EMAIL_USER = defaults['email_user']
+            EMAIL_PASSWORD = defaults['email_password']
+            EMAIL_SENDER = defaults['email_sender']
+            EMAIL_REPLY_TO = defaults['email_reply_to']
+            EMAIL_SERVER_HOSTNAME = defaults['email_server_hostname']
+            EMAIL_SERVER_PORT = defaults['email_server_port']
+            break
+    print()
+
+
 
 ##############################################################################
 # make the installation setup directory
@@ -337,8 +378,6 @@ os.chmod(CONFIGURATION_JSON, 0o500)
 
 ##############################################################################
 # Setup ${SUBMITTY_INSTALL_DIR}/config
-
-CONFIG_INSTALL_DIR = os.path.join(SUBMITTY_INSTALL_DIR, 'config')
 
 DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
@@ -469,6 +508,25 @@ if not args.worker:
         json.dump(config, json_file, indent=2)
     shutil.chown(SECRETS_PHP_JSON, 'root', PHP_GROUP)
     os.chmod(SECRETS_PHP_JSON, 0o440)
+
+##############################################################################
+# Write email json
+
+config = OrderedDict()
+config['email_enabled'] = EMAIL_ENABLED
+config['email_user'] = EMAIL_USER
+config['email_password'] = EMAIL_PASSWORD
+config['email_sender'] = EMAIL_SENDER
+config['email_reply_to'] = EMAIL_REPLY_TO
+config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
+config['email_server_port'] = EMAIL_SERVER_PORT
+
+with open(EMAIL_JSON, 'w') as json_file:
+    json.dump(config, json_file, indent=2)
+shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
+os.chmod(EMAIL_JSON, 0o440)
+
+
 
 
 ##############################################################################

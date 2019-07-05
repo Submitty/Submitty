@@ -2637,83 +2637,133 @@ AND gc_id IN (
             $this->getTeamIdFromAnonId($anon_id);
     }
 
+    // NOTIFICATION/EMAIL QUERIES
+
     /**
-     * Generate notification rows
+     * get all users' ids
      *
-     * @param Notification $notification
+     * @Param string $current_user_id
      */
-    public function pushNotification($notification){
-        $params = array();
-        $params[] = $notification->getComponent();
-        $params[] = $notification->getNotifyMetadata();
-        $params[] = $notification->getNotifyContent();
-        $params[] = $notification->getNotifySource();
-
-        $type = $notification->getType();
-        $target_users_query = "SELECT user_id FROM users";
-        $ignore_self_query = "";
-        $not_send_users = array();
-        $announcement = $type === 'new_announcement' || $type === 'updated_announcement';
-
-        if(!empty($notification->getNotifyTarget())) {
-        	//Notify specific user
-        	$not_send_users[] = $notification->getNotifyTarget();
-        	if($params[3] !== $not_send_users[0]) {
-        		$this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                    VALUES (?, ?, ?, current_timestamp, ?, ?)",
-                    array_merge($params, $not_send_users));
-        	}
-        }
-
-        if($notification->getNotifyNotToSource()){
-            $not_send_users[] = $notification->getNotifySource();
-        }
-
-        $restrict = count($not_send_users);
-        if($restrict > 0) {
-        	$ignore_self_query = "WHERE user_id NOT IN (" . implode(',', array_fill(0, $restrict, '?')) . ')';
-        }
-
-        $column = '';
-        if($type === 'reply') {
-        	$post_thread_id = json_decode($params[1], true)[0]['thread_id'];
-            $params[] = $post_thread_id;
-            $target_users_query = "SELECT n.user_id from notification_settings n, posts p where p.thread_id = ? and p.author_user_id = n.user_id and n.reply_in_post_thread = 'true' ";
-            $target_users_query .= "UNION SELECT user_id from notification_settings where all_new_posts = 'true'";
-        } else if(!$announcement) {
-        	switch ($type) {
-	            case 'new_thread':
-	                $column = 'all_new_threads';
-	                break;
-	            case 'merge_thread':
-	                $column = 'merge_threads';
-	                break;
-	            case 'edited':
-	            case 'deleted':
-	            case 'undeleted':
-	                $column = 'all_modifications_forum';
-	                break;
-    		}
-    		$target_users_query = "SELECT user_id FROM notification_settings where {$column} = 'true'";
-        }
-
-        //Notify users based on settings
-        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                    SELECT ?, ?, ?, current_timestamp, ?, user_id as to_user_id FROM ({$target_users_query}) as u {$ignore_self_query}",
-                    array_merge($params, $not_send_users));
+    public function getAllUsersIds() {
+        $query = "SELECT user_id FROM users";
+        $this->course_db->query($query);
+        return $this->rowsToArray($this->course_db->rows());
     }
 
-    //TODO: refactor this to use push notification function..
-    public function pushSingleNotification($notification) {
-        $params = array();
-        $params[] = $notification->getComponent();
-        $params[] = $notification->getNotifyMetadata();
-        $params[] = $notification->getNotifyContent();
-        $params[] = $notification->getNotifySource();
-        $params[] = $notification->getNotifyTarget();
-        $this->course_db->query("INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-                VALUES (?, ?, ?, current_timestamp, ?, ?)", $params);
-     }
+    /**
+     * Get all users with a preference
+     * @param string $column
+     * @return array
+     */
+    public function getAllUsersWithPreference(string $column) {
+        $preferences = [
+            'merge_threads',
+            'all_new_threads',
+            'all_new_posts',
+            'all_modifications_forum',
+            'reply_in_post_thread',
+            'merge_threads_email',
+            'all_new_threads_email',
+            'all_new_posts_email',
+            'all_modifications_forum_email',
+            'reply_in_post_thread_email'
+        ];
+        $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
+        $this->course_db->query($query);
+        if (!in_array($column,$preferences)) {
+            throw new DatabaseException("Given column, {$column}, is not a valid column", $query);
+        }
+        return $this->rowsToArray($this->course_db->rows());
+    }
+
+    /**
+     * Gets All Parent Authors who this user responded to
+     * @param string $post_author_id current_user_id
+     * @param string $post_id   the parent post id
+
+     */
+    public function getAllParentAuthors(string $post_author_id, string $post_id) {
+        $params = [$post_id, $post_author_id];
+        $query = "SELECT * FROM
+                  (WITH RECURSIVE parents AS (
+                  SELECT
+                    author_user_id, parent_id, id FROM  posts
+                  WHERE id = ?
+                  UNION SELECT
+                    p.author_user_id, p.parent_id, p.id
+                  FROM
+                    posts p
+                   INNER JOIN parents pa ON pa.parent_id = p.id
+                  ) SELECT DISTINCT 
+                    author_user_id AS user_id
+                  FROM
+                    parents
+                  WHERE author_user_id <> ?) AS parents;";
+        $this->course_db->query($query,$params);
+        return $this->rowsToArray($this->course_db->rows());
+    }
+
+    /**
+     * returns all authors who want to be notified if a post has been made in a thread they have posted in
+     * @param $thread_id
+     * @param $column ("reply_in_thread" or "reply_in_thread_email")
+     * @return array
+     */
+    public function getAllThreadAuthors($thread_id, $column) {
+        $params = [$thread_id];
+        $query = "SELECT author_user_id AS user_id FROM posts WHERE thread_id = ? AND
+                  EXISTS (
+                  SELECT user_id FROM notification_settings WHERE
+                  user_id = author_user_id AND {$column} = 'true');";
+        if ($column != 'reply_in_post_thread' && $column != 'reply_in_post_thread_email') {
+            throw new DatabaseException("Given column, {$column}, is not a valid column", $query, $params);
+        }
+        $this->course_db->query($query,$params);
+        return $this->rowsToArray($this->course_db->rows());
+
+    }
+
+    /*
+     * helper function to convert rows array to one dimensional array of user ids
+     *
+     */
+    protected function rowsToArray($rows) {
+        $result = array();
+        foreach ($rows as $row) {
+            foreach ($row as $key => $value) {
+                $result[] = $value;
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * Sends notifications to all recipients
+     * @param array $notifications
+     */
+    public function insertNotifications(array $flattened_notifications, int $notification_count){
+        // PDO Placeholders
+        $row_string = "(?, ?, ?, current_timestamp, ?, ?)";
+        $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
+        $this->course_db->query("
+            INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
+            VALUES ".$value_param_string, $flattened_notifications);
+
+    }
+
+    /**
+     * Queues emails for all given recipients to be sent by email job
+     * @param array $flattened_emails array of params
+     * @param int $email_count
+     */
+    public function insertEmails(array $flattened_emails, int $email_count){
+        // PDO Placeholders
+        $row_string = "(?, ?, ?, current_timestamp, ?)";
+        $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
+        $this->submitty_db->query("
+            INSERT INTO emails(recipient, subject, body, created, user_id)
+            VALUES ".$value_param_string, $flattened_emails);
+    }
 
     /**
      * Returns notifications for a user
@@ -2735,8 +2785,7 @@ AND gc_id IN (
         $rows = $this->course_db->rows();
         $results = array();
         foreach ($rows as $row) {
-            $results[] = new Notification($this->core, array(
-                    'view_only' => true,
+            $results[] = Notification::createViewOnlyNotification($this->core, array(
                     'id' => $row['id'],
                     'component' => $row['component'],
                     'metadata' => $row['metadata'],
@@ -3750,24 +3799,6 @@ AND gc_id IN (
       $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
       return $this->course_db->rows();
-    }
-
-    /**
-     * Queues an email to be sent by email job
-     * @param array $email_data
-     * @param Email $recipient
-     */
-    public function createEmail($email){
-        $parameters = array($email->getUserId(), $email->getRecipient(), $email->getSubject(), $email->getBody());
-
-        $this->submitty_db->query("
-            INSERT INTO emails(
-              user_id,
-              recipient,
-              subject,
-              body,
-              created)
-            VALUES(?, ?, ?, ?, NOW())", $parameters);
     }
 
     /**

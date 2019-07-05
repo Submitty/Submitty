@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use http\Exception\InvalidArgumentException;
+use RecursiveIteratorIterator;
 
 class AdminGradeableController extends AbstractController {
     public function run() {
@@ -184,51 +185,29 @@ class AdminGradeableController extends AbstractController {
 
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
-        // This helps determine which radio button to check when selecting config.
-        // Default option, which means the user has to specify the path.
-        $config_select_mode = 'manual';
-
         // These are hard coded default config options.
-        $default_config_paths = [ ['upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
-                                  ['pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
-                                  ['iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
-                                  ['left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
-                                  ['test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
-                                  ['test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
-        foreach ($default_config_paths as $default_config_path) {
-            $path = $default_config_path[1];
-            // If this happens then select the first radio button 'Using Default'
-            if ($path === $saved_config_path) {
-                $config_select_mode = 'defaults';
-                break;
-            }
-        }
+        $default_config_paths = [ ['PROVIDED: upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
+                                  ['PROVIDED: pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
+                                  ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
+                                  ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
+                                  ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
+                                  ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = $file['path'];
-            // If this happens then select the second radio button 'Using Uploaded'
-            if ($file['path'] === $saved_config_path) {
-                $config_select_mode = 'uploaded';
-            }
+            $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
         }
 
         // Configs stored in a private repository (specified in course config)
         $config_repo_name = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
+        $repository_error_message = "";
         if ($config_repo_name !== '') {
-            $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
-            $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
-            foreach ($all_repository_configs as $file) {
-                $all_repository_config_paths[] = $file['path'];
-                // If this happens then select the third radio button 'Use Private Repository'
-                if ($file['path'] === $saved_config_path) {
-                    $config_select_mode = 'repo';
-                }
-            }
+            $repository_config_dir = $config_repo_name;
+            $repository_error_message = $this->getValidPathsToConfigDirectories($repository_config_dir,$all_repository_config_paths);
         }
 
         // Load output from build of config file
@@ -276,7 +255,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -306,11 +284,8 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
-            'config_repo_name' => $config_repo_name,
-            'all_repository_config_paths' => $all_repository_config_paths,
-            'all_uploaded_config_paths' => $all_uploaded_config_paths,
-            'default_config_paths' => $default_config_paths,
-            'config_select_mode' => $config_select_mode,
+            'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
+            'repository_error_message' => $repository_error_message,
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
@@ -507,6 +482,46 @@ class AdminGradeableController extends AbstractController {
         $component->setText(true);
         $component->setPeer(false);
         $component->setPage(Component::PDF_PAGE_NONE);
+    }
+
+    /**
+     * Iterates through the directory and finds config.json files
+     * Terminates loop after a hard coded numbere of files is checked
+     * Returns an error message if something goes wrong, or empty string otherwise
+     * Changes $results, adds an array of form [path_label,path] for each config file found
+     * @param string $dir
+     * @param array $results
+     * @return string
+     */
+    private function getValidPathsToConfigDirectories($dir,&$results) {
+        if (!file_exists($dir)) {
+            return "The repository entered on the \"Course Settings\" page does not exist";
+        }
+        try {
+            $files = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::LEAVES_ONLY,
+                \RecursiveIteratorIterator::CATCH_GET_CHILD);
+        } catch(\Exception $e) {
+            return "An error occured when parsing the repository entered on the \"Course Settings\" page";
+        }
+
+        $counter = 0;
+        foreach ($files as $file) {
+            if ($counter >= 1000) {
+                $results = array();
+                return "The repository entered on the \"Course Settings\" page was too large";
+            }
+
+            if (!$file->isDir()) {
+                if ($file->getFilename() === 'config.json') {
+                    $config_path = substr($file->getPathname(),0,-strlen("/config.json")); //remove /config.json from path
+                    $results[] = ["DIRECTORY: ".substr($config_path,strlen($this->core->getConfig()->getPrivateRepository())+1),$config_path];
+                }
+                $counter++;
+            }
+        }
+        return "";
     }
 
     private function updateRubric(Gradeable $gradeable, $details) {
