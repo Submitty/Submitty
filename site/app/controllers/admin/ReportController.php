@@ -268,15 +268,17 @@ class ReportController extends AbstractController {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-
-            // Check if the score should be a zero
-            if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
-                if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
-                    // Version conflict or incomplete grading, so zero score
-                    $row[$gg->getGradeableId()] = 0;
-                } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
-                    // BAD submission, so zero score
-                    $row[$gg->getGradeableId()] = 0;
+            
+            if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() !== LateDayInfo::STATUS_OVERRIDDEN) {
+                // Check if the score should be a zero
+                if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+                    if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
+                        // Version conflict or incomplete grading, so zero score
+                        $row[$gg->getGradeableId()] = 0;
+                    } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                        // BAD submission, so zero score
+                        $row[$gg->getGradeableId()] = 0;
+                    }
                 }
             }
         }
