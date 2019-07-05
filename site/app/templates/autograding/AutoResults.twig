@@ -37,7 +37,7 @@
 {% endif %}
 
 {% if not incomplete_autograding %}
-    {% for testcase in testcases if testcase.can_view %}
+    {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
         {% set can_view = (not testcase.hidden or show_hidden) %}
         {% set can_view_details = (not testcase.hidden or show_hidden_details and show_hidden) %}
         <div class="box" {{ testcase.hidden and show_hidden ? "style='background-color:#D3D3D3;'" : "" }}>
