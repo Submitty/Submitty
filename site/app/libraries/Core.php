@@ -12,6 +12,9 @@ use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
+use app\NotificationFactory;
+
+
 
 /**
  * Class Core
@@ -61,6 +64,8 @@ class Core {
     /** @var ClassicRouter */
     private $router;
 
+    /** @var NotificationFactory */
+    private $notification_factory;
     /** @var bool */
     private $redirect = true;
 
@@ -79,19 +84,20 @@ class Core {
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
-    
+
         // initialize our alert types if one of them doesn't exist
         foreach (array('error', 'notice', 'success') as $key) {
             if(!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
         }
-    
+
         // we cast each of our controller markers to lower to normalize our controller switches
         // and prevent any unexpected page failures for users in entering a capitalized controller
         foreach (array('component', 'page', 'action') as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
+        $this->notification_factory = new NotificationFactory($this);
     }
 
     /**
@@ -552,7 +558,7 @@ class Core {
         }
         return $semester;
     }
-    
+
     /**
      * @return Output
      */
@@ -627,7 +633,6 @@ class Core {
     public function getRouter(): ClassicRouter {
         return $this->router;
     }
-
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
      * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
@@ -638,5 +643,9 @@ class Core {
      */
     public function isTesting() {
         return false;
+    }
+
+    public function getNotificationFactory() {
+        return $this->notification_factory;
     }
 }
