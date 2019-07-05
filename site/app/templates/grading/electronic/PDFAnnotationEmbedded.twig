@@ -1,22 +1,15 @@
-<script src="vendor/jquery/jquery.min.js"></script>
-<script src="vendor/pdfjs/pdf.min.js"></script>
-<script src="vendor/pdfjs/pdf_viewer.js"></script>
-<script src="vendor/pdf-annotate.js/pdf-annotate.min.js"></script>
-<script src="js/pdf/PDFAnnotateEmbedded.js"></script>
-{% if student_popup is not defined or student_popup == false %}
-    {#This initializes the toolbar and activates annotation mode#}
-    <script src="js/pdf/PDFInitToolbar.js"></script>
-{% endif %}
-
-<link rel="stylesheet" type="text/css" href="vendor/pdfjs/pdf_viewer.css"/>
-<link rel="stylesheet" type="text/css" href="css/pdf/pdf_embedded.css"/>
+{% for stylesheet in localcss %}
+    <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
+{% endfor %}
+{% for script in localjs %}
+    <script src="{{ script }}"></script>
+{% endfor %}
 
 <div id="content-wrapper">
     <div id="viewer" class="pdfViewer"></div>
 </div>
 
 <script>
-
     try {
         for(let i = 0 ; i < localStorage.length; i++){
             if(localStorage.key(i).includes('annotations')){

@@ -17,6 +17,8 @@ class CourseMaterialsView extends AbstractView {
     public function listCourseMaterials($user_group) {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
             $files[$start_dir_name] = array();
@@ -104,7 +106,9 @@ class CourseMaterialsView extends AbstractView {
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
+            "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"])
         ]);
     }
 }
