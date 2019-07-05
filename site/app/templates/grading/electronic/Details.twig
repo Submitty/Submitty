@@ -290,7 +290,10 @@
 
 {# Grading Button #}
 {% macro render_column_grading(self, section, graded_gradeable, index, info, column) %}
-    {% if not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
+    {% if  graded_gradeable.hasOverriddenGrades() %}
+        {% set contents = "Overridden" %}
+        {% set btn_class = "btn-default" %}
+    {% elseif not graded_gradeable.getAutoGradedGradeable().hasSubmission() %}
         {% set contents = "No Submission" %}
         {% set btn_class = "btn-default" %}
     {% elseif graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0 %}

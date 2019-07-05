@@ -329,6 +329,9 @@ class GradedGradeable extends AbstractModel {
         return $this->gradeable->hasSubmission($this->submitter);
     }
 
+    public function hasOverriddenGrades() {
+        return $this->gradeable->hasOverriddenGrades($this->submitter);
+    }
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */
