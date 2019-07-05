@@ -96,16 +96,24 @@ os.chdir(rg_course_path)
 # Run make pull_test (command outputs capture in cmd_output for debugging)
 print('Pulling in grade reports')
 cmd_output = os.popen('make pull_test').read()
-# print(cmd_output)
 
 # Run make
 print('Compiling rainbow grades')
 cmd_output = os.popen('make').read()
-# print(cmd_output)
 
 # Run make push_test
 print('Exporting to summary_html')
 cmd_output = os.popen('make push_test').read()
-# print(cmd_output)
+
+# Recursively update permissions for all files in the rainbow_grades directory
+print('Updating permissions')
+cmd_output = os.popen('chmod -R o-rwx ' + rg_course_path).read()
+
+summary_html_path = os.path.join(COURSES_PATH,
+                                 semester,
+                                 course,
+                                 'reports',
+                                 'summary_html')
+cmd_output = os.popen('chmod -R o-rwx ' + summary_html_path).read()
 
 print('Done')
