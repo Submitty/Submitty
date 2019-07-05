@@ -2,35 +2,35 @@
     <a href="{{ thread.link }}">
         <div class="{{ thread.class }}">
             {% if thread.pinned %}
-                <i class="fas fa-star" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title = "Announcement" aria-hidden="true"></i>
+                <i class="fas fa-star thread-announcement" title = "Announcement" aria-hidden="true"></i>
             {% endif %}
             {% if thread.favorite %}
-                <i class="fas fa-thumbtack" style="padding-left:3px;position:relative; float:right; display:inline-block; color:gold; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title="Pinned as my favorite" aria-hidden="true"></i>
+                <i class="fas fa-thumbtack thread-favorite" title="Pinned as my favorite" aria-hidden="true"></i>
             {% endif %}
             {% if thread.merged_thread_id != -1 %}
-                <i class="fas fa-link" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title="Thread Merged" aria-hidden="true"></i>
+                <i class="fas fa-link thread-merged" title="Thread Merged" aria-hidden="true"></i>
             {% endif %}
 
             {% if thread.status != 0 %}
-                <i class="fa {{ thread.fa_icon }}" style="margin-right:{{ thread.fa_margin_right }}; padding-left:3px; position:relative; float:right; display:inline-block; color:{{ thread.fa_color }}; font-size:{{ thread.fa_font_size }};" title="{{ thread.tooltip }}" aria-hidden="true"></i>
+                <i class="fa {{ thread.fa_icon }} thread-status" style="margin-right:{{ thread.fa_margin_right }}; color:{{ thread.fa_color }}; font-size:{{ thread.fa_font_size }};" title="{{ thread.tooltip }}" aria-hidden="true"></i>
             {% endif %}
 
             {% if thread.is_locked %}
-                <i class="fas fa-lock" style="padding-left:3px;position:relative; float:right; display:inline-block; color: white; -webkit-text-stroke-width: 1px; -webkit-text-stroke-color: black;" title="Locked" aria-hidden="true"></i>
+                <i class="fas fa-lock thread-locked" title="Locked" aria-hidden="true"></i>
             {% endif %}
 
-            <h4>{% if thread.current_user_posted %}
+            <span class="thread-list-item">{% if thread.current_user_posted %}
                     <i class="fas fa-comments" title="You have contributed"></i>
                 {% endif %}
-                {{ thread.title }}</h4>
-            <h5 style="font-weight: normal;">{{ thread.content }}</h5>
+                {{ thread.title }}</span>
+            <span class="thread-content">{{ thread.content }}</span>
 
             {% for category in thread.categories %}
                 <span class="label_forum" style="background-color: {{ category[1] }}">{{ category[0] }}</span>
             {% endfor %}
 
             {% if thread.date.not_null %}
-                <h5 style="float:right; font-weight:normal;margin-top:5px">{{ thread.date.formatted }}</h5>
+                <span class="thread-date">{{ thread.date.formatted }}</span>
             {% endif %}
 
         </div>

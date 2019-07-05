@@ -1830,7 +1830,7 @@ class ElectronicGraderController extends GradingController {
         try {
             //display hidden testcases only if the user can view the entirety of this gradeable.
             $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable]);
-            $popup_css = "{$this->core->getConfig()->getBaseUrl()}css/diff-viewer.css";
+            $popup_css = "diff-viewer.css";
             $this->core->getOutput()->renderJsonSuccess(
                 $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
                     $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden)

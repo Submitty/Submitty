@@ -19,12 +19,6 @@ use app\models\gradeable\AbstractGradeableInput;
 
 class HomeworkView extends AbstractView {
 
-    public function unbuiltGradeable(Gradeable $gradeable) {
-        return $this->core->getOutput()->renderTwigTemplate('error/UnbuiltGradeable.twig', [
-            'title' => $gradeable->getTitle()
-        ]);
-    }
-
     /**
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
@@ -356,7 +350,16 @@ class HomeworkView extends AbstractView {
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
 
-        $DATE_FORMAT = "m/d/Y @ H:i";
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
+        $DATE_FORMAT = "m/d/Y @ h:i A";
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
@@ -479,9 +482,9 @@ class HomeworkView extends AbstractView {
         }
 
         for ($i = 0; $i < count($files); $i++) {
-            if($bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
                 continue;
-            }else if($bulk_upload_data['is_qr']){
+            }else if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
                 $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
 
@@ -489,14 +492,25 @@ class HomeworkView extends AbstractView {
             $is_valid = true;
             $id = '';
 
-            if($bulk_upload_data['is_qr']){
-                $id = $data['id'];
-                $is_valid = $this->core->getQueries()->getUserById($id);
-                $page_count = $data['page_count'];
+            //decoded.json may be read before the assoicated data is written, check if key exists first
+            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+                if(array_key_exists('id', $data)){
+                    $id = $data['id'];
+                    $is_valid = $this->core->getQueries()->getUserById($id);
+                }else{
+                    //set the blank id as invalid for now, after a page refresh it will recorrect
+                    $id = '';
+                    $is_valid = false;
+                }
+                if(array_key_exists('page_count', $data)){
+                    $page_count = $data['page_count'];
+                }
             }else{
                 $is_valid = true;
                 $id = '';
-                $page_count = $bulk_upload_data['page_count'];
+                if(array_key_exists('page_count', $bulk_upload_data)){
+                    $page_count = $bulk_upload_data['page_count'];
+                }
             }
 
             $files[$i] += ['page_count' => $page_count, 
