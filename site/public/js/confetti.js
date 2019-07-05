@@ -47,47 +47,48 @@ function addConfetti(){
 	if(due_date.length >= 2){
 		month = parseInt(due_date[0], 10) - 1;
 	}
-	month = 11;
+	
 	function randomColor () {
 		let colors = [];
 		
 		//JS month : 0-11
 		switch(month){
 			case 0: //jan
-
+				colors = ['#406bc9','#ffffff','#809bce','#9ac8de','#b6c7be'];
 			break;
 			case 1: //feb
-
+				colors = ['#df3b57','#ee4b6a','#7d2335','#86cec5','#b2e6f1'];
 			break;
 			case 2: //mar
-
+				colors = ['#8db62f','#7b9233','#034121','#022607','#ffcc00'];
 			break;
 			case 3: //apr
-
+				colors = ['#eed149','#3bca8b','#9ee0e7','#ebb8aa','#ffffff'];
 			break;
 			case 4: //may
-
+				colors = ['#f9eae5','#f16878','#c1dbb3','#7ebc89','#ff8154'];
 			break;
 			case 5: //jun
-
+				colors = ['#ec4067','#f4d35e','#f78764','#00889f','#083d77'];
 			break;
 			case 6: //jul
-
+				colors = ["#ffffff",'#de1a1a','#090c9b'];
 			break;
 			case 7: //aug
-
+				colors = ['#f0a202','#ff4040','#f2c940','#ab2321'];
 			break;
 			case 8: //sept
 				    //sky blue,  submitty blue, shail green,  yellow,     red,  open-books purple
-				colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];//<--- i vote for this pallete for sept! - Shail :)
+				colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
 			break;
 			case 9: //oct
-				
+				colors = ['#000000','#ff6700','#291528'];
 			break;
 			case 10://nov
+				colors = ['#5a351e','#522b47','#912f09','#f0a202','#fbf5f3'];
 			break;
 			case 11://dec
-				colors = ['red', 'green'];
+				colors = ['#d7cdcc','#f7b11d','#1f5e00','#de1a1a','#ffffff'];
 			break;
 		}
 
