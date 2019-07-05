@@ -333,7 +333,7 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => $team_button_text,
             "subtitle" => $team_display_date,
-            "href" => $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team')),
+            "href" => $this->core->buildNewCourseUrl([$gradeable->getId(), 'team']),
             "class" => "btn {$team_button_type} btn-nav",
             "name" => "team-btn"
         ]);

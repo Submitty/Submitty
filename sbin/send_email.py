@@ -40,9 +40,9 @@ LOG_FILE = open(os.path.join(
 try:
     with open(os.path.join(CONFIG_PATH, 'email.json')) as open_file:
         EMAIL_CONFIG = json.load(open_file)
-
-    EMAIL_USER = EMAIL_CONFIG.get('email_user', None)
-    EMAIL_PASSWORD = EMAIL_CONFIG.get('email_password', None)
+    EMAIL_ENABLED = EMAIL_CONFIG.get('email_enabled', False)
+    EMAIL_USER = EMAIL_CONFIG.get('email_user', '')
+    EMAIL_PASSWORD = EMAIL_CONFIG.get('email_password', '')
     EMAIL_SENDER = EMAIL_CONFIG['email_sender']
     EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
     EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
@@ -87,7 +87,7 @@ def construct_mail_client():
         pass
     client.ehlo()
 
-    if EMAIL_USER is not None:
+    if EMAIL_USER != '' and EMAIL_PASSWORD != '':
         client.login(EMAIL_USER, EMAIL_PASSWORD)
 
     return client
@@ -151,7 +151,7 @@ def send_email():
     db = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
-    if len(queued_emails) == 0:
+    if not EMAIL_ENABLED or len(queued_emails) == 0:
         return
 
     success_count = 0

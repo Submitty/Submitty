@@ -100,7 +100,7 @@ class GlobalController extends AbstractController {
             $any_files = FileUtils::getAllFiles($course_materials_path);
             if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                    "href" => $this->core->buildNewCourseUrl(['course_materials']),
                     "title" => "Course Materials",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-materials",

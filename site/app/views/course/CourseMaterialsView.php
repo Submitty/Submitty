@@ -104,7 +104,9 @@ class CourseMaterialsView extends AbstractView {
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
+            "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"])
         ]);
     }
 }
