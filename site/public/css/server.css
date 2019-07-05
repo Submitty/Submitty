@@ -467,6 +467,10 @@ table tr.table-header {
     color: white;
 }
 
+.content.overridden_message {
+    background-color: #fcc200;
+    color: white;
+}
 
 .content h1 {
     margin-bottom: 20px;

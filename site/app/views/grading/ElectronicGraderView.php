@@ -656,7 +656,14 @@ HTML;
         if ($this->core->getConfig()->isRegradeEnabled()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
         }
-        if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+
+        if ($graded_gradeable->hasOverriddenGrades()) {
+            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                "color" => "#FFEF00", // canary yellow
+                "message" => "Overridden grades"
+            ]);
+        }
+        else if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "#FF8040", // mango orange
