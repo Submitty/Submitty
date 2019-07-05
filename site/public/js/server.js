@@ -1717,16 +1717,16 @@ $.fn.isInViewport = function() {                                        // jQuer
 function checkSidebarCollapse() {
     var size = $(document.body).width();
     if (size < 1000) {
-        $("sidebar").toggleClass("collapsed", true);
+        $("aside").toggleClass("collapsed", true);
     }
     else{
-        $("sidebar").toggleClass("collapsed", false);
+        $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("sidebar");
+    var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
 
     localStorage.sidebar = !shown;
@@ -1738,7 +1738,7 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
         content: function () {
-            if($("sidebar").hasClass("collapsed")) {
+            if($("aside").hasClass("collapsed")) {
                 if ($(this).attr("title") === "Collapse Sidebar") {
                     return "Expand Sidebar";
                 }
@@ -1753,7 +1753,7 @@ $(document).ready(function() {
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {
         //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("sidebar").toggleClass("collapsed", localStorage.sidebar === "true");
+        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space

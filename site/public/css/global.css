@@ -1,10 +1,7 @@
 body {
     font-family: 'Source Sans Pro', sans-serif;
     margin: 0;
-    height: 100%;
-    width: 100%;
-    min-height: 100%;
-    min-width: 100%;
+    min-height: 100vh;
     position: relative;
     display: flex;
     background: #f6fbfe;
@@ -88,21 +85,18 @@ nav a > i.f {
 }
 
 #wrapper {
-    flex-grow: 1;
     display: flex;
+    flex-grow: 1;
 }
 
 main {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+    width: 100%
 }
 
 footer {
     text-align: center;
     width: 100%;
     padding: 10px;
-    flex-shrink: 0;
 }
 
 footer a {
@@ -139,6 +133,6 @@ footer .footer-separator {
     }
 
     footer {
-        margin-top: -25px; /* 30px content padding and 10px footer padding */
+        margin-top: -20px; /* 30px content padding and 10px footer padding */
     }
 }

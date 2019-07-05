@@ -1518,7 +1518,6 @@ end of styles used in the admin gradeable page
     padding: 0px;
 }
 
-<<<<<<< HEAD
 #skip-nav:not(:focus) {
     clip: rect(1px,1px,1px,1px);
     overflow: hidden;
@@ -1541,8 +1540,6 @@ end of styles used in the admin gradeable page
     z-index: 999;
 }
 
-=======
->>>>>>> 5f738e67... Global mobile header/footer, new login/home, menu and sidebar
 .warning {
     background: #fff3cd;
     color: #856404;

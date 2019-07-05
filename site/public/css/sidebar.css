@@ -1,22 +1,23 @@
-sidebar {
+aside {
     display: none;
 }
 
 @media (min-width: 541px) {
-    sidebar {
+    aside {
         display: block;
         margin: 0 -30px 0 0;
-        transition: margin-right 0.3s ease-out;
+        transition: all 0.3s ease-out;
         padding-top: 30px;
         width: 250px;
         min-width: 250px;
+        z-index: 1;
     }
 
-    sidebar hr {
+    aside hr {
         margin: 6px 15px;
     }
 
-    sidebar i  {
+    aside i  {
         transition: margin 0.3s ease-out;
         color: #000;
         width: 30px;
@@ -25,81 +26,75 @@ sidebar {
         margin: 0 0 0 15px;
     }
 
-    sidebar li {
+    aside li {
         list-style: none;
     }
         
-    sidebar li .nav-row {
+    aside li .nav-row {
         padding: 6px 0;
         width: 100%;
         display: flex;
     }
 
-    sidebar li.heading {
+    aside li.heading {
         font-weight: bold;
         font-variant: all-small-caps;
         font-size: 20px;
     }    
 
-    sidebar .icon-title {
+    aside .icon-title {
         margin-right: 15px;
         min-width: 100%;
     }
 
-    sidebar .notification-badge {
+    aside .notification-badge {
         margin: 0 6px;
     }
 
-    sidebar a {
+    aside a {
         text-decoration: none;
     }
         
-    sidebar a .icon-title {
+    aside a .icon-title {
         color: #006398;
     }
     
-    sidebar a .icon-title:hover {
+    aside a .icon-title:hover {
         color: #002334;
     }
     
-    sidebar a .icon-title:active {
+    aside a .icon-title:active {
         color: #790000;
     }
 
-    sidebar li .selected {
+    aside li .selected {
         background-color: #d9e1e2;
     }
 
-    sidebar a.selected .icon-title {
+    aside a.selected .icon-title {
         color: #000;
         font-weight: bold;
     }
 
-    /* for collapsed, shift margin over so that we don't have partially rendered text and we maintain height */
-
-    sidebar.collapsed {
-        margin-right: -220px; /* 60px left after 250+30-220 */
-    }
-
-    sidebar.collapsed a {
+    aside.collapsed {
         width: 60px;
+        min-width: 60px;
     }
-    
-    sidebar.collapsed i {
+        
+    aside.collapsed i {
         padding: 2px 0px;
         margin: 0 15px;
     }
 
-    sidebar.collapsed .icon-title {
-        visibility: hidden;
-    }
-
-    sidebar.collapsed hr {
-        margin: 6px 205px 6px 15px; /* 15px on either side */
+    aside.collapsed .icon-title {
+        width: 0px;
+        overflow: hidden;
+        min-width: 0px;
+        white-space: nowrap;
     }
     
     /* put it on top of the icon */
-    sidebar.collapsed .notification-badge {
+    aside.collapsed .notification-badge {
         font-size: 12px;
         position: absolute;
         margin: 12px 0 0 32px;
