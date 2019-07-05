@@ -462,11 +462,18 @@ class ReportController extends AbstractController {
         }
     }
     public function generateCustomization(){
+
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
         if(isset($_POST["json_string"])){
+
             //Handle user input (the form) being submitted
             try {
 

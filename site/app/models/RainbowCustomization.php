@@ -322,8 +322,6 @@ class RainbowCustomization extends AbstractModel{
         // Place in queue
         file_put_contents($path, $job_json);
 
-        print("");
-
 //        $this->has_error = "true";
 //        foreach($_POST as $field => $value){
 //            $this->error_messages[] = "$field: $value";

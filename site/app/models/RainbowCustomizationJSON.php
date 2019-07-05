@@ -18,7 +18,7 @@ use app\libraries\FileUtils;
  * This class is a PHP representation of a customization.json file as used in RainbowGrades and provides means
  * to update its fields.
  *
- * When adding to data to any property, the appropriate setting must be used as they preform additional validation.
+ * When adding to data to any property, the appropriate setter must be used as they preform additional validation.
  */
 class RainbowCustomizationJSON extends AbstractModel
 {
@@ -48,6 +48,11 @@ class RainbowCustomizationJSON extends AbstractModel
         $this->benchmark_percent = (object)[];
     }
 
+    /**
+     * Get gradeables array
+     *
+     * @return array
+     */
     public function getGradeables()
     {
         return $this->gradeables;
@@ -166,34 +171,81 @@ class RainbowCustomizationJSON extends AbstractModel
         }
     }
 
-    // TODO: Validate section data
+    /**
+     * Add a section label
+     *
+     * @param $sectionID The sectionID
+     * @param $label The label you would like to assign to the sectionID
+     * @throws BadArgumentException The passed in section label is empty
+     */
     public function addSection($sectionID, $label)
     {
+        if(empty($label))
+        {
+            throw new BadArgumentException('The section label may not be empty.');
+        }
+
         $this->section->$sectionID = $label;
     }
 
+    /**
+     * Get the section object
+     *
+     * @return object
+     */
     public function getSection()
     {
         return $this->section;
     }
 
-    // TODO: Validate gradeable data
+    /**
+     * Add a gradeable object to the gradeables array
+     *
+     * @param object $gradeable
+     */
     public function addGradeable(object $gradeable)
     {
+        // TODO: Validate gradeable data
+        // Validation of this item will be better handled when schema validation is complete, until then just make
+        // sure gradeable is not empty
+        $emptyObject = (object)[];
+        if($gradeable == $emptyObject)
+        {
+            throw new BadArgumentException('Gradeable may not be empty.');
+        }
+
         $this->gradeables[] = $gradeable;
     }
 
+    /**
+     * Get messages
+     *
+     * @return array
+     */
     public function getMessages()
     {
         return $this->messages;
     }
 
-    // TODO: Validate message
+
+    /**
+     * Add a message to the message array
+     *
+     * @param string $message
+     */
     public function addMessage(string $message)
     {
+        if(empty($message))
+        {
+            throw new BadArgumentException('You may not add an empty message.');
+        }
+
         $this->messages[] = $message;
     }
 
+    /**
+     * Save the contents in this objects properties to the customization.json for the current course
+     */
     public function saveToJsonFile()
     {
         // Get path of where to save file
@@ -226,6 +278,4 @@ class RainbowCustomizationJSON extends AbstractModel
         // Write to file
         file_put_contents($course_path, $json);
     }
-
-
 }
