@@ -12,8 +12,8 @@ use Doctrine\Common\Annotations\Annotation;
  */
 class AccessControl {
     /**
-     * @var string "INSTRUCTOR", "FULL_ACCESS GRADER", "LIMITED
-     * ACCESS GRADER" or "STUDENT".
+     * @var string "INSTRUCTOR", "FULL_ACCESS GRADER", "LIMITED_
+     * ACCESS_GRADER" or "STUDENT".
      */
     private $role = null;
 
