@@ -10,6 +10,11 @@
     --hover-active-danger-red: #ff6661;
     --disabled-danger-red: #ad3937;
 
+    --warning-brown: #945600;
+    --focus-warning-brown: #ad7c37;
+    --hover-warning-brown: #9c5b00;
+    --active-warning-brown: #b58a4e;
+
     --good-green: #5fb760;
     --hover-good-green: #66cc77;
     --disabled-good-green: #5cb85c;
@@ -52,6 +57,7 @@
     --standard-light-gray: #d3d3d3;
     --standard-light-medium-gray: #bbbbbb;
     --standard-medium-gray: #888888;
+    --standard-medium-dark-gray: #666666;
     --standard-dark-gray: #5555555;
     --standard-deep-dark-gray: #2e2e2e;
 
@@ -89,15 +95,24 @@
     --standard-mint-green: #00e08e;
     --standard-dark-mint-green: #00a368;
 
+    --standard-pale-lime-green: #dff0d8;
+    --standard-light-lime-green: #c3e3b5;
+    --standard-medium-lime-green: #99cb84;
+    --standard-medium-dark-lime-green: #7dfa78;
+
     --standard-vibrant-dark-blue: #006699;
     --standard-bronze: #856404;
+    --standard-pastel-pink: #f2dede;
     --standard-light-pink: #ff9999;
+    --standard-pastel-yellow: #fcf8e3;
     --standard-pale-yellow: #ffff99;
     --standard-light-yellow: #ffff66;
     --standard-light-yellow-brown: #eac73d;
     --standard-light-gold: #fff3cd;
     --standard-light-green: #99ff99;
+    --standard-pastel-blue: #d9edf7;
     --standard-light-blue: #99ccff;
+    --standard-light-seafoam: #a4dad5;
 
     /*the look of the webpage itself*/
     --background-blue: #f6fbfe;

@@ -279,22 +279,22 @@ fieldset[disabled] .btn-info.focus {
 }
 .btn-warning {
     color: var(--default-white);
-    background-color: #945600;
+    background-color: var(--warning-brown);
 }
 .btn-warning:focus,
 .btn-warning.focus {
     color: var(--default-white);
-    background-color: #ad7c37;
+    background-color: var(--focus-warning-brown);
 }
 .btn-warning:hover {
     color: var(--default-white);
-    background-color: #9c5b00;
+    background-color: var(--hover-warning-brown);
 }
 .btn-warning:active,
 .btn-warning.active,
 .open > .dropdown-toggle.btn-warning {
     color: var(--default-white);
-    background-color: #b58a4e;
+    background-color: var(--active-warning-brown);
 }
 .btn-warning:active:hover,
 .btn-warning.active:hover,
@@ -306,7 +306,7 @@ fieldset[disabled] .btn-info.focus {
 .btn-warning.active.focus,
 .open > .dropdown-toggle.btn-warning.focus {
     color: var(--default-white);
-    background-color: #b58a4e;
+    background-color: var(--active-warning-brown);
 }
 .btn-warning:active,
 .btn-warning.active,
@@ -322,10 +322,10 @@ fieldset[disabled] .btn-warning:focus,
 .btn-warning.disabled.focus,
 .btn-warning[disabled].focus,
 fieldset[disabled] .btn-warning.focus {
-    background-color: #ad7c37;
+    background-color: var(--focus-warning-brown);
 }
 .btn-warning .badge {
-    color: #f0ad4e;
+    color: var(--standard-light-orange);
     background-color: var(--default-white);
 }
 .btn-danger {
@@ -459,7 +459,7 @@ input[type="button"].btn-block {
 
 .alert,
 .alert h4 {
-    color: #c09853;
+    color: var(--alert-bronze);
 }
 
 .alert h4 {
@@ -565,11 +565,11 @@ input[type="button"].btn-block {
   background-color: var(--hover-focus-info-blue);
 }
 .label_forum-warning {
-  background-color: #f0ad4e;
+  background-color: var(--standard-light-orange);
 }
 .label_forum-warning[href]:hover,
 .label_forum-warning[href]:focus {
-  background-color: #ec971f;
+  background-color: var(--standard-medium-orange);
 }
 .label_forum-danger {
   background-color: var(--standard-light-red);
