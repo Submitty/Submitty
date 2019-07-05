@@ -22,6 +22,7 @@ class LateDayInfo extends AbstractModel {
     const STATUS_GOOD = 1;
     const STATUS_LATE = 2;
     const STATUS_BAD = 3;
+    const STATUS_OVERRIDDEN = 4;
 
     public static function isValidStatus($status) {
         return in_array($status, [self::STATUS_GOOD, self::STATUS_LATE, self::STATUS_BAD]);
@@ -108,6 +109,11 @@ class LateDayInfo extends AbstractModel {
      * @return int One of self::STATUS_NO_ACTIVE_VERSION, self::STATUS_BAD, self::STATUS_LATE, or self::STATUS_GOOD
      */
     public function getStatus() {
+        // If overriden grades
+        if ($this->graded_gradeable->hasOverriddenGrades()) {
+            return self::STATUS_OVERRIDDEN;
+        }
+
         // No late days info, so NO_SUBMISSION
         if (!$this->hasLateDaysInfo()) {
             return self::STATUS_NO_ACTIVE_VERSION;
@@ -133,6 +139,8 @@ class LateDayInfo extends AbstractModel {
      */
     public function getStatusMessage() {
         switch ($this->getStatus()) {
+            case self::STATUS_OVERRIDDEN:
+                return 'Overridden';
             case self::STATUS_NO_ACTIVE_VERSION:
                 if ($this->graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                     return 'Cancelled Submission';
