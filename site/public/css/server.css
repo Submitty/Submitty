@@ -274,6 +274,8 @@ table tr.table-header {
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
+    max-height: calc(100vh - 122px); /* 61px header, 41px footer, 20px margins */
+    overflow: auto;
 }
 
 .content:last-child {
@@ -1094,6 +1096,8 @@ div.full_height {
     flex-direction: column;
     align-content: space-around;
     margin: 10px;
+    height: calc(100% - 20px);
+    width: calc(100vw - 20px);
 }
 
 .popup-form form {
@@ -1633,7 +1637,8 @@ ul.bare-list {
 
 @media (min-width: 541px) {
     .content {
-        margin: 30px;
+    margin: 30px;
+        max-height: none;
     }
 
     .mobile-block {
@@ -1643,8 +1648,10 @@ ul.bare-list {
 
 @media (min-width: 768px) {
     .popup-window {
-        width: 680px;
-        max-height: 80%;
         min-height: 300px;
+        width: 60%;
+        max-height: min-content;
+        height: auto;
+        max-width: 680px;
     }
 }

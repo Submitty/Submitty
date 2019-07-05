@@ -9,10 +9,9 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    {#
-        TODO: When we are mobile-friendly
+    
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    #}
+   
 
     {% for js_ref in js %}
     <script type='text/javascript' src='{{ js_ref }}'></script>
@@ -80,7 +79,7 @@
                         {% endif %}
                     </button>
                 {% elseif sidebar_buttons|length %}
-                    <a id="logout-button" class="black-btn" href="{{ core.buildNewUrl(['authentication', 'logout']) }}"><i class="fas fa-sign-out-alt"></i></a>
+                    <a id="logout-button" class="black-btn" href="{{ core.buildNewUrl(['authentication', 'logout']) }}" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></a>
                 {% endif %}
             </nav>
             <noscript class="system-message danger">

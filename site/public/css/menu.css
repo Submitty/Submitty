@@ -10,7 +10,7 @@
     display: none;
     z-index: 2;
     position: absolute;
-    height: 100%;
+    height: 100vh;
     width: 90%;
     background: #316498;
     color: #FFF;

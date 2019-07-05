@@ -1,8 +1,8 @@
 $(document).ready(function() {
     function openMenu() {
         $("body").css("overflow", "hidden");
-        $(document).scrollTop(0);
-        $(document).scrollLeft(0);
+        $(document.body).scrollTop(0);
+        $(document.body).scrollLeft(0);
         $("#menu-overlay").addClass("mobile-block");
         $("#mobile-menu").addClass("mobile-block");
     }
