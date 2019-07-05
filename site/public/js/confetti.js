@@ -4,7 +4,22 @@ function addConfetti(){
 		return;
 	let times_ran = 0;
 
-	canvas.width  = window.outerWidth;
+	//destroy the canvas animation on click or on enter
+	canvas.addEventListener("click", function(){ 
+		if(canvas.style.display != "none"){
+			canvas.style.display = "none";
+			return;
+		}
+	});
+	window.addEventListener("keypress", function(e){
+		key = window.event ? window.event.keyCode : e.keyCode;
+		if(key === 13 && canvas.style.display != "none"){
+			canvas.style.display = "none";
+			return;
+		}
+	});
+
+	canvas.width  = window.innerWidth;
 	var body = document.body;
     var html = document.documentElement;
 	canvas.height = Math.max( body.scrollHeight, body.offsetHeight, 
@@ -21,9 +36,64 @@ function addConfetti(){
 	let size_const = 10;
 	let gravity_const = 0.25;
 
+	let date_box = document.getElementsByClassName("upperinfo-right")
+	if(date_box && date_box.length != 0)
+		due_date = date_box[0].innerHTML.match(/\d+/g);
+
+	let d = new Date();
+	let month = d.getMonth();
+
+	//if we parsed the submission due date, use that instead
+	if(due_date.length >= 2){
+		month = parseInt(due_date[0], 10) - 1;
+	}
+	month = 11;
 	function randomColor () {
-				//    dark blue  sky blue   shail green yellow    red      open-books purple
-	    let colors = ['#0F47B6', '#8FD7FF', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
+		let colors = [];
+		
+		//JS month : 0-11
+		switch(month){
+			case 0: //jan
+
+			break;
+			case 1: //feb
+
+			break;
+			case 2: //mar
+
+			break;
+			case 3: //apr
+
+			break;
+			case 4: //may
+
+			break;
+			case 5: //jun
+
+			break;
+			case 6: //jul
+
+			break;
+			case 7: //aug
+
+			break;
+			case 8: //sept
+				    //sky blue,  submitty blue, shail green,  yellow,     red,  open-books purple
+				colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];//<--- i vote for this pallete for sept! - Shail :)
+			break;
+			case 9: //oct
+				
+			break;
+			case 10://nov
+			break;
+			case 11://dec
+				colors = ['red', 'green'];
+			break;
+		}
+
+		//make sure we have a default if parsing goes wrong
+		if(colors.length === 0)
+			colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
 	    return colors[Math.floor(Math.random() * colors.length)];
 	}
 
