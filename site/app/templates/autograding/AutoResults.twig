@@ -16,9 +16,12 @@
     </script>
 {% endif %}
 
-{% if not is_ta_grading %}
+{% if show_hidden_breakdown and hidden_earned >= hidden_max %}
+    <canvas id="confetti_canvas"></canvas>
+{% elseif nonhidden_earned >= nonhidden_max %}
     <canvas id="confetti_canvas"></canvas>
 {% endif %}
+
 
 {% if num_visible_testcases > 1 %}
     {# check if instructor grades exist and change title, display hidden points when TA grades are released (if hidden tests exist) #}
