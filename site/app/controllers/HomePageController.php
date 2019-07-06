@@ -102,6 +102,18 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * @api {GET} /api/courses List Courses
+     * @apiGroup Courses
+     *
+     * @apiSuccess {Course[]} unarchived_courses            List of unarchived courses.
+     * @apiSuccess {String} unarchived_courses.semester     Semester of the course.
+     * @apiSuccess {String} unarchived_courses.title        Title of the course.
+     * @apiSuccess {String} unarchived_courses.display_name Displayed name of the course.
+     * @apiSuccess {Course[]} archived_courses              List of archived courses.
+     * @apiSuccess {String} archived_courses.semester       Semester of the course.
+     * @apiSuccess {String} archived_courses.title          Title of the course.
+     * @apiSuccess {String} archived_courses.display_name   Displayed name of the course.
+     *
      * @Route("/api/courses")
      */
     public function getApiCourses() {

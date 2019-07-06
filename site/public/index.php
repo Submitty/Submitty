@@ -11,6 +11,7 @@ use app\libraries\routers\ClassicRouter;
 use app\libraries\response\Response;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\AnnotationReader;
 use Symfony\Component\HttpFoundation\Request;
 
 /*
@@ -30,6 +31,13 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 $loader = require_once(__DIR__.'/../vendor/autoload.php');
+AnnotationReader::addGlobalIgnoredName('api');
+AnnotationReader::addGlobalIgnoredName('apiName');
+AnnotationReader::addGlobalIgnoredName('apiParam');
+AnnotationReader::addGlobalIgnoredName('apiGroup');
+AnnotationReader::addGlobalIgnoredName('apiSuccess');
+AnnotationReader::addGlobalIgnoredName('apiError');
+AnnotationReader::addGlobalIgnoredName('apiExample');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $request = Request::createFromGlobals();

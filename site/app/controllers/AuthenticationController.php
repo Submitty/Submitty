@@ -6,6 +6,8 @@ use app\libraries\Core;
 use app\libraries\Output;
 use app\libraries\Utils;
 use app\libraries\Logger;
+use app\libraries\response\Response;
+use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -122,24 +124,38 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     *
+     * @api {POST} /api/token Get Token
+     * @apiGroup Authentication
+     *
+     * @apiParam {String} user_id   User's unique ID.
+     * @apiParam {String} password  User's password.
+     *
+     * @apiSuccess {String} token   Access token for the user.
+     * @apiError FailedAuthentication Could not login using that user id or password.
+     * @apiError InvalidArguments Cannot leave user id or password blank.
+     *
+     * @apiExample {curl} Example usage:
+     *     curl -d "user_id=instructor&password=instructor" -X POST http://192.168.56.111/api/token
+     *
      * @Route("/api/token", methods={"POST"})
      *
-     * @return array
+     * @return Response
      */
     public function getToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
-            $msg = 'Cannot leave user id or password blank';
-            return $this->core->getOutput()->renderJsonFail($msg);
+            $msg = 'Cannot leave user id or password blank.';
+            return new Response(JsonResponse::getFailResponse($msg));
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         $token = $this->core->authenticateJwt();
         if ($token) {
-            return $this->core->getOutput()->renderJsonSuccess(['token' => $token]);
+            return new Response(JsonResponse::getSuccessResponse(['token' => $token]));
         }
         else {
-            $msg = "Could not login using that user id or password";
-            return $this->core->getOutput()->renderJsonFail($msg);
+            $msg = "Could not login using that user id or password.";
+            return new Response(JsonResponse::getFailResponse($msg));
         }
     }
 
