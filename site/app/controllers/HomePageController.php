@@ -2,9 +2,8 @@
 
 namespace app\controllers;
 
+use app\models\Course;
 use app\libraries\Core;
-use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -87,25 +86,62 @@ class HomePageController extends AbstractController {
      * @Route("/home")
      */
     public function showHomepage() {
+        $courses = $this->getCourses();
+
+        return new Response(
+            null,
+            new WebResponse(
+                ['HomePage'],
+                'showHomePage',
+                $user = $this->core->getUser(),
+                $courses["unarchived_courses"],
+                $courses["archived_courses"],
+                $this->core->getConfig()->getUsernameChangeText()
+            )
+        );
+    }
+
+    /**
+     * @Route("/api/courses")
+     */
+    public function getApiCourses() {
+        $courses = $this->getCourses();
+        return new Response(
+            JsonResponse::getSuccessResponse([
+                "unarchived_courses" => array_map(
+                    function(Course $course) {
+                        return $course->getCourseInfo();
+                    },
+                    $courses["unarchived_courses"]
+                ),
+                "archived_courses" => array_map(
+                    function(Course $course) {
+                        return $course->getCourseInfo();
+                    },
+                    $courses["archived_courses"]
+                )
+            ])
+        );
+    }
+
+    private function getCourses() {
         $user = $this->core->getUser();
         $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user->getId());
         $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user->getId());
 
-        //Filter out any courses a student has dropped so they do not appear on the homepage.
-        //Do not filter courses for non-students.
+        // Filter out any courses a student has dropped so they do not appear on the homepage.
+        // Do not filter courses for non-students.
 
-        $unarchived_courses = array_filter($unarchived_courses, function($course) use($user) {
+        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user) {
             return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
         });
-        $archived_courses = array_filter($archived_courses, function($course) use($user) {
+        $archived_courses = array_filter($archived_courses, function(Course $course) use($user) {
             return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
         });
 
-        $changeNameText = $this->core->getConfig()->getUsernameChangeText();
-
-        return new Response(
-            null,
-            new WebResponse(['HomePage'], 'showHomePage', $user, $unarchived_courses, $archived_courses, $changeNameText)
-        );
+        return [
+            "unarchived_courses" => $unarchived_courses,
+            "archived_courses" => $archived_courses
+        ];
     }
 }
