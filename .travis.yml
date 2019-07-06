@@ -111,6 +111,8 @@ jobs:
         - pip3 install -U pip
         - pip3 install tzlocal
         - pip3 install sqlalchemy
+        - pip3 install jsonschema
+        - pip3 install jsonref
       script:
         - pushd python_submitty_utils
         - python3 setup.py test
