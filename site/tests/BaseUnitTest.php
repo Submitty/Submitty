@@ -10,9 +10,21 @@ use app\libraries\Access;
 use app\models\Config;
 use app\models\User;
 use ReflectionException;
+use Doctrine\Common\Annotations\AnnotationReader;
 
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
+
+    protected function setUp(): void {
+        AnnotationReader::addGlobalIgnoredName('api');
+        AnnotationReader::addGlobalIgnoredName('apiName');
+        AnnotationReader::addGlobalIgnoredName('apiHeader');
+        AnnotationReader::addGlobalIgnoredName('apiParam');
+        AnnotationReader::addGlobalIgnoredName('apiGroup');
+        AnnotationReader::addGlobalIgnoredName('apiSuccess');
+        AnnotationReader::addGlobalIgnoredName('apiError');
+        AnnotationReader::addGlobalIgnoredName('apiExample');
+    }
 
     /** @noinspection PhpDocSignatureInspection */
     /**
