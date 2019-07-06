@@ -104,6 +104,7 @@ class HomePageController extends AbstractController {
     /**
      * @api {GET} /api/courses List Courses
      * @apiGroup Courses
+     * @apiHeader {String} Authorization User's token.
      *
      * @apiSuccess {Course[]} unarchived_courses            List of unarchived courses.
      * @apiSuccess {String} unarchived_courses.semester     Semester of the course.

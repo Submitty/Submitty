@@ -33,6 +33,7 @@ ini_set('display_errors', 1);
 $loader = require_once(__DIR__.'/../vendor/autoload.php');
 AnnotationReader::addGlobalIgnoredName('api');
 AnnotationReader::addGlobalIgnoredName('apiName');
+AnnotationReader::addGlobalIgnoredName('apiHeader');
 AnnotationReader::addGlobalIgnoredName('apiParam');
 AnnotationReader::addGlobalIgnoredName('apiGroup');
 AnnotationReader::addGlobalIgnoredName('apiSuccess');
