@@ -16,7 +16,7 @@
     </script>
 {% endif %}
 
-{% if not is_ta_grade_released %}
+{% if not is_ta_grading %}
     <canvas id="confetti_canvas"></canvas>
 {% endif %}
 
@@ -31,7 +31,7 @@
             {% endif %}
          >
             {{ Badge.render(nonhidden_earned, nonhidden_max, false) }}
-            <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }} {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
+            <h4>{{ is_ta_grading ? "Autograding Subtotal" : "Total" }} {% if show_hidden_breakdown %} <i>(Without Hidden Points)</i>{% endif %}</h4>
         </div>
     </div>
     {% if show_hidden_breakdown %}
@@ -43,7 +43,7 @@
         >
             <div class="box-title">
                 {{ Badge.render(hidden_earned, hidden_max, false) }}
-                <h4>{{ is_ta_grade_released ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
+                <h4>{{ is_ta_grading ? "Autograding Subtotal" : "Total" }} <i>(With Hidden Points)</i></h4>
             </div>
         </div>
     {% endif %}
