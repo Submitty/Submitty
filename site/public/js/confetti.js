@@ -112,7 +112,7 @@ function addConfetti(){
 
 	        p.y += p.gravity * dt;
 	        p.rotation += p.rotationSpeed * dt;
-	        p.x += Math.random() * x_const;
+	        p.x += p.x_vel;
 	    }
 
 	    while (pieces.length < numberOfPieces && times_ran < max_times) {
@@ -158,6 +158,7 @@ function addConfetti(){
 	function Piece (x, y) {
 	    this.x = x;
 	    this.y = y;
+            this.x_vel = (Math.random() - 0.5) * x_const;
 	    this.size = (Math.random() * 0.5 + 0.75) * size_const;
 	    this.gravity = (Math.random() * 0.5 + 0.75) * gravity_const;
 	    this.rotation = (Math.PI * 2) * Math.random();
