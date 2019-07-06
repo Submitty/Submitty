@@ -803,7 +803,6 @@ class ForumController extends AbstractController {
             $anon = $current_post["anonymous"];
             foreach ($older_posts as $post) {
                 $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
-//                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
                 $_post['content'] = $return = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                     "post_content" => $post["content"]
                 ]);
@@ -813,7 +812,6 @@ class ForumController extends AbstractController {
             if(count($output) == 0) {
                 // Current post
                 $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
-//                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
                 $_post['content'] = $return = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
                     "post_content" => $current_post["content"]
                 ]);
