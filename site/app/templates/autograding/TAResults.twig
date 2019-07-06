@@ -109,11 +109,19 @@
         {# Total auto + manual #}
         {% if has_autograding %}
             <div class="box">
-                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
+                <div class="box-title"
+                    {% if total_score >= total_max %}
+                        onclick="addConfetti();" 
+                        style="padding-top: 15px; padding-bottom: 15px; cursor:pointer;" 
+                    {% else %}
+                        style="padding-top: 15px; padding-bottom: 15px;"
+                    {% endif %}
+                >
                     {{ Badge.render(total_score, total_max, false) }}
                     <h4>Total</h4>
                 </div>
             </div>
+            <canvas id="confetti_canvas"></canvas>
         {% endif %}
         {# /Total auto + manual #}
     </div>
