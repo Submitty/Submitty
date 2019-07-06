@@ -1961,6 +1961,14 @@ end of styles used in the admin gradeable page
     font-size: 0.75em;
 }
 
+#confetti_canvas{
+    position: absolute;
+    display: none;
+    z-index: 99999;
+    top:0px;
+    left: 0px;
+}
+
 .ui-autocomplete{
     max-height: 300px;
     overflow-y: scroll;
