@@ -1,13 +1,16 @@
+"""For use in validating submitty configuration objects against json schemas."""
+
+
 import json
 from jsonschema import validate
-import sys
-# import traceback
-import argparse
 import jsonref
 
 
 class SubmittySchemaException(Exception):
+    """An exception capable of printing helpful information about schema errors."""
+
     def __init__(self, config_json, schema, message, title, schema_error):
+        """Use to aid in printing helpful information about schema errors."""
         super(SubmittySchemaException, self).__init__(schema_error.message)
         self.config_json = config_json
         self.schema = schema
@@ -16,10 +19,7 @@ class SubmittySchemaException(Exception):
         self.schema_message = schema_error.message
 
     def print_human_readable_error(self):
-        """
-        Prints a human readable version of this exception, complete with context
-        from from the violating json object.
-        """
+        """Use to print a human readable version of this exception."""
         print()
         print('{0}:'.format(self.my_message))
         if self.schema_message is not None:
@@ -31,9 +31,11 @@ class SubmittySchemaException(Exception):
 
 def complete_config_validator(j_, s_, show_warnings=True):
     """
+    Validate a complete configuration against a schema.
+
     Given a complete config and a complete config schema, validate
     the complete config one piece at a time. On error, raise a
-    SubmittySchemaException, which is capable of printing a 
+    SubmittySchemaException, which is capable of printing a
     human readable error message.
     """
     warn = show_warnings
@@ -126,6 +128,8 @@ def complete_config_validator(j_, s_, show_warnings=True):
 
 def validate_schema(j_, s_, key='', prefix='', required=True, warn=False):
     """
+    Validate a configuration against a schema.
+
     A function which validates a key within a config and a schema.
     If no key is given, we evaluate the whole config or schema.
     """
@@ -163,12 +167,14 @@ def validate_schema(j_, s_, key='', prefix='', required=True, warn=False):
                                       e)
 
 
-def validate_complete_config_schema_using_filenames(config_path, 
+def validate_complete_config_schema_using_filenames(config_path,
                                                     schema_path,
                                                     show_warnings=True):
     """
+    Call validate_config after reading in config and schema files.
+
     Given a path to a complete configuration and a schema, this function
-    loads both and validates the configuration against the schema. On 
+    loads both and validates the configuration against the schema. On
     failure, an exception is thrown, else, nothing is returned.
     """
     with open(schema_path, 'r') as infile:
