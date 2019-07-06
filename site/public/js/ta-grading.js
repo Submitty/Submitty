@@ -746,6 +746,9 @@ function downloadFile(html_file, url_file) {
     else if (url_file.includes("results")) {
         directory = "results";
     }
+    else if (url_file.includes("checkout")) {
+        directory = "checkout";
+    }
     window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
     return false;
 }
