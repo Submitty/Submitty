@@ -94,6 +94,9 @@ class ForumController extends AbstractController{
             case 'change_thread_status_resolve':
                 $this->changeThreadStatus(1);
                 break;
+            case 'view_single_thread':
+                $this->showSingleThread();
+                break;
             case 'view_thread':
             default:
                 $this->showThreads();
@@ -755,6 +758,87 @@ class ForumController extends AbstractController{
                 "count" => count($threads),
                 "page_number" => $pageNumber,
             ));
+    }
+
+    public function showSingleThread(){
+        $user = $this->core->getUser()->getId();
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
+        $category_id = array($category_id);
+        $thread_status = array();
+        $new_posts = array();
+        $unread_threads = false;
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+            $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
+        }
+        if(!empty($_COOKIE['forum_thread_status'])){
+            $thread_status = explode("|", $_COOKIE['forum_thread_status']);
+        }
+        if(!empty($_COOKIE['unread_select_value'])){
+            $unread_threads = ($_COOKIE['unread_select_value'] === 'true');
+        }
+        foreach ($category_id as &$id) {
+            $id = (int)$id;
+        }
+        foreach ($thread_status as &$status) {
+            $status = (int)$status;
+        }
+
+        $max_thread = 0;
+        $show_deleted = $this->showDeleted();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
+        $current_user = $this->core->getUser()->getId();
+
+        $posts = null;
+        $option = 'tree';
+        if(!empty($_REQUEST['option'])) {
+            $option = $_REQUEST['option'];
+        } else if(!empty($_COOKIE['forum_display_option'])) {
+            $option = $_COOKIE['forum_display_option'];
+        }
+        $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
+        if(!empty($_REQUEST["thread_id"])){
+            $thread_id = (int)$_REQUEST["thread_id"];
+            $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
+            $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
+            foreach ($unread_p as $up) {
+                $new_posts[] = $up["id"];
+            }
+            $thread = $this->core->getQueries()->getThread($thread_id);
+            if(!empty($thread)) {
+                $thread = $thread[0];
+                if($thread['merged_thread_id'] != -1){
+                    // Redirect merged thread to parent
+                    $this->core->addSuccessMessage("Requested thread is merged into current thread.");
+                    $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id'])));
+                    return;
+                }
+                if($option == "alpha"){
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
+                } else if($option == "reverse-time") {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'reverse-time');
+                }else {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
+                }
+                if(empty($posts)){
+                    $this->core->addErrorMessage("No posts found for selected thread.");
+                }
+            }
+
+        }
+        if(empty($_REQUEST["thread_id"]) || empty($posts)) {
+            $new_posts = $this->core->getQueries()->getUnviewedPosts(-1, $current_user);
+            $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
+        }
+        $thread_id = -1;
+        if(!empty($posts)){
+            $thread_id = $posts[0]["thread_id"];
+        }
+        $pageNumber = 0;
+        $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+
+        $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showSingleThread', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
+
     }
 
     public function showThreads(){
