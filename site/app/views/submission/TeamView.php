@@ -2,7 +2,6 @@
 
 namespace app\views\submission;
 
-use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
 use app\views\AbstractView;
 
@@ -16,9 +15,7 @@ class TeamView extends AbstractView {
     * @return string
     */
     public function showTeamPage(Gradeable $gradeable, $team, $teams, $lock, $users_seeking_team) {
-        $site_url = $this->core->getConfig()->getSiteUrl();
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
+        $gradeable_id = $gradeable->getId();
         $user_id = $this->core->getUser()->getId();
         $members = [];
         $seekers = [];
@@ -54,7 +51,14 @@ class TeamView extends AbstractView {
             "members" => $members,
             "seekers" => $seekers,
             "invites_received" => $invites_received,
-            "seeking_partner" => $seeking_partner
+            "seeking_partner" => $seeking_partner,
+            "create_team_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'new']),
+            "leave_team_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'leave']),
+            "seek_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'seek', 'new']),
+            "stop_seek_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'seek', 'stop']),
+            "send_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'new']),
+            "accept_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'accept']),
+            "cancel_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'cancel']),
         ]);
     }
 }
