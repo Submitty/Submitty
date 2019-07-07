@@ -41,7 +41,7 @@
                         {% else %}
                         <i class="fas fa-check-circle"></i>
                         {% endif %}
-                        {{ message.error }}
+                        {{ message.error | nl2br }}
                     </div>
                 {% endfor %}
             </div>
