@@ -108,7 +108,7 @@ class ForumThreadView extends AbstractView {
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
+    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $ajax=false) {
         if(!$this->forumAccess()){
             $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
             return;
@@ -120,20 +120,23 @@ class ForumThreadView extends AbstractView {
         $show_deleted_thread_title = null;
         $currentCourse = $this->core->getConfig()->getCourse();
         $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 
-        //Body Style is necessary to make sure that the forum is still readable...
-        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
-        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
-        $this->core->getOutput()->addInternalCss('forum.css');
-        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
-        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
-        $this->core->getOutput()->addInternalJs('forum.js');
-        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
-        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        if(!$ajax) {
+            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+
+            //Body Style is necessary to make sure that the forum is still readable...
+            $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+            $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+            $this->core->getOutput()->addInternalCss('forum.css');
+            $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+            $this->core->getOutput()->addInternalJs('forum.js');
+            $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+            $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        }
 
         if($filteredThreadExists || $threadFiltering) {
             $currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
@@ -320,245 +323,50 @@ class ForumThreadView extends AbstractView {
             $this->core->getQueries()->visitThread($user, $activeThread['id']);
         }
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
-            "categories" => $categories,
-            "filterFormData" => $filterFormData,
-            "button_params" => $button_params,
-            "thread_exists" => $threadExists,
-            "next_page" => $next_page,
-            "prev_page" => $prev_page,
-            "arrowup_visibility" => $arrowup_visibility,
-            "display_thread_content" => $displayThreadContent,
-            "currentThread" => $currentThread,
-            "currentCourse" => $currentCourse,
-            "generate_post_content" => $generatePostContent,
-            "display_option" => $display_option,
-            "csrf_token" => $this->core->getCsrfToken()
-        ]);
+        $return = "";
+
+        if(!$ajax) {
+            $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
+                "categories" => $categories,
+                "filterFormData" => $filterFormData,
+                "button_params" => $button_params,
+                "thread_exists" => $threadExists,
+                "next_page" => $next_page,
+                "prev_page" => $prev_page,
+                "arrowup_visibility" => $arrowup_visibility,
+                "display_thread_content" => $displayThreadContent,
+                "currentThread" => $currentThread,
+                "currentCourse" => $currentCourse,
+                "generate_post_content" => $generatePostContent,
+                "display_option" => $display_option,
+                "csrf_token" => $this->core->getCsrfToken()
+            ]);
+        }
+        else{
+            $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
+                "userGroup" => $generatePostContent["userGroup"],
+                "activeThread" => $generatePostContent["activeThread"],
+                "activeThreadAnnouncement" => $generatePostContent["activeThreadAnnouncement"],
+                "isCurrentFavorite" => $generatePostContent["isCurrentFavorite"],
+                "display_option" => $generatePostContent["display_option"],
+                "post_data" => $generatePostContent["post_data"],
+                "isThreadLocked" => $generatePostContent["isThreadLocked"],
+                "accessFullGrading" => $generatePostContent["accessFullGrading"],
+                "includeReply" => $generatePostContent["includeReply"],
+                "thread_id" => $generatePostContent["thread_id"],
+                "first_post_id" => $generatePostContent["first_post_id"],
+                "form_action_link" => $generatePostContent["form_action_link"],
+                "merge_thread_content" => $generatePostContent["merge_thread_content"],
+                "csrf_token" => $generatePostContent["csrf_token"],
+                "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
+                "post_box_id" => $generatePostContent["post_box_id"]
+            ]);
+
+            $return = $this->core->getOutput()->renderJsonSuccess(["html"=> json_encode($return)]);
+        }
+
         return $return;
     }
-
-    public function showSingleThread($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
-        if(!$this->forumAccess()){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
-            return;
-        }
-        $threadExists = $this->core->getQueries()->threadExists();
-        $filteredThreadExists = (count($threadsHead)>0);
-        $currentThread = -1;
-        $currentCategoriesIds = array();
-        $show_deleted_thread_title = null;
-        $currentCourse = $this->core->getConfig()->getCourse();
-        $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
-
-        if($filteredThreadExists || $threadFiltering) {
-            $currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
-            $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
-        }
-
-        $currentThreadArr = array_filter($threadsHead, function($ar) use($currentThread) {
-            return ($ar['id'] == $currentThread);
-        });
-
-        if($show_merged_thread) {
-            $show_merged_thread_class = "active";
-            $show_merged_thread_action = "alterShowMergeThreadStatus(0,'" . $currentCourse . "');";
-            $show_merged_thread_title = "Hide Merged Threads";
-        } else {
-            $show_merged_thread_class = "";
-            $show_merged_thread_action = "alterShowMergeThreadStatus(1,'" . $currentCourse . "');";
-            $show_merged_thread_title = "Show Merged Threads";
-        }
-
-        $show_deleted_class = '';
-        $show_deleted_action = '';
-        $show_deleted_thread_title = '';
-
-        if($this->core->getUser()->accessGrading()){
-            if($show_deleted) {
-                $show_deleted_class = "active";
-                $show_deleted_action = "alterShowDeletedStatus(0);";
-                $show_deleted_thread_title = "Hide Deleted Threads";
-            } else {
-                $show_deleted_class = "";
-                $show_deleted_action = "alterShowDeletedStatus(1);";
-                $show_deleted_thread_title = "Show Deleted Threads";
-            }
-        }
-
-        $categories = $this->core->getQueries()->getCategories();
-
-        $cookieSelectedCategories = array();
-        $cookieSelectedThreadStatus = array();
-        $cookieSelectedUnread = false;
-        $category_ids_array = array_column($categories, 'category_id');
-
-        if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
-            foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
-                if(in_array((int)$selectedId, $category_ids_array)) {
-                    $cookieSelectedCategories[] = $selectedId;
-                }
-            }
-        }
-
-        if(!empty($_COOKIE['forum_thread_status'])) {
-            foreach(explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
-                if(in_array((int)$selectedStatus, array(-1,0,1))) {
-                    $cookieSelectedThreadStatus[] = $selectedStatus;
-                }
-            }
-        }
-
-        if(!empty($_COOKIE['unread_select_value'])){
-            $cookieSelectedUnread = $_COOKIE['unread_select_value'];
-        }
-
-        $default_button = array(
-            array(
-                "required_rank" => 4,
-                "display_text" => 'Create Thread',
-                "style" => 'float:right;position:relative;top:3px;',
-                "link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'))),
-                "optional_class" => '',
-                "title" => 'Create Thread',
-                "onclick" => array(false)
-            )
-        );
-
-        $button_params = [
-            "current_thread" => $currentThread,
-            "forum_bar_buttons_right" => $default_button,
-            "forum_bar_buttons_left" => [],
-            "show_threads" => true,
-            "thread_exists" => true,
-            "show_more" => true
-        ];
-
-        if($this->core->getUser()->accessGrading()){
-            if($show_deleted) {
-                $show_deleted_class = "active";
-                $show_deleted_action = "alterShowDeletedStatus(0);";
-                $show_deleted_thread_title = "Hide Deleted Threads";
-            } else {
-                $show_deleted_class = "";
-                $show_deleted_action = "alterShowDeletedStatus(1);";
-                $show_deleted_thread_title = "Show Deleted Threads";
-            }
-        }
-
-        $filterFormData = Array(
-            "categories" => $categories,
-            "current_thread" => $currentThread,
-            "current_category_ids" => $currentCategoriesIds,
-            "current_course" => $currentCourse,
-            "cookie_selected_categories" => $cookieSelectedCategories,
-            "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
-            "cookie_selected_unread_value" => $cookieSelectedUnread,
-            "display_option" => $display_option,
-            "thread_exists" => $threadExists,
-            "display_option" => $display_option
-        );
-
-        $next_page = 0;
-        $prev_page = 0;
-        $arrowup_visibility = 0;
-        $displayThreadContent = "";
-        $generatePostContent = "";
-
-        if(!$threadExists){
-            $button_params["show_threads"] = false;
-            $button_params["thread_exists"] = false;
-        } else {
-            $more_data = array(
-                array(
-                    "filter_option" => $display_option
-                ),
-                array(
-                    "display_text" => $show_merged_thread_title,
-                    "id" => 'merge_thread',
-                    "optional_class" => array(!empty($show_merged_thread_class), $show_merged_thread_class),
-                    "title" => $show_merged_thread_title,
-                    "onclick" => array(true, $show_merged_thread_action),
-                    "link" => '#',
-                    "required_rank" => 4
-                ),
-                array(
-                    "display_text" => $show_deleted_thread_title,
-                    "optional_class" => array(!empty($show_deleted_class), $show_deleted_class),
-                    "id" => 'delete',
-                    "title" => $show_deleted_thread_title,
-                    "link" => '#',
-                    "onclick" => array(true, $show_deleted_action),
-                    "required_rank" => 3
-                ),
-                array(
-                    "display_text" => 'Stats',
-                    "id" => 'forum_stats',
-                    "optional_class" => array(false, ''),
-                    "title" => 'Forum Statistics',
-                    "onclick" => array(false, ''),
-                    "link" => $this->core->buildUrl(['component' => 'forum', 'page' => 'show_stats']),
-                    "required_rank" => 2
-                )
-            );
-            $other_buttons = array(
-                array(
-                    "required_rank" => 4,
-                    "display_text" => 'Filter',
-                    "style" => 'display:inline-block;',
-                    "link" => array(false),
-                    "optional_class" => '',
-                    "title" => 'Filter Threads based on Categories',
-                    "onclick" => array(true, "$('#category_wrapper').css('display','block');")
-                )
-            );
-
-            $button_params["more_data"] = $more_data;
-            $button_params["forum_bar_buttons_left"] = $other_buttons;
-            $next_page = $initialPageNumber + 1;
-            $prev_page = ($initialPageNumber == 1)?0:($initialPageNumber - 1);
-            $arrowup_visibility = ($initialPageNumber == 1)?"display:none;":"";
-            $activeThreadAnnouncement = false;
-            $activeThreadTitle = "";
-            $activeThread = array();
-            $displayThreadContent = $this->displayThreadList($threadsHead, false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds, false);
-
-            if(count($activeThread) == 0) {
-                $activeThread = $this->core->getQueries()->getThread($currentThread)[0];
-            }
-
-            $currentThreadArrValues = array_values($currentThreadArr);
-            $currentThreadFavorite = !empty($currentThreadArrValues) ? $currentThreadArrValues[0]['favorite'] : false;
-            $generatePostContent = $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite, false);
-        }
-
-        if ( !empty($activeThread['id']) ) {
-            $this->core->getQueries()->visitThread($user, $activeThread['id']);
-        }
-
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowSingleThread.twig", [
-            "categories" => $categories,
-            "filterFormData" => $filterFormData,
-            "button_params" => $button_params,
-            "thread_exists" => $threadExists,
-            "next_page" => $next_page,
-            "prev_page" => $prev_page,
-            "arrowup_visibility" => $arrowup_visibility,
-            "display_thread_content" => $displayThreadContent,
-            "currentThread" => $currentThread,
-            "currentCourse" => $currentCourse,
-            "generate_post_content" => $generatePostContent,
-            "display_option" => $display_option,
-            "csrf_token" => $this->core->getCsrfToken()
-        ]);
-//        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowSingleThread.twig", [
-//
-//            "generate_post_content" => $generatePostContent,
-//            "csrf_token" => $this->core->getCsrfToken()
-//        ]);
-        return $this->core->getOutput()->renderJsonSuccess(["html"=> json_encode($return)]);
-    }
-
 
     public function generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, $includeReply = false, $threadExists = false, $display_option = 'time', $categories = [], $cookieSelectedCategories = [], $cookieSelectedThreadStatus = [], $cookieSelectedUnread = [], $currentCategoriesIds = [], $isCurrentFavorite = false, $render=true) {
 

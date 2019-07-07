@@ -1058,13 +1058,13 @@ function sortTable(sort_element_index, reverse=false){
 
 function loadThread(e, obj, thread_id){
     e.preventDefault();
-    var url = buildUrl({'component': 'forum', 'page': 'view_single_thread'});
-    var view_url = buildUrl({'component': 'forum', 'page': 'view_thread'}) + "&thread_id=" + thread_id;
+    var url = buildUrl({'component': 'forum', 'page': 'view_thread'});
     $.ajax({
         url: url,
         type: "POST",
         data: {
-            thread_id: thread_id
+            thread_id: thread_id,
+            ajax: "true"
         },
         success: function(data){
             try {
@@ -1079,13 +1079,13 @@ function loadThread(e, obj, thread_id){
                 $('#messages').append(message);
                 return;
             }
-
-            $('.thread_box').removeClass('active');
             
+            $('.thread_box').removeClass('active');
+
             $(obj).children("div.thread_box").addClass('active');
 
             $('#posts_list').empty().html(JSON.parse(json.data.html));
-            window.history.pushState({"pageTitle":document.title},"", view_url);
+            window.history.pushState({"pageTitle":document.title},"", url);
 
         },
         error: function(){
