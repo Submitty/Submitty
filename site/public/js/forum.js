@@ -129,6 +129,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
     }
     var submit_url = form.attr('action');
 
+    console.log(submit_url);
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -137,6 +139,9 @@ function publishFormWithAttachments(form, test_category, error_message) {
         type: 'POST',
         success: function(data){
             try {
+
+                console.log(data);
+
                 var json = JSON.parse(data);
 
                 if(json["error"]) {
@@ -1047,18 +1052,16 @@ function sortTable(sort_element_index, reverse=false){
             headers[i].innerHTML = headers[i].innerHTML.slice(0, -2);
         }
     }
-
     if (reverse) {
         headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
     } else {
         headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
     }
-
 }
 
 function loadThread(e, obj, thread_id){
     e.preventDefault();
-    var url = buildUrl({'component': 'forum', 'page': 'view_thread'});
+    var url = buildUrl({'component': 'forum', 'page': 'view_thread'}) + "&thread_id=" + thread_id;
     $.ajax({
         url: url,
         type: "POST",
@@ -1079,13 +1082,19 @@ function loadThread(e, obj, thread_id){
                 $('#messages').append(message);
                 return;
             }
-            
+
             $('.thread_box').removeClass('active');
 
             $(obj).children("div.thread_box").addClass('active');
 
             $('#posts_list').empty().html(JSON.parse(json.data.html));
             window.history.pushState({"pageTitle":document.title},"", url);
+
+            enableTabsInTextArea('.post_content_reply');
+            saveScrollLocationOnRefresh('posts_list');
+            addCollapsable();
+
+            $(".post_reply_from").submit(publishPost);
 
         },
         error: function(){
