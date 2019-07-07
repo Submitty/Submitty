@@ -148,7 +148,7 @@
                     Download Zip of All Students
                 </a>
             {% endif %}
-            {% if core.getUser().accessFullGrading() %}
+            {% if core.getUser().accessFullGrading() and is_scanned_exam %}
                 <a class="btn btn-primary"
                    href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
                     Bulk Upload Forensics

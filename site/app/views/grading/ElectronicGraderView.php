@@ -196,6 +196,7 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
+            "is_scanned_exam" => $gradeable->isScannedExam(),
             "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
                 and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
