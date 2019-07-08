@@ -126,10 +126,12 @@ class AdminGradeableController extends AbstractController {
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(
             FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
         );
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -253,6 +255,8 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
@@ -848,7 +852,7 @@ class AdminGradeableController extends AbstractController {
         $tonight = $this->core->getDateTimeNow();
         $tonight->setTime(23, 59, 59);
         $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => (clone $tonight)->sub(new \DateInterval('P1D')),
+            'ta_view_start_date' => (clone $tonight),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
             'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
