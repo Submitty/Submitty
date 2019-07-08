@@ -692,6 +692,7 @@ class HomeworkView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken()
         ]);
 
+        $this->core->getOutput()->addInternalJs('confetti.js');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionBox.twig', $param);
     }
 
