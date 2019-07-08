@@ -494,6 +494,8 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
 
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+
             // Print the form
             $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
                 "customization_data" => $customization->getCustomizationData(),
