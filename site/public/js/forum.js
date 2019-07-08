@@ -129,8 +129,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
     }
     var submit_url = form.attr('action');
 
-    console.log(submit_url);
-
     $.ajax({
         url: submit_url,
         data: formData,
@@ -139,9 +137,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
         type: 'POST',
         success: function(data){
             try {
-
-                console.log(data);
-
                 var json = JSON.parse(data);
 
                 if(json["error"]) {
@@ -1059,47 +1054,52 @@ function sortTable(sort_element_index, reverse=false){
     }
 }
 
-function loadThread(e, obj, thread_id){
-    e.preventDefault();
-    var url = buildUrl({'component': 'forum', 'page': 'view_thread'}) + "&thread_id=" + thread_id;
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: {
-            thread_id: thread_id,
-            ajax: "true"
-        },
-        success: function(data){
-            try {
-                var json = JSON.parse(data);
-            } catch (err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
-                return;
+function loadThreadHandler(){
+    $("a.thread_box_link").click(function(event){
+        event.preventDefault();
+        var obj = this;
+
+        var thread_id = $(obj).attr("data");
+
+        var url = buildUrl({'component': 'forum', 'page': 'view_thread'}) + "&thread_id=" + thread_id;
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                thread_id: thread_id,
+                ajax: "true"
+            },
+            success: function(data){
+                try {
+                    var json = JSON.parse(data);
+                } catch (err){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                if(json['error']){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+
+                $('.thread_box').removeClass('active');
+
+                $(obj).children("div.thread_box").addClass('active');
+
+                $('#posts_list').empty().html(JSON.parse(json.data.html));
+                window.history.pushState({"pageTitle":document.title},"", url);
+
+                enableTabsInTextArea('.post_content_reply');
+                saveScrollLocationOnRefresh('posts_list');
+                addCollapsable();
+
+                $(".post_reply_from").submit(publishPost);
+
+            },
+            error: function(){
+                window.alert("Something went wrong while trying to display thread details. Please try again.");
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
-                $('#messages').append(message);
-                return;
-            }
-
-            $('.thread_box').removeClass('active');
-
-            $(obj).children("div.thread_box").addClass('active');
-
-            $('#posts_list').empty().html(JSON.parse(json.data.html));
-            window.history.pushState({"pageTitle":document.title},"", url);
-
-            enableTabsInTextArea('.post_content_reply');
-            saveScrollLocationOnRefresh('posts_list');
-            addCollapsable();
-
-            $(".post_reply_from").submit(publishPost);
-
-        },
-        error: function(){
-            window.alert("Something went wrong while trying to display thread details. Please try again.");
-        }
+        });
     });
-    return false;
 }
