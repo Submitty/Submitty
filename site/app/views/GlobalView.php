@@ -1,6 +1,7 @@
 <?php
 
 namespace app\views;
+use app\models\Breadcrumb;
 
 class GlobalView extends AbstractView {
     public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css=array(), $js=array()) {
@@ -17,13 +18,19 @@ class GlobalView extends AbstractView {
             }
         }
 
-        $pageTitle = $this->core->getConfig()->isCourseLoaded() ? $this->core->getFullCourseName() : "Submitty";
+        $course_name = ucwords(strtolower($this->core->getFullCourseName()));
+        $page_name = end($breadcrumbs)->getTitle();
+        // We assume that if there is no page breadcrumb (only course), we are on gradeables
+        if ($course_name == ucwords(strtolower($page_name))) {
+            $page_name = "Gradeables";
+        }
+        $page_title = $this->core->getConfig()->isCourseLoaded() ? "Submitty ".$course_name." ".$page_name : "Submitty";
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
             "css" => $css,
             "js" => $js,
-            "page_title" => $pageTitle,
+            "page_title" => $page_title,
             "sidebar_buttons" => $sidebar_buttons,
             "breadcrumbs" => $breadcrumbs,
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
