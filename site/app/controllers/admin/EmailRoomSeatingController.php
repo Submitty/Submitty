@@ -70,13 +70,12 @@ Please email your instructor with any questions or concerns.';
             $email_data = [
                 "subject" => $this->replacePlaceholders($seating_assignment_subject, $room_seating_json),
                 "body" => $this->replacePlaceholders($seating_assignment_body, $room_seating_json),
-                "recipient" => $user_email
+                "to_user_id" => $user_id
             ];
 
-            $seating_assignment_email = new Email($this->core, $email_data);
-            $this->core->getQueries()->createEmail($seating_assignment_email);
+            $seating_assignment_emails[] = new Email($this->core, $email_data);
         }
-
+        $this->core->getNotificationFactory()->sendEmails($seating_assignment_emails);
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
         $this->core->redirect($this->core->buildNewCourseUrl());
     }

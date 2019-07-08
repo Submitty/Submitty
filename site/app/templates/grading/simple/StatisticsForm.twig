@@ -13,7 +13,7 @@
                     <th width="33%">Std. Deviation</th>
                 </tr>
             </thead>
-            {% for section, info in sections if section != null %}
+            {% for section, info in sections |filter((section,info) => section != null) %}
                 <tbody>
                 <tr>
                     <td>{{ section }}</td>

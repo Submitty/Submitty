@@ -385,6 +385,16 @@ table tr.table-header {
     font-size: 18px;
 }
 
+#config_search {
+    padding-right: 20px;
+}
+
+#clear_search_button {
+    margin-left: -20px;
+    padding-right: 20px;
+    color: red;
+}
+
 .option-alt {
     font-style: italic;
 }
@@ -1475,6 +1485,14 @@ end of styles used in the admin gradeable page
     list-style: none;
     padding-left: 15px;
     font-size: 0.75em;
+}
+
+#confetti_canvas{
+    position: absolute;
+    display: none;
+    z-index: 99999;
+    top:0px;
+    left: 0px;
 }
 
 .ui-autocomplete{
