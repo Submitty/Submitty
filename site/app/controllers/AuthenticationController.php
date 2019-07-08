@@ -132,7 +132,7 @@ class AuthenticationController extends AbstractController {
      * @apiParam {String} password  User's password.
      *
      * @apiSuccess {String} token   Access token for the user.
-     * @apiError FailedAuthentication Could not login using that user id or password.
+     * @apiError AuthenticationException Could not login using that user id or password.
      * @apiError InvalidArguments Cannot leave user id or password blank.
      *
      * @apiExample {curl} Example usage:

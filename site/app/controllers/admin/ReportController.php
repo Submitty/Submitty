@@ -53,6 +53,10 @@ class ReportController extends AbstractController {
     /**
      * Generates grade summary files for every user
      *
+     * @api {POST} /api/:semester/:course/reports/summaries Generate grade summary
+     * @apiGroup Courses
+     * @apiHeader {String} Authorization User's token.
+     *
      * @Route("/{_semester}/{_course}/reports/summaries")
      * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
