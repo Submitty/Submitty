@@ -171,7 +171,10 @@ function getMessages()
 
     var message = $('#cust_messages_textarea').val();
 
-    messages.push(message);
+    if(message)
+    {
+        messages.push(message);
+    }
 
     return messages;
 }
