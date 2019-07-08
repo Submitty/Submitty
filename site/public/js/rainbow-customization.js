@@ -92,6 +92,11 @@ function getSection()
         var section = this.getAttribute('data-section').toString();
         var label = this.value;
 
+        if(label === "")
+        {
+            throw "All sections MUST have a label before saving"
+        }
+
         // Add to sections
         sections[section] = label;
     });
@@ -230,33 +235,41 @@ function checkAutoRGStatus()
 //This function attempts to create a new customization.json server-side based on form input
 function ajaxUpdateJSON(successCallback, errorCallback) {
     $('#save_status').html('Saving...');
-    $.getJSON({
-        type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'reports',
-            'action': 'customization'
-        }),
-        data: {json_string: buildJSON()},
-        success: function (response) {
-            if (response.status === 'success') {
-                $('#save_status').html('Generating rainbow grades, please wait...');
 
-                // Call the server to see if auto_rainbow_grades has completed
-                checkAutoRGStatus();
-                //successCallback(response.data);
-            } else if (response.status === 'fail') {
-                $('#save_status').html('A failure occurred saving customization data');
-                //errorCallback(response.message, response.data);
-            } else {
-                $('#save_status').html('Internal Server Error');
-                console.error(response.message);
+    try
+    {
+        $.getJSON({
+            type: "POST",
+            url: buildUrl({
+                'component': 'admin',
+                'page': 'reports',
+                'action': 'customization'
+            }),
+            data: {json_string: buildJSON()},
+            success: function (response) {
+                if (response.status === 'success') {
+                    $('#save_status').html('Generating rainbow grades, please wait...');
+
+                    // Call the server to see if auto_rainbow_grades has completed
+                    checkAutoRGStatus();
+                    //successCallback(response.data);
+                } else if (response.status === 'fail') {
+                    $('#save_status').html('A failure occurred saving customization data');
+                    //errorCallback(response.message, response.data);
+                } else {
+                    $('#save_status').html('Internal Server Error');
+                    console.error(response.message);
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server: ' + response);
             }
-        },
-        error: function (response) {
-            console.error('Failed to parse response from server: ' + response);
-        }
-    });
+        });
+    }
+    catch(err)
+    {
+        $('#save_status').html(err);
+    }
 }
 
 $(document).ready(function () {
