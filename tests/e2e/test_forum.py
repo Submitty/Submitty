@@ -277,6 +277,7 @@ class TestForum(BaseTestCase):
         assert not self.thread_exists(title3)
 
     def test_infinite_scroll(self):
+        self.skipTest('Skipping until rewritten to be more stable/less flakey')
         self.init_and_enable_discussion()
         list_title = []
         list_content = []
