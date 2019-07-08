@@ -130,7 +130,6 @@ class BaseTestCase(unittest.TestCase):
     def click_class(self, course, course_name=None):
         if course_name is None:
             course_name = course
-            course_name = course_name.capitalize()
         course_name = course_name.title()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
         print(self.driver.page_source)
