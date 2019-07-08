@@ -11,8 +11,14 @@
     </p>
 
     <div class="column-wrapper" style="margin: 1em 0;">
-        {# Search box #}
-        {% include "grading/simple/StudentSearch.twig" %}
+        <div id="checkpoint-sticky" class="column-wrapper">
+            {% include "grading/simple/StudentSearch.twig" %}
+            <div>
+                <p class="not-sticky">Undo/Redo Changes</p>
+                <button id="checkpoint-undo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled><i class="fas fa-undo"></i></button>
+                <button id="checkpoint-redo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled><i class="fas fa-redo"></i></button>
+            </div>
+        </div>
 
         <div>
             <button class="btn btn-primary" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>

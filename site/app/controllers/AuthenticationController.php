@@ -61,6 +61,7 @@ class AuthenticationController extends AbstractController {
     public function logout() {
         Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
         Utils::setCookie('submitty_session', '', time() - 3600);
+        Utils::setCookie('checkpoint_history', '', time() - 3600);
         $this->core->removeCurrentSession();
         $this->core->redirect($this->core->buildNewUrl(['authentication', 'login']));
     }
