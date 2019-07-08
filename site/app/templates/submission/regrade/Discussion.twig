@@ -60,34 +60,37 @@
     </div>
 {% endfor %}
 <div style="padding:20px;">
-    <form method="POST" id="reply-text-form" >
-        <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
-        <input type="hidden" id="gradeable_id" name="gradeable_id" value="{{ gradeable_id }}">
-        <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
-        <label for="reply-text-area">Write a inquiry:</label>
-        <textarea name="replyTextArea" id="reply-text-area" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ "Type Response Here" }}" required></textarea>
-        <div class="row" style="justify-content: flex-end">
-        <div style="margin-right: auto">
-        {{ self.bbcode_buttons() }}
-        </div>
-            {% if grade_inquiry_status == 'none' %}
-                {# No request yet #}
-                <input disabled type="button" formaction="{{ request_regrade_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Submit Grade Inquiry" style="float: right" >
-            {% elseif grade_inquiry_status == 'pending_grading' %}
-                {# Admin, request is open #}
-                <input disabled type="button" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Respond and Resolve Grade Inquiry" style="margin:15px 0 0 5px; float: right">
-                <input disabled type="button" formaction="{{ make_request_post_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Post Additional Information" style="margin:15px 0 0 5px; float: right">
-                <input type="button" id="grading_close_inquiry" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-default" value="Close Grade Inquiry"  style="margin:15px 0 0 5px; float: right">
-            {% elseif grade_inquiry_status == 'pending' %}
-                {# Request pending, we can submit new posts #}
-                <input disabled type="button" formaction="{{ make_request_post_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Post Additional Information" style="margin:15px 0 0 5px; float: right">
-                <input disabled type="button" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-default" value="Close Grade Inquiry" style="margin:15px 0 0 5px; float: right">
-            {% elseif grade_inquiry_status == 'resolved' %}
-                {# Request closed #}
-                <input disabled type="button" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-default" value="Reopen Grade Inquiry" style="margin:15px 0 0 5px; float: right" >
-            {% endif %}
-        </div>
-    </form>
+    {% if grade_inquiry_status != 'no_submission' %}
+        <form method="POST" id="reply-text-form" >
+            <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
+            <input type="hidden" id="gradeable_id" name="gradeable_id" value="{{ gradeable_id }}">
+            <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
+
+                <label for="reply-text-area">Write a inquiry:</label>
+                <textarea name="replyTextArea" id="reply-text-area" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ "Type Response Here" }}" required></textarea>
+            <div class="row" style="justify-content: flex-end">
+            <div style="margin-right: auto">
+            {{ self.bbcode_buttons() }}
+            </div>
+                {% if grade_inquiry_status == 'none' %}
+                    {# No request yet #}
+                    <input disabled type="button" formaction="{{ request_regrade_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Submit Grade Inquiry" style="float: right" >
+                {% elseif grade_inquiry_status == 'pending_grading' %}
+                    {# Admin, request is open #}
+                    <input disabled type="button" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Respond and Resolve Grade Inquiry" style="margin:15px 0 0 5px; float: right">
+                    <input disabled type="button" formaction="{{ make_request_post_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Post Additional Information" style="margin:15px 0 0 5px; float: right">
+                    <input type="button" id="grading_close_inquiry" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-default" value="Close Grade Inquiry"  style="margin:15px 0 0 5px; float: right">
+                {% elseif grade_inquiry_status == 'pending' %}
+                    {# Request pending, we can submit new posts #}
+                    <input disabled type="button" formaction="{{ make_request_post_url }}" class="grade-inquiry-action-submit btn btn-primary" value="Post Additional Information" style="margin:15px 0 0 5px; float: right">
+                    <input disabled type="button" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-default" value="Close Grade Inquiry" style="margin:15px 0 0 5px; float: right">
+                {% elseif grade_inquiry_status == 'resolved' %}
+                    {# Request closed #}
+                    <input disabled type="button" formaction="{{ change_request_status_url }}" class="grade-inquiry-action-submit btn btn-default" value="Reopen Grade Inquiry" style="margin:15px 0 0 5px; float: right" >
+                {% endif %}
+            </div>
+        </form>
+    {% endif %}
 </div>
 <script type="text/javascript">
     $("#reply-text-area").keyup(function() {
