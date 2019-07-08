@@ -228,14 +228,9 @@ class SubmissionController extends AbstractController {
     }
 
     private function changeRequestStatus() {
+        $content = str_replace("\r", "", $_POST['replyTextArea']);
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['submitter_id'] ?? '';
-        $status = $_REQUEST['status'] ?? null;
-
-        if ($status === null) {
-            $this->core->getOutput()->renderJsonFail('Missing status parameter');
-            return;
-        }
 
         $user = $this->core->getUser();
 
@@ -260,9 +255,21 @@ class SubmissionController extends AbstractController {
             return;
         }
 
+        // toggle status
+        $status = $graded_gradeable->getRegradeRequest()->getStatus();
+        if ($status == -1) {
+            $status = 0;
+        }
+        else {
+            $status = -1;
+        }
+
         try {
             $graded_gradeable->getRegradeRequest()->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            if ($content != "") {
+                $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
+            }
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1861,7 +1868,7 @@ class SubmissionController extends AbstractController {
               "recipient" => $grader->getEmail(),
               "user_id" => $grader->getId()
           ];
-          $new_grade_inquiry_email = new Email($this->core, grade_inquiry_email_data);
+          $new_grade_inquiry_email = new Email($this->core, $grade_inquiry_email_data);
           $this->core->getQueries()->createEmail($new_grade_inquiry_email);
         }
 
