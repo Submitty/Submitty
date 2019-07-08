@@ -738,17 +738,6 @@ function autoResizeComment(e){
     e.target.style.height = e.target.scrollHeight + "px";
 }
 
-function downloadTaGradingFile(file, path, dir) {
-    window.location = buildUrl({
-        'component': 'misc',
-        'page': 'download_file',
-        'dir': dir,
-        'file': file,
-        'path': path
-    });
-    return false;
-}
-
 function hideIfEmpty(element) {
     $(element).each(function() {
         if ($(this).hasClass("empty")) {
