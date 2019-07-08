@@ -41,6 +41,7 @@ class AccessControl {
      * @param string $role
      */
     public function setRole($role) {
+        $role = strtoupper($role);
         if (in_array(
             $role,
             [
