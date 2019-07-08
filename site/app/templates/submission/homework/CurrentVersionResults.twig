@@ -26,7 +26,7 @@
         {% endif %}
     </div>
     <div class="box col-md-6">
-        submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}<br />
+        <span id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
         days late: {{ days_late }} (before extensions)<br />
         {% if results is defined %}
             grading time: {{ grade_time }} seconds<br />
