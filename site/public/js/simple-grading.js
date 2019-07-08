@@ -376,7 +376,7 @@ function setupCheckboxCells() {
 
     if (history.length > 1) {
         $("#checkpoint-undo").prop("disabled", false);
-        if (history[0] < history.length) {
+        if (history[0] < history.length - 1) {
             $("#checkpoint-redo").prop("disabled", false);
         }
     }
