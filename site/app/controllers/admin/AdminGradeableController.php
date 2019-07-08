@@ -210,6 +210,7 @@ class AdminGradeableController extends AbstractController {
         if ($config_repo_name !== '') {
             $repository_config_dir = $config_repo_name;
             $repository_error_message = $this->getValidPathsToConfigDirectories($repository_config_dir,$all_repository_config_paths);
+            usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
         }
 
         // Load output from build of config file
