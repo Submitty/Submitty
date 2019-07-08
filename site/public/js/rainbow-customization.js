@@ -234,10 +234,12 @@ function checkAutoRGStatus()
 
 //This function attempts to create a new customization.json server-side based on form input
 function ajaxUpdateJSON(successCallback, errorCallback) {
-    $('#save_status').html('Saving...');
 
     try
     {
+        $('#save_status').html('Saving...');
+
+
         $.getJSON({
             type: "POST",
             url: buildUrl({
@@ -270,6 +272,7 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     {
         $('#save_status').html(err);
     }
+
 }
 
 $(document).ready(function () {

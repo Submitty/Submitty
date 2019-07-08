@@ -1,9 +1,13 @@
 <div class="content">
     <h2>Rainbow Grades Customization</h2>
-    <div id="save_status">
-        No changes to save
+
+    <div id="save_status_container" class="customization_item">
+        <span id="status_label">Status: </span>
+        <div id="save_status">
+            No changes to save
+        </div>
+        <input id="save_status_button" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
     </div>
-    <input type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
 
     <div id="list_wrapper">
         <div id="display_benchmarks" class="customization_item">
