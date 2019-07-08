@@ -167,9 +167,12 @@ class UsersController extends AbstractController {
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
         $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
-        $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"".strip_tags($_POST['user_preferred_lastname'])."\"<br>";
-
+        if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
+        }
+        if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
+            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"".strip_tags($_POST['user_preferred_lastname'])."\"<br>";
+        }
 
         //Database password cannot be blank, no check on format
         if ($use_database && (($_POST['edit_user'] == 'true' && !empty($_POST['user_password'])) || $_POST['edit_user'] != 'true')) {
@@ -199,12 +202,12 @@ class UsersController extends AbstractController {
         $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalFirstName(trim($_POST['user_firstname']));
-        if (isset($_POST['user_preferred_firstname'])) {
+        if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
             $user->setPreferredFirstName(trim($_POST['user_preferred_firstname']));
         }
 
         $user->setLegalLastName(trim($_POST['user_lastname']));
-        if (isset($_POST['user_preferred_lastname'])) {
+        if (isset($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) != "") {
             $user->setPreferredLastName(trim($_POST['user_preferred_lastname']));
         }
 
