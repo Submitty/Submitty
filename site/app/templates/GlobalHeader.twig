@@ -99,7 +99,7 @@
                             {% else %}
                             <i class="fas fa-check-circle"></i>
                             {% endif %}
-                            {{ message.error }}
+                            {{ message.error | nl2br }}
                         </span>
                         <a class="fas fa-times" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                     </div>

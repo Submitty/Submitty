@@ -36,7 +36,7 @@
                 {% if lock %}
                     <span>&emsp;{{ invited }}</span> <br />
                 {% else %}
-                    <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'cancel'}) }}" method="post">
+                    <form action="{{ cancel_invitation_url }}" method="post">
                         <input type="hidden" name="cancel_id" value={{ invited }} />
                         &emsp;{{ invited }}: <input type="submit" value = "Cancel" class="btn btn-danger" />
                     </form>
@@ -74,12 +74,12 @@
     <div class="content">
         <h3>Invite new teammates by their user ID:</h3>
         <br />
-        <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'invitation'}) }}" method="post">
+        <form action="{{ send_invitation_url }}" method="post">
             <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
             <input type="submit" value = "Invite" class="btn btn-primary" />
         </form>
         <br />
-        <button class="btn btn-danger" onclick="location.href='{{ core.buildUrl({'component' : 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'leave_team'}) }}'">Leave Team</button>
+        <button class="btn btn-danger" onclick="location.href='{{ leave_team_url }}'">Leave Team</button>
     </div>
 {% elseif team == null %}
     <div class="content">
@@ -89,7 +89,7 @@
             <h3>Invitations:</h3> <br />
 
             {% for invite in invites_received %}
-                <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'accept'}) }}" method="post">
+                <form action="{{ accept_invitation_url }}" method="post">
                     <input type="hidden" name="team_id" value={{ invite.getId() }} />
                     &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" class="btn btn-success" />
                 </form>
@@ -99,12 +99,12 @@
 
         {# Create new team button #}
         <br />
-        <button class="btn btn-primary" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'create_new_team'}) }}'">Create New Team </button>
+        <button class="btn btn-primary" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
 
         {% if seeking_partner %}
-            <button class="btn btn-danger" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'stop_seek_team'}) }}'">Stop Seeking Team/Partner </button>
+            <button class="btn btn-danger" onclick="location.href='{{ stop_seek_url }}'">Stop Seeking Team/Partner </button>
         {% else %}
-            &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'seek_team'}) }}'">Seek Team/Partner </button>
+            &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{{ seek_url }}'">Seek Team/Partner </button>
         {% endif %}
     </div>
 {% endif %}
