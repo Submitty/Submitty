@@ -12,13 +12,13 @@ use app\libraries\Core;
  */
 class Response extends AbstractResponse {
     /** @var null | WebResponse  */
-    protected $web_response = null;
+    public $web_response = null;
 
     /** @var null | JsonResponse  */
-    protected $json_response = null;
+    public $json_response = null;
 
     /** @var null | RedirectResponse */
-    protected $redirect_response = null;
+    public $redirect_response = null;
 
     /**
      * Response constructor.

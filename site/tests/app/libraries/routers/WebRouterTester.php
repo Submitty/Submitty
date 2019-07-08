@@ -148,12 +148,11 @@ class WebRouterTester extends BaseUnitTest {
         $request = Request::create(
             "/api" . $url
         );
-        $this->expectException(ResourceNotFoundException::class);
-        $router = new WebRouter($request, $core, true, true);
+        $response = WebRouter::getApiResponse($request, $core, true);
         $this->assertEquals([
             'status' => "fail",
             'message' => "Endpoint not found."
-        ], $router->run()->render());
+        ], $response->json_response->json);
     }
 
     public function testApiWrongMethod() {
@@ -161,11 +160,10 @@ class WebRouterTester extends BaseUnitTest {
         $request = Request::create(
             "/api/token"
         );
-        $this->expectException(MethodNotAllowedException::class);
-        $router = new WebRouter($request, $core, true, true);
+        $response = WebRouter::getApiResponse($request, $core, true);
         $this->assertEquals([
             'status' => "fail",
             'message' => "Method not allowed."
-        ], $router->run()->render());
+        ], $response->json_response->json);
     }
 }
