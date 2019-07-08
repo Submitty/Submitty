@@ -738,18 +738,14 @@ function autoResizeComment(e){
     e.target.style.height = e.target.scrollHeight + "px";
 }
 
-function downloadFile(html_file, url_file) {
-    var directory = "";
-    if (url_file.includes("submissions")) {
-        directory = "submissions";
-    }
-    else if (url_file.includes("results")) {
-        directory = "results";
-    }
-    else if (url_file.includes("checkout")) {
-        directory = "checkout";
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
+function downloadTaGradingFile(file, path, dir) {
+    window.location = buildUrl({
+        'component': 'misc',
+        'page': 'download_file',
+        'dir': dir,
+        'file': file,
+        'path': path
+    });
     return false;
 }
 
