@@ -454,7 +454,6 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
-config['timezone'] = TIMEZONE
 
 if not args.worker:
     config['site_log_path'] = TAGRADING_LOG_PATH
@@ -464,6 +463,9 @@ if not args.worker:
     config['institution_name'] = INSTITUTION_NAME
     config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
+    config['timezone'] = TIMEZONE
+
+config['worker'] = True if args.worker == 1 else False
 
 with open(SUBMITTY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
@@ -512,19 +514,20 @@ if not args.worker:
 ##############################################################################
 # Write email json
 
-config = OrderedDict()
-config['email_enabled'] = EMAIL_ENABLED
-config['email_user'] = EMAIL_USER
-config['email_password'] = EMAIL_PASSWORD
-config['email_sender'] = EMAIL_SENDER
-config['email_reply_to'] = EMAIL_REPLY_TO
-config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
-config['email_server_port'] = EMAIL_SERVER_PORT
+if not args.worker:
+    config = OrderedDict()
+    config['email_enabled'] = EMAIL_ENABLED
+    config['email_user'] = EMAIL_USER
+    config['email_password'] = EMAIL_PASSWORD
+    config['email_sender'] = EMAIL_SENDER
+    config['email_reply_to'] = EMAIL_REPLY_TO
+    config['email_server_hostname'] = EMAIL_SERVER_HOSTNAME
+    config['email_server_port'] = EMAIL_SERVER_PORT
 
-with open(EMAIL_JSON, 'w') as json_file:
-    json.dump(config, json_file, indent=2)
-shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
-os.chmod(EMAIL_JSON, 0o440)
+    with open(EMAIL_JSON, 'w') as json_file:
+        json.dump(config, json_file, indent=2)
+    shutil.chown(EMAIL_JSON, 'root', DAEMONPHP_GROUP)
+    os.chmod(EMAIL_JSON, 0o440)
 
 
 
