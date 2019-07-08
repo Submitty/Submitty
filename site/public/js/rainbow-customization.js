@@ -192,6 +192,38 @@ function buildJSON(){
     return ret;
 }
 
+function checkAutoRGStatus()
+{
+    // Send request
+    $.getJSON({
+        type: "POST",
+        url: buildUrl({
+            'component': 'admin',
+            'page': 'reports',
+            'action': 'check_autorg_status'
+        }),
+        success: function (response) {
+            if (response.status === 'success') {
+
+                $('#save_status').html('Rainbow grades successfully generated!');
+
+            } else if (response.status === 'fail') {
+
+                $('#save_status').html('A failure occurred generating rainbow grades');
+
+            } else {
+
+                $('#save_status').html('Internal Server Error');
+                console.error(response.message);
+
+            }
+        },
+        error: function (response) {
+            console.error('Failed to parse response from server: ' + response);
+        }
+    });
+}
+
 //This function attempts to create a new customization.json server-side based on form input
 function ajaxUpdateJSON(successCallback, errorCallback) {
     $('#save_status').html('Saving...');
@@ -205,13 +237,16 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
         data: {json_string: buildJSON()},
         success: function (response) {
             if (response.status === 'success') {
-                $('#save_status').html('Saved successfully');
+                $('#save_status').html('Generating rainbow grades, please wait...');
+
+                // Call the server to see if auto_rainbow_grades has completed
+                checkAutoRGStatus();
                 //successCallback(response.data);
             } else if (response.status === 'fail') {
-                $('#save_status').html('Failed to save');
+                $('#save_status').html('A failure occurred saving customization data');
                 //errorCallback(response.message, response.data);
             } else {
-                alert('Internal server error');
+                $('#save_status').html('Internal Server Error');
                 console.error(response.message);
             }
         },

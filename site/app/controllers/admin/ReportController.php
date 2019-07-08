@@ -28,6 +28,10 @@ use app\exceptions\ValidationException;
  *
  */
 class ReportController extends AbstractController {
+
+    const MAX_AUTO_RG_WAIT_TIME = 60;       // Time in seconds a call to autoRainbowGradesStatus should
+                                            // wait for the job to complete before timing out and returning failure
+
     public function run() {
         switch ($_REQUEST['action']) {
             case 'csv':
@@ -38,6 +42,9 @@ class ReportController extends AbstractController {
                 break;
             case 'customization':
                 $this->generateCustomization();
+                break;
+            case 'check_autorg_status':
+                $this->autoRainbowGradesStatus();
                 break;
             case 'reportpage':
             default:
@@ -461,6 +468,7 @@ class ReportController extends AbstractController {
                 return 'ERROR';
         }
     }
+
     public function generateCustomization(){
 
         // Only allow course admins to access this page
@@ -507,6 +515,54 @@ class ReportController extends AbstractController {
                 'messages' => $customization->getMessages()
             ]);
 
+        }
+    }
+
+    public function autoRainbowGradesStatus()
+    {
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        // Create path to the file we expect to find in the jobs queue
+        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Create path to output.html we expect to find in rainbow_grades directory
+        $rg_file = $this->core->getConfig()->getCoursePath();
+        $rg_file = FileUtils::joinPaths($rg_file, 'rainbow_grades', 'output.html');
+
+        // Get the max time to wait before timing out
+        $maxWaitTime = self::MAX_AUTO_RG_WAIT_TIME;
+
+        // Wait for rainbow_grades directory to be populated if it isn't already
+        while(!file_exists($rg_file) AND $maxWaitTime)
+        {
+            sleep(1);
+            $maxWaitTime--;
+        }
+
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($jobs_file) AND $maxWaitTime)
+        {
+            sleep(1);
+            $maxWaitTime--;
+        }
+
+        // If we finished the previous loops before maxWaitTime hit 0 then the file successfully left the jobs queue
+        // implying that it finished
+        if($maxWaitTime)
+        {
+            $this->core->getOutput()->renderJsonSuccess("Success");
+        }
+        // Else we timed out or something else went wrong
+        else
+        {
+            $this->core->getOutput()->renderJsonFail('A failure occurred waiting for the job to finish');
         }
     }
 }
