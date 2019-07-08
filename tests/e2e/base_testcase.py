@@ -132,7 +132,7 @@ class BaseTestCase(unittest.TestCase):
             course_name = course
         course_name = course_name.title()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
-        print(self.driver.page_source)
+        # print(self.driver.page_source)
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is('Submitty ' + course_name + ' Gradeables'))
 
     # see Navigation.twig for html attributes to use as arguments
