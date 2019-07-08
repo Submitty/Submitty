@@ -1,3 +1,59 @@
+"""
+How to read this file and extend it for your own course:
+
+This file presents an example of a python custom validator for use in your Submitty assignment.
+At a high level, the structure of such a validator is simple:
+
+As input, a python custom validator can take:
+1. Any files produced by a student during a testcase.
+2. A json file, entitled custom_validator_input.json. This json file
+     is the validation object within the config.json that invokes this
+     custom validator.
+3. Command line arguments provided to this validator.
+
+As output, a python custom validator provides:
+On standard output, a json of the following form:
+
+{
+  'status' : "success"
+  'data': {
+            # Score is on a range from zero (no credit) to 1 (full credit)
+            'score' : score,
+            # A message to the student
+            'message' : message,
+            # The status of the submission (indicates if the
+            # student succeeded at the testcase).
+            # Values can be 'information', 'failure', 'warning'
+            # or 'success'.
+            'status':status
+          }
+}
+
+OR
+
+{
+  'status' : "failure"
+  'message' : 'A failure message to help you debug the error'
+}
+
+In this assignment, the student has been asked to randomly generate
+n numbers, output them, and then output their sum.
+
+To test that the output is truly random, we run their program multiple
+times. For each run, we make sure that:
+1. The student produced n numbers.
+2. They are correctly summed.
+3. Between each pair of runs we make sure that the generated numbers aren't
+   identical (that they are random)
+
+To read this file, begin at the bottom with do_the_grading, then progress to
+grade_a_single_file. If you are interested, you may also examine the return_result
+functions and the get_actual_files helper function or you may just copy them.
+
+If you are interested in parsing command line arguments, examine the parse_args function.
+
+"""
+
 import os
 import sys
 import argparse
