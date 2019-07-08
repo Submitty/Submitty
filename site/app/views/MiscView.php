@@ -11,6 +11,15 @@ class MiscView extends AbstractView {
     }
 
     public function displayCode($file_type, $filename, $file_contents) {
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
         return $this->core->getOutput()->renderTwigTemplate("misc/Code.twig", [
             "filename" => $filename,
             "file_contents" => $file_contents,

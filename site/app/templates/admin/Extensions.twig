@@ -56,23 +56,52 @@
     function clearDate(){
         document.getElementById("late_calendar").value = "";
     }
+    function calculateLateDays(inputDate){
+        var due_date_value = document.getElementById("due_date").innerHTML.substr(0,10);
+        var new_due_date = new Date(inputDate);
+        var old_due_date = new Date(due_date_value);
+        var delta = (new_due_date - old_due_date) / (1000*60*60*24);
+        if (delta < 0) {
+            delta = 0;
+        }
+        var diff = Math.floor(delta);
+        document.getElementById("late_days").value = diff;    
+    }
     $(document).ready(function() {
-        flatpickr(document.getElementById("late_calendar"), {
+        flatpickr("#late_calendar", {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Now"
+                            }, 
+                            {
+                                label: "End of time"
+                            }
+                        ],
+                        label: "or",
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0: 
+                                    date = new Date();
+                                    break;
+                                case 1: 
+                                    date = new Date("9999-01-01");
+                                    break;
+                            }
+                            fp.setDate(date);
+                            calculateLateDays(date);
+                        }
+                    }
+                )],
             allowInput: true,
             enableTime: false,
             enableSeconds: false,
             time_24hr: true,
             dateFormat: "Y-m-d",
             onChange: function(selectedDates, dateStr, instance) {
-                var due_date_value = document.getElementById("due_date").innerHTML.substr(0,10);
-                var new_due_date = new Date(selectedDates[0]);
-                var old_due_date = new Date(due_date_value);
-                var delta = (new_due_date - old_due_date) / (1000*60*60*24);
-                if (delta < 0) {
-                    delta = 0;
-                }
-                var diff = Math.floor(delta);
-                document.getElementById("late_days").value = diff;
+                calculateLateDays(selectedDates[0]);
             },
         });
     });

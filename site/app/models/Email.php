@@ -42,8 +42,8 @@ class Email extends AbstractModel {
         if (count($details) == 0) {
             return;
         }
-        $this->setUserId($details["user_id"]);
-        $this->setRecipient($details["recipient"]);
+        $this->setUserId($details["to_user_id"]);
+        $this->setRecipient('DEPRECATED');
         $this->setSubject($this->formatSubject($details["subject"]));
         $this->setBody($this->formatBody($details["body"]));
     }

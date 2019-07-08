@@ -84,6 +84,9 @@ cp ${NODE_FOLDER}/codemirror/theme/eclipse.css ${VENDOR_FOLDER}/codemirror/theme
 # flatpickr
 mkdir ${VENDOR_FOLDER}/flatpickr
 cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+# shortcut-buttons-flatpickr
+mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
+cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
 # jquery
 mkdir ${VENDOR_FOLDER}/jquery
 cp ${NODE_FOLDER}/jquery/dist/jquery.min.* ${VENDOR_FOLDER}/jquery

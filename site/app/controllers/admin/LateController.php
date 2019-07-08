@@ -43,6 +43,8 @@ class LateController extends AbstractController {
     public function viewExtensions() {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $e_gradeables = $this->core->getQueries()->getAllElectronicGradeablesIds();
         $this->core->getOutput()->renderOutput(array('admin', 'Extensions'), 'displayExtensions', $e_gradeables);
     }
