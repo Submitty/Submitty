@@ -6,7 +6,12 @@
 <div class="content">
     <form method="post" action="{{ core.buildUrl({'component': 'notification', 'page': 'alter_notification_settings'}) }}" id="form_notification_settings">
         <div id="config">
-            <div><h1>Notification/Email Settings</h1></div>
+            {% if email_enabled %}
+                {% set header = "Notification/Email Settings" %}
+            {% else %}
+                {% set header = "Notification Settings" %}
+            {% endif %}
+            <div><h1>{{ header }}</h1></div>
             <div class="row">
                 <div class="heading col-md-4">
                 </div>
