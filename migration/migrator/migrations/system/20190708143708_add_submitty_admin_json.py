@@ -19,3 +19,6 @@ def up(config):
         shutil.chown(submitty_admin_filename, 'root', 'submitty_daemon')
         os.chmod(submitty_admin_filename, 0o440)
 
+
+def down(config):
+    pass
