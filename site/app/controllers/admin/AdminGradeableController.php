@@ -205,15 +205,18 @@ class AdminGradeableController extends AbstractController {
         // Configs stored in a private repository (specified in course config)
         $config_repo_string = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
+        $repository_error_messages = array();
         $repo_id_number = 1;
         foreach (explode(',',$config_repo_string) as $config_repo_name) {
+            $config_repo_name = str_replace(' ', '', $config_repo_name);
             if ($config_repo_name == '') {
                 continue;
             }
-            $repository_error_message = "";
-            $files_searched = 0;
             $directory_queue = array($config_repo_name);
-            $this->getValidPathsToConfigDirectoriesRecursive($all_repository_config_paths,$files_searched,$directory_queue,$repository_error_message);
+            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue,$repository_error_messages,$repo_id_number);
+            if (isset($repo_paths)) {
+                $all_repository_config_paths = array_merge($all_repository_config_paths,$repo_paths);
+            }
             $repo_id_number++;
         }
         usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
@@ -295,7 +298,7 @@ class AdminGradeableController extends AbstractController {
 
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
-            'repository_error_message' => $repository_error_message,
+            'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
@@ -495,6 +498,11 @@ class AdminGradeableController extends AbstractController {
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
+    /**
+     * Returns true if given path has a file named config.json in it, false otherwise
+     * @param string $folder_path
+     * @return boolean
+     */
     private function checkPathToConfigFile($folder_path) {
         if (!file_exists($folder_path)) {
             return false;
@@ -514,64 +522,58 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * Recursively goes through the directory and finds config.json files (BFS)
-     * Terminates loop after a hard coded numbere of files is checked
-     * Changes $error_message if something goes wrong
-     * Changes $results, adds an array of form [path_label,path] for each config file found
-     * @param string $results
-     * @param string $count
-     * @param string $dir_queue
-     * @param array $error_message
+     * Iterates through the directory and finds config.json files (BFS)
+     * Terminates loop after a hard coded number of folders are searched (currently 1000)
+     * does not look at files deeper than the config.json file
+     * pushes new errors to $error_messages if something goes wrong
+     * returns array of valid paths arrays of form [path_name,full_path]
+     * @param array $dir_queue
+     * @param array $error_messages
+     * @param integer $repo_id_number
+     * @return array
      */
-    private function getValidPathsToConfigDirectoriesRecursive(&$results,&$count,&$dir_queue,&$error_message) {
-        if (count($dir_queue) === 0 || $error_message != '') {
-            return;
-        }
+    private function getValidPathsToConfigDirectories($dir_queue,&$error_messages,$repo_id_number) {
+        $repository_path = $dir_queue[0];
+        $count = 0;
+        $return_array = array();
 
-        if ($count >= 200) {
-            $results = array();
-            $error_message = "The repository entered on the \"Course Settings\" page was too large";
-            return;
-        }
+        while(count($dir_queue) != 0) {
+            if ($count >= 1000) {
+                $error_messages[] = "Repository #".$repo_id_number." entered on the \"Course Settings\" is too large to parse.";
+                return array();
+            }
 
-        $dir = $dir_queue[0];
-        unset($dir_queue[0]);
-        $dir_queue = array_values($dir_queue);
+            $dir = $dir_queue[0];
+            unset($dir_queue[0]);
+            $dir_queue = array_values($dir_queue);
 
-        if (!file_exists($dir)) {
-            $error_message = "The repository entered on the \"Course Settings\" page does not exist";
-            return;
-        }
+            if (!file_exists($dir) || !is_dir($dir)) {
+                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                return array();
+            }
 
-        try {
-            $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
-        } catch(\Exception $e) {
-            $error_message = "An error occured when parsing the repository entered on the \"Course Settings\" page";
-            return;
-        }
+            try {
+                $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
+            } catch(\Exception $e) {
+                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                return array();
+            }
 
-        $directories = array();
-        $config_found = false;
-        while($iter->valid()) {
-            $file = $iter->current();
-            if ($file->isDir()) {
-                $directories[] = $file->getPathname();
+            if ($this->checkPathToConfigFile($dir)) {
+                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)+1),$dir];
             }
             else {
-                if ($file->getFilename() === 'config.json') {
-                    $config_found = true;
-                    $config_path = substr($file->getPathname(),0,-strlen("/config.json")); //remove /config.json from path
-                    $results[] = ["DIRECTORY: ".substr($config_path,strlen($this->core->getConfig()->getPrivateRepository())+1),$config_path];
+                while($iter->valid()) {
+                    $file = $iter->current();
+                    if ($file->isDir()) {
+                        $dir_queue[] = $file->getPathname();
+                    }
+                    $iter->next();
                 }
             }
-            $iter->next();
+            $count++;
         }
-
-        if (!$config_found) {
-            $dir_queue = array_merge($dir_queue,$directories);
-        }
-        $count++;
-        $this->getValidPathsToConfigDirectoriesRecursive($results,$count,$dir_queue,$error_message);
+        return $return_array;
     }
 
     private function updateRubric(Gradeable $gradeable, $details) {
