@@ -165,7 +165,7 @@ class WebRouter {
             return Response::RedirectOnlyResponse(new RedirectResponse($this->core->getConfig()->getBaseUrl()));
         }
 
-        return $course_loaded;
+        return $this->core->getConfig()->isCourseLoaded();
     }
 
     private function loginCheck() {
