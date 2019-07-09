@@ -8,6 +8,7 @@ use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
 use app\libraries\routers\ClassicRouter;
+use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
@@ -295,11 +296,7 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 $supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
 
 if ($is_api) {
-    $core->getOutput()->disableRender();
-    $core->disableRedirects();
-
-    $router = new app\libraries\routers\WebRouter($request, $core, $api_logged_in, true);
-    $response = $router->run();
+    $response = WebRouter::getApiResponse($request, $core, $api_logged_in);
 }
 elseif (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
