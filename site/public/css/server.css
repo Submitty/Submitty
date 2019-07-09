@@ -2035,3 +2035,13 @@ end of styles used in the admin gradeable page
     position: absolute;
     z-index: 999;
 }
+
+.float-right {
+    float: right;
+}
+
+.flex-col {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+}

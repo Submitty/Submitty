@@ -1,0 +1,13 @@
+fieldset > * {
+    margin-bottom: 0.5em;
+}
+
+#redo-data {
+    margin-left: 13px;
+    border-left: solid #CCC 1px;
+    padding-left: 13px;
+}
+
+#redo-data > label {
+    display: block;
+}
