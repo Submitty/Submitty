@@ -60,7 +60,8 @@ class UsersView extends AbstractView {
             ],
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
-            "use_database" => $use_database
+            "use_database" => $use_database,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
