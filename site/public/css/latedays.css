@@ -1,0 +1,8 @@
+fieldset {
+    display: flex;
+    margin: 1em 0;
+}
+
+fieldset > * {
+    padding-right: 2em;
+}
