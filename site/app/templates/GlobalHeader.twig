@@ -19,7 +19,8 @@
     {% endfor %}
 </head>
 <script>var onAjaxInit;</script>
-<body data-site-url="{{ site_url }}" data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ core.getCsrfToken() }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<body data-site-url="{{ site_url }}" data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<a id="skip-nav" href="#nav-positioner">Skip to main content</a>
 <div id="container">
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
@@ -40,7 +41,7 @@
                         {% else %}
                         <i class="fas fa-check-circle"></i>
                         {% endif %}
-                        {{ message.error }}
+                        {{ message.error | nl2br }}
                     </div>
                 {% endfor %}
             </div>
