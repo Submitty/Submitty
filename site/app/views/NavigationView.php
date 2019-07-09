@@ -71,7 +71,7 @@ class NavigationView extends AbstractView {
         ]
     ];
 
-    const DATE_FORMAT = "m/d/Y @ H:i";
+    const DATE_FORMAT = "m/d/Y @ h:i A";
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone) {
         // ======================================================================================
@@ -333,7 +333,7 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => $team_button_text,
             "subtitle" => $team_display_date,
-            "href" => $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId(), 'page' => 'team')),
+            "href" => $this->core->buildNewCourseUrl([$gradeable->getId(), 'team']),
             "class" => "btn {$team_button_type} btn-nav",
             "name" => "team-btn"
         ]);
