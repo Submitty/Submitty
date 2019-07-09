@@ -289,12 +289,12 @@ class Utils {
 
    /**
     * Convert the shorthand byte notation in php.ini to bytes.
-    * E.g : php return_bytes(ini_get('post_max_size'))
+    * E.g : php returnBytes(ini_get('post_max_size'))
     * Src : https://www.php.net/manual/en/function.ini-get.php
-    * @param string $val
+    * @param string $size_str
     * @return int 
     */
-    public static function return_bytes ($size_str){
+    public static function returnBytes ($size_str){
         switch (substr ($size_str, -1)){
             case 'M': case 'm': return (int)$size_str * 1048576;
             case 'K': case 'k': return (int)$size_str * 1024;
@@ -310,9 +310,9 @@ class Utils {
     * @param int $bytes
     * @return string
     */
-    public static function format_bytes($format, $bytes){
+    public static function formatBytes($format, $bytes){
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
-        return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . ucfirst(strtolower($format));
+        return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
 
 }

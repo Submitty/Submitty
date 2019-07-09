@@ -98,8 +98,8 @@ class CourseMaterialsView extends AbstractView {
             return;
         }
 
-        $max_size = Utils::return_bytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::format_bytes("MB", $max_size ) . " (" . Utils::format_bytes("KB", $max_size) . ")"; 
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")"; 
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
