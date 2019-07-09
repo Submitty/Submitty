@@ -10,39 +10,11 @@ use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
 class CourseMaterialsController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        foreach (array('path', 'file') as $key) {
-            if (isset($_REQUEST[$key])) {
-                $_REQUEST[$key] = htmlspecialchars_decode(urldecode($_REQUEST[$key]));
-            }
-        }
-
-        switch ($_REQUEST['action']) {
-            case 'view_course_materials_page':
-                $this->viewCourseMaterialsPage();
-                break;
-            case 'delete_course_material_file':
-                $this->deleteCourseMaterial($_REQUEST["path"]);
-                break;
-            case 'delete_course_material_folder':
-                $this->deleteCourseMaterial($_REQUEST["path"]);
-                break;
-            case 'download_course_material_zip':
-                $this->downloadCourseMaterialZip($_REQUEST["dir_name"], $_REQUEST['path']);
-                break;
-            case 'modify_course_materials_file_permission':
-                $this->modifyCourseMaterialsFilePermission($_REQUEST['filename'], $_REQUEST['checked']);
-                break;
-            case 'modify_course_materials_file_time_stamp':
-                $this->modifyCourseMaterialsFileTimeStamp($_REQUEST["dir_name"], $_REQUEST['newdatatime']);
-                break;
-            case 'upload_course_materials_files':
-                $this->ajaxUploadCourseMaterialsFiles();
-                break;
-            default:
-                $this->viewCourseMaterialsPage();
-                break;
-        }
+        return null;
     }
 
     /**

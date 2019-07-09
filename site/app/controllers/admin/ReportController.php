@@ -25,19 +25,11 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
-        }
+        return null;
     }
 
     /**

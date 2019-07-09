@@ -6,6 +6,7 @@ namespace app\libraries\routers;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
+use app\libraries\response\WebResponse;
 use app\exceptions\AuthenticationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,9 +18,6 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
-use app\libraries\response\Response;
-use app\libraries\response\WebResponse;
-use app\libraries\response\JsonResponse;
 
 
 class WebRouter {
