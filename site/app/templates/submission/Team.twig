@@ -38,6 +38,7 @@
                 {% else %}
                     <form action="{{ cancel_invitation_url }}" method="post">
                         <input type="hidden" name="cancel_id" value={{ invited }} />
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                         &emsp;{{ invited }}: <input type="submit" value = "Cancel" class="btn btn-danger" />
                     </form>
                     <br />
@@ -76,6 +77,7 @@
         <br />
         <form action="{{ send_invitation_url }}" method="post">
             <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <input type="submit" value = "Invite" class="btn btn-primary" />
         </form>
         <br />
@@ -91,6 +93,7 @@
             {% for invite in invites_received %}
                 <form action="{{ accept_invitation_url }}" method="post">
                     <input type="hidden" name="team_id" value={{ invite.getId() }} />
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" class="btn btn-success" />
                 </form>
                 <br />
