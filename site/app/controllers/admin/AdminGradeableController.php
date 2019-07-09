@@ -202,17 +202,21 @@ class AdminGradeableController extends AbstractController {
         foreach ($all_uploaded_configs as $file) {
             $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
         }
-
         // Configs stored in a private repository (specified in course config)
-        $config_repo_name = $this->core->getConfig()->getPrivateRepository();
-        $repository_error_message = "";
+        $config_repo_string = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
-        $files_searched = 0;
-        $directory_queue = array($config_repo_name);
-        if ($config_repo_name !== '') {
+        $repo_id_number = 1;
+        foreach (explode(',',$config_repo_string) as $config_repo_name) {
+            if ($config_repo_name == '') {
+                continue;
+            }
+            $repository_error_message = "";
+            $files_searched = 0;
+            $directory_queue = array($config_repo_name);
             $this->getValidPathsToConfigDirectoriesRecursive($all_repository_config_paths,$files_searched,$directory_queue,$repository_error_message);
-            usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
+            $repo_id_number++;
         }
+        usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
 
         // Load output from build of config file
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
@@ -292,6 +296,7 @@ class AdminGradeableController extends AbstractController {
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
             'repository_error_message' => $repository_error_message,
+            'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
@@ -488,6 +493,24 @@ class AdminGradeableController extends AbstractController {
         $component->setText(true);
         $component->setPeer(false);
         $component->setPage(Component::PDF_PAGE_NONE);
+    }
+
+    private function checkPathToConfigFile($folder_path) {
+        if (!file_exists($folder_path)) {
+            return false;
+        }
+        try {
+            $file_iter = new \RecursiveDirectoryIterator($folder_path, \RecursiveDirectoryIterator::SKIP_DOTS);
+        } catch (\Exception $e) {
+            return false;
+        }
+        while($file_iter->valid()) {
+            if ($file_iter->current()->getFilename() == 'config.json') {
+                return true;
+            }
+            $file_iter->next();
+        }
+        return false;
     }
 
     /**
