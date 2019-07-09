@@ -1761,12 +1761,13 @@ function changeNewDateTime(filename, newdatatime,handleData) {
         url: url,
         success: function(data) {
             tbr=true;
+            console.log('ajax success');
             if(handleData){
                 handleData(data);
             }
         },
         error: function(e) {
-            console.log('not handled');
+            console.log('ajax fail');
             //alert("Encounter saving the NewDateTime.");
 
         }

@@ -84,11 +84,13 @@
             console.log(dirArr.length);
             //go through the array of folder paths and set the time to the new one
             dirArr.forEach(function (element) {
+                console.log(element);
                 setChildNewDateTime(element,releaseDate.value,function (output) {
                     if(output){
                         count++;
-                        console.log(element," success ",count);
-                        if(count==dirArr.length){
+                        console.log(element," success ",count,"/",dirArr.length);
+                        if(count==dirArr.length-1){
+                            console.log("done");
                             if(handleData){
                                 console.log("count: ",count);
                                 handleData(count);

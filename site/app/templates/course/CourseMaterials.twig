@@ -311,13 +311,17 @@
         //change the date and time of the subfiles in the folder with the time chosen for the whole
         //folder (passed in)
         var success;
+        success = false;
         success  = changeNewDateTime(path,changeDate,function (output) {
             if(output){
                 success =true;
-                //console.log(path," ",success);
+                console.log(path," changed? ",success);
                 if(handleData){
                     handleData(success);
                 }
+            }
+            else{
+                console.log(path," changed?",success);
             }
         });
     }
