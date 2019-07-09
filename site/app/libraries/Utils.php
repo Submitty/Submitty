@@ -305,7 +305,7 @@ class Utils {
 
     /**
     * Convert bytes to a specified format thats human readable 
-    * E.g : MB, 10485760 => 10Mb
+    * E.g : MB, 10485760 => 10MB
     * @param string $format
     * @param int $bytes
     * @return string
