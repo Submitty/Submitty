@@ -423,7 +423,6 @@ function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
     $('[name="submit"]',form).attr('data-iden',id);
     $('[name="submit"]',form).attr('data-inDir',inDir);
 
-
 }
 
 function deletePlagiarismResultAndConfigForm(form_action, gradeable_title) {
@@ -1748,19 +1747,28 @@ function changePermission(filename, checked) {
         url: url,
         success: function(data) {},
         error: function(e) {
-            alert("Encounter saving the checkbox state.");
+            //alert("Encounter saving the checkbox state.");
         }
     })
 }
 
-function changeNewDateTime(filename, newdatatime) {
+function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file permission change
     let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    var tbr;
+    tbr=false;
     $.ajax({
         url: url,
-        success: function(data) {},
+        success: function(data) {
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+        },
         error: function(e) {
-            alert("Encounter saving the NewDateTime.");
+            console.log('not handled');
+            //alert("Encounter saving the NewDateTime.");
+
         }
     })
 }

@@ -167,7 +167,7 @@
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
                 [{% for file in inDir %}
-                        {% if dir in file %}
+                        {% if folderPath in file %}
                             "{{ file }}",
                         {% endif %}
                 {% endfor %}]
@@ -307,10 +307,19 @@
         changeNewDateTime(path, newDateTime);
     }
 
-    function setChildNewDateTime(path, changeDate) {
+    function setChildNewDateTime(path, changeDate,handleData) {
         //change the date and time of the subfiles in the folder with the time chosen for the whole
         //folder (passed in)
-        changeNewDateTime(path,changeDate);
+        var success;
+        success  = changeNewDateTime(path,changeDate,function (output) {
+            if(output){
+                success =true;
+                //console.log(path," ",success);
+                if(handleData){
+                    handleData(success);
+                }
+            }
+        });
     }
 
     $(document).ready(function() {
