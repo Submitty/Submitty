@@ -3,8 +3,13 @@
 
 namespace app\libraries\routers;
 
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\Response;
+use app\libraries\response\JsonResponse;
+use app\exceptions\AuthenticationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
@@ -36,6 +41,9 @@ class WebRouter {
     /** @var AnnotationReader */
     protected $reader;
 
+    /** @var bool */
+    protected $is_api = false;
+
     /** @var array */
     public $parameters;
 
@@ -49,6 +57,7 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
         $this->logged_in = $logged_in;
+        $this->is_api = $is_api;
 
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -60,22 +69,11 @@ class WebRouter {
 
         $this->matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         if ($is_api) {
-            try {
-                $this->parameters = $this->matcher->matchRequest($this->request);
-                // prevent /api/something from being matched to /{_semester}/{_course}
-                if ($this->parameters['_method'] === 'navigationPage') {
-                    throw new ResourceNotFoundException;
-                }
-                // prevent user that is not logged in from going anywhere except AuthenticationController
-                if (!$this->logged_in &&
-                    !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                    $this->core->getOutput()->renderJsonFail("Unauthorized access. Please log in.");
-                    die($this->core->getOutput()->getOutput());
-                }
-            }
-            catch (ResourceNotFoundException $e) {
-                $this->core->getOutput()->renderJsonFail("Endpoint not found.");
-                die($this->core->getOutput()->getOutput());
+            $this->parameters = $this->matcher->matchRequest($this->request);
+            // prevent user that is not logged in from going anywhere except AuthenticationController
+            if (!$this->logged_in &&
+                !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+                throw new AuthenticationException("Unauthenticated access. Please log in.");
             }
         }
         else {
@@ -91,11 +89,53 @@ class WebRouter {
         }
     }
 
+    /**
+     * @param Request $request
+     * @param Core $core
+     * @param $logged_in
+     * @return Response|mixed should be of type Response only in the future
+     */
+    static public function getApiResponse(Request $request, Core $core, $logged_in) {
+        try {
+            $router = new self($request, $core, $logged_in, true);
+        }
+        catch (ResourceNotFoundException $e) {
+            return new Response(JsonResponse::getFailResponse("Endpoint not found."));
+        }
+        catch (AuthenticationException $e) {
+            return new Response(JsonResponse::getFailResponse($e->getMessage()));
+        }
+        catch (MethodNotAllowedException $e) {
+            return new Response(JsonResponse::getFailResponse("Method not allowed."));
+        }
+        catch (\Exception $e) {
+            return new Response(JsonResponse::getErrorResponse($e->getMessage()));
+        }
+
+        $core->getOutput()->disableRender();
+        $core->disableRedirects();
+        return $router->run();
+    }
+
     public function run() {
         if (!$this->accessCheck()) {
             return new Response(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+      
+        if (!$this->is_api &&
+            $this->request->isMethod('POST') &&
+            !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
+            !$this->core->checkCsrfToken()
+        ) {
+            $msg = "Invalid CSRF token.";
+            $this->core->addErrorMessage($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildNewUrl())
             );
         }
 

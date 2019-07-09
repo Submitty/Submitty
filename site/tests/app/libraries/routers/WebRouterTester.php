@@ -5,6 +5,8 @@ namespace tests\app\libraries\routers;
 use app\libraries\routers\WebRouter;
 use tests\BaseUnitTest;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
 class WebRouterTester extends BaseUnitTest {
@@ -135,5 +137,33 @@ class WebRouterTester extends BaseUnitTest {
             ["/index.php?semester=s19&course=sample"],
             ["/s19/sample/random/invalid/endpoint"]
         ];
+    }
+
+    /**
+     * @param string $url a url to an nonexistent API endpoint
+     * @dataProvider randomUrlProvider
+     */
+    public function testApiNotFound($url) {
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample']);
+        $request = Request::create(
+            "/api" . $url
+        );
+        $response = WebRouter::getApiResponse($request, $core, true);
+        $this->assertEquals([
+            'status' => "fail",
+            'message' => "Endpoint not found."
+        ], $response->json_response->json);
+    }
+
+    public function testApiWrongMethod() {
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample']);
+        $request = Request::create(
+            "/api/token"
+        );
+        $response = WebRouter::getApiResponse($request, $core, true);
+        $this->assertEquals([
+            'status' => "fail",
+            'message' => "Method not allowed."
+        ], $response->json_response->json);
     }
 }
