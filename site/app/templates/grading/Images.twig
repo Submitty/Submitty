@@ -49,4 +49,4 @@
     </table>
 </div>
 {% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
-{% include('grading/UploadImagesForm.twig') %}
+{% include('grading/UploadImagesForm.twig') with {'max_size_string' : max_size_string} %}

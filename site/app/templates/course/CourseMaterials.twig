@@ -177,5 +177,5 @@
 
 
 {% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
-{% include('course/UploadCourseMaterialsForm.twig') %}
+{% include('course/UploadCourseMaterialsForm.twig') with {'max_size_string' : max_size_string} %}
 {% include('course/DeleteCourseMaterialForm.twig') %}

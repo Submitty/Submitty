@@ -58,13 +58,17 @@ class ImagesView extends AbstractView {
             }
         }
 
+        $max_size = Utils::return_bytes(ini_get('upload_max_filesize'));
+        $max_size_string = Utils::format_bytes("MB", $max_size ) . " (" . Utils::format_bytes("KB", $max_size) . ")"; 
+
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
             "imageData" => $image_data,
             "errorImageData" => $error_image_data,
             "hasInstructorPermission" => $instructor_permission,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "max_size_string" => $max_size_string
         ]);
     }
 }
