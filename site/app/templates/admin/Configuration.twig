@@ -219,8 +219,9 @@
                      <div class="option-alt" style="margin-top: 15px" id="email_seating_assignment_label">Customize an email to send to each students.</div>
                     {% if not email_enabled %}
                         <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
+                    {% else %}
+                        <button class ="option-alt" {{ not email_enabled ? "disabled"}}> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment">Email Seating Assignments</a> </button>
                     {% endif %}
-                     <div class ="option-alt"> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment"  {{ not email_enabled ? "disabled"}}>Email Seating Assignments</a> </div>
                 </label>
             </div>
             <div class="option-input col-md-4">
