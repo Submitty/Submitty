@@ -532,6 +532,13 @@ class ReportController extends AbstractController {
             $this->core->getConfig()->getCourse() .
             '.json';
 
+        // Create path to 'processing' file in jobs queue
+        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
         // Create path to output.html we expect to find in rainbow_grades directory
         $rg_file = $this->core->getConfig()->getCoursePath();
         $rg_file = FileUtils::joinPaths($rg_file, 'rainbow_grades', 'output.html');
@@ -551,6 +558,17 @@ class ReportController extends AbstractController {
         {
             sleep(1);
             $maxWaitTime--;
+            clearstatcache();
+        }
+
+        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+        // We must also wait for that file to be removed
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($processing_jobs_file) AND $maxWaitTime)
+        {
+            sleep(1);
+            $maxWaitTime--;
+            clearstatcache();
         }
 
         // If we finished the previous loops before maxWaitTime hit 0 then the file successfully left the jobs queue
