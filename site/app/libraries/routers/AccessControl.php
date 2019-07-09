@@ -19,25 +19,25 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * Example (role only):
  *
- * The following function is only accessible to full access graders and
- * instructors.
+ *      The following function is only accessible to full access graders and
+ *      instructors.
  *
  *      @AccessControl(role="FULL_ACCESS_GRADER")
  *      public function foo() {...}
  *
  * Example (permission only):
  *
- * All functions inside the following class is only accessible to users
- * with "grading.simple" permission, which is equivalent to having
- * canI("grading.simple") being true.
+ *      All functions inside the following class is only accessible to users
+ *      with "grading.simple" permission, which is equivalent to having
+ *      canI("grading.simple") being true.
  *
  *      @AccessControl(permission="grading.simple")
  *      class SomeController extends AbstractController {...}
  *
  * Example (role & permission):
  *
- * The following function is only accessible to full access graders
- * and instructors with "grading.simple" permission.
+ *      The following function is only accessible to full access graders
+ *      and instructors with "grading.simple" permission.
  *
  *      @AccessControl(role="FULL_ACCESS_GRADER", permission="grading.simple")
  *      public function foo() {...}
@@ -48,9 +48,9 @@ use Doctrine\Common\Annotations\Annotation;
  *
  * Example (class & method):
  *
- * The foo() function is NOT accessible to non-instructors with "grading.simple"
- * permission. It IS accessible to instructors with OR without "grading.simple"
- * permission.
+ *      The foo() function is NOT accessible to non-instructors with "grading.simple"
+ *      permission. It IS accessible to instructors with OR without "grading.simple"
+ *      permission.
  *
  *      @AccessControl(permission="grading.simple")
  *      class SomeController extends AbstractController {
