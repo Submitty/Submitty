@@ -571,9 +571,18 @@ class ReportController extends AbstractController {
             clearstatcache();
         }
 
+        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
+        $debug_output_path = '/var/local/submitty/courses/'.
+            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getCourse() .
+            '/rainbow_grades/auto_debug_output.txt';
+
+        $debug_output = file_get_contents($debug_output_path);
+        $exceptionDetected = strpos($debug_output, 'Exception');
+
         // If we finished the previous loops before maxWaitTime hit 0 then the file successfully left the jobs queue
         // implying that it finished
-        if($maxWaitTime)
+        if($maxWaitTime AND $exceptionDetected === false)
         {
             $this->core->getOutput()->renderJsonSuccess("Success");
         }
