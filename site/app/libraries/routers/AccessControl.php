@@ -7,12 +7,63 @@ use Doctrine\Common\Annotations\Annotation;
 /**
  * Annotation class for @AccessControl().
  *
+ * The annotation checks if users have access to a class or method.
+ *
+ * By setting $role, the class or method will only be accessible to users
+ * with a higher or equal rank to that role. Roles include INSTRUCTOR,
+ * FULL_ACCESS_GRADER, LIMITED_ACCESS_GRADER and STUDENT.
+ *
+ * By setting $permission, the class or method will only be accessible to
+ * users with that permission. Please check app/libraries/Access to get a
+ * full list of possible permissions.
+ *
+ * Example (role only):
+ *
+ * The following function is only accessible to full access graders and
+ * instructors.
+ *
+ *      @AccessControl(role="FULL_ACCESS_GRADER")
+ *      public function foo() {...}
+ *
+ * Example (permission only):
+ *
+ * All functions inside the following class is only accessible to users
+ * with "grading.simple" permission, which is equivalent to having
+ * canI("grading.simple") being true.
+ *
+ *      @AccessControl(permission="grading.simple")
+ *      class SomeController extends AbstractController {...}
+ *
+ * Example (role & permission):
+ *
+ * The following function is only accessible to full access graders
+ * and instructors with "grading.simple" permission.
+ *
+ *      @AccessControl(role="FULL_ACCESS_GRADER", permission="grading.simple")
+ *      public function foo() {...}
+ *
+ * Note that @AccessControl() annotation of methods will override the one
+ * of their classes. For clarity, it is recommended not to have class-level
+ * @AccessControl() and method-level @AccessControl() at the same time.
+ *
+ * Example (class & method):
+ *
+ * The foo() function is NOT accessible to non-instructors with "grading.simple"
+ * permission. It IS accessible to instructors with OR without "grading.simple"
+ * permission.
+ *
+ *      @AccessControl(permission="grading.simple")
+ *      class SomeController extends AbstractController {
+ *          @AccessControl(role="INSTRUCTOR")
+ *          public function foo() {...}
+ *      }
+ *
  * @Annotation
  * @Target({"CLASS", "METHOD"})
  */
 class AccessControl {
     /**
-     * @var string "INSTRUCTOR", "FULL_ACCESS GRADER", "LIMITED_
+     * @var string "INSTRUCTOR", "FULL_ACCESS_GRADER", "LIMITED_
      * ACCESS_GRADER" or "STUDENT".
      */
     private $role = null;
@@ -39,6 +90,7 @@ class AccessControl {
 
     /**
      * @param string $role
+     * @throws \InvalidArgumentException
      */
     public function setRole($role) {
         $role = strtoupper($role);
