@@ -259,7 +259,7 @@ else:
 
     CGI_URL = SUBMISSION_URL + '/cgi-bin'
 
-    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username?", defaults['submitty_admin_username'])
+    SUBMITTY_ADMIN_USERNAME = get_input("What is the submitty admin username (optional)?", defaults['submitty_admin_username'])
     while True:
         SUBMITTY_ADMIN_PASSWORD = get_input("What is the submitty admin password", defaults['submitty_admin_password'])
         if SUBMITTY_ADMIN_USERNAME != '' and SUBMITTY_ADMIN_PASSWORD == '':
