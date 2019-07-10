@@ -30,6 +30,9 @@ class UsersController extends AbstractController {
                 $this->core->getOutput()->addBreadcrumb('Manage Graders');
                 $this->listGraders();
                 break;
+            case 'assign_registration_sections':
+                $this->reassignRegistrationSections();
+                break;
             case 'rotating_sections':
                 $this->core->getOutput()->addBreadcrumb('Manage Sections');
                 $this->rotatingSectionsForm();
@@ -65,13 +68,50 @@ class UsersController extends AbstractController {
     }
 
     public function listGraders() {
-        $graders = $this->core->getQueries()->getAllGraders();
+        $graders_unsorted = $this->core->getQueries()->getAllGraders();
+        // graders are split into groups based on grading permissions
+        $graders = array('1' => array(),
+                         '2' => array(),
+                         '3' => array());
+        foreach ($graders_unsorted as $grader){
+            $graders[$grader->getGroup()][] =  $grader;
+        }
+
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
+    }
+
+    private function reassignRegistrationSections() {
+        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
+            'action' => 'graders'));
+        $new_registration_information = array();
+
+        foreach ($_POST as $key => $value) {
+            $key_array = explode("_",$key,2);
+            if (!array_key_exists($key_array[0],$new_registration_information)) {
+                $new_registration_information[$key_array[0]] = array();
+            }
+            if ($key_array[1] != 'all') {
+                $new_registration_information[$key_array[0]][] = $key_array[1];
+            }
+        }
+
+        foreach($this->core->getQueries()->getAllGraders() as $grader) {
+            $grader_id = $grader->getId();
+            if (array_key_exists($grader_id,$new_registration_information)) {
+                $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
+            }
+            else {
+                $grader->setGradingRegistrationSections(array());
+            }
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+        }
+
+        $this->core->redirect($return_url);
     }
 
     private function renderDownloadForm($code, $use_database) {

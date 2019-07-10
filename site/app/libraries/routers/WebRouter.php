@@ -6,7 +6,6 @@ namespace app\libraries\routers;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
-use app\exceptions\AuthenticationException;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
@@ -29,29 +28,19 @@ class WebRouter {
     /** @var bool */
     protected $logged_in;
 
-    /** @var UrlMatcher  */
-    protected $matcher;
-
-    /** @var bool */
-    protected $course_loaded = false;
-
-    /** @var bool */
-    protected $is_api = false;
-
     /** @var array */
-    public $parameters;
+    protected $parameters;
 
     /** @var string the controller to call */
-    public $controller_name;
+    protected $controller_name;
 
     /** @var string the method to call */
-    public $method_name;
+    protected $method_name;
 
-    public function __construct(Request $request, Core $core, $logged_in, $is_api = false) {
+    private function __construct(Request $request, Core $core, $logged_in) {
         $this->core = $core;
         $this->request = $request;
         $this->logged_in = $logged_in;
-        $this->is_api = $is_api;
 
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -60,26 +49,8 @@ class WebRouter {
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
 
-        $this->matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
-        if ($is_api) {
-            $this->parameters = $this->matcher->matchRequest($this->request);
-            // prevent user that is not logged in from going anywhere except AuthenticationController
-            if (!$this->logged_in &&
-                !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                throw new AuthenticationException("Unauthenticated access. Please log in.");
-            }
-        }
-        else {
-            try {
-                $this->parameters = $this->matcher->matchRequest($this->request);
-                $this->loadCourses();
-                $this->loginCheck();
-            }
-            catch (ResourceNotFoundException $e) {
-                // redirect to login page or home page
-                $this->loginCheck();
-            }
-        }
+        $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
+        $this->parameters = $matcher->matchRequest($this->request);
     }
 
     /**
@@ -90,13 +61,16 @@ class WebRouter {
      */
     static public function getApiResponse(Request $request, Core $core, $logged_in) {
         try {
-            $router = new self($request, $core, $logged_in, true);
+            $router = new self($request, $core, $logged_in);
+
+            // prevent user that is not logged in from going anywhere except AuthenticationController
+            if (!$logged_in &&
+                !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')) {
+                return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
+            }
         }
         catch (ResourceNotFoundException $e) {
             return new Response(JsonResponse::getFailResponse("Endpoint not found."));
-        }
-        catch (AuthenticationException $e) {
-            return new Response(JsonResponse::getFailResponse($e->getMessage()));
         }
         catch (MethodNotAllowedException $e) {
             return new Response(JsonResponse::getFailResponse("Method not allowed."));
@@ -110,21 +84,49 @@ class WebRouter {
         return $router->run();
     }
 
-    public function run() {
-        if (!$this->is_api &&
-            $this->request->isMethod('POST') &&
-            !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
-            !$this->core->checkCsrfToken()
-        ) {
-            $msg = "Invalid CSRF token.";
-            $this->core->addErrorMessage($msg);
-            return new Response(
-                JsonResponse::getFailResponse($msg),
-                null,
-                new RedirectResponse($this->core->buildNewUrl())
-            );
+    /**
+     * @param Request $request
+     * @param Core $core
+     * @param $logged_in
+     * @return Response|mixed should be of type Response only in the future
+     */
+    static public function getWebResponse(Request $request, Core $core, $logged_in) {
+        try {
+            $router = new self($request, $core, $logged_in);
+
+            $course_check_response = $router->loadCourses();
+            if ($course_check_response instanceof Response) {
+                return $course_check_response;
+            }
+
+            $login_check_response = $router->loginCheck();
+            if ($login_check_response instanceof Response) {
+                return $login_check_response;
+            }
+
+            $csrf_check_response = $router->csrfCheck();
+            if ($csrf_check_response instanceof Response) {
+                return $csrf_check_response;
+            }
+        }
+        catch (ResourceNotFoundException $e) {
+            // redirect to login page or home page
+            if (!$logged_in) {
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($core->buildNewUrl(['authentication', 'login']))
+                );
+            }
+            else {
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($core->buildNewUrl(['home']))
+                );
+            }
         }
 
+        return $router->run();
+    }
+
+    private function run() {
         $this->controller_name = $this->parameters['_controller'];
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
@@ -150,73 +152,81 @@ class WebRouter {
             $course = $this->parameters['_course'];
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadConfig($semester, $course);
-            $this->course_loaded = true;
+            $course_loaded = true;
         }
+
+        // This is a workaround for backward compatibility
+        // Should be removed after ClassicRouter is killed completely
+        if ($this->core->getConfig()->isCourseLoaded() && !isset($course_loaded)) {
+            if ($this->core->getConfig()->isDebug()) {
+                throw new \RuntimeException("Attempted to use router for invalid URL. 
+                Please report the sequence of pages/actions you took to get to this exception to API developers.");
+            }
+            return Response::RedirectOnlyResponse(new RedirectResponse($this->core->getConfig()->getBaseUrl()));
+        }
+
+        return $this->core->getConfig()->isCourseLoaded();
     }
 
     private function loginCheck() {
-        // This is a workaround for backward compatibility
-        // Should be removed after ClassicRouter is killed completely
-        if ($this->core->getConfig()->isCourseLoaded() && !$this->course_loaded) {
-            if ($this->core->getConfig()->isDebug()) {
-                throw new \RuntimeException("Attempted to use router for invalid URL. Please report the sequence of pages/actions you took to get to this exception to API developers.");
-            }
-            $this->core->redirect($this->core->getConfig()->getBaseUrl());
-        }
-
         if (!$this->logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
-            $this->request = Request::create(
-                '/authentication/login',
-                'GET',
-                ['old' => urlencode($old_request_url)]
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse(
+                    $this->core->buildNewUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url)
+                )
             );
-            $this->parameters = $this->matcher->matchRequest($this->request);
         }
-        elseif ($this->core->getUser() === null) {
+        elseif ($this->core->getUser() === null && $this->parameters['_method'] !== 'noAccess') {
             $this->core->loadSubmittyUser();
             if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                $this->request = Request::create(
-                    $this->parameters['_semester'] . '/' . $this->parameters['_course'] . '/no_access',
-                    'GET'
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildNewCourseUrl(['no_access']))
                 );
-                $this->parameters = $this->matcher->matchRequest($this->request);
             }
         }
         elseif ($this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
-            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-            $this->request = Request::create(
-                $this->parameters['_semester'] . '/' . $this->parameters['_course'] . '/no_access',
-                'GET'
+            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && $this->parameters['_method'] !== 'noAccess') {
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['no_access']))
             );
-            $this->parameters = $this->matcher->matchRequest($this->request);
         }
 
         if(!$this->core->getConfig()->isCourseLoaded()) {
             if ($this->logged_in){
-                if (isset($this->parameters['_method']) && $this->parameters['_method'] === 'logout'){
-                    $this->request = Request::create(
-                        '/authentication/logout',
-                        'GET'
+                if ($this->parameters['_method'] !== 'logout' &&
+                    !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
+                    return Response::RedirectOnlyResponse(
+                        new RedirectResponse($this->core->buildNewUrl(['home']))
                     );
-                    $this->parameters = $this->matcher->matchRequest($this->request);
-                }
-                elseif (!Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
-                    $this->request = Request::create(
-                        '/home',
-                        'GET'
-                    );
-                    $this->parameters = $this->matcher->matchRequest($this->request);
                 }
             }
             elseif (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                $this->request = Request::create(
-                    '/authentication/login',
-                    'GET'
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildNewUrl(['authentication', 'login']))
                 );
-                $this->parameters = $this->matcher->matchRequest($this->request);
             }
         }
+
+        return true;
+    }
+
+    private function csrfCheck() {
+        if ($this->request->isMethod('POST') &&
+            !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
+            !$this->core->checkCsrfToken()
+        ) {
+            $msg = "Invalid CSRF token.";
+            $this->core->addErrorMessage($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildNewUrl())
+            );
+        }
+
+        return true;
     }
 }
