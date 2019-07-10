@@ -47,6 +47,9 @@ class TeamControllerTester extends BaseUnitTest {
 	}
 
 	public function testCreateTeamSuccess(){
+		$this->config['use_mock_time'] = true;
+		$this->core = $this->createMockCore($this->config);
+
 		$mock_gradeable = $this->createMockGradeable();
 		$this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($mock_gradeable);
 		$this->core->getQueries()->method('createTeam')->willReturn('test');
@@ -68,7 +71,7 @@ class TeamControllerTester extends BaseUnitTest {
 		$current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
 		
 		$team_history = FileUtils::encodeJson(array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => "testUser"))));
-
+		
 		$this->assertJsonStringEqualsJsonFile($settings_file, $team_history);
 	}
 
