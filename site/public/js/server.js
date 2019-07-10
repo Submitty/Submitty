@@ -170,8 +170,13 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     }
 }
 
-
-
+/**
+ * Displays edit registration sections form on button press
+ */
+function editRegistrationSectionsForm() {
+    var form = $("#registration-sections-form");
+    form.css("display","block");
+}
 
 /**
  *
