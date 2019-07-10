@@ -269,7 +269,7 @@ class ReportController extends AbstractController {
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
             
-            if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() !== LateDayInfo::STATUS_OVERRIDDEN) {
+            if ($late_days->getLateDayInfoByGradeable(!$gg->hasOverriddenGrades()) ){
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
                     if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
@@ -337,8 +337,8 @@ class ReportController extends AbstractController {
 
         $ldi = $ld->getLateDayInfoByGradeable($g);
 
-        if ($ldi->getStatus() === LateDayInfo::STATUS_OVERRIDDEN){
-            $entry['status'] = $this->getLateStatusMessage($ldi);
+        if ($gg->hasOverriddenGrades()){
+            $entry['status'] = 'Overridden';
             $entry['comment'] = $gg->getOverriddenComment(); 
         }
         else {
@@ -446,8 +446,6 @@ class ReportController extends AbstractController {
      */
     private function getLateStatusMessage(LateDayInfo $ldi) {
         switch ($ldi->getStatus()) {
-            case LateDayInfo::STATUS_OVERRIDDEN:
-                return 'Overridden';
             case LateDayInfo::STATUS_GOOD:
                 return 'Good';
             case LateDayInfo::STATUS_LATE:
