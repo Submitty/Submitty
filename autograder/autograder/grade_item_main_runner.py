@@ -170,6 +170,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
                     setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1],testcase_num)
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
+                    grade_item.remove_read_permissions(os.path.join(tmp_work,"random_input")) 
 
                     display_sys_variable = os.environ.get('DISPLAY', None)
                     display_line = [] if display_sys_variable is None else ['--display', str(display_sys_variable)]
@@ -184,6 +185,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       '--testcase', str(testcase_num)]
                                                       + display_line,
                                                       stdout=logfile)
+                    grade_item.add_all_permissions(os.path.join(tmp_work,"random_input"))
                 except Exception as e:
                     grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
                     print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)

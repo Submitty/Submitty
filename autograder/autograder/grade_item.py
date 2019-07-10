@@ -196,6 +196,15 @@ def add_all_permissions(folder):
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
+def remove_read_permissions(top_dir):
+    for root, dirs, files in os.walk(top_dir):
+        os.chmod(root,os.stat(root).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
+        for d in dirs:
+            os.chmod(os.path.join(root, d),os.stat(os.path.join(root, d)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
+        for f in files:
+            if os.getuid() == os.stat(os.path.join(root, f)).st_uid:
+                os.chmod(os.path.join(root, f),os.stat(os.path.join(root, f)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
+   
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
     os.chdir(SUBMITTY_DATA_DIR)
