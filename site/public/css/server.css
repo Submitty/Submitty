@@ -616,9 +616,6 @@ table tr.table-header {
     font-style: italic;
 }
 
-.option-input {
-}
-
 .option-input > textarea,
 .option-input > input[type="text"] {
     width: 95%;
@@ -2016,4 +2013,14 @@ end of styles used in the admin gradeable page
     height: min-content;
     position: absolute;
     z-index: 999;
+}
+
+.float-right {
+    float: right;
+}
+
+.flex-col {
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
 }
