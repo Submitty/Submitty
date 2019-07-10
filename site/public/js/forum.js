@@ -1055,3 +1055,65 @@ function sortTable(sort_element_index, reverse=false){
     }
 
 }
+
+function formatIFrameInlineImages(a, name, url){
+    //Not best practice but good enough for V1
+    return function(){
+        var contents = $('#file_viewer_' + a + '_iframe').contents();
+        var body = contents.find('body');
+        var img = body.find('img');
+        body.append(`<style>
+            img { border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 400px; }
+            img:hover { box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5); cursor: pointer; } </style>`);
+        body.css("text-align", "center");
+        body.append('<h4 style="text-align:center">' + decodeURI(name) + '</h3> <br/>');
+        $('#file_viewer_' + a + '_iframe').height(contents.find('img').height() + 100);
+        $(img).attr("title", "Click to view attachment in a popup");
+        $(img).click(function() {
+            window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        });
+    }
+}
+
+function loadAllInlineImages(data) {
+    var json = JSON.parse(data);
+    for(var i = 0; i < json.length; i++) {
+        loadInlineImages(json[i], true);
+    }
+}
+
+function loadInlineImages(data, all = false) {
+    try {
+        var json;
+        if(!all) {
+            json = JSON.parse(data);
+        } else {
+            json = data;
+        }
+        var length = json.length-1;
+        var element = document.getElementById('button_'+json[length]);
+        if($('#'+json[length]).is(':visible')) {
+            $('#'+json[length]).hide();
+            element.classList.remove('active');
+        } else {
+            $('#'+json[length]).show();
+            element.classList.add('active');
+        }
+        for(var i = 0; i < length; i++) {
+            //json[i][0] => url
+            //json[i][1] => div id
+            //json[i][2] => name
+            openFrame(json[i][0], json[i][1], json[i][2]);
+            var e = $('#file_viewer_' + json[i][1] + '_iframe');
+            if(!e[0].hasAttribute('frame_styled')) {
+                e.on('load', formatIFrameInlineImages(json[i][1], json[i][2], json[i][0]));
+                e[0].classList.add('frame_styled');
+            }
+        }
+    } catch (err){
+        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Could not load image attachments. Please try again.' + data + '</div>';
+        $('#messages').append(message);
+        return;
+    }
+}
+
