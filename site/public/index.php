@@ -340,8 +340,7 @@ elseif (!$supported_by_new_router) {
     $response = null;
 }
 else {
-    $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
-    $response = $router->run();
+    $response = WebRouter::getWebResponse($request, $core, $logged_in);
 }
 
 if ($response instanceof Response) {
