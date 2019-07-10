@@ -170,8 +170,13 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     }
 }
 
-
-
+/**
+ * Displays edit registration sections form on button press
+ */
+function editRegistrationSectionsForm() {
+    var form = $("#registration-sections-form");
+    form.css("display","block");
+}
 
 /**
  *
@@ -1213,11 +1218,11 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path) {
+function downloadFile(file, path, dir) {
     window.location = buildUrl({
         'component': 'misc',
         'page': 'download_file',
-        'dir': 'submissions',
+        'dir': dir,
         'file': file,
         'path': path});
 }

@@ -8,7 +8,7 @@
         <br><br>
         Upload png images by zipping up multiple course sections together,<br>
         zipping up each course section, or uploading the png image(s).<br><br>
-        Total files cannot exceed 10 mb or 10000 kb.<br><br>
+        Total files cannot exceed {{ max_size_string }} .<br><br>
     </p>
     <br/>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
