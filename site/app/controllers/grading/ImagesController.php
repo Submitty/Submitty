@@ -6,6 +6,7 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\models\user;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
     public function run() {
@@ -121,7 +122,7 @@ class ImagesController extends AbstractController {
             }
         }
 
-        $max_size = 10485760;
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         if ($file_size > $max_size) {
             return $this->core->getOutput()->renderResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
         }
