@@ -109,15 +109,21 @@ class GradeableController extends AbstractController {
 
         } else if (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
             $this->core->addErrorMessage("This action can't be completed.");
-        } else if (preg_match('/\s/',$config_file_path)) {
-            $this->core->addErrorMessage("The file name cannot contain space.");
         } else {
-            $new_name = $_POST['new_config_name'] ?? null;
-            $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
-            if(rename($config_file_path, $new_dir)){
-                $this->core->addSuccessMessage("Successfully renamed file");
-            } else {
-                $this->core->addErrorMessage("Directory already exist, please choose another name.");
+            $new_name = $_POST['new_config_name'] ?? "";
+            if ($new_name === "") {
+                $this->core->addErrorMessage("Could not rename upload because no name was entered.");
+            }
+            else if (!ctype_alnum(str_replace(['_','-'], '', $new_name))) {
+                $this->core->addErrorMessage("Name can only contain alphanumeric characters, dashes, and underscores.");
+            }
+            else {
+                $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
+                if(rename($config_file_path, $new_dir)){
+                    $this->core->addSuccessMessage("Successfully renamed file");
+                } else {
+                    $this->core->addErrorMessage("Directory already exist, please choose another name.");
+                }
             }
         }
         $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',

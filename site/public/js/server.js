@@ -170,8 +170,13 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     }
 }
 
-
-
+/**
+ * Displays edit registration sections form on button press
+ */
+function editRegistrationSectionsForm() {
+    var form = $("#registration-sections-form");
+    form.css("display","block");
+}
 
 /**
  *
@@ -320,7 +325,8 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
     form.css("display", "block");
 }
 
-function newDeleteCourseMaterialForm(form_action, file_name) {
+function newDeleteCourseMaterialForm(path, file_name) {
+    let url = buildNewCourseUrl(["course_materials", "delete"]) + "?path=" + path;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
 
@@ -341,7 +347,7 @@ function newDeleteCourseMaterialForm(form_action, file_name) {
     var form = $("#delete-course-material-form");
     $('[name="delete-course-material-message"]', form).html('');
     $('[name="delete-course-material-message"]', form).append('<b>'+file_name+'</b>');
-    $('[name="delete-confirmation"]', form).attr('action', form_action);
+    $('[name="delete-confirmation"]', form).attr('action', url);
     form.css("display", "block");
 }
 
@@ -993,6 +999,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
+            $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
         var team_history_len=user_assignment_setting_json.team_history.length;
         team_history_title_div.append('Team History: ');
@@ -1211,11 +1218,11 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path) {
+function downloadFile(file, path, dir) {
     window.location = buildUrl({
         'component': 'misc',
         'page': 'download_file',
-        'dir': 'submissions',
+        'dir': dir,
         'file': file,
         'path': path});
 }
@@ -1246,7 +1253,7 @@ function downloadFileWithAnyRole(file_name, path) {
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'download_course_material_zip', 'dir_name': dir_name, 'path': path});
+    window.location = buildNewCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
 }
 
 function checkColorActivated() {
@@ -1677,7 +1684,7 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_permission', 'filename': encodeURIComponent(filename), 'checked': checked});
+    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filename) + '&checked=' + checked;
 
     $.ajax({
         url: url,
@@ -1690,7 +1697,7 @@ function changePermission(filename, checked) {
 
 function changeNewDateTime(filename, newdatatime) {
     // send to server to handle file permission change
-    var url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'modify_course_materials_file_time_stamp', 'filename': encodeURIComponent(filename), 'newdatatime': encodeURIComponent(newdatatime)});
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
 
     $.ajax({
         url: url,
@@ -1717,19 +1724,17 @@ $.fn.isInViewport = function() {                                        // jQuer
 function checkSidebarCollapse() {
     var size = $(document.body).width();
     if (size < 1000) {
-        $("#sidebar").toggleClass("collapsed", true);
+        $("aside").toggleClass("collapsed", true);
     }
     else{
-        $("#sidebar").toggleClass("collapsed", false);
+        $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("#sidebar");
+    var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
-
-    sidebar.addClass("animate");
 
     localStorage.sidebar = !shown;
     sidebar.toggleClass("collapsed", !shown);
@@ -1740,7 +1745,7 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
         content: function () {
-            if($("#sidebar").hasClass("collapsed")) {
+            if($("aside").hasClass("collapsed")) {
                 if ($(this).attr("title") === "Collapse Sidebar") {
                     return "Expand Sidebar";
                 }
@@ -1755,7 +1760,7 @@ $(document).ready(function() {
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {
         //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("#sidebar").toggleClass("collapsed", localStorage.sidebar === "true");
+        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space

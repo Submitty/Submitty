@@ -42,9 +42,16 @@
         {% endif %}
         {# /Overview #}
 
+        {% if (graded_score >= graded_max) or (total_score >= total_max) %}
+            <canvas id="confetti_canvas"></canvas>
+        {% endif %}
+
         {# Manual total #}
         <div class="box">
-            <div class="box-title">
+            <div class="box-title" 
+                {% if graded_score >= graded_max %}
+                        onclick="addConfetti();" style="cursor:pointer;"
+                {% endif %}>
                 {{ Badge.render(graded_score, graded_max, false) }}
                 <h4>{{ has_autograding ? "TA / Instructor Grading Subtotal" : "Total" }}</h4>
             </div>
@@ -68,7 +75,7 @@
                         <p>
                         {# This is a layout table #}
                         <table class="gradeable_comment">
-                            {% for mark in component.marks if mark.show_mark %}
+                            {% for mark in component.marks|filter((mark) => mark.show_mark) %}
                                 <tr>
                                     <td>
                                         {% if mark.earned %}
@@ -109,7 +116,14 @@
         {# Total auto + manual #}
         {% if has_autograding %}
             <div class="box">
-                <div class="box-title" style="padding-top: 15px; padding-bottom: 15px;">
+                <div class="box-title"
+                    {% if total_score >= total_max %}
+                        onclick="addConfetti();" 
+                        style="padding-top: 15px; padding-bottom: 15px; cursor:pointer;" 
+                    {% else %}
+                        style="padding-top: 15px; padding-bottom: 15px;"
+                    {% endif %}
+                >
                     {{ Badge.render(total_score, total_max, false) }}
                     <h4>Total</h4>
                 </div>

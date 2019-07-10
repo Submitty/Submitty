@@ -13,7 +13,11 @@
     outline: 3px dashed #337ab7;
 }
 
-.fixed-top {
+.sticky-top {
     position: fixed;
     top: 0;
+}
+
+.sticky-top label, .sticky-top .not-sticky {
+    display: none !important;
 }

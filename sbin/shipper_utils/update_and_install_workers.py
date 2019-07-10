@@ -77,8 +77,13 @@ if __name__ == "__main__":
   for worker, stats in autograding_workers.items():
       user = stats['username']
       host = stats['address']
+      enabled = stats['enabled']
 
       if worker == 'primary' or host == 'localhost':
+          continue
+
+      if enabled == False:
+          print("Skipping rsync to {0} because it is disabled.".format(worker))
           continue
 
       exit_code = run_systemctl_command(worker, 'status')
