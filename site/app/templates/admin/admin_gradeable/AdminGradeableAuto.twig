@@ -32,9 +32,9 @@
 
     <div class="btn-container">
         <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Student Permission Settings" onclick="showAdvancedStudentPermissions()">
-        <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
+        <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student-permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
     </div>
-    <div class="student_permissions settings" hidden>
+    <div class="student-permissions settings" hidden>
         <div>
             What are students allowed to do?
         </div>
@@ -186,13 +186,13 @@
     }
 
     function showAdvancedStudentPermissions() {
-        $('.student_permissions').show();
+        $('.student-permissions').show();
         $('#hide-advanced-student-permissions-container').show();
         $('#show-advanced-student-permissions').hide();
     }
 
     function hideAdvancedStudentPermissions() {
-        $('.student_permissions').hide();
+        $('.student-permissions').hide();
         $('#hide-advanced-student-permissions-container').hide();
         $('#show-advanced-student-permissions').show();
     }
