@@ -5,8 +5,11 @@
                     from the Course Settings Page. </p>
                 <p> Manually type the full path to a configuration file, or select from the list below. </p>
 		<p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
-		{% if repository_error_message != '' %}
-			<div id="repository_error">({{repository_error_message}})</div>
+		{% for error_message in repository_error_messages %}
+			<div name="config_search_error">({{error_message}})</div>
+		{% endfor %}
+		{% if not currently_valid_repository %}
+			<div name="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
 		{% endif %}
 
     <fieldset>
