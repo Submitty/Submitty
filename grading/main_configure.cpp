@@ -162,11 +162,17 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  /******************************************
+  // Configure defaults for hide_submitted_files
+  j["hide_submitted_files"] = config_json.value("hide_submitted_files", false);
 
-  Validate and inflate notebook data
+  // Configure defaults for hide_versions_and_tests_details
+  j["hide_versions_and_tests_details"] = config_json.value("hide_versions_and_tests_details", false);
 
-  ******************************************/
+    /******************************************
+
+    Validate and inflate notebook data
+
+    ******************************************/
 
   nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
   if (in_notebook_cells != config_json.end())
