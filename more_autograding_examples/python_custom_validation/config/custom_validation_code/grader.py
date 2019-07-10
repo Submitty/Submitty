@@ -4,7 +4,7 @@ This file presents an example of a python custom validator for use in your Submi
 In this assignment, the student has been asked to randomly generate
 n numbers, output them, and then output their sum.
 
-To test that the output is truly random, we run the student program program multiple
+To test that the output is truly random, we run the student program multiple
 times. For each run, we make sure that:
 1. The student produced n numbers.
 2. They are correctly summed.
@@ -105,7 +105,7 @@ def get_actual_files():
     # Open the custom_validator_input.json that we specified in our config.
     with open(GLOBAL_INPUT_JSON_PATH) as json_file:
       testcase = json.load(json_file)
-      #Grab the folder housing the files.
+      # Grab the folder housing the files.
       prefix = testcase['testcase_prefix']
   except Exception as e:
     return_error('Could not open custom_validator_input.json')
@@ -175,7 +175,7 @@ def do_the_grading():
 
   try:
     # Parse command line arguments. In this assignment, this is how we learn
-    # How many numbers the student was supposed to sum together.
+    # how many numbers the student was supposed to sum together.
     args = parse_args()
   except Exception as e:
     # If we can't parse the command line arguments, we must have done something
