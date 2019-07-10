@@ -1,13 +1,5 @@
 {% import _self as self %}
 
-<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/codemirror.css" />
-<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/eclipse.css" />
-<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/monokai.css" />
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/codemirror.js"></script>
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/clike/clike.js"></script>
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/python/python.js"></script>
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/shell/shell.js"></script>
-
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
     <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
