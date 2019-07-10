@@ -12,6 +12,7 @@ if [[ $(command -v jdk_switcher) ]]; then
 fi
 
 # Set Node.JS version
+nvm install 10
 nvm use 10
 
 # Set the Java version
