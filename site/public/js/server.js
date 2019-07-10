@@ -1218,11 +1218,11 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path) {
+function downloadFile(file, path, dir) {
     window.location = buildUrl({
         'component': 'misc',
         'page': 'download_file',
-        'dir': 'submissions',
+        'dir': dir,
         'file': file,
         'path': path});
 }
