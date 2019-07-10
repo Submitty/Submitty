@@ -752,7 +752,7 @@ class HomeworkView extends AbstractView {
         if (!$graded_gradeable->hasSubmission()) {
             $grade_inquiry_status = "no_submission";
         }
-         else if (!$graded_gradeable->hasRegradeRequest()) {
+        else if (!$graded_gradeable->hasRegradeRequest()) {
             $grade_inquiry_status = 'none';
         }
         elseif ($graded_gradeable->hasActiveRegradeRequest()) {
@@ -764,7 +764,12 @@ class HomeworkView extends AbstractView {
             }
         }
         else {
-            $grade_inquiry_status = 'resolved';
+            if ($this->core->getUser()->accessGrading()) {
+                $grade_inquiry_status = 'resolved_grading';
+            }
+            else {
+                $grade_inquiry_status = 'resolved';
+            }
         }
 
         $posts = [];
