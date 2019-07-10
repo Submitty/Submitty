@@ -114,7 +114,7 @@ class WebRouter {
                 return $csrf_check_response;
             }
           
-            if (!$this->accessCheck()) {
+            if (!$router->accessCheck()) {
                 return new Response(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
