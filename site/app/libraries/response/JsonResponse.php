@@ -13,7 +13,7 @@ use app\libraries\Core;
 class JsonResponse extends AbstractResponse {
 
     /** @var array json encoded array */
-    protected $json;
+    public $json;
 
     /**
      * JsonResponse constructor.

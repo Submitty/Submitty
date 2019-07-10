@@ -1,68 +1,47 @@
-<div class="content">
-    <div class="row">
-        <div class="box col-md-6">
-            <h1>About You</h1>
-            {# This is a layout table #}
-            <table>
-                <tbody>
-                <tr>
-                    <td><b>Username:</b> {{ user.getId() }} </td>
-                </tr>
-                <tr>
-                    <td><b>First Name:</b> {{ user.getDisplayedFirstName() }} </td>
-                    <td><a onclick="userNameChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
-                </tr>
-                <tr>
-                    <td><b>Last Name:</b> {{ user.getDisplayedLastName() }} </td>
-                </tr>
-                <tr>
-                    <td><b>Email:</b> {{ user.getEmail() }} </td>
-                </tr>
-                {% if show_change_password %}
-                    <tr>
-                        <td><b>Change Password</b></td>
-                        <td><a onclick="passwordChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
-                    </tr>
-                {% endif %}
-                </tbody>
-            </table>
-        </div>
-        <div class="box col-md-6">
-            {% for ranks in statuses %}
-                {% if loop.index == 1 or ranks|length > 0 %}
-                    <h2>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h2>
-                    {# This is also a layout table #}
-                    <table class="courses-table">
-                        <tbody>
-                        {% for rank in ranks %}
-                            <tr>
-                                <td colspan="8">
-                                    <h3>{{ rank.title }}</h3>
-                                </td>
-                            </tr>
-                            {% for course in rank.courses %}
-                                <tr>
-                                    <td>
-                                        <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block text-left" style="text-align:left; padding-left:10px" href="{{ core.buildNewUrl([course.getSemester(), course.getTitle()]) }}">
-                                            {{ course.getLongSemester() }} &nbsp; &nbsp;
-                                            {{ course.getCapitalizedTitle() }} &nbsp; &nbsp;
-                                            {% if course.getDisplayName() != "" %}
-                                                {{ course.getDisplayName() }}
-                                            {% endif %}
-                                            {{ user.accessAdmin() }}
-                                        </a>
-                                    </td>
-                                </tr>
-                            {% endfor %}
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+<div class="flex-wrapper">
+    <div id="courses" class="content">
+        {% for ranks in statuses %}
+            {% if loop.index == 1 or ranks|length > 0 %}
+                <h1>Your {{ loop.index == 1 ? "" : "Archived " }}Courses</h1>
+                {% for rank in ranks %}
+                    <h2>As {{ rank.title }}</h2>
+                    <ul id="course-list" class="bare-list">
+                        {% for course in rank.courses %}
+                            <li>
+                                <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block text-left" style="text-align:left; padding-left:10px" href="{{ core.buildNewUrl([course.getSemester(), course.getTitle()]) }}">
+                                    {{ course.getLongSemester() }} &nbsp; &nbsp;
+                                    {{ course.getCapitalizedTitle() }} &nbsp; &nbsp;
+                                    {% if course.getDisplayName() != "" %}
+                                        {{ course.getDisplayName() }}
+                                    {% endif %}
+                                    {{ user.accessAdmin() }}
+                                </a>
+                            </li>
                         {% endfor %}
-                        </tbody>
-                    </table>
-                    {% if not (loop.index == statuses|length or statuses[loop.index0 + 1]|length == 0) %}
-                        <br>
-                    {% endif %}
-                {% endif %}
-            {% endfor %}
-        </div>
+                    </ul>
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div class="content">
+        <h1>About You</h1>
+        <ul class="bare-list">
+            <li><b>Username:</b> {{ user.getId() }}</li>
+            <li class="flex-row">
+                <span><b>First Name:</b>&nbsp;{{ user.getDisplayedFirstName() }}</span>
+                <a onclick="userNameChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+            </li>
+            <li><b>Last Name:</b> {{ user.getDisplayedLastName() }}</li>
+            <li><b>Email:</b> {{ user.getEmail() }}</li>
+            {% if show_change_password %}
+                <li class="flex-row">
+                    <b>Change Password</b>
+                    <a onclick="passwordChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+                </li>
+            {% endif %}
+        </ul>
     </div>
 </div>
 {% include 'EditNameForm.twig' %}

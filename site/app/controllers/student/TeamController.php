@@ -21,11 +21,13 @@ class TeamController extends AbstractController {
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
             $this->core->redirect($this->core->buildNewCourseUrl());
+            return $this->core->getOutput()->renderJsonFail("Invalid or missing gradeable id!");
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
             $this->core->redirect($this->core->buildNewCourseUrl());
+            return $this->core->getOutput()->renderJsonFail($gradeable->getTitle() . " is not a team assignment");
         }
 
         $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
@@ -34,6 +36,7 @@ class TeamController extends AbstractController {
         if ($graded_gradeable !== false) {
             $this->core->addErrorMessage("You must leave your current team before you can create a new team");
             $this->core->redirect($return_url);
+            return $this->core->getOutput()->renderJsonFail("You must leave your current team before you can create a new team");
         }
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
@@ -45,12 +48,14 @@ class TeamController extends AbstractController {
         if (!FileUtils::createDir($gradeable_path)) {
             $this->core->addErrorMEssage("Failed to make folder for this assignment");
             $this->core->redirect($return_url);
+            return $this->core->getOutput()->renderJsonFail("Failed to make folder for this assignment");
         }
 
         $user_path = FileUtils::joinPaths($gradeable_path, $team_id);
         if (!FileUtils::createDir($user_path)) {
             $this->core->addErrorMEssage("Failed to make folder for this assignment for the team");
             $this->core->redirect($return_url);
+            return $this->core->getOutput()->renderJsonFail("Failed to make folder for this assignment for the team");
         }
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
@@ -59,8 +64,10 @@ class TeamController extends AbstractController {
 
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
+            return $this->core->getOutput()->renderJsonFail("Failed to write to team history to settings file");
         }
         $this->core->redirect($return_url);
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**
