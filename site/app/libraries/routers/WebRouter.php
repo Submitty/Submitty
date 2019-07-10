@@ -115,10 +115,10 @@ class WebRouter {
             }
           
             if (!$this->accessCheck()) {
-              return new Response(
-                  JsonResponse::getFailResponse("You don't have access to this endpoint."),
-                  new WebResponse("Error", "errorPage", "You don't have access to this page.")
-              );
+                return new Response(
+                    JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                    new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
             }
         }
         catch (ResourceNotFoundException $e) {
