@@ -6,6 +6,7 @@ use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\models\Email;
 use app\models\Notification;
+use LogicException;
 
 /**
  * A factory class that will handle all notification events and send notifications and emails accordingly
@@ -159,8 +160,7 @@ class NotificationFactory {
      */
     public function sendEmails(array $emails) {
         if (!$this->core->getConfig()->isEmailEnabled()) {
-            throwException(new ConfigException("Email is not enabled"));
-            return;
+            throw new LogicException("Email is not enabled");
         }
         if (empty($emails)) {
             return;

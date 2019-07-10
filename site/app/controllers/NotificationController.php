@@ -88,6 +88,14 @@ class NotificationController extends AbstractController {
     public function changeSettings() {
         //Change settings for the current user...
         $new_settings = $_POST;
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            foreach ($new_settings as $key => $value) {
+                if (!substr_compare($key,'_email',strlen($key)-6)) {
+                    unset($new_settings[$key]);
+                }
+            }
+        }
+
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff(self::NOTIFICATION_SELECTIONS, array_keys($new_settings));
             foreach(array_values($values_not_sent) as $value) {
