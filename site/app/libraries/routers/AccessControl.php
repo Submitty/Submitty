@@ -42,15 +42,15 @@ use Doctrine\Common\Annotations\Annotation;
  *      @AccessControl(role="FULL_ACCESS_GRADER", permission="grading.simple")
  *      public function foo() {...}
  *
- * Note that @AccessControl() annotation of methods will override the one
- * of their classes. For clarity, it is recommended not to have class-level
- * @AccessControl() and method-level @AccessControl() at the same time.
+ * Note that if you use method level @AccessControl() annotation, the class
+ * level @AccessControl() annotation will not be considered at the same time.
+ * For clarity, it is recommended not to have class and method level annotations
+ * at the same time.
  *
  * Example (class & method):
  *
- *      The foo() function is NOT accessible to non-instructors with "grading.simple"
- *      permission. It IS accessible to instructors with OR without "grading.simple"
- *      permission.
+ *      The foo() function will only consider if the user has the "instructor"
+ *      role, and will NOT check the "grading.simple" permission.
  *
  *      @AccessControl(permission="grading.simple")
  *      class SomeController extends AbstractController {
