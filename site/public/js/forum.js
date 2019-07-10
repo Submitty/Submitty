@@ -1055,3 +1055,19 @@ function sortTable(sort_element_index, reverse=false){
     }
 
 }
+
+function thread_post_handler(){
+    $('.submit_unresolve').click(function(event){
+        var post_box_id = $(this).attr("post_box_id");
+        $('#thread_status_input_'+post_box_id).val(-1);
+        return true;
+    });
+
+    $('.post_reply_from').submit(function(){
+        var post = $(this).find("[name=post]");
+        var post_unresolve = $(this).find("[name=post_and_unresolve]");
+        post.attr("disabled", "true").val('Submitting post...');
+        post_unresolve.attr("disabled", "true").val('Submitting post...');
+        return true;
+    });
+}

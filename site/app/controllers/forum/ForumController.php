@@ -120,8 +120,10 @@ class ForumController extends AbstractController{
             return array(-1, $url);
     }
 
-	private function changeThreadStatus($status) {
-		$thread_id = $_POST['thread_id'];
+	private function changeThreadStatus($status, $thread_id=-1) {
+        if($thread_id==-1) {
+            $thread_id = $_POST['thread_id'];
+        }
 		$result = array();
 		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
 			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
@@ -348,6 +350,7 @@ class ForumController extends AbstractController{
             $lock_thread_date = null;
         }
         $thread_status = $_POST["thread_status"];
+
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
         $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
 
@@ -425,6 +428,11 @@ class ForumController extends AbstractController{
         $file_post = 'file_input';
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        if(isset($_POST['thread_status'])){
+            $this->changeThreadStatus($_POST['thread_status'], $thread_id);
+        }
+
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
@@ -786,6 +794,8 @@ class ForumController extends AbstractController{
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $current_user = $this->core->getUser()->getId();
 
+        $thread_resolve_state = 0;
+
         $posts = null;
         $option = 'tree';
         if(!empty($_REQUEST['option'])) {
@@ -796,6 +806,7 @@ class ForumController extends AbstractController{
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){
             $thread_id = (int)$_REQUEST["thread_id"];
+            $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
             $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
             foreach ($unread_p as $up) {
@@ -834,7 +845,7 @@ class ForumController extends AbstractController{
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state);
     }
 
     private function getAllowedCategoryColor() {

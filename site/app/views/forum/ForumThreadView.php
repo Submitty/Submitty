@@ -108,7 +108,7 @@ class ForumThreadView extends AbstractView {
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
+    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state){
         if(!$this->forumAccess()){
             $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
             return;
@@ -333,6 +333,7 @@ class ForumThreadView extends AbstractView {
             "currentCourse" => $currentCourse,
             "generate_post_content" => $generatePostContent,
             "display_option" => $display_option,
+            "thread_resolve_state" => $thread_resolve_state,
             "csrf_token" => $this->core->getCsrfToken()
         ]);
         return $return;
