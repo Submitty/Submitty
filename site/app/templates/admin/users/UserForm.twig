@@ -109,7 +109,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': action}) }}" onchange="userFormChange()">
+    <form method="post" action="{{ return_url_update_grader }}" onchange="userFormChange()">
         {{ parent() }}
     </form>
 {% endblock %}
