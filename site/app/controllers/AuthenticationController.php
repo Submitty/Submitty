@@ -3,9 +3,12 @@
 namespace app\controllers;
 
 use app\libraries\Core;
-use app\libraries\Output;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\WebResponse;
 use app\libraries\Utils;
 use app\libraries\Logger;
+use app\libraries\response\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -57,6 +60,7 @@ class AuthenticationController extends AbstractController {
      * is not strictly necessary, but still good to tidy up.
      *
      * @Route("/authentication/logout")
+     * @return Response
      */
     public function logout() {
         Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
@@ -68,7 +72,9 @@ class AuthenticationController extends AbstractController {
             }
         }
         $this->core->removeCurrentSession();
-        $this->core->redirect($this->core->buildNewUrl(['authentication', 'login']));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewUrl(['authentication', 'login']))
+        );
     }
     
     /**
@@ -77,9 +83,12 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/login")
      *
      * @var string $old the url to redirect to after login
+     * @return Response
      */
     public function loginForm($old = null) {
-        $this->core->getOutput()->renderOutput('Authentication', 'loginForm', $old);
+        return Response::WebOnlyResponse(
+            new WebResponse('Authentication', 'loginForm', $old)
+        );
     }
     
     /**
@@ -91,22 +100,27 @@ class AuthenticationController extends AbstractController {
      * @Route("/authentication/check_login")
      *
      * @var string $old the url to redirect to after login
-     * @return array
+     * @return Response
      */
     public function checkLogin($old = null) {
         if (isset($old)) {
             $old = urldecode($old);
         }
         if ($this->logged_in) {
-            $this->core->redirect($old);
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($old)
+            );
         }
         $_POST['stay_logged_in'] = (isset($_POST['stay_logged_in']));
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
 
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($old);
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($old)
+            );
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
@@ -115,37 +129,44 @@ class AuthenticationController extends AbstractController {
             $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
 
             $this->core->addSuccessMessage($msg);
-            $this->core->redirect($old);
-            return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+            return new Response(
+                JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]),
+                null,
+                new RedirectResponse($old)
+            );
         }
         else {
             $msg = "Could not login using that user id or password";
 
             $this->core->addErrorMessage($msg);
             $this->core->redirect($old);
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($old)
+            );
         }
     }
 
     /**
      * @Route("/api/token", methods={"POST"})
      *
-     * @return array
+     * @return Response
      */
     public function getToken() {
         if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
             $msg = 'Cannot leave user id or password blank';
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         $token = $this->core->authenticateJwt();
         if ($token) {
-            return $this->core->getOutput()->renderJsonSuccess(['token' => $token]);
+            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['token' => $token]));
         }
         else {
             $msg = "Could not login using that user id or password";
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
     }
 
@@ -158,28 +179,29 @@ class AuthenticationController extends AbstractController {
      * gradeable in that course.
      *
      * @Route("{_semester}/{_course}/authentication/vcs_login")
+     * @return Response
      */
     public function vcsLogin() {
         if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
             || empty($_POST['id']) || !$this->core->getConfig()->isCourseLoaded()) {
             $msg = 'Missing value for one of the fields';
-            return $this->core->getOutput()->renderJsonError($msg);
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         $this->core->getAuthentication()->setUserId($_POST['user_id']);
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->getAuthentication()->authenticate() !== true) {
             $msg = "Could not login using that user id or password";
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
 
         $user = $this->core->getQueries()->getUserById($_POST['user_id']);
         if ($user === null) {
             $msg = "Could not find that user for that course";
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
         else if ($user->accessFullGrading()) {
             $msg = "Successfully logged in as {$_POST['user_id']}";
-            return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
         }
 
         try {
@@ -192,15 +214,15 @@ class AuthenticationController extends AbstractController {
         if ($gradeable !== null && $gradeable->isTeamAssignment()) {
             if (!$this->core->getQueries()->getTeamById($_POST['id'])->hasMember($_POST['user_id'])) {
                 $msg = "This user is not a member of that team.";
-                return $this->core->getOutput()->renderJsonFail($msg);
+                return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
             }
         }
         elseif ($_POST['user_id'] !== $_POST['id']) {
             $msg = "This user cannot check out that repository.";
-            return $this->core->getOutput()->renderJsonFail($msg);
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
 
         $msg = "Successfully logged in as {$_POST['user_id']}";
-        return $this->core->getOutput()->renderJsonSuccess(['message' => $msg, 'authenticated' => true]);
+        return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
     }
 }
