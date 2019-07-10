@@ -2,6 +2,12 @@
 <html>
 <head>
     <title>{{ filename }}</title>
+    {% for stylesheet in code_css %}
+        <link rel="stylesheet" type="text/css" href="{{ stylesheet }}"/>
+    {% endfor %}
+    {% for script in code_js %}
+        <script type='text/javascript' src='{{ script }}'></script>
+    {% endfor %}
     <script type="text/javascript">
         $(document).ready(function() {
             $('body').css("height", ($('.CodeMirror').height()) + "px");
