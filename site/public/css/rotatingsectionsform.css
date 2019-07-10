@@ -1,3 +1,8 @@
+p {
+    margin-block-start: 1em;
+    margin-block-end: 1em;
+}
+
 fieldset > * {
     margin-bottom: 0.5em;
 }
@@ -10,4 +15,17 @@ fieldset > * {
 
 #redo-data > label {
     display: block;
+    margin: 0.5em 0;
+}
+
+table caption {
+    font-size: 1.17rem;
+    font-weight: bold;
+    text-align: center;
+    caption-side: top;
+    border: 0;
+}
+
+table caption .subcaption {
+    font-size: 1rem;
 }
