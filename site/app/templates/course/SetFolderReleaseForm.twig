@@ -80,25 +80,13 @@
             }
         }
         function setChild(dirArr,releaseDate,handleData) {
-            var count=0;
-            console.log(dirArr.length);
-            //go through the array of folder paths and set the time to the new one
-            dirArr.forEach(function (element) {
-                console.log(element);
-                setChildNewDateTime(element,releaseDate.value,function (output) {
-                    if(output){
-                        count++;
-                        console.log(element," success ",count,"/",dirArr.length);
-                        if(count==dirArr.length-1){
-                            console.log("done");
-                            if(handleData){
-                                console.log("count: ",count);
-                                handleData(count);
-                            }
-                        }
+            //send the array of folder paths and set the time to the new one
+            setChildNewDateTime(dirArr,releaseDate.value,function (output) {
+                if(output){
+                    if(handleData){
+                        handleData(true);
                     }
-
-                });
+                }
 
             });
 
@@ -116,13 +104,10 @@
             }
 
             setChild(dirArr,releaseDate,function (output) {
-
+                //when done reload
                if(output) {
-                   console.log("here");
-                   //var reloadPause = 100*dirArr.length;
-                   //console.log(reloadPause);
                    var selectedDiv = 'date_to_release_'+ID;
-                   //change value immediately and background color (will only appear after refresh)
+                   //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
                    $("[id^="+selectedDiv+"]").val(releaseDate.value);
                    $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
                    //delay so function can finish most of the way

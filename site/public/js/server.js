@@ -1747,7 +1747,7 @@ function changePermission(filename, checked) {
         url: url,
         success: function(data) {},
         error: function(e) {
-            //alert("Encounter saving the checkbox state.");
+            alert("Encounter saving the checkbox state.");
         }
     })
 }
@@ -1758,17 +1758,38 @@ function changeNewDateTime(filename, newdatatime,handleData) {
     var tbr;
     tbr=false;
     $.ajax({
+        type: "POST",
         url: url,
+        data: {'fn':filename},
         success: function(data) {
             tbr=true;
-            console.log('ajax success');
             if(handleData){
                 handleData(data);
             }
         },
         error: function(e) {
-            console.log('ajax fail');
-            //alert("Encounter saving the NewDateTime.");
+            alert("Encounter saving the NewDateTime.");
+
+        }
+    })
+}
+function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+    // send to server to handle folder permission change
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    var tbr;
+    tbr=false;
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'fn':filenames},
+        success: function(data) {
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+        },
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
 
         }
     })

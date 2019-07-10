@@ -39,6 +39,7 @@ class CourseMaterialsView extends AbstractView {
                 if ($json == true){
                     if ( isset( $json[$expected_file_path] ) )
                     {
+                        $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
                         $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
@@ -75,7 +76,11 @@ class CourseMaterialsView extends AbstractView {
                 $file_datas[$expected_file_path] = $isShareToOther;
 
                 if( $releaseData == $now_date_time->format("Y-m-d H:i:sO")){
+                    //for uploaded files that have had no manually set date to be set to never and maintained as never
+                    //also permission set to yes
                     $releaseData=substr_replace($releaseData,"9999",0,4);
+                    $json[$expected_file_path]['checked']='1';
+                    $json[$expected_file_path]['release_datetime']= $releaseData;
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
