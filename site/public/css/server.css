@@ -195,6 +195,10 @@ table tr.table-header {
     border-top: 1px solid var(--standard-light-gray);
 }
 
+.table tr {
+    border-top: 1px solid #ddd;
+}
+
 .table-bordered {
     border: 1px solid var(--standard-medium-gray);
     border-collapse: separate;
@@ -215,8 +219,13 @@ table tr.table-header {
     background: var(--standard-hover-light-gray);
 }
 
+<<<<<<< HEAD
 .table>tbody>tr.info {
     background-color: var(--table-info);
+=======
+tr.info, tr.info td, tr.info th {
+    background-color: #d9edf7;
+>>>>>>> base, without mobile table
 }
 
 .floating-thead,
@@ -1656,9 +1665,29 @@ end of styles used in the admin gradeable page
     margin-bottom: 0;
 }
 
-ul.bare-list {
+ul.full-list, ol.full-list {
+    display: block;
+    margin: 1em 0;
+    padding-left: 40px;
+}
+
+ul.bare-list, ol.bare-list {
     list-style: none;
     padding: 0;
+}
+
+.std-margin {
+    margin: 1em 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+header > * {
+    margin-bottom: 20px
 }
 
 .align-left {
