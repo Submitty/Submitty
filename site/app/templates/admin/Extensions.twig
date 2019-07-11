@@ -57,10 +57,15 @@
         document.getElementById("late_calendar").value = "";
     }
     function calculateLateDays(inputDate){
-        var due_date_value = document.getElementById("due_date").innerHTML.substr(0,10);
+        let select_menu = document.getElementById("g_id");
+        if(select_menu.selectedIndex === 0){
+            alert("Please select a gradeable first!");
+            return;
+        }
+        var due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute("data-due-date");
         var new_due_date = new Date(inputDate);
         var old_due_date = new Date(due_date_value);
-        var delta = (new_due_date - old_due_date) / (1000*60*60*24);
+        var delta = (new_due_date.getTime() - old_due_date.getTime()) / (1000*60*60*24);
         if (delta < 0) {
             delta = 0;
         }
@@ -87,11 +92,10 @@
                                     date = new Date();
                                     break;
                                 case 1: 
-                                    date = new Date("9999-01-01");
+                                    date = new Date("9998-01-01");
                                     break;
                             }
-                            fp.setDate(date);
-                            calculateLateDays(date);
+                            fp.setDate(date, true);
                         }
                     }
                 )],
