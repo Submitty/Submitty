@@ -462,7 +462,7 @@ class ReportController extends AbstractController {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
             } catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
                 $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());

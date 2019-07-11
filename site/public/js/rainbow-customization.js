@@ -195,14 +195,13 @@ function buildJSON(){
 //This function attempts to create a new customization.json server-side based on form input
 function ajaxUpdateJSON(successCallback, errorCallback) {
     $('#save_status').html('Saving...');
+
+    var url = buildNewCourseUrl(['rainbow_grades_customization']);
+
     $.getJSON({
         type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'reports',
-            'action': 'customization'
-        }),
-        data: {json_string: buildJSON()},
+        url: url,
+        data: {json_string: buildJSON(), csrf_token: csrfToken},
         success: function (response) {
             if (response.status === 'success') {
                 $('#save_status').html('Saved successfully');
