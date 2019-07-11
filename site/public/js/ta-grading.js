@@ -460,8 +460,8 @@ function toggleDiscussion() {
 }
 
 function resetModules() {
-    var width = $("#nav-positioner").width();
-    var height = $("#nav-positioner").height();
+    var width = $("main").width();
+    var height = $("main").height();
 
     $('.grading_toolbar .fa-list').addClass('icon-selected');
     $("#autograding_results").attr("style", "z-index:30; left:0; top:60%; width:48%; height:40%; display:block;");
