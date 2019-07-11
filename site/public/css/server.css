@@ -274,7 +274,6 @@ table tr.table-header {
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
-    max-height: calc(100vh - 122px); /* 61px header, 41px footer, 20px margins */
     overflow: auto;
 }
 
@@ -1655,6 +1654,10 @@ end of styles used in the admin gradeable page
 ul.bare-list {
     list-style: none;
     padding: 0;
+}
+
+.align-left {
+    text-align: left !important;
 }
 
 @media (min-width: 541px) {
