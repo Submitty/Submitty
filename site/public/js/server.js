@@ -1758,14 +1758,14 @@ function changePermission(filename, checked) {
 }
 
 function changeNewDateTime(filename, newdatatime,handleData) {
-    // send to server to handle file permission change
+    // send to server to handle file date/time change
     let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
     var tbr;
     tbr=false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'fn':filename},
+        data: {'fn':filename,csrf_token: csrfToken},
         success: function(data) {
             tbr=true;
             if(handleData){
@@ -1779,14 +1779,14 @@ function changeNewDateTime(filename, newdatatime,handleData) {
     })
 }
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
-    // send to server to handle folder permission change
+    // send to server to handle folder date/time change
     let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
     var tbr;
     tbr=false;
     $.ajax({
         type: "POST",
         url: url,
-        data: {'fn':filenames},
+        data: {'fn':filenames,csrf_token: csrfToken},
         success: function(data) {
             tbr=true;
             if(handleData){
