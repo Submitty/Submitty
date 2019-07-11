@@ -22,6 +22,7 @@ class UsersView extends AbstractView {
         }
 
         $this->core->getOutput()->addInternalCss('studentlist.css');
+        $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('userform.js');
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
