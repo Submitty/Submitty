@@ -484,12 +484,16 @@
 {# Viewed Grade #}
 {% macro render_column_viewed_grade(self, section, graded_gradeable, index, info, column, team_gradeable_view_history) %}
 	{% if graded_gradeable.getSubmitter().isTeam() %}
-		{% if team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]|length == 0%}
+		{% if team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['no_student_viewed'] %}
 			<td class="viewed-red-x" title="">&#10008;</td>
 		{% else %}
 			<td class="td-viewed-grade">
-				{% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] %}
-					<i class="viewed-green-check" title="Last Viewed: {{ time|date }} by {{user_id}}">&#x2714;</i>
+				{% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'no_student_viewed' %}
+					{% if time == null %}
+						<i class="viewed-white-check" title="Last Viewed: {{ time|date }} by {{user_id}}">&#x2714;</i>
+					{% else %}
+						<i class="viewed-green-check" title="Last Viewed: {{ time|date }} by {{user_id}}">&#x2714;</i>
+					{% endif %}
 				{% endfor %}
 			</td>
 		{% endif %}

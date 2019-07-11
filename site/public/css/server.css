@@ -1372,6 +1372,16 @@ end of styles used in the admin gradeable page
     font-size: 1.5em;
 }
 
+.viewed-white-check {
+    color: white;
+    font-size: 1.5em;
+    text-shadow:
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+}
+
 .viewed-red-x {
     color: red;
     font-size: 1.5em;

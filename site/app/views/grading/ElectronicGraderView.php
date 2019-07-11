@@ -585,6 +585,17 @@ HTML;
         }
 
         $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getTeamViewedTimes($gradeable) : array();
+        foreach ($team_gradeable_view_history as $team) {
+            $not_viewed_yet = true;
+            $hover_over_string = "";
+                foreach ($team as $user => $value) {
+                    if ($value != null) {
+                        $not_viewed_yet = false;
+                        //$hover_over_string.= "Last"
+                    }
+
+                }
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
