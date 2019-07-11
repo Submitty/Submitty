@@ -6,42 +6,15 @@ use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\ErrorMessages;
+use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
 class CourseMaterialsController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        foreach (array('path', 'file') as $key) {
-            if (isset($_REQUEST[$key])) {
-                $_REQUEST[$key] = htmlspecialchars_decode(urldecode($_REQUEST[$key]));
-            }
-        }
-
-        switch ($_REQUEST['action']) {
-            case 'view_course_materials_page':
-                $this->viewCourseMaterialsPage();
-                break;
-            case 'delete_course_material_file':
-                $this->deleteCourseMaterial($_REQUEST["path"]);
-                break;
-            case 'delete_course_material_folder':
-                $this->deleteCourseMaterial($_REQUEST["path"]);
-                break;
-            case 'download_course_material_zip':
-                $this->downloadCourseMaterialZip($_REQUEST["dir_name"], $_REQUEST['path']);
-                break;
-            case 'modify_course_materials_file_permission':
-                $this->modifyCourseMaterialsFilePermission($_REQUEST['filename'], $_REQUEST['checked']);
-                break;
-            case 'modify_course_materials_file_time_stamp':
-                $this->modifyCourseMaterialsFileTimeStamp($_REQUEST["dir_name"], $_REQUEST['newdatatime']);
-                break;
-            case 'upload_course_materials_files':
-                $this->ajaxUploadCourseMaterialsFiles();
-                break;
-            default:
-                $this->viewCourseMaterialsPage();
-                break;
-        }
+        return null;
     }
 
     /**
@@ -169,16 +142,9 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/course_materials/modify_permission")
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFilePermission($filename, $checked) {
-
-        // security check
-        if(!$this->core->getUser()->accessAdmin()) {
-            $message = "You do not have access to that page. ";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
-        }
-
         if (!isset($filename) ||
             !isset($checked)) {
             $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
@@ -207,15 +173,9 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/course_materials/modify_timestamp")
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($filename, $newdatatime) {
-
-        if(!$this->core->getUser()->accessAdmin()) {
-            $message = "You do not have access to that page. ";
-            $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
-        }
-
         if (!isset($filename) ||
             !isset($newdatatime)) {
             $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
@@ -241,12 +201,9 @@ class CourseMaterialsController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/course_materials/upload", methods={"POST"})
+     * @AccessControl(role="INSTRUCTOR")
      */
     public function ajaxUploadCourseMaterialsFiles() {
-        if(!$this->core->getUser()->accessAdmin()) {
-            return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);
-        }
-
         if (empty($_POST)) {
             $max_size = ini_get('post_max_size');
             return $this->core->getOutput()->renderResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
