@@ -5,3 +5,10 @@
 #course-list li {
     margin: 3px 0;
 }
+
+.btn-course {
+    text-align: left;
+    padding: 10px;
+    white-space: normal;
+    word-wrap: break-word;
+}
