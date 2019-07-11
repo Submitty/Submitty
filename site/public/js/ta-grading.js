@@ -460,8 +460,8 @@ function toggleDiscussion() {
 }
 
 function resetModules() {
-    var width = $("#nav-positioner").width();
-    var height = $("#nav-positioner").height();
+    var width = $("main").width();
+    var height = $("main").height();
 
     $('.grading_toolbar .fa-list').addClass('icon-selected');
     $("#autograding_results").attr("style", "z-index:30; left:0; top:60%; width:48%; height:40%; display:block;");
@@ -736,18 +736,6 @@ function validateInput(id, question_total, delta){
 function autoResizeComment(e){
     e.target.style.height ="";
     e.target.style.height = e.target.scrollHeight + "px";
-}
-
-function downloadFile(html_file, url_file) {
-    var directory = "";
-    if (url_file.includes("submissions")) {
-        directory = "submissions";
-    }
-    else if (url_file.includes("results")) {
-        directory = "results";
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file', 'dir': directory, 'file': html_file, 'path': url_file});
-    return false;
 }
 
 function hideIfEmpty(element) {

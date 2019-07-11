@@ -69,17 +69,16 @@ input[type="radio"],input[type="checkbox"] {
     vertical-align: middle;
 }
 
-fieldset {
+.settings {
     padding: 8px;
     border-radius: 4px;
-    display: block;
 }
 
 #electronic_file {
     padding-left: 20px;
 }
 
-legend{
+.settings-description {
     padding: 2px;
     font-size: 12pt;
 }
@@ -114,7 +113,7 @@ table#grader-history th, table#grader-history td {
     margin-top: 20px;
 }
 
-#repository_error {
+[name = 'config_search_error'] {
     font-weight:normal;
     /* color is danger-red from colors.css can be changed when available */
     color:#e84848;

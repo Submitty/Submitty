@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\libraries\routers\AccessControl;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -25,42 +26,23 @@ use app\exceptions\ValidationException;
 /**
  * Class ReportController
  * @package app\controllers\admin
- *
+ * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
 
     const MAX_AUTO_RG_WAIT_TIME = 60;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'customization':
-                $this->generateCustomization();
-                break;
-            case 'check_autorg_status':
-                $this->autoRainbowGradesStatus();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
-        }
+        return null;
     }
 
     /**
      * @Route("/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
@@ -71,10 +53,6 @@ class ReportController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $g_sort_keys = [
             'type',
@@ -101,10 +79,6 @@ class ReportController extends AbstractController {
      * @Route("/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
@@ -469,6 +443,9 @@ class ReportController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
     public function generateCustomization(){
 
         // Only allow course admins to access this page
@@ -488,7 +465,7 @@ class ReportController extends AbstractController {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
             } catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
                 $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());

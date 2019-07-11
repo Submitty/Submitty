@@ -151,50 +151,73 @@ function showSimpleGraderStats(action) {
     }
 }
 
-function updateCheckpointCells(elems, score) {
-    var scores = {}; // keep track of changes
+function updateCheckpointCells(elems, scores, no_cookie) {
+    // see if we're setting all of a row to one score
+    var singleScore = null;
+    if (scores && typeof scores != 'object') {
+        singleScore = scores;
+    }
+
+    // keep track of changes
+    var new_scores = {}; 
     var old_scores = {};
     
     elems = $(elems);
     elems.each(function(idx, el) {
         var elem = $(el);
+        var set_new = false;
 
         old_scores[elem.data('id')] = elem.data('score');
 
-        // set score
-        if (score) {
-            elem.data("score", score);
+        // if one score passed, set all elems to it
+        if (singleScore) {
+            elem.data("score", singleScore);
+            set_new = true;
+        }
+        // otherwise match up object IDs with a scores object
+        else if (scores && elem.data("id") in scores) {
+            elem.data("score", scores[elem.data("id")]);
+            set_new = true;
         } 
         // if no score set, toggle through options
-        else {
+        else if (!scores) {
             if (elem.data("score") === 1.0) elem.data("score", 0.5);
             else if (elem.data("score") === 0.5) elem.data("score", 0);
             else elem.data("score", 1);
+            set_new = true;
+        } 
+        
+        if (set_new) {
+            new_scores[elem.data("id")] = elem.data("score");
+    
+            // update css to reflect score
+            if (elem.data("score") === 1.0) elem.css("background-color", "#149bdf");
+            else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
+            else elem.css("background-color", "");
+    
+            // create border we can animate to reflect ajax status
+            elem.css("border-right", "60px solid #ddd");
         }
-
-        scores[elem.data("id")] = elem.data("score");
-
-        // update css to reflect score
-        if (elem.data("score") === 1.0) elem.css("background-color", "#149bdf");
-        else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
-        else elem.css("background-color", "");
-
-        // create border we can animate to reflect ajax status
-        elem.css("border-right", "60px solid #ddd");
     });
-
-    // get data for ajax url
+    
     var parent = $(elems[0]).parent();
+    var user_id = parent.data("user");
+    var g_id = parent.data('gradeable');
+
+    // update cookie for undo/redo 
+    if (!no_cookie) {
+        generateCheckpointCookie(user_id, g_id, old_scores, new_scores);
+    }
 
     // Update the buttons to reflect that they were clicked
     submitAJAX(
         buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
         {
           'csrf_token': csrfToken,
-          'user_id': parent.data("user"),
-          'g_id': parent.data('gradeable'),
+          'user_id': user_id,
+          'g_id': g_id,
           'old_scores': old_scores,
-          'scores': scores
+          'scores': new_scores
         },
         function() {
             elems.each(function(idx, elem) {
@@ -211,6 +234,114 @@ function updateCheckpointCells(elems, score) {
             });
         }
     );
+}
+
+function getCheckpointHistory(g_id) {
+    var name = g_id + "_history=";
+    var cookies = decodeURIComponent(document.cookie).split(';');
+    for(var i = 0; i < cookies.length; i++) {
+        var c = cookies[i];
+        while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+            return JSON.parse(c.substring(name.length, c.length));
+        }
+    }
+    // if history is empty set pointer to 0
+    return [0];
+}
+
+function setCheckpointHistory(g_id, history) {
+    var expiration_date = new Date(Date.now());
+    expiration_date.setDate(expiration_date.getDate() + 1);
+    document.cookie = g_id + "_history=" + JSON.stringify(history) + "; expires=" + expiration_date.toUTCString();
+}
+
+function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
+    // format: [pointer, [studentID1, old_scores], [studentID1, new_scores], [studentID2, old_scores ... where studentid1 is the oldest edited
+    // pointer should be the index of the current state in history. new_scores should be true for all leading up to that state
+    // the pointer is bound by 1, history.length-1
+    var history = getCheckpointHistory(g_id);
+    
+    // erase future snapshots on write
+    if (history[0] < history.length-1) {
+        history = history.slice(0, history[0]);
+    }
+    
+    // write new student entry
+    history.push([user_id, old_scores]);
+    history.push([user_id, new_scores]);
+
+    // update undo/redo buttons
+    if (history.length > 1) {
+        $("#checkpoint-undo").prop("disabled", false);
+    }
+    $("#checkpoint-redo").prop("disabled", true);
+
+    // keep max history of 5 entries (1 buffer for pointer, 5x2 for old/new)
+    if (history.length > 11) {
+        history.splice(1, 2);
+    } else {
+        history[0] = history.length-1; // increment to latest new_scores
+    }
+    
+    setCheckpointHistory(g_id, history);
+}
+
+// helper function for undo/redo which rolls the history to a specific point
+function checkpointRollTo(g_id, diff) {
+    // grab history from cookie
+    var history = getCheckpointHistory(g_id);
+    
+    var update_queue = []; 
+    var direction = Math.sign(diff);
+    var pointer = history[0];
+
+    // clamp to bounds
+    if (pointer + diff < 1) diff = 1 - pointer;
+    if (pointer + diff >= history.length) diff = history.length - 1 - pointer;
+    
+    // if redoing and pointer is on an old_score, move pointer to next new_score
+    if (direction>0 && pointer%2) {
+        pointer += 1;
+        diff -= direction;
+        update_queue.push(history[pointer]);
+    }
+    // if undoing and pointer is on an new_score, move pointer to next old_score
+    else if (direction<0 && !(pointer%2)) {
+        pointer -= 1;
+        diff -= direction;
+        update_queue.push(history[pointer]);
+    }
+
+    // incrementally move snapshot and set states to update, incrementing by old_scores if direction < 0, new_scores if dir > 0
+    while (diff != 0) {
+        pointer += (2*direction);
+        update_queue.push(history[pointer]);
+        diff -= direction;
+    }
+
+    // update buttons
+    $("#checkpoint-undo").prop("disabled", false);
+    $("#checkpoint-redo").prop("disabled", false);
+    if (pointer <= 1) {
+        $("#checkpoint-undo").prop("disabled", true);
+    }
+    if (pointer >= history.length-1) {
+        $("#checkpoint-redo").prop("disabled", true);
+    }
+    
+    //write new cookie
+    history[0] = pointer;
+    setCheckpointHistory(g_id, history);
+
+    // update cells for each snapshot
+    update_queue.forEach(function(snaphot) {
+        // get elems from studentID
+        var elems = $("tr[data-user='" + snaphot[0] + "'] .cell-grade");
+        updateCheckpointCells(elems, snaphot[1], true);
+    });
 }
 
 function setupCheckboxCells() {
@@ -239,6 +370,16 @@ function setupCheckboxCells() {
         }
     });
 
+    // initialize undo/redo
+    var g_id = $("tr#row-0").data('gradeable');
+    var history = getCheckpointHistory(g_id);
+
+    if (history.length > 1) {
+        $("#checkpoint-undo").prop("disabled", false);
+        if (history[0] < history.length - 1) {
+            $("#checkpoint-redo").prop("disabled", false);
+        }
+    }
 }
 
 function setupNumericTextCells() {
@@ -641,34 +782,34 @@ function setupSimpleGrading(action) {
     });
 
     // the offset of the search bar: used to lock the search bar on scroll
-    var search_bar_offset = $("#student-search-input").offset(); 
+    var sticky_offset = $("#checkpoint-sticky").offset(); 
 
     // used to reposition the search field when the window scrolls
     $(window).on("scroll", function(event) {
-        var search_field = $("#student-search-input");
-        if(search_bar_offset.top < $(window).scrollTop()) {
-            search_field.addClass("fixed-top");
+        var sticky = $("#checkpoint-sticky");
+        if(sticky_offset.top < $(window).scrollTop()) {
+            sticky.addClass("sticky-top");
         }
         else {
-            search_field.removeClass("fixed-top");
+            sticky.removeClass("sticky-top");
         }
     });
 
     // check if the search field needs to be repositioned when the page is loaded
-    if(search_bar_offset.top < $(window).scrollTop()) {
-        var search_field = $("#student-search-input");
-        search_field.addClass("fixed-top");
+    if(sticky_offset.top < $(window).scrollTop()) {
+        var sticky = $("#checkpoint-sticky");
+        sticky.addClass("sticky-top");
     }
 
     // check if the search field needs to be repositioned when the page is resized
     $(window).on("resize", function(event) {
         var settings_btn_offset = $("#settings-btn").offset();
-        search_bar_offset = {  
+        sticky_offset = {  
             top : settings_btn_offset.top,
         };
-        if(search_bar_offset.top < $(window).scrollTop()) {
-            var search_field = $("#student-search-input");
-            search_field.addClass("fixed-top");
+        if(sticky_offset.top < $(window).scrollTop()) {
+            var sticky = $("#checkpoint-sticky");
+            sticky.addClass("sticky-top");
         }
     });
 
