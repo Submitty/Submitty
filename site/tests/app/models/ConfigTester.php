@@ -265,7 +265,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
-            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
+            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
+            'email_enabled' => true
         );
         $actual = $config->toArray();
 
