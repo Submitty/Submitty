@@ -1,38 +1,34 @@
 {% import _self as self %}
 {# Looks mismatched because this is a continuation of GlobalHeader.twig #}
-                    </div> {# /#nav-positioner #}
-                </div> {# /.col-md#nav-body #}
-            </div> {# /.row #}
-            <div id="footer">
-                &copy; {{ "now"|date("Y") }} <a href="https://submitty.org" target="_blank">Submitty</a>
-                <span class="footer_seperator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub"><i class="fab fa-github fa-lg"></i></a>
-                <span class="footer_seperator">|</span> <a href="https://rcos.io" target="_blank">An RCOS project</a>
+            </div>
+            </main>
+            <footer>
+                &copy; {{ "now"|date("Y") }} <a href="https://submitty.org" target="_blank" class="black-btn">Submitty</a>
+                <span class="footer-separator">|</span> <a href="https://github.com/Submitty/Submitty" target="_blank" title="Visit our GitHub" aria-label="Visit our GitHub" class="black-btn"><i class="fab fa-github fa-lg"></i></a>
+                <span class="footer-separator">|</span> <a href="https://rcos.io" target="_blank" class="black-btn">An RCOS project</a>
 
                 {% for link in footer_links %}
-                    <span class="footer_seperator">|</span>
+                    <span class="footer-separator">|</span>
                     {% if link['icon'] is defined %}
-                        <i class="footer_link_icon fa fa-lg {{ link['icon'] }}"></i>
+                        <i class="footer-link-icon fa fa-lg {{ link['icon'] }}"></i>
                     {% endif %}
-                    <a href="{{ link['url'] }}" target="_blank">{{ link['title'] }}</a>
+                    <a href="{{ link['url'] }}" target="_blank" class="black-btn">{{ link['title'] }}</a>
                 {% endfor %}
 
                 {% if is_debug %}
-                    <span class="footer_seperator">|</span>
-                    <a href="#" onClick="togglePageDetails();">Show Page Details</a>
+                    <span class="footer-separator">|</span>
+                    <a href="#" onClick="togglePageDetails();" class="black-btn">Show Page Details</a>
                 {% endif %}
-            </div>
-
-        </div> {# /#site-body #}
+            </footer>
+        </div> {# /#submitty-body #}
         {% if wrapper_urls['right_sidebar.html'] != null %}
             {# uploaded homepage redirect can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="right_sidebar" src="{{ wrapper_urls['right_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
-    </div> {# /#center-container #}
     {% if wrapper_urls['bottom_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
-</div> {# /#container #}
 {% if is_debug %}
     <div id='page-info'>
         Runtime: {{ runtime }}<br /><br />

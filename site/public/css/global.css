@@ -1,0 +1,139 @@
+body {
+    font-family: 'Source Sans Pro', sans-serif;
+    margin: 0;
+    min-height: 100vh;
+    position: relative;
+    display: flex;
+    background: #f6fbfe;
+}
+
+#submitty-body {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+nav {
+    background: #ffffff;
+    font-size: 1.5em;
+    font-weight: bold;
+    min-height: min-content;
+}
+
+nav a,
+nav a:link,
+nav a:visited {
+    color: #000;
+    text-decoration: underline;
+}
+
+nav a:hover {
+    text-decoration: none;
+}
+
+nav a > i.fa, 
+nav a > i.fas, 
+nav a > i.f {
+    font-size: 20px;
+}
+
+#nav-links {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    flex-grow: 1;
+}
+
+#home-button {
+    margin-right: 15px;
+}
+
+#breadcrumbs {
+    display: flex;
+    width: 1px;
+    overflow-x: auto;
+    flex: 1 1 auto;
+    white-space: nowrap;
+}
+
+#breadcrumbs > *:not(:last-child) {
+    padding-right: 7px;
+    display: none;
+}
+
+#logout-button {
+    margin: 15px;
+    text-decoration: none;
+}
+
+#logo-submitty {
+    display: none;
+}
+
+.system-message {
+    width: 100%;
+    text-align: center;
+    margin: auto;
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.inner-message {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0 !important;
+    padding: 8px 14px !important;
+}
+
+#wrapper {
+    display: flex;
+    flex-grow: 1;
+}
+
+main {
+    width: 100%
+}
+
+footer {
+    text-align: center;
+    width: 100%;
+    padding: 10px;
+}
+
+footer a {
+    text-decoration: none !important;
+}
+
+footer .footer-separator {
+    padding: 0 8px;
+}
+
+@media (min-width: 541px) {
+    #home-button, #logout-button {
+        display: none;
+    }
+
+    #logo-submitty {
+        display: block;
+        height: 80px;
+    }
+
+    /* specificity less than no @media since :not stated (for speed) */
+    #breadcrumbs > * {
+        display: block !important;
+    }
+
+    #messages {
+        z-index: 999;
+        position: fixed;
+        top: 40px;
+        left: 50%;
+        width: 30%;
+        min-width: 450px;
+        transform: translateX(-50%);
+    }
+
+    footer {
+        margin-top: -20px; /* 30px content padding and 10px footer padding */
+    }
+}
