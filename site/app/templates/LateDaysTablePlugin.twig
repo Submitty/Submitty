@@ -49,8 +49,6 @@
             <td class="{{ class }}" id="{{ id }}">{{ late_day_info.getStatusMessage() }}</td>
             <td class="{{ class }}">{{ (late_day_info.getLateDaysCharged() != 0 ) ? late_day_info.getLateDaysCharged() : "N/A" }}</td>
         </tr>
-        {% set class = "" %}
-        {% set id = "" %}
     {% endfor %}
     </tbody>
 </table>
