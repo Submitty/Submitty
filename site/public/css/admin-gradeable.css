@@ -69,17 +69,16 @@ input[type="radio"],input[type="checkbox"] {
     vertical-align: middle;
 }
 
-fieldset {
+.settings {
     padding: 8px;
     border-radius: 4px;
-    display: block;
 }
 
 #electronic_file {
     padding-left: 20px;
 }
 
-legend{
+.settings-description {
     padding: 2px;
     font-size: 12pt;
 }
