@@ -495,6 +495,9 @@ class ReportController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/auto_rg_status")
+     */
     public function autoRainbowGradesStatus()
     {
         // Only allow course admins to access this page

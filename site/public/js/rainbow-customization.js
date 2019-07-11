@@ -205,11 +205,8 @@ function checkAutoRGStatus()
     // Send request
     $.getJSON({
         type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'reports',
-            'action': 'check_autorg_status'
-        }),
+        url: buildNewCourseUrl(['auto_rg_status']),
+        data: {csrf_token: csrfToken},
         success: function (response) {
             if (response.status === 'success') {
 
