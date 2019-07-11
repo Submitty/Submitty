@@ -730,6 +730,9 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
+
+        $this->core->getOutput()->addInternalJs('forum.js');
+
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         if (!$graded_gradeable->hasRegradeRequest() && !$this->core->getUser()->accessGrading()) {
             $btn_type = 'request';
