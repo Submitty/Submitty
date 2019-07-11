@@ -5,10 +5,10 @@ from pathlib import Path
 
 def up(config, conn, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
-    course_rainbow_grades_dir = Path(course_dir, 'rainbow_grades')
 
 
     # add boolean to course config
+    config_file = Path(course_dir, 'config', 'config.json')
     if config_file.is_file():
 
         with open(config_file, 'r') as in_file:
@@ -23,6 +23,7 @@ def up(config, conn, semester, course):
 
     
     # create the directories
+    course_rainbow_grades_dir = Path(course_dir, 'rainbow_grades')
     os.makedirs(str(course_rainbow_grades_dir), exist_ok=True)
 
     php_user = config.submitty_users['php_user']
