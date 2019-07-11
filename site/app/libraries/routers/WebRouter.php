@@ -6,6 +6,7 @@ namespace app\libraries\routers;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
+use app\libraries\response\WebResponse;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
@@ -28,6 +29,9 @@ class WebRouter {
     /** @var bool */
     protected $logged_in;
 
+    /** @var AnnotationReader */
+    protected $reader;
+
     /** @var array */
     protected $parameters;
 
@@ -44,7 +48,8 @@ class WebRouter {
 
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
-        $annotationLoader = new AnnotatedRouteLoader(new AnnotationReader());
+        $this->reader = new AnnotationReader();
+        $annotationLoader = new AnnotatedRouteLoader($this->reader);
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
@@ -107,6 +112,13 @@ class WebRouter {
             $csrf_check_response = $router->csrfCheck();
             if ($csrf_check_response instanceof Response) {
                 return $csrf_check_response;
+            }
+          
+            if (!$router->accessCheck()) {
+                return new Response(
+                    JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                    new WebResponse("Error", "errorPage", "You don't have access to this page.")
+                );
             }
         }
         catch (ResourceNotFoundException $e) {
@@ -228,5 +240,59 @@ class WebRouter {
         }
 
         return true;
+    }
+
+    /**
+     * Check if the call passes access control defined
+     * in @AccessControl() annotation.
+     *
+     * @return bool
+     * @throws \ReflectionException
+     */
+    private function accessCheck() {
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $access_control = $this->reader->getMethodAnnotation(
+            new \ReflectionMethod($this->parameters['_controller'], $this->parameters['_method']),
+            AccessControl::class
+        );
+
+        if (is_null($access_control)) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $access_control = $this->reader->getClassAnnotation(
+                new \ReflectionClass($this->parameters['_controller']),
+                AccessControl::class
+            );
+        }
+
+        if (is_null($access_control)) {
+            return true;
+        }
+
+        $user = $this->core->getUser();
+        $access = true;
+
+        if ($access_control->getRole()) {
+            switch ($access_control->getRole()) {
+                case 'INSTRUCTOR':
+                    $access = $user->accessAdmin();
+                    break;
+                case 'FULL_ACCESS_GRADER':
+                    $access = $user->accessFullGrading();
+                    break;
+                case 'LIMITED_ACCESS_GRADER':
+                    $access = $user->accessGrading();
+                    break;
+                case 'STUDENT':
+                default:
+                    $access = $user !== null;
+                    break;
+            }
+        }
+
+        if ($access_control->getPermission()) {
+            $access = $this->core->getAccess()->canI($access_control->permission);
+        }
+
+        return $access;
     }
 }
