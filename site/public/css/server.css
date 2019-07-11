@@ -1,9 +1,12 @@
 @import url("reset.css");
 @import url("google/inconsolata.css");
+@import "colors.css";
+
 
 :root {
     --viewed_content: #e8f0f7;
 }
+
 a, a:hover, a:link, a:visited {
     cursor: pointer;
 }
@@ -13,39 +16,41 @@ a:visited,
 a:link,
 a.fa:hover,
 a > i.fa:hover {
-    color: #2627ee;
+    color: var(--external-link-blue);
 }
 a,
 a:visited,
 a:link,
 a.fas:hover,
 a > i.fas:hover {
-    color: #2627ee;
+    color: var(--external-link-blue);
 }
 a,
 a:visited,
 a:link,
 a.far:hover,
 a > i.far:hover {
-    color: #2627ee;
+    color: var(--external-link-blue);
 }
 
 a:hover {
-    color: #131399;
+    color: var(--external-link-hover);
 }
 a:active {
-    color: #991313;
+    color: var(--external-link-active);
 }
 
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fa.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
-    color: #fff;
+
+    color: var(--default-white);
+
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.fas.btn-success, a.btn-primary, a.btn-danger,
 a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
-    color: #fff;
+    color: var(--default-white);
 }
 a.btn-success, a.btn-primary, a.btn-danger,
 a.far.btn-success, a.btn-primary, a.btn-danger,
@@ -57,21 +62,21 @@ a.btn-default,
 a.fa.btn-default,
 a.fa,
 a > i.fa {
-    color: #000;
+    color: var(--text-black);
 }
 
 a.btn-default,
 a.fas.btn-default,
 a.fas,
 a > i.fas {
-    color: #000;
+    color: var(--text-black);
 }
 
 a.btn-default,
 a.far.btn-default,
 a.far,
 a > i.far {
-    color: #000;
+    color: var(--text-black);
 }
 
 a.btn {
@@ -104,7 +109,7 @@ input[type="color"] {
     line-height: 20px;
     color: #555555;
     vertical-align: middle;
-    border: 1px solid #ccc;
+    border: 1px solid var(--standard-light-gray);
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
     border-radius: 4px;
@@ -112,16 +117,16 @@ input[type="color"] {
 }
 
 input.readonly {
-    background-color: #f2f2f2;
+    background-color: var(--standard-pale-gray);
     cursor: not-allowed;
 }
 
 select {
     padding: 5px 35px 5px 10px;
     font-size: 16px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--standard-light-gray);
     height: 34px;
-    background: #FFF;
+    background: var(--default-white);
     background-size: 20px;
 }
 
@@ -130,11 +135,11 @@ input[type="checkbox"]{
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    background: #FFF;
+    background: var(--default-white);
     box-sizing: border-box;
     width: 20px;
     height: 20px;
-    border: 1px solid #000000;
+    border: 1px solid var(--text-black);
     transition: all .2s linear;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -142,14 +147,14 @@ input[type="checkbox"]{
 }
 
 input[type="checkbox"]:checked{
-    background-color: #3093FC;
+    background-color: var(--submitty-logo-blue);
 }
 
 /* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
 input[type="checkbox"]:checked:before {
     font-family: 'Font Awesome\ 5 Free';
     content: "\f00c";
-    color: #FFF;
+    color: var(--default-white);
     font-size: 18px;
     font-weight: 900
 }
@@ -157,7 +162,7 @@ input[type="checkbox"]:checked:before {
 .helpicon::before {
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
-  color: #1E90FF;
+  color: var(--actionable-blue);
   font-weight: 300;
   display: inline-block;
 }
@@ -165,7 +170,7 @@ input[type="checkbox"]:checked:before {
 select.disabled,
 textarea.disabled,
 input.disabled {
-    background-color: lightgrey;
+    background-color: var(--standard-light-gray);
 }
 
 /****************************
@@ -187,11 +192,11 @@ table tr.table-header {
 
 .table td {
     padding: 5px;
-    border-top: 1px solid #dddddd;
+    border-top: 1px solid var(--standard-light-gray);
 }
 
 .table-bordered {
-    border: 1px solid #AAAAAA;
+    border: 1px solid var(--standard-medium-gray);
     border-collapse: separate;
     -webkit-border-radius: 4px;
     -moz-border-radius: 4px;
@@ -199,19 +204,19 @@ table tr.table-header {
 }
 
 .table-striped>tbody>tr:nth-child(even) {
-    background: #ededed;
+    background: var(--standard-hover-light-gray);
 }
 
 .table-striped>tbody>tr:nth-child(odd) {
-    background: #ffffff;
+    background: var(--default-white);
 }
 
 .table>thead>tr {
-    background: #ededed;
+    background: var(--standard-hover-light-gray);
 }
 
 .table>tbody>tr.info {
-    background-color: #d9edf7;
+    background-color: var(--table-info);
 }
 
 .floating-thead,
@@ -269,8 +274,8 @@ table tr.table-header {
 }
 
 .content {
-    box-shadow: 0 2px 15px -5px #888888;
-    background-color: #ffffff;
+    box-shadow: 0 2px 15px -5px var(--standard-light-gray);
+    background-color: var(--default-white);
     border-radius: 3px;
     padding: 30px;
     margin: 15px;
@@ -282,8 +287,8 @@ table tr.table-header {
 }
 
 .content.gradeable_message {
-    background-color: #006398;
-    color: white;
+    background-color: var(--actionable-blue);
+    color: var(--default-white);
 }
 
 
@@ -301,6 +306,7 @@ table tr.table-header {
     white-space: normal;
 }
 
+
 .sub::after {
     content: ".";
     display: block;
@@ -310,7 +316,7 @@ table tr.table-header {
 }
 
 .panel {
-    background-color: #FAFCFC;
+    background-color: var(--standard-pale-gray);
     margin: 1%;
     padding: 1%;
 }
@@ -321,7 +327,7 @@ table tr.table-header {
 
 .clear {
     clear: both;
-    border-bottom: 1px solid lightgrey;
+    border-bottom: 1px solid var(--standard-light-gray); /*same color, saw no need to make 2 vars*/
     padding-top: 20px;
 }
 
@@ -332,8 +338,8 @@ table tr.table-header {
     top: 40px;
     left: 40px;
     z-index:1000;
-    background: #fff;
-    border: 1px solid #000;
+    background: var(--default-white);
+    border: 1px solid var(--text-black);
     width: 80%;
     overflow-y: scroll;
     padding: 5px;
@@ -468,46 +474,45 @@ table tr.table-header {
 
 .box {
     border-radius: 3px;
-    border: 1px solid #dddddd;
+    border: 1px solid var(--standard-light-gray);
     width: 100%;
     margin-top: 3px;
     margin-bottom: 3px;
     position: relative;
     float: left;
-    background: rgba(255,255,255,0.8);
-    box-shadow: 2px 2px 4px -3px #dddddd;
+    background: var(--default-white);
+    box-shadow: 2px 2px 4px -3px var(--standard-light-gray);
     padding: 5px 5px 10px;
 }
 
 .active {
-    background-color: white;
+    background-color: var(--default-white);
     /*    color: #4a4a4a;*/
-    border: 4px solid #276394;
+    border: 4px solid var(--submitty-logo-blue);
 }
 
 .viewed_post{
-    background-color: white;
+    background-color: var(--default-white);
 }
 
 /* TODO: MAKE THIS CASCADE */
 .deleted {
-    background-color: #dcdcdc;
+    background-color: var(--deleted-discussion-post-grey);
 }
 
 .deleted.active {
-    background-color: #dcdcdc;
+    background-color: var(--deleted-discussion-post-grey);
 }
 
 .new_post {
     background-color: var(--viewed_content);
-    /*background-color: #d4e1f2;*/
 }
 
 .important {
     /* THIS IS WHERE THE BACKGROUND COLOR FOR POSTS IS */
     border-style: solid;
     border-width: 4px;
-    border-color: #ffd700; /* gold */
+    border-color: var(--important-post); /* gold */
 }
 
 .new_thread{
@@ -544,8 +549,8 @@ table tr.table-header {
 .box-block > code,
 .box-block > pre {
     padding: 10px;
-    background-color: #F8F8F8;
-    border: 1px solid #ddd;
+    background-color: var(--standard-pale-gray);
+    border: 1px solid var(--standard-light-gray);
     white-space: pre;
 }
 
@@ -567,11 +572,11 @@ table tr.table-header {
     padding: 3px 7px;
     font-weight: bold;
     line-height: 1;
-    color: #fff;
+    color: var(--default-white);
     text-align: center;
     white-space: nowrap;
     vertical-align: baseline;
-    background-color: #999;
+    background-color: var(--standard-medium-gray);
     border-radius: 10px;
     margin-left: 10px;
     margin-right: 10px;
@@ -586,20 +591,20 @@ table tr.table-header {
 }
 
 .green-background {
-    background-color: #006600;
+    background-color: var(--standard-deep-dark-green);
 }
 
 .yellow-background {
-    background-color: #eac73d;
-    color: #000000;
+    background-color: var(--standard-light-yellow-brown);
+    color: var(--text-black);
 }
 
 .red-background {
-    background-color: #c00000;
+    background-color: var(--error-alert-dark-red);
 }
 
 .blue-background {
-    background-color: #337ab7;
+    background-color: var(--standard-medium-blue);
 }
 
 .badge-container {
@@ -717,10 +722,10 @@ tbody.collapse.in {
   font-size: 14px;
   text-align: left;
   list-style: none;
-  background-color: #fff;
+  background-color: var(--default-white);
   -webkit-background-clip: padding-box;
           background-clip: padding-box;
-  border: 1px solid #ccc;
+  border: 1px solid var(--standard-light-gray);
   border: 1px solid rgba(0, 0, 0, .15);
   border-radius: 4px;
   -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, .175);
@@ -734,7 +739,7 @@ tbody.collapse.in {
   height: 1px;
   margin: 9px 0;
   overflow: hidden;
-  background-color: #e5e5e5;
+  background-color: var(--standard-hover-light-gray);
 }
 .dropdown-menu > li > a {
   display: block;
@@ -743,20 +748,20 @@ tbody.collapse.in {
   clear: both;
   font-weight: normal;
   line-height: 1.42857143;
-  color: #333;
+  color: var(--standard-deep-dark-gray);
   white-space: nowrap;
 }
 .dropdown-menu > li > a:hover,
 .dropdown-menu > li > a:focus {
-  color: #262626;
+  color: var(--standard-deep-dark-gray);
   text-decoration: none;
-  background-color: #f5f5f5;
+  background-color: var(--standard-pale-blue-gray);
 }
 
 .dropdown-menu > .disabled > a,
 .dropdown-menu > .disabled > a:hover,
 .dropdown-menu > .disabled > a:focus {
-  color: #777;
+  color: var(--standard-medium-gray);
 }
 .dropdown-menu > .disabled > a:hover,
 .dropdown-menu > .disabled > a:focus {
@@ -800,13 +805,13 @@ tbody.collapse.in {
     border-color: transparent;
     border-style: solid;
     border-width: 5px 0 5px 5px;
-    border-left-color: #ccc;
+    border-left-color: var(--standard-light-gray);
     margin-top: 5px;
     margin-right: -10px;
 }
 
 .dropdown-submenu:hover>a:after {
-    border-left-color: #fff;
+    border-left-color: var(--default-white);
 }
 
 .dropdown-submenu.pull-left {
@@ -838,7 +843,7 @@ tbody.collapse.in {
   padding: 3px 20px;
   font-size: 12px;
   line-height: 1.42857143;
-  color: #777;
+  color: var(--standard-medium-gray);
   white-space: nowrap;
 }
 .dropdown-backdrop {
@@ -851,28 +856,28 @@ tbody.collapse.in {
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #337ab7;
-  border-color: #2e6da4;
+  color: var(--default-white);
+  background-color: var(--actionable-blue);
+  border-color: var(--hover-light-border-actionable-blue)
 }
 .btn-primary:focus,
 .btn-primary.focus {
-  color: #fff;
-  background-color: #286090;
-  border-color: #122b40;
+  color: var(--default-white);
+  background-color: var(--focus-actionable-blue);
+  border-color: var(--hover-dark-border-actionable-blue);
 }
 .btn-primary:hover {
-  color: #fff;
-  background-color: #286090;
-  border-color: #204d74;
+  color: var(--default-white);
+  background-color: var(--hover-actionable-blue);
+  border-color: var(--hover-border-actionable-blue);
 }
 .btn-primary:active,
 .btn-primary.active,
 .show > .dropdown-toggle.btn-primary,
 .open > .dropdown-toggle.btn-primary {
-  color: #fff;
-  background-color: #286090;
-  border-color: #204d74;
+  color: var(--default-white);
+  background-color: var(--hover-actionable-blue) ;
+  border-color: var(--hover-border-actionable-blue);
 }
 .btn-primary:active:hover,
 .btn-primary.active:hover,
@@ -886,9 +891,9 @@ tbody.collapse.in {
 .btn-primary.active.focus,
 .show > .dropdown-toggle.btn-primary.focus,
 .open > .dropdown-toggle.btn-primary.focus {
-  color: #fff;
-  background-color: #204d74;
-  border-color: #122b40;
+  color: var(--default-white);
+  background-color: var(--hover-border-actionable-blue);
+  border-color: var(--hover-dark-border-actionable-blue);
 }
 .btn-primary:active,
 .btn-primary.active,
@@ -905,12 +910,12 @@ fieldset[disabled] .btn-primary:focus,
 .btn-primary.disabled.focus,
 .btn-primary[disabled].focus,
 fieldset[disabled] .btn-primary.focus {
-  background-color: #337ab7;
-  border-color: #2e6da4;
+  background-color: var(--actionable-blue);
+  border-color: var(--hover-light-border-actionable-blue);
 }
 .btn-primary .badge {
-  color: #337ab7;
-  background-color: #fff;
+  color: var(--actionable-blue);
+  background-color: var(--default-white);
 }
 
 .panel-heading > .dropdown .dropdown-toggle {
@@ -923,7 +928,7 @@ table .colspan{
 	font-weight: 600;
 }
 table .hr {
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--standard-light-gray);
 }
 table .bar{
 	height:20px;
@@ -1030,7 +1035,7 @@ div.full_height {
 
 #ui-category-list li {
     border-style: solid;
-    border-color: LightGray;
+    border-color: var(--standard-light-gray);
     border-width: thin;
     border-radius: 0.3em;
     margin: 0.3em 0.1em 0.3em 0.1em;
@@ -1072,7 +1077,7 @@ div.full_height {
     background-position: center center;
     background-repeat: no-repeat;
     border-radius: 5px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--standard-medium-gray);
 }
 
 .popup-form {
@@ -1096,7 +1101,7 @@ div.full_height {
 }
 
 .popup-window {
-    background: #ffffff;
+    background: var(--default-white);
     box-shadow: 0 6px 20px 2px #0000007f;
     border-radius: 4px;
     padding: 10px;
@@ -1116,7 +1121,7 @@ div.full_height {
 
 .popup-form .form-title {
     padding-bottom: 10px;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--standard-medium-gray);
     margin-bottom: 10px;
 }
 
@@ -1128,7 +1133,7 @@ div.full_height {
 .popup-form .form-buttons {
     padding-top: 10px;
     margin-top: 10px;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid var(--standard-medium-gray);
 }
 
 .popup-form .form-button-container {
@@ -1185,7 +1190,7 @@ div.full_height {
 }
 
 .cell-grade {
-    border-left: 1px solid #dddddd;
+    border-left: 1px solid var(--standard-medium-gray);
 }
 
 /* Makes the grade and time on checkpoint pages not visible at first */
@@ -1201,7 +1206,7 @@ div.full_height {
 }
 
 .late-box {
-    background:#d9534f;
+    background:var(--danger-red);
     padding:3px;
     margin-top:3px;
     margin-bottom:3px;
@@ -1213,8 +1218,8 @@ div.full_height {
 .tooltip .tooltiptext {
     visibility: hidden;
     width: 220px;
-    background-color: #555;
-    color: #fff;
+    background-color: var(--standard-dark-gray);
+    color: var(--default-white);
     text-align: center;
     border-radius: 6px;
     padding: 5px 0;
@@ -1233,7 +1238,7 @@ div.full_height {
     top: 40%;
     right: -4%;
     border: 5px solid transparent;
-    border-left-color: #555;
+    border-left-color: var(--standard-dark-gray);
 }
 
 .tooltip:hover .tooltiptext {
@@ -1245,13 +1250,13 @@ div.full_height {
 .meter {
     height: 10px;
     position: relative;
-    background: rgb(224,224,224);
+    background: var(--standard-pale-gray);
     padding: 0px;
 }
 .meter > span {
     display: block;
     height: 100%;
-    background-color: rgb(92,184,92);
+    background-color: var(--good-green);
     position: relative;
 }
 
@@ -1270,13 +1275,13 @@ textarea.comment_display {
 }
 
 .rubric_layout_body {
-    background: #f9f9f9;
+    background: var(--standard-pale-gray);
 }
 
 /* <tr> tag styling to replace <thead> and <tfoot> in rubric tables*/
 .rubric_layout_header,
 .rubric_layout_footer {
-    background: #e1e1e1;
+    background: var(--standard-hover-light-gray);
 }
 
 /*
@@ -1295,13 +1300,13 @@ end of styles used in the admin gradeable page
 }
 
 #hotkeys-list tr {
-    border: 1px solid #ddd;
+    border: 1px solid var(--standard-light-gray);
     border-left: none;
     border-right: none;
 }
 
 #hotkeys-list tr:nth-child(even) {
-    background-color: #eee;
+    background-color: var(--standard-pale-gray);
 }
 
 #hotkeys-list td {
@@ -1316,7 +1321,7 @@ end of styles used in the admin gradeable page
 /* styles for the colors for the electronic grader details page */
 /* color for no grader */
 .grader-NULL {
-    color: white;
+    color: var(--default-white)
     text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
@@ -1328,7 +1333,7 @@ end of styles used in the admin gradeable page
 .grader-verified{
                                         /* yellow       green   */
     background: linear-gradient(to right, #ffcc33 50%, #33cc33 50%);
-    background-clip : text;
+    background-clip: text;
     color: transparent;
     /* chrome & safari */
     -webkit-background-clip: text;
@@ -1337,23 +1342,23 @@ end of styles used in the admin gradeable page
 
 /* color for student/peer grading */
 .grader-4 {
-    color: #cc66ff; /* purple */
+    color: var(--standard-vibrant-purple) /* purple */
 }
 
 /* color for a limited access grader */
 .grader-3 {
-    color: #ffcc33;  /* yellow */
+    color: var(--important-post)  /* yellow */
 }
 
 /* color for an instructor or full access grader */
 .grader-2,
 .grader-1 {
-    color: #33cc33;  /* green */
+    color: var(--standard-vibrant-green) /* green */
 }
 
 /* color for double graded */
 .grader-double {
-    color: #006699;  /* dark blue */
+    color: var(--standard-vibrant-dark-blue)  /* dark blue */
 }
 
 /* prevents line break in the graded questions column */
@@ -1363,16 +1368,16 @@ end of styles used in the admin gradeable page
 
 /* color for nav page edit button for rebuild error on gradeable */
 .edit-build-error {
-    color: red;
+    color: var(--badge-backgroud-red);
 }
 
-.required::-webkit-input-placeholder { color: #cc0000; }
-.required:-moz-placeholder { color: #cc0000; }
-.required::-moz-placeholder { color: #cc0000; }
-.required:-ms-input-placeholder { color: #cc0000; }
+.required::-webkit-input-placeholder { color: var(--error-alert-dark-red); }
+.required:-moz-placeholder { var(--error-alert-dark-red); }
+.required::-moz-placeholder { var(--error-alert-dark-red); }
+.required:-ms-input-placeholder { var(--error-alert-dark-red); }
 
 #required_type{
-    color: #cc0000;
+    var(--error-alert-dark-red);
     display: inline;
 }
 
@@ -1391,11 +1396,11 @@ end of styles used in the admin gradeable page
 
 .modal-content{
     text-align: center;
-    background-color: #fefefe;
+    background-color: var(--standard-pale-gray);
     margin: auto;
     padding: 30px;
     padding-top: 15px;
-    border: 1px solid #888;
+    border: 1px solid var(--standard-medium-gray);
     width: 420px;
     min-width: 400px;
     border-radius: 5px;
@@ -1420,7 +1425,7 @@ end of styles used in the admin gradeable page
 .wrapper-example .wrapper-right,
 .wrapper-example .wrapper-bottom {
     flex-grow: 1;
-    border: 1px solid #000;
+    border: 1px solid var(--text-black);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1430,28 +1435,28 @@ end of styles used in the admin gradeable page
     flex-grow: 5;
 }
 .wrapper-top {
-    background-color: #ff9999;
+    background-color: var(--standard-light-pink);
 }
 .wrapper-left {
-    background-color: #ffff66;
+    background-color: var(--standard-light-yellow);
 }
 .wrapper-body {
-    background-color: #ffffff;
+    background-color: var(--default-white);
 }
 .wrapper-right {
-    background-color: #99ff99;
+    background-color: var(--standard-light-green);
 }
 .wrapper-bottom {
-    background-color: #99ccff;
+    background-color: var(--standard-light-blue);
 }
 
 .wrapper-upload td {
     padding: 4px;
-    border: 1px solid #000;
+    border: 1px solid var(--text-black);
 }
 
 .wrapper-upload .wrapper_layout_header {
-    background-color: #f4f4f4;
+    background-color: var(--standard-pale-gray);
 }
 
 .query-list {
@@ -1525,12 +1530,12 @@ end of styles used in the admin gradeable page
 
 /* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
 #upload-boxes > div:focus {
-    outline: 2px solid cornflowerblue;
+    outline: var(--standard-focus-cornflowe-blue);
 }
 
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .fa-trash:focus {
-    outline: 2px solid cornflowerblue;
+    outline: var(--standard-focus-cornflowe-blue);
 }
 
 .invisible-btn{
