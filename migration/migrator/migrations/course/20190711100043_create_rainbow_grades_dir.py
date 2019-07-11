@@ -7,6 +7,21 @@ def up(config, conn, semester, course):
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     course_rainbow_grades_dir = Path(course_dir, 'rainbow_grades')
 
+
+    # add boolean to course config
+    if config_file.is_file():
+
+        with open(config_file, 'r') as in_file:
+
+            j = json.load(in_file)
+
+        if 'auto_rainbow_grades' not in j['course_details']:
+            j['course_details']['auto_rainbow_grades'] = False
+
+        with open(config_file, 'w') as out_file:
+            json.dump(j, out_file, indent=4)
+
+    
     # create the directories
     os.makedirs(str(course_rainbow_grades_dir), exist_ok=True)
 
