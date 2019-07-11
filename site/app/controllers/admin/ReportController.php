@@ -33,21 +33,6 @@ class ReportController extends AbstractController {
      * @deprecated
      */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'customization':
-                $this->generateCustomization();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
-        }
         return null;
     }
 
@@ -454,6 +439,10 @@ class ReportController extends AbstractController {
                 return 'ERROR';
         }
     }
+
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
     public function generateCustomization(){
 
         // Only allow course admins to access this page
@@ -473,7 +462,7 @@ class ReportController extends AbstractController {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
             } catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
                 $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
