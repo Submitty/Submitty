@@ -291,6 +291,10 @@ table tr.table-header {
     color: var(--default-white);
 }
 
+.content.gradeable_message p:not(:last-child){
+    padding-bottom: 20px;
+}
+
 
 .content h1 {
     margin-bottom: 20px;

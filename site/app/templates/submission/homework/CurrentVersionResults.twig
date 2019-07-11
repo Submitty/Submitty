@@ -3,54 +3,56 @@
 </div>
 
 {# Submitted files #}
-<h4>Submitted Files</h4>
-<div class="row">
-    <div class="box col-md-6" id="submitted-files">
-        {% for file in files %}
-            {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
+{% if hide_submitted_files == false %}
+    <h4>Submitted Files</h4>
+    <div class="row">
+        <div class="box col-md-6" id="submitted-files">
+            {% for file in files %}
+                {{ file.relative_name }} ({{ (file.size / 1024) | number_format(2) | default(-1) }}kb)
 
-            {# download icon if student can download files #}
-            {% if can_download %}
-                <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}", "submissions")'>
-                    <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
-            {% endif %}
-
-            {% if loop.index != files|length %}
-                <br />
-            {% endif %}
-        {% endfor %}
-        {% if can_download and files|length > 1 %}
-            <br />
-            <br />
-            Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
-        {% endif %}
-    </div>
-    <div class="box col-md-6">
-        <span id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
-        days late: {{ days_late }} (before extensions)<br />
-        {% if results is defined %}
-            grading time: {{ grade_time }} seconds<br />
-            {% if num_autogrades > 1 %}
-                <br />
-                number of re-autogrades: {{ num_autogrades - 1 }}<br />
-                last re-autograde finished: {{ grading_finished|date('m/d/Y h:i:s A') }}<br />
-            {% else %}
-                queue wait time: {{ wait_time }} seconds<br />
-            {% endif %}
-            {% if is_vcs %}
-                git commit hash:
-                {% if revision %}
-                    {{ revision[0:7] }}
-                {% else %}
-                    None
+                {# download icon if student can download files #}
+                {% if can_download %}
+                    <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}", "submissions")'>
+                        <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
                 {% endif %}
+
+                {% if loop.index != files|length %}
+                    <br />
+                {% endif %}
+            {% endfor %}
+            {% if can_download and files|length > 1 %}
                 <br />
+                <br />
+                Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
             {% endif %}
-        {% else %}
-            grading not complete
-        {% endif %}
+        </div>
+        <div class="box col-md-6">
+            <span id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
+            days late: {{ days_late }} (before extensions)<br />
+            {% if results is defined %}
+                grading time: {{ grade_time }} seconds<br />
+                {% if num_autogrades > 1 %}
+                    <br />
+                    number of re-autogrades: {{ num_autogrades - 1 }}<br />
+                    last re-autograde finished: {{ grading_finished|date('m/d/Y h:i:s A') }}<br />
+                {% else %}
+                    queue wait time: {{ wait_time }} seconds<br />
+                {% endif %}
+                {% if is_vcs %}
+                    git commit hash:
+                    {% if revision %}
+                        {{ revision[0:7] }}
+                    {% else %}
+                        None
+                    {% endif %}
+                    <br />
+                {% endif %}
+            {% else %}
+                grading not complete
+            {% endif %}
+        </div>
     </div>
-</div>
+{% endif %}
 {# /Submitted files #}
 
 <div class="sub">
