@@ -67,6 +67,7 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.driver = webdriver.Chrome(options=self.options)
+        self.driver.set_window_size(1024, 768)
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
@@ -148,10 +149,8 @@ class BaseTestCase(unittest.TestCase):
     # clicks the navigation header text to 'go back' pages
     # for homepage, selector can be gradeable list
     def click_header_link_text(self, text, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='header-text']/div[1]/a[text()='{}']".format(text)).click()
+        self.driver.find_element_by_xpath("//div[@id='breadcrumbs']/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
-
-
 
     def wait_after_ajax(self):
         WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))

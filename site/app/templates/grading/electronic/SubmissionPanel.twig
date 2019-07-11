@@ -230,7 +230,7 @@
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             <a onclick='expandFile("{{ dir }}", "{{ path }}")'><i class="fas fa-share" aria-hidden="true" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ dir }}", "{{ path }}", "{{ title }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>

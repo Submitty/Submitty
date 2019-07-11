@@ -9,9 +9,8 @@
     <link rel='stylesheet' type='text/css' href='{{ css_ref }}' />
     {% endfor %}
 
-    {#
-        TODO: When we are mobile-friendly
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    {# TODO, eventually remove these form individual twig files and enable this one
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /> 
     #}
 
     {% for js_ref in js %}
@@ -20,42 +19,47 @@
 </head>
 <script>var onAjaxInit;</script>
 <body data-site-url="{{ site_url }}" data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
-<a id="skip-nav" href="#nav-positioner">Skip to main content</a>
-<div id="container">
+<a id="skip-nav" href="#main">Skip to main content</a>
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="top_bar" src="{{ wrapper_urls['top_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
-    <div id="center-container">
         {% if wrapper_urls['left_sidebar.html'] != null %}
             {# uploaded sidebar can go here? #}
             <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="left_sidebar" src="{{ wrapper_urls['left_sidebar.html'] }}" frameborder="0"></iframe>
         {% endif %}
-        <div id="site-body">
-            <div id='messages'>
-                {% for message in messages %}
-                    <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
-                        <a class="fas fa-times message-close" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
-                        {% if message.type == "error" %}
-                        <i class="fas fa-times-circle"></i>
-                        {% else %}
-                        <i class="fas fa-check-circle"></i>
+        {# separates our content from user custom bars #}
+        <div id="submitty-body" class="flex-col">
+            <div id="mobile-menu">
+                <div id="menu-header" class="flex-row">
+                <a href="{{ base_url }}" aria-label="Go to Submitty Home"><h1>Submitty</h1></a>
+                    <button id="menu-exit"><span class="screen-reader">Close Menu</span><i class="fas fa-times"></i></button>
+                </div>
+                <ul>
+                    {% set total_notifications = 0 %}
+                    {% for button in sidebar_buttons %}
+                        {% if button.getTitle() != "Collapse Sidebar" %}
+                            {{ self.render_sidebar_button(button, true) }}
                         {% endif %}
-                        {{ message.error | nl2br }}
-                    </div>
-                {% endfor %}
+                        {% if button.getBadge() %}
+                            {% set total_notifications = total_notifications + button.getBadge() %}
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             </div>
-            <div id="header" class="row">
-                <div class="col-12 col-sm" id="header-text">
-                    <div>
+            <div id="menu-overlay"></div>
+            <nav class="flex-row shadow">
+                <div id="nav-links">
+                    <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home"><i class="fas fa-home"></i></a>
+                    <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}
-                                &gt;
+                                <span>&gt;</span> {# span required to give conditional rendering #}
                             {% endif %}
-                            {% if b.getUrl() is not empty %}
+                            {% if b.getUrl() is not empty and not loop.last %}
                                 <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
                             {% else %}
-                                {{ b.getTitle() }}
+                                <span>{{ b.getTitle() }}</span>
                             {% endif %}
                             {% if b.getExternalUrl() is not empty %}
                                 <a class="external" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
@@ -63,79 +67,100 @@
                         {% endfor %}
                     </div>
                 </div>
-                <a class="col-12 col-sm-auto" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
+                <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                     <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
                 </a>
-            </div>
-            <noscript>
-                <div class="row noscript">
-                    <span>You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.</span>
-                </div>
+                {# assuming that if sidebar_buttons only has len 2 it contains logout and collapse (on index page only) #}
+                {% if sidebar_buttons|length > 2 %}
+                    <button id="menu-button" class="black-btn">
+                        MENU
+                        {% if total_notifications %}
+                            <span class="notification-badge">{{  total_notifications }}</span>
+                        {% endif %}
+                    </button>
+                {% elseif sidebar_buttons|length %}
+                    <a id="logout-button" class="black-btn" href="{{ core.buildNewUrl(['authentication', 'logout']) }}" aria-label="Logout"><i class="fas fa-sign-out-alt"></i></a>
+                {% endif %}
+            </nav>
+            <noscript class="system-message danger">
+                You must have JavaScript enabled for Submitty to function properly. Please re-enable it when browsing this site.
             </noscript>
             {% if system_message is not null and system_message|length > 0 %}
-            <div class="row system_message">
-                <span>{{ system_message }}</span>
+            <div class="system-message warning">
+                {{ system_message }}
             </div>
             {% endif %}
-            <div class="row" id="push">
-                {% if sidebar_buttons|length > 0 %}
-                    <div class="col-md-auto" id="sidebar">
-                        <div id="nav-buttons-visible">
-                            <div id="nav-buttons">
-                                <ul>
-                                    {% for button in sidebar_buttons %}
-                                        {{ self.render_sidebar_button(button) }}
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        </div>
+            <div id='messages'>
+                {% for message in messages %}
+                    <div id='{{ message.type }}-{{ message.key }}' class="inner-message alert alert-{{ message.type }}">
+                        <span>
+                            {% if message.type == "error" %}
+                            <i class="fas fa-times-circle"></i>
+                            {% else %}
+                            <i class="fas fa-check-circle"></i>
+                            {% endif %}
+                            {{ message.error | nl2br }}
+                        </span>
+                        <a class="fas fa-times" onClick="removeMessagePopup('{{ message.type }}-{{ message.key }}');"></a>
                     </div>
+                {% endfor %}
+            </div>
+            <div id="wrapper">
+                {% if sidebar_buttons|length > 0 %}
+                    <aside>
+                        <ul>
+                            {% for button in sidebar_buttons %}
+                                {{ self.render_sidebar_button(button, false) }}
+                            {% endfor %}
+                        </ul>
+                    </aside>
                 {% endif %}
-                <div class="col-md" id="nav-body">
-                    <div id="nav-positioner">
+                <main id="main">
 {# Looks mismatched because this lines up with GlobalFooter.twig #}
 
-{% macro render_sidebar_button(button) %}
+{% macro render_sidebar_button(button, mobile) %}
     {% if button.getTitle() == "" %}
-        <li class="short-line"></li>
+        <hr />
     {% else %}
         <li>
             {% if button.getHref() == null %}
                 <span
-                    {% if button.getClass() != "" %}
-                        class="{{ button.getClass() }}"
-                    {% endif %}
+                    class="flex-row {{ button.getClass() }}"
                     {% if button.getId() != "" %}
-                        id="{{ button.getId() }}"
+                        id="{{ [mobile ? 'mobile-' : '', button.getId()]|join }}"
                     {% endif %}
                 >
-                    {% if button.getIcon() != null %}
-                        <i class="fa {{ button.getIcon() }}"></i>
-                    {% endif %}
+                    <span> {# col in flex-row #}
+                        {% if button.getIcon() != null %}
+                            <i class="fa {{ button.getIcon() }}"></i>
+                        {% endif %}
 
-                    {{ button.getTitle() }}
+                        {{ button.getTitle() }}
+                    </span>
                     {% if button.getBadge() > 0 %}
-                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                        <span class="notification-badge">{{  button.getBadge() }} </span>
                     {% endif %}
                 </span>
             {% else %}
                 <a href="{{ button.getHref() }}"
-                    data-toggle="tooltip"
                     title="{{ button.getTitle() }}"
-                    {% if button.getClass() != "" %}
-                        class="{{ button.getClass() }}"
-                    {% endif %}
+                    class="flex-row {{ button.getClass() }}"
                     {% if button.getId() != "" %}
-                        id="{{ button.getId() }}"
+                        id="{{ [mobile ? 'mobile-' : '', button.getId()]|join }}"
+                    {% endif %}
+                    {% if not mobile %}
+                        data-toggle="tooltip"
                     {% endif %}
                 >
-                    {% if button.getIcon() != null %}
-                        <i class="fa {{ button.getIcon() }}"></i>
-                    {% endif %}
+                    <span> {# col in flex-row #}
+                        {% if button.getIcon() != null %}
+                            <i class="fa {{ button.getIcon() }}"></i>
+                        {% endif %}
 
-                    <span class="iconTitle"> {{ button.getTitle() }} </span>
+                        <span class="icon-title"> {{ button.getTitle() }} </span>
+                    </span>
                     {% if button.getBadge() > 0 %}
-                        <span class="notification_badge">{{  button.getBadge() }} </span>
+                        <span class="notification-badge">{{  button.getBadge() }} </span>
                     {% endif %}
                 </a>
 
