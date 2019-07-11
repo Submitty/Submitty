@@ -1362,6 +1362,21 @@ end of styles used in the admin gradeable page
     white-space: nowrap;
 }
 
+/* prevents line break in the grade viewed check marks */
+.td-viewed-grade {
+    white-space: nowrap;
+}
+
+.viewed-green-check {
+    color: #5cb85c;
+    font-size: 1.5em;
+}
+
+.viewed-red-x {
+    color: red;
+    font-size: 1.5em;
+}
+
 /* color for nav page edit button for rebuild error on gradeable */
 .edit-build-error {
     color: red;

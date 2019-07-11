@@ -1702,6 +1702,35 @@ WHERE gcm_id=?", $params);
         }
     }
 
+    public function updateTeamViewedTime($team_id, $user_id) {
+        $this->course_db->query("UPDATE teams SET last_viewed_time = NOW() WHERE team_id=? and user_id=?",
+                array($team_id,$user_id));
+    }
+
+    public function clearTeamViewedTime($team_id) {
+        $this->course_db->query("UPDATE teams SET last_viewed_time = NULL WHERE team_id=?",
+            array($team_id));
+    }
+
+    public function getTeamViewedTimes($gradeable) {
+        $params = array($gradeable->getId());
+        $this->course_db->query("SELECT team_id,user_id,last_viewed_time FROM teams WHERE 
+                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
+
+        $user_viewed_info = [];
+        foreach ($this->course_db->rows() as $row){
+            $team = $row['team_id'];
+            $user = $row['user_id'];
+            $time = $row['last_viewed_time'];
+
+            if (!array_key_exists($team,$user_viewed_info)) {
+                $user_viewed_info[$team] = array();
+            }
+            $user_viewed_info[$team][$user] = $time;
+        }
+        return $user_viewed_info;
+    }
+
     /**
      * @todo: write phpdoc
      *

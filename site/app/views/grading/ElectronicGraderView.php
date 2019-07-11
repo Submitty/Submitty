@@ -422,6 +422,7 @@ HTML;
         //Convert rows into sections and prepare extra row info for things that
         // are too messy to calculate in the template.
         $sections = [];
+        $gradeable_team_ids = [];
         /** @var GradedGradeable $row */
         foreach ($graded_gradeables as $row) {
             //Extra info for the template
@@ -459,6 +460,11 @@ HTML;
 
             if ($peer) {
                 $section_graders = $this->core->getUser()->getId();
+            }
+
+            //For team assignments, find team_ids
+            if ($gradeable->isTeamAssignment()) {
+                $gradeable_team_ids[] = $row->getSubmitter()->getId();
             }
 
             //Team edit button, specifically the onclick event.
@@ -578,12 +584,15 @@ HTML;
             ];
         }
 
+        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getTeamViewedTimes($gradeable) : array();
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
             "empty_team_info" => $empty_team_info,
+            "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
