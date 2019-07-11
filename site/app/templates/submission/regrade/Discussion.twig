@@ -69,7 +69,7 @@
 {% for post in posts %}
     <div style="margin-top: 20px;">
         <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
-            <p style='white-space:pre-wrap;'>{{ post.content }}</p>
+            <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
             <hr>
             <div style="float:right">
                 <b>{{ post.name }}</b> &nbsp;
@@ -87,7 +87,7 @@
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" required></textarea>
         <div class="row" style="justify-content: flex-end">
         <div style="margin-right: auto">
-        {{ self.bbcode_buttons() }}
+        {{ self.markdown_buttons() }}
         </div>
             {% if btn_type == 'pending' %}
                 {# Request pending, we can submit new posts #}
@@ -128,11 +128,11 @@
     });
 </script>
 
-{% macro bbcode_buttons() %}
-    <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
+{% macro markdown_buttons() %}
+    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
         Link <i class="fas fa-link fa-1x"></i>
     </button>
-    <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">
+    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, '#replyTextArea')" class="btn btn-default">
         Code <i class="fas fa-code fa-1x"></i>
     </button>
 {% endmacro %}

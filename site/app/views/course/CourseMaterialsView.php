@@ -7,6 +7,7 @@ use app\libraries\DateUtils;
 use app\models\User;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 
 class CourseMaterialsView extends AbstractView {
@@ -97,6 +98,9 @@ class CourseMaterialsView extends AbstractView {
             return;
         }
 
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")"; 
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
             'date_format' => 'Y-m-d H:i:sO',
@@ -108,7 +112,8 @@ class CourseMaterialsView extends AbstractView {
             "userGroup" => $user_group,
             "csrf_token" => $this->core->getCsrfToken(),
             "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
-            "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"])
+            "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"]),
+            "max_size_string" => $max_size_string
         ]);
     }
 }
