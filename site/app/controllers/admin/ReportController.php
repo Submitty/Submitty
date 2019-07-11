@@ -439,6 +439,10 @@ class ReportController extends AbstractController {
                 return 'ERROR';
         }
     }
+
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
     public function generateCustomization(){
 
         // Only allow course admins to access this page
