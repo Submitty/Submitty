@@ -52,7 +52,7 @@
     {% endif %}
 {% endif %}
 
-{% if hide_tests == false %}
+{% if hide_version_and_test_details == false %}
     {% if not incomplete_autograding %}
         {% for testcase in testcases|filter((testcase) => testcase.can_view) %}
             {% set can_view = (not testcase.hidden or show_hidden) %}

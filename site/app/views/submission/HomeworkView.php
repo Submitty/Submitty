@@ -666,8 +666,8 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
-            'hide_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
-            'hide_tests' => $gradeable->getAutogradingConfig()->getHideVersionsAndTestsDetails(),
+            'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
+            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionsAndTestsDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             // TODO: change this to submitter ID when the MiscController uses new model
             'user_id' => $this->core->getUser()->getId(),

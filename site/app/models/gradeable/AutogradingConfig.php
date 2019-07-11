@@ -38,7 +38,7 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var string A message to show the user above the file upload box */
     protected $gradeable_message;
     /** @property @var bool Indicates if list of test should be shown at the bottom of the page */
-    protected $hide_versions_and_tests_details;
+    protected $hide_version_and_test_details;
     /** @property @var bool Indicates if list os submitted files should be shown on page */
     protected $hide_submitted_files;
     /** @property @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
@@ -97,7 +97,7 @@ class AutogradingConfig extends AbstractModel {
         }
 
         // These two items default to false if they don't exist in the gradeable config.json
-        $this->hide_versions_and_tests_details = $details['hide_versions_and_tests_details'] ?? false;
+        $this->hide_version_and_test_details = $details['hide_version_and_test_details'] ?? false;
         $this->hide_submitted_files = $details['hide_submitted_files'] ?? false;
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';

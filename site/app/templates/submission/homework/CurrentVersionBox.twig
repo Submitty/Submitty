@@ -3,7 +3,7 @@
         <h3>Team: {{ team_members }}</h3><br />
     {% endif %}
 
-    {% if hide_tests == false %}
+    {% if hide_version_and_test_details == false %}
         <h3 class='label' id="submission_header" style="float: left">Select Submission Version:</h3>
         {% include 'grading/VersionChoice.twig' with({
             'on_change': "versionChange('" ~ view_version_url ~ "', this)"

@@ -165,8 +165,8 @@ int main(int argc, char *argv[]) {
   // Configure defaults for hide_submitted_files
   j["hide_submitted_files"] = config_json.value("hide_submitted_files", false);
 
-  // Configure defaults for hide_versions_and_tests_details
-  j["hide_versions_and_tests_details"] = config_json.value("hide_versions_and_tests_details", false);
+  // Configure defaults for hide_version_and_test_details
+  j["hide_version_and_test_details"] = config_json.value("hide_version_and_test_details", false);
 
     /******************************************
 
