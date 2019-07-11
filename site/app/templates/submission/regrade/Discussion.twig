@@ -87,7 +87,7 @@
         <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" required></textarea>
         <div class="row" style="justify-content: flex-end">
         <div style="margin-right: auto">
-        {{ self.bbcode_buttons() }}
+        {{ self.markdown_buttons() }}
         </div>
             {% if btn_type == 'pending' %}
                 {# Request pending, we can submit new posts #}
@@ -128,7 +128,7 @@
     });
 </script>
 
-{% macro bbcode_buttons() %}
+{% macro markdown_buttons() %}
     <button type="button" title="Insert a link" onclick="addMarkdownCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
         Link <i class="fas fa-link fa-1x"></i>
     </button>
