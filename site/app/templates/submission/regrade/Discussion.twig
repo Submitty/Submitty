@@ -63,7 +63,7 @@
 {% for post in posts %}
     <div style="margin-top: 20px;">
         <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
-            <p style='white-space:pre-wrap;'>{{ post.content }}</p>
+            <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
             <hr>
             <div style="float:right">
                 <b>{{ post.name }}</b> &nbsp;
@@ -73,6 +73,7 @@
     </div>
 {% endfor %}
 <div style="padding:20px;">
+<<<<<<< HEAD
     {% if grade_inquiry_status != 'no_submission' %}
         <form method="POST" id="reply-text-form" >
             <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
@@ -107,6 +108,42 @@
             </div>
         </form>
     {% endif %}
+=======
+    <form method="POST" id="replyTextForm" action="{{ url }}">
+        <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
+        <input type="hidden" id="gradeable_id" name="gradeable_id" value="{{ gradeable_id }}">
+        <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
+        <input type="hidden" id="status" name="status" value="0">
+        <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" required></textarea>
+        <div class="row" style="justify-content: flex-end">
+        <div style="margin-right: auto">
+        {{ self.markdown_buttons() }}
+        </div>
+            {% if btn_type == 'pending' %}
+                {# Request pending, we can submit new posts #}
+                <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(-1);">
+                <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Grade Inquiry" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id }}', '{{ submitter_id }}', 0);">
+            {% elseif btn_type == 'completed' %}
+                {# Request closed #}
+                <input type="button" class="btn btn-primary" id="cancelRegrade" value="Reopen Grade Inquiry Without Responding" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
+                <input type="submit" value="{{ button_message }}" class="btn btn-default" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(0);">
+            {% elseif btn_type == 'admin_open' %}
+                {# Admin, request is open #}
+                <input type="submit" value="Respond and Resolve Grade Inquiry" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="closeAllComponents();$('#status').val(0);">
+                <input type="submit" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(-1);">
+                <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Grade Inquiry Without Response" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', 0);">
+            {% elseif btn_type == 'admin_closed' %}
+                {# Admin, request is closed #}
+                <input type="submit" value="Post" class="btn btn-primary" style="margin:15px 0px 0px 5px; float: right" onclick="$('#status').val(0);">
+                <input type="submit" class="btn btn-default" value="Submit Grade Inquiry" style="margin:15px 0px 0px 5px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
+            {% else %}
+                {# No request yet #}
+                {% set disabled = not has_submission ? "disabled" : ""  %}
+                <input type="submit" value="Submit Grade Inquiry" class="btn btn-primary {{ disabled }}" style="float: right" onclick="$('#status').val(-1);" {{ disabled }}>
+            {% endif %}
+        </div>
+    </form>
+>>>>>>> 26bae2ecb07468d32110dc5b28e5d516cc9bb98a
 </div>
 <script type="text/javascript">
     $("#reply-text-area").keyup(function() {
@@ -144,11 +181,11 @@
     });
 </script>
 
-{% macro bbcode_buttons() %}
-    <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
+{% macro markdown_buttons() %}
+    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
         Link <i class="fas fa-link fa-1x"></i>
     </button>
-    <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">
+    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, '#replyTextArea')" class="btn btn-default">
         Code <i class="fas fa-code fa-1x"></i>
     </button>
 {% endmacro %}
