@@ -52,5 +52,5 @@
         {% endif %}
     </table>
 </div>
-{% include('admin/users/UserForm.twig') %}
+{% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
 {% include('admin/users/ClassListForm.twig') %}
