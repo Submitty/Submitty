@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\libraries\Core;
 use app\libraries\response\Response;
@@ -42,6 +43,7 @@ class HomePageController extends AbstractController {
 
     /**
      * @Route("/home/change_password", methods={"POST"})
+     * @return Response
      */
     public function changePassword(){
         $user = $this->core->getUser();
@@ -54,11 +56,14 @@ class HomePageController extends AbstractController {
         else {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
-        $this->core->redirect($this->core->buildNewUrl(['home']));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewUrl(['home']))
+        );
     }
 
     /**
      * @Route("/home/change_username", methods={"POST"})
+     * @return Response
      */
     public function changeUserName(){
         $user = $this->core->getUser();
@@ -77,13 +82,16 @@ class HomePageController extends AbstractController {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
             }
         }
-        $this->core->redirect($this->core->buildNewUrl(['home']));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewUrl(['home']))
+        );
     }
 
     /**
      * Display the HomePageView to the student.
      *
      * @Route("/home")
+     * @return Response
      */
     public function showHomepage() {
         $courses = $this->getCourses();
@@ -103,6 +111,7 @@ class HomePageController extends AbstractController {
 
     /**
      * @Route("/api/courses")
+     * @return Response
      */
     public function getApiCourses() {
         $courses = $this->getCourses();
