@@ -1139,6 +1139,17 @@ TestResults* dispatch::ImageDiff_doit(const TestCase &tc, const nlohmann::json& 
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; expected file does not exist.")});
   }
 
+  // Before we compare, make certain that the images are the same size.
+  std::string size_command_actual = "identify -ping -format '%w %h' " + actual_file;
+  std::string size_command_expected = "identify -ping -format '%w %h' " + expected_file;
+
+  std::string actual_size_output = output_of_system_command(size_command_actual.c_str());
+  std::string expected_size_output = output_of_system_command(size_command_expected.c_str());
+
+  if(actual_size_output != expected_size_output){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; Images are not of the same size.")});
+  }
+
   std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
   std::string output = output_of_system_command(command.c_str()); //get the string
   std::cout << "captured the following:\n" << output << "\n" <<std::endl;

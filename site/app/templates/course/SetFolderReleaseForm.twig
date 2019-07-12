@@ -1,0 +1,129 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}set-folder-release-form{% endblock %}
+{% block title %}Set Folder Release{% endblock %}
+{% block body %}
+
+
+
+    <center>
+        <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
+        <script>
+            //inserts file path into title show what folder you are editing
+            window.onclick = function() {
+                var rD = document.getElementById("release_title");
+                var folderPath =rD.dataset.path;
+                document.getElementById("release_title").innerHTML = folderPath;
+            }
+        </script>
+
+    <br/>
+    <br/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime(this)"/>
+        <br>
+        Depending on folder size, this may take a minute
+    </center>
+    <script>
+
+        function getNewDateTime(me){
+            var releaseDate = document.getElementById("date_to_release");
+            // pass filename to server to record the new date and time of the file to be released
+            var newDateTime = $(me).val();
+            //set the value to the new date and time
+            releaseDate.value = newDateTime;
+
+        }
+        function determineRelease(nDT) {
+            //get current date and time to determine what color the box is based
+            //on time you want released and the current date
+            var today = new Date();
+            //in order to compare correctly, need to add a zero to all single digits
+            if (today.getMonth() + 1 < 10) {
+                var month = '0' + (today.getMonth() + 1);
+            } else {
+                var month = (today.getMonth() + 1);
+            }
+            if (today.getDate() < 10) {
+                var day = '0' + today.getDate();
+            } else {
+                var day = today.getDate();
+            }
+            if (today.getHours() < 10) {
+                var hours = "0" + today.getHours();
+            } else {
+                var hours = today.getHours();
+            }
+            if (today.getMinutes() < 10) {
+                var mins = "0" + today.getMinutes();
+            } else {
+                var mins = today.getMinutes();
+            }
+            if (today.getSeconds() < 10) {
+                var secs = "0" + today.getSeconds();
+            } else {
+                var secs = today.getSeconds();
+            }
+            var date = today.getFullYear() + '-' + month + '-' + day;
+
+            var time = hours + ":" + mins + ":" + secs;
+            var currentDT = date + ' ' + time;
+            var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
+            //will add to colors.css
+            //custom colors for the input box not on sheet for readability
+            if (nDT <= currentDT) {
+                return "#87db88";
+            }
+            else if(nDT>=neverDT){
+                return "#f76c6c";
+            }
+            else {
+                return "#ffeb54";
+            }
+        }
+        function setChild(dirArr,releaseDate,handleData) {
+            //send the array of folder paths and set the time to the new one
+            setChildNewDateTime(dirArr,releaseDate.value,function (output) {
+                if(output){
+                    if(handleData){
+                        handleData(true);
+                    }
+                }
+
+            });
+
+        }
+        function confirm(){
+            var directory = document.getElementById("submit_time");
+            var dirArr = JSON.parse(directory.dataset.indir);
+            var ID = directory.dataset.iden;
+
+            var releaseDate = document.getElementById("date_to_release");
+            //makes sure you cannot set to null times
+            if(releaseDate.value == ""){
+                window.alert("No blank time allowed");
+                return;
+            }
+
+            setChild(dirArr,releaseDate,function (output) {
+                //when done reload
+               if(output) {
+                   var selectedDiv = 'date_to_release_'+ID;
+                   //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
+                   $("[id^="+selectedDiv+"]").val(releaseDate.value);
+                   $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
+                   //delay so function can finish most of the way
+                   //window.setTimeout('parent.location.reload()',100);
+                   parent.location.reload();
+               }
+            });
+
+        }
+    </script>
+
+{% endblock %}
+
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm()"/>
+
+{% endblock %}
+

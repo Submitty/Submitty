@@ -12,33 +12,52 @@ use app\libraries\Core;
  */
 class Response extends AbstractResponse {
     /** @var null | WebResponse  */
-    protected $web_response = null;
+    public $web_response = null;
 
     /** @var null | JsonResponse  */
-    protected $json_response = null;
+    public $json_response = null;
+
+    /** @var null | RedirectResponse */
+    public $redirect_response = null;
 
     /**
      * Response constructor.
      * @param JsonResponse|null $json_response
      * @param WebResponse|null $web_response
+     * @param RedirectResponse|null $redirect_response
      */
-    public function __construct(JsonResponse $json_response = null, WebResponse $web_response = null) {
+    public function __construct(
+        JsonResponse $json_response = null,
+        WebResponse $web_response = null,
+        RedirectResponse $redirect_response = null
+    ) {
         $this->json_response = $json_response;
         $this->web_response = $web_response;
+        $this->redirect_response = $redirect_response;
     }
 
     /**
      * @param WebResponse $web_response
+     * @return Response
      */
-    public function setWebResponse(WebResponse $web_response) {
-        $this->web_response = $web_response;
+    static public function WebOnlyResponse(WebResponse $web_response) {
+        return new self(null, $web_response, null);
     }
 
     /**
      * @param JsonResponse $json_response
+     * @return Response
      */
-    public function setJsonResponse(JsonResponse $json_response) {
-        $this->json_response = $json_response;
+    static public function JsonOnlyResponse(JsonResponse $json_response) {
+        return new self($json_response, null, null);
+    }
+
+    /**
+     * @param RedirectResponse $redirect_response
+     * @return Response
+     */
+    static public function RedirectOnlyResponse(RedirectResponse $redirect_response) {
+        return new self(null, null, $redirect_response);
     }
 
     /**
@@ -52,14 +71,15 @@ class Response extends AbstractResponse {
      * @param Core $core
      */
     public function render(Core $core) {
-        if ($this->web_response && is_null($this->json_response)) {
-            $this->web_response->render($core);
+        $web_response = $this->redirect_response ? $this->redirect_response : $this->web_response;
+        if ($web_response && is_null($this->json_response)) {
+            $web_response->render($core);
         }
-        elseif ($this->json_response && is_null($this->web_response)) {
+        elseif ($this->json_response && is_null($web_response)) {
             $this->json_response->render($core);
         }
         elseif ($core->getOutput()->getRender()) {
-            $this->web_response->render($core);
+            $web_response->render($core);
         }
         else {
             $this->json_response->render($core);
