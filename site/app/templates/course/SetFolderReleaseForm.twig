@@ -19,8 +19,6 @@
     <br/>
     <br/>
     <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime(this)"/>
-        <br>
-        Depending on folder size, this may take a minute
     </center>
     <script>
 
@@ -79,6 +77,15 @@
                 return "#ffeb54";
             }
         }
+        function setChildPerm(dirArr,handleData){
+            changeFolderPermission(dirArr,'1',function (output) {
+                if(output){
+                    if(handleData){
+                        handleData(true);
+                    }
+                }
+            });
+        }
         function setChild(dirArr,releaseDate,handleData) {
             //send the array of folder paths and set the time to the new one
             setChildNewDateTime(dirArr,releaseDate.value,function (output) {
@@ -102,19 +109,23 @@
                 window.alert("No blank time allowed");
                 return;
             }
-
-            setChild(dirArr,releaseDate,function (output) {
-                //when done reload
-               if(output) {
-                   var selectedDiv = 'date_to_release_'+ID;
-                   //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
-                   $("[id^="+selectedDiv+"]").val(releaseDate.value);
-                   $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
-                   //delay so function can finish most of the way
-                   //window.setTimeout('parent.location.reload()',100);
-                   parent.location.reload();
-               }
+            setChildPerm(dirArr,function (output) {
+                if(output){
+                    setChild(dirArr,releaseDate,function (output) {
+                        //when done reload
+                        if(output) {
+                            var selectedDiv = 'date_to_release_'+ID;
+                            //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
+                            $("[id^="+selectedDiv+"]").val(releaseDate.value);
+                            $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
+                            //delay so function can finish most of the way
+                            //window.setTimeout('parent.location.reload()',100);
+                            parent.location.reload();
+                        }
+                    });
+                }
             });
+
 
         }
     </script>
