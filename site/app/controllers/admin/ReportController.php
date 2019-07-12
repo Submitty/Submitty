@@ -16,7 +16,6 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
-use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\GradeSummary;
@@ -43,6 +42,10 @@ class ReportController extends AbstractController {
      * @Route("/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
@@ -53,6 +56,10 @@ class ReportController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $g_sort_keys = [
             'type',
@@ -79,6 +86,10 @@ class ReportController extends AbstractController {
      * @Route("/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
@@ -512,6 +523,13 @@ class ReportController extends AbstractController {
             $this->core->getConfig()->getCourse() .
             '.json';
 
+        // Create path to 'processing' file in jobs queue
+        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
         // Create path to output.html we expect to find in rainbow_grades directory
         $rg_file = $this->core->getConfig()->getCoursePath();
         $rg_file = FileUtils::joinPaths($rg_file, 'rainbow_grades', 'output.html');
@@ -531,11 +549,31 @@ class ReportController extends AbstractController {
         {
             sleep(1);
             $maxWaitTime--;
+            clearstatcache();
         }
+
+        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+        // We must also wait for that file to be removed
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($processing_jobs_file) AND $maxWaitTime)
+        {
+            sleep(1);
+            $maxWaitTime--;
+            clearstatcache();
+        }
+
+        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
+        $debug_output_path = '/var/local/submitty/courses/'.
+            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getCourse() .
+            '/rainbow_grades/auto_debug_output.txt';
+
+        $debug_output = file_get_contents($debug_output_path);
+        $exceptionDetected = strpos($debug_output, 'Exception');
 
         // If we finished the previous loops before maxWaitTime hit 0 then the file successfully left the jobs queue
         // implying that it finished
-        if($maxWaitTime)
+        if($maxWaitTime AND $exceptionDetected === false)
         {
             $this->core->getOutput()->renderJsonSuccess("Success");
         }
