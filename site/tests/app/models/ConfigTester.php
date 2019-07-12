@@ -110,7 +110,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'regrade_enabled' => false,
                 'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
-                'room_seating_gradeable_id' => ""
+                'room_seating_gradeable_id' => "",
+                'auto_rainbow_grades' => false
             )
         );
 
@@ -250,7 +251,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'regrade_enabled' => false,
                     'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
-                    'room_seating_gradeable_id' => ""
+                    'room_seating_gradeable_id' => "",
+                    'auto_rainbow_grades' => false
                 ]
             ],
             'course_loaded' => true,
@@ -266,7 +268,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'wrapper_files' => [],
             'system_message' => 'Some system message',
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
-            'email_enabled' => true
+            'email_enabled' => true,
+            'auto_rainbow_grades' => false
         );
         $actual = $config->toArray();
 

@@ -1,13 +1,14 @@
+@import "colors.css";
 #bar_wrapper {
      position: absolute;
      height: 41px;
      width: 650px;
      top: -90px;
      left: 45%;
-     background-color: #edf6f6;
+     background-color: var(--standard-pale-blue-gray)
      cursor: move;
      z-index:40;
-     border: solid 6px #FFD700;
+     border: solid 6px var(--important-post);
      box-sizing: content-box;
 }
 
@@ -27,17 +28,17 @@
      float: left;
      padding-top:3px;
      padding-bottom:3px;
-     background-color: #edf6f6;
+     background-color: #var(--standard-pale-blue-gray);
  }
 
 .grading_toolbar i:not(.icon-disabled):hover {
     cursor: pointer;
-    box-shadow: 0px 0px 5px 5px yellow;
+    box-shadow: 0px 0px 5px 5px var(--standard-vibrant-yellow);
     background-color: yellow;
 }
 
 .banner {
-    border: solid 6px #FFD700;
+    border: solid 6px var(--important-post);
     position:relative;
     display: block;
     float: left;
@@ -51,7 +52,7 @@
     vertical-align: middle;
     line-height: 25px;  
     font-weight:    bold;
-    background-color: red;
+    background-color: var(--badge-backgroud-red);
 }
 
 .icon-auto-grading-results {
@@ -62,8 +63,8 @@
     margin: 5px;
 }
 .icon-selected.fa-list {
-    box-shadow: 0px 0px 3px 3px #fd4472;
-    background-color: #fd4472;
+    box-shadow: 0px 0px 3px 3px var(--standard-vibrant-pink);
+    background-color: var(--standard-vibrant-pink);
 }
 
 .icon-grading-panel {
@@ -74,13 +75,13 @@
     margin: 5px;
 }
 .icon-selected.fa-edit {
-    box-shadow: 0px 0px 3px 3px #00e08e;
-    background-color: #00e08e;
+    box-shadow: 0px 0px 3px 3px var(--standard-mint-green);
+    background-color: var(--standard-mint-green);
 }
 
 .icon-selected.fa-comment-alt {
-    box-shadow: 0px 0px 3px 3px #72518a;
-    background-color: #72518a;
+    box-shadow: 0px 0px 3px 3px var(--standard-plum-purple);
+    background-color: var(--standard-plum-purple);
 }
 
 .icon-files {
@@ -91,8 +92,8 @@
     margin: 5px;
 }
 .icon-selected.fa-folder-open {
-    box-shadow: 0px 0px 3px 3px #00b3fa;
-    background-color: #00b3fa;
+    box-shadow: 0px 0px 3px 3px var(--standard-aqua);
+    background-color: var(--standard-aqua);
 }
 
 .icon-status {
@@ -107,8 +108,8 @@
     background-color: rgba(0, 0, 0, 0.4);
 }
 .icon-selected.grade_inquiry_icon{
-    box-shadow: 0px 0px 3px 3px #ffa500;
-    background-color: #ffa500;
+    box-shadow: 0px 0px 3px 3px var(--standard-vibrant-orange);
+    background-color: var(--standard-vibrant-orange);
 }
 
 .icon-header {
@@ -117,8 +118,8 @@
 }
 
 .icon-selected.fa-wrench {
-    box-shadow: 0px 0px 3px 3px #bbbbbb;
-    background-color: #bbbbbb;
+    box-shadow: 0px 0px 3px 3px var(--standard-light-medium-gray);
+    background-color: var(--standard-light-medium-gray);
 }
 
 .icon-refresh{
@@ -159,8 +160,8 @@
     height: 31px;
     width: 190px;
     float: right;
-    background-color: #edf6f6;
-    border: 5px solid #edf6f6;
+    background-color: var(--standard-pale-blue-gray);
+    border: 5px solid var(--standard-pale-blue-gray);
 }
 
 progress {
@@ -168,7 +169,7 @@ progress {
 }
 
 progress::-webkit-progress-value {
-    background: #1E90FF;
+    background: var(--standard-medium-vibrant-blue);
 }
 
 .draggable {
@@ -178,7 +179,7 @@ progress::-webkit-progress-value {
     font-size: 90%;
     cursor: move;
     position: absolute;
-    background-color: #E9EFEF;
+    background-color: var(--standard-pale-blue-gray);
     display: none;
     z-index: 30;
     overflow:hidden;
@@ -186,21 +187,21 @@ progress::-webkit-progress-value {
 }
 
 #autograding_results.rubric_panel {
-    border:5px solid #c40233 ;
+    border:5px solid var(--standard-vibrant-pink-red);
 }
 
 #grading_rubric.rubric_panel {
-    border:5px solid #00a368;
+    border:5px solid var(--standard-dark-mint-green);
 }
 
 #submission_browser.rubric_panel {
-    border:5px solid #0088bf ;
+    border:5px solid var(--standard-gray-blue);
 }
 #regrade_info.rubric_panel {
-    border:5px solid #ffa500 ;
+    border:5px solid var(--standard-vibrant-orange);
 }
 #student_info.rubric_panel {
-    border:5px solid black;
+    border:5px solid var(--text-black);
 }
 
 .grading_label {

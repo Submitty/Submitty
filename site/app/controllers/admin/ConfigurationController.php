@@ -42,7 +42,8 @@ class ConfigurationController extends AbstractController {
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
-            'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor()
+            'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
+            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
 
         if (isset($_SESSION['request'])) {
