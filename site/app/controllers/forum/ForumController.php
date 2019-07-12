@@ -821,7 +821,6 @@ class ForumController extends AbstractController{
                     $this->core->addErrorMessage("No posts found for selected thread.");
                 }
             }
-
         }
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $new_posts = $this->core->getQueries()->getUnviewedPosts(-1, $current_user);
@@ -834,7 +833,12 @@ class ForumController extends AbstractController{
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
+        if(!empty($_REQUEST["ajax"])){
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, true);
+        }
+        else {
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, false);
+        }
     }
 
     private function getAllowedCategoryColor() {
