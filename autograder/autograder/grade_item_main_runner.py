@@ -9,7 +9,7 @@ from pwd import getpwnam
 import glob
 
 from submitty_utils import dateutils
-from . import grade_item, grade_items_logging, write_grade_history, CONFIG_PATH
+from . import grade_item, grade_items_logging, CONFIG_PATH
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
