@@ -2,13 +2,6 @@ table.mobile-table {
     width: 100%;
 }
 
-.mobile-table th,
-.mobile-table td {
-    border: 1px solid black;
-    text-align: center;
-    padding: 5px;
-}
-
 @media (max-width: 800px) {
     table.mobile-table, 
     .mobile-table thead, 

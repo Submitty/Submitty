@@ -6,6 +6,13 @@
     margin: 1em 0 0;
 }
 
+#late-day-table th,
+#late-day-table td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 5px;
+}
+
 @media (max-width: 800px) {
     #late-day-table {
         margin: 0;
