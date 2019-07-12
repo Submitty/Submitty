@@ -1749,8 +1749,10 @@ function changePermission(filename, checked) {
     let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filename) + '&checked=' + checked;
 
     $.ajax({
+        type: "POST",
         url: url,
-        success: function(data) {csrf_token: csrfToken},
+        data: {'fn':filename,csrf_token: csrfToken},
+        success: function(data) {},
         error: function(e) {
             alert("Encounter saving the checkbox state.");
         }
