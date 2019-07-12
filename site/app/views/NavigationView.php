@@ -397,12 +397,21 @@ class NavigationView extends AbstractView {
             }
 
             // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
-            if ($gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
-                $ta_graded_gradeable->getUserViewedDate() === null &&
-                $list_section === GradeableList::GRADED) {
-                //Graded and you haven't seen it yet
-                $class = "btn-success";
+            $grade_ready_for_view = $gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
+                $list_section === GradeableList::GRADED;
+            if ($gradeable->isTeamAssignment()) {
+                if ($grade_ready_for_view &&
+                    $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId()) === null) {
+                    $class = "btn-success";
+                }
             }
+            else {
+                if ($grade_ready_for_view && $ta_graded_gradeable->getUserViewedDate() === null) {
+                    //Graded and you haven't seen it yet
+                    $class = "btn-success";
+                }
+            }
+
             // Submitted, currently after grade released date
             if ($graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 $list_section == GradeableList::GRADED) {

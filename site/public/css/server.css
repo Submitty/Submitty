@@ -1325,7 +1325,7 @@ end of styles used in the admin gradeable page
 /* styles for the colors for the electronic grader details page */
 /* color for no grader */
 .grader-NULL {
-    color: var(--default-white)
+    color: var(--default-white);
     text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
@@ -1376,12 +1376,12 @@ end of styles used in the admin gradeable page
 }
 
 .viewed-green-check {
-    color: #5cb85c;
+    color: var(--standard-vibrant-green);
     font-size: 1.5em;
 }
 
 .viewed-white-check {
-    color: white;
+    color: var(--default-white);
     font-size: 1.5em;
     text-shadow:
             -1px -1px 0 #000,
@@ -1391,7 +1391,7 @@ end of styles used in the admin gradeable page
 }
 
 .viewed-red-x {
-    color: red;
+    color: var(--badge-backgroud-red);
     font-size: 1.5em;
 }
 

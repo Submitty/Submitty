@@ -585,15 +585,27 @@ HTML;
         }
 
         $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getTeamViewedTimes($gradeable) : array();
-        foreach ($team_gradeable_view_history as $team) {
+        foreach ($team_gradeable_view_history as $team_id => $team) {
             $not_viewed_yet = true;
             $hover_over_string = "";
+            ksort($team_gradeable_view_history[$team_id]);
+            ksort($team);
                 foreach ($team as $user => $value) {
                     if ($value != null) {
                         $not_viewed_yet = false;
-                        //$hover_over_string.= "Last"
+                        $date_object = new \DateTime($value);
+                        $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
                     }
+                    else {
+                        $hover_over_string.= "Not viewed by ".$user."\n";
+                    }
+                }
 
+                if ($not_viewed_yet) {
+                    $team_gradeable_view_history[$team_id]['hover_string'] = '';
+                }
+                else {
+                    $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
                 }
         }
 

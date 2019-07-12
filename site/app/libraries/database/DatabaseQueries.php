@@ -1702,6 +1702,11 @@ WHERE gcm_id=?", $params);
         }
     }
 
+    public function getTeamViewedTime($team_id,$user_id) {
+        $this->course_db->query("SELECT last_viewed_time FROM teams WHERE team_id = ? and user_id=?",array($team_id,$user_id));
+        return $this->course_db->rows()[0]['last_viewed_time'];
+    }
+
     public function updateTeamViewedTime($team_id, $user_id) {
         $this->course_db->query("UPDATE teams SET last_viewed_time = NOW() WHERE team_id=? and user_id=?",
                 array($team_id,$user_id));
