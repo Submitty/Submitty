@@ -204,7 +204,7 @@
                     <div class="option-title">Display Rainbow Grades Summary</div>
                     <div class="option-alt">Show Rainbow Grades summaries to students.
                     <strong>Note:</strong>
-                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/overview">
+                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/">
                     You must manually run rainbow grades. <i style="font-style:normal;" class="helpicon"></i></a>
                     </div>
                 </label>
@@ -245,6 +245,15 @@
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="display_custom_message" id="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} /></div>
         </div>
+
+{#        <div class="option row">#}
+{#            <div class="option-desc col-md-8">#}
+{#                <div class="option-title">Automatic Rainbow Grades Generation</div>#}
+{#                <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>#}
+{#            </div>#}
+{#            <div class="option-input col-md-4"><input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ?#}
+{#                'checked': '' }} /></div>#}
+{#        </div>#}
 
     </div>
 </div>

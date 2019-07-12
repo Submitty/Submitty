@@ -5,75 +5,174 @@
 <div class="content">
     {% if userGroup == 1 %}
         <div style="float: right; margin-bottom: 20px;">
+            {# button to open all of the subfolders and cookie it#}
+            <a onclick='setCookie("foldersOpen",openAllDivForCourseMaterials());' class="btn btn-primary">Open/Close All Folders</a>
+            {# button to set the release dates of all files in the page/course materials #}
+            <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
+                    [{% for file in inDir %}
+                        "{{ file }}",
+                    {% endfor %}]
+                    )' class="btn btn-primary">Set All Release Dates</a>
             <a onclick="newUploadCourseMaterialsForm()" class="btn btn-primary">Upload Course Materials</a>
         </div>
     {% endif %}
     <h1>Course Materials</h1>
+    {% if userGroup==1 %}
+        <ul style="justify-self: center" id="details-legend" class="table-bordered">
+            <li>
+                <i class="fas fa-circle grader-NULL"></i>
+                Null date
+            </li>
+            <li>
+                <i class="fas fa-circle grader-invalid"></i>
+                Never release for at LEAST 10 years
+            </li>
+            <li>
+                <i class="fas fa-circle grader-3"></i>
+                Imminent release in at MOST 10 years
+            </li>
+            <li>
+                <i class="fas fa-circle grader-1"></i>
+                Released
+            </li>
+        </ul>
+    {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath,inDir) }}
+
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,inDir) %}
     {# Files on top #}
 
     {% for dir, path in files|filter((path,dir) => path is not iterable) %}
         {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup) }}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup,inDir) }}
         {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
-    {% for dir, path in files|filter((path,dir) => path is iterable) %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir) }}
+    {% for dir, path in files if path is iterable %}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup,inDir) %}
     <div>
         <div class="file-viewer">
+
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
-            {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs'] %}
+            {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
                  <a target="_blank" href="{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=course_materials&file={{ dir }}&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
-                <input id="share_checkbox_{{ id }}" type="checkbox"
-                {% if ( (fileShares[path] == "1") )%}
-                   checked="true"
-                {% endif %}
-                onclick="shareToOther('{{ id }}', '{{ path }}')" name="ch1"/><label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26" value="{{ fileReleaseDates[path]}}" onChange="setNewDateTime(this, '{{ path }}')"/>
+               <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <label for="latest-events">Share to student on</label>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"
+                       onChange="setNewDateTime(this, '{{ path }}'), determineRelease('date_to_release_{{ id }}')"/>
+                <script>
+                    //this needs to be here so the boxes can be colored on load (will say it is not declared)
+                    function determineRelease(inputID){
+                        var today = new Date();
+                        //to properly compare dates/times they need to match in format
+                        //not getting it from the picker leaves out the zero before single digits
+                        if(today.getMonth()+1<10){
+                            var month = '0'+(today.getMonth()+1);
+                        }
+                        else{
+                            var month = (today.getMonth()+1);
+                        }
+                        if(today.getDate()<10){
+                            var day = '0'+today.getDate();
+                        }
+                        else{
+                            var day = today.getDate();
+                        }
+                        if(today.getHours()<10){
+                            var hours = "0"+today.getHours();
+                        }
+                        else{
+                            var hours = today.getHours();
+                        }
+                        if(today.getMinutes()<10){
+                            var mins = "0"+today.getMinutes();
+                        }
+                        else{
+                            var mins = today.getMinutes();
+                        }
+                        if(today.getSeconds()<10){
+                            var secs = "0"+today.getSeconds();
+                        }
+                        else {
+                            var secs = today.getSeconds();
+                        }
+
+                        var date = today.getFullYear()+'-'+month+'-'+day;
+
+                        var time = hours+":"+mins+":"+secs;
+                        var currentDT = date+' '+time;
+                        var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
+
+                        //get the value in each file so the color can be assigned
+                        //based on the time chosen
+                        var inputDT = document.getElementById(inputID);
+                        var fileDT = inputDT.value;
+
+                        //also custom colors for this page for readability
+                        if(fileDT<=currentDT){
+                            inputDT.style.backgroundColor = "#87db88";
+                        }
+                        else if(fileDT>=neverDT){
+                            inputDT.style.backgroundColor = "#f76c6c";
+                        }
+                        else{
+                            inputDT.style.backgroundColor = "#ffeb54";
+                        }
+
+                    }
+                    determineRelease('date_to_release_{{ id }}')
+                </script>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
     {% else %}
     <div>
+
         <div class="div-viewer">
-            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='openDivForCourseMaterials("{{ id }}");'>
+            {# button to open each folder #}
+            <a class='openAllDiv openAllDiv{{ title }} openable-element-{{ title }}' id='{{ dir }}' onclick='setCookie("{{ folderPath }}",openDivForCourseMaterials("{{ id }}")+"{{ id }}")'>
                 <span class="fas fa-folder open-all-folder" style='vertical-align:text-top;font-size:20px'></span>
                 {{ dir }}
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+               <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                {# button to choose release date for all files in folder and subfolders #}
+                <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
+                [{% for file in inDir %}
+                        {% if folderPath in file %}
+                            "{{ file }}",
+                        {% endif %}
+                {% endfor %}]
+                        )' class="btn btn-primary">Set Folder Release Date</a>
             {% endif %}
         </div>
         <div id='div_viewer_{{ id }}' style='margin-left:15px; display: none' data-file_name="{{ dir }}">
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
 
         </div>
     </div>
@@ -82,12 +181,73 @@
 
 
 <script type="text/javascript">
-
+    //set cookie for open adapted from w3schools
+    function setCookie(cName,cVal){
+        document.cookie = cName+'='+cVal;
+    }
+    //get the value for the cookie with this name
+    function getCookie(cName) {
+        var name = cName+'=';
+        var decodedCookie = decodeURIComponent(document.cookie);
+        var ca = decodedCookie.split(';');
+        for(var i = 0; i <ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
     window.onload = function () {
+        //determine if folders have been left open or closed
+        var folderCookie = getCookie('foldersOpen');
+        //if the cookie says it is open
+        if(folderCookie == "open"){
+            //open all the folders
+            openAllDivForCourseMaterials();
+            //
+            {% for file in inDir %}
+                //if one of the subdirs, check if it is closed post opening all
+                var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
+                if(subFolderCookie.indexOf("closed")==0){
+                    //if closed. close it after it has been opened by the override above
+                    closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+                }
+            {% endfor %}
+        }
+        else{
+            //makes sure that opened folders don't get opened multiple times
+            let trackOpens = new Map();
+            //goes through all possible directories
+            {% for file in inDir %}
+                    //get the cookie for each dir
+                    var subFolderCookie = getCookie("{{ file }}".substr(0,'{{ file }}'.lastIndexOf("/")));
+                    //if the folder is open
+                    if(subFolderCookie.indexOf("open")==0){
+                        //check if the folder has been opened already (do it it again will close it)
+                        if(trackOpens.get(subFolderCookie.substr(4,subFolderCookie.length)) === undefined){
+                            //undefined means it has not been opened
+                            //set the value as open so it will not be reopened
+                            trackOpens.set(subFolderCookie.substr(4,subFolderCookie.length),"released");
+                            //open the folder
+                            openDivForCourseMaterials(subFolderCookie.substr(4,subFolderCookie.length));
+                        }
+                    }
+                    else{
+                        if(subFolderCookie.indexOf("closed")==0){
+                            //if the folder should be closed, close it
+                            closeDivForCourseMaterials(subFolderCookie.substr(6,subFolderCookie.length));
+                            //there's no way to open it in that function
+                        }
+                    }
+            {% endfor %}
+        }
         // loop thru each div_viewer_xxx
-
-        var jumpToScrollPostion = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPostion\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-        if (jumpToScrollPostion.length > 0 && jumpToScrollPostion != '-1') {
+        var jumpToScrollPosition = document.cookie.replace(/(?:(?:^|.*;\s*)jumpToScrollPosition\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        if (jumpToScrollPosition.length > 0 && jumpToScrollPosition != '-1') {
 
             $('[id^=div_viewer_]').each(function() {
             var number = this.id.replace('div_viewer_', '').trim();
@@ -103,8 +263,8 @@
             }
         });
             // jump to last location if scroll is enabled.
-            window.scrollTo(0, jumpToScrollPostion);
-            document.cookie = 'jumpToScrollPostion=-1';
+            window.scrollTo(0, jumpToScrollPosition);
+            document.cookie = 'jumpToScrollPosition=-1';
 
         }
         else {
@@ -137,8 +297,23 @@
     function setNewDateTime(me, path) {
         // pass filename to server to record the new date and time of the file to be released
         var newDateTime = $(me).val();
-        //alert(newDateTime);
+
         changeNewDateTime(path, newDateTime);
+    }
+
+    function setChildNewDateTime(path, changeDate,handleData) {
+        //change the date and time of the subfiles in the folder with the time chosen for the whole
+        //folder (passed in)
+        var success;
+        success = false;
+        success  = changeFolderNewDateTime(path,changeDate,function (output) {
+            if(output){
+                success =true;
+                if(handleData){
+                    handleData(success);
+                }
+            }
+        });
     }
 
     $(document).ready(function() {
@@ -164,7 +339,7 @@
                                     date = new Date("9999-01-01 00:00:00");
                                     break;
                             }
-                            fp.setDate(date);
+                            fp.setDate(date,true);
                         }
                     }
                 )],
@@ -179,5 +354,6 @@
 
 
 {% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
+{% include('course/SetFolderReleaseForm.twig') %}
 {% include('course/UploadCourseMaterialsForm.twig') %}
 {% include('course/DeleteCourseMaterialForm.twig') %}
