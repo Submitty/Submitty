@@ -137,6 +137,10 @@ jobs:
           packages:
             - apache2
             - libapache2-mod-fastcgi
+            - apache2-suexec-custom
+            - libapache2-mod-authnz-external
+            - libapache2-mod-authz-unixgroup
+            - libapache2-mod-wsgi-py3
             - build-essential
             - automake
             - cmake
@@ -195,22 +199,26 @@ jobs:
         - sudo bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
         - sudo bash .setup/travis/setup_test_suite.sh
-        - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
-        - sudo a2enmod include rewrite actions cgi alias headers
+        - sudo a2enmod include rewrite actions cgi alias headers fastcgi suexec authnz_external headers proxy_fcgi
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+        - sudo mkdir /run/php
+        - sudo chown www-data:www-data /run/php
+        - sudo chmod 755 /run/php
+        - sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
         - sudo a2dissite 000-default
         - sudo rm -rf /etc/apache2/sites-available/*
         - sudo rm -rf /etc/apache2/sites-enabled/*
-        - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
+        - sudo cp -f .setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
+        - sudo sed -e "s?Require ip SUBMITTY_URL?Require all granted?g" --in-place /etc/apache2/sites-available/submitty.conf
+        - sudo sed -e "s?SUBMITTY_URL?*?g" --in-place /etc/apache2/sites-available/submitty.conf
+        # - sudo sed '54d' --in-place /etc/apache2/sites-available/submitty.conf
+        - sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+        - sudo chmod 0640 /etc/apache2/suexec/www-data
         - sudo a2ensite submitty
-        - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
-        # TODO: Figure out why these chmod's are necessary and fix whatever has
-        #       bad permission (https://github.com/Submitty/Submitty/issues/1040)
-        - sudo chmod -R 755 /usr/local/submitty
-        - sudo chmod -R 777 /usr/local/submitty/test_suite
-        - sudo chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
-        - sudo chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+        - cat /etc/apache2/sites-available/submitty.conf
+        - sudo apache2ctl -t
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests

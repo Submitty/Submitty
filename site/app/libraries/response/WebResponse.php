@@ -12,10 +12,10 @@ use app\libraries\Core;
  */
 class WebResponse extends AbstractResponse {
     /** @var string | array */
-    protected $view_class;
+    public $view_class;
 
     /** @var string */
-    protected $view_function;
+    public $view_function;
 
     /** @var array  */
     protected $parameters;
