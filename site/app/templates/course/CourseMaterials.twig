@@ -337,11 +337,10 @@
                                     var offset = date.getTimezoneOffset();
                                     offset = offset/60;
                                     console.log(offset);
-                                    if(offset){
-                                        var currDay = date.getDay();
-                                        currDay = currDay-1;
-                                        var newdate = date.substring(0,8)+currDay+date.substring(9+1);
-                                        console.log(newdate);
+                                    //if your time is ahead of New York, sets back a day so
+                                    //everything is simultaneous
+                                    if(offset<4){
+                                       date.setUTCDate(date.getDate()-1);
                                     }
                                     break;
                                 case 1: 
