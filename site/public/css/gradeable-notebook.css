@@ -56,20 +56,20 @@
 /* Style the color of notebook feedback messages */
 .notebook .feedback_msg_failure
 {
-    color: red;
+    color: var(--badge-backgroud-red);
 }
 
 .notebook .feedback_msg_warning
 {
-    color: orange;
+    color: var(--standard-vibrant-orange);
 }
 
 .notebook .feedback_msg_info
 {
-    color: blue;
+    color: var(--standard-deep-blue);
 }
 
 .notebook .feedback_msg_success
 {
-    color: green;
+    color: var(--standard-dark-green);
 }
