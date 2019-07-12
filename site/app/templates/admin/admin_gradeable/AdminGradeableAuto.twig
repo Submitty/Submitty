@@ -12,7 +12,7 @@
 			<div name="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
 		{% endif %}
 
-    <fieldset>
+    <div class="settings">
 		<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
 			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
 		<a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
@@ -28,40 +28,38 @@
 		{# text box with the path to the current config file, hidden but still used in js #}
 		<input style='width: 83%' type='hidden' id='input_provide_full_path' name='autograding_config_path' 
 			value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
-    </fieldset>
+    </div>
 
     <div class="btn-container">
         <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Student Permission Settings" onclick="showAdvancedStudentPermissions()">
-        <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student_permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
+        <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student-permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
     </div>
-    <div class="student_permissions" hidden>
-        <fieldset>
-            <div>
-                What are students allowed to do?
-            </div>
-            <div>
-                View the gradeable on the course home page and download submitted files?
-                <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
-                        {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
-                <input type="radio" id="no_student_view" name="student_view" value="false"
-                        {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
-                <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                        {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> When grades are released
+    <div class="student-permissions settings" hidden>
+        <div>
+            What are students allowed to do?
+        </div>
+        <div>
+            View the gradeable on the course home page and download submitted files?
+            <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
+                    {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_view" name="student_view" value="false"
+                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
+            <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
+                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> When grades are released
 
-                <input type="radio" id="yes_student_view" name="student_view" value="true"
-                        {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
-            </div>
+            <input type="radio" id="yes_student_view" name="student_view" value="true"
+                    {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
+        </div>
 
-            <div id="student_submit_view">
-                <div>
-                    Make new submissions and access all prior versions?
-                    <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                            {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
-                    <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                            {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
-                </div>
+        <div id="student_submit_view">
+            <div>
+                Make new submissions and access all prior versions?
+                <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+                <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
             </div>
-        </fieldset>
+        </div>
     </div>
     <div class="btn-container">
         <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
@@ -188,13 +186,13 @@
     }
 
     function showAdvancedStudentPermissions() {
-        $('.student_permissions').show();
+        $('.student-permissions').show();
         $('#hide-advanced-student-permissions-container').show();
         $('#show-advanced-student-permissions').hide();
     }
 
     function hideAdvancedStudentPermissions() {
-        $('.student_permissions').hide();
+        $('.student-permissions').hide();
         $('#hide-advanced-student-permissions-container').hide();
         $('#show-advanced-student-permissions').show();
     }

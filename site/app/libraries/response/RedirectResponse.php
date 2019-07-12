@@ -12,7 +12,7 @@ use app\libraries\Core;
  */
 class RedirectResponse extends AbstractResponse {
     /** @var string */
-    protected $url;
+    public $url;
 
     /**
      * RedirectResponse constructor.
