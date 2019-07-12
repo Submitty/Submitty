@@ -105,8 +105,7 @@ class CourseMaterialsController extends AbstractController {
                 if (!Utils::startsWith(realpath($path), $root_path)) {
                     continue;
                 }
-                if ($file['checked'] === '1' &&
-                    $file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                if ($file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
                     $relative_path = substr($path, strlen($root_path) + 1);
                     $zip->addFile($path, $relative_path);
                 }
