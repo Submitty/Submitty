@@ -1,8 +1,8 @@
 @import url("google/inconsolata.css");
 
 .diff-container {
-    background-color: #F8F8F8;
-    border: 1px solid #ddd;
+    background-color: var(--standard-pale-gray);
+    border: 1px solid var(--standard-light-gray);
     width: 100%;
 }
 
@@ -15,7 +15,7 @@
 }
 
 .diff-code .bad {
-    background-color: #fdffe0;
+    background-color: var(--alert-background-bronze);
 }
 
 .diff-code .highlight {
@@ -38,11 +38,11 @@
 }
 
 .highlight-hover {
-    background-color: #ddf !important;
+    background-color: var(--standard-light-blue-gray) !important;
 }
 
 .highlight-char {
-    background-color: #fe5b5b;
+    background-color: var(--focus-danger-red);
 }
 
 .line_number {
@@ -76,5 +76,5 @@
 }
 
 .diff-code .whitespace {
-    border: 1px solid blue;
+    border: 1px solid var(--standard-deep-blue);
 }
