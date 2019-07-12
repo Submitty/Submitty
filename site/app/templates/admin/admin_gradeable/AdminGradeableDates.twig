@@ -136,7 +136,6 @@
                         label: "or",
                         onClick: (index, fp) => {
                             let date;
-                            let event = new Event("change");
                             switch (index) {
                                 case 0: 
                                     date = new Date();
@@ -145,8 +144,7 @@
                                     date = new Date("9998-01-01 00:00:00");
                                     break;
                             }
-                            fp.setDate(date);
-                            $(".date_picker").each(function(i, obj){obj.dispatchEvent(event); });
+                            fp.setDate(date, true);
                         }
                     }
                 )],
