@@ -88,23 +88,19 @@
         </div>
 
 
-        <fieldset>
-            <div class="option row">
-                <div class="option-desc col-md-8">
-                    <legend>
-                        <div class="option-title">Version Control System (VCS) Type</div>
-                        <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
-                    </legend>
-                </div>
-                <div class="option-input col-md-4">
-                    <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
-                    {#
-                    <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
-                    <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>
-                    #}
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Version Control System (VCS) Type</div>
+                <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
             </div>
-        </fieldset>
+            <div class="option-input col-md-4">
+                <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
+                {#
+                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>
+                #}
+            </div>
+        </div>
 
         <div class="option row">
             <div class="option-desc col-md-8">

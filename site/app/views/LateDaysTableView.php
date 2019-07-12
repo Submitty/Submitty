@@ -20,6 +20,8 @@ class LateDaysTableView extends AbstractView {
 
     public function showLateTablePage(LateDays $late_days) {
         $this->core->getOutput()->addBreadcrumb("My Late Days");
+        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalCss('latedays.css');
         return $this->core->getOutput()->renderTwigTemplate('LateDaysTable.twig', [
             'late_days' => $late_days
         ]);

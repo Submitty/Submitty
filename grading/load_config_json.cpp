@@ -61,6 +61,42 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 }
 
 
+// This function ensures that any file explicitly tagged as an
+// executable in a compilation step is validated and copied
+// to each testcase directory.
+void PreserveCompiledFiles(nlohmann::json &whole_config) {
+
+  // Loop over all of the test cases
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin();
+       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+    std::string testcase_type = my_testcase->value("type","Execution");
+    //Skip non compilation tests
+    if(testcase_type != "Compilation"){
+      continue;
+    }
+
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
+    // Add all executables to compilation_to_runner and compilation_to_validation
+    for(std::vector<std::string>::iterator exe = executable_names.begin(); exe != executable_names.end(); exe++){
+      std::stringstream ss;
+      ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << *exe;
+      std::string executable_name = ss.str();
+
+      if(whole_config["autograding"]["compilation_to_runner"].find("executable_name") == whole_config["autograding"]["compilation_to_runner"].end()){
+        whole_config["autograding"]["compilation_to_runner"].push_back(executable_name);
+      }
+
+      if(whole_config["autograding"]["compilation_to_validation"].find("executable_name") == whole_config["autograding"]["compilation_to_validation"].end()){
+         whole_config["autograding"]["compilation_to_validation"].push_back(executable_name);
+      }
+    }
+  }
+}
+
 // This function will automatically archive all non-executable files
 // that are validated.  This ensures that the web viewers will have
 // the necessary files to display the results to students and graders.
@@ -72,6 +108,8 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
   int which_testcase = 0;
   for (nlohmann::json::iterator my_testcase = tc->begin();
        my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+
     nlohmann::json::iterator validators = my_testcase->find("validation");
     if (validators == my_testcase->end()) { /* no autochecks */ continue; }
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
@@ -852,6 +890,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   InflateTestcases(answer);
 
   ArchiveValidatedFiles(answer);
+  PreserveCompiledFiles(answer);
 
   return answer;
 }
