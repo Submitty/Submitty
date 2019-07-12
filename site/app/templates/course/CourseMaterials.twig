@@ -71,10 +71,11 @@
             {% endif %}
             <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
+
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"
-                       onChange="setNewDateTime(this, '{{ path }}'), determineRelease('date_to_release_{{ id }}')"/>
+                       onChange="setNewDateTime(this, '{{ path }}')"/>
                 <script>
                     //this needs to be here so the boxes can be colored on load (will say it is not declared)
                     function determineRelease(inputID){
@@ -125,17 +126,17 @@
 
                         //also custom colors for this page for readability
                         if(fileDT<=currentDT){
-                            inputDT.style.backgroundColor = "#87db88";
+                            return "#87db88";
                         }
                         else if(fileDT>=neverDT){
-                            inputDT.style.backgroundColor = "#f76c6c";
+                            return "#f76c6c";
                         }
                         else{
-                            inputDT.style.backgroundColor = "#ffeb54";
+                            return "#ffeb54";
                         }
 
                     }
-                    determineRelease('date_to_release_{{ id }}')
+                    document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
                 </script>
             {% endif %}
         </div>
@@ -297,8 +298,65 @@
     function setNewDateTime(me, path) {
         // pass filename to server to record the new date and time of the file to be released
         var newDateTime = $(me).val();
-
         changeNewDateTime(path, newDateTime);
+        var today = new Date();
+        //to properly compare dates/times they need to match in format
+        //not getting it from the picker leaves out the zero before single digits
+        if(today.getMonth()+1<10){
+            var month = '0'+(today.getMonth()+1);
+        }
+        else{
+            var month = (today.getMonth()+1);
+        }
+        if(today.getDate()<10){
+            var day = '0'+today.getDate();
+        }
+        else{
+            var day = today.getDate();
+        }
+        if(today.getHours()<10){
+            var hours = "0"+today.getHours();
+        }
+        else{
+            var hours = today.getHours();
+        }
+        if(today.getMinutes()<10){
+            var mins = "0"+today.getMinutes();
+        }
+        else{
+            var mins = today.getMinutes();
+        }
+        if(today.getSeconds()<10){
+            var secs = "0"+today.getSeconds();
+        }
+        else {
+            var secs = today.getSeconds();
+        }
+
+        var date = today.getFullYear()+'-'+month+'-'+day;
+
+        var time = hours+":"+mins+":"+secs;
+        var currentDT = date+' '+time;
+        var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
+
+        //get the value in each file so the color can be assigned
+        //based on the time chosen
+        var fileDT = newDateTime;
+
+        //also custom colors for this page for readability
+        if(fileDT<=currentDT){
+            me.style.backgroundColor = "#87db88";
+
+            return "#87db88";
+        }
+        else if(fileDT>=neverDT){
+            me.style.backgroundColor = "#f76c6c";
+            return "#f76c6c";
+        }
+        else{
+            me.style.backgroundColor = "#ffeb54";
+            return "#ffeb54";
+        }
     }
 
     function setChildNewDateTime(path, changeDate,handleData) {
