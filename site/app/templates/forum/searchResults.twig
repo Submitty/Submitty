@@ -24,7 +24,10 @@
                     </tr>
                     {% for post in thread.posts %}
                         <tr title="Go to post" class="cursor-pointer" onclick="window.location = '{{ post.post_link }}';" id="search-row-{{ post.count }}" class="hoverable">
-                            <td align="left"><pre class='pre_forum'><p class="post_content pre-wrap">{{ post.post_content }}</p></pre></td>
+                            <td align="left"><pre class='pre_forum'>
+                                    <p class="post_content pre-wrap">
+                                        {% include "forum/RenderPost.twig" with { "post_content": post.post_content } only %}
+                                    </p></pre></td>
                             <td>{{ post.visible_username }}</td>
                             <td>{{ post.posted_on }}</td>
                         </tr>

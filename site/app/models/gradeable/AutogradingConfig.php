@@ -37,7 +37,10 @@ class AutogradingConfig extends AbstractModel {
     protected $max_submissions;
     /** @property @var string A message to show the user above the file upload box */
     protected $gradeable_message;
-
+    /** @property @var bool Indicates if list of test should be shown at the bottom of the page */
+    protected $hide_version_and_test_details;
+    /** @property @var bool Indicates if list os submitted files should be shown on page */
+    protected $hide_submitted_files;
     /** @property @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
     /** @property @var int The number of seconds allowed for autograding */
@@ -88,10 +91,14 @@ class AutogradingConfig extends AbstractModel {
         $this->max_submission_size = floatval($details['max_submission_size'] ?? 0);
         $this->max_submissions = intval($details['max_submissions'] ?? 0);
         if (isset($details['assignment_message'])) {
-            $this->gradeable_message = Utils::prepareHtmlString($details['assignment_message'] ?? '');
+            $this->gradeable_message = $details['assignment_message'] ?? '';
         } else if (isset($details['gradeable_message'])) {
-            $this->gradeable_message = Utils::prepareHtmlString($details['gradeable_message'] ?? '');
+            $this->gradeable_message = $details['gradeable_message'] ?? '';
         }
+
+        // These two items default to false if they don't exist in the gradeable config.json
+        $this->hide_version_and_test_details = $details['hide_version_and_test_details'] ?? false;
+        $this->hide_submitted_files = $details['hide_submitted_files'] ?? false;
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
