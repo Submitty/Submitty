@@ -256,7 +256,6 @@ class CourseMaterialsController extends AbstractController {
                 }
 
                 $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
-
                 if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                     return "Failed to write to file {$fp}";
                 }
