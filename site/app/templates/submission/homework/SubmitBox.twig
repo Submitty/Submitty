@@ -2,7 +2,7 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
+    <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
 {% endif %}
 
 <div class="content">
