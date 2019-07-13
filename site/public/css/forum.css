@@ -440,3 +440,11 @@ body {min-width: 925px;}
     display: block;
     margin-bottom: 0.25em;
 }
+
+#forum_filters{
+    position: absolute;
+    margin-left: 5px;
+    margin-top: 7px;
+    font-size: small;
+    display: none;
+}

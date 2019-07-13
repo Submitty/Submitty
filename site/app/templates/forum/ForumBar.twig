@@ -29,11 +29,10 @@
 
 	<div class="row">
 
-	<div class="col-7">
+	<div class="col-8">
 
 
 		{% if thread_exists %}
-
 
 			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
 			<div class="row">
@@ -61,15 +60,19 @@
 
 						{% endif %}
 					{% endfor %}
+
+					<span id="forum_filters">Filters: <span id="filter_names">None</span> &middot; <a onclick="clearForumFilter()" id="filter_close">Clear </a></span>
 				</div>
+
 			</div>
+
 			</form>
 
 		{% endif %}
-		
+
 		</div>
 		
-	<div class="col-5">
+	<div class="col-4">
 
 		{% for button in forum_bar_buttons_right %}
 			{% if user_group <= button.required_rank %}
@@ -86,6 +89,8 @@
 				{% endif %}
 			{% endif %}
 		{% endfor %}
+
+
 
 
 	{% if show_more %}

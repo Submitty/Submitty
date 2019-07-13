@@ -1103,3 +1103,34 @@ function loadThreadHandler(){
         });
     });
 }
+
+var filters_applied = [];
+
+// Taken from https://stackoverflow.com/a/1988361/2650341
+
+Array.prototype.inArray = function(comparer) {
+    for(var i=0; i < this.length; i++) {
+        if(comparer(this[i])) return i;
+    }
+    return false;
+};
+
+// adds an element to the array if it does not already exist using a comparer
+// function
+Array.prototype.toggleElement = function(element, comparer) {
+    var index = this.inArray(comparer);
+    if ((typeof(index) == "boolean" && !index) || (typeof(index) == "int" && index === 0)){
+        this.push(element);
+    }
+    else{
+        this.splice(index, 1);
+    }
+};
+
+function clearForumFilter(){
+    var fliters_applied = [];
+    $('#thread_category option, #thread_status_select option').prop('selected', false);
+    updateThreads(true, null);
+    $('#filter_names').empty().text("None");
+    $('#forum_filters').css('display', 'none');
+}
