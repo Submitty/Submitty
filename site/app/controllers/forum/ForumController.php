@@ -563,6 +563,7 @@ class ForumController extends AbstractController{
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
             $any_changes = false;
+            $type = null;
             $isError = false;
             $messageString = '';
              // Author of first post and thread must be same
@@ -580,6 +581,7 @@ class ForumController extends AbstractController{
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
+                    $type = "Thread and Post";
                     $messageString = "Thread and post updated successfully.";
                     $any_changes = true;
                 } else {
@@ -599,8 +601,17 @@ class ForumController extends AbstractController{
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
-                $content = "Update: A thread/post ";
-                $subject = "A thread/post was edited in thread, ".$thread_title;
+                if ($type == "Post") {
+                    $post_content = $_POST["thread_post_content"];
+                    $subject = "A post was edited";
+                    $content = "A post in thread {$thread_title} was changed to: \n\n{$post_content}";
+                }
+                else if ($type == "Thread and Post") {
+                    $post_content = $_POST["thread_post_content"];
+                    $subject = "A thread was edited";
+                    $content = "A thread was changed to {$thread_title}: \n\n{$post_content}";
+                }
+
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
             }
