@@ -70,6 +70,10 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/sbin/authentication.py
 # everyone needs to be able to run this script
 chmod 555 ${SUBMITTY_INSTALL_DIR}/sbin/killall.py
 
+# DAEMON_USER should be able to run these scripts as root
+echo "%${DAEMON_GROUP} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/create_course.sh" >> /etc/sudoers
+echo "%${DAEMON_GROUP} ALL = (root) NOPASSWD: ${SUBMITTY_INSTALL_DIR}/sbin/adduser.py" >> /etc/sudoers
+
 # DAEMON_USER only things
 array=( auto_rainbow_grades.py build_config_upload.py run_lichen_plagiarism.py send_email.py generate_grade_summaries.py submitty_autograding_shipper.py submitty_autograding_worker.py submitty_daemon_jobs autograder)
 for i in "${array[@]}"; do
