@@ -318,7 +318,9 @@ class CreateCourse(AbstractJob):
         head_instructor = self.job_details['head_instructor']
         base_group = self.job_details['base_course'] + "_tas_www"
 
-        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', 'course_creation.txt')
+        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', 'course_creation_{}_{}_{}_{}.txt'.format(
+            semester, course, head_instructor, base_group
+        ))
 
         with log_file_path.open("w") as output_file:
             subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
