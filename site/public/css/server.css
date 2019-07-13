@@ -1524,14 +1524,6 @@ end of styles used in the admin gradeable page
 }
 
 /* Data table captions that replace <h3> and <h5> for VPAT */
-.caption_h3 {
-    font-size: 1.17em;
-    font-weight: bold;
-    text-align: left;
-    caption-side: top;
-    border: 0;
-}
-
 .caption_h5 {
     font-size: 0.83em;
     font-weight: bold;
@@ -1581,7 +1573,7 @@ end of styles used in the admin gradeable page
 .float-right {
     float: right;
 }
-  
+
 .warning {
     background: #fff3cd;
     color: #856404;
