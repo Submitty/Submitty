@@ -21,7 +21,7 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group) {
+        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
@@ -29,6 +29,8 @@ class CourseMaterialsView extends AbstractView {
             foreach($course_materials_array as $file) {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
+
+                array_push($in_dir,$expected_file_path);
 
                 // Check whether the file is shared to student or not
                 // If shared, will add to courseMaterialsArray
@@ -38,6 +40,7 @@ class CourseMaterialsView extends AbstractView {
                 if ($json == true){
                     if ( isset( $json[$expected_file_path] ) )
                     {
+                        $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
                         $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
@@ -57,17 +60,29 @@ class CourseMaterialsView extends AbstractView {
                 $path = explode('/', $file);
                 $working_dir = &$files[$start_dir_name];
                 $filename = array_pop($path);
+
                 foreach($path as $dir) {
                     if (!isset($working_dir[$dir])) {
                         $working_dir[$dir] = array();
                     }
+
+
                     $working_dir = &$working_dir[$dir];
+
                 }
 
                 $working_dir[$filename] = $expected_file_path;
 
 
                 $file_datas[$expected_file_path] = $isShareToOther;
+
+                if( $releaseData == $now_date_time->format("Y-m-d H:i:sO")){
+                    //for uploaded files that have had no manually set date to be set to never and maintained as never
+                    //also permission set to yes
+                    $releaseData=substr_replace($releaseData,"9999",0,4);
+                    $json[$expected_file_path]['checked']='1';
+                    $json[$expected_file_path]['release_datetime']= $releaseData;
+                }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
         }
@@ -75,6 +90,7 @@ class CourseMaterialsView extends AbstractView {
         $submissions = array();
         $file_shares = array();
         $file_release_dates = array();
+        $in_dir = array();
 
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
@@ -88,7 +104,7 @@ class CourseMaterialsView extends AbstractView {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
 
-        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group);
+        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
@@ -110,6 +126,7 @@ class CourseMaterialsView extends AbstractView {
             "fileShares" => $file_shares,
             "fileReleaseDates" => $file_release_dates,
             "userGroup" => $user_group,
+            "inDir" => $in_dir,
             "csrf_token" => $this->core->getCsrfToken(),
             "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
             "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"]),

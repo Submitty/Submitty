@@ -8,7 +8,8 @@ class ReportView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Grade Reports');
         return $this->core->getOutput()->renderTwigTemplate("admin/Report.twig", [
             'summaries_url' => $this->core->buildNewCourseUrl(['reports', 'summaries']),
-            'csv_url' => $this->core->buildNewCourseUrl(['reports', 'csv'])
+            'csv_url' => $this->core->buildNewCourseUrl(['reports', 'csv']),
+            'rainbow_grades_customization_url' => $this->core->buildNewCourseUrl(['rainbow_grades_customization'])
         ]);
     }
 }

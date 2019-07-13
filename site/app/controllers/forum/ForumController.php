@@ -352,7 +352,6 @@ class ForumController extends AbstractController{
         $thread_status = $_POST["thread_status"];
 
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
-        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
@@ -832,7 +831,6 @@ class ForumController extends AbstractController{
                     $this->core->addErrorMessage("No posts found for selected thread.");
                 }
             }
-
         }
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $new_posts = $this->core->getQueries()->getUnviewedPosts(-1, $current_user);
@@ -845,7 +843,12 @@ class ForumController extends AbstractController{
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state);
+        if(!empty($_REQUEST["ajax"])){
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, true);
+        }
+        else {
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, false);
+        }
     }
 
     private function getAllowedCategoryColor() {

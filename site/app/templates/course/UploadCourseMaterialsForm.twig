@@ -29,8 +29,7 @@
             handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath);
         }
         $(function() {
-            $("#submit").click(function(e){ // Submit button
-
+            $("#submit_materials").click(function(e){ // Submit button
                 var cb = $("input#expand_zip_checkbox");
                 var expandZip = 'off';
                 if (cb.is(":checked")) {
@@ -57,5 +56,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" id="submit" type="submit" value="Submit" />
+    <input class="btn btn-primary" id="submit_materials" type="submit" value="Submit" />
 {% endblock %}
