@@ -11,6 +11,7 @@ def up(config):
     daemonphp_group = config.submitty_users['daemonphp_group']
     daemonphp_gid = grp.getgrnam(daemonphp_group).gr_gid
 
+    # -r--r-----  1 root submitty_daemonphp     email.json
     os.chown(str(email_json),0,daemonphp_gid)
     os.chmod(str(email_json),0o440)
 
