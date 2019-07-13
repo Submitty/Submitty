@@ -105,6 +105,7 @@ class TestForum(BaseTestCase):
                 categories.append(element.text.strip())
             return {'categories': categories}
         div.click()
+        self.wait_after_ajax()
         thread_title = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h2[contains(string(),'{}')]".format(title))
         assert len(thread_title) > 0
         thread_title_with_id = thread_title[0].text.strip()

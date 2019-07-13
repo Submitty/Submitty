@@ -17,7 +17,8 @@ class NotificationView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildUrl(['component' => 'notification', 'page' => 'notifications']));
         $this->core->getOutput()->addBreadcrumb("Notification Settings");
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
-            'notification_saves' => $notification_saves
+            'notification_saves' => $notification_saves,
+            'email_enabled' => $this->core->getConfig()->isEmailEnabled()
         ]);
     }
 }
