@@ -1,0 +1,59 @@
+<div class="content">
+    <h2>New Course -- Work In Progress</h2>
+
+    <form id="course-creation-form" action="{{ course_creation_url }}"
+          method="post" enctype="multipart/form-data">
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_semester">
+                    <div class="option-title">Semester</div>
+                    <div class="option-alt">What is the semester of the new course? <p style="color:red">(Required)</p></div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <textarea name='semester' id='course_semester' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea>
+            </div>
+        </div>
+
+
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_title">
+                    <div class="option-title">Title</div>
+                    <div class="option-alt">What is the title of the new course? <p style="color:red">(Required)</p></div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea>
+            </div>
+        </div>
+
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="base_course">
+                    <div class="option-title">Base Course</div>
+                    <div class="option-alt">What course is the new course based on?
+                        Note that graders with access to the base course is able to see the content of the new course as well.
+                        <p style="color:red">(Required)</p></div>
+                </label>
+            </div>
+
+            <div class="option-input col-md-6">
+                <select name="base_course" id="base_courses" class="auto_save">
+                    {% for course in base_courses %}
+                        <option value="{{ course.getSemester }}|{{ course.getTitle() }}">
+                            {{ course.getSemester() }}.{{ course.getTitle() }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="head_instructor" value="{{ head_instructor }}" />
+
+        <div class="row">
+            <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Course</button>
+        </div>
+    </form>
+</div>

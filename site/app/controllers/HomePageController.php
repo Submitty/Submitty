@@ -134,24 +134,58 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * @Route("/home/new_course", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})
      */
     public function createCourse() {
+        // TODO: access control
         $semester = $_POST['semester'];
-        $course = $_POST['course'];
+        $course_title = $_POST['course_title'];
         $head_instructor = $_POST['head_instructor'];
-        $base_course = $_POST['base_course'];
+        if (isset($_POST['base_course'])) {
+            $exploded_course = explode('|', $_POST['base_course']);
+            $base_course_semester = $exploded_course[0];
+            $base_course_title = $exploded_course[1];
+        }
+        else {
+            $base_course_semester = $_POST['base_course_semester'];
+            $base_course_title = $_POST['base_course_title'];
+        }
 
         $json = [
             "job" => 'CreateCourse',
             'semester' => $semester,
-            'course' => $course,
+            'course' => $course_title,
             'head_instructor' => $head_instructor,
-            'base_course' => $base_course
+            'base_course_semester' => $base_course_semester,
+            'base_course_title' => $base_course_title
         ];
 
         $json = json_encode($json, JSON_PRETTY_PRINT);
-        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course . '.json', $json);
+        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
+
+        return new Response(
+            JsonResponse::getSuccessResponse(null),
+            null,
+            new RedirectResponse($this->core->buildNewUrl(['home']))
+        );
+    }
+
+    /**
+     * @Route("/home/new_course", methods={"GET"})
+     */
+    public function createCoursePage() {
+        $courses = $this->getCourses();
+
+        return new Response(
+            null,
+            new WebResponse(
+                ['HomePage'],
+                'showCourseCreationPage',
+                $courses,
+                $this->core->getUser()->getId()
+            )
+        );
     }
 
     private function getCourses() {

@@ -303,7 +303,7 @@ class BulkUpload(CourseJob):
 # pylint: disable=abstract-method
 class CreateCourse(AbstractJob):
     def validate_job_details(self):
-        for key in ['semester', 'course', 'head_instructor', 'base_course']:
+        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
             if key not in self.job_details or self.job_details[key] is None:
                 return False
             if self.job_details[key] in ['', '.', '..']:
@@ -316,7 +316,10 @@ class CreateCourse(AbstractJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
         head_instructor = self.job_details['head_instructor']
-        base_group = self.job_details['base_course'] + "_tas_www"
+        base_course_semester = self.job_details['base_course_semester']
+        base_course_title = self.job_details['base_course_title']
+
+        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
 
         log_file_path = Path(DATA_DIR, 'logs', 'course_creation', 'course_creation_{}_{}_{}_{}.txt'.format(
             semester, course, head_instructor, base_group
