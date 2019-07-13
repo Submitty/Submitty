@@ -110,7 +110,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/api/courses")
+     * @Route("/api/courses", methods={"GET"})
      * @return Response
      */
     public function getApiCourses() {
@@ -131,6 +131,27 @@ class HomePageController extends AbstractController {
                 )
             ])
         );
+    }
+
+    /**
+     * @Route("/api/courses", methods={"POST"})
+     */
+    public function createCourse() {
+        $semester = $_POST['semester'];
+        $course = $_POST['course'];
+        $head_instructor = $_POST['head_instructor'];
+        $base_course = $_POST['base_course'];
+
+        $json = [
+            "job" => 'CreateCourse',
+            'semester' => $semester,
+            'course' => $course,
+            'head_instructor' => $head_instructor,
+            'base_course' => $base_course
+        ];
+
+        $json = json_encode($json, JSON_PRETTY_PRINT);
+        file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course . '.json', $json);
     }
 
     private function getCourses() {

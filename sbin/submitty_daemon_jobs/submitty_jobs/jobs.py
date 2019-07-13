@@ -298,3 +298,28 @@ class BulkUpload(CourseJob):
             pass
 
         os.chdir(current_path)
+
+
+# pylint: disable=abstract-method
+class CreateCourse(AbstractJob):
+    def validate_job_details(self):
+        for key in ['semester', 'course', 'head_instructor', 'base_course']:
+            if key not in self.job_details or self.job_details[key] is None:
+                return False
+            if self.job_details[key] in ['', '.', '..']:
+                return False
+            if self.job_details[key] != os.path.basename(self.job_details[key]):
+                return False
+        return True
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        head_instructor = self.job_details['head_instructor']
+        base_group = self.job_details['base_course'] + "_tas_www"
+
+        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', 'course_creation.txt')
+
+        with log_file_path.open("w") as output_file:
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser.py", "--course", semester, course, "null", head_instructor], input="\n\n\n\n", encoding='ascii', stdout=output_file, stderr=output_file)

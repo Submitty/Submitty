@@ -256,6 +256,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -295,6 +296,9 @@ chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emai
 
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
+chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/course_creation
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
