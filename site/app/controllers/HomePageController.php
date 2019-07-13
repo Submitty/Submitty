@@ -4,6 +4,7 @@ namespace app\controllers;
 
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
+use app\models\User;
 use app\libraries\Core;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
@@ -138,7 +139,14 @@ class HomePageController extends AbstractController {
      * @Route("/api/courses", methods={"POST"})
      */
     public function createCourse() {
-        // TODO: access control
+        $user = $this->core->getUser();
+        if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_FACULTY) {
+            return new Response(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+
         $semester = $_POST['semester'];
         $course_title = $_POST['course_title'];
         $head_instructor = $_POST['head_instructor'];
@@ -175,6 +183,14 @@ class HomePageController extends AbstractController {
      * @Route("/home/new_course", methods={"GET"})
      */
     public function createCoursePage() {
+        $user = $this->core->getUser();
+        if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_FACULTY) {
+            return new Response(
+                JsonResponse::getFailResponse("You don't have access to this endpoint."),
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
+        }
+
         $courses = $this->getCourses();
 
         return new Response(
