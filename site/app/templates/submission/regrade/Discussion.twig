@@ -78,9 +78,13 @@
             <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
             <input type="hidden" id="gradeable_id" name="gradeable_id" value="{{ gradeable_id }}">
             <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
-
-                <label for="reply-text-area">Write a inquiry:</label>
-                <textarea name="replyTextArea" id="reply-text-area" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ "Type Response Here" }}" required></textarea>
+            {% if grade_inquiry_status == 'none' or grade_inquiry_status == 'resolved' %}
+                {% set text_area_label_text = 'Write an inquiry:' %}
+            {% elseif grade_inquiry_status == 'pending' or grade_inquiry_status == 'pending_grading' %}
+                {% set text_area_label_text = 'Add comment to grade inquiry:' %}
+            {% endif %}
+            <label for="reply-text-area">{{ text_area_label_text }}</label>
+            <textarea name="replyTextArea" id="reply-text-area" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ "Type Response Here" }}" required></textarea>
             <div class="row" style="justify-content: flex-end">
             <div style="margin-right: auto">
             {{ self.markdown_buttons() }}
@@ -119,7 +123,13 @@
         }
     });
     $(".grade-inquiry-action-submit").click(function(event) {
+        // check double submission
+        var form = $("#reply-text-form");
+        if (form.data("submitted") === true) {
+            return;
+        }
         event.preventDefault();
+
         // if grader clicks Close Grade Inquiry button with text in text area we want to confirm that they want to close the grade inquiry
         // and ignore their response
         var text_area = $("#reply-text-area");
@@ -133,10 +143,13 @@
                 }
             }
         }
+
+        // prevent double submission
+        form.data("submitted",true);
         $.ajax({
             type: "POST",
             url: $(this).attr("formaction"),
-            data: $("#reply-text-form").serialize(),
+            data: form.serialize(),
             success: function(){
                 window.location.reload();
             }

@@ -150,7 +150,6 @@ class SubmissionController extends AbstractController {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['submitter_id'] ?? '';
-        $status = $_REQUEST['status'] ?? -1;
 
         $user = $this->core->getUser();
 
@@ -177,7 +176,6 @@ class SubmissionController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
