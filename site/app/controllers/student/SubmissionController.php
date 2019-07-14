@@ -129,8 +129,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        $can_grade = $this->core->getAccess()->canI("grading.electronic.grade", ['gradeable' => $graded_gradeable->getGradeable()]);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_grade) {
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
             return;
         }
@@ -168,8 +168,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        $can_grade = $this->core->getAccess()->canI("grading.electronic.grade", ['gradeable' => $graded_gradeable->getGradeable()]);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_grade) {
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
             return;
         }
@@ -245,8 +245,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        $can_grade = $this->core->getAccess()->canI("grading.electronic.grade", ['gradeable' => $graded_gradeable->getGradeable()]);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_grade) {
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
             return;
         }

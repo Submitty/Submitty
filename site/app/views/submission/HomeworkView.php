@@ -727,9 +727,10 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
+     * @param bool $can_inquirye
      * @return string
      */
-    public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
+    public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
 
         $this->core->getOutput()->addInternalJs('forum.js');
 
@@ -755,7 +756,7 @@ class HomeworkView extends AbstractView {
         if (!$graded_gradeable->hasSubmission()) {
             $grade_inquiry_status = "no_submission";
         }
-        else if (!$graded_gradeable->hasRegradeRequest()) {
+        else if (!$graded_gradeable->hasRegradeRequest() || !$can_inquiry) {
             $grade_inquiry_status = 'none';
         }
         elseif ($graded_gradeable->hasActiveRegradeRequest()) {
@@ -803,7 +804,8 @@ class HomeworkView extends AbstractView {
             'gradeable_id' => $graded_gradeable->getGradeableId(),
             'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-            'regrade_message' => $regrade_message
+            'regrade_message' => $regrade_message,
+            'can_inquiry' => $can_inquiry
         ]);
     }
 }
