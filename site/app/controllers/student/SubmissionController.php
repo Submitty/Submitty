@@ -129,8 +129,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        $can_grade = $this->core->getAccess()->canI("grading.electronic.grade", ['gradeable' => $graded_gradeable->getGradeable()]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_grade) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
             return;
         }
@@ -168,8 +168,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        $can_grade = $this->core->getAccess()->canI("grading.electronic.grade", ['gradeable' => $graded_gradeable->getGradeable()]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_grade) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
             return;
         }
@@ -245,8 +245,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        $can_grade = $this->core->getAccess()->canI("grading.electronic.grade", ['gradeable' => $graded_gradeable->getGradeable()]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_grade) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
             return;
         }
