@@ -74,7 +74,7 @@ def setup_db():
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData(bind=db)
-    return db,metadata
+    return db, metadata
 
 
 def construct_mail_client():
@@ -123,9 +123,10 @@ def mark_sent(email_id, db):
 
 def store_error(email_id, db, metadata, myerror):
     """Store an error string for the specified email"""
-    emails_table = Table('emails',metadata,autoload=True)
+    emails_table = Table('emails', metadata, autoload=True)
     # use bindparam to correctly handle a myerror string with single quote character
-    query = emails_table.update().where(emails_table.c.id==email_id).values(error=bindparam('b_myerror'))
+    query = emails_table.update().where(
+        emails_table.c.id == email_id).values(error=bindparam('b_myerror'))
     db.execute(query, b_myerror=myerror)
 
 
@@ -149,7 +150,7 @@ def construct_mail_string(send_to, subject, body):
 
 def send_email():
     """Send queued emails."""
-    db,metadata = setup_db()
+    db, metadata = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
     if not EMAIL_ENABLED or len(queued_emails) == 0:
