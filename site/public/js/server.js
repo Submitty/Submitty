@@ -1638,7 +1638,7 @@ function refreshOnResponseLateDays(json) {
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
+    var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
         url: url,
         type: "POST",
