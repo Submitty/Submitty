@@ -122,7 +122,7 @@ def mark_sent(email_id, db):
 
 
 def store_error(email_id, db, metadata, myerror):
-    """Store an error string for the specified email"""
+    """Store an error string for the specified email."""
     emails_table = Table('emails', metadata, autoload=True)
     # use bindparam to correctly handle a myerror string with single quote character
     query = emails_table.update().where(
