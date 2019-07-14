@@ -78,8 +78,6 @@ def setup_db():
 
 
 def construct_mail_client():
-    print ("construct mail client")
-
     """Authenticate with an SMTP server and return a reference to the connection."""
     client = smtplib.SMTP(EMAIL_HOSTNAME, EMAIL_PORT)
     # attempt to use TLS for connection, but don't require it
@@ -90,7 +88,6 @@ def construct_mail_client():
     client.ehlo()
 
     if EMAIL_USER != '' and EMAIL_PASSWORD != '':
-        print ("client login")
         client.login(EMAIL_USER, EMAIL_PASSWORD)
 
     return client
