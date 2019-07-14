@@ -1128,6 +1128,7 @@ Array.prototype.toggleElement = function(element, comparer) {
 };
 
 function clearForumFilter(){
+    window.location.hash = "all";
     var fliters_applied = [];
     $('#thread_category option, #thread_status_select option').prop('selected', false);
     updateThreads(true, null);

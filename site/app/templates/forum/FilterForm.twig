@@ -25,6 +25,12 @@
         }
 
         $( document ).ready(function() {
+
+            if(!(window.location.hash === "#filtered")){
+                console.log(window.location.hash);
+                clearForumFilter();
+            }
+
             $('#thread_category option, #thread_status_select option').mousedown(function(e) {
                 e.preventDefault();
 
@@ -38,9 +44,12 @@
                 });
 
                 if(filters_applied.length == 0){
+                    window.location.hash = "all";
                     clearForumFilter();
                 }
                 else {
+                    window.location.hash = "filtered";
+
                     $('#filter_names').empty().text(filters_applied.join(", "));
 
                     $('#forum_filters').css('display', 'inline-block');
@@ -69,7 +78,8 @@
             {% endfor %}
 
             if(filters_applied.length > 0){
-                clearForumFilter();
+
+                window.location.hash = "filtered";
 
                 $('#filter_names').empty().text(filters_applied.join(", "));
 
