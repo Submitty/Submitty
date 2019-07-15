@@ -113,6 +113,7 @@ HTML;
 
         $this->addVendorCss(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.css'));
         $this->addVendorCss(FileUtils::joinpaths('bootstrap', 'css', 'bootstrap-grid.min.css'));
+        $this->addInternalCss('colors.css');
         $this->addInternalCss('server.css');
         $this->addInternalCss('global.css');
         $this->addInternalCss('menu.css');
@@ -120,6 +121,7 @@ HTML;
         $this->addInternalCss('bootstrap.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
+
 
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
