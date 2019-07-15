@@ -28,24 +28,24 @@
         <tr class="wrapper_layout_header">
             <td class="layout_th_cell">Panel</td>
             <td class="layout_th_cell">File Type</td>
-            <td class="layout_th_cell">Upload</th>
+            <td class="layout_th_cell">Upload</td>
             <td class="layout_th_cell">Current File</td>
         </tr>
-        {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar") }}
-        {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar") }}
-        {{ self.table_file(wrapper_files, "right_sidebar.html", "Right Sidebar", "HTML", "wrapper-right", "right_sidebar") }}
-        {{ self.table_file(wrapper_files, "bottom_bar.html", "Bottom Bar", "HTML", "wrapper-bottom", "bottom_bar") }}
-        {{ self.table_file(wrapper_files, "override.css", "Custom Style", "CSS", "wrapper-css", "custom_style") }}
-        {{ self.table_file(wrapper_files, "sidebar.json", "Sidebar Links", "JSON", "wrapper-css", "sidebar_links") }}
+        {{ self.table_file(wrapper_files, "top_bar.html", "Top Bar", "HTML", "wrapper-top", "top_bar", csrf_token, upload_url, delete_url) }}
+        {{ self.table_file(wrapper_files, "left_sidebar.html", "Left Sidebar", "HTML", "wrapper-left", "left_sidebar", csrf_token, upload_url, delete_url) }}
+        {{ self.table_file(wrapper_files, "right_sidebar.html", "Right Sidebar", "HTML", "wrapper-right", "right_sidebar", csrf_token, upload_url, delete_url) }}
+        {{ self.table_file(wrapper_files, "bottom_bar.html", "Bottom Bar", "HTML", "wrapper-bottom", "bottom_bar", csrf_token, upload_url, delete_url) }}
+        {{ self.table_file(wrapper_files, "override.css", "Custom Style", "CSS", "wrapper-css", "custom_style", csrf_token, upload_url, delete_url) }}
+        {{ self.table_file(wrapper_files, "sidebar.json", "Sidebar Links", "JSON", "wrapper-css", "sidebar_links", csrf_token, upload_url, delete_url) }}
     </table>
 </div>
 
-{% macro table_file(wrapper_files, file, name, type, class, aria_labelledby_id) %}
+{% macro table_file(wrapper_files, file, name, type, class, aria_labelledby_id, csrf_token, upload_url, delete_url) %}
     <tr class="{{ class }}">
         <td id="name_{{ aria_labelledby_id }}">{{ name }}</td>
         <td id="type_{{ aria_labelledby_id }}">{{ type }}</td>
         <td>
-            <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'process_upload_html'}) }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                 <input type="hidden" name="location" value="{{ file }}">
                 <input type="file" name="wrapper_upload" aria-labelledby="name_{{ aria_labelledby_id }} type_{{ aria_labelledby_id }}">
@@ -54,7 +54,7 @@
         </td>
         <td>
             {% if wrapper_files[file] != null %}
-                <form action="{{ core.buildUrl({'component': 'admin', 'page': 'wrapper', 'action': 'delete_uploaded_html'}) }}" method="post">
+                <form action="{{ delete_url }}" method="post">
                     <input type="hidden" name="location" value="{{ file }}">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                     <input type="submit" class="btn btn-danger" value="Delete">&nbsp;
