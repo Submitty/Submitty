@@ -966,6 +966,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories')));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
