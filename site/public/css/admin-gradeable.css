@@ -1,10 +1,11 @@
+@import "colors.css";
 input[readonly] {
-    background:rgba(0,0,0,0);
+    background:var(--default-white);
     border:none;
 }
 
 input[disabled] {
-    background: #999;
+    background: var(--standard-medium-gray);
 }
 
 #gradeable-dates input[type="text"] {
@@ -60,7 +61,7 @@ select {
     padding-left: 10px;
     padding-top: 4px;
     padding-bottom: 4px;
-    background-color: green;
+    background-color: var(--standard-dark-green);
 }
 
 /* align the radio, buttons and checkboxes with labels */
@@ -97,7 +98,7 @@ input[type="radio"],input[type="checkbox"] {
 
 table#grader-history th, table#grader-history td {
     padding: 8px;
-    border: 3px solid black;
+    border: 3px solid var(--text-black);
     text-align: center;
 }
 
@@ -142,13 +143,13 @@ div.btn-container {
 }
 
 .disabled-btn{
-    background-color:#d4d4d4 ;
-    color: #5a5a5a ;
+    background-color: var(--standard-light-gray);
+    color: var(--standard-dark-gray) ;
     cursor: default;
 }
 .normal-btn{
-    background-color: #d0d0d0 ;
-    color: #111111 ;
+    background-color: var(--standard-light-gray) ;
+    color: var(--standard-gray-black);
     border:solid 1px rgba(0,0,0,0.75);
 }
 .normal-btn:hover{
@@ -156,8 +157,8 @@ div.btn-container {
 }
 
 .active-btn{
-    background-color: #008000;
-    color: #ffffff;
+    background-color: var(--standard-dark-green);
+    color: var(--default-white);
     border: none;
 }
 

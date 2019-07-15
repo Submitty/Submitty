@@ -132,7 +132,7 @@
         {% if sections|length == 0 %}
             <tbody>
                 <tr class="info">
-                    <td colspan="{{ colspan }}" style="text-align: center">No Grading To Be Done! :)</td>
+                    <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">No Grading To Be Done! :)</td>
                 </tr>
             </tbody>
         {% else %}
@@ -141,7 +141,7 @@
                 {# Section header #}
                 <tbody>
                     <tr class="info persist-header">
-                        <td colspan="{{ colspan }}" style="text-align: center">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
@@ -156,7 +156,7 @@
                         </td>
                     </tr>
                     <tr class="info">
-                        <td colspan="{{ colspan }}" style="text-align: center">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)"">
                             Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
                         </td>
                     </tr>
@@ -248,13 +248,15 @@
             <td class="option-small-input">
                 <input
                     class="option-small-box cell-grade"
-                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: #bbbbbb;" : "" }}"
+                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                        {{ component_grade.getScore() == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_grade.getScore() | default('0') }}"
                     value="{{ component_grade.getScore() | default('0') }}"
                     onclick="this.select()"
+                    onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}

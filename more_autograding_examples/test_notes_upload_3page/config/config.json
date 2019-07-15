@@ -16,7 +16,7 @@
             "test01/student_file.pdf", "test02/test_template.pdf" ]
     },
 
-    "assignment_message" : "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.<br><br>Be sure to inspect the produced sample test pdf to make sure that your notes are successfully attached to the back and that they will be legible when printed.",
+    "assignment_message" : "Prepare a 3 page, black & white, 8.5x11”, portrait orientation, max size = 3MB .pdf of notes you would like to have during the test.\n\nBe sure to inspect the produced sample test pdf to make sure that your notes are successfully attached to the back and that they will be legible when printed.",
 
     "testcases" : [
 	{
