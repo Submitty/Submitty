@@ -14,8 +14,8 @@ class ConfigurationView extends AbstractView {
             "theme_url" => $theme_url,
             "email_room_seating_url" => $email_room_seating_url,
             "manage_categories_url" => $manage_categories_url,
-            "csrf_token" => $this->core->getCsrfToken()
-
+            "csrf_token" => $this->core->getCsrfToken(),
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ]);
     }
 }

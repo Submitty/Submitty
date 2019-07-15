@@ -1,0 +1,70 @@
+{% import _self as self %} {# Required to use macros in same template #}
+{# 
+Macros
+#}
+{# Display the checkboxes for a given set of graders at a grader level #}
+{% macro display_graders(graders, reg_sections) %}
+    {% for grader in graders %}
+        <tr>
+            <th>{{ grader.getDisplayedFirstName() ~ " " ~ grader.getDisplayedLastName() ~ "(" ~ grader.getId() ~ ")" }}</th>
+            <td><input type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all" 
+				{{ grader.getGradingRegistrationSections()|length == reg_sections|length ? 'checked' : ''}} 
+				onclick="fixCheckBoxes('{{ grader.getId() }}',true);" /></td>
+            {% for section in reg_sections %}
+                <td><input type="checkbox" name="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
+				id="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
+				{{ section['sections_registration_id'] in grader.getGradingRegistrationSections() ? 'checked' : ''}} 
+				onclick="fixCheckBoxes('{{ grader.getId() }}',false);"/></td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+
+{% endmacro %}
+
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}registration-sections-form{% endblock %}
+{% block title %}Edit Registration Sections for Graders{% endblock %}
+
+{% block body %}
+<input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+{% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
+	<table id="registration_section_assignment">
+		{% if reg_sections|length > 0 %}
+			<tr>
+				<th />
+				<th>All</th>
+				{% for section in reg_sections %}
+					<th>{{ section['sections_registration_id'] }}</th>
+				{% endfor %}
+			</tr>
+			<tr>
+				<th>Instructor Graders</th>
+			</tr>
+			{{ self.display_graders(graders[1], reg_sections) }}
+			<tr>
+				<th>Full Access Graders</th>
+			</tr>
+			{{ self.display_graders(graders[2], reg_sections) }}
+			<tr>
+				<th>Limited Access Graders</th>
+			</tr>
+			{{ self.display_graders(graders[3], reg_sections) }}
+		{% elseif num_rotating_sections == 0 %}
+			<br/>
+			<p><b>Rotating Sections have not been set up yet. <br/> You can set up Rotating Sections using the "Manage Sections" option on the sidebar.</b></p>
+		{% endif %}
+	</table>
+{% else %}
+	No graders found
+{% endif %}
+{% endblock %}
+
+{% block form %}
+    <form method="post" action="{{ return_url_assign_reg_sections }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Save" />
+{% endblock %}
