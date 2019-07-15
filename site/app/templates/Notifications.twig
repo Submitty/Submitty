@@ -32,12 +32,15 @@
                                 {% endif %}
                             </td>
                             <td colspan="4">
-                                 {% set link_action = has_link ? "open_notification" : "mark_as_seen"%}
-                                <a href="{{ core.buildUrl({"component": "notification", "page": "notifications", "action": link_action, "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                {% if hasLink %}
+                                    <a href="{{ core.buildUrl({"component": "notification", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                {% endif %}
                                     <div style="height: 100%; width: 100%;">
                                         {{ notification.getNotifyContent() }}
                                     </div>
-                                </a>
+                                {% if hasLink %}
+                                    </a>
+                                {% endif %}
                             </td>
                             <td colspan="2">
                                 {{ notification.getNotifyTime() }}
