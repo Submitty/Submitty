@@ -1,3 +1,12 @@
+fieldset {
+    display: flex;
+    margin: 1em 0;
+}
+
+fieldset > * {
+    padding-right: 2em;
+}
+
 #late-day-history li {
     margin-left: 30px;
 }

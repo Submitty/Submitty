@@ -121,7 +121,7 @@ class WebRouter {
                 );
             }
         }
-        catch (ResourceNotFoundException $e) {
+        catch (ResourceNotFoundException | MethodNotAllowedException $e) {
             // redirect to login page or home page
             if (!$logged_in) {
                 return Response::RedirectOnlyResponse(
@@ -290,7 +290,7 @@ class WebRouter {
         }
 
         if ($access_control->getPermission()) {
-            $access = $this->core->getAccess()->canI($access_control->permission);
+            $access = $this->core->getAccess()->canI($access_control->getPermission());
         }
 
         return $access;
