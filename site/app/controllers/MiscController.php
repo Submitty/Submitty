@@ -6,6 +6,7 @@ namespace app\controllers;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\models\CourseMaterial;
 
 class MiscController extends AbstractController {
     public function run() {
@@ -87,10 +88,20 @@ class MiscController extends AbstractController {
                 return false;
             }
         } else {
+
+            // Check access through Access library
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
+
+            // If the user attempting to access the file is not an instructor then ensure the file has been released
+            if(!$this->core->getUser()->accessAdmin() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+            {
+                $this->core->getOutput()->showError("You may not access this file until it is released.");
+                return false;
+            }
+
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
@@ -155,8 +166,16 @@ class MiscController extends AbstractController {
                 return false;
             }
         } else {
+
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
+
+            // If the user attempting to access the file is not an instructor then ensure the file has been released
+            if(!$this->core->getUser()->accessAdmin() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+            {
+                $this->core->getOutput()->showError("You may not access this file until it is released.");
                 return false;
             }
         }

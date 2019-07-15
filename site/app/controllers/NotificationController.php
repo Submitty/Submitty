@@ -18,7 +18,10 @@ class NotificationController extends AbstractController {
         'all_new_threads',
         'all_new_posts',
         'all_modifications_forum',
-        'reply_in_post_thread',
+        'reply_in_post_thread'
+    ];
+
+	const EMAIL_SELECTIONS = [
         'merge_threads_email',
         'all_new_threads_email',
         'all_new_posts_email',
@@ -26,8 +29,14 @@ class NotificationController extends AbstractController {
         'reply_in_post_thread_email'
     ];
 
+	protected $selections;
+
 	public function __construct(Core $core) {
         parent::__construct($core);
+        $this->selections = self::NOTIFICATION_SELECTIONS;
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $this->selections = array_merge($this->selections,self::EMAIL_SELECTIONS);
+        }
     }
 
     public function run() {
@@ -88,8 +97,9 @@ class NotificationController extends AbstractController {
     public function changeSettings() {
         //Change settings for the current user...
         $new_settings = $_POST;
+
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
-            $values_not_sent = array_diff(self::NOTIFICATION_SELECTIONS, array_keys($new_settings));
+            $values_not_sent = array_diff($this->selections, array_keys($new_settings));
             foreach(array_values($values_not_sent) as $value) {
                 $new_settings[$value] = 'false';
             }
@@ -102,7 +112,7 @@ class NotificationController extends AbstractController {
     }
 
     private function validateNotificationSettings($columns) {
-        if (count($columns) <= count(NotificationController::NOTIFICATION_SELECTIONS) && count(array_intersect($columns, self::NOTIFICATION_SELECTIONS)) == count($columns)) {
+        if (count($columns) <= count($this->selections) && count(array_intersect($columns, $this->selections)) == count($columns)) {
             return true;
         }
         return false;
