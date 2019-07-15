@@ -388,14 +388,14 @@ class ForumController extends AbstractController{
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
                 // notify on a new announcement
                 if ($announcement) {
-                    $subject = "New Announcement: ".$thread_title;
+                    $subject = "New Announcement: ".Notification::textShortner($thread_title);
                     $content = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 // notify on a new thread
                 else {
-                    $subject = "New Thread: ".$thread_title;
+                    $subject = "New Thread: ".Notification::textShortner($thread_title);
                     $content = "A new thread was created in the Submitty discussion forum:\n\n".$thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewThread($event);
@@ -466,7 +466,7 @@ class ForumController extends AbstractController{
 
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
 
-                $subject = "New Reply";
+                $subject = "New Reply: ".Notification::textShortner($post_content);
                 $content = "The post, ".Notification::textShortner($parent_post_content).", got a new reply: \n\n".$post_content."\n\n in the thread, ".$thread_title;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
@@ -531,8 +531,8 @@ class ForumController extends AbstractController{
 
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
-            $subject = "A post was deleted";
-            $content = "Deleted: A thread/post '".Notification::textShortner($post["content"])."' was deleted in thread, ".$thread_title;
+            $subject = "Deleted: ".Notification::textShortner($post["content"]);
+            $content = "A thread/post '".$post["content"]."' was deleted in thread, ".$thread_title;
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
 
@@ -550,8 +550,8 @@ class ForumController extends AbstractController{
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
-                $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted in thread, ".$thread_title;
-                $subject = "A post was undeleted";
+                $subject = "Undeleted: ".Notification::textShortner($post["content"]);
+                $content = "A thread/post '".$post["content"]."' has been undeleted in thread, ".$thread_title;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
@@ -603,12 +603,12 @@ class ForumController extends AbstractController{
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 if ($type == "Post") {
                     $post_content = $_POST["thread_post_content"];
-                    $subject = "A post was edited";
+                    $subject = "Edited: ".Notification::textShortner($post_content);
                     $content = "A post in thread {$thread_title} was changed to: \n\n{$post_content}";
                 }
                 else if ($type == "Thread and Post") {
                     $post_content = $_POST["thread_post_content"];
-                    $subject = "A thread was edited";
+                    $subject = "Edited: ".Notification::textShortner($thread_title);
                     $content = "A thread was changed to {$thread_title}: \n\n{$post_content}";
                 }
 
@@ -654,8 +654,8 @@ class ForumController extends AbstractController{
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
                     $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
-                    $content = "Thread Merged: '".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
-                    $subject = "A thread was merged";
+                    $subject = "Merged: ".Notification::textShortner($child_thread_title);
+                    $content = "The thread ".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
                     $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
                     $this->core->getNotificationFactory()->onPostModified($event);
                     $this->core->addSuccessMessage("Threads merged!");
