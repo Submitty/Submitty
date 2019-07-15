@@ -10,6 +10,7 @@ use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\Notification;
 use app\models\Email;
 use app\controllers\grading\ElectronicGraderController;
@@ -1690,7 +1691,7 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
 
-    private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type){
+    private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type){
       //TODO: send notification to grader per component
       if($graded_gradeable->hasTaGradingInfo()){
           $course = $this->core->getConfig()->getCourse();
@@ -1698,33 +1699,62 @@ class SubmissionController extends AbstractController {
           $graders = $ta_graded_gradeable->getGraders();
           $submitter = $graded_gradeable->getSubmitter();
           $user_id = $this->core->getUser()->getId();
+          $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
 
           if ($type == 'new') {
               // instructor/TA/Mentor submitted
               if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A Instructor/TA/Mentor submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "An Instructor/TA/Mentor has made a new Grade Inquiry for ".$gradeable_id;
+                  $email_subject = "[Submitty $course] New Grade Inquiry";
+                  $email_body = "An Instructor/TA/Mentor submitted a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "An Instructor/TA/Mentor has made a new Grade Inquiry for ".$gradeable_title;
               }
               // student submitted
               else {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A student has submitted a new grade inquiry for ".$gradeable_id;
+                  $email_subject = "[Submitty $course] New Grade Inquiry";
+                  $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "A student has submitted a new grade inquiry for ".$gradeable_title;
               }
           } else if ($type == 'reply') {
               if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A Instructor/TA/Mentor made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A instructor has replied to your Grade Inquiry for ".$gradeable_id;
+                  $email_subject = "[Submitty $course] New Grade Inquiry Post";
+                  $email_body = "An Instructor/TA/Mentor made a post in a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "An instructor has replied to your Grade Inquiry for ".$gradeable_title;
               }
               // student submitted
               else {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A student has made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "New reply in Grade Inquiry for ".$gradeable_id;
+                  $email_subject = "[Submitty $course] New Grade Inquiry Post";
+                  $email_body = "A student has made a post in a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "New reply in Grade Inquiry for ".$gradeable_title;
               }
 
+          } else if ($type == 'resolved' ) {
+              if ($this->core->getUser()->accessGrading()) {
+                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
+                  $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
+                  $email_body = "An Instructor/TA/Mentor has resolved your grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "An instructor has resolved your Grade Inquiry for ".$gradeable_title;
+              }
+              // student submitted
+              else {
+                  $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
+                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
+                  $email_body = "A student has cancelled a grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "A student has cancelled a grade inquiry for gradeable".$gradeable_title;
+              }
+          } else if ($type == 'reopen') {
+              if ($this->core->getUser()->accessGrading()) {
+                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
+                  $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
+                  $email_body = "An Instructor/TA/Mentor has reopened your grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "An instructor has reopened your grade inquiry for ".$gradeable_title;
+              }
+              // student submitted
+              else {
+                  $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
+                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
+                  $email_body = "A student has reopened a grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
+                  $n_content = "A student has reopened a grade inquiry for gradeable ".$gradeable_title;
+              }
           }
 
           // make graders' notifications and emails
