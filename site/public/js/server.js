@@ -275,7 +275,7 @@ function newUserForm() {
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
-    form[0].outerHTML = json['popup'];
+    form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
 }
 
@@ -1549,7 +1549,7 @@ function enableTabsInTextArea(jQuerySelector) {
 
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
+    var url = buildNewCourseUrl(['extensions', 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1599,7 +1599,7 @@ function updateHomeworkExtensions(data) {
 }
 
 function loadHomeworkExtensions(g_id, due_date) {
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    var url = buildNewCourseUrl(['extensions', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
