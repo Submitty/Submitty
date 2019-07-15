@@ -93,7 +93,7 @@ class HomePageController extends AbstractController {
      * @Route("/api/courses", methods={"GET"})
      * @Route("/api/courses/{user_id}", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
-     * @Route("/home/courses/{user_id}", methods={"GET"}, requirements={"user_id": "^(?!new)"})
+     * @Route("/home/courses/{user_id}", methods={"GET"}, requirements={"user_id": "^(?!new)[^\/]+"})
      * @return Response
      */
     public function getCourses($user_id = null) {
