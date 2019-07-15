@@ -28,6 +28,30 @@
             </div>
         </div>
 
+        {% if is_superuser %}
+            <div class="option row">
+                <div class="option-desc col-md-6">
+                    <label for="head_instructor">
+                        <div class="option-title">Head Instructor</div>
+                        <div class="option-alt">Who is the head instructor?
+                            <p style="color:red">(Required)</p></div>
+                    </label>
+                </div>
+
+                <div class="option-input col-md-6">
+                    <select name="head_instructor" id="head_instructor" class="auto_save">
+                        {% for instructor in faculty %}
+                            <option value="{{ instructor.getId() }}">
+                                {{ instructor.getId() }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        {% else %}
+            <input type="hidden" name="head_instructor" id="head_instructor" value="{{ head_instructor }}" />
+        {% endif %}
+
         <div class="option row">
             <div class="option-desc col-md-6">
                 <label for="base_course">
@@ -39,21 +63,37 @@
             </div>
 
             <div class="option-input col-md-6">
-                <select name="base_course" id="base_courses" class="auto_save">
-                    {% for course in base_courses %}
-                        <option value="{{ course.getSemester }}|{{ course.getTitle() }}">
-                            {{ course.getSemester() }}.{{ course.getTitle() }}
-                        </option>
-                    {% endfor %}
-                </select>
+                <select name="base_course" id="base_courses" class="auto_save"></select>
             </div>
         </div>
 
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <input type="hidden" name="head_instructor" value="{{ head_instructor }}" />
 
         <div class="row">
             <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Course</button>
         </div>
     </form>
 </div>
+
+<script type="text/javascript">
+    function onHeadInstructorChange() {
+        let headInstructor = $('#head_instructor').val();
+        $.ajax({
+            type: "GET",
+            url: buildNewUrl(['home', 'courses', headInstructor]),
+            success: function(data) {
+                let json = JSON.parse(data);
+                let courses = json['data']['unarchived_courses'].concat(json['data']['archived_courses']);
+                $('#base_courses').find('option').remove();
+                $.each(courses, (i, val) => {
+                    $('#base_courses').append(`<option value="${val['semester']}|${val['title']}">${val['semester']}.${val['title']}`)
+                })
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        onHeadInstructorChange();
+        $('[name="head_instructor"]').change(onHeadInstructorChange);
+    });
+</script>

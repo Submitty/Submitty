@@ -66,7 +66,7 @@ class GlobalController extends AbstractController {
             }
             elseif ($this->core->getUser()->accessFaculty()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildNewUrl(['home', 'new_course']),
+                    "href" => $this->core->buildNewUrl(['home', 'courses', 'new']),
                     "title" => "New Course",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-new-course",

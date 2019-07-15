@@ -89,13 +89,57 @@ class HomePageController extends AbstractController {
     }
 
     /**
+     * @param $user_id
+     * @Route("/api/courses", methods={"GET"})
+     * @Route("/api/courses/{user_id}", methods={"GET"})
+     * @Route("/home/courses", methods={"GET"})
+     * @Route("/home/courses/{user_id}", methods={"GET"}, requirements={"user_id": "^(?!new)[^\/]+"})
+     * @return Response
+     */
+    public function getCourses($user_id = null) {
+        $user = $this->core->getUser();
+        if (is_null($user_id) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+            $user_id = $user->getId();
+        }
+        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user_id);
+        $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user_id);
+
+        // Filter out any courses a student has dropped so they do not appear on the homepage.
+        // Do not filter courses for non-students.
+
+        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user_id) {
+            return $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
+        });
+        $archived_courses = array_filter($archived_courses, function(Course $course) use($user_id) {
+            return $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
+        });
+
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse([
+                "unarchived_courses" => array_map(
+                    function(Course $course) {
+                        return $course->getCourseInfo();
+                    },
+                    $unarchived_courses
+                ),
+                "archived_courses" => array_map(
+                    function(Course $course) {
+                        return $course->getCourseInfo();
+                    },
+                    $archived_courses
+                )
+            ])
+        );
+    }
+
+    /**
      * Display the HomePageView to the student.
      *
      * @Route("/home")
      * @return Response
      */
     public function showHomepage() {
-        $courses = $this->getCourses();
+        $courses = $this->getCourses()->json_response->json;
 
         return new Response(
             null,
@@ -103,39 +147,15 @@ class HomePageController extends AbstractController {
                 ['HomePage'],
                 'showHomePage',
                 $user = $this->core->getUser(),
-                $courses["unarchived_courses"],
-                $courses["archived_courses"],
+                $courses["data"]["unarchived_courses"],
+                $courses["data"]["archived_courses"],
                 $this->core->getConfig()->getUsernameChangeText()
             )
         );
     }
 
     /**
-     * @Route("/api/courses", methods={"GET"})
-     * @return Response
-     */
-    public function getApiCourses() {
-        $courses = $this->getCourses();
-        return new Response(
-            JsonResponse::getSuccessResponse([
-                "unarchived_courses" => array_map(
-                    function(Course $course) {
-                        return $course->getCourseInfo();
-                    },
-                    $courses["unarchived_courses"]
-                ),
-                "archived_courses" => array_map(
-                    function(Course $course) {
-                        return $course->getCourseInfo();
-                    },
-                    $courses["archived_courses"]
-                )
-            ])
-        );
-    }
-
-    /**
-     * @Route("/home/new_course", methods={"POST"})
+     * @Route("/home/courses/new", methods={"POST"})
      * @Route("/api/courses", methods={"POST"})
      */
     public function createCourse() {
@@ -150,6 +170,27 @@ class HomePageController extends AbstractController {
         $semester = $_POST['semester'];
         $course_title = $_POST['course_title'];
         $head_instructor = $_POST['head_instructor'];
+
+        if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
+            $error = "You can only create course for yourself.";
+            $this->core->addErrorMessage($error);
+            return new Response(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildNewUrl(['home']))
+            );
+        }
+
+        if (empty($this->core->getQueries()->getSubmittyUser($head_instructor))) {
+            $error = "Head instructor doesn't exist.";
+            $this->core->addErrorMessage($error);
+            return new Response(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildNewUrl(['home']))
+            );
+        }
+
         if (isset($_POST['base_course'])) {
             $exploded_course = explode('|', $_POST['base_course']);
             $base_course_semester = $exploded_course[0];
@@ -172,6 +213,7 @@ class HomePageController extends AbstractController {
         $json = json_encode($json, JSON_PRETTY_PRINT);
         file_put_contents('/var/local/submitty/daemon_job_queue/create_' . $semester . '_' . $course_title . '.json', $json);
 
+        $this->core->addSuccessMessage("Course creation request successfully sent.\n Please refresh the page later.");
         return new Response(
             JsonResponse::getSuccessResponse(null),
             null,
@@ -180,7 +222,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/new_course", methods={"GET"})
+     * @Route("/home/courses/new", methods={"GET"})
      */
     public function createCoursePage() {
         $user = $this->core->getUser();
@@ -191,37 +233,18 @@ class HomePageController extends AbstractController {
             );
         }
 
-        $courses = $this->getCourses();
+        if ($user->getAccessLevel() === User::LEVEL_SUPERUSER) {
+            $faculty = $this->core->getQueries()->getAllFaculty();
+        }
 
         return new Response(
             null,
             new WebResponse(
                 ['HomePage'],
                 'showCourseCreationPage',
-                $courses,
+                $faculty ?? null,
                 $this->core->getUser()->getId()
             )
         );
-    }
-
-    private function getCourses() {
-        $user = $this->core->getUser();
-        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user->getId());
-        $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user->getId());
-
-        // Filter out any courses a student has dropped so they do not appear on the homepage.
-        // Do not filter courses for non-students.
-
-        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user) {
-            return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
-        });
-        $archived_courses = array_filter($archived_courses, function(Course $course) use($user) {
-            return $this->core->getQueries()->checkStudentActiveInCourse($user->getId(), $course->getTitle(), $course->getSemester());
-        });
-
-        return [
-            "unarchived_courses" => $unarchived_courses,
-            "archived_courses" => $archived_courses
-        ];
     }
 }

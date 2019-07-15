@@ -74,13 +74,13 @@ class HomePageView extends AbstractView {
         ]);
     }
 
-    public function showCourseCreationPage($courses, $head_instructor) {
-        $base_courses = array_merge($courses['unarchived_courses'], $courses['archived_courses']);
+    public function showCourseCreationPage($faculty, $head_instructor) {
         return $this->core->getOutput()->renderTwigTemplate('CreateCourseForm.twig', [
             "csrf_token" => $this->core->getCsrfToken(),
-            "base_courses" => $base_courses,
             "head_instructor" => $head_instructor,
-            "course_creation_url" => $this->core->buildNewUrl(['home', 'new_course'])
+            "faculty" => $faculty,
+            "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
+            "course_creation_url" => $this->core->buildNewUrl(['home', 'courses', 'new'])
         ]);
     }
 }
