@@ -389,14 +389,14 @@ class ForumController extends AbstractController{
                 // notify on a new announcement
                 if ($announcement) {
                     $subject = "New Announcement: ".Notification::textShortner($thread_title);
-                    $content = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread_post_content;
+                    $content = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n"."$thread_title: \n".$thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 // notify on a new thread
                 else {
                     $subject = "New Thread: ".Notification::textShortner($thread_title);
-                    $content = "A new thread was created in the Submitty discussion forum:\n\n".$thread_post_content;
+                    $content = "A new thread was created in the Submitty discussion forum:\n\n"."$thread_title: \n".$thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
