@@ -6,20 +6,25 @@
 <div class="content">
     <form method="post" action="{{ core.buildUrl({'component': 'notification', 'page': 'alter_notification_settings'}) }}" id="form_notification_settings">
         <div id="config">
-            <div><h1>Notification/Email Settings</h1></div>
+            {% if email_enabled %}
+                {% set header = "Notification/Email Settings" %}
+            {% else %}
+                {% set header = "Notification Settings" %}
+            {% endif %}
+            <div><h1>{{ header }}</h1></div>
             <div class="row">
                 <div class="heading col-md-4">
                 </div>
                 <div class="heading col-md-3">
                     <h2>Notification Settings</h2>
                 </div>
-                <div class="heading col-md-5">
-                    <h2>Email Settings (work in progress)</h2>
-                </div>
+                {% if email_enabled %}
+                    <div class="heading col-md-5">
+                        <h2>Email Settings</h2>
+                    </div>
+                {% endif %}
 
             </div>
-
-
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -28,8 +33,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
-
-                <div class="option-input col-md-5"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
+                {% endif %}
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -39,8 +45,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
-
-                <div class="option-input col-md-5"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
+                {% endif %}
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -50,8 +57,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" disabled="true" checked></div>
-
-                <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" disabled checked></div>
+                {% endif %}
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -61,10 +69,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
-
-                <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
-
-
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -74,10 +81,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
-
-                <div class="option-input col-md-5"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
-
-
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -87,10 +93,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
-
-                <div class="option-input col-md-5"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
-
-
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
             <div class="option row">
                 <div class="option-desc col-md-4">
@@ -101,10 +106,9 @@
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
 
-
-                <div class="option-input col-md-5"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
-
-
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
             {% if core.getUser().accessFullGrading() %}
                 <div class="option row">
@@ -115,10 +119,9 @@
                         </label>
                     </div>
                     <div class="option-input col-md-3"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
-
-                    <div class="option-input col-md-5"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
-
-
+                    {% if email_enabled %}
+                        <div class="option-input col-md-5"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
+                    {% endif %}
                 </div>
             {% endif %}
         </div>

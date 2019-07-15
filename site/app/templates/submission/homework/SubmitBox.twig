@@ -318,22 +318,22 @@
                                 {% if cell.allow_multiple == true %}
                                     <input type="checkbox"
                                            name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                            value="{{ choice.value }}"
                                            onclick="handle_input_keypress();" />
 
-                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         {{ choice.description | markdown }}
                                     </label>
 
                                 {% else %}
                                     <input type="radio"
                                            name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                            value="{{ choice.value }}"
                                            onclick="handle_input_keypress();" />
 
-                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         {{ choice.description | markdown }}
                                     </label>
 

@@ -126,6 +126,19 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             }
         }
         FileUtils::writeJsonFile($this->course_json_path, $config);
+
+        // Create psuedo email json
+        $config = array(
+            'email_enabled' => true,
+            'email_user' => '',
+            'email_password' => '',
+            'email_sender' => 'submitty@myuniversity.edu',
+            'email_reply_to'=> 'submitty_do_not_reply@myuniversity.edu',
+            'email_server_hostname' => 'localhost',
+            'email_server_port' => 25
+        );
+        $config = array_replace($config,$extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
     }
 
     public function testConfig() {
@@ -255,6 +268,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'wrapper_files' => [],
             'system_message' => 'Some system message',
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
+            'email_enabled' => true,
             'auto_rainbow_grades' => false
         );
         $actual = $config->toArray();
@@ -378,6 +392,15 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Error parsing the config file: Syntax error');
         $config->loadCourseJson(FileUtils::joinPaths($this->temp_dir, "test.txt"));
+    }
+
+    public function testMissingEmailJson() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
+        $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessageRegExp('/Could not find email config: .*\/config\/email.json/');
+        $config->loadMasterConfigs($this->config_path);
     }
 
     public function getRequiredSections() {
