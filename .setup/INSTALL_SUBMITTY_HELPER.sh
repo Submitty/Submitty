@@ -606,6 +606,15 @@ cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/
 
 ################################################################################################################
 ################################################################################################################
+# Allow course creation by daemon
+#############################################################
+
+cat ${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers | envsubst | cat - > /etc/sudoers.d/submitty
+chmod 0440 /etc/sudoers.d/submitty
+chown root:root /etc/sudoers.d/submitty
+
+################################################################################################################
+################################################################################################################
 # INSTALL & START GRADING SCHEDULER DAEMON
 #############################################################
 # stop the any of the submitty daemons (if they're running)
