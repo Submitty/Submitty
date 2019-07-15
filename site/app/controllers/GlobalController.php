@@ -87,7 +87,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                    "href" => $this->core->buildNewCourseUrl(['config']),
                     "title" => "Course Settings",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-settings",
