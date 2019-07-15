@@ -95,11 +95,15 @@ class MiscController extends AbstractController {
                 return false;
             }
 
-            // If the user attempting to access the file is not an instructor then ensure the file has been released
-            if(!$this->core->getUser()->accessAdmin() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+            // If attempting to obtain course materials
+            if($dir == 'course_materials')
             {
-                $this->core->getOutput()->showError("You may not access this file until it is released.");
-                return false;
+                // If the user attempting to access the file is not at least a grader then ensure the file has been released
+                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                {
+                    $this->core->getOutput()->showError("You may not access this file until it is released.");
+                    return false;
+                }
             }
 
         }
@@ -172,11 +176,15 @@ class MiscController extends AbstractController {
                 return false;
             }
 
-            // If the user attempting to access the file is not an instructor then ensure the file has been released
-            if(!$this->core->getUser()->accessAdmin() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+            // If attempting to obtain course materials
+            if($dir == 'course_materials')
             {
-                $this->core->getOutput()->showError("You may not access this file until it is released.");
-                return false;
+                // If the user attempting to access the file is not at least a grader then ensure the file has been released
+                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                {
+                    $this->core->getOutput()->showError("You may not access this file until it is released.");
+                    return false;
+                }
             }
         }
 

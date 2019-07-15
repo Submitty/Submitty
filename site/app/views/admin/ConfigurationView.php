@@ -11,7 +11,7 @@ class ConfigurationView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("admin/Configuration.twig", [
             "fields" => $fields,
             "gradeable_seating_options" => $gradeable_seating_options,
-            "theme_url" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper')),
+            "theme_url" => $this->core->buildNewCourseUrl(['theme']),
             "email_room_seating_url" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'email_room_seating')),
             "manage_categories_url" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories')),
             "csrf_token" => $this->core->getCsrfToken(),
