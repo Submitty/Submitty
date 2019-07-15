@@ -121,7 +121,7 @@ class WebRouter {
                 );
             }
         }
-        catch (ResourceNotFoundException $e) {
+        catch (ResourceNotFoundException | MethodNotAllowedException $e) {
             // redirect to login page or home page
             if (!$logged_in) {
                 return Response::RedirectOnlyResponse(
