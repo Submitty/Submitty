@@ -398,6 +398,7 @@ class ElectronicGraderController extends GradingController {
             $overall_scores=$order->getSortedGradedGradeables();
             $num_components = count($gradeable->getNonPeerComponents());
             $viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedGradeBySections($gradeable, $sections);
+            //var_dump($this->core->getQueries()->getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections));
         }
         $sections = array();
         //Either # of teams or # of students (for non-team assignments). Either case

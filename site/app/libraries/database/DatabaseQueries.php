@@ -1109,6 +1109,32 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return intval($this->course_db->row()['cnt']);
     }
 
+    public function getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections) {
+        $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+
+        $params = array($gradeable->getId());
+
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query= "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $params = array_merge($sections, $params);
+        }
+
+        $this->course_db->query("
+            SELECT COUNT(*) as cnt
+            FROM teams AS tm
+            INNER JOIN (
+                SELECT u.team_id, u.{$grade_type}_section FROM gradeable_teams AS u
+                WHERE u.{$sections_query} and u.g_id = ?
+            ) AS u
+            ON tm.team_id=u.team_id
+            WHERE tm.last_viewed_time IS NOT NULL
+        ", $params);
+
+        return intval($this->course_db->row()['cnt']);
+    }
+    
+
     public function getNumUsersGraded($g_id) {
         $this->course_db->query("
 SELECT COUNT(*) as cnt FROM gradeable_data
