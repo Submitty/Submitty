@@ -140,7 +140,7 @@ class HomePageController extends AbstractController {
      */
     public function createCourse() {
         $user = $this->core->getUser();
-        if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_FACULTY) {
+        if (is_null($user) || !$user->accessFaculty()) {
             return new Response(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")
@@ -184,7 +184,7 @@ class HomePageController extends AbstractController {
      */
     public function createCoursePage() {
         $user = $this->core->getUser();
-        if (is_null($user) || $user->getAccessLevel() !== User::LEVEL_FACULTY) {
+        if (is_null($user) || !$user->accessFaculty()) {
             return new Response(
                 JsonResponse::getFailResponse("You don't have access to this endpoint."),
                 new WebResponse("Error", "errorPage", "You don't have access to this page.")

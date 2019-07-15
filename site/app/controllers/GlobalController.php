@@ -64,7 +64,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-star"
                 ]);
             }
-            elseif ($this->core->getUser()->getAccessLevel() === User::LEVEL_FACULTY) {
+            elseif ($this->core->getUser()->accessFaculty()) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "href" => $this->core->buildNewUrl(['home', 'new_course']),
                     "title" => "New Course",
