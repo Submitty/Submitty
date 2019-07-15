@@ -293,7 +293,8 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
 }
 
 
-function changeDisplayOptions(option, thread_id){
+function changeDisplayOptions(option){
+    thread_id = $('#current-thread').val();
     document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
