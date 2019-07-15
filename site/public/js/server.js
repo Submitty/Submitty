@@ -1634,13 +1634,14 @@ function refreshOnResponseOverridenGrades(json) {
     var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
     $('#title').replaceWith(title);
     if(json['data']['users'].length === 0){
-        $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
+        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+    } else {
+        json['data']['users'].forEach(function(elem){
+            var delete_button = "<a onclick=\"deleteOverridenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#my_table').append(bits.join('</td><td>'));
+        });
     }
-    json['data']['users'].forEach(function(elem){
-        var delete_button = "<a onclick=\"deleteOverridenGrades('"+elem['user_id']+"', '"+json['data']['gradeable_id']+"');\"><i class='fas fa-trash'></i></a>"
-        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
-        $('#my_table').append(bits.join('</td><td>'));
-    });
 }
 
 function updateLateDays(data) {
