@@ -1669,6 +1669,14 @@ ul.bare-list {
     text-align: left !important;
 }
 
+.bare-button {
+    border: none;
+    padding: 0;
+    font-size: 1em;
+    background: unset;
+    color: unset;
+}
+
 @media (min-width: 541px) {
     .content {
     margin: 30px;
