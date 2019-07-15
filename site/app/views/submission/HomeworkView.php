@@ -350,7 +350,16 @@ class HomeworkView extends AbstractView {
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
 
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'clike', 'clike.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'python', 'python.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'mode', 'shell', 'shell.js'));
+
         $DATE_FORMAT = "m/d/Y @ h:i A";
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
@@ -474,9 +483,9 @@ class HomeworkView extends AbstractView {
         }
 
         for ($i = 0; $i < count($files); $i++) {
-            if($bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
                 continue;
-            }else if($bulk_upload_data['is_qr']){
+            }else if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
                 $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
 
@@ -484,14 +493,25 @@ class HomeworkView extends AbstractView {
             $is_valid = true;
             $id = '';
 
-            if($bulk_upload_data['is_qr']){
-                $id = $data['id'];
-                $is_valid = $this->core->getQueries()->getUserById($id);
-                $page_count = $data['page_count'];
+            //decoded.json may be read before the assoicated data is written, check if key exists first
+            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+                if(array_key_exists('id', $data)){
+                    $id = $data['id'];
+                    $is_valid = $this->core->getQueries()->getUserById($id);
+                }else{
+                    //set the blank id as invalid for now, after a page refresh it will recorrect
+                    $id = '';
+                    $is_valid = false;
+                }
+                if(array_key_exists('page_count', $data)){
+                    $page_count = $data['page_count'];
+                }
             }else{
                 $is_valid = true;
                 $id = '';
-                $page_count = $bulk_upload_data['page_count'];
+                if(array_key_exists('page_count', $bulk_upload_data)){
+                    $page_count = $bulk_upload_data['page_count'];
+                }
             }
 
             $files[$i] += ['page_count' => $page_count, 
@@ -647,6 +667,8 @@ class HomeworkView extends AbstractView {
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
+            'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),
+            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails(),
             'has_manual_grading' => $gradeable->isTaGrading(),
             // TODO: change this to submitter ID when the MiscController uses new model
             'user_id' => $this->core->getUser()->getId(),
@@ -661,7 +683,6 @@ class HomeworkView extends AbstractView {
             'versions' => $version_data,
             'total_points' => $autograding_config->getTotalNonHiddenNonExtraCredit(),
             'allowed_late_days' => $gradeable->getLateDays(),
-
             'ta_grades_released' => $gradeable->isTaGradeReleased(),
             'is_vcs' => $gradeable->isVcs(),
             'can_download' => $can_download,
@@ -673,6 +694,7 @@ class HomeworkView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken()
         ]);
 
+        $this->core->getOutput()->addInternalJs('confetti.js');
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionBox.twig', $param);
     }
 
@@ -710,6 +732,9 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable): string {
+
+        $this->core->getOutput()->addInternalJs('forum.js');
+
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         if (!$graded_gradeable->hasRegradeRequest() && !$this->core->getUser()->accessGrading()) {
             $btn_type = 'request';

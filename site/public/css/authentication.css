@@ -1,0 +1,45 @@
+#login-box {
+    flex-grow: 0;
+}
+
+#login-box h1 {
+    margin: 0 0 20px !important;
+}
+
+#login {
+    margin: 0;
+}
+
+#login > * {
+    margin-bottom: 1em;
+    width: 100%;
+    font-size: 1.1em;
+}
+
+#login label {
+    display: flex;
+    align-items: center;
+}
+
+#login input[type="text"],
+#login input[type="password"] {
+    padding: 1.1em;
+}
+
+#login input[type="submit"] {
+    padding: 0.5em 1em;
+}
+
+@media (min-width: 768px) {
+    #login-box {
+        margin: 30px auto;
+        min-width: 450px;
+        width: 30%;
+        height: fit-content;
+        height: -moz-fit-content;    
+    }
+
+    #login input[type="submit"] {
+        width: auto;
+    }
+}

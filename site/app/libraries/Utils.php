@@ -286,4 +286,33 @@ class Utils {
         }
         return $students;
    }
+
+   /**
+    * Convert the shorthand byte notation in php.ini to bytes.
+    * E.g : php returnBytes(ini_get('post_max_size'))
+    * Src : https://www.php.net/manual/en/function.ini-get.php
+    * @param string $size_str
+    * @return int 
+    */
+    public static function returnBytes ($size_str){
+        switch (substr ($size_str, -1)){
+            case 'M': case 'm': return (int)$size_str * 1048576;
+            case 'K': case 'k': return (int)$size_str * 1024;
+            case 'G': case 'g': return (int)$size_str * 1073741824;
+            default: return $size_str;
+        }
+    }
+
+    /**
+    * Convert bytes to a specified format thats human readable 
+    * E.g : MB, 10485760 => 10MB
+    * @param string $format
+    * @param int $bytes
+    * @return string
+    */
+    public static function formatBytes($format, $bytes){
+        $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
+        return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
+    }
+
 }

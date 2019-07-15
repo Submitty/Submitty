@@ -106,7 +106,9 @@ class AutoGradingView extends AbstractView {
             "has_badges" => $has_badges,
             'testcases' => $testcase_array,
             'is_ta_grade_released' => $gradeable->isTaGradeReleased(),
-            'display_version' => $version_instance->getVersion()
+            'display_version' => $version_instance->getVersion(),
+            'is_ta_grading' => $gradeable->isTaGrading(),
+            'hide_version_and_test_details' => $gradeable->getAutogradingConfig()->getHideVersionAndTestDetails()
         ]);
     }
 
@@ -222,13 +224,15 @@ class AutoGradingView extends AbstractView {
             $diff_viewer->destroyViewer();
         }
 
+        $popup_css_file = $this->core->getOutput()->timestampResource($popup_css_file, 'css');
+
         return $this->core->getOutput()->renderTwigTemplate("autograding/AutoChecks.twig", [
             "gradeable_id" => $gradeable->getId(),
             "checks" => $checks,
             "display_version" => $version->getVersion(),
             "index" => $testcase->getTestcase()->getIndex(),
             "who" => $who,
-            "popup_css_file" => $popup_css_file,
+            "popup_css_file" => $popup_css_file
         ]);
     }
 

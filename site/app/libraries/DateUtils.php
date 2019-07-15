@@ -96,6 +96,7 @@ class DateUtils {
                 $date = new \DateTime($date, $time_zone);
             } catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
+                $date =  new \DateTime("9998-12-31 23:59:59", $time_zone);
             }
         } else if (!($date instanceof \DateTime)) {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
