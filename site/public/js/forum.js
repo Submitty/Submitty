@@ -816,8 +816,9 @@ function refreshCategories() {
     $(".cat-buttons").trigger("eventChangeCatClass");
 }
 
-function reorderCategories(){
+function reorderCategories(csrf_token) {
     var data = $('#ui-category-list').sortable('serialize');
+    data += "&csrf_token=" + csrf_token;
     var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
     $.ajax({
         url: url,
