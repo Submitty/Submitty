@@ -79,7 +79,7 @@ class Access {
     const REQUIRE_ARG_VERSION           = 1 << 27;
     /** If the current set of flags requires the "semester" (type string) and "course" (type string) arguments */
     const REQUIRE_ARGS_SEMESTER_COURSE  = 1 << 28;
-    /** Ensure on the forum the operation is done by the correct user. */ 
+    /** Ensure on the forum the operation is done by the correct user. */
     const REQUIRE_FORUM_SAME_STUDENT    = 1 << 29;
 
 
@@ -173,6 +173,7 @@ class Access {
         $this->permissions["path.read.results"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_HAS_SUBMISSION;
         $this->permissions["path.read.results_public"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
         $this->permissions["path.read.submissions"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT | self::ALLOW_SELF_GRADEABLE | self::CHECK_HAS_SUBMISSION | self::CHECK_STUDENT_VIEW | self::CHECK_STUDENT_SUBMIT;
+        $this->permissions["path.read.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_FILE_DIRECTORY | self::CHECK_FILE_EXISTS;
 
         $this->permissions["path.write.submissions"] = self::ALLOW_MIN_STUDENT | self::ALLOW_ONLY_SELF_GRADEABLE | self::CHECK_CSRF;
         $this->permissions["path.write.split_pdf"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
@@ -182,6 +183,7 @@ class Access {
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF| self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
 
 
@@ -189,7 +191,7 @@ class Access {
         $this->permissions["forum.modify_category"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
         $this->permissions["forum.publish"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
         $this->permissions["forum.modify_announcement"] = self::ALLOW_MIN_FULL_ACCESS_GRADER | self::CHECK_CSRF;
-        $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT; 
+        $this->permissions["forum.modify_post"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF | self::REQUIRE_FORUM_SAME_STUDENT;
         $this->permissions["forum.merge_thread"] = self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_CSRF;
 
         $this->permissions["admin.wrapper"] = self::ALLOW_MIN_INSTRUCTOR;
@@ -296,6 +298,14 @@ class Access {
                 "path.write" => "path.write.forum_attachments",
             ]
         ];
+        $this->directories["rainbow_grades"] = [
+            "base" => $this->core->getConfig()->getCoursePath() . "/uploads/rainbow_grades",
+            "subparts" => [],
+            "permissions" => [
+                "path.read" => "path.read.rainbow_grades",
+                "path.write" => "path.write.rainbow_grades",
+            ]
+        ];
     }
 
     /**
@@ -356,7 +366,7 @@ class Access {
         }
 
         if (self::checkBits($checks, self::REQUIRE_FORUM_SAME_STUDENT)) {
-            if ($group === User::GROUP_STUDENT && array_key_exists('post_author', $args) && $this->core->getUser()->getId() != $args['post_author']) { 
+            if ($group === User::GROUP_STUDENT && array_key_exists('post_author', $args) && $this->core->getUser()->getId() != $args['post_author']) {
                 return false;
             }
         }

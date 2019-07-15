@@ -74,7 +74,7 @@
 </div>
 
 <div class="option">
-    <legend class="option-desc col-md-12">
+    <div class="option-desc col-md-12">
         {% if action == 'new' or action == 'template' %}
             <!-- Gradeable Type radio buttons (readonly in edit mode) -->
             <div class="option-title">Gradable Type</div>
@@ -84,8 +84,8 @@
             <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
         {% endif %}
-    </legend>
-    <fieldset class="option-desc col-md-12">
+    </div>
+    <div class="option-desc col-md-12">
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
             <div>
                 <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
@@ -123,44 +123,40 @@
         </div>
 
       <!-- This is only relevant to Electronic Files -->
-        <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-            <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
-            <div>
+        <div class="gradeable_type_options electronic_file" id="electronic_file">
+            <fieldset>
+                <legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend>
                 <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
                         {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
-            </div>
+            </fieldset>
             
             {% if regrade_enabled %}
-                <div id="regrade_request_enable_container">
-                    Will grade inquiries be enabled for this assignment?
-                    <br />
+                <fieldset id="regrade_request_enable_container">
+                    <legend>Will grade inquiries be enabled for this assignment?</legend>
                     <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
                             {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
                     <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
                             {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_alowed">No</label>
-                </div>
+                </fieldset>
             {% endif %}
 
             {% if forum_enabled %}
-
-                <div id="discussion_grading_enable_container">
-                    Is there a discussion component for this assignment?
-                    <br />
-                    <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
-                            {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
-                    <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
-                            {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
-
+                <div>
+                    <fieldset id="discussion_grading_enable_container">
+                        <legend>Is there a discussion component for this assignment?</legend>
+                        <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
+                                {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
+                        <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
+                                {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
+                    </fieldset>
                     <div class="discussion_id_wrapper">
                         <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
                             <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
                                    value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
                     </div>
-
                 </div>
-
             {% endif %}
 
             <div id="team-settings-container">
@@ -244,8 +240,8 @@
                     {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
                     {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)
             </div>
-        </fieldset>
-    </fieldset>
+        </div>
+    </div>
 </div>
 
 <!-- Gradeable bucket (read/write in all modes) -->

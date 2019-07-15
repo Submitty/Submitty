@@ -7,7 +7,8 @@ class EmailRoomSeatingView extends AbstractView {
     public function displayPage($defaultSubject, $defaultBody) {
         return $this->core->getOutput()->renderTwigTemplate("admin/EmailRoomSeating.twig", [
             "defaultSubject" => $defaultSubject,
-            "defaultBody" => $defaultBody
+            "defaultBody" => $defaultBody,
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ]);
     }
 }
