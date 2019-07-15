@@ -51,7 +51,7 @@ class LateController extends AbstractController {
     /**
      * @param $csv_option string csv_option_overwrite_all or csv_option_preserve_higher
      *
-     * @Route("/{_semester}/{_course}/late_days/update")
+     * @Route("/{_semester}/{_course}/late_days/update", methods={"POST"})
      * @return Response
      */
     public function updateLateDays($csv_option = null) {
@@ -96,7 +96,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/late_days/delete")
+     * @Route("/{_semester}/{_course}/late_days/delete", methods={"POST"})
      * @return Response
      */
     public function deleteLateDays() {
@@ -119,7 +119,7 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/extensions/update")
+     * @Route("/{_semester}/{_course}/extensions/update", methods={"POST"})
      * @return Response
      */
     public function updateExtension() {
