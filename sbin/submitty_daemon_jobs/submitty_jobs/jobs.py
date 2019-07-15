@@ -321,7 +321,7 @@ class CreateCourse(AbstractJob):
 
         base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
 
-        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', 'course_creation_{}_{}_{}_{}.txt'.format(
+        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
             semester, course, head_instructor, base_group
         ))
 
