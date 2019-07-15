@@ -54,7 +54,7 @@ class User extends AbstractModel {
     const GROUP_NONE                  = 5;
 
     /**
-     * Access levels
+     * Access levels, lower level means more access
      */
     const LEVEL_SUPERUSER             = 1;
     const LEVEL_FACULTY               = 2;
@@ -219,6 +219,14 @@ class User extends AbstractModel {
      */
     public function accessAdmin() {
         return $this->group === 1;
+    }
+
+    /**
+     * Gets whether the user is allowed to access the faculty interface
+     * @return bool
+     */
+    public function accessFaculty() {
+        return $this->access_level < 3;
     }
 
     public function setPassword($password) {
