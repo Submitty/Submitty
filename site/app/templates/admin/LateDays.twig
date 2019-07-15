@@ -3,20 +3,42 @@
     <h1>Late Days Allowed</h1>
     <form id="lateDayForm" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <p> Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
-            Students may use these additional late days for any future homeworks (after the specificed date).<br><br><br>
+        <p>
+            Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
+            Students may use these additional late days for any future homeworks (after the specificed date).
         </p>
-        <div class="option-title">Single Student Entry<br></div>
-        <div class="option" style="width:30%; display:inline-block;"><label for="user_id">Student ID:<br></label><input class="option-input" type="text" name="user_id" id="user_id" style="float:left"></div>
-        <div class="option" style="width:30%; display:inline-block;"><label for="datestamp">Datestamp (MM/DD/YY):<br></label><input class="option-input" type="text" name="datestamp" id="datestamp" style="float:left"></div>
-        <div class="option" style="width:15%; display:inline-block;"><label for="late_days">Late Days:<br></label><input class="option-input" type="text" name="late_days" id="late_days" style="float:left"></div>
-        <div class="option" style="width:15%; display:inline-block; float:right;"><br><input class="btn btn-primary" type="submit" value="Submit" style="float:left"></div>
         <fieldset>
-        <div class="option-title" id="csv_upload_title"><br><br><legend>Multiple Student Entry Via CSV Upload</legend></div>
-        <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
-        <div style="padding-bottom:10px;"><input type="file" name="csv_upload" id="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="return updateLateDays($(this));"></div>
-        <div style="padding-bottom:2px;"><input type="radio" style="margin:-3px 7px 0 0;" name="csv_option" id="csv_option_overwrite_all" value="csv_option_overwrite_all" checked><label for="csv_option_overwrite_all">Upload overwrites <em>all</em> values</label></div>
-        <div><input type="radio" style="margin:-3px 7px 0 0;" name="csv_option" id="csv_option_preserve_higher" value="csv_option_preserve_higher"><label for="csv_option_preserve_higher">Do not overwrite higher values</label></div>
+            <legend class="option-title">Single Student Entry</legend>
+            <label for="user_id">
+                Student ID:
+                <input class="option-input" type="text" name="user_id" id="user_id">
+            </label>
+            <label for="datestamp">
+                Datestamp (MM/DD/YY):
+                <input class="option-input" type="text" name="datestamp" id="datestamp">
+            </label>
+            <label for="late_days">
+                Late Days:
+                <input class="option-input" type="text" name="late_days" id="late_days">
+            </label>
+            <div>
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </div>
+        </fieldset>
+        <fieldset>
+            <legend>
+                <span class="option-title" id="csv_upload_title">Multiple Student Entry Via CSV Upload</span>
+                <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
+            </legend>
+            <input type="file" name="csv_upload" id="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="return updateLateDays($(this));">
+            <label for="csv_option_overwrite_all">
+                Upload overwrites <em>all</em> values
+                <input type="radio" name="csv_option" id="csv_option_overwrite_all" value="csv_option_overwrite_all" checked>
+            </label>
+            <label for="csv_option_preserve_higher">
+                Do not overwrite higher values
+                <input type="radio" name="csv_option" id="csv_option_preserve_higher" value="csv_option_preserve_higher">
+            </label>
         </fieldset>
     </form>
     <div id="load-late-days" align="center">

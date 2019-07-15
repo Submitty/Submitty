@@ -6,7 +6,6 @@ use app\controllers\admin\ReportController;
 use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
 use app\controllers\admin\AdminGradeableController;
-use app\controllers\admin\ConfigurationController;
 use app\controllers\admin\UsersController;
 use app\controllers\admin\LateController;
 use app\controllers\admin\PlagiarismController;
@@ -27,10 +26,6 @@ class AdminController extends AbstractController {
         switch ($_REQUEST['page']) {
             case 'users':
                 $controller = new UsersController($this->core);
-                break;
-            case 'configuration':
-                $this->core->getOutput()->addBreadcrumb('Course Settings');
-                $controller = new ConfigurationController($this->core);
                 break;
             case 'gradeable':
                 $controller = new GradeableController($this->core);
