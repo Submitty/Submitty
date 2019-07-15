@@ -1668,10 +1668,8 @@ class SubmissionController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $base_path = $course_path . "/submissions/" . $gradeable_id . "/";
-        if(!is_dir($base_path))
-                return;
-        $users = array();      
-        $user_id_arr = array_slice(scandir($base_path), 2);
+        $users = array();
+        $user_id_arr = is_dir($base_path) ? array_slice(scandir($base_path), 2) : [];
         for($i = 0; $i < count($user_id_arr); $i++) {
             $user_path = $base_path . $user_id_arr[$i];
             if(!is_dir($user_path))
