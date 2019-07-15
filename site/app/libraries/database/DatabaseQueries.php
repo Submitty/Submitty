@@ -135,6 +135,13 @@ class DatabaseQueries {
     }
 
     /**
+     * @return User[]
+     */
+    public function getAllFaculty() {
+        throw new NotImplementedException();
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {
