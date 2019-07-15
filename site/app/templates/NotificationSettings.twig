@@ -146,8 +146,10 @@
                         <div class="option-alt">Receive a notification when you get an invitation to join a team</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="team_invite" id="team_invite" checked></div>
-                <div class="option-input col-md-5"><input type="checkbox" name="team_invite_email" id="team_invite_email" checked></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
 
             <div class="option row">
@@ -157,12 +159,12 @@
                         <div class="option-alt">Receive a notification when a team member makes a submission to your gradeable</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="team_member_submission" id="new_team_member_submission" checked></div>
-                <div class="option-input col-md-5"><input type="checkbox" name="team_member_submission_email" id="new_team_member_submission_email" checked></div>
+                <div class="option-input col-md-3"><input type="checkbox" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}>></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
-
-
-
+            
         </div>
     </form>
     <script>
