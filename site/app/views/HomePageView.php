@@ -34,7 +34,7 @@ class HomePageView extends AbstractView {
 
             //Assemble courses into rank lists
             foreach ($course_type as $course) {
-                $rank = $this->core->getQueries()->getGroupForUserInClass($course->getSemester(), $course->getTitle(), $user->getId());
+                $rank = $this->core->getQueries()->getGroupForUserInClass($course['semester'], $course['title'], $user->getId());
                 array_push($ranks[$rank]["courses"], $course);
             }
 
