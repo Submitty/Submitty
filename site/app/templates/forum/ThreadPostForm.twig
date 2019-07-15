@@ -160,10 +160,9 @@
         </select>
         {% endif %}
         {% if show_announcement and core.getUser().accessFullGrading() %}
-            <label class="inline-block" for="Announcement">Announcement?</label> <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
-        {% endif %}
-        {% if show_announcement and core.getUser().accessFullGrading() %}
-            <label class="inline-block" for="EmailAnnouncement">Send Email?</label> <input type="checkbox" class="email-announcement-checkbox" name="EmailAnnouncement" value="EmailAnnouncement" data-ays-ignore="true"/>
+            {% set announcement_text = email_enabled ? "Announcement?(w/ notification and email)" : "Announcement?(w/ notification)" %}
+            <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
+            <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');

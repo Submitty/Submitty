@@ -1758,7 +1758,9 @@ class SubmissionController extends AbstractController {
               }
           }
           $this->core->getNotificationFactory()->sendNotifications($notifications);
-          $this->core->getNotificationFactory()->sendEmails($emails);
+          if ($this->core->getConfig()->isEmailEnabled()) {
+              $this->core->getNotificationFactory()->sendEmails($emails);
+          }
       }
     }
 

@@ -102,6 +102,22 @@ class CourseGradeableJob(CourseJob):
         return self.job_details['gradeable'] not in ['', '.', '..']
 
 
+class RunAutoRainbowGrades(CourseJob):
+    def run_job(self):
+
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+
+        path = '/usr/local/submitty/sbin/auto_rainbow_grades.py'
+        debug_output = '/var/local/submitty/courses/' + semester + '/' + course + '/rainbow_grades/auto_debug_output.txt'
+
+        try:
+            with open(debug_output, "w") as file:
+                subprocess.call(['python3', path, semester, course], stdout=file, stderr=file)
+        except PermissionError:
+            print("error, could not open "+file+" for writing")
+
+
 class BuildConfig(CourseGradeableJob):
     def run_job(self):
         semester = self.job_details['semester']

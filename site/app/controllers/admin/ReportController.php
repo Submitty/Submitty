@@ -8,6 +8,7 @@ use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\libraries\routers\AccessControl;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -15,38 +16,30 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
+use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\GradeSummary;
+use app\models\RainbowCustomization;
+use app\exceptions\ValidationException;
 
 /**
  * Class ReportController
  * @package app\controllers\admin
- *
+ * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
-        }
+        return null;
     }
 
     /**
      * @Route("/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
@@ -57,10 +50,6 @@ class ReportController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $g_sort_keys = [
             'type',
@@ -87,10 +76,6 @@ class ReportController extends AbstractController {
      * @Route("/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
@@ -452,6 +437,58 @@ class ReportController extends AbstractController {
                 }
             default:
                 return 'ERROR';
+        }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
+    public function generateCustomization(){
+
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        //Build a new model, pull in defaults for the course
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+
+        if(isset($_POST["json_string"])){
+
+            //Handle user input (the form) being submitted
+            try {
+
+                $customization->processForm();
+
+                // Finally, send the requester back the information
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
+            } catch (ValidationException $e) {
+                //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
+                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+            } catch (\Exception $e) {
+                //Catches any other exceptions, should be "unexpected" issues
+                $this->core->getOutput()->renderJsonError($e->getMessage());
+            }
+        }
+        else{
+
+            $this->core->getOutput()->addInternalJs('rainbow-customization.js');
+            $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+
+            // Print the form
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+                "customization_data" => $customization->getCustomizationData(),
+                "available_buckets" => $customization->getAvailableBuckets(),
+                "used_buckets" => $customization->getUsedBuckets(),
+                'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
+                'bucket_percentages' => $customization->getBucketPercentages(),
+                'messages' => $customization->getMessages()
+            ]);
+
         }
     }
 }

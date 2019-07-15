@@ -1,0 +1,7 @@
+user_firstname: Clark
+user_lastname: Kent
+user_id: superuser
+anon_id: superuser
+user_email: superuser@example.com
+user_access_level: 1
+courses: []

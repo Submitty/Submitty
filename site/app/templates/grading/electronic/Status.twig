@@ -130,6 +130,7 @@
                 {% else %}
                     href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
                 {% endif %}
+
                 Index of Grading Details for All Students
             </a>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
@@ -719,6 +720,7 @@
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
         }
+
 
         // Get all elements with class="btn btn-primary" and remove the class "active"
         tablinks = document.getElementsByClassName("btn btn-primary");
