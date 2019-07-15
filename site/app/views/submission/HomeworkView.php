@@ -23,10 +23,11 @@ class HomeworkView extends AbstractView {
      * @param Gradeable $gradeable
      * @param GradedGradeable|null $graded_gradeable
      * @param int $display_version
+     * @param bool $can_inquiry
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $show_hidden_testcases = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false ) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -97,7 +98,7 @@ class HomeworkView extends AbstractView {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
-            $return .= $this->renderRegradeBox($graded_gradeable);
+            $return .= $this->renderRegradeBox($graded_gradeable,$can_inquiry);
         }
         return $return;
     }
@@ -717,11 +718,13 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
+     * @param bool $can_inquiry
      * @return string
      */
-    private function renderRegradeBox(GradedGradeable $graded_gradeable): string {
+    private function renderRegradeBox(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/RegradeBox.twig', [
-            'graded_gradeable' => $graded_gradeable
+            'graded_gradeable' => $graded_gradeable,
+            'can_inquiry' => $can_inquiry
         ]);
     }
 
