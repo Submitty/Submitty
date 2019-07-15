@@ -1674,7 +1674,7 @@ function updateLateDays(data) {
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'delete_late'});
+    var url = buildNewCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({

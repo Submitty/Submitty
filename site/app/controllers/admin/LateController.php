@@ -18,9 +18,6 @@ use Symfony\Component\Routing\Annotation\Route;
 class LateController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'delete_late':
-                $this->deleteLateDays();
-                break;
             case 'update_extension':
                 $this->updateExtension();
                 break;
@@ -83,7 +80,7 @@ class LateController extends AbstractController {
                 return $this->getLateDays();
             }
         }
-        else { // not CSV, it's an individual
+        else {
             $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
             if (!$user) {
                 $error = "Invalid Student ID";
@@ -108,15 +105,23 @@ class LateController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/late_days/delete")
+     * @return Response
+     */
     public function deleteLateDays() {
         $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
         if (!$user) {
             $error = "Invalid Student ID";
-            return $this->core->getOutput()->renderJsonFail($error);
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse($error)
+            );
         }
         if ((!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp']))) {
             $error = "Datestamp must be mm/dd/yy";
-            return $this->core->getOutput()->renderJsonFail($error);
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse($error)
+            );
         }
         $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
 
@@ -124,10 +129,8 @@ class LateController extends AbstractController {
     }
 
     public function updateExtension() {
-        //Check to see if a CSV file was submitted.
-        $data = array();
         if (isset($_FILES['csv_upload']) && (file_exists($_FILES['csv_upload']['tmp_name']))) {
-            //Validate
+            $data = array();
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
                 return $this->core->getOutput()->renderJsonFail($error);
@@ -140,7 +143,7 @@ class LateController extends AbstractController {
                 $this->getExtensions($data[0][1]);
             }
         }
-        else { // not CSV, it's an individual
+        else {
             if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" )) {
                 $error = "Please choose a gradeable_id";
                 return $this->core->getOutput()->renderJsonFail($error);
