@@ -12,6 +12,32 @@ import json
 import os
 import datetime
 from sqlalchemy import create_engine, MetaData, Table, bindparam
+import sys
+import psutil
+
+
+# ======================================================================
+#
+# Let's make sure we're the only copy of this script running on the
+# server.  Multiple copies might happen if sending emails is slow or
+# hangs and takes longer than 1 minute and the cron job fires again.
+#
+
+my_program_name = sys.argv[0].split('/')[-1]
+my_pid = os.getpid()
+
+# loop over all active process on the server
+for p in psutil.pids():
+    cmdline = psutil.Process(p).cmdline()
+    # if anything on the command line matches the name of the program
+    for i in cmdline:
+        if i.find(my_program_name) != -1:
+            if p != my_pid:
+                print("ERROR!  Another copy of '" + my_program_name +
+                      "' is already running on the server.  Exiting.")
+                exit()
+
+# ======================================================================
 
 try:
     CONFIG_PATH = os.path.join(
