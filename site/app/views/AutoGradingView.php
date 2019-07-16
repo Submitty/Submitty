@@ -320,9 +320,13 @@ class AutoGradingView extends AbstractView {
 
         // Todo: this is a modest amount of math for the view
         // add total points if autograding and ta grading are the same version consistently
+        $files = null;
+        $display_version = 0;
         if ($version_instance !== null) {
             $total_score += $version_instance->getTotalPoints();
             $total_max += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
+            $files = $version_instance->getFiles();
+            $display_version = $version_instance->getVersion();
         }
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         //Clamp full gradeable score to zero
@@ -378,7 +382,9 @@ class AutoGradingView extends AbstractView {
                 $uploaded_pdfs[] = $file;
             }
         }
+        $can_download = !$gradeable->isVcs();
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
+            'files'=> array_merge($files['submissions'], $files['checkout']),
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
@@ -399,7 +405,10 @@ class AutoGradingView extends AbstractView {
             'regrade_message' => $regrade_message,
             'num_decimals' => $num_decimals,
             'uploaded_pdfs' => $uploaded_pdfs,
-            'gradeable_id' => $gradeable->getId()
+            'user_id' => $this->core->getUser()->getId(),
+            'gradeable_id' => $gradeable->getId(),
+            'can_download' =>$can_download,
+            'display_version' => $display_version
         ]);
     }
 }

@@ -95,7 +95,6 @@ class HomeworkView extends AbstractView {
             && $submission_count !== 0
             && $active_version !== 0) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available,$version_instance);
-            $return .= $this->renderVersionFiles($graded_gradeable,$version_instance);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable);
@@ -554,32 +553,6 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden
      * @return string
      */
-    private function renderVersionFiles(GradedGradeable $graded_gradeable, $version_instance): string {
-        $gradeable = $graded_gradeable->getGradeable();
-
-
-        $param = [];
-
-        if ($version_instance !== null) {
-
-            $files = $version_instance->getFiles();
-
-            $param = array_merge($param, [
-                'files' => array_merge($files['submissions'], $files['checkout']),
-            ]);
-
-        }
-
-        // If its not git checkout
-        $can_download = !$gradeable->isVcs();
-        $param = array_merge($param, [
-            'gradeable_id' => $gradeable->getId(),
-            'can_download' => $can_download,
-            "csrf_token" => $this->core->getCsrfToken()
-        ]);
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/CurrentVersionFiles.twig', $param);
-
-    }
 
     /**
      * @param GradedGradeable $graded_gradeable
@@ -736,21 +709,8 @@ class HomeworkView extends AbstractView {
      * @param bool $regrade_available
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available,$version_instance): string {
-        $gradeable = $graded_gradeable->getGradeable();
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
 
-
-        $param = [];
-
-        if ($version_instance !== null) {
-
-            $files = $version_instance->getFiles();
-
-            $param = array_merge($param, [
-                'files' => array_merge($files['submissions'], $files['checkout']),
-            ]);
-
-        }
         $rendered_ta_results = '';
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
@@ -758,13 +718,10 @@ class HomeworkView extends AbstractView {
             $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults',
                 $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles());
         }
-        $can_download = !$gradeable->isVcs();
-        $param = array_merge($param,['been_ta_graded' => $been_ta_graded,
-            'rendered_ta_results' => $rendered_ta_results,
-            'gradeable_id' => $gradeable->getId(),
-            'can_download' => $can_download,
-            "csrf_token" => $this->core->getCsrfToken()]);
-        return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', $param);
+
+        return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
+            'been_ta_graded' => $been_ta_graded,
+            'rendered_ta_results' => $rendered_ta_results]);
     }
 
     /**
