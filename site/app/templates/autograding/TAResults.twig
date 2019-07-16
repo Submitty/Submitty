@@ -32,7 +32,6 @@
         {% if uploaded_pdfs|length >= 0 %}
             <br />
             <br />
-
             <div class="box half" style="float: right; width: 25%; word-break: break-word">
                 View/Download submission with feedback:
                 <br />
@@ -42,10 +41,7 @@
                     <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'pdf', 'page':'student_pdf_view', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fas fa-window-restore"></i></a>
                 {% endfor %}
             </div>
-            <div class="box half" style="float: right; width: 25%; word-break: break-word">
-                View/Download original submission:
-
-            </div>
+                {% include 'submission/homework/CurrentVersionFiles.twig' %}
         {% endif %}
         {# /Overview #}
 
