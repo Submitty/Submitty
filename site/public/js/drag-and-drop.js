@@ -276,7 +276,7 @@ function addLabel(filename, filesize, part, previous){
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
     tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash'></i><br />";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i><br />";
 
     // styling
     tmp.children[0].onmouseover = function(e){
