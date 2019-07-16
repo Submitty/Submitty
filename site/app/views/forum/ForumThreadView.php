@@ -108,7 +108,7 @@ class ForumThreadView extends AbstractView {
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber) {
+    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $ajax=false) {
         if(!$this->forumAccess()){
             $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
             return;
@@ -120,18 +120,23 @@ class ForumThreadView extends AbstractView {
         $show_deleted_thread_title = null;
         $currentCourse = $this->core->getConfig()->getCourse();
         $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 
-        //Body Style is necessary to make sure that the forum is still readable...
-        $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
-        $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
-        $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
-        $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
-        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
-        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
-        $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        if(!$ajax) {
+            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+
+            //Body Style is necessary to make sure that the forum is still readable...
+            $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
+            $this->core->getOutput()->addVendorCss('codemirror/theme/eclipse.css');
+            $this->core->getOutput()->addInternalCss('forum.css');
+            $this->core->getOutput()->addVendorJs('codemirror/codemirror.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/clike/clike.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/python/python.js');
+            $this->core->getOutput()->addVendorJs('codemirror/mode/shell/shell.js');
+            $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+            $this->core->getOutput()->addInternalJs('forum.js');
+            $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+            $this->core->getOutput()->addVendorJs('bootstrap/js/bootstrap.bundle.min.js');
+        }
 
         if($filteredThreadExists || $threadFiltering) {
             $currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
@@ -169,6 +174,7 @@ class ForumThreadView extends AbstractView {
         }
 
         $categories = $this->core->getQueries()->getCategories();
+
         $cookieSelectedCategories = array();
         $cookieSelectedThreadStatus = array();
         $cookieSelectedUnread = false;
@@ -317,20 +323,48 @@ class ForumThreadView extends AbstractView {
             $this->core->getQueries()->visitThread($user, $activeThread['id']);
         }
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
-            "categories" => $categories,
-            "filterFormData" => $filterFormData,
-            "button_params" => $button_params,
-            "thread_exists" => $threadExists,
-            "next_page" => $next_page,
-            "prev_page" => $prev_page,
-            "arrowup_visibility" => $arrowup_visibility,
-            "display_thread_content" => $displayThreadContent,
-            "currentThread" => $currentThread,
-            "currentCourse" => $currentCourse,
-            "generate_post_content" => $generatePostContent,
-            "display_option" => $display_option
-        ]);
+        $return = "";
+
+        if(!$ajax) {
+            $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
+                "categories" => $categories,
+                "filterFormData" => $filterFormData,
+                "button_params" => $button_params,
+                "thread_exists" => $threadExists,
+                "next_page" => $next_page,
+                "prev_page" => $prev_page,
+                "arrowup_visibility" => $arrowup_visibility,
+                "display_thread_content" => $displayThreadContent,
+                "currentThread" => $currentThread,
+                "currentCourse" => $currentCourse,
+                "generate_post_content" => $generatePostContent,
+                "display_option" => $display_option,
+                "csrf_token" => $this->core->getCsrfToken()
+            ]);
+        }
+        else{
+            $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
+                "userGroup" => $generatePostContent["userGroup"],
+                "activeThread" => $generatePostContent["activeThread"],
+                "activeThreadAnnouncement" => $generatePostContent["activeThreadAnnouncement"],
+                "isCurrentFavorite" => $generatePostContent["isCurrentFavorite"],
+                "display_option" => $generatePostContent["display_option"],
+                "post_data" => $generatePostContent["post_data"],
+                "isThreadLocked" => $generatePostContent["isThreadLocked"],
+                "accessFullGrading" => $generatePostContent["accessFullGrading"],
+                "includeReply" => $generatePostContent["includeReply"],
+                "thread_id" => $generatePostContent["thread_id"],
+                "first_post_id" => $generatePostContent["first_post_id"],
+                "form_action_link" => $generatePostContent["form_action_link"],
+                "merge_thread_content" => $generatePostContent["merge_thread_content"],
+                "csrf_token" => $generatePostContent["csrf_token"],
+                "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
+                "post_box_id" => $generatePostContent["post_box_id"]
+            ]);
+
+            $return = $this->core->getOutput()->renderJsonSuccess(["html"=> json_encode($return)]);
+        }
+
         return $return;
     }
 
@@ -433,6 +467,10 @@ class ForumThreadView extends AbstractView {
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('chosen-js', 'chosen.jquery.min.js'));
             $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
             $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+            $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+            $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+            $this->core->getOutput()->addInternalJs('forum.js');
+            $this->core->getOutput()->addInternalCss('forum.css');
             $current_thread_first_post = $this->core->getQueries()->getFirstPostForThread($currentThread);
             $current_thread_date = $current_thread_first_post["timestamp"];
             $merge_thread_list = $this->core->getQueries()->getThreadsBefore($current_thread_date, 1);
@@ -610,6 +648,7 @@ class ForumThreadView extends AbstractView {
             }
 
             $thread_content[] = [
+                'thread_id' => $thread['id'],
                 "title" => $titleDisplay,
                 "content" => $contentDisplay,
                 "categories" => $categories_content,
@@ -735,7 +774,6 @@ class ForumThreadView extends AbstractView {
 
         $offset = min(($reply_level - 1) * 30, 180);
 
-//        $post_content = ($this->filter_post_content($post['content']));
         $post_content = $post['content'];
 
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
@@ -823,6 +861,7 @@ class ForumThreadView extends AbstractView {
             }
         }
 
+        $post_box_id = 1;
         if ($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading()) {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
@@ -869,9 +908,15 @@ class ForumThreadView extends AbstractView {
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
-
         $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+
+        $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('forum.css');
+
+        $categories = "";
 
         $category_colors;
 
@@ -894,6 +939,7 @@ class ForumThreadView extends AbstractView {
         );
 
         $thread_exists = $this->core->getQueries()->threadExists();
+        $manage_categories_url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories'));
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
@@ -901,6 +947,66 @@ class ForumThreadView extends AbstractView {
             "buttons" => $buttons,
             "thread_exists" => $thread_exists,
             "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
+            "manage_categories_url" => $manage_categories_url,
+            "csrf_token" => $this->core->getCsrfToken(),
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
+        ]);
+
+        return $return;
+    }
+
+    public function showCategories($category_colors){
+
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            return;
+        }
+
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
+        $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories')));
+
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
+        $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
+
+        $this->core->getOutput()->addVendorCss('flatpickr/flatpickr.min.css');
+
+        $categories = "";
+        $category_colors;
+
+        if($this->core->getUser()->accessGrading()){
+            $categories = $this->core->getQueries()->getCategories();
+
+            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+            array_unshift($categories, $dummy_category);
+        }
+
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;float:right;top:3px;',
+                "link" => array(true, $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'))),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
+        $thread_exists = $this->core->getQueries()->threadExists();
+
+        $forumBarData = [
+            "forum_bar_buttons_right" => $buttons,
+            "forum_bar_buttons_left" => [],
+            "show_threads" => false,
+            "thread_exists" => $thread_exists
+        ];
+
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowCategories.twig", [
+            "categories" => $categories,
+            "category_colors" => $category_colors,
+            "forumBarData" => $forumBarData,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
 
         return $return;
@@ -920,6 +1026,8 @@ class ForumThreadView extends AbstractView {
 		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')));
 		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_stats')));
 
+        $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('forum.css');
 
 		$buttons = array(
 			array(

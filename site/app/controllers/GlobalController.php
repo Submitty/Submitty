@@ -87,7 +87,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                    "href" => $this->core->buildNewCourseUrl(['config']),
                     "title" => "Course Settings",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-settings",
@@ -100,7 +100,7 @@ class GlobalController extends AbstractController {
             $any_files = FileUtils::getAllFiles($course_materials_path);
             if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                    "href" => $this->core->buildNewCourseUrl(['course_materials']),
                     "title" => "Course Materials",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-materials",
@@ -188,7 +188,7 @@ class GlobalController extends AbstractController {
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                        "href" => $this->core->buildNewCourseUrl(['student_photos']),
                         "title" => "Student Photos",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-photos",
@@ -199,7 +199,7 @@ class GlobalController extends AbstractController {
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
                         $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                            "href" => $this->core->buildNewCourseUrl(['student_photos']),
                             "title" => "Student Photos",
                             "class" => "nav-row",
                             "id" => "nav-sidebar-photos",
@@ -217,14 +217,14 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
+                    "href" => $this->core->buildNewCourseUrl(['late_days']),
                     "title" => "Late Days Allowed",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-late-days-allowed",
                     "icon" => "fa-calendar-check"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
+                    "href" => $this->core->buildNewCourseUrl(['extensions']),
                     "title" => "Excused Absence Extensions",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-extensions",
@@ -253,7 +253,7 @@ class GlobalController extends AbstractController {
             $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
             if ($display_rainbow_grades_summary) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
+                    "href" => $this->core->buildNewCourseUrl(['grades']),
                     "title" => "Rainbow Grades",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grades",
@@ -262,7 +262,7 @@ class GlobalController extends AbstractController {
             }
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+                "href" => $this->core->buildNewCourseUrl(['late_table']),
                 "title" => "My Late Days/Extensions",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-late-days",

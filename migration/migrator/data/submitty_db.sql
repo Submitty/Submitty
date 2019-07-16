@@ -125,11 +125,13 @@ CREATE TABLE users (
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
+    user_access_level INTEGER NOT NULL DEFAULT 3,
     user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
     last_updated timestamp(6) with time zone,
-    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex')
+    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
+    CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3))
 );
 
 CREATE TABLE courses_registration_sections (

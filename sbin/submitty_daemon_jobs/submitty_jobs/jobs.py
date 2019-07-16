@@ -102,6 +102,22 @@ class CourseGradeableJob(CourseJob):
         return self.job_details['gradeable'] not in ['', '.', '..']
 
 
+class RunAutoRainbowGrades(CourseJob):
+    def run_job(self):
+
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+
+        path = '/usr/local/submitty/sbin/auto_rainbow_grades.py'
+        debug_output = '/var/local/submitty/courses/' + semester + '/' + course + '/rainbow_grades/auto_debug_output.txt'
+
+        try:
+            with open(debug_output, "w") as file:
+                subprocess.call(['python3', path, semester, course], stdout=file, stderr=file)
+        except PermissionError:
+            print("error, could not open "+file+" for writing")
+
+
 class BuildConfig(CourseGradeableJob):
     def run_job(self):
         semester = self.job_details['semester']
@@ -245,6 +261,14 @@ class BulkUpload(CourseJob):
             if not os.path.isfile(os.path.join(split_path, filename)):
                 shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
 
+            # reset permissions just in case, group needs read/write
+            # access so submitty_php can view & delete pdfs when they are
+            # assigned to a student and/or deleted
+            self.add_permissions_recursive(split_path,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )
+
             # move to copy folder
             os.chdir(split_path)
         except Exception:
@@ -274,11 +298,3 @@ class BulkUpload(CourseJob):
             pass
 
         os.chdir(current_path)
-
-        # reset permissions just in case, group needs read/write
-        # access so submitty_php can view & delete pdfs when they are
-        # assigned to a student and/or deleted
-        self.add_permissions_recursive(split_path,
-                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
-                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
-                                       stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )

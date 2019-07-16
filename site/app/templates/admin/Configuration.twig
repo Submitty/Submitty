@@ -1,10 +1,12 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div class="content">
     <h1>Course Settings</h1>
     <span class="pull-right">
         <a href="{{ theme_url }}" class="btn btn-default">Customize Website Theme</a>
     </span>
     <div id="config">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 
         <div class="heading">
             <h2>Course Info</h2>
@@ -18,7 +20,7 @@
                     <div class="option-alt">Input the course name that should appear in the header of the site (your course code is {{ core.getConfig().getCourse() }})</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="text" name="course_name" id="course_name" value="{{ fields['course_name']|raw }}" /></div>
+            <div class="option-input col-md-4"><input type="text" name="course_name" id="course_name" value="{{ fields['course_name'] }}" /></div>
         </div>
 
         <div class="option row">
@@ -38,7 +40,10 @@
                     <div class="option-alt">Choose whether to enable a forum for this course.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} /></div>
+            <div class="option-input col-md-4"><input type="checkbox" name="forum_enabled" id="forum_enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
+                <span id="forum_enabled_message" style="display: {% if fields['forum_enabled'] %} inline-block; {% else %} none; {% endif %}"><a href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a></span>
+            </div>
+
         </div>
 
         <div class="heading">
@@ -54,14 +59,17 @@
                         on the submission page.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><textarea style="height: 50px" name="upload_message" id="upload_message">{{ fields['upload_message']|raw }}</textarea></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="upload_message" id="upload_message">{{ fields['upload_message'] }}</textarea></div>
         </div>
 
         <div class="option row">
             <div class="option-desc col-md-8">
                 <label for="private_repository">
                     <div class="option-title">Course Autograding Config Directory</div>
-                    <div class="option-alt">Use your own directory for storing gradeable configs. Will appear in the create/edit gradeable page.<br>Leave blank if you do not have a private repository for gradeable configurations.</div>
+                    <div class="option-alt">Use your own directories for storing gradeable configs. Will appear in the create/edit gradeable page.<br>
+					To enter multiple directories, type the full paths separated by a comma. <br>
+					Leave blank if you do not have a private repository for gradeable configurations.
+					</div>
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -80,23 +88,19 @@
         </div>
 
 
-        <fieldset>
-            <div class="option row">
-                <div class="option-desc col-md-8">
-                    <legend>
-                        <div class="option-title">Version Control System (VCS) Type</div>
-                        <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
-                    </legend>
-                </div>
-                <div class="option-input col-md-4">
-                    <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
-                    {#
-                    <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
-                    <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>
-                    #}
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Version Control System (VCS) Type</div>
+                <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
             </div>
-        </fieldset>
+            <div class="option-input col-md-4">
+                <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
+                {#
+                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>
+                #}
+            </div>
+        </div>
 
         <div class="option row">
             <div class="option-desc col-md-8">
@@ -152,7 +156,7 @@
                     <div class="option-alt">Input the message shown on grades returned to students.  Include instructions for grade inquiries and the course staff mailing list.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']|raw  }}</textarea></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="course_email" id="course_email"  />{{ fields['course_email']  }}</textarea></div>
         </div>
 
         <div class="option row">
@@ -173,7 +177,7 @@
                     <div class="option-alt">Input the warning message show to students while submitting a grade inquiry.</div>
                 </label>
             </div>
-            <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message']|raw}}</textarea></div>
+            <div class="option-input col-md-4"><textarea style="height: 50px" name="regrade_message" id="regrade_message" rows="4"/>{{ fields['regrade_message'] }}</textarea></div>
         </div>
 
         {# TODO: Not sure what this is
@@ -200,7 +204,7 @@
                     <div class="option-title">Display Rainbow Grades Summary</div>
                     <div class="option-alt">Show Rainbow Grades summaries to students.
                     <strong>Note:</strong>
-                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/overview">
+                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/">
                     You must manually run rainbow grades. <i style="font-style:normal;" class="helpicon"></i></a>
                     </div>
                 </label>
@@ -214,7 +218,11 @@
                     <div class="option-title">Display Room Seating Guide</div>
                     <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
                      <div class="option-alt" style="margin-top: 15px" id="email_seating_assignment_label">Customize an email to send to each students.</div>
-                     <div class ="option-alt"> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a> </div>
+                    {% if not email_enabled %}
+                        <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
+                    {% else %}
+                        <button class ="option-alt"> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment">Email Seating Assignments</a> </button>
+                    {% endif %}
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -241,6 +249,15 @@
             </div>
             <div class="option-input col-md-4"><input type="checkbox" name="display_custom_message" id="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} /></div>
         </div>
+
+{#        <div class="option row">#}
+{#            <div class="option-desc col-md-8">#}
+{#                <div class="option-title">Automatic Rainbow Grades Generation</div>#}
+{#                <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>#}
+{#            </div>#}
+{#            <div class="option-input col-md-4"><input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ?#}
+{#                'checked': '' }} /></div>#}
+{#        </div>#}
 
     </div>
 </div>
@@ -275,6 +292,17 @@
              }
              else{
                 showEmailSeatingOption();
+            }
+        });
+
+        $(document).on('change', '#forum_enabled', function(){
+            var forum_enabled = $('#forum_enabled').is(":checked");
+
+            if(!forum_enabled){
+                $('#forum_enabled_message').hide();
+            }
+            else{
+                $('#forum_enabled_message').show();
             }
         });
 

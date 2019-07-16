@@ -11,8 +11,14 @@
     </p>
 
     <div class="column-wrapper" style="margin: 1em 0;">
-        {# Search box #}
-        {% include "grading/simple/StudentSearch.twig" %}
+        <div id="checkpoint-sticky" class="column-wrapper">
+            {% include "grading/simple/StudentSearch.twig" %}
+            <div>
+                <p class="not-sticky">Undo/Redo Changes</p>
+                <button id="checkpoint-undo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled><i class="fas fa-undo"></i></button>
+                <button id="checkpoint-redo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled><i class="fas fa-redo"></i></button>
+            </div>
+        </div>
 
         <div>
             <button class="btn btn-primary" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
@@ -126,7 +132,7 @@
         {% if sections|length == 0 %}
             <tbody>
                 <tr class="info">
-                    <td colspan="{{ colspan }}" style="text-align: center">No Grading To Be Done! :)</td>
+                    <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">No Grading To Be Done! :)</td>
                 </tr>
             </tbody>
         {% else %}
@@ -135,7 +141,7 @@
                 {# Section header #}
                 <tbody>
                     <tr class="info persist-header">
-                        <td colspan="{{ colspan }}" style="text-align: center">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
@@ -150,7 +156,7 @@
                         </td>
                     </tr>
                     <tr class="info">
-                        <td colspan="{{ colspan }}" style="text-align: center">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)"">
                             Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
                         </td>
                     </tr>
@@ -235,20 +241,22 @@
 {% macro render_numeric_cols(self, gradeable, section, grade, index, components_numeric) %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
-        {% for component in grade.getGradeable().getComponents() if not component.isText() %}
+        {% for component in grade.getGradeable().getComponents()|filter((component) => not component.isText()) %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade.getGradedComponent(component) %}
             {% set total = total + component_grade.getScore() %}
             <td class="option-small-input">
                 <input
                     class="option-small-box cell-grade"
-                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: #bbbbbb;" : "" }}"
+                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                        {{ component_grade.getScore() == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
                     data-origval="{{ component_grade.getScore() | default('0') }}"
                     value="{{ component_grade.getScore() | default('0') }}"
                     onclick="this.select()"
+                    onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
@@ -266,7 +274,7 @@
     {% endif %}
 
     {% set text_start = components_numeric|length %}
-    {% for component in grade.getGradeable().getComponents() if component.isText() %}
+    {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">

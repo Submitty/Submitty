@@ -161,9 +161,11 @@ HTML;
     }
 
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
+
         $return = "";
         $return .= <<<HTML
-        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.js"></script>
         <script>
 
             $(document).ready(function() {
@@ -299,7 +301,6 @@ HTML;
             });
 
         </script>
-        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.css" />
 <div style="padding:5px 5px 0px 5px;" class="full_height content forum_content forum_show_threads">
 HTML;
 

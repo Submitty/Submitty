@@ -604,12 +604,14 @@ HTML;
             "view" => isset($_REQUEST["view"]) ? $_REQUEST["view"] : null,
             "all_reg_sections" => $all_reg_sections,
             "all_rot_sections" => $all_rot_sections,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
     public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
-            "gradeable_id" => $gradeable->getId()
+            "gradeable_id" => $gradeable->getId(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -623,7 +625,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
@@ -642,17 +644,15 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId());
         }
 
-        $return .= <<<HTML
-            <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.css" />
-        <link rel="stylesheet" href="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/theme/eclipse.css" />
-        <script type="text/javascript" language="javascript" src="{$this->core->getConfig()->getBaseUrl()}vendor/codemirror/codemirror.js"></script>
-HTML;
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
         if(!$peer) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
         if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
@@ -799,6 +799,9 @@ HTML;
             add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
 
+        // For PDFAnnotationBar.twig
+        $toolbar_css = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'toolbar_embedded.css'), 'css');
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/SubmissionPanel.twig", [
             "gradeable_id" => $graded_gradeable->getGradeableId(),
             "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
@@ -808,7 +811,8 @@ HTML;
             "results" => $results,
             "results_public" => $results_public,
             "site_url" => $this->core->getConfig()->getSiteUrl(),
-            "active_version" => $display_version
+            "active_version" => $display_version,
+            'toolbar_css' => $toolbar_css
         ]);
     }
 
@@ -864,6 +868,7 @@ HTML;
 
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -910,11 +915,13 @@ HTML;
     /**
      * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable
+     * @param bool $can_inquiry
      * @return string
      */
-    public function renderRegradePanel(GradedGradeable $graded_gradeable) {
+    public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
         return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
-            "graded_gradeable" => $graded_gradeable
+            "graded_gradeable" => $graded_gradeable,
+            "can_inquiry" =>$can_inquiry
         ]);
     }
 

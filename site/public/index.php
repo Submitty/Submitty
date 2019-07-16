@@ -8,6 +8,8 @@ use app\libraries\Utils;
 use app\libraries\Access;
 use app\libraries\TokenManager;
 use app\libraries\routers\ClassicRouter;
+use app\libraries\routers\WebRouter;
+use app\libraries\response\Response;
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
@@ -77,6 +79,8 @@ if ($core->getRouter()->hasNext()) {
     $first = $core->getRouter()->getNext();
     if ($first === 'api') {
         $is_api = True;
+        $semester = $core->getRouter()->getNext() ?? '';
+        $course = $core->getRouter()->getNext() ?? '';
     }
     elseif (in_array($first, ['authentication', 'home'])) {
         $_REQUEST['component'] = $first;
@@ -131,7 +135,7 @@ $core->loadGradingQueue();
 if($core->getConfig()->getInstitutionName() !== ""){
     $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), null, $core->getConfig()->getInstitutionHomepage());
 }
-$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getHomepageUrl());
+$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getBaseUrl());
 if($core->getConfig()->isCourseLoaded()){
     $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildNewCourseUrl(), $core->getConfig()->getCourseHomeUrl());
 }
@@ -197,6 +201,26 @@ if (isset($_COOKIE[$cookie_key])) {
     catch (\InvalidArgumentException $exc) {
         // Invalid cookie data, delete it
         Utils::setCookie($cookie_key, "", time() - 3600);
+    }
+}
+
+// check if the user has a valid jwt in the header
+$api_logged_in = false;
+$jwt = $request->headers->get("authorization");
+if (!empty($jwt)) {
+    try {
+        $token = TokenManager::parseApiToken(
+            $request->headers->get("authorization"),
+            $core->getConfig()->getBaseUrl(),
+            $core->getConfig()->getSecretSession()
+        );
+        $api_key = $token->getClaim('api_key');
+        $api_logged_in = $core->loadApiUser($api_key);
+    }
+    catch (\InvalidArgumentException $exc) {
+        $core->getOutput()->renderJsonFail("Invalid token.");
+        $core->getOutput()->displayOutput();
+        return;
     }
 }
 
@@ -271,7 +295,10 @@ if (empty($_REQUEST['component']) && $core->getUser() !== null) {
 
 $supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
 
-if (!$supported_by_new_router) {
+if ($is_api) {
+    $response = WebRouter::getApiResponse($request, $core, $api_logged_in);
+}
+elseif (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
         case 'admin':
             $control = new app\controllers\AdminController($core);
@@ -310,10 +337,14 @@ if (!$supported_by_new_router) {
             $control->run();
             break;
     }
+    $response = null;
 }
 else {
-    $router = new app\libraries\routers\WebRouter($request, $core, $logged_in);
-    $router->run();
+    $response = WebRouter::getWebResponse($request, $core, $logged_in);
+}
+
+if ($response instanceof Response) {
+    $response->render($core);
 }
 
 $core->getOutput()->displayOutput();
