@@ -1651,16 +1651,23 @@ end of styles used in the admin gradeable page
 .flex-wrapper {
     display: flex;
     flex-wrap: wrap;
-    align-content: center;
-}
-
-.flex-wrapper .btn {
-    flex: 1 0 auto;
-    margin: 5px 0 0 5px;
 }
 
 .flex-wrapper .content {
     margin-bottom: 0;
+}
+
+.btn-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    max-width: 100%;
+    width: 100%;
+}
+
+.btn-wrapper .btn {
+    flex: 1 0 90%;
+    margin: 5px 0 0 5px;
 }
 
 ul.full-list, ol.full-list {
@@ -1704,6 +1711,14 @@ header > * {
 }
 
 @media (min-width: 768px) {
+    .btn-wrapper {
+        width: max-content;
+    }
+
+    .btn-wrapper .btn {
+        flex: 1 0 auto;
+    }
+
     .popup-window {
         min-height: 300px;
         width: 60%;
