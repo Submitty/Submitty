@@ -98,35 +98,32 @@ class NotificationFactory {
         }
     }
     // ***********************************TEAM NOTIFICATIONS***********************************
-    public function onTeamEvent(array $event) {
-        $user_settings = User::constructNotificationSettings($this->core->getQueries()->getUserNotificationSettings($event['to_user_id']));
-        if ($user_settings[$event['type']]) {
-            $notification = Notification::createNotification($this->core,$event);
-            $this->sendNotifications([$notification]);
-        }
-        if ($this->core->getConfig()->isEmailEnabled() && $user_settings[$event['type']."_email"]) {
-            $email = new Email($this->core,$event);
-            $this->sendEmails([$email]);
-        }
-    }
 
-    public function onTeamMemberSubmission(array $event, array $recipients) {
+    public function onTeamEvent(array $event, array $recipients) {
         $notification_recipients = array();
         $email_recipients = array();
+        $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
         foreach ($recipients as $recipient) {
-            $user_settings = User::constructNotificationSettings($this->core->getQueries()->getUserNotificationSettings($recipient));
-            if ($user_settings['team_member_submission']) {
+            $user_settings_row = array_filter($users_settings, function($v, $k) use ($recipient) {
+                return $v['user_id'] === $recipient;
+            }, ARRAY_FILTER_USE_BOTH);
+            $user_settings = User::constructNotificationSettings($user_settings_row);
+            if ($user_settings[$event['type']]) {
                 $notification_recipients[] = $recipient;
             }
-            if ($user_settings['team_member_submission_email']) {
+            if ($user_settings[$event['type'].'_email']) {
                 $email_recipients[] = $recipient;
             }
         }
         $notifications = $this->createNotificationsArray($event, $notification_recipients);
-        $emails = $this->createEmailsArray($event,$email_recipients);
         $this->sendNotifications($notifications);
-        $this->sendEmails($emails);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $emails = $this->createEmailsArray($event,$email_recipients);
+            $this->sendEmails($emails);
+        }
+
     }
+
     // ***********************************HELPERS***********************************
 
     /**

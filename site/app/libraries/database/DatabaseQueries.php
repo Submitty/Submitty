@@ -2684,11 +2684,12 @@ AND gc_id IN (
      * @param string $column
      * @param string $user_id
      */
-    public function getUserNotificationSettings(string $user_id) {
-        $params = [$user_id];
-        $query = "SELECT * FROM notification_settings WHERE user_id = ?";
+    public function getUsersNotificationSettings(array $user_ids) {
+        $params = $user_ids;
+        $user_id_query = implode(" OR ",array_fill(0,count($user_ids),"user_id = ?"));
+        $query = "SELECT * FROM notification_settings WHERE ".$user_id_query;
         $this->course_db->query($query,$params);
-        return $this->course_db->row();
+        return $this->course_db->rows();
     }
 
     /**

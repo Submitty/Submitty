@@ -194,8 +194,8 @@ class TeamController extends AbstractController {
         $metadata = json_encode(array(array($gradeable_id,'team'),null,true));
         $subject = "New Team Invitation: ".$graded_gradeable->getGradeable()->getTitle();
         $content = "You have received a new invitation to join a team from $user_id";
-        $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'to_user_id' => $invite_id, 'sender_id' => $user_id];
-        $this->core->getNotificationFactory()->onTeamEvent($event);
+        $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'sender_id' => $user_id];
+        $this->core->getNotificationFactory()->onTeamEvent($event,[$invite_id]);
 
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 

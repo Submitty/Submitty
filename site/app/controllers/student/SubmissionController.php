@@ -1467,10 +1467,10 @@ class SubmissionController extends AbstractController {
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
             // remove submitting user from recipient list
             if (($key = array_search($original_user_id, $team_members)) !== false) {
-                unset($team_members[$key]);
+                array_splice($team_members, $key, 1);
             }
             $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
-            $this->core->getNotificationFactory()->onTeamMemberSubmission($event,$team_members);
+            $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
