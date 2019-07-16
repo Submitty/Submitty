@@ -109,6 +109,24 @@ class NotificationFactory {
             $this->sendEmails([$email]);
         }
     }
+
+    public function onTeamMemberSubmission(array $event, array $recipients) {
+        $notification_recipients = array();
+        $email_recipients = array();
+        foreach ($recipients as $recipient) {
+            $user_settings = User::constructNotificationSettings($this->core->getQueries()->getUserNotificationSettings($recipient));
+            if ($user_settings['team_member_submission']) {
+                $notification_recipients[] = $recipient;
+            }
+            if ($user_settings['team_member_submission_email']) {
+                $email_recipients[] = $recipient;
+            }
+        }
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
+        $emails = $this->createEmailsArray($event,$email_recipients);
+        $this->sendNotifications($notifications);
+        $this->sendEmails($emails);
+    }
     // ***********************************HELPERS***********************************
 
     /**
