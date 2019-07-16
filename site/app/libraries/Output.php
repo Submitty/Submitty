@@ -68,17 +68,16 @@ class Output {
         return $this->render;
     }
 
-    public function loadTwig() {
+    public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
+        $debug = $full_load && $this->core->getConfig()->isDebug();
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
-            'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
-            'debug' => $this->core->getConfig()->isDebug()
+            'cache' => $debug ? false : $cache_path,
+            'debug' => $debug
         ]);
-        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
-            ->setTimezone($this->core->getConfig()->getTimezone());
         $this->twig->addGlobal("core", $this->core);
 
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
@@ -97,8 +96,15 @@ HTML;
             throw new OutputException('Invalid path to image file');
         }, ['is_safe' => ['html']]));
 
-        if($this->core->getConfig()->wrapperEnabled()) {
-            $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
+        if ($full_load) {
+            $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
+                ->setTimezone($this->core->getConfig()->getTimezone());
+            if($this->core->getConfig()->wrapperEnabled()) {
+                $this->twig_loader->addPath(
+                    FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
+                    $namespace = 'site_uploads'
+                );
+            }
         }
         $engine = new ParsedownEngine();
         $engine->setSafeMode(true);
@@ -409,6 +415,11 @@ HTML;
      * @return string
      */
     public function showException($exception = "", $die = true) {
+        // Load minimal twig if it hasn't been already because we're crashing
+        // before $core->loadConfig() could be successfully run.
+        if ($this->twig === null) {
+            $this->loadTwig(false);
+        }
         /** @noinspection PhpUndefinedMethodInspection */
         $exceptionPage = $this->getView("Error")->exceptionPage($exception);
         // @codeCoverageIgnore
