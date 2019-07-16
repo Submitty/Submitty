@@ -1647,6 +1647,12 @@ end of styles used in the admin gradeable page
 .flex-wrapper {
     display: flex;
     flex-wrap: wrap;
+    align-content: center;
+}
+
+.flex-wrapper .btn {
+    flex: 1 0 auto;
+    margin: 5px 0 0 5px;
 }
 
 .flex-wrapper .content {

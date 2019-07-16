@@ -5,7 +5,7 @@
 
 #student-table {
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid var(--standard-hover-light-gray);
 }
 
 caption {
@@ -13,6 +13,7 @@ caption {
     font-weight: bold;
     font-size: 1.2em;
     width: 100%;
+    display: block;
 }
 
 #student-table th {
@@ -20,12 +21,12 @@ caption {
 }
 
 .section-break {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid var(--standard-hover-light-gray);
     font-weight: normal;
 }
 
 .access-grading td, .access-grading i {
-    background: #AAB3F7 !important;
+    background: var(--standard-focus-cornflowe-blue) !important;
 }
 
 #edit-user-form {
@@ -71,6 +72,10 @@ caption {
 } 
 
 @media (min-width: 801px) {
+    caption {
+        display: table-caption;
+    }
+
     tbody {
         counter-reset: student;
     }
@@ -86,5 +91,9 @@ caption {
 
     thead tr::before {
         visibility: hidden;
+    }
+
+    tr.access-grading {
+        background: var(--standard-focus-cornflowe-blue) !important;
     }
 }
