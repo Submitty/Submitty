@@ -44,6 +44,7 @@ use app\libraries\Utils;
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
+ * @method bool isEmailEnabled()
  * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
  * @method string getCourseEmail()
@@ -147,6 +148,9 @@ class Config extends AbstractModel {
 
     /** @property @var array */
     protected $wrapper_files = array();
+
+    /** @property @var bool */
+    protected $email_enabled;
 
     /** @property @var string */
     protected $course_name;
@@ -321,6 +325,12 @@ class Config extends AbstractModel {
             }
             $this->$var = $secrets_json[$key];
         }
+
+        $email_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'email.json'));
+        if (!$email_json) {
+            throw new ConfigException("Could not find email config: {$this->config_path}/email.json");
+        }
+        $this->email_enabled = $email_json['email_enabled'];
     }
 
     public function loadCourseJson($course_json_path) {
