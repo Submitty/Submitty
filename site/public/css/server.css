@@ -1683,9 +1683,10 @@ ul.bare-list {
 @media (min-width: 768px) {
     .popup-window {
         min-height: 300px;
-        width: 60%;
-        max-height: min-content;
-        height: auto;
-        max-width: 680px;
+        max-height: 80%;
+        min-width: 40%;
+        max-width: 80%;
+        height: min-content;
+        width: min-content;
     }
 }
