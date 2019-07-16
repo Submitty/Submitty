@@ -1109,6 +1109,13 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * Finds the number of users who has a non NULL last_viewed_time for team assignments
+     * NULL times represent unviewed, non-null represent the user has viewed the latest version already
+     * @param $gradeable
+     * @param $sections
+     * @return integer
+     */
     public function getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections) {
         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
 
@@ -1134,6 +1141,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * @param $gradeable_id
+     * @param $team_id
+     * @return integer
+     */
     public function getActiveVersionForTeam($gradeable_id,$team_id) {
         $params = array($gradeable_id,$team_id);
         $this->course_db->query("SELECT active_version FROM electronic_gradeable_version WHERE g_id = ? and team_id = ?",$params);
@@ -1733,22 +1745,45 @@ WHERE gcm_id=?", $params);
         }
     }
 
+    /**
+     * Finds the viewed time for a specific user on a team.
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $team_id
+     * @param $user_id
+     */
     public function getTeamViewedTime($team_id,$user_id) {
         $this->course_db->query("SELECT last_viewed_time FROM teams WHERE team_id = ? and user_id=?",array($team_id,$user_id));
         return $this->course_db->rows()[0]['last_viewed_time'];
     }
 
+    /**
+     * Updates the viewed time to now for a specific user on a team.
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $team_id
+     * @param $user_id
+     */
     public function updateTeamViewedTime($team_id, $user_id) {
         $this->course_db->query("UPDATE teams SET last_viewed_time = NOW() WHERE team_id=? and user_id=?",
                 array($team_id,$user_id));
     }
 
+    /**
+     * Updates the viewed time to NULL for all users on a team.
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $team_id
+     */
     public function clearTeamViewedTime($team_id) {
         $this->course_db->query("UPDATE teams SET last_viewed_time = NULL WHERE team_id=?",
             array($team_id));
     }
 
-    public function getTeamViewedTimes($gradeable) {
+    /**
+     * Finds all teams for a gradeable and creates a map for each with key => user_id ; value => last_viewed_tim
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $gradeable
+     * @return array
+     */
+    public function getAllTeamViewedTimesForGradeable($gradeable) {
         $params = array($gradeable->getId());
         $this->course_db->query("SELECT team_id,user_id,last_viewed_time FROM teams WHERE 
                 team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
