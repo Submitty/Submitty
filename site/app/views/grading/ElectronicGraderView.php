@@ -38,6 +38,8 @@ class ElectronicGraderView extends AbstractView {
         $overall_scores,
         $overall_average,
         int $total_submissions,
+        int $individual_viewed_grade,
+        int $total_students_submitted,
         int $registered_but_not_rotating,
         int $rotating_but_not_registered,
         int $viewed_grade,
@@ -143,6 +145,8 @@ class ElectronicGraderView extends AbstractView {
                 if ($gradeable->isTaGradeReleased()) {
                     $viewed_total = $total/$num_components;
                     $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
+                    $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
+                        number_format(($individual_viewed_grade/$total_students_submitted)*100,1);
                 }
             }
             if(!$peer) {
@@ -226,6 +230,9 @@ class ElectronicGraderView extends AbstractView {
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
             "component_overall_percentage" => $component_overall_percentage,
+            "individual_viewed_grade" => $individual_viewed_grade,
+            "total_students_submitted" => $total_students_submitted,
+            "individual_viewed_percent" => $individual_viewed_percent,
             "regrade_requests" => $regrade_requests
         ]);
     }

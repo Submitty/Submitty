@@ -1133,7 +1133,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return intval($this->course_db->row()['cnt']);
     }
-    
+
+    public function getActiveVersionForTeam($gradeable_id,$team_id) {
+        $params = array($gradeable_id,$team_id);
+        $this->course_db->query("SELECT active_version FROM electronic_gradeable_version WHERE g_id = ? and team_id = ?",$params);
+        return $this->course_db->row()['active_version'];
+    }
 
     public function getNumUsersGraded($g_id) {
         $this->course_db->query("
