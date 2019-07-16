@@ -281,7 +281,7 @@
             }
         });
         }
-    }
+    };
 
     function shareToOther(id, path) {
         // pass filename to server to record the permission of the file
@@ -333,13 +333,13 @@
                             let date;
                             switch (index) {
                                 case 0: 
-                                    date = new Date();
+                                    updateToServerTime(fp);
                                     break;
                                 case 1: 
                                     date = new Date("9998-01-01 00:00:00");
+                                    fp.setDate(date,true);
                                     break;
                             }
-                            fp.setDate(date,true);
                         }
                     }
                 )],

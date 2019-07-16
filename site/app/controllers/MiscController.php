@@ -41,7 +41,30 @@ class MiscController extends AbstractController {
             case 'check_bulk_progress':
                 $this->checkBulkProgress();
                 break;
+            case 'get_server_time':
+                $this->getServerTime();
+                break;
         }
+    }
+
+    /**
+     * Get the current server time
+     *
+     * Returns a json string which contains the current server time broken up into year, month, day, hour, minute,
+     * second
+     */
+    private function getServerTime() {
+        $time = new \DateTime('now', $this->core->getConfig()->getTimezone());
+
+        $json = (object)[];
+        $json->year = $time->format('Y');
+        $json->month = $time->format('m');
+        $json->day = $time->format('j');
+        $json->hour = $time->format('G');
+        $json->minute = $time->format('i');
+        $json->second = $time->format('s');
+
+        $this->core->getOutput()->renderJson($json);
     }
 
     private function encodePDF(){
