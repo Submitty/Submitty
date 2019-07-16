@@ -2,10 +2,10 @@
 
 namespace app;
 
-use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\models\Email;
 use app\models\Notification;
+use app\models\User;
 use LogicException;
 
 /**
@@ -97,7 +97,18 @@ class NotificationFactory {
             $this->sendEmails($emails);
         }
     }
-
+    // ***********************************TEAM NOTIFICATIONS***********************************
+    public function onTeamEvent(array $event) {
+        $user_settings = User::constructNotificationSettings($this->core->getQueries()->getUserNotificationSettings($event['to_user_id']));
+        if ($user_settings[$event['type']]) {
+            $notification = Notification::createNotification($this->core,$event);
+            $this->sendNotifications([$notification]);
+        }
+        if ($this->core->getConfig()->isEmailEnabled() && $user_settings[$event['type']."_email"]) {
+            $email = new Email($this->core,$event);
+            $this->sendEmails([$email]);
+        }
+    }
     // ***********************************HELPERS***********************************
 
     /**

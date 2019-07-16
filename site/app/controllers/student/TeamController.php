@@ -189,6 +189,14 @@ class TeamController extends AbstractController {
         }
 
         $this->core->getQueries()->sendTeamInvitation($team->getId(), $invite_id);
+
+        // send invited user a notification
+        $metadata = json_encode(array(array($gradeable_id,'team'),null,true));
+        $subject = "New Team Invitation: ".$graded_gradeable->getGradeable()->getTitle();
+        $content = "You have received a new invitation to join a team from $user_id";
+        $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'to_user_id' => $invite_id, 'sender_id' => $user_id];
+        $this->core->getNotificationFactory()->onTeamEvent($event);
+
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();

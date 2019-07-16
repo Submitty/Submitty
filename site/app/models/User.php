@@ -165,20 +165,7 @@ class User extends AbstractModel {
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
 
         //Other call to get notification settings??
-        $this->notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
-        $this->notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
-        $this->notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
-        $this->notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
-        $this->notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
-        $this->notification_settings['team_invite'] = isset($details['team_invite']) ? $details['team_invite'] : true;
-        $this->notification_settings['team_member_submission'] = isset($details['team_member_submission']) ? $details['team_member_submission'] : true;
-        $this->notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
-        $this->notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
-        $this->notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
-        $this->notification_settings['all_new_posts_email'] = !empty($details['all_new_posts_email']) ? $details['all_new_posts_email'] : false;
-        $this->notification_settings['all_modifications_forum_email'] = !empty($details['all_modifications_forum_email']) ? $details['all_modifications_forum_email'] : false;
-        $this->notification_settings['team_invite_email'] = isset($details['team_invite_email']) ? $details['team_invite_email'] : true;
-        $this->notification_settings['team_member_submission_email'] = isset($details['team_member_submission_email']) ? $details['team_member_submission_email'] : true;
+        $this->notification_settings = self::constructNotificationSettings($details);
 
         $this->registration_section = isset($details['registration_section']) ? $details['registration_section'] : null;
         $this->rotating_section = isset($details['rotating_section']) ? intval($details['rotating_section']) : null;
@@ -350,6 +337,25 @@ class User extends AbstractModel {
 			$ex_data = '$data:  ' . var_export(htmlentities($data), true);
 			throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
     	}
+    }
+
+    static public function constructNotificationSettings($details) {
+        $notification_settings = array();
+        $notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
+        $notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
+        $notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
+        $notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
+        $notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
+        $notification_settings['team_invite'] = isset($details['team_invite']) ? $details['team_invite'] : true;
+        $notification_settings['team_member_submission'] = isset($details['team_member_submission']) ? $details['team_member_submission'] : true;
+        $notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
+        $notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
+        $notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
+        $notification_settings['all_new_posts_email'] = !empty($details['all_new_posts_email']) ? $details['all_new_posts_email'] : false;
+        $notification_settings['all_modifications_forum_email'] = !empty($details['all_modifications_forum_email']) ? $details['all_modifications_forum_email'] : false;
+        $notification_settings['team_invite_email'] = isset($details['team_invite_email']) ? $details['team_invite_email'] : true;
+        $notification_settings['team_member_submission_email'] = isset($details['team_member_submission_email']) ? $details['team_member_submission_email'] : true;
+        return $notification_settings;
     }
 
     /**
