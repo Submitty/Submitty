@@ -1524,11 +1524,6 @@ end of styles used in the admin gradeable page
     border: 0;
 }
 
-/* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
-#upload-boxes > div:focus {
-    outline: 2px solid cornflowerblue;
-}
-
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .fa-trash:focus {
     outline: 2px solid cornflowerblue;
@@ -1604,6 +1599,10 @@ end of styles used in the admin gradeable page
     flex-direction: column;
 }
 
+.flex-col-space > * {
+    margin: 10px 0;
+}
+
 .shadow {
     box-shadow: 0 2px 15px -5px #888888;
     border-radius: 3px;
@@ -1653,6 +1652,11 @@ ul.bare-list {
     padding: 0;
 }
 
+.full-width {
+    width: 100%;
+    display: block;
+}
+
 @media (min-width: 541px) {
     .content {
     margin: 30px;
@@ -1667,9 +1671,10 @@ ul.bare-list {
 @media (min-width: 768px) {
     .popup-window {
         min-height: 300px;
-        width: 60%;
         max-height: min-content;
         height: auto;
-        max-width: 680px;
+        min-width: max-content;
+        max-width: 60%;
+        width: auto;
     }
 }
