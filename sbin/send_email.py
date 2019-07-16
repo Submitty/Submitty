@@ -26,7 +26,7 @@ import psutil
 my_program_name = sys.argv[0].split('/')[-1]
 my_pid = os.getpid()
 
-# loop over all active process on the server
+# loop over all active processes on the server
 for p in psutil.pids():
     try:
         cmdline = psutil.Process(p).cmdline()
