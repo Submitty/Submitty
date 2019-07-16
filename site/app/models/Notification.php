@@ -118,7 +118,9 @@ class Notification extends AbstractModel {
         }
         $parts = $metadata[0];
         $hash = $metadata[1] ?? null;
-        return $core->buildUrl($parts, $hash);
+        $is_router = $metadata[2];
+
+        return $is_router ? $core->buildNewCourseUrl($parts) : $core->buildUrl($parts, $hash);
     }
 
     public static function getThreadIdIfExists($metadata_json) {

@@ -385,7 +385,7 @@ class ForumController extends AbstractController{
 
                 }
 
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id),null,false));
                 // notify on a new announcement
                 if ($announcement) {
                     $content = "New Announcement: ".$thread_title;
@@ -462,7 +462,7 @@ class ForumController extends AbstractController{
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id),null,false));
                 $content = "Reply: A post '".Notification::textShortner($parent_post_content). "' got new a reply";
                 $subject = "A New Reply";
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
@@ -544,7 +544,7 @@ class ForumController extends AbstractController{
             } else {
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
+                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, false));
                 $content = "Undeleted: A thread/post '".Notification::textShortner($post["content"])."' has been undeleted ";
                 $subject = "Your post was undeleted";
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -592,7 +592,7 @@ class ForumController extends AbstractController{
             }
             if($any_changes) {
                 $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
+                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, false));
                 $content = "Update: A thread/post '".Notification::textShortner($post["content"]);
                 $subject = "A thread/post was edited";
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -636,7 +636,7 @@ class ForumController extends AbstractController{
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
+                    $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post, false));
                     $content = "Thread Merged: '".Notification::textShortner($child_thread_title)."' got merged into '".Notification::textShortner($parent_thread_title);
                     $subject = "A thread was merged";
                     $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
