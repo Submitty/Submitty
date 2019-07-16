@@ -52,7 +52,7 @@
         </tbody>
     </table>
 </div>
-{% include('admin/users/UserForm.twig') %}
+{% include('admin/users/UserForm.twig') with {'action': 'update_grader'} %}
 {% include('admin/users/GraderListForm.twig') %}
 {% include('admin/users/RegistrationSectionsForm.twig') %}
 

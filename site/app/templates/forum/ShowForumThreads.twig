@@ -13,6 +13,7 @@
         $('#'+'{{ display_option }}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
         $(".post_reply_from").submit(publishPost);
         $("form").areYouSure();
+        loadThreadHandler();
     });
 
 </script>

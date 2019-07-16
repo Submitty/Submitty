@@ -15,6 +15,9 @@
 			<textarea name="room_seating_email_body" id="room_seating_email_body" class="fill-available post_content_reply" style="resize:none;min-height:250px;" rows="4">{{ defaultBody }}</textarea>
 	</div>
 	<p style="display: inline-block; margin-top:15px"><b>NOTE:</b> clicking send will email each student their seating assignment.</p>
-	<button class="btn btn-primary" type="submit" style="margin-top:15px;width:100%;">Send</button>
+     {% if not email_enabled %}
+        <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
+     {% endif %}
+	<button class="btn btn-primary" type="submit" style="margin-top:15px;width:100%;" {{ not email_enabled ? "disabled"}}>Send</button>
 </form>
 </div>

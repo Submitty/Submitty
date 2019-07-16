@@ -10,6 +10,8 @@ class LateDayView extends AbstractView {
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = Utils::getAutoFillData($students);
 
+        $this->core->getOutput()->addInternalCss('latedays.css');
+
         return $this->core->getOutput()->renderTwigTemplate("admin/LateDays.twig", [
             "users" => $users,
             "student_full" => $student_full,
@@ -17,4 +19,3 @@ class LateDayView extends AbstractView {
         ]);
     }
 }
-

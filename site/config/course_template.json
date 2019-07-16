@@ -20,6 +20,7 @@
         "regrade_enabled": false,
         "regrade_message": "Warning: Frivolous grade inquiries may lead to grade deductions or lost late days",
         "seating_only_for_instructor": false,
-        "room_seating_gradeable_id": ""
+        "room_seating_gradeable_id": "",
+        "auto_rainbow_grades": false
     }
 }
