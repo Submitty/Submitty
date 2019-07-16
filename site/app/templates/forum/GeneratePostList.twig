@@ -1,3 +1,4 @@
+<data id="current-thread" value="{{ post_data[0].thread_id }}"></data>
 {% for post_d in  post_data %}
 
     {% include "forum/CreatePost.twig" with {
@@ -66,3 +67,4 @@
         "possibleMerges" : merge_thread_content.possibleMerges
     } %}
 {% endif %}
+

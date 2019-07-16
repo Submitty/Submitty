@@ -464,18 +464,18 @@ function resetModules() {
     var height = $("main").height();
 
     $('.grading_toolbar .fa-list').addClass('icon-selected');
-    $("#autograding_results").attr("style", "z-index:30; left:0; top:60%; width:48%; height:40%; display:block;");
+    $("#autograding_results").attr("style", "position: absolute; z-index:30; left:30px; top:60%; width:48%; height:40%; display:block;");
     $('.grading_toolbar .fa-edit').addClass('icon-selected');
-    $("#grading_rubric").attr("style", "left: 50%; z-index:30; top:10%; width:48%; height:68%; display:block;");
+    $("#grading_rubric").attr("style", "position: absolute; left: 50%; z-index:30; top:10%; width:48%; height:68%; display:block;");
     $('.grading_toolbar .fa-folder-open').addClass('icon-selected');
-    $("#submission_browser").attr("style", "left:0; z-index:30; top:10%; width:48%; height:48%; display:block;");
+    $("#submission_browser").attr("style", "position: absolute; left:30px; z-index:30; top:10%; width:48%; height:48%; display:block;");
     $('.grading_toolbar .fa-user').addClass('icon-selected');
-    $('#bar_wrapper').attr("style", "top: 0; left: " + ((width - $('#bar_wrapper').width()) / 2) + "; z-index:40;");
-    $("#student_info").attr("style", "left: 50%; top: 80%; z-index:30; width:48%; height:20%; display:block;");
+    $('#bar_wrapper').attr("style", "position: absolute; top: 0; left: " + ((width - $('#bar_wrapper').width()) / 2) + "px; z-index:40;");
+    $("#student_info").attr("style", "position: absolute; left: 50%; top: 80%; z-index:30; width:48%; height:20%; display:block;");
     $('.grading_toolbar .fa-hand-paper').addClass('icon-selected');
-    $("#regrade_info").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
+    $("#regrade_info").attr("style", "position: absolute; bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     $('.grading_toolbar .fa-comment-alt').addClass('icon-selected');
-    $("#discussion_browser").attr("style", "bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
+    $("#discussion_browser").attr("style", "position: absolute; bottom:30px; z-index:30; right:15px; width:48%; height:37%; display:block;");
     // $("#pdf_annotation_bar").attr("style", "left: 58%, z-index:40; top:307px");
     deleteCookies();
     updateCookies();

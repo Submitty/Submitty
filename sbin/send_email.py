@@ -11,7 +11,7 @@ import smtplib
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Table, bindparam
 
 try:
     CONFIG_PATH = os.path.join(
@@ -73,8 +73,8 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    MetaData(bind=db)
-    return db
+    metadata = MetaData(bind=db)
+    return db, metadata
 
 
 def construct_mail_client():
@@ -121,11 +121,13 @@ def mark_sent(email_id, db):
     db.execute(query_string)
 
 
-def store_error(email_id, db, myerror):
-    """Mark an email as sent in the database."""
-    query_string = "UPDATE emails SET error='{}' WHERE id = {};".format(
-        myerror, email_id)
-    db.execute(query_string)
+def store_error(email_id, db, metadata, myerror):
+    """Store an error string for the specified email."""
+    emails_table = Table('emails', metadata, autoload=True)
+    # use bindparam to correctly handle a myerror string with single quote character
+    query = emails_table.update().where(
+        emails_table.c.id == email_id).values(error=bindparam('b_myerror'))
+    db.execute(query, b_myerror=myerror)
 
 
 def construct_mail_string(send_to, subject, body):
@@ -148,7 +150,7 @@ def construct_mail_string(send_to, subject, body):
 
 def send_email():
     """Send queued emails."""
-    db = setup_db()
+    db, metadata = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
     if not EMAIL_ENABLED or len(queued_emails) == 0:
@@ -158,7 +160,7 @@ def send_email():
 
     for email_data in queued_emails:
         if email_data["send_to"] == "":
-            store_error(email_data["id"], db, "WARNING: empty email address")
+            store_error(email_data["id"], db, metadata, "WARNING: empty email address")
             e = "[{}] WARNING: empty email address for recipient {}".format(
                 str(datetime.datetime.now()), email_data["user_id"])
             LOG_FILE.write(e+"\n")
@@ -174,7 +176,7 @@ def send_email():
             success_count += 1
 
         except Exception as email_send_error:
-            store_error(email_data["id"], db, "ERROR: sending email "
+            store_error(email_data["id"], db, metadata, "ERROR: sending email "
                         + str(email_send_error))
             e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
                 str(datetime.datetime.now()),
