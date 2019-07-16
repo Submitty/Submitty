@@ -124,6 +124,17 @@ ORDER BY user_id", [User::LEVEL_FACULTY]);
         return $return;
     }
 
+    public function getAllUnarchivedSemester() {
+        $this->submitty_db->query("
+SELECT DISTINCT semester
+FROM courses
+WHERE status = 1");
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['semester'];
+        }
+        return $return;
+    }
 
     public function insertSubmittyUser(User $user) {
         $array = array($user->getId(), $user->getPassword(), $user->getNumericId(),

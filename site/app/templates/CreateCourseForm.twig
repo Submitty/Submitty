@@ -11,7 +11,13 @@
                 </label>
             </div>
             <div class="option-input col-md-6">
-                <textarea name='semester' id='course_semester' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea>
+                <select name="course_semester" id="course_semester" class="auto_save">
+                    {% for semester in semesters %}
+                        <option value="{{ semester }}">
+                            {{ semester }}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
         </div>
 

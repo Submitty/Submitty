@@ -142,6 +142,13 @@ class DatabaseQueries {
     }
 
     /**
+     * @return string[]
+     */
+    public function getAllUnarchivedSemester() {
+        throw new NotImplementedException();
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {

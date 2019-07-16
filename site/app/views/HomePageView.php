@@ -74,12 +74,13 @@ class HomePageView extends AbstractView {
         ]);
     }
 
-    public function showCourseCreationPage($faculty, $head_instructor) {
+    public function showCourseCreationPage($faculty, $head_instructor, $semesters) {
         return $this->core->getOutput()->renderTwigTemplate('CreateCourseForm.twig', [
             "csrf_token" => $this->core->getCsrfToken(),
             "head_instructor" => $head_instructor,
             "faculty" => $faculty,
             "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
+            "semesters" => $semesters,
             "course_creation_url" => $this->core->buildNewUrl(['home', 'courses', 'new'])
         ]);
     }

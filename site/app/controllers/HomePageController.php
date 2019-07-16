@@ -167,7 +167,7 @@ class HomePageController extends AbstractController {
             );
         }
 
-        $semester = $_POST['semester'];
+        $semester = $_POST['course_semester'];
         $course_title = $_POST['course_title'];
         $head_instructor = $_POST['head_instructor'];
 
@@ -243,7 +243,8 @@ class HomePageController extends AbstractController {
                 ['HomePage'],
                 'showCourseCreationPage',
                 $faculty ?? null,
-                $this->core->getUser()->getId()
+                $this->core->getUser()->getId(),
+                $this->core->getQueries()->getAllUnarchivedSemester()
             )
         );
     }
