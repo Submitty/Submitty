@@ -128,6 +128,7 @@ int main(int argc, char *argv[]) {
                             +
                             " 1>" + "STDOUT" + which + ".txt" +
                             " 2>" + "STDERR" + which + ".txt",
+                            false,
                             actions,
                             dispatcher_actions,
                             logfile,

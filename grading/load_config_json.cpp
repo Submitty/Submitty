@@ -48,11 +48,16 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
   if (whole_config["autograding"].find("work_to_details") == whole_config["autograding"].end()) {
     whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("random_output/test*/*.txt");
     whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
     whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
     //todo check up on how this works.
     whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
+  }
+
+  if (whole_config["autograding"].find("work_to_random_output") == whole_config["autograding"].end()){
+    whole_config["autograding"]["work_to_random_output"].push_back("random_output/test*/*.txt");
   }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
@@ -996,7 +1001,7 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output ("+filename+")";
   } else if (filename.find("STDERR") != std::string::npos) {
-    std::string program_name = get_program_name(command,whole_config);
+    std::string program_name = get_program_name(command,false,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
     } else if (program_name.find("java") != std::string::npos) {

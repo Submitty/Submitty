@@ -190,13 +190,13 @@ std::set<std::string> get_compiled_executables(const nlohmann::json &whole_confi
 }
 
 
-bool local_executable (const std::string &program, const nlohmann::json &whole_config) {
+bool local_executable (const std::string &program, const nlohmann::json &whole_config, const bool isInstructor) {
   assert (program.size() > 3);
   assert (program.substr(0,2) == "./");
 
   std::set<std::string> executables = get_compiled_executables(whole_config);
 
-  if (executables.find(program.substr(2,program.size())) != executables.end()) {
+  if (executables.find(program.substr(2,program.size())) != executables.end() || isInstructor) {
     return true;
   }
 
@@ -213,11 +213,11 @@ bool local_executable (const std::string &program, const nlohmann::json &whole_c
 }
 
 
-std::string validate_program(const std::string &program, const nlohmann::json &whole_config) {
+std::string validate_program(const std::string &program, const nlohmann::json &whole_config, const bool isInstructor) {
   std::string full_path_executable;
   assert (program.size() >= 1);
   if (program.size() > 2 && program.substr(0,2) == "./") {
-    if (local_executable(program,whole_config)) {
+    if (local_executable(program,whole_config,isInstructor)) {
       return program;
     }
     std::string message = "ERROR: This local program '" + program + "' looks suspicious.\n"
@@ -511,14 +511,14 @@ void wildcard_expansion(std::vector<std::string> &my_finished_args, const std::s
 // =====================================================================================
 // =====================================================================================
 
-std::string get_program_name(const std::string &cmd, const nlohmann::json &whole_config) {
+std::string get_program_name(const std::string &cmd, const bool isInstructor, const nlohmann::json &whole_config) {
   std::string my_program;
   std::stringstream ss(cmd);
 
   ss >> my_program;
   assert (my_program.size() >= 1);
 
-  std::string full_path_executable = validate_program(my_program, whole_config);
+  std::string full_path_executable = validate_program(my_program, whole_config, isInstructor);
   return full_path_executable;
 }
 
@@ -572,6 +572,7 @@ std::vector<std::string> break_into_tokens(const std::string &cmd) {
 
 
 void parse_command_line(const std::string &cmd,
+      const bool isInstructor,
       std::string &my_program,
       std::vector<std::string> &my_args,
       std::string &my_stdin,
@@ -595,7 +596,7 @@ void parse_command_line(const std::string &cmd,
     if (my_program == "") {
       assert (my_args.size() == 0);
       // program name
-      my_program = validate_program(token, whole_config);
+      my_program = validate_program(token, whole_config, isInstructor);
       assert (my_program != "");
     }
 
@@ -802,7 +803,7 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config) {
+int exec_this_command(const std::string &cmd, const bool isInstructor, std::ofstream &logfile, const nlohmann::json &whole_config) {
 
   // to avoid creating extra layers of processes, use exec and not
   // system or the shell
@@ -813,7 +814,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   std::string my_stdin;
   std::string my_stdout;
   std::string my_stderr;
-  parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile, whole_config);
+  parse_command_line(cmd, isInstructor, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile, whole_config);
 
 
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
@@ -1059,7 +1060,8 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, 
+int execute(const std::string &cmd,
+      const bool isInstructor,
       const std::vector<nlohmann::json> actions,
       const std::vector<nlohmann::json> dispatcher_actions,
       const std::string &execute_logfile,
@@ -1130,7 +1132,7 @@ int execute(const std::string &cmd,
   // ensure fork was successful
   assert (childPID >= 0);
 
-  std::string program_name = get_program_name(cmd,whole_config);
+  std::string program_name = get_program_name(cmd,isInstructor,whole_config);
   int seconds_to_run = get_the_limit(program_name,RLIMIT_CPU,test_case_limits,assignment_limits);
 
   int allowed_rss_memory = get_the_limit(program_name,RLIMIT_RSS,test_case_limits,assignment_limits);
@@ -1151,7 +1153,7 @@ int execute(const std::string &cmd,
       close(dispatcherpipe[0]); // close read end of the pipe
     }
     int child_result;
-    child_result = exec_this_command(cmd,logfile,whole_config);
+    child_result = exec_this_command(cmd,isInstructor,logfile,whole_config);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -1230,7 +1232,7 @@ int execute(const std::string &cmd,
                   close(dispatcherpipe[0]); // close read end of the pipe
                 }
                 int child_result;
-                child_result = exec_this_command(cmd,logfile,whole_config);
+                child_result = exec_this_command(cmd,isInstructor,logfile,whole_config);
 
                 // send the system status code back to the parent process
                 //std::cout << "    child_result = " << child_result << std::endl;

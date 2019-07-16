@@ -9,6 +9,7 @@
 
 // implemented in execute.cpp
 int execute(const std::string &cmd, 
+      const bool isInstructor,
       const std::vector<nlohmann::json> actions,
       const std::vector<nlohmann::json> dispatcher_actions,
       const std::string &execute_logfile,
@@ -18,7 +19,7 @@ int execute(const std::string &cmd,
       const bool windowed,
       const std::string display_variable);
 
-int exec_this_command(const std::string &cmd, std::ofstream &logfile);
+int exec_this_command(const std::string &cmd,const bool isInstructor, std::ofstream &logfile);
 
 int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstream &logfile, const nlohmann::json &whole_config);
 
@@ -31,7 +32,7 @@ rlim_t get_the_limit(const std::string &program_name, int which_limit,
                      const nlohmann::json &test_case_limits,
                      const nlohmann::json &assignment_limits);
 
-std::string get_program_name(const std::string &cmd,const nlohmann::json &whole_config);
+std::string get_program_name(const std::string &cmd,const bool isInstructor,const nlohmann::json &whole_config);
 
 void wildcard_expansion(std::vector<std::string> &my_args, const std::string &full_pattern, std::ostream &logfile);
 
