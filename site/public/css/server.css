@@ -1116,6 +1116,7 @@ div.full_height {
     margin: 10px;
     height: calc(100% - 20px);
     width: calc(100vw - 20px);
+    word-break: break-word;
 }
 
 .popup-form form {
@@ -1665,7 +1666,7 @@ ul.bare-list {
 }
 
 .full-width {
-    width: 100%;
+    width: 100% !important;
     display: block;
 }
 
@@ -1688,7 +1689,7 @@ ul.bare-list {
     .popup-window {
         min-height: 300px;
         max-height: 80%;
-        min-width: max-content;
+        min-width: 680px;
         max-width: 80%;
         height: min-content;
         width: min-content;
