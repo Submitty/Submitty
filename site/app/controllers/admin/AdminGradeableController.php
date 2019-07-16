@@ -11,6 +11,7 @@ use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use http\Exception\InvalidArgumentException;
+use RecursiveIteratorIterator;
 
 class AdminGradeableController extends AbstractController {
     public function run() {
@@ -125,10 +126,12 @@ class AdminGradeableController extends AbstractController {
         ]);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(
             FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
         );
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'submit_url' => $submit_url,
@@ -161,13 +164,21 @@ class AdminGradeableController extends AbstractController {
 
         // Construct a list of rotating gradeables
         $rotating_gradeables = [];
-        foreach ($this->core->getQueries()->getGradeablesPastAndSection() as $row) {
+        foreach ($this->core->getQueries()->getGradeablesRotatingGraderHistory($gradeable->getId()) as $row) {
             $gradeable_section_history[$row['user_id']][$row['g_id']] = $row['sections_rotating_id'];
 
             // Use the keys to remove duplicates
             $rotating_gradeables[$row['g_id']] = 1;
         }
         $rotating_gradeables = array_keys($rotating_gradeables);
+
+        // The current gradeable will always load its grader history,
+        // but if it is grade by registration it should not be in $rotating_gradeables array
+        if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
+            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            unset($rotating_gradeables[$current_g_id_key]);
+            $rotating_gradeables = array_values($rotating_gradeables);
+        }
 
         // Get some global configuration data
         $num_rotating_sections = $this->core->getQueries()->getNumberRotatingSections();
@@ -176,52 +187,39 @@ class AdminGradeableController extends AbstractController {
 
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
-        // This helps determine which radio button to check when selecting config.
-        // Default option, which means the user has to specify the path.
-        $config_select_mode = 'manual';
-
         // These are hard coded default config options.
-        $default_config_paths = [ ['upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
-                                  ['pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
-                                  ['iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
-                                  ['left_right_exam_seating (for collecting student handedness for exam seating assignment', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
-                                  ['test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
-                                  ['test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
-        foreach ($default_config_paths as $default_config_path) {
-            $path = $default_config_path[1];
-            // If this happens then select the first radio button 'Using Default'
-            if ($path === $saved_config_path) {
-                $config_select_mode = 'defaults';
-                break;
-            }
-        }
+        $default_config_paths = [ ['PROVIDED: upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
+                                  ['PROVIDED: pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
+                                  ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
+                                  ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
+                                  ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
+                                  ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = $file['path'];
-            // If this happens then select the second radio button 'Using Uploaded'
-            if ($file['path'] === $saved_config_path) {
-                $config_select_mode = 'uploaded';
-            }
+            $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
         }
-
         // Configs stored in a private repository (specified in course config)
-        $config_repo_name = $this->core->getConfig()->getPrivateRepository();
+        $config_repo_string = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
-        if ($config_repo_name !== '') {
-            $repository_config_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $config_repo_name);
-            $all_repository_configs = FileUtils::getAllFiles($repository_config_dir);
-            foreach ($all_repository_configs as $file) {
-                $all_repository_config_paths[] = $file['path'];
-                // If this happens then select the third radio button 'Use Private Repository'
-                if ($file['path'] === $saved_config_path) {
-                    $config_select_mode = 'repo';
-                }
+        $repository_error_messages = array();
+        $repo_id_number = 1;
+        foreach (explode(',',$config_repo_string) as $config_repo_name) {
+            $config_repo_name = str_replace(' ', '', $config_repo_name);
+            if ($config_repo_name == '') {
+                continue;
             }
+            $directory_queue = array($config_repo_name);
+            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue,$repository_error_messages,$repo_id_number);
+            if (isset($repo_paths)) {
+                $all_repository_config_paths = array_merge($all_repository_config_paths,$repo_paths);
+            }
+            $repo_id_number++;
         }
+        usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
 
         // Load output from build of config file
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
@@ -266,9 +264,10 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-
         $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
             'gradeable' => $gradeable,
             'action' => 'edit',
@@ -298,11 +297,9 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
-            'config_repo_name' => $config_repo_name,
-            'all_repository_config_paths' => $all_repository_config_paths,
-            'all_uploaded_config_paths' => $all_uploaded_config_paths,
-            'default_config_paths' => $default_config_paths,
-            'config_select_mode' => $config_select_mode,
+            'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
+            'repository_error_messages' => $repository_error_messages,
+            'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
@@ -501,6 +498,84 @@ class AdminGradeableController extends AbstractController {
         $component->setPage(Component::PDF_PAGE_NONE);
     }
 
+    /**
+     * Returns true if given path has a file named config.json in it, false otherwise
+     * @param string $folder_path
+     * @return boolean
+     */
+    private function checkPathToConfigFile($folder_path) {
+        if (!file_exists($folder_path)) {
+            return false;
+        }
+        try {
+            $file_iter = new \RecursiveDirectoryIterator($folder_path, \RecursiveDirectoryIterator::SKIP_DOTS);
+        } catch (\Exception $e) {
+            return false;
+        }
+        while($file_iter->valid()) {
+            if ($file_iter->current()->getFilename() == 'config.json') {
+                return true;
+            }
+            $file_iter->next();
+        }
+        return false;
+    }
+
+    /**
+     * Iterates through the directory and finds config.json files (BFS)
+     * Terminates loop after a hard coded number of folders are searched (currently 1000)
+     * does not look at files deeper than the config.json file
+     * pushes new errors to $error_messages if something goes wrong
+     * returns array of valid paths arrays of form [path_name,full_path]
+     * @param array $dir_queue
+     * @param array $error_messages
+     * @param integer $repo_id_number
+     * @return array
+     */
+    private function getValidPathsToConfigDirectories($dir_queue,&$error_messages,$repo_id_number) {
+        $repository_path = $dir_queue[0];
+        $count = 0;
+        $return_array = array();
+
+        while(count($dir_queue) != 0) {
+            if ($count >= 1000) {
+                $error_messages[] = "Repository #".$repo_id_number." entered on the \"Course Settings\" is too large to parse.";
+                return array();
+            }
+
+            $dir = $dir_queue[0];
+            unset($dir_queue[0]);
+            $dir_queue = array_values($dir_queue);
+
+            if (!file_exists($dir) || !is_dir($dir)) {
+                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                return array();
+            }
+
+            try {
+                $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
+            } catch(\Exception $e) {
+                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                return array();
+            }
+
+            if ($this->checkPathToConfigFile($dir)) {
+                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)+1),$dir];
+            }
+            else {
+                while($iter->valid()) {
+                    $file = $iter->current();
+                    if ($file->isDir()) {
+                        $dir_queue[] = $file->getPathname();
+                    }
+                    $iter->next();
+                }
+            }
+            $count++;
+        }
+        return $return_array;
+    }
+
     private function updateRubric(Gradeable $gradeable, $details) {
         $old_components = $gradeable->getComponents();
         $num_old_components = count($old_components);
@@ -639,11 +714,12 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function updateGraders(Gradeable $gradeable, $details) {
-        if (!isset($details['graders'])) {
-            throw new \InvalidArgumentException('Missing "graders" parameter');
+        $new_graders = array();
+        if (isset($details['graders'])) {
+            $new_graders = $details['graders'];
         }
 
-        $gradeable->setRotatingGraderSections($details['graders']);
+        $gradeable->setRotatingGraderSections($new_graders);
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
@@ -660,7 +736,7 @@ class AdminGradeableController extends AbstractController {
             $this->redirectToEdit($gradeable_id);
         } catch (\Exception $e) {
             $this->core->addErrorMessage($e);
-            $this->core->redirect($this->core->buildUrl());
+            $this->core->redirect($this->core->buildNewCourseUrl());
         }
     }
 
@@ -670,18 +746,19 @@ class AdminGradeableController extends AbstractController {
             throw new \InvalidArgumentException('Gradeable already exists');
         }
 
+        $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         // Create the gradeable with good default information
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
             'type' => $gradeable_type,
-            'grade_by_registration' => true,
+            'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
             'min_grading_group' => 1,
         ];
 
         $template_property_names = [
             'min_grading_group',
-            'grade_by_registration',
+            'grader_assignment_method',
             'ta_instructions',
             'autograding_config_path',
             'student_view',
@@ -708,13 +785,13 @@ class AdminGradeableController extends AbstractController {
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
-                'grade_by_registration' => true,
+                'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
                 'ta_instructions' => '',
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
                 'student_view' => true,
                 'student_view_after_grades' => false,
                 'student_submit' => true,
-                'late_days' => 0,
+                'late_days' => $default_late_days,
                 'precision' => 0.5
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
@@ -823,7 +900,7 @@ class AdminGradeableController extends AbstractController {
         $tonight = $this->core->getDateTimeNow();
         $tonight->setTime(23, 59, 59);
         $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => (clone $tonight)->sub(new \DateInterval('P1D')),
+            'ta_view_start_date' => (clone $tonight),
             'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
             'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
             'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
@@ -890,7 +967,6 @@ class AdminGradeableController extends AbstractController {
         $trigger_rebuild = count(array_intersect($trigger_rebuild_props, array_keys($details))) > 0;
 
         $boolean_properties = [
-            'grade_by_registration',
             'ta_grading',
             'scanned_exam',
             'student_view',
@@ -907,7 +983,8 @@ class AdminGradeableController extends AbstractController {
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
-            'precision'
+            'precision',
+            'grader_assignment_method'
         ];
 
         // Date properties all need to be set at once
@@ -968,7 +1045,6 @@ class AdminGradeableController extends AbstractController {
                 $errors[$prop] = $e->getMessage();
             }
         }
-
         // Set the dates last just in case the request contained parameters that
         //  affect date validation
         if ($date_set) {
@@ -1010,8 +1086,6 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->deleteGradeable($g_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
 
         $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $g_id . ".json");
         if ((file_exists($file)) && (!unlink($file))) {
@@ -1021,7 +1095,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($g_id);
 
-        $this->returnToNav();
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1155,6 +1229,15 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Student access already open for ";
                 $success = false;
             }
+        } else if ($action === "close_submissions") {
+            if ($dates['submission_due_date'] > $now) {
+                $this->shiftDates($dates, 'submission_due_date', $now);
+                $message .= "Closed assignment ";
+                $success = true;
+            } else {
+                $message .= "Grading already closed for ";
+                $success = false;
+            }
         }
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
@@ -1165,8 +1248,8 @@ class AdminGradeableController extends AbstractController {
         } else {
             $this->core->addErrorMessage("Failed to update status of ".$g_id);
         }
-        $this->returnToNav();
 
+        $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
     private function checkRefresh() {
@@ -1184,11 +1267,6 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->renderString($refresh_string);
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
-    }
-
-    //return to the navigation page
-    private function returnToNav() {
-        $this->core->redirect($this->core->buildUrl(array()));
     }
 
     private function redirectToEdit($gradeable_id) {
@@ -1212,7 +1290,7 @@ class AdminGradeableController extends AbstractController {
      * Exports components to json and downloads for user
      */
     private function exportComponentsRequest() {
-        $url = $this->core->buildUrl([]);
+        $url = $this->core->buildNewCourseUrl();
 
         $gradeable_id = $_GET['gradeable_id'] ?? '';
 

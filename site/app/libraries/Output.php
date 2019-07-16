@@ -3,6 +3,7 @@
 namespace app\libraries;
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
+use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
@@ -60,17 +61,29 @@ class Output {
         $this->render = false;
     }
 
-    public function loadTwig() {
+    /**
+     * @return bool
+     */
+    public function getRender() {
+        return $this->render;
+    }
+
+    public function loadTwig($full_load = true) {
         $template_root = FileUtils::joinPaths(dirname(__DIR__), 'templates');
         $cache_path = FileUtils::joinPaths(dirname(dirname(__DIR__)), 'cache', 'twig');
+        $debug = $full_load && $this->core->getConfig()->isDebug();
 
         $this->twig_loader = new \Twig\Loader\FilesystemLoader($template_root);
         $this->twig = new \Twig\Environment($this->twig_loader, [
-            'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
-            'debug' => $this->core->getConfig()->isDebug()
+            'cache' => $debug ? false : $cache_path,
+            'debug' => $debug
         ]);
-        $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
-            ->setTimezone($this->core->getConfig()->getTimezone());
+
+        if($debug){
+            $this->twig->addExtension(new \Twig\Extension\DebugExtension());
+        }
+        
+
         $this->twig->addGlobal("core", $this->core);
 
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
@@ -89,8 +102,15 @@ HTML;
             throw new OutputException('Invalid path to image file');
         }, ['is_safe' => ['html']]));
 
-        if($this->core->getConfig()->wrapperEnabled()) {
-            $this->twig_loader->addPath(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'), $namespace = 'site_uploads');
+        if ($full_load) {
+            $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
+                ->setTimezone($this->core->getConfig()->getTimezone());
+            if($this->core->getConfig()->wrapperEnabled()) {
+                $this->twig_loader->addPath(
+                    FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
+                    $namespace = 'site_uploads'
+                );
+            }
         }
         $engine = new ParsedownEngine();
         $engine->setSafeMode(true);
@@ -105,15 +125,21 @@ HTML;
 
         $this->addVendorCss(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.css'));
         $this->addVendorCss(FileUtils::joinpaths('bootstrap', 'css', 'bootstrap-grid.min.css'));
+        $this->addInternalCss('colors.css');
         $this->addInternalCss('server.css');
+        $this->addInternalCss('global.css');
+        $this->addInternalCss('menu.css');
+        $this->addInternalCss('sidebar.css');
         $this->addInternalCss('bootstrap.css');
         $this->addInternalCss('diff-viewer.css');
         $this->addInternalCss('glyphicons-halflings.css');
+
 
         $this->addVendorJs(FileUtils::joinPaths('jquery', 'jquery.min.js'));
         $this->addVendorJs(FileUtils::joinPaths('jquery-ui', 'jquery-ui.min.js'));
         $this->addInternalJs('diff-viewer.js');
         $this->addInternalJs('server.js');
+        $this->addInternalJs('menu.js');
     }
 
     /**
@@ -246,6 +272,30 @@ HTML;
         // Because sometimes the controllers want to return the response array
         return $response;
     }
+
+    /**
+     * Renders success/error messages and/or JSON responses.
+     * @param $message
+     * @param bool $success
+     * @param bool $show_msg
+     * @return array
+     */
+    public function renderResultMessage($message, $success = true, $show_msg = true) {
+        if ($show_msg == true) {
+            if ($success) {
+                $this->core->addSuccessMessage($message);
+            }
+            else {
+                $this->core->addErrorMessage($message);
+            }
+        }
+
+        if ($success == true) {
+            return $this->core->getOutput()->renderJsonSuccess($message);
+        } else {
+            return $this->core->getOutput()->renderJsonFail($message);
+        }
+    }
     
     public function renderString($string) {
         $this->output_buffer .= $string;
@@ -371,6 +421,11 @@ HTML;
      * @return string
      */
     public function showException($exception = "", $die = true) {
+        // Load minimal twig if it hasn't been already because we're crashing
+        // before $core->loadConfig() could be successfully run.
+        if ($this->twig === null) {
+            $this->loadTwig(false);
+        }
         /** @noinspection PhpUndefinedMethodInspection */
         $exceptionPage = $this->getView("Error")->exceptionPage($exception);
         // @codeCoverageIgnore
@@ -396,42 +451,42 @@ HTML;
      * @return string
      */
     public function showError($error = "", $die = true) {
-        /** @noinspection PhpUndefinedMethodInspection */
-        $errorPage = static::getView("Error")->errorPage($error);
+        $this->renderOutput("Error", "errorPage", $error);
         // @codeCoverageIgnore
         if ($die) {
-            die($errorPage);
+            die($this->getOutput());
         }
 
-        return $errorPage;
+        return $this->getOutput();
     }
     
     public function addInternalCss($file, $folder='css') {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        $this->addCss($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
+        $this->addCss($this->timestampResource($file, $folder));
     }
     
     public function addVendorCss($file) {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
-        $this->addCss($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
+        $this->addCss($this->timestampResource($file, "vendor"));
     }
 
-    public function addCss($url, $timestamp=0) {
-        $this->css[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
+    public function addCss($url) {
+        $this->css[] = $url;
     }
 
     public function addInternalJs($file, $folder='js') {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        $this->addJs($this->core->getConfig()->getBaseUrl().$folder."/".$file, $timestamp);
+        $this->addJs($this->timestampResource($file, $folder));
     }
 
     public function addVendorJs($file) {
-        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', 'vendor', $file));
-        $this->addJs($this->core->getConfig()->getBaseUrl()."vendor/".$file, $timestamp);
+        $this->addJs($this->timestampResource($file, "vendor"));
     }
 
-    public function addJs($url, $timestamp=0) {
-        $this->js[] = $url.(($timestamp !== 0) ? "?v={$timestamp}" : '');
+    public function addJs($url) {
+        $this->js[] = $url;
+    }
+
+    public function timestampResource($file, $folder) {
+        $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
+        return $this->core->getConfig()->getBaseUrl().$folder."/".$file.(($timestamp !== 0) ? "?v={$timestamp}" : "");
     }
     
     /**

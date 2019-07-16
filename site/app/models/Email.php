@@ -9,10 +9,12 @@ use app\libraries\Utils;
  *
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
+ * @method void     setUserId($uid)
  * @method void     setRecipient($recip)
 
  * @method string   getSubject()
  * @method string   getBody()
+ * @method string   getUserId()
  * @method string   getRecipient()
  */
 class Email extends AbstractModel {
@@ -20,8 +22,13 @@ class Email extends AbstractModel {
     protected $subject;
     /** @property @var string Body of email */
     protected $body;
+    /** @property @var string user name */
+    protected $user_id;
+
     /** @property @var string Intended receiver of email */
+    // NOTE: THIS IS ESSENTIALLY A DEPRECATED / LEGACY FIELD
     protected $recipient;
+
 
   /**
    * Email constructor.
@@ -35,8 +42,8 @@ class Email extends AbstractModel {
         if (count($details) == 0) {
             return;
         }
-
-        $this->setRecipient($details["recipient"]);
+        $this->setUserId($details["to_user_id"]);
+        $this->setRecipient('DEPRECATED');
         $this->setSubject($this->formatSubject($details["subject"]));
         $this->setBody($this->formatBody($details["body"]));
     }

@@ -18,16 +18,14 @@
             <td width="53%">PDF preview</td>
             <td width="5%">Full PDF</td>
             <td width="15%">User ID</td>
-            {% if use_qr_codes %}
-                <td>Page Count</td>
-            {% endif %}
+            <td>Page Count</td>
             <td width="8%">Submit</td>
             <td width="8%">Delete</td>
         </tr>
         </thead>
         <tbody>
             {% for file in files %}
-                {% if use_qr_codes and file["valid"] == false %}
+                {% if file["valid"] == false %}
                     <tr class="tr tr-vertically-centered" style="background-color:pink;" id="row-{{ loop.index}}">
                 {% else %}
                     <tr class="tr tr-vertically-centered" id="row-{{ loop.index }}" >
@@ -38,40 +36,45 @@
                         {{ file.filename_full }}
                         <br>
                         <div class="scrollable-image" >
-                            <img src="{{ file.cover_image.url }}" width="100%"/>
+                            <img src="{{ file.cover_image.url }}" width="100%" alt = "{{ file.filename_full }} preview"/>
                         </div>
                     </td>
                     <td>
-                        <a onclick="openFile('{{ file.url_full }}')"><i class="fas fa-window-restore" aria-hidden="true" title="Pop out the full PDF in a new window"></i></a>
+                        <a href="javascript:openFile('{{ file.url_full }}');" aria-label="View full PDF in a new window">
+                            <i class="fas fa-window-restore" aria-hidden="true"></i>
+			            </a>
                     </td>
                     <td id="input_area">
-                        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                         <div id="users_{{ loop.index }}">
-                            <input type="text" id="bulk_user_id_{{ loop.index }}" 
-                                {% if use_qr_codes %}
-                                    value ="{{ file["id"] }}"
+                            <input type="text" id="bulk_user_id_{{ loop.index }}" aria-label = "Enter User ID to assign" 
+                                value ="{{ file["id"] }}"
+                                {# we should only submit on enter for normal bulk uploads or on the last team upload box #}
+                                {% if not team_assignment %} 
+                                    onkeydown="uploadOnEnter( {{ loop.index }}, event );"
                                 {% else %}
-                                    value =""
-                                {% endif %}
-
-                                {% if team_assignment %}
-                                    onkeydown="uploadOnEnter( {{ loop.index }} );"
+                                    onkeydown="focusNextOnEnter({{ loop.index }}, 0)"
                                 {% endif %}
                             />
                             {% if team_assignment %}
                                 {# (size - 1) because twig loops are range inclusive #}
                                 {% set outer_loop = loop %}
                                 {% for i in 1..(max_team_size - 1) %}
-                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value ="" onkeydown="uploadOnEnter( {{ outer_loop.index }} );" />
+                                    <input type="text" id="bulk_user_id_{{ outer_loop.index }}[{{ i }}]" value ="" 
+                                        {# if this is the last input box submit on enter, otherwise move to next box#}
+                                        {% if i == (max_team_size - 1) %}
+                                            onkeydown="uploadOnEnter({{ outer_loop.index }}, event);" 
+                                        {% else %}
+                                            onkeydown="focusNextOnEnter({{ outer_loop.index}}, {{ i }} )" 
+                                        {% endif %}
+                                    />
                                 {% endfor %}
                             {% endif %}
                         </div>
                     </td>
-                    {% if use_qr_codes %}
-                        <td class="pdf_page_count" id="page_count_{{ loop.index }}">
-                            {{ file["page_count"] }}
-                        </td>
-                    {% endif %}
+                    <td class="pdf_page_count" id="page_count_{{ loop.index }}">
+                        {{ file["page_count"] }}
+                    </td>
                     <td>
                         <button type="button" id="bulk_submit_{{ loop.index }}" class="btn btn-primary"
                         onclick="uploadSplit( {{ loop.index }} )">Submit</button>
@@ -88,7 +91,7 @@
 <script type="text/javascript">
     var path_list = {{ count_array|json_encode|raw }};
     var num_submissions = {{ files|length }};
-    var CSRF = "{{ core.getCsrfToken() }}";
+    var CSRF = "{{ csrf_token }}";
     var g_id = "{{ gradeable_id }}";
     var max_team_size = {{ max_team_size }};
     //team_assignment may either be 1 or not given so convert to a string to handle either case
@@ -139,20 +142,32 @@
         }
     }
 
-    function focusNextSubmission(index){
+    function moveToNextSubmission(index){
         if( (index + 1) <= num_submissions){
             document.getElementById("bulk_user_id_" + String(index + 1)).focus();
         }
         document.getElementById('row-' + String(index)).remove();
         num_submissions -= 1;
+        
     }
 
     //if the user presses 'enter' try and make a submission as if hitting the submit button
-    function uploadOnEnter(index){
-        var key = window.event.keyCode;
-        if(key === 13 && is_team_assignment){
+    function uploadOnEnter(index, e = null){
+        key = window.event ? window.event.keyCode : e.keyCode;
+        if(key === 13)
             uploadSplit(index);
-        }
+    }
+
+    //on enter move focus on the next submission box in a given row
+    function focusNextOnEnter(table_row, input_index, e = null ){
+        var key = window.event ? window.event.keyCode : e.keyCode;
+        if(key !== 13)
+            return;
+        var input_box  = document.getElementById("bulk_user_id_" + String(table_row) + "[" + String(input_index + 1) + "]" ); 
+        if(!input_box)
+            return;
+        
+        input_box.focus();
     }
 
     function uploadSplit(index){
@@ -181,7 +196,7 @@
         //verify user id is valid, then assign
         validateUserId(CSRF, g_id, user_id)
         .then(function(response){
-            if(response['previous_submission'] === false){
+            if(response['data']['previous_submission'] === false){
                 //no previous submission, submit split item normally
                 uploadSplitHelper(user_id,path, index);
             }else{
@@ -193,9 +208,14 @@
                     //user closes do nothing
                     if(option === -1){
                         toggleButtons(index, false);
+                        //if the user does nothing focus back on the first box or the last team box
+                        if(is_team_assignment){
+                            document.getElementById("bulk_user_id_" + String(index) + "[" + String(max_team_size-1) + "]").focus();
+                        }else{
+                            user_id_textarea.focus();
+                        }
                         return;
                     }
-
 
                     var merge_previous = false;
                     var clobber = false;
@@ -215,18 +235,18 @@
             //allow user to retry assigning on failure
             toggleButtons(index, false);
             console.error(response);
-            displaySubmissionMessage({'success' : false, 'message' : response});
+            displaySubmissionMessage(response);
         });
     }
 
     function uploadSplitHelper(user_id,path,index = 0,merge_previous = false,clobber = false){
         submitSplitItem(CSRF, g_id, user_id, path, merge_previous, clobber)
         .then(function(submit_response){
-            displaySubmissionMessage(submit_response,index);
-            focusNextSubmission(index);
+            displaySubmissionMessage(submit_response);
+            moveToNextSubmission(index);
         })
         .catch(function(submit_response){
-            displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+            displaySubmissionMessage(submit_response);
             console.error(submit_response);
             //allow user to retry assigning on failure
             toggleButtons(index, false);
@@ -246,12 +266,12 @@
         if(confirm("Are you sure you want to delete this submission?")){
             deleteSplitItem(CSRF,g_id,path)
             .then(function(submit_response){
-                displaySubmissionMessage(submit_response, index);
-                focusNextSubmission(index);
+                displaySubmissionMessage(submit_response);
+                moveToNextSubmission(index);
             })
             .catch(function(submit_response){
                 console.error(submit_response);
-                displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+                displaySubmissionMessage(submit_response);
 
                 toggleButtons(index, false);
             });
@@ -262,7 +282,7 @@
     }
 
     function submitAll(index){
-        if(index > Object.keys(path_list).length || index > num_submissions)
+        if(index > Object.keys(path_list).length)
             return;
 
         var text_area = document.getElementById("bulk_user_id_" + String(index));
@@ -293,12 +313,12 @@
 
         validateUserId(CSRF,g_id,user_id)
         .then(function(response){
-            if(response['previous_submission'] === false){
+            if(response['data']['previous_submission'] === false){
                 var submit_btn = document.getElementById("bulk_submit_" + String(index));
                 var delete_btn = document.getElementById("bulk_delete_" + String(index));
                 var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
 
-                toggleButtons(index, true);
+                moveToNextSubmission(index);
                 uploadSplitHelper(user_id,path,index);
                 return submitAll(index + 1);
             }else{
@@ -306,7 +326,7 @@
             }
         })
         .catch(function(response){
-            displaySubmissionMessage({'success' : false, 'message' : response}, index);
+            displaySubmissionMessage(response);
             console.error(response);
             return submitAll(index + 1);
         });
@@ -319,9 +339,9 @@
     }
 
     function deleteAll(index){
-
-        if(index > path_list.length || index > num_submissions)
+        if(index > Object.keys(path_list).length){
             return;
+        }
 
         var submit_btn = document.getElementById("bulk_submit_" + String(index));
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
@@ -332,22 +352,19 @@
         }else if(submit_btn.disabled === true){
             return deleteAll(index + 1);
         }
-
-        toggleButtons(index, true);
-
         var path = decodeURIComponent(path_list[index]);
 
         deleteSplitItem(CSRF,g_id,path)
         .then(function(submit_response){
-            displaySubmissionMessage(submit_response, index);
+            displaySubmissionMessage(submit_response);
+            moveToNextSubmission(index);
             return deleteAll(index + 1);
         })
         .catch(function(submit_response){
             console.error(submit_response);
-            displaySubmissionMessage({'success' : false, 'message' : submit_response}, index);
+            displaySubmissionMessage(submit_response);
 
             toggleButtons(index, false);
-
             return deleteAll(index + 1);
         });
     }

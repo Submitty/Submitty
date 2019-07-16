@@ -1109,7 +1109,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
 
 TestResults* dispatch::ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");
-  std::string expected_file = j.value("expected_file","");
+  std::string expected_file = "test_output/" + j.value("expected_file","");
   std::string acceptable_threshold_str = j.value("acceptable_threshold","");
 
   if(actual_file == "" || expected_file == "" || acceptable_threshold_str == ""){
@@ -1137,6 +1137,17 @@ TestResults* dispatch::ImageDiff_doit(const TestCase &tc, const nlohmann::json& 
   std::ifstream img_file_expected(expected_file);
   if(!img_file_expected.good()){
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; expected file does not exist.")});
+  }
+
+  // Before we compare, make certain that the images are the same size.
+  std::string size_command_actual = "identify -ping -format '%w %h' " + actual_file;
+  std::string size_command_expected = "identify -ping -format '%w %h' " + expected_file;
+
+  std::string actual_size_output = output_of_system_command(size_command_actual.c_str());
+  std::string expected_size_output = output_of_system_command(size_command_expected.c_str());
+
+  if(actual_size_output != expected_size_output){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; Images are not of the same size.")});
   }
 
   std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";

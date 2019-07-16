@@ -61,6 +61,42 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 }
 
 
+// This function ensures that any file explicitly tagged as an
+// executable in a compilation step is validated and copied
+// to each testcase directory.
+void PreserveCompiledFiles(nlohmann::json &whole_config) {
+
+  // Loop over all of the test cases
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin();
+       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+    std::string testcase_type = my_testcase->value("type","Execution");
+    //Skip non compilation tests
+    if(testcase_type != "Compilation"){
+      continue;
+    }
+
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
+    // Add all executables to compilation_to_runner and compilation_to_validation
+    for(std::vector<std::string>::iterator exe = executable_names.begin(); exe != executable_names.end(); exe++){
+      std::stringstream ss;
+      ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << *exe;
+      std::string executable_name = ss.str();
+
+      if(whole_config["autograding"]["compilation_to_runner"].find("executable_name") == whole_config["autograding"]["compilation_to_runner"].end()){
+        whole_config["autograding"]["compilation_to_runner"].push_back(executable_name);
+      }
+
+      if(whole_config["autograding"]["compilation_to_validation"].find("executable_name") == whole_config["autograding"]["compilation_to_validation"].end()){
+         whole_config["autograding"]["compilation_to_validation"].push_back(executable_name);
+      }
+    }
+  }
+}
+
 // This function will automatically archive all non-executable files
 // that are validated.  This ensures that the web viewers will have
 // the necessary files to display the results to students and graders.
@@ -72,6 +108,8 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
   int which_testcase = 0;
   for (nlohmann::json::iterator my_testcase = tc->begin();
        my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+
     nlohmann::json::iterator validators = my_testcase->find("validation");
     if (validators == my_testcase->end()) { /* no autochecks */ continue; }
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
@@ -189,7 +227,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       assert(whole_config["autograding_method"] == "docker");
     }
 
-    bool found_router = false;
+    int router_container = -1;
     bool found_non_server = false;
 
     for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
@@ -209,7 +247,8 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
 
       if (this_testcase["containers"][container_num]["container_name"] == "router"){
-        found_router = true;
+        assert(router_container == -1);
+        router_container = container_num;
       }
 
       if(!this_testcase["containers"][container_num]["server"].is_boolean()){
@@ -217,7 +256,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
 
       if(this_testcase["containers"][container_num]["server"] == true){
-        assert(!this_testcase["containers"][container_num]["commands"].size() > 0);
+        assert(this_testcase["containers"][container_num]["commands"].size() == 0);
       }else{
         found_non_server = true;
       }
@@ -236,7 +275,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       }
     }
 
-    if(this_testcase["use_router"] && !found_router){
+    if(this_testcase["use_router"] && router_container == -1){
       nlohmann::json insert_router = nlohmann::json::object();
       insert_router["outgoing_connections"] = nlohmann::json::array();
       insert_router["commands"] = nlohmann::json::array();
@@ -244,8 +283,14 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
       insert_router["container_name"] = "router";
       insert_router["import_default_router"] = true;
       insert_router["container_image"] = "ubuntu:custom";
+      insert_router["server"] = false;
       this_testcase["containers"].push_back(insert_router);
     }
+    //We now always add the default router in case of instructor overriding
+    else if(this_testcase["use_router"] && router_container != -1){
+      this_testcase["containers"][router_container]["import_default_router"] = true;
+    }
+
     assert(found_non_server == true);
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
@@ -845,6 +890,7 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   InflateTestcases(answer);
 
   ArchiveValidatedFiles(answer);
+  PreserveCompiledFiles(answer);
 
   return answer;
 }

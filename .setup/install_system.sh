@@ -447,10 +447,9 @@ if [ ${WORKER} == 0 ]; then
         rm /etc/apache2/sites*/000-default.conf
         rm /etc/apache2/sites*/default-ssl.conf
 
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-        # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+        cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require ip ${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
@@ -633,7 +632,16 @@ else
     ${SUBMISSION_URL}
 
 
-    1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+    1
+
+
+    y
+
+
+    submitty@vagrant
+    do-not-reply@vagrant
+    localhost
+    25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
 
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
@@ -751,14 +759,8 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if [[ ${VAGRANT} == 1 ]]; then
-    # add email configuration stuff to database.json
-    jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_logs_path |= "/var/local/submitty/logs/emails/"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_reply_to |= "do-not-reply@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/database.json
-    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/database.json
+    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
+    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
     chown -R root:root /etc/systemd/system/nullsmtpd.service
     chmod 444 /etc/systemd/system/nullsmtpd.service

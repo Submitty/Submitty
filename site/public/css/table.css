@@ -1,0 +1,59 @@
+table.mobile-table {
+    width: 100%;
+}
+
+.mobile-table th,
+.mobile-table td {
+    border: 1px solid black;
+    text-align: center;
+    padding: 5px;
+} 
+
+@media (max-width: 800px) {
+    table.mobile-table, 
+    .mobile-table thead, 
+    .mobile-table tbody, 
+    .mobile-table th, 
+    .mobile-table td, 
+    .mobile-table tr { 
+        display: block; 
+        border: none;
+    }
+
+    /* Hide table headers */
+    .mobile-table thead tr { 
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0,0,0,0);
+        border: 0;
+    }
+
+    .mobile-table tr {
+        margin-top: 1em;
+    }
+
+    .mobile-table td { 
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2px 8px;
+        margin: 2px 0;
+    }
+
+    .mobile-table tr:nth-child(even) td {
+        background: #EEE;
+    }
+
+    .mobile-table tr:nth-child(odd) td {
+        background: #DDD;
+    }
+
+    .mobile-table td:before { 
+        padding-right: 1em;
+        font-weight: bold;
+    }
+}

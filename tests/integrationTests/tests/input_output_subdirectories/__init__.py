@@ -34,11 +34,6 @@ def initialize(test):
     subprocess.call(["cp"] + ["-r"] +
         glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "*")) +
         [data_path])
-
-    subprocess.call(["cp"] + ["-r"] +
-        glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*")) +
-        [data_path])
-
     
 ############################################################################
 def cleanup(test):
@@ -48,7 +43,11 @@ def cleanup(test):
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "*.cpp")))
-
+    
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+    subprocess.call(["cp"] + ["-r"] +
+                    glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*")) +
+                    [os.path.join(test.testcase_path, "data", "test_output")])
 
 @testcase
 def correct(test):

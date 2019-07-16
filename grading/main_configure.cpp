@@ -18,6 +18,7 @@
 nlohmann::json printTestCase(TestCase test) {
   nlohmann::json j;
   j["title"] = "Test " + std::to_string(test.getID()) + " " + test.getTitle();
+  j["testcase_label"] = test.getTestcaseLabel();
   j["details"] = test.getDetails();
   j["points"] = test.getPoints();
   j["extra_credit"] = test.getExtraCredit();
@@ -161,11 +162,17 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  /******************************************
+  // Configure defaults for hide_submitted_files
+  j["hide_submitted_files"] = config_json.value("hide_submitted_files", false);
 
-  Validate and inflate notebook data
+  // Configure defaults for hide_version_and_test_details
+  j["hide_version_and_test_details"] = config_json.value("hide_version_and_test_details", false);
 
-  ******************************************/
+    /******************************************
+
+    Validate and inflate notebook data
+
+    ******************************************/
 
   nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
   if (in_notebook_cells != config_json.end())
@@ -183,6 +190,13 @@ int main(int argc, char *argv[]) {
       std::string type = in_notebook_cell.value("type", "");
       assert(type != "");
       out_notebook_cell["type"] = type;
+
+      // Get testcase_ref if it exists
+      std::string testcase_ref = in_notebook_cell.value("testcase_ref", "");
+      if(testcase_ref != "")
+      {
+        out_notebook_cell["testcase_ref"] = testcase_ref;
+      }
 
       // Handle each specific note book cell type
       // Handle markdown data

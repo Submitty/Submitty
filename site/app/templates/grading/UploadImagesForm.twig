@@ -8,10 +8,10 @@
         <br><br>
         Upload png images by zipping up multiple course sections together,<br>
         zipping up each course section, or uploading the png image(s).<br><br>
-        Total files cannot exceed 10 mb or 10000 kb.<br><br>
+        Total files cannot exceed {{ max_size_string }} .<br><br>
     </p>
     <br/>
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
         <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
             <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
@@ -20,7 +20,7 @@
     </div>
     <script type="text/javascript">
         function makeSubmission() {
-            handleDownloadImages('{{ core.getCsrfToken() }}');
+            handleDownloadImages('{{ csrf_token }}');
         }
         $(function() {
             $("#submit").click(function(e){ // Submit button

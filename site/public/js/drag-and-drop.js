@@ -366,22 +366,14 @@ function isValidSubmission(){
             }
         }
     }
+
+    // If is_notebook is set then always valid submission
+    if(window.hasOwnProperty('is_notebook'))
+    {
+        return true;
+    }
+
     return false;
-}
-
-function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
-    var formData = new FormData();
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-
-    return $.ajax({
-        async: false,
-        url: url,
-        data: {
-            'csrf_token' : csrf_token,
-            'user_id' : user_id
-        },
-        type: 'POST',
-    });
 }
 
 /**
@@ -404,15 +396,15 @@ function validateUserId(csrf_token, gradeable_id, user_id){
             type : 'POST',
             success : function(response){ 
                 response = JSON.parse(response);
-                if(response['success']){
-                    resolve(response); 
+                if(response['status'] === 'success'){
+                    resolve(response);
                 }else{
-                    reject(response['message']);
+                    reject(response);
                 }
             },
             error : function(err){
                 console.log("Error while trying to validate user id" + user_id);
-                reject(new Error(err));
+                reject({'status' : 'failed', 'message' : err});
             }
         });
     });
@@ -421,17 +413,24 @@ function validateUserId(csrf_token, gradeable_id, user_id){
 //@param json a dictionary {success : true/false, message : string}
 //@param index used for id
 //function to display pop-up notification after bulk submission/delete
-function displaySubmissionMessage(json, index = 0){
-    var message ='<div id="bulk_message_' + String(index) + '" class="inner-message alert alert-' +
-                        (json['success'] ? 'success' : 'error') + '">\
-                    <a class="fas fa-times message-close" onclick="removeMessagePopup(\'bulk_message_' + String(index) + '\');"></a>\
-                    <i class="' + (json['success'] ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>' + json['message'] + 
-                 '</div>';
+function displaySubmissionMessage(json){
+    //let the id be the date to prevent closing the wrong message
+    let d = new Date();
+    let t = String(d.getTime());
 
+    let class_str = 'class="inner-message alert ' + (json['status'] === 'success' ? 'alert-success' : 'alert-error') + '"' ; 
+    let close_btn = '<a class="fas fa-times message-close" onclick="removeMessagePopup(' + t + ');"></a>';
+    let fa_icon = '<i class="' + (json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>';
+    let response = (json['status'] === 'success' ? json['data'] : json['message'] )
+
+    let message = '<div id="' + t + '"' + class_str + '>' + fa_icon + response + close_btn + '</div>';
     $('#messages').append(message);
-    setTimeout(function() {
-        $("#bulk_message_" + String(index)).fadeOut().empty();
-    }, 5000);
+
+    if(json['status'] === 'success'){
+        setTimeout(function() {
+            removeMessagePopup(t);
+        }, 5000);
+    }
 }
 
 //@param callback to function when user selects an option
@@ -442,6 +441,8 @@ function displayPreviousSubmissionOptions(callback){
     var closer_btn = form.find(".close-button");
 
     var option;
+    submit_btn.attr('tabindex', '0');
+    closer_btn.attr('tabindex', '0');
     // on click, make submission based on which radio input was checked
     submit_btn.on('click', function() { 
         if($("#instructor-submit-option-new").is(":checked")) {
@@ -482,6 +483,58 @@ function displayPreviousSubmissionOptions(callback){
         radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
     }
     form.find('input:radio')[radio_idx].checked = true;
+    //since the modal object isn't rendered on the page manually set what the tab button does
+    $("#instructor-submit-option-new").attr('tabindex', '0');
+    $("#instructor-submit-option-merge-1").attr('tabindex', '0');
+    $("#instructor-submit-option-merge-2").attr('tabindex', '0');
+    submit_btn.focus();
+    var current_btn = 4;
+    if(form.css('display') !== 'none'){
+        document.addEventListener("keydown", e => {
+            if(e.keyCode == 9){
+                //on tab update the focus, cycle through the radio buttons and then
+                //the close/submit buttons and then back to the radio buttons
+                $('input[name=instructor-submit]').css({"outline": "none"});
+                e.preventDefault();
+                if(current_btn === 0){
+                    $("#instructor-submit-option-merge-1").focus();
+                    $("#instructor-submit-option-merge-1").css({"outline" : "2px solid #C1E0FF"});
+                }else if(current_btn === 1){
+                    $("#instructor-submit-option-merge-2").focus();
+                    $("#instructor-submit-option-merge-2").css({"outline" : "2px solid #C1E0FF"});
+                }else if(current_btn === 2){
+                    closer_btn.focus();
+                }else if(current_btn === 3){
+                    submit_btn.focus();
+                }else if(current_btn === 4){
+                    $("#instructor-submit-option-new").focus();
+                    $("#instructor-submit-option-new").css({"outline" : "2px solid #C1E0FF"});
+                }
+                current_btn = (current_btn == 4) ? 0 : current_btn + 1;
+            }else if(e.keyCode === 27){
+                //close the modal box on escape
+                closer_btn.click();
+            }else if(e.keyCode === 13){
+                //on enter update whatever the user is focussing on
+                //uncheck everything and then recheck the desired button to make sure it actually updates
+                if(current_btn === 1){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-merge-1").prop('checked', true);
+                }else if(current_btn === 2){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-merge-2").prop('checked', true);
+                }else if(current_btn === 0){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-new").prop('checked', true);
+                }else if(current_btn === 3){
+                    //close the modal if the close button is selected
+                    closer_btn.click();
+                }else if(current_btn === 4){
+                    submit_btn.click();
+                }
+            }
+        });
+    }
 }
 
 /**
@@ -510,7 +563,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             type: 'POST',
             success: function(response) {     
                 response = JSON.parse(response);
-                if (response['success']) {
+                if (response['status'] === 'success') {
                     resolve(response);
                 }
                 else {
@@ -519,7 +572,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
             },
             error: function(err) {
                 console.log("Failed while submiting split item");
-                reject(new Error(err));
+                reject({'status' : 'failed', 'message' : err});
             }
         });
     });
@@ -545,15 +598,15 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
             type: 'POST',
             success: function(response) {
                 response = JSON.parse(response);
-                if (response['success']) {
+                if (response['status'] === 'success') {
                     resolve(response);
                 }else {
                     reject(response);
                 }
             },
-            error: function(err) {
-                console.log("Failed while deleting split item");
-                reject(new Error(err));
+            error: function(jqXHR, err_msg, exception) {
+                console.error("Failed while deleting split item");
+                reject({'status' : 'failed', 'message' : err_msg});
             }
         });
     });
@@ -622,7 +675,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -652,7 +705,16 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
  */
 function gatherInputAnswersByType(type){
     var input_answers = {};
-    var inputs = $("[id^="+type+"_]");
+
+    // If type is codebox only grab 'div' but not buttons with similar ids
+    if(type == "codebox")
+    {
+        var inputs = $("div[id^="+type+"_]");
+    }
+    else
+    {
+        var inputs = $("[id^="+type+"_]");
+    }
 
     if(type != "codebox"){
         inputs = inputs.serializeArray();
@@ -801,7 +863,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -830,8 +892,8 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
  * @param csrf_token
  */
 function handleDownloadImages(csrf_token) {
-    var image_submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_images_files'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+    var image_submit_url = buildNewCourseUrl(['student_photos', 'upload']);
+    var return_url = buildNewCourseUrl(['student_photos']);
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('file_count', file_array.length);
@@ -869,7 +931,7 @@ function handleDownloadImages(csrf_token) {
             try {
                 data = JSON.parse(data);
 
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -882,7 +944,7 @@ function handleDownloadImages(csrf_token) {
             }
         },
         error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+            window.location.href = buildNewCourseUrl(['student_photos']);
         }
     });
 }
@@ -892,8 +954,8 @@ function handleDownloadImages(csrf_token) {
  */
 
 function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+    var submit_url = buildNewCourseUrl(['course_materials', 'upload']);
+    var return_url = buildNewCourseUrl(['course_materials']);
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
@@ -965,7 +1027,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             try {
                 var jsondata = JSON.parse(data);
 
-                if (jsondata['success']) {
+                if (jsondata['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -978,7 +1040,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             }
         },
         error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+            window.location.href = buildNewCourseUrl(['course_materials']);
         }
     });
 }

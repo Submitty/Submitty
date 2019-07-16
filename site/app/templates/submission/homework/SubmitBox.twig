@@ -1,23 +1,15 @@
 {% import _self as self %}
 
-<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/codemirror.css" />
-<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/eclipse.css" />
-<link rel="stylesheet" href="{{ base_url }}vendor/codemirror/theme/monokai.css" />
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/codemirror.js"></script>
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/clike/clike.js"></script>
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/python/python.js"></script>
-<script type="text/javascript" language="javascript" src="{{ base_url }}vendor/codemirror/mode/shell/shell.js"></script>
-
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
+    <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
 {% endif %}
 
 <div class="content">
     <div class="upperinfo">
         <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
-            <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+            <h2 class="upperinfo-right">Due: {{ formatted_due_date }}</h2>
         {% endif %}
     </div>
 
@@ -27,9 +19,13 @@
         </div>
     {% endif %}
 
+    <br/>
+
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
         <form id="submissionForm" method="post" style="width: 100%; ">
+	    <fieldset>
+            <legend> Select submission mode: </legend>
             <div style="clear:both;">
                 <input type='radio' id="radio_normal" name="submission_type" checked="true">
                 <label for="radio_normal">Normal Submission</label>
@@ -39,7 +35,11 @@
                 {% if part_names|length == 1 and not is_vcs %}
                     &nbsp;&nbsp;&nbsp;&nbsp;
                     <input type='radio' id="radio_bulk" name="submission_type">
-                    <label for="radio_bulk">Bulk Upload</label>
+                    <label for="radio_bulk">Bulk PDF Upload
+                    <a style="text-decoration:none;" aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
+	                    <i aria-hidden="true" title="Bulk PDF Upload Help" class="far fa-question-circle helpicon"></i>
+                    </a>
+                    </label>
                 {% endif %}
             </div>
             <div id="user_id_input" style="display: none">
@@ -48,32 +48,34 @@
                     Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
                 </div>
                 <div class="sub">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    user_id: <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <label for="user_id"> user_id: </label>
+		    <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
             <br />
             <div class = "sub" id="pdf_submit_button" style="display: none">
                 <div class="sub">
-                    Split by QR code?
+                    <label for="use_qr">Split by QR code?</label>
                     <input type="checkbox" id="use_qr">
                     <br />
-                    <span id="pages_prompt"># of page(s) per PDF:</span>
+                    <label id="pages_prompt" for="num_pages"># of page(s) per PDF:</label>
                     <span id="prefix_prompt">QR code prefix/suffix:
-                    <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
-                        <i title="Bulk Upload QR Help" class="far fa-question-circle helpicon"></i>
+                    <a style="text-decoration:none;" aria-label="Split by QR Code Help" href = "https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
+	                    <i aria-hidden="true" title="Split by QR Code Help" class="far fa-question-circle helpicon"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
-                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
-                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
+                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
                     <div id="expected_num_box">
-                    Expected Number of pages per PDF:
+                    <label for= "expected_pages_input"> Expected Number of pages per PDF: </label>
                     <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
                     </div>
                 </div>
                 <br />
             </div>
+            </fieldset>
         </form>
 
         <script type="text/javascript">
@@ -199,34 +201,9 @@
         {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 
-            <script>
-                {# Set the multiple choice checkmarks or radio buttons from a previous submission #}
-                function setMultipleChoices(mc_field_id)
-                {
-                    var parts = mc_field_id.split("_");
-                    var id = parts[2];
-                    var prev_checked = $("#" + mc_field_id).attr("data-prev_checked");
-
-                    prev_checked = prev_checked.split("\n");
-
-                    // For each input inside the fieldset see if its value is inside the prev checked array
-                    $("#" + mc_field_id + " :input").each(function(index,element) {
-
-                        var value = element.getAttribute("value");
-
-                        if(prev_checked.includes(value))
-                        {
-                            $(element).prop("checked", true);
-                        }
-                        else
-                        {
-                            $(element).prop("checked", false);
-                        }
-                    });
-                }
-            </script>
+        {# Notebook #}
+        <div class="notebook">
 
             {# Render content #}
             {% set num_short_answer = 0 %}
@@ -240,9 +217,12 @@
 
                         {# Render markdown #}
                         {{ cell.markdown_data | markdown }}
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                     {# Handle if cell is image #}
                     {% elseif cell.type == "image" %}
+
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                         <img src="{{ attribute(image_data, cell.image) }}"
 
@@ -263,6 +243,8 @@
                     {# Handle if cell is short_answer #}
                     {% elseif cell.type == "short_answer" %}
 
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
+
                         {# If programming language not defined render regular text boxes #}
                         {% if cell.programming_language is not defined %}
 
@@ -271,33 +253,64 @@
 
                         {# Else render a codebox #}
                         {% else %}
-                            <br>
-                                <div id="codebox_{{ num_codeboxes }}" name="codebox_{{ num_codeboxes }}" style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                <div id="codebox_{{ num_codeboxes }}"
+                                     name="codebox_{{ num_codeboxes }}"
+                                     class="codebox"
+                                     data-initial_value="{{ cell.initial_value }}"
+                                     data-recent_submission="{{ cell.recent_submission }}"
+                                     style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
                                 </div>
+
+                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox_clear_reset">Clear</button>
+                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox_clear_reset">Use Most Recent Submission</button>
+
                                 <script>
-
-                                    {# Get recent submission #}
-                                    var recent_submission = `{% if core.getConfig().keepPreviousFiles() %}{{ cell.recent_submission }}{% else %}{{ cell.initial_value }}{% endif %}`;
-
-                                    {# Transform escaped characters back into regular characters #}
-                                    recent_submission = convertHTMLEntity(recent_submission);
 
                                     var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
                                         {
-                                            "value" : recent_submission,
                                             "mode": "{{ cell.programming_language }}",
                                             lineNumbers: true,
                                             "theme": "eclipse"
                                         }
                                     );
+
+                                    {# Populate codebox initially #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                                    {% endif %}
+
+                                    {# Hide recent button if no previous submissions #}
+                                    {% if highest_version == 0 %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                                    {% endif %}
+
+                                    {# Setup init state of buttons #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+
+                                        {% if highest_version == 0 %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        {% else %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        {% endif %}
+
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                                    {% else %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = false;
+
+                                    {% endif %}
                                 </script>
                             <br>
                             {% set num_codeboxes = num_codeboxes + 1 %}
                         {% endif %}
 
+                    {# Handle if cell is multiple choice #}
                     {% elseif cell.type == "multiple_choice" %}
 
-                        <br>
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
+
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
                                   {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
@@ -305,22 +318,22 @@
                                 {% if cell.allow_multiple == true %}
                                     <input type="checkbox"
                                            name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                            value="{{ choice.value }}"
                                            onclick="handle_input_keypress();" />
 
-                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         {{ choice.description | markdown }}
                                     </label>
 
                                 {% else %}
                                     <input type="radio"
                                            name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                            value="{{ choice.value }}"
                                            onclick="handle_input_keypress();" />
 
-                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         {{ choice.description | markdown }}
                                     </label>
 
@@ -328,9 +341,9 @@
                                 <br/>
                             {% endfor %}
                         </fieldset>
-                        <br>
 
                         {# Create reset to recent submission button #}
+                        <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc_clear">Clear</button>
                         <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_recent">Use Most Recent Submission</button>
 
                         <script>
@@ -346,9 +359,17 @@
 
                             {# Configure initial state for the button #}
                             {% if core.getConfig().keepPreviousFiles() %}
+
+                                {% if highest_version == 0 %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                {% else %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                                {% endif %}
+
                                 $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
                             {% else %}
-                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
                             {% endif %}
                         </script>
 
@@ -360,104 +381,10 @@
 
             {% endfor %}
 
-            {# Place scripts relevant to short answer items here #}
-            <script>
+        </div>
 
-                {# Register click event handler for mc reset button #}
-                $(".mc_recent").click(function() {
-
-                    // Collect the id of the button and split it apart to find out which field it is bound to
-                    var items = this.id.split("_");
-                    var index = items[1];
-                    var field_set_id = "mc_field_" + index;
-
-                    setMultipleChoices(field_set_id);
-                    $(this).attr("disabled", true);
-                });
-
-                {# Register change event handler for mc fieldsets #}
-                $(".mc").change(function() {
-
-                    var items = this.id.split("_");
-                    var index = items[2];
-
-                    // Enable reset button
-                    $("#mc_" + index + "_recent_button").attr("disabled", false);
-                });
-
-                // Setup click events for short answer buttons
-                $(".sa_clear_reset").click(function() {
-
-                    // Collect the id of the button and split it apart to find out which short answer it is bound to
-                    // and which action it preforms
-                    var items = this.id.split("_");
-
-                    var index_num = items[2];
-                    var button_action = items[3];
-                    var field_id = "#short_answer_" + index_num;
-
-                    var data_to_set = "";
-
-                    // Collect data from the data-* attribute of the text box
-                    if(button_action == "clear")
-                    {
-                        var data_to_set = $(field_id).attr("data-initial_value");
-                    }
-                    else
-                    {
-                        var data_to_set = $(field_id).attr("data-recent_submission");
-                    }
-
-                    // Set the data into the textbox
-                    $(field_id).val(data_to_set);
-
-                    // Set button states
-                    if(button_action == "clear")
-                    {
-                        $(field_id + "_clear_button").attr("disabled", true);
-                        $(field_id + "_recent_button").attr("disabled", false);
-                    }
-                    else
-                    {
-                        $(field_id + "_clear_button").attr("disabled", false);
-                        $(field_id + "_recent_button").attr("disabled", true);
-                    }
-                });
-
-                // Setup keyup event for short answer boxes
-                $(".sa_box").keyup(function() {
-
-                    var items = this.id.split("_");
-
-                    var index_num = items[2];
-
-                    var initial_value = this.getAttribute("data-initial_value");
-                    var recent_submission = this.getAttribute("data-recent_submission");
-
-                    var text_box_id = "#short_answer_" + index_num;
-                    var clear_button_id = "#short_answer_" + index_num + "_clear_button";
-                    var recent_button_id = "#short_answer_" + index_num + "_recent_button";
-
-                    if($(text_box_id).val() == initial_value)
-                    {
-                        $(clear_button_id).attr("disabled", true);
-                    }
-                    else
-                    {
-                        $(clear_button_id).attr("disabled", false);
-                    }
-
-                    if($(text_box_id).val() == recent_submission)
-                    {
-                        $(recent_button_id).attr("disabled", true);
-                    }
-                    else
-                    {
-                        $(recent_button_id).attr("disabled", false);
-                    }
-                });
-            </script>
-
+        {# File upload boxes #}
+        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
             {# Submit boxes #}
             {% for part in part_names %}
                 <div tabindex="0"
@@ -466,17 +393,16 @@
                      role="text"
                      aria-label="Press enter to upload your {{ part }} file"
                      style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-                    <h3 class="label" id="label{{ loop.index }}">
+                    <h2 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
                         {% else %}
                             Drag your file(s) here or click to open file browser
                         {% endif %}
-                    </h3>
-                    <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
+                    </h2>
+                    <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                 </div>
             {% endfor %}
-
         </div>
 
         {# Page selector #}
@@ -573,7 +499,7 @@
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
+            submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
 
         // otherwise, this is a regular submission of the uploaded files
@@ -582,7 +508,7 @@
                 {{ allowed_late_days }},
                 {{ highest_version }},
                 {{ max_submissions }},
-                "{{ core.getCsrfToken() }}",
+                "{{ csrf_token }}",
                 {{ is_vcs ? "true" : "false" }},
                 {{ num_inputs }},
                 "{{ gradeable_id }}",
@@ -600,7 +526,7 @@
                 {{ allowed_late_days }},
                 highest_version,
                 {{ max_submissions }},
-                "{{ core.getCsrfToken() }}",
+                "{{ csrf_token }}",
                 {{ is_vcs ? "true" : "false" }},
                 {{ num_inputs }},
                 "{{ gradeable_id }}",
@@ -650,7 +576,7 @@
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id)
+                validateUserId("{{ csrf_token }}", "{{ gradeable_id }}", user_id)
                 .then(function(response){
                     if(response['highest_version']){
                         var option = displayPreviousSubmissionOptions(getSubmissionOption);
@@ -676,6 +602,23 @@
         });
     });
 </script>
+
+{% macro render_testcase_messages(cell, testcase_messages) %}
+
+    {# If testcase_ref is set then attempt to display associated messages #}
+    {% if cell.testcase_ref is defined %}
+
+        {% if testcase_messages[cell.testcase_ref] is defined %}
+
+            {% for msg in testcase_messages[cell.testcase_ref] %}
+                <p class="feedback_msg_{{ msg.type }}">{{ msg.message }}</p>
+            {% endfor %}
+
+        {% endif %}
+
+    {% endif %}
+
+{% endmacro %}
 
 {% macro render_short_answer(short_answer, index, version) %}
 
@@ -718,8 +661,8 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary btn-push-down sa_clear_reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary btn-push-down sa_clear_reset">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa_clear_reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa_clear_reset">Use Most Recent Submission</button>
         <script>
 
             {% if version == 0 %}
