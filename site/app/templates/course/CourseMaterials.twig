@@ -316,6 +316,44 @@
         });
     }
 
+    function handleTimeZones() {
+
+        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {csrf_token: csrfToken},
+            success: function(data) {
+
+                // Collect server time
+                var server_time = JSON.parse(data);
+                server_time = new Date(parseInt(server_time.year),
+                    parseInt(server_time.month) - 1,
+                    parseInt(server_time.day),
+                    parseInt(server_time.hour),
+                    parseInt(server_time.minute),
+                    parseInt(server_time.second));
+
+                // Collect client time
+                var client_time = new Date();
+
+                // Calculate difference in minutes
+                var diff_in_minutes = Math.abs(server_time.valueOf() - client_time.valueOf());
+                diff_in_minutes = diff_in_minutes / 1000 / 60;
+
+                // If difference in minutes is greater than 10 minutes then append message to flatpickr
+                if(diff_in_minutes > 10) {
+                    $('.flatpickr-calendar').append('<p>Enter all times relative to the server timezone</p>');
+                    $('.flatpickr-calendar').append('<p>Server timezone: {{ core.getConfig().getTimezone().getName() }}</p>');
+                }
+            },
+            error: function(e) {
+                console.log("Error getting server time.");
+            }
+        });
+    }
+
     $(document).ready(function() {
         flatpickr(".date_picker", {
             plugins: [ShortcutButtonsPlugin(
@@ -347,7 +385,8 @@
             enableTime: true,
             enableSeconds: true,
             time_24hr: true,
-            dateFormat: "Y-m-d H:i:S"
+            dateFormat: "Y-m-d H:i:S",
+            onOpen: handleTimeZones()
         });
     });
 </script>
