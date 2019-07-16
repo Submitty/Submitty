@@ -12,15 +12,16 @@
     height: 20px;
 }
 
-#upload-boxes input[type="file"] {
+.file-input input[type="file"] {
     display: none;
 }
 
-#upload-boxes .label {
+.file-input .label {
     font-weight: 700;
     font-size: 1.2em;
     padding: 1em;
     display: block;
+    cursor: pointer;
 }
 
 /* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
