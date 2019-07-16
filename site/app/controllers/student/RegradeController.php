@@ -17,7 +17,7 @@ class RegradeController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/request", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/new", methods={"POST"})
      * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
      */
     public function requestRegrade($gradeable_id) {
