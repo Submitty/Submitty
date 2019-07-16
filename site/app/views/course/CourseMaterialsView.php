@@ -115,7 +115,9 @@ class CourseMaterialsView extends AbstractView {
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")"; 
+        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
+
+        $server_time = (array)DateUtils::getServerTimeJson($this->core);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
@@ -130,7 +132,8 @@ class CourseMaterialsView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
             "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"]),
-            "max_size_string" => $max_size_string
+            "max_size_string" => $max_size_string,
+            'server_time' => $server_time
         ]);
     }
 }
