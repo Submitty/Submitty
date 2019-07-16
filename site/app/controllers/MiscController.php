@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\Core;
@@ -54,17 +55,10 @@ class MiscController extends AbstractController {
      * second
      */
     private function getServerTime() {
-        $time = new \DateTime('now', $this->core->getConfig()->getTimezone());
 
-        $json = (object)[];
-        $json->year = $time->format('Y');
-        $json->month = $time->format('m');
-        $json->day = $time->format('j');
-        $json->hour = $time->format('G');
-        $json->minute = $time->format('i');
-        $json->second = $time->format('s');
-
+        $json = DateUtils::getServerTimeJson($this->core);
         $this->core->getOutput()->renderJson($json);
+
     }
 
     private function encodePDF(){
