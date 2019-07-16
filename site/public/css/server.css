@@ -1670,6 +1670,10 @@ end of styles used in the admin gradeable page
     margin: 5px 0 0 5px;
 }
 
+.wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
 ul.full-list, ol.full-list {
     display: block;
     margin: 1em 0;
