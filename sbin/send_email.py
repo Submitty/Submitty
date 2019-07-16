@@ -28,14 +28,19 @@ my_pid = os.getpid()
 
 # loop over all active process on the server
 for p in psutil.pids():
-    cmdline = psutil.Process(p).cmdline()
-    # if anything on the command line matches the name of the program
-    for i in cmdline:
-        if i.find(my_program_name) != -1:
-            if p != my_pid:
-                print("ERROR!  Another copy of '" + my_program_name +
-                      "' is already running on the server.  Exiting.")
-                exit()
+    try:
+        cmdline = psutil.Process(p).cmdline()
+        # if anything on the command line matches the name of the program
+        for i in cmdline:
+            if i.find(my_program_name) != -1:
+                if p != my_pid:
+                    print("ERROR!  Another copy of '" + my_program_name +
+                          "' is already running on the server.  Exiting.")
+                    exit()
+    except psutil.NoSuchProcess:
+        # Whoops, the process ended before we could look at it.
+        # But that's ok!
+        pass
 
 # ======================================================================
 
