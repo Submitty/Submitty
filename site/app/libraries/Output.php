@@ -77,6 +77,11 @@ class Output {
             'cache' => $this->core->getConfig()->isDebug() ? false : $cache_path,
             'debug' => $this->core->getConfig()->isDebug()
         ]);
+
+        if($this->core->getConfig()->isDebug()){
+            $this->twig->addExtension(new \Twig\Extension\DebugExtension());
+        }
+        
         $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
             ->setTimezone($this->core->getConfig()->getTimezone());
         $this->twig->addGlobal("core", $this->core);
