@@ -79,7 +79,7 @@ class Output {
             'debug' => $debug
         ]);
 
-        if($this->core->getConfig()->isDebug()){
+        if($debug){
             $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         }
         
