@@ -1,7 +1,7 @@
 {% import _self as self %}
 
 <div class="content">
-    <h1>Upload Gradeable Config</h1>
+    <h1>Upload Autograding Config</h1>
     <br><br>
     <p>
         Following the assignment configuration specifications:<br>
@@ -14,7 +14,7 @@
 
     <br><br>
     <p>
-        Prepare your assignment configuration as a single <code>config.json</code> file.<br>
+        Prepare your autograding configuration as a single <code>config.json</code> file.<br>
         Or as a zip of the <code>config.json</code>, and the directories <code>provided_code</code>,
         <code>test_input</code>, <code>instructor_solution</code>, <code>test_output</code>, and/or <code>custom_validation_code</code>.
     </p>
@@ -36,7 +36,7 @@
     <br>&nbsp;<br>
     <script>
         function openRenamePopup(file_path){
-            let url = buildNewCourseUrl(['gradeable_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
+            let url = buildNewCourseUrl(['autograding_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
             $('#alert_in_use').html('');
             $('#gradeables_using_config').empty();
             $.ajax({

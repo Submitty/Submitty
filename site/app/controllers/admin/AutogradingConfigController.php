@@ -13,11 +13,11 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 /**
- * Class GradeableConfigController
+ * Class AutogradingConfigController
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
  */
-class GradeableConfigController extends AbstractController {
+class AutogradingConfigController extends AbstractController {
     /**
      * @deprecated
      */
@@ -26,7 +26,7 @@ class GradeableConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable_config", methods={"GET"})
+     * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
      * @return Response
      */
     public function showConfig() {
@@ -56,14 +56,14 @@ class GradeableConfigController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable_config/upload", methods={"POST"})
+     * @Route("/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
      * @return Response
      */
     public function uploadConfig() {
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+                new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
             );
         }
 
@@ -71,7 +71,7 @@ class GradeableConfigController extends AbstractController {
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
             $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+                new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
             );
         }
 
@@ -97,7 +97,7 @@ class GradeableConfigController extends AbstractController {
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
                 $this->core->addErrorMessage("Upload failed: {$error_message}");
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+                    new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
                 );
             }
         }
@@ -106,18 +106,18 @@ class GradeableConfigController extends AbstractController {
                 FileUtils::recursiveRmdir($target_dir);
                 $this->core->addErrorMessage("Upload failed: Could not copy file");
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+                    new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
                 );
             }
         }
         $this->core->addSuccessMessage("Gradeable config uploaded");
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
         );
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable_config/rename", methods={"POST"})
+     * @Route("/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
      * @return Response
      */
     public function renameConfig(){
@@ -144,12 +144,12 @@ class GradeableConfigController extends AbstractController {
             }
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
         );
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable_config/delete", methods={"POST"})
+     * @Route("/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
      * @return Response
      */
     public function deleteConfig(){
@@ -175,13 +175,13 @@ class GradeableConfigController extends AbstractController {
             }
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['gradeable_config']))
+            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
         );
     }
 
     /**
      * @param $config_path
-     * @Route("/{_semester}/{_course}/gradeable_config/usage", methods={"GET"})
+     * @Route("/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
      * @return Response
      */
     public function configUsedBy($config_path = null) {

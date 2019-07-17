@@ -312,7 +312,7 @@ class AdminGradeableController extends AbstractController {
             'is_in_rebuild_queue' => $is_in_rebuild_queue,
             'check_refresh_url' => $check_refresh_url,
 
-            'upload_config_url' => $this->core->buildNewCourseUrl(['gradeable_config'])
+            'upload_config_url' => $this->core->buildNewCourseUrl(['autograding_config'])
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
