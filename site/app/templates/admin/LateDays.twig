@@ -14,7 +14,7 @@
                 <input class="option-input" type="text" name="user_id" id="user_id">
             </label>
             <label for="datestamp">
-                Datestamp (MM/DD/YY):
+                Datestamp (MM/DD/YYYY):
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
@@ -96,7 +96,7 @@
                                     date = new Date();
                                     break;
                                 case 1: 
-                                    date = new Date("1998/01/01");
+                                    date = new Date("01/01/1998");
                                     break;
                             }
                             fp.setDate(date, true);
@@ -104,7 +104,7 @@
                     }
                 )],
             allowInput: true,
-            dateFormat: "Y-m-d"
+            dateFormat: "m-d-Y"
         });
 
 </script>
