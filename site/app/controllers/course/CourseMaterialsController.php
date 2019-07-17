@@ -105,8 +105,7 @@ class CourseMaterialsController extends AbstractController {
                 if (!Utils::startsWith(realpath($path), $root_path)) {
                     continue;
                 }
-                if ($file['checked'] === '1' &&
-                    $file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
+                if ($file['release_datetime'] < $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")) {
                     $relative_path = substr($path, strlen($root_path) + 1);
                     $zip->addFile($path, $relative_path);
                 }
@@ -144,59 +143,125 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/{_semester}/{_course}/course_materials/modify_permission")
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function modifyCourseMaterialsFilePermission($filename, $checked) {
-        if (!isset($filename) ||
-            !isset($checked)) {
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
-        }
+    public function modifyCourseMaterialsFilePermission($filenames, $checked) {
+        $data=$_POST['fn'];
+        if(count($data)==1){
+            $filename = $filenames;
+            if (!isset($filename) ||
+                !isset($checked)) {
+                $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+            }
 
-        $file_name = htmlspecialchars($filename);
+            $file_name = htmlspecialchars($filename);
 
-        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+            $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-        $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
-        $json = FileUtils::readJsonFile($fp);
-        if ($json != false) {
-            $release_datetime  = $json[$file_name]['release_datetime'];
-        }
-
-        if (!isset($release_datetime)) {
             $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+            $json = FileUtils::readJsonFile($fp);
+            if ($json != false) {
+                $release_datetime  = $json[$file_name]['release_datetime'];
+            }
+
+            if (!isset($release_datetime)) {
+                $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+            }
+
+            $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
+
+            if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+                return "Failed to write to file {$fp}";
+            }
+        }
+        else{
+            foreach ($data as $filename){
+                if (!isset($filename) ||
+                    !isset($checked)) {
+                    $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                }
+
+                $file_name = htmlspecialchars($filename);
+
+                $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+                $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+                $json = FileUtils::readJsonFile($fp);
+                if ($json != false) {
+                    $release_datetime  = $json[$file_name]['release_datetime'];
+                }
+
+                if (!isset($release_datetime)) {
+                    $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+                }
+
+                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
+
+                if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+                    return "Failed to write to file {$fp}";
+                }
+            }
         }
 
-        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
-
-        if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
-            return "Failed to write to file {$fp}";
-        }
     }
 
     /**
      * @Route("/{_semester}/{_course}/course_materials/modify_timestamp")
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function modifyCourseMaterialsFileTimeStamp($filename, $newdatatime) {
-        if (!isset($filename) ||
-            !isset($newdatatime)) {
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+    public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
+        $data=$_POST['fn'];
+        //only one will not iterate correctly
+        if(count($data)==1){
+            //so just take the single passed in
+            $filename = $filenames;
+
+            if (!isset($filename) ||
+                !isset($newdatatime)) {
+                $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+            }
+
+            $file_name = htmlspecialchars($filename);
+            $new_data_time = htmlspecialchars($newdatatime);
+
+            $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+            $checked = '0';
+            $json = FileUtils::readJsonFile($fp);
+            if ($json != false) {
+                $checked  = $json[$file_name]['checked'];
+            }
+
+            $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
+
+            if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+                return "Failed to write to file {$fp}";
+            }
+        }
+        else{
+            foreach ($data as $filename){
+                if (!isset($filename) ||
+                    !isset($newdatatime)) {
+                    $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                }
+
+                $file_name = htmlspecialchars($filename);
+                $new_data_time = htmlspecialchars($newdatatime);
+
+                $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+
+                $checked = '0';
+                $json = FileUtils::readJsonFile($fp);
+                if ($json != false) {
+                    $checked  = $json[$file_name]['checked'];
+                }
+
+                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
+                if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
+                    return "Failed to write to file {$fp}";
+                }
+            }
         }
 
-        $file_name = htmlspecialchars($filename);
-        $new_data_time = htmlspecialchars($newdatatime);
 
-        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-
-        $checked = '0';
-        $json = FileUtils::readJsonFile($fp);
-        if ($json != false) {
-            $checked  = $json[$file_name]['checked'];
-        }
-
-        $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
-
-        if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
-            return "Failed to write to file {$fp}";
-        }
     }
 
     /**

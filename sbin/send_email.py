@@ -11,7 +11,44 @@ import smtplib
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Table, bindparam
+import sys
+import psutil
+
+
+# ======================================================================
+#
+# Let's make sure we're the only copy of this script running on the
+# server.  Multiple copies might happen if sending emails is slow or
+# hangs and takes longer than 1 minute and the cron job fires again.
+#
+
+# We could just match the program name, but this is problematic if
+# happens to match the filename submitted by a student.
+# my_program_name = sys.argv[0].split('/')[-1]
+
+# So instead let's match the full path used in the cron script
+my_program_name = sys.argv[0]
+
+my_pid = os.getpid()
+
+# loop over all active processes on the server
+for p in psutil.pids():
+    try:
+        cmdline = psutil.Process(p).cmdline()
+        # if anything on the command line matches the name of the program
+        for i in cmdline:
+            if i.find(my_program_name) != -1:
+                if p != my_pid:
+                    print("ERROR!  Another copy of '" + my_program_name +
+                          "' is already running on the server.  Exiting.")
+                    exit()
+    except psutil.NoSuchProcess:
+        # Whoops, the process ended before we could look at it.
+        # But that's ok!
+        pass
+
+# ======================================================================
 
 try:
     CONFIG_PATH = os.path.join(
@@ -73,8 +110,8 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    MetaData(bind=db)
-    return db
+    metadata = MetaData(bind=db)
+    return db, metadata
 
 
 def construct_mail_client():
@@ -121,11 +158,13 @@ def mark_sent(email_id, db):
     db.execute(query_string)
 
 
-def store_error(email_id, db, myerror):
-    """Mark an email as sent in the database."""
-    query_string = "UPDATE emails SET error='{}' WHERE id = {};".format(
-        myerror, email_id)
-    db.execute(query_string)
+def store_error(email_id, db, metadata, myerror):
+    """Store an error string for the specified email."""
+    emails_table = Table('emails', metadata, autoload=True)
+    # use bindparam to correctly handle a myerror string with single quote character
+    query = emails_table.update().where(
+        emails_table.c.id == email_id).values(error=bindparam('b_myerror'))
+    db.execute(query, b_myerror=myerror)
 
 
 def construct_mail_string(send_to, subject, body):
@@ -148,7 +187,7 @@ def construct_mail_string(send_to, subject, body):
 
 def send_email():
     """Send queued emails."""
-    db = setup_db()
+    db, metadata = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
     if not EMAIL_ENABLED or len(queued_emails) == 0:
@@ -158,7 +197,7 @@ def send_email():
 
     for email_data in queued_emails:
         if email_data["send_to"] == "":
-            store_error(email_data["id"], db, "WARNING: empty email address")
+            store_error(email_data["id"], db, metadata, "WARNING: empty email address")
             e = "[{}] WARNING: empty email address for recipient {}".format(
                 str(datetime.datetime.now()), email_data["user_id"])
             LOG_FILE.write(e+"\n")
@@ -174,7 +213,7 @@ def send_email():
             success_count += 1
 
         except Exception as email_send_error:
-            store_error(email_data["id"], db, "ERROR: sending email "
+            store_error(email_data["id"], db, metadata, "ERROR: sending email "
                         + str(email_send_error))
             e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
                 str(datetime.datetime.now()),

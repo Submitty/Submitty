@@ -275,7 +275,7 @@ function newUserForm() {
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
-    form[0].outerHTML = json['popup'];
+    form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
 }
 
@@ -409,6 +409,24 @@ function newUploadCourseMaterialsForm() {
 
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
+
+}
+
+function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
+
+    $('.popup-form').css('display', 'none');
+
+    var form = $("#set-folder-release-form");
+
+    form.css("display", "block");
+
+    $('[id="release_title"]',form).attr('data-path',changeActionVariable);
+    $('[name="release_date"]', form).val(releaseDates);
+    $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
+
+    inDir = JSON.stringify(inDir);
+    $('[name="submit"]',form).attr('data-iden',id);
+    $('[name="submit"]',form).attr('data-inDir',inDir);
 
 }
 
@@ -1294,11 +1312,55 @@ function openDivForCourseMaterials(num) {
         elem.hide();
         elem.removeClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
+    }
+    return false;
+}
+
+function openAllDivForCourseMaterials() {
+    var elem = $("[id ^= 'div_viewer_']");
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
+    }
+    return false;
+}
+function closeDivForCourseMaterials(num) {
+    var elem = $('#div_viewer_' + num);
+    elem.hide();
+    elem.removeClass('open');
+    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    return 'closed';
+
+
+}
+function openAllDivForCourseMaterials() {
+    var elem = $("[id ^= 'div_viewer_']");
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
     }
     return false;
 }
@@ -1487,7 +1549,7 @@ function enableTabsInTextArea(jQuerySelector) {
 
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
+    var url = buildNewCourseUrl(['extensions', 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1537,7 +1599,7 @@ function updateHomeworkExtensions(data) {
 }
 
 function loadHomeworkExtensions(g_id, due_date) {
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    var url = buildNewCourseUrl(['extensions', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1576,7 +1638,7 @@ function refreshOnResponseLateDays(json) {
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
+    var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
         url: url,
         type: "POST",
@@ -1612,7 +1674,7 @@ function updateLateDays(data) {
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'delete_late'});
+    var url = buildNewCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1687,7 +1749,9 @@ function changePermission(filename, checked) {
     let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filename) + '&checked=' + checked;
 
     $.ajax({
+        type: "POST",
         url: url,
+        data: {'fn':filename,csrf_token: csrfToken},
         success: function(data) {},
         error: function(e) {
             alert("Encounter saving the checkbox state.");
@@ -1695,15 +1759,65 @@ function changePermission(filename, checked) {
     })
 }
 
-function changeNewDateTime(filename, newdatatime) {
+function changeFolderPermission(filenames, checked,handleData) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
 
     $.ajax({
+        type: "POST",
         url: url,
-        success: function(data) {},
+        data: {'fn':filenames,csrf_token: csrfToken},
+        success: function(data) {
+            if(handleData){
+                handleData(data);
+            }
+        },
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function changeNewDateTime(filename, newdatatime,handleData) {
+    // send to server to handle file date/time change
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    var tbr;
+    tbr=false;
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'fn':filename,csrf_token: csrfToken},
+        success: function(data) {
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+        },
         error: function(e) {
             alert("Encounter saving the NewDateTime.");
+
+        }
+    })
+}
+
+function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+    // send to server to handle folder date/time change
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    var tbr;
+    tbr=false;
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'fn':filenames,csrf_token: csrfToken},
+        success: function(data) {
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+        },
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+
         }
     })
 }

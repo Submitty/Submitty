@@ -625,7 +625,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
@@ -652,7 +652,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
         if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
@@ -915,11 +915,13 @@ HTML;
     /**
      * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable
+     * @param bool $can_inquiry
      * @return string
      */
-    public function renderRegradePanel(GradedGradeable $graded_gradeable) {
+    public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
         return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
-            "graded_gradeable" => $graded_gradeable
+            "graded_gradeable" => $graded_gradeable,
+            "can_inquiry" =>$can_inquiry
         ]);
     }
 

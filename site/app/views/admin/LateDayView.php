@@ -7,6 +7,9 @@ use app\libraries\Utils;
 
 class LateDayView extends AbstractView {
     public function displayLateDays($users) {
+        $this->core->getOutput()->addInternalCss('latedays.css');
+        $this->core->getOutput()->addBreadcrumb('Late Days Allowed');
+
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = Utils::getAutoFillData($students);
 
@@ -17,4 +20,3 @@ class LateDayView extends AbstractView {
         ]);
     }
 }
-

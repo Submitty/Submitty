@@ -4,8 +4,17 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
+use app\libraries\response\RedirectResponse;
+use app\libraries\routers\AccessControl;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class WrapperController
+ * @package app\controllers\admin
+ * @AccessControl(permission="admin.wrapper")
+ */
 class WrapperController extends AbstractController {
 
     const WRAPPER_FILES = [
@@ -17,82 +26,100 @@ class WrapperController extends AbstractController {
         'sidebar.json'
     ];
 
+    /**
+     * @deprecated
+     */
     public function run() {
-        if (!$this->core->getAccess()->canI("admin.wrapper")) {
-            $this->core->getOutput()->showError("You do not have permission to do this.");
-        }
-        switch($_REQUEST['action']) {
-            case 'process_upload_html':
-                $this->processUploadHTML();
-                break;
-            case 'delete_uploaded_html':
-                $this->deleteUploadedHTML();
-                break;
-            case 'show_page':
-            default:
-                $this->uploadWrapperPage();
-                break;
-        }
+        return null;
     }
 
-    private function uploadWrapperPage() {
-        $this->core->getOutput()->renderOutput(array('admin', 'Wrapper'), 'displayPage', $this->core->getConfig()->getWrapperFiles());
+    /**
+     * @Route("/{_semester}/{_course}/theme")
+     * @return Response
+     */
+    public function uploadWrapperPage() {
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                ['admin', 'Wrapper'],
+                'displayPage',
+                $this->core->getConfig()->getWrapperFiles()
+            )
+        );
     }
 
-    private function processUploadHTML() {
-        $filename = $_REQUEST['location'];
+    /**
+     * @Route("/{_semester}/{_course}/theme/upload", methods={"POST"})
+     * @return Response
+     */
+    public function processUploadHTML() {
+        $filename = $_POST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
         if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
-            $this->core->getOutput()->showError("You do not have permission to do this.");
+            return Response::WebOnlyResponse(
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
         }
 
         if (empty($_FILES) || !isset($_FILES['wrapper_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            );
         }
         $upload = $_FILES['wrapper_upload'];
 
-        if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
+        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            );
         }
 
         if (!@copy($upload['tmp_name'], $location)) {
             $this->core->addErrorMessage("Upload failed: Could not copy file");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            );
         }
 
         $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-            'action' => 'show_page')));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+        );
     }
 
-    private function deleteUploadedHTML() {
-        $filename = $_REQUEST['location'];
+    /**
+     * @Route("/{_semester}/{_course}/theme/delete", methods={"POST"})
+     * @return Response
+     */
+    public function deleteUploadedHTML() {
+        $filename = $_POST['location'];
         $location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site', $filename);
 
         if (!$this->core->getAccess()->canI("path.write.site", ["dir" => "site", "path" => $location])) {
-            $this->core->getOutput()->showError("You do not have permission to do this.");
+            return Response::WebOnlyResponse(
+                new WebResponse("Error", "errorPage", "You don't have access to this page.")
+            );
         }
 
-        if(!isset($_REQUEST['location']) || !in_array($_REQUEST['location'], WrapperController::WRAPPER_FILES)) {
+        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Delete failed: Invalid filename");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            );
         }
         if(!@unlink($location)) {
             $this->core->addErrorMessage("Deletion failed: Could not unlink file");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-                'action' => 'show_page')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            );
         }
 
         $this->core->addSuccessMessage("Deleted ".$filename);
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper',
-            'action' => 'show_page')));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+        );
     }
 
 }

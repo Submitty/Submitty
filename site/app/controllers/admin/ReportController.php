@@ -16,8 +16,12 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
+use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\GradeSummary;
+use app\models\RainbowCustomization;
+use app\exceptions\ValidationException;
 
 /**
  * Class ReportController
@@ -433,6 +437,58 @@ class ReportController extends AbstractController {
                 }
             default:
                 return 'ERROR';
+        }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
+    public function generateCustomization(){
+
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        //Build a new model, pull in defaults for the course
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+
+        if(isset($_POST["json_string"])){
+
+            //Handle user input (the form) being submitted
+            try {
+
+                $customization->processForm();
+
+                // Finally, send the requester back the information
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
+            } catch (ValidationException $e) {
+                //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
+                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+            } catch (\Exception $e) {
+                //Catches any other exceptions, should be "unexpected" issues
+                $this->core->getOutput()->renderJsonError($e->getMessage());
+            }
+        }
+        else{
+
+            $this->core->getOutput()->addInternalJs('rainbow-customization.js');
+            $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+
+            // Print the form
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+                "customization_data" => $customization->getCustomizationData(),
+                "available_buckets" => $customization->getAvailableBuckets(),
+                "used_buckets" => $customization->getUsedBuckets(),
+                'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
+                'bucket_percentages' => $customization->getBucketPercentages(),
+                'messages' => $customization->getMessages()
+            ]);
+
         }
     }
 }
