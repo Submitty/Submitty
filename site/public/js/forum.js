@@ -507,6 +507,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                 $("#thread_list .fa-caret-down").hide();
             }
             dynamicScrollLoadIfScrollVisible(jElement);
+            loadThreadHandler();
             if(success_callback != null) {
                 success_callback();
             }
