@@ -256,9 +256,11 @@ class SubmissionController extends AbstractController {
         $status = $graded_gradeable->getRegradeRequest()->getStatus();
         if ($status == -1) {
             $status = 0;
+            $type = 'resolve';
         }
         else {
             $status = -1;
+            $type = 'reopen';
         }
 
         try {
@@ -267,6 +269,7 @@ class SubmissionController extends AbstractController {
             if ($content != "") {
                 $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             }
+            $this->notifyGradeInquiryEvent($graded_gradeable,$gradeable_id,$content,$type);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1702,7 +1705,6 @@ class SubmissionController extends AbstractController {
     private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type){
       //TODO: send notification to grader per component
       if($graded_gradeable->hasTaGradingInfo()){
-          $course = $this->core->getConfig()->getCourse();
           $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
           $graders = $ta_graded_gradeable->getGraders();
           $submitter = $graded_gradeable->getSubmitter();
@@ -1710,58 +1712,45 @@ class SubmissionController extends AbstractController {
           $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
 
           if ($type == 'new') {
-              // instructor/TA/Mentor submitted
               if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] New Grade Inquiry";
-                  $email_body = "An Instructor/TA/Mentor submitted a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "An Instructor/TA/Mentor has made a new Grade Inquiry for ".$gradeable_title;
+                  $subject = "New Grade Inquiry: $gradeable_title - $user_id";
+                  $body = "An Instructor/TA/Mentor submitted a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
               }
-              // student submitted
               else {
-                  $email_subject = "[Submitty $course] New Grade Inquiry";
-                  $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A student has submitted a new grade inquiry for ".$gradeable_title;
+                  $subject = "New Grade Inquiry: $gradeable_title - $user_id";
+                  $body = "A student has submitted a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
               }
           } else if ($type == 'reply') {
               if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] New Grade Inquiry Post";
-                  $email_body = "An Instructor/TA/Mentor made a post in a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "An instructor has replied to your Grade Inquiry for ".$gradeable_title;
+                  $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
+                  $body = "An Instructor/TA/Mentor made a post in a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
               }
-              // student submitted
               else {
-                  $email_subject = "[Submitty $course] New Grade Inquiry Post";
-                  $email_body = "A student has made a post in a grade inquiry for gradeable $gradeable_title.\n\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "New reply in Grade Inquiry for ".$gradeable_title;
+                  $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
+                  $body = "A student has made a post in a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
               }
 
-          } else if ($type == 'resolved' ) {
+          } else if ($type == 'resolve' ) {
               if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
                   $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
-                  $email_body = "An Instructor/TA/Mentor has resolved your grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "An instructor has resolved your Grade Inquiry for ".$gradeable_title;
+                  $subject = "Grade Inquiry Resolved: $gradeable_title - $user_id";
+                  $body = "An Instructor/TA/Mentor has resolved your grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
               }
-              // student submitted
               else {
                   $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
-                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
-                  $email_body = "A student has cancelled a grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A student has cancelled a grade inquiry for gradeable".$gradeable_title;
+                  $subject = "Grade Inquiry Resolved: $gradeable_title - $user_id";
+                  $body = "A student has cancelled a grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
               }
           } else if ($type == 'reopen') {
               if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
                   $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
-                  $email_body = "An Instructor/TA/Mentor has reopened your grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "An instructor has reopened your grade inquiry for ".$gradeable_title;
+                  $subject = "Grade Inquiry Reopened: $gradeable_title - $user_id";
+                  $body = "An Instructor/TA/Mentor has reopened your grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
               }
-              // student submitted
               else {
                   $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
-                  $email_subject = "[Submitty $course] Grade Inquiry Resolved";
-                  $email_body = "A student has reopened a grade inquiry for gradeable $gradeable_title.\n\n$included_post_content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A student has reopened a grade inquiry for gradeable ".$gradeable_title;
+                  $subject = "Grade Inquiry Reopened: $gradeable_title - $user_id";
+                  $body = "A student has reopened a grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
               }
           }
 
@@ -1769,7 +1758,8 @@ class SubmissionController extends AbstractController {
           $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
           foreach ($graders as $grader) {
               if ($grader->accessFullGrading() && $grader->getId() != $user_id){
-                  $details = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
+                  // delete content key when notifications take subject
+                  $details = ['component' => 'grading', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
                   $notifications[] = Notification::createNotification($this->core, $details);
                   $emails[] = new Email($this->core,$details);
               }
@@ -1781,14 +1771,14 @@ class SubmissionController extends AbstractController {
               $submitting_team = $submitter->getTeam()->getMemberUsers();
               foreach($submitting_team as $submitting_user){
                   if($submitting_user->getId() != $user_id) {
-                      $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
+                      $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
                       $notifications[] = Notification::createNotification($this->core, $details);
                       $emails[] = new Email($this->core,$details);
                   }
               }
           } else {
               if ($submitter->getUser()->getId() != $user_id) {
-                  $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
+                  $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
                   $notifications[] = Notification::createNotification($this->core, $details);
                   $emails[] = new Email($this->core,$details);
               }

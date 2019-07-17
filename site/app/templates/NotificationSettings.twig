@@ -149,7 +149,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
-                <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
+                {% endif %}
             </div>
 
             <div class="option row">
@@ -173,7 +175,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
-                <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
+                {% endif %}
             </div>
         </div>
     </form>
