@@ -13,17 +13,17 @@
         $("[name='sort_type']").change(function() {
             var val = $(this).val();
 			if (val != "redo") {
-				$('#redo_data').hide();
+				$('#redo-data').hide();
 			}	
             else {
-				$('#redo_data').show();
+				$('#redo-data').show();
             }
         });
     });
 
 	
     $(document).ready(function() {
-       $('#redo_data').hide();
+       $('#redo-data').hide();
     });
 	
 </script>
@@ -31,13 +31,15 @@
     <h1>Manage Registration Sections</h1>
     <p>
         Large courses are often split into multiple <em>registrations sections</em> for laboratory or recitation class time.<br>
-        Courses that are cross-listed in different departments may have multiple course codes/prefixes.<br>
-        <br>
+        Courses that are cross-listed in different departments may have multiple course codes/prefixes.
+    </p>
+    <p>
         Each student in the course is assigned to one registration section.<br>
-        Students who have dropped the course will be assigned to the <em>NULL</em> registration section.<br>
-        <br>
+        Students who have dropped the course will be assigned to the <em>NULL</em> registration section.
+    </p>
+    <p>
         From the "Graders" tab in the top menu, each grader may be assigned to grade zero, one, or multiple registration sections.<br>
-        Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.<br>
+        Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
     <br />
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_registration_sections'}) }}" method="POST">
@@ -117,13 +119,13 @@
         Rotating sections are an alternate way to divide the task of grading a large course enrollment among multiple graders.<br>
         If the registration sections are of significantly different size, rotating sections will allow a more equitable assignment of grading tasks.<br>
         Furthermore, shuffling or rotating the assignment of graders to rotating sections for each assignment will ensure that each student <br>
-        receives feedback from multiple graders throughout the term and can mitigate the variations in ease or strictness between the graders.<br>
-        <br>
+        receives feedback from multiple graders throughout the term and can mitigate the variations in ease or strictness between the graders.
+    </p>
+    <p>
         Each registered student is assigned to a rotating section for the duration of the course.<br>
         For each assignment with manual/TA grading assigned by rotating sections, each grader is assigned zero, one, or multiple rotating sections.<br>
-        The rotating assignments for each gradeable are made via the "Create/Edit Gradeable" page for the specific gradeable.<br>
+        The rotating assignments for each gradeable are made via the "Create/Edit Gradeable" page for the specific gradeable.
     </p>
-    <br />
 
     <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_rotating_sections'}) }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -134,7 +136,7 @@
                     <div class="col-md-6">
                         {# This is a data table #}
                         <table class="table table-striped">
-                            <caption class="caption_h3" style="text-align: center"> Registered Students<br><div style="font-size:medium">(non-NULL registration section)</div></caption>
+                            <caption>Registered Students<div class="subcaption">(non-NULL registration section)</div></caption>
                             <thead class="table-bordered">
                                 <th>Rotating Section</th>
                                 <th>Students</th>
@@ -152,7 +154,7 @@
                     <div class="col-md-6">
                         {# This is a data table #}
                         <table class="table table-striped">
-                            <caption class="caption_h3" style="text-align: center"> Unregistered Students<br><div style="font-size:medium">(NULL registration section)</div></caption>
+                            <caption>Unregistered Students<div class="subcaption">(NULL registration section)</div></caption>
                              <thead class="table-bordered">
                                 <th>Rotating Section</th>
                                 <th>Students</th>
@@ -170,56 +172,48 @@
                 </div>
             </div>
             <div class="box col-md-6" id="right_box">
-   				<fieldset>
-					
+   				<fieldset class="flex-col">
+					<legend class="option-title">Change Current Sections</legend>
 					<label>
-						<input type="radio" style="margin-top: -2px" name="sort_type" value="drop_null" /> Only remove unregistered students (registration section=NULL) from rotating sections
-					</label><br /><br />
+						<input type="radio" name="sort_type" value="drop_null" />
+                        Only remove unregistered students (registration section=NULL) from rotating sections
+					</label>
 					<label>
-						<input type="radio" style="margin-top: -2px" name="sort_type" value="fewest" /> Remove unregistered students (registration section=NULL) from rotating sections and put newly registered students into rotating section with fewest members
-					</label><br /><br />
+						<input type="radio" name="sort_type" value="fewest" />
+                        Remove unregistered students (registration section=NULL) from rotating sections and put newly registered students into rotating section with fewest members
+					</label>
                     <label>
-                        <input type="radio" style="margin-top: -2px" name="sort_type" value="drop_all" /> Remove all students from rotating sections
-                    </label><br /><br />
+                        <input type="radio" name="sort_type" value="drop_all" />
+                        Remove all students from rotating sections
+                    </label>
 					<label>
-						<input type="radio" style="margin-top: -2px" name="sort_type" value="redo" /> Redo rotating sections completely
-					</label><br />
-					
+						<input type="radio" name="sort_type" value="redo" />
+                        Redo rotating sections completely
+					</label>
 				</fieldset>
-				<fieldset>
-					
-					<legend>
-					<br />
-					<div id="redo_data">
-						<div style="font-size:small">
-						<label>Place students in <input type="text" name="sections" placeholder="#" style="width: 30px" /></label> 
-						<label>rotating sections
-							<select name="rotating_type">
-								<option value="random">randomly</option>
-								<option value="alphabetically">alphabetically</option>
-							</select>
+                <div id="redo-data">
+                    <label>
+                        Number of sections:
+                        <input type="number" name="sections" />
+                    </label> 
+                    <label>
+                        Sort students:
+                        <select name="rotating_type">
+                            <option value="random">Randomly</option>
+                            <option value="alphabetically">Alphabetically</option>
+                        </select>
+                    </label>
+                    <fieldset class="flex-col">
+                        <legend>Exclude students in the following registrations:</legend>
+                        {% for row in reg_sections %}
+                        <label>
+                            <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" />
+                            Section {{ row['sections_registration_id'] }}
                         </label>
-                        <label>excluding students in registration: </label>
-						</div>
-                        {# This is a layout table #}
-                        <table style="margin-left: auto; margin-right: auto">
-                            {% for row in reg_sections %}
-                            <tr>
-                                <td style="text-align: left; font-weight: bold">
-                                    <input type="checkbox" name="{{ row['sections_registration_id'] }}" value="{{ row['sections_registration_id'] }}" >Section {{ row['sections_registration_id'] }}</input>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </table>
-
-                        <br /><br />
-					</div>
-					</legend>
-					
-					<input style="margin-top: 20px; margin-right: 4.5px; float:right" type="submit" class="btn btn-primary" value="Submit" />
-					
-				</fieldset>
-				
+                        {% endfor %}
+                    </fieldset>
+                </div>
+                <input type="submit" class="btn btn-primary float-right" value="Submit" />
             </div>
         </div>
     </form>

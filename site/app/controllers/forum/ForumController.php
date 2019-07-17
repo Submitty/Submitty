@@ -349,7 +349,6 @@ class ForumController extends AbstractController{
         }
         $thread_status = $_POST["thread_status"];
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
-        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
