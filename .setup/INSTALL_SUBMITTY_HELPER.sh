@@ -256,13 +256,13 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
 
 #Make site logging directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
 fi
 
 # set the permissions of these directories
@@ -281,8 +281,10 @@ fi
 
 #Set up permissions on the logs directory. If in worker mode, PHP_USER does not exist.
 if [ "${WORKER}" == 0 ]; then
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
+    chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/course_creation
 else
     chown  -R root:${COURSE_BUILDERS_GROUP}           ${SUBMITTY_DATA_DIR}/logs
     chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
@@ -296,9 +298,6 @@ chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emai
 
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/course_creation
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
