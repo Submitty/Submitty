@@ -13,6 +13,10 @@
         var second = {{ server_time['second'] }};
 
         server_time = new Date(year, month, day, hour, minute, second);
+
+        green = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-green');
+        yellow = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-yellow');
+        red = getComputedStyle(document.documentElement).getPropertyValue('--date-picker-red');
     </script>
 
     {% if userGroup == 1 %}
@@ -109,13 +113,13 @@
                         var fileDT = inputDT.value;
                         //also custom colors for this page for readability
                         if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-                            return "#87db88";
+                            return green;
                         }
                         else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                            return "#f76c6c";
+                            return red;
                         }
                         else{
-                            return "#ffeb54";
+                            return yellow;
                         }
 
                     }
@@ -313,16 +317,16 @@
                 var fileDT = newDateTime;
                 //also custom colors for this page for readability
                 if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-                    me.style.backgroundColor = "#87db88";
-                    return "#87db88";
+                    me.style.backgroundColor = green;
+                    return green;
                 }
                 else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                    me.style.backgroundColor = "#f76c6c";
-                    return "#f76c6c";
+                    me.style.backgroundColor = red;
+                    return red;
                 }
                 else{
-                    me.style.backgroundColor = "#ffeb54";
-                    return "#ffeb54";
+                    me.style.backgroundColor = yellow;
+                    return yellow;
                 }
             },
             error: function(e) {
