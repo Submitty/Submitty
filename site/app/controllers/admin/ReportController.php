@@ -29,7 +29,7 @@ use app\exceptions\ValidationException;
  */
 class ReportController extends AbstractController {
 
-    const MAX_AUTO_RG_WAIT_TIME = 60;       // Time in seconds a call to autoRainbowGradesStatus should
+    const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
     /**
      * @deprecated
@@ -530,19 +530,8 @@ class ReportController extends AbstractController {
             $this->core->getConfig()->getCourse() .
             '.json';
 
-        // Create path to output.html we expect to find in rainbow_grades directory
-        $rg_file = $this->core->getConfig()->getCoursePath();
-        $rg_file = FileUtils::joinPaths($rg_file, 'rainbow_grades', 'output.html');
-
         // Get the max time to wait before timing out
         $maxWaitTime = self::MAX_AUTO_RG_WAIT_TIME;
-
-        // Wait for rainbow_grades directory to be populated if it isn't already
-        while(!file_exists($rg_file) AND $maxWaitTime)
-        {
-            sleep(1);
-            $maxWaitTime--;
-        }
 
         // Check the jobs queue every second to see if the job has finished yet
         while(file_exists($jobs_file) AND $maxWaitTime)
