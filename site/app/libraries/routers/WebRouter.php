@@ -148,7 +148,7 @@ class WebRouter {
         $method = new \ReflectionMethod($this->controller_name, $this->method_name);
         foreach ($method->getParameters() as $param) {
             $param_name = $param->getName();
-            $arguments[$param_name] = $this->parameters[$param_name];
+            $arguments[$param_name] = $this->parameters[$param_name] ?? null;
             if (!isset($arguments[$param_name])) {
                 $arguments[$param_name] = $this->request->query->get($param_name);
             }
