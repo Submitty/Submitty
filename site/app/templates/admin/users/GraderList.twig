@@ -23,10 +23,10 @@
         <tbody>
         {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
 			{% for grading_group in 1..3 %}
-				<tr class="info persist-header">
-                    <td colspan="8" style="text-align: center">{{groups[grading_group].name}}</td>
-                </tr>
 				{% if graders[grading_group]|length > 0 %}
+					<tr class="info persist-header">
+						<td colspan="8" style="text-align: center">{{groups[grading_group].name}}</td>
+					</tr>
 					{% for grader in graders[grading_group] %}
 						<tr id="user-{{ grader.getId() }}">
 							<td>{{ loop.index }}</td>
@@ -39,8 +39,8 @@
 						</tr>
 					{% endfor %}
 				{% else %}
-					<tr>
-						<td colspan="3">No graders in User Group: {{groups[grading_group].name}}</td>
+					<tr class="info persist-header">
+						<td colspan="8" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
 					</tr>
 				{% endif %}
 			{% endfor %}
