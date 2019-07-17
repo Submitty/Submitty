@@ -2,30 +2,23 @@
 
 namespace app\controllers\grading;
 
-use app\models\gradeable\Gradeable;
-use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\Submitter;
-use app\models\gradeable\TaGradedGradeable;
-use app\models\GradingSection;
 use app\models\User;
 use app\controllers\GradingController;
 use app\libraries\Utils;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class SimpleGraderController
+ * @package app\controllers\grading
+ * @AccessControl(permission="grading.simple")
+ */
 class SimpleGraderController extends GradingController  {
     public function run() {
-        if(!$this->core->getAccess()->canI("grading.simple")) {
-            $this->core->getOutput()->showError("This account doesn't have access to grading");
-        }
         switch ($_REQUEST['action']) {
-            case 'lab':
-                $this->grade();
-                break;
             case 'save_lab':
                 $this->save();
-                break;
-            case 'numeric':
-                $this->grade();
                 break;
             case 'save_numeric':
                 $this->save();
@@ -33,35 +26,21 @@ class SimpleGraderController extends GradingController  {
             case 'upload_csv_numeric':
                 $this->UploadCSV();
                 break;
-            case 'print_lab':
-                $this->printLab();
-                break;
             default:
                 break;
         }
     }
 
-    public function printLab(){
-        $g_id = $section = $sort_by = $sectionType = "";
-
-        //Get the id for the current gradeable. Later used to get gradeable object from db.
-        if (!isset($_REQUEST['g_id'])) {
-            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
-        }
-        else{
-            $g_id = $_REQUEST['g_id'];
-        }
-
-        //Figure out what order we are supposed to be sorting the students in.
-        if (isset($_REQUEST['sort'])) {
-          $sort_by = $_REQUEST['sort'];
-        }
-        else{
-            $sort_by = "registration_section";
-        }
-
+    /**
+     * @param $gradeable_id
+     * @param $section
+     * @param $section_type
+     * @param $sort_by
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
+     */
+    public function printLab($gradeable_id, $section = null, $section_type = null, $sort_by = "registration_section"){
         //convert from id --> u.user_id etc for use by the database.
-        if($sort_by === "id"){
+        if ($sort_by === "id") {
             $sort_by = "u.user_id";
         }
         else if($sort_by === "first"){
@@ -72,16 +51,13 @@ class SimpleGraderController extends GradingController  {
         }
 
         //Figure out what section we are supposed to print
-        if (isset($_REQUEST['section'])) {
-            $section = $_REQUEST['section'];
-        }
-        else{
+        if (is_null($section)) {
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
             $this->core->redirect($this->core->buildNewCourseUrl());
             return;
-        }
+        };
 
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
 
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
@@ -90,21 +66,18 @@ class SimpleGraderController extends GradingController  {
         }
 
         //Figure out if we are getting users by rotating or registration section.
-        if (!isset($_REQUEST['sectionType'])) {
+        if (is_null($section_type)) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable');
-        }
-        else{
-            $sectionType = $_REQUEST['sectionType'];
         }
 
         //Grab the students in section, sectiontype.
-        if($sectionType === "rotating_section"){
+        if ($section_type === "rotating_section") {
             $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort_by);
         }
-        else if($sectionType === "registration_section"){
+        elseif ($section_type === "registration_section") {
             $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort_by);
         }
-        else{
+        else {
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
             $this->core->redirect($this->core->buildNewCourseUrl());
             return;
@@ -117,15 +90,17 @@ class SimpleGraderController extends GradingController  {
         $this->core->getOutput()->renderOutput(array('grading', 'SimpleGrader'), 'displayPrintLab', $gradeable, $section, $students);
     }
 
-    public function grade() {
-        if (!isset($_REQUEST['g_id'])) {
-            $this->core->getOutput()->renderOutput('Error', 'noGradeable');
-        }
-        $g_id = $_REQUEST['g_id'];
+    /**
+     * @param $gradeable_id
+     * @param $view
+     * @param $sort
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
+     */
+    public function grade($gradeable_id, $view = null, $sort = null) {
         try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         } catch(\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $g_id);
+            $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return;
         }
 
@@ -135,19 +110,14 @@ class SimpleGraderController extends GradingController  {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
-        $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
-
         // sort makes sorting remain when clicking print lab or view all
-        if(!isset($_GET['sort']) || $_GET['sort'] === "id"){
-            $sort = "id";
+        if($sort === "id"){
             $sort_key = "u.user_id";
         }
-        else if($_GET['sort'] === "first"){
-            $sort = "first";
+        else if($sort === "first"){
             $sort_key = "coalesce(u.user_preferred_firstname, u.user_firstname)";
         }
-        else{
-            $sort = "last";
+        else {
             $sort_key = "coalesce(u.user_preferred_lastname, u.user_lastname)";
         }
 
@@ -159,7 +129,7 @@ class SimpleGraderController extends GradingController  {
         //Can you show all
         $can_show_all = $this->core->getAccess()->canI("grading.simple.show_all");
         //Are you currently showing all
-        $show_all = ((isset($_GET['view']) && $_GET['view'] === "all") || $grading_count === 0) && $can_show_all;
+        $show_all = ($view === 'all' || $grading_count === 0) && $can_show_all;
         //Should the button be shown
         $show_all_sections_button = $can_show_all;
 
