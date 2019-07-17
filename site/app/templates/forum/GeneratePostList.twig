@@ -1,4 +1,6 @@
 {% set show_unresolve = false %}
+<data id="current-thread" value="{{ post_data[0].thread_id }}"></data>
+
 {% for post_d in  post_data %}
 
     {% if (post_d.userGroup <= 3 or post_d.post.author_user_id == post_d.current_user) and post_d.first %}
