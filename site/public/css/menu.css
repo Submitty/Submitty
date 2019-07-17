@@ -1,0 +1,106 @@
+#menu-button {
+    border: 1px solid #000;
+    border-radius: 3px;
+    background: transparent;
+    margin: 15px;
+    padding: 6px 12px;
+}
+
+#mobile-menu {
+    display: none;
+    z-index: 2;
+    position: absolute;
+    height: 100vh;
+    width: 90%;
+    background: #316498;
+    color: #FFF;
+    border-color: #FFF;
+    line-height: 31px;
+    list-style-type: none;
+    overflow-y: auto;
+    right: 0;
+    animation-duration: 0.5s;
+    animation-name: slideFromRight;
+}
+
+@keyframes slideFromRight {
+    from {right: -100%;}
+    to {right: 0;}
+}
+
+#mobile-menu a, #mobile-menu .fa {
+    text-decoration: none;
+    color: #FFF;
+    font-size: 20px;
+    text-align: center;
+    padding: 10px;
+}
+
+#mobile-menu ul {
+    padding: 1em 0;
+    margin: 0;
+}
+
+#mobile-menu li .selected, #mobile-menu li .selected i {
+    background: #FFF;
+    color: #000;
+    font-weight: bold;
+}
+
+#mobile-menu hr {
+    border-color: #FFF;
+}
+
+#menu-header {
+    border-bottom: 2px solid #FFF;
+}
+
+#menu-header h1 {
+    margin: 0;
+    font-size: 31px;
+}
+
+#menu-header > * {
+    padding: 15px;
+}
+
+#menu-overlay {
+    display: none;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0,0,0,.55);
+    z-index: 1;
+}
+
+#menu-exit {
+    background: none;
+    border: none;
+    color: #FFF;
+    font-size: 31px;
+}
+
+.icon-title { 
+    flex: 1 0 auto;
+}
+
+#menu-button .notification-badge {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+}
+
+#mobile-menu .notification-badge {
+    background-color: #000;
+    padding: 0 10px;
+    color: #FFF;
+    font-weight: bold;
+    border-radius: 4px;
+    height: 40px;
+}
+
+@media (min-width: 541px) {
+    #menu-button, #mobile-menu, #menu-overlay {
+        display: none;
+    }
+}

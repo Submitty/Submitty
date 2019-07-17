@@ -1,5 +1,5 @@
 {% for thread in thread_content %}
-    <a href="{{ thread.link }}">
+    <a href="{{ thread.link }}" class="thread_box_link" data="{{ thread.thread_id }}">
         <div class="{{ thread.class }}">
             {% if thread.pinned %}
                 <i class="fas fa-star thread-announcement" title = "Announcement" aria-hidden="true"></i>

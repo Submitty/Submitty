@@ -263,7 +263,7 @@ class DatabaseQueries {
         if($blockNumber <= -1) {
             // Find the last block
             $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, false, false);
-            $query = "SELECT count(*) FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where}) AS SUBQUERY";
+            $query = "SELECT count(*) FROM (SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where})";
             $this->course_db->query($query, $query_parameters);
             $results = $this->course_db->rows();
             $row_count = $results[0]['count'];
@@ -1025,7 +1025,6 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             GROUP BY gd_id, autograding
           )g 
       ", array($g_id));
-
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     public function getAverageForGradeable($g_id, $section_key, $is_team) {
