@@ -31,7 +31,7 @@ class RegradeController extends AbstractController {
             return null;
         }
 
-        if(!$gradeable->isRegradeAllowed()) {
+        if(!$gradeable->isRegradeOpen()) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Grade inquiries are not enabled for this gradeable')
             );
