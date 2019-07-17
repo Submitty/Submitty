@@ -290,7 +290,7 @@ class WebRouter {
         }
 
         if ($access_control->getPermission()) {
-            $access = $this->core->getAccess()->canI($access_control->permission);
+            $access = $this->core->getAccess()->canI($access_control->getPermission());
         }
 
         return $access;
