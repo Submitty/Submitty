@@ -173,6 +173,11 @@
                      class="btn btn-default close-button">Cancel</a>
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
+
+        {% if thread_resolve_state == 1 and show_unresolve %}
+            <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
+            <input type="submit" name="post_and_unresolve" class="submit_unresolve btn btn-primary inline-block" {{ post_box_id | length > 0 ? "post_box_id=" ~ post_box_id : ""  }} value="{{ submit_label }} and Unresolve" />
+        {% endif %}
     </span>
 </div>
 <br>
@@ -182,7 +187,5 @@
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
         });
-
-
     });
 </script>
