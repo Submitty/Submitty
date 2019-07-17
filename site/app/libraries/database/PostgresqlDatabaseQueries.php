@@ -28,11 +28,12 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
         $this->course_db->query("
 SELECT u.*, ns.merge_threads, ns.all_new_threads,
         ns.all_new_posts, ns.all_modifications_forum,
-        ns.reply_in_post_thread,ns.team_invite,ns.team_member_submission, 
+        ns.reply_in_post_thread,ns.team_invite, 
+       ns.team_member_submission, ns.team_joined,
        ns.merge_threads_email, ns.all_new_threads_email,
         ns.all_new_posts_email, ns.all_modifications_forum_email,
         ns.reply_in_post_thread_email, ns.team_invite_email, 
-       ns.team_member_submission_email,
+       ns.team_member_submission_email, ns.team_joined_email,
        sr.grading_registration_sections
        
 FROM users u

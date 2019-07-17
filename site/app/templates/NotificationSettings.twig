@@ -155,6 +155,19 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
+                        <div class="option-title">New team member</div>
+                        <div class="option-alt">Receive a notification when a new now member joins your team</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
                         <div class="option-title">New team member submission</div>
                         <div class="option-alt">Receive a notification when a team member makes a submission to your gradeable</div>
                     </label>
