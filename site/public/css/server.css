@@ -1370,11 +1370,10 @@ end of styles used in the admin gradeable page
     white-space: nowrap;
 }
 
-/* prevents line break in the grade viewed check marks */
-.td-viewed-grade {
+#team-check-marks {
     white-space: nowrap;
+    padding-right: 10px;
 }
-
 .viewed-green-check {
     color: var(--standard-vibrant-green);
     font-size: 1.5em;

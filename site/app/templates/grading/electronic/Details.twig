@@ -487,7 +487,7 @@
 		{% if team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] == '' %}
 			<td class="viewed-red-x" title="">&#10008;</td>
 		{% else %}
-			<td class="td-viewed-grade" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
+			<td class="td-viewed-grade" id="team-check-marks" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
 				{% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'hover_string' %}
 					{% if time == null %}
 						<i class="viewed-white-check">&#x2714;</i>
