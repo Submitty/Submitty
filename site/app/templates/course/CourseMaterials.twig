@@ -282,34 +282,53 @@
         // pass filename to server to record the new date and time of the file to be released
         var newDateTime = $(me).val();
         changeNewDateTime(path, newDateTime);
-        var now = new Date();
 
-        function pad(str){
-            return ('0'+str).slice(-2);
-        }
+        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
 
-        var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: {csrf_token: csrfToken},
+            success: function(data) {
+                var now = JSON.parse(data);
+                now = new Date(parseInt(now.year),
+                    parseInt(now.month) - 1,
+                    parseInt(now.day),
+                    parseInt(now.hour),
+                    parseInt(now.minute),
+                    parseInt(now.second));
 
-        var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-        var currentDT = date+' '+time;
-        var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+                function pad(str){
+                    return ('0'+str).slice(-2);
+                }
 
-        //get the value in each file so the color can be assigned
-        //based on the time chosen
-        var fileDT = newDateTime;
-        //also custom colors for this page for readability
-        if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-            me.style.backgroundColor = "#87db88";
-            return "#87db88";
-        }
-        else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-            me.style.backgroundColor = "#f76c6c";
-            return "#f76c6c";
-        }
-        else{
-            me.style.backgroundColor = "#ffeb54";
-            return "#ffeb54";
-        }
+                var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+
+                var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+                var currentDT = date+' '+time;
+                var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+
+                //get the value in each file so the color can be assigned
+                //based on the time chosen
+                var fileDT = newDateTime;
+                //also custom colors for this page for readability
+                if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
+                    me.style.backgroundColor = "#87db88";
+                    return "#87db88";
+                }
+                else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
+                    me.style.backgroundColor = "#f76c6c";
+                    return "#f76c6c";
+                }
+                else{
+                    me.style.backgroundColor = "#ffeb54";
+                    return "#ffeb54";
+                }
+            },
+            error: function(e) {
+                console.log("Error getting server time.");
+            }
+        });
     }
 
     function setChildNewDateTime(path, changeDate,handleData) {
