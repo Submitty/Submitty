@@ -2662,6 +2662,7 @@ AND gc_id IN (
             'all_modifications_forum',
             'reply_in_post_thread',
             'team_invite',
+            'team_joined_email',
             'team_member_submission',
             'merge_threads_email',
             'all_new_threads_email',
@@ -2669,6 +2670,7 @@ AND gc_id IN (
             'all_modifications_forum_email',
             'reply_in_post_thread_email',
             'team_invite_email',
+            'team_joined_email',
             'team_member_submission_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";

@@ -111,6 +111,8 @@ class Notification extends AbstractModel {
      * @param  string   metadata
      * @return string   url
      */
+
+    // added flag for links that go to sites handled by a router
     public static function getUrl($core, $metadata_json) {
         $metadata = json_decode($metadata_json);
         if(is_null($metadata)) {
@@ -120,6 +122,7 @@ class Notification extends AbstractModel {
         $hash = $metadata[1] ?? null;
         $is_router = $metadata[2];
 
+        // after all sites are controlled by router remove $is_router, $hash, and $core->buildUrl
         return $is_router ? $core->buildNewCourseUrl($parts) : $core->buildUrl($parts, $hash);
     }
 

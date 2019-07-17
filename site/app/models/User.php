@@ -22,8 +22,6 @@ use app\exceptions\ValidationException;
  * @method string getPreferredLastName()  Get the preferred last name of the loaded user
  * @method string getDisplayedLastName()  Returns the preferred last name if one exists and is not null or blank,
  *                                        otherwise return the legal last name field for the user.
- * @method void setLegalFirstName(string $name)
- * @method void setLegalLastName(string $name)
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method int getGroup()
