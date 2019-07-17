@@ -33,44 +33,22 @@
         function determineRelease(nDT) {
             //get current date and time to determine what color the box is based
             //on time you want released and the current date
-            var today = new Date();
-            //in order to compare correctly, need to add a zero to all single digits
-            if (today.getMonth() + 1 < 10) {
-                var month = '0' + (today.getMonth() + 1);
-            } else {
-                var month = (today.getMonth() + 1);
-            }
-            if (today.getDate() < 10) {
-                var day = '0' + today.getDate();
-            } else {
-                var day = today.getDate();
-            }
-            if (today.getHours() < 10) {
-                var hours = "0" + today.getHours();
-            } else {
-                var hours = today.getHours();
-            }
-            if (today.getMinutes() < 10) {
-                var mins = "0" + today.getMinutes();
-            } else {
-                var mins = today.getMinutes();
-            }
-            if (today.getSeconds() < 10) {
-                var secs = "0" + today.getSeconds();
-            } else {
-                var secs = today.getSeconds();
-            }
-            var date = today.getFullYear() + '-' + month + '-' + day;
+            var now = new Date();
 
-            var time = hours + ":" + mins + ":" + secs;
-            var currentDT = date + ' ' + time;
-            var neverDT = (today.getFullYear()+10)+'-'+month+'-'+day+' '+time;
-            //will add to colors.css
-            //custom colors for the input box not on sheet for readability
-            if (nDT <= currentDT) {
+            function pad(str){
+                return ('0'+str).slice(-2);
+            }
+
+            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+
+            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+            var currentDT = date+' '+time;
+            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+
+            if (new Date(nDT).getTime() <= new Date(currentDT).getTime()) {
                 return "#87db88";
             }
-            else if(nDT>=neverDT){
+            else if(new Date(nDT).getTime()>=new Date(neverDT).getTime()){
                 return "#f76c6c";
             }
             else {
@@ -88,7 +66,7 @@
         }
         function setChild(dirArr,releaseDate,handleData) {
             //send the array of folder paths and set the time to the new one
-            setChildNewDateTime(dirArr,releaseDate.value,function (output) {
+            changeFolderNewDateTime(dirArr,releaseDate.value,function (output) {
                 if(output){
                     if(handleData){
                         handleData(true);
