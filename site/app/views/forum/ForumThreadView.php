@@ -948,7 +948,8 @@ class ForumThreadView extends AbstractView {
             "thread_exists" => $thread_exists,
             "form_action" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'publish_thread')),
             "manage_categories_url" => $manage_categories_url,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "email_enabled" => $this->core->getConfig()->isEmailEnabled()
         ]);
 
         return $return;
@@ -965,6 +966,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories')));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 
