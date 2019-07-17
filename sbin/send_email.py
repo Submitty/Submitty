@@ -23,7 +23,13 @@ import psutil
 # hangs and takes longer than 1 minute and the cron job fires again.
 #
 
-my_program_name = sys.argv[0].split('/')[-1]
+# We could just match the program name, but this is problematic if
+# happens to match the filename submitted by a student.
+# my_program_name = sys.argv[0].split('/')[-1]
+
+# So instead let's match the full path used in the cron script
+my_program_name = sys.argv[0]
+
 my_pid = os.getpid()
 
 # loop over all active process on the server
