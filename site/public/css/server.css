@@ -1566,6 +1566,7 @@ end of styles used in the admin gradeable page
     width: 108px;
     border: 2px solid #2627ee;
     height: min-content;
+    height: -moz-min-content;
     position: absolute;
     z-index: 999;
 }
@@ -1687,6 +1688,8 @@ ul.bare-list {
         min-width: 40%;
         max-width: 80%;
         height: min-content;
+        height: -moz-min-content;
         width: min-content;
+        width: -moz-min-content;
     }
 }
