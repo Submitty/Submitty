@@ -283,9 +283,8 @@ fi
 
 
 # ------------------------------------------------------------------------
-# Set permissions on the top level logs directory
+# Set owner/group of the top level logs directory
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
-chmod 751                           ${SUBMITTY_DATA_DIR}/logs/
 # Set owner/group for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 # Set owner/group for logs directories that exist only on the primary machine
@@ -302,6 +301,8 @@ find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
 find ${SUBMITTY_DATA_DIR}/logs/ -type d -exec chmod 750 {} \;
 # Created files in the logs subdirectories should inherit the group of the parent directory
 find ${SUBMITTY_DATA_DIR}/logs/ -type d -exec chmod g+s {} \;
+# Set permissions of the top level logs directory
+chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
 # ------------------------------------------------------------------------
 
