@@ -3,7 +3,6 @@
 namespace app\controllers;
 
 use app\controllers\admin\ReportController;
-use app\controllers\admin\GradeableController;
 use app\controllers\admin\GradeablesController;
 use app\controllers\admin\AdminGradeableController;
 use app\controllers\admin\UsersController;
@@ -24,9 +23,6 @@ class AdminController extends AbstractController {
         switch ($_REQUEST['page']) {
             case 'users':
                 $controller = new UsersController($this->core);
-                break;
-            case 'gradeable':
-                $controller = new GradeableController($this->core);
                 break;
             case 'late':
                 $controller = new LateController($this->core);
