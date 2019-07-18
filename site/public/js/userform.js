@@ -6,10 +6,10 @@ function userFormChange() {
     var is_no_regis = regis_elem.options[regis_elem.selectedIndex].text === "Not Registered";
 
     if(is_student && is_no_regis) {
-        $("#student-error-message").show();
+        $("#user-form-student-error-message").show();
     }
     else {
-        $("user-form-#student-error-message").hide();
+        $("#user-form-student-error-message").hide();
     }
     if(is_student) {
         $("#user-form-assigned-sections").hide();
@@ -90,7 +90,7 @@ function editUserForm(user_id) {
     })
 }
 
-function newUserForm() {
+function newUserForm(grader_flag) {
     $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
@@ -104,8 +104,15 @@ function newUserForm() {
     $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
     $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
     $('[name="manual_registration"]', form).prop('checked', true);
-    $('[name="user_group"] option[value="4"]', form).prop('selected', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
-    $('#user-form-student-error-message').css('display', 'block');
-    $('#user-form-assigned-sections').css('display', 'none');
+
+    if (grader_flag) {
+        $('[name="user_group"] option[value="3"]', form).prop('selected', true);
+        $('#user-form-student-error-message').css('display', 'none');
+    }
+    else {
+        $('[name="user_group"] option[value="4"]', form).prop('selected', true);
+        $('#user-form-assigned-sections').css('display', 'none');
+        $('#user-form-student-error-message').css('display', 'block');
+    }
 }
