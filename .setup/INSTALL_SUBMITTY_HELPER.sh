@@ -257,11 +257,11 @@ fi
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 # Create the logs directories that only exist on the primary machine
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
@@ -289,18 +289,18 @@ chmod 751                           ${SUBMITTY_DATA_DIR}/logs/
 # Set permissions for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/autograding
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/emails
 # Set permissions for logs directories that exist only on the primary machine
 if [ "${WORKER}" == 0 ]; then
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
-    chmod  -R 1750                                 ${SUBMITTY_DATA_DIR}/logs/access
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/site_errors
-    chmod  -R 1750                                 ${SUBMITTY_DATA_DIR}/logs/site_errors
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
-    chmod  -R 1750                                 ${SUBMITTY_DATA_DIR}/logs/ta_grading
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
+    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/access
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/emails
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
+    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
 # ------------------------------------------------------------------------
 
