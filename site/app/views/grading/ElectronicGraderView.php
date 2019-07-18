@@ -657,26 +657,26 @@ HTML;
 
         if ($graded_gradeable->hasOverriddenGrades()) {
             $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                "color" => "#FFEF00", // canary yellow
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
                 "message" => "Overridden grades"
             ]);
         }
         else if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#FF8040", // mango orange
+                    "color" => "var(--standard-creamsicle-orange)", // mango orange
                     "message" => "Cancelled Submission"
                 ]);
             } else {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#C38189", // lipstick pink (purple)
+                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
                     "message" => "No Submission"
                 ]);
             }
         } else {
             if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#F62817", // fire engine red
+                    "color" => "var(--standard-red-orange)", // fire engine red
                     "message" => "Late Submission"
                 ]);
             }
