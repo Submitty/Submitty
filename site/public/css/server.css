@@ -1116,6 +1116,7 @@ div.full_height {
     margin: 10px;
     height: calc(100% - 20px);
     width: calc(100vw - 20px);
+    word-break: break-word;
 }
 
 .popup-form form {
@@ -1532,11 +1533,6 @@ end of styles used in the admin gradeable page
     border: 0;
 }
 
-/* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
-#upload-boxes > div:focus {
-    outline: var(--standard-focus-cornflowe-blue);
-}
-
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .fa-trash:focus {
     outline: var(--standard-focus-cornflowe-blue);
@@ -1616,6 +1612,10 @@ end of styles used in the admin gradeable page
     flex-direction: column;
 }
 
+.flex-col-space > * {
+    margin: 10px 0;
+}
+
 .shadow {
     box-shadow: 0 2px 15px -5px #888888;
     border-radius: 3px;
@@ -1665,6 +1665,11 @@ ul.bare-list {
     padding: 0;
 }
 
+.full-width {
+    width: 100% !important;
+    display: block;
+}
+
 .align-left {
     text-align: left !important;
 }
@@ -1684,7 +1689,7 @@ ul.bare-list {
     .popup-window {
         min-height: 300px;
         max-height: 80%;
-        min-width: 40%;
+        min-width: 680px;
         max-width: 80%;
         height: min-content;
         width: min-content;

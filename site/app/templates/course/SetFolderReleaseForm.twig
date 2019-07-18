@@ -76,7 +76,7 @@
             });
 
         }
-        function confirm(){
+        function confirmReleaseDate(){
             var directory = document.getElementById("submit_time");
             var dirArr = JSON.parse(directory.dataset.indir);
             var ID = directory.dataset.iden;
@@ -112,7 +112,7 @@
 
 {% block buttons %}
     {{ block('close_button') }}
-    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirm()"/>
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirmReleaseDate()"/>
 
 {% endblock %}
 
