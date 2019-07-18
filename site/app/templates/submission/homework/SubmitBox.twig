@@ -387,6 +387,7 @@
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
             {# Submit boxes #}
             {% for part in part_names %}
+                {# uploadIndex and input_fileIndex required for drag-and-drop.js #}
                 <div tabindex="0"
                      id="upload{{ loop.index }}"
                      onkeypress="clicked_on_box(event)"

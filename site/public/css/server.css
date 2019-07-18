@@ -1,7 +1,5 @@
 @import url("reset.css");
 @import url("google/inconsolata.css");
-@import "colors.css";
-
 
 :root {
     --viewed_content: #e8f0f7;
@@ -195,6 +193,10 @@ table tr.table-header {
     border-top: 1px solid var(--standard-light-gray);
 }
 
+.table tr {
+    border-top: 1px solid #ddd;
+}
+
 .table-bordered {
     border: 1px solid var(--standard-medium-gray);
     border-collapse: separate;
@@ -215,7 +217,7 @@ table tr.table-header {
     background: var(--standard-hover-light-gray);
 }
 
-.table>tbody>tr.info {
+tr.info, tr.info td, tr.info th {
     background-color: var(--table-info);
 }
 
@@ -277,9 +279,11 @@ table tr.table-header {
     box-shadow: 0 2px 15px -5px var(--standard-light-gray);
     background-color: var(--default-white);
     border-radius: 3px;
-    padding: 30px;
-    margin: 15px;
     overflow: auto;
+    margin: 10px;;
+    padding: 30px;
+    background-color: #fff;
+    flex-grow: 1;
 }
 
 .content:last-child {
@@ -1116,6 +1120,7 @@ div.full_height {
     margin: 10px;
     height: calc(100% - 20px);
     width: calc(100vw - 20px);
+    word-break: break-word;
 }
 
 .popup-form form {
@@ -1532,11 +1537,6 @@ end of styles used in the admin gradeable page
     border: 0;
 }
 
-/* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
-#upload-boxes > div:focus {
-    outline: var(--standard-focus-cornflowe-blue);
-}
-
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
 .fa-trash:focus {
     outline: var(--standard-focus-cornflowe-blue);
@@ -1616,16 +1616,13 @@ end of styles used in the admin gradeable page
     flex-direction: column;
 }
 
+.flex-col-space > * {
+    margin: 10px 0;
+}
+
 .shadow {
     box-shadow: 0 2px 15px -5px #888888;
     border-radius: 3px;
-}
-
-.content {
-    margin: 10px;;
-    padding: 30px;
-    background-color: #fff;
-    flex-grow: 1;
 }
 
 .screen-reader {
@@ -1660,9 +1657,51 @@ end of styles used in the admin gradeable page
     margin-bottom: 0;
 }
 
-ul.bare-list {
+.btn-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    max-width: 100%;
+    width: 100%;
+}
+
+.btn-wrapper .btn {
+    flex: 1 0 90%;
+    margin: 5px 0 0 5px;
+}
+
+.wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
+ul.full-list, ol.full-list {
+    display: block;
+    margin: 1em 0;
+    padding-left: 40px;
+}
+
+ul.bare-list, ol.bare-list {
     list-style: none;
     padding: 0;
+}
+
+.std-margin {
+    margin: 1em 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+header > * {
+    margin-bottom: 20px
+}
+
+.full-width {
+    width: 100% !important;
+    display: block;
 }
 
 .align-left {
@@ -1681,10 +1720,18 @@ ul.bare-list {
 }
 
 @media (min-width: 768px) {
+    .btn-wrapper {
+        width: max-content;
+    }
+
+    .btn-wrapper .btn {
+        flex: 1 0 auto;
+    }
+
     .popup-window {
         min-height: 300px;
         max-height: 80%;
-        min-width: 40%;
+        min-width: 680px;
         max-width: 80%;
         height: min-content;
         width: min-content;

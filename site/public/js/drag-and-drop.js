@@ -104,15 +104,15 @@ function addFilesFromInput(part, check_duplicate_zip=true){
 // 0 - a file with the same name already selected for this version
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
-function fileExists(file, part){
+function fileExists(filename, part){
     for(var i = 0; i < previous_files[part-1].length; i++){
-        if(previous_files[part-1][i] == file.name){
+        if(previous_files[part-1][i] == filename){
             return [1, i];
         }
     }
 
     for(var j = 0; j < file_array[part-1].length; j++){
-        if(file_array[part-1][j].name == file.name){
+        if(file_array[part-1][j].name == filename){
             return [0, j];
         }
     }
@@ -144,7 +144,7 @@ function isFolder(file){
 }
 
 function addFile(file, part, check_duplicate_zip=true){
-    var i = fileExists(file, part);
+    var i = fileExists(file.name, part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
@@ -990,8 +990,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
                 return;
             }
 
-            var file = new File([""], target_path + "/" + file_array[i][j].name);
-            var k = fileExists(file, 1);
+            var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
             // Check conflict here
             if ( k[0] == 1 )
             {
