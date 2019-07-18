@@ -742,19 +742,19 @@ class HomeworkView extends AbstractView {
         $request_regrade_url = $this->core->buildNewCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
-            'regrade',
+            'grade_inquiry',
             'new'
         ]);
         $change_request_status_url = $this->core->buildNewCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
-            'regrade',
+            'grade_inquiry',
             'toggle_status'
         ]);
         $make_regrade_post_url = $this->core->buildNewCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
-            'regrade',
+            'grade_inquiry',
             'post'
         ]);
         if (!$graded_gradeable->hasSubmission()) {
