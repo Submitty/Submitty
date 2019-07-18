@@ -99,7 +99,7 @@ class SubmissionController extends AbstractController {
                 break;
             case 'display':
             default:
-                
+
                 return $this->showHomeworkPage(
                     $_REQUEST['gradeable_id'] ?? null,
                     $_REQUEST['gradeable_version'] ?? 0
@@ -129,8 +129,8 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
             return;
         }
@@ -150,7 +150,6 @@ class SubmissionController extends AbstractController {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['submitter_id'] ?? '';
-        $status = $_REQUEST['status'] ?? -1;
 
         $user = $this->core->getUser();
 
@@ -169,15 +168,14 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
             return;
         }
 
         try {
             $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->core->getOutput()->renderJsonSuccess();
@@ -226,14 +224,9 @@ class SubmissionController extends AbstractController {
     }
 
     private function changeRequestStatus() {
+        $content = str_replace("\r", "", $_POST['replyTextArea']);
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $submitter_id = $_REQUEST['submitter_id'] ?? '';
-        $status = $_REQUEST['status'] ?? null;
-
-        if ($status === null) {
-            $this->core->getOutput()->renderJsonFail('Missing status parameter');
-            return;
-        }
 
         $user = $this->core->getUser();
 
@@ -252,15 +245,27 @@ class SubmissionController extends AbstractController {
             return;
         }
 
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
             return;
+        }
+
+        // toggle status
+        $status = $graded_gradeable->getRegradeRequest()->getStatus();
+        if ($status == -1) {
+            $status = 0;
+        }
+        else {
+            $status = -1;
         }
 
         try {
             $graded_gradeable->getRegradeRequest()->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            if ($content != "") {
+                $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
+            }
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -334,10 +339,13 @@ class SubmissionController extends AbstractController {
                 if ($graded_gradeable != NULL) {
                   $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
                 }
+                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
 
                 // If we get here, then we can safely construct the old model w/o checks
+                $this->core->getOutput()->addInternalCss('forum.css');
+                $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $show_hidden, false);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -580,7 +588,7 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => true
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
 
                 //add new job to queue
                 if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
@@ -601,7 +609,7 @@ class SubmissionController extends AbstractController {
                     "is_qr"     => false
                 ];
 
-                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
 
                 //add new job to queue
                 if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT)) ){
@@ -663,7 +671,7 @@ class SubmissionController extends AbstractController {
             $user_ids = array($tmp_ids);
             $user_ids = array_filter($user_ids);
         }
-        
+
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
 
