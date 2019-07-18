@@ -1684,6 +1684,29 @@ function changeFolderPermission(filenames, checked,handleData) {
     })
 }
 
+function updateToServerTime(fp) {
+    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {csrf_token: csrfToken},
+        success: function(data) {
+            var time = JSON.parse(data);
+            time = new Date(parseInt(time.year),
+                            parseInt(time.month) - 1,
+                            parseInt(time.day),
+                            parseInt(time.hour),
+                            parseInt(time.minute),
+                            parseInt(time.second));
+            fp.setDate(time,true);
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
     let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
