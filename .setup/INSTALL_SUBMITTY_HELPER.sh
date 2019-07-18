@@ -286,22 +286,23 @@ fi
 # Set permissions on the top level logs directory
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
 chmod 751                           ${SUBMITTY_DATA_DIR}/logs/
-# Set permissions for logs directories that exist on both primary & work machines
+# Set owner/group for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
-chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/autograding
-# Set permissions for logs directories that exist only on the primary machine
+# Set owner/group for logs directories that exist only on the primary machine
 if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
-    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/access
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/emails
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
-    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
-    chmod  -R 1750                                    ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
+# Set permissions of all files in the logs directories
+find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
+# Set permissions of all logs subdirectires
+find ${SUBMITTY_DATA_DIR}/logs/ -type d -exec chmod 750 {} \;
+# Created files in the logs subdirectories should inherit the group of the parent directory
+find ${SUBMITTY_DATA_DIR}/logs/ -type d -exec chmod g+s {} \;
+
 # ------------------------------------------------------------------------
 
 
