@@ -25,14 +25,12 @@ class LateController extends AbstractController {
      * @return Response
      */
     public function viewLateDays() {
-<<<<<<< HEAD
         $user_table = $this->core->getQueries()->getUsersWithLateDays();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->renderOutput(array('admin', 'LateDay'), 'displayLateDays', $user_table);
-=======
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'LateDay'],
@@ -40,7 +38,6 @@ class LateController extends AbstractController {
                 $this->core->getQueries()->getUsersWithLateDays()
             )
         );
->>>>>>> 2a041906b4603417adea01a7fbf5a614cbb56e48
     }
 
     /**
