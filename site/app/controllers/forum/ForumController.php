@@ -384,19 +384,19 @@ class ForumController extends AbstractController{
                     }
 
                 }
-
+                $full_course_name = $this->core->getConfig()->getFullCourseName();
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
                 // notify on a new announcement
                 if ($announcement) {
                     $subject = "New Announcement: ".Notification::textShortner($thread_title);
-                    $content = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n"."$thread_title: \n".$thread_post_content;
+                    $content = "An Instructor/TA in ".$full_course_name." made an announcement:\n\n".$thread_title."\n\n".$thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 // notify on a new thread
                 else {
                     $subject = "New Thread: ".Notification::textShortner($thread_title);
-                    $content = "A new thread was created in the Submitty discussion forum:\n\n"."$thread_title: \n".$thread_post_content;
+                    $content = "A new thread in ".$full_course_name." was created:\n\n".$thread_title."\n\n".$thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
@@ -460,14 +460,16 @@ class ForumController extends AbstractController{
                         move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                     }
                 }
+
+                $full_course_name = $this->core->getConfig()->getFullCourseName();
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
 
-                $subject = "New Reply: ".Notification::textShortner($post_content);
-                $content = "The post, ".Notification::textShortner($parent_post_content).", got a new reply: \n\n".$post_content."\n\n in the thread, ".$thread_title;
+                $subject = "New Reply: ".Notification::textShortner($thread_title);
+                $content = "In ".$full_course_name."\n\nThread: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nReceived a new reply:\n\n".$post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
@@ -506,6 +508,7 @@ class ForumController extends AbstractController{
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
      */
     public function alterPost($modifyType){
+        $full_course_name = $this->core->getConfig()->getFullCourseName();
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
         $post = $this->core->getQueries()->getPost($post_id);
         $current_user_id = $this->core->getUser()->getId();
@@ -532,7 +535,7 @@ class ForumController extends AbstractController{
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
             $subject = "Deleted: ".Notification::textShortner($post["content"]);
-            $content = "A thread/post '".$post["content"]."' was deleted in thread, ".$thread_title;
+            $content = "In ".$full_course_name."\n\nThread: ".$thread_title."\n\nPost:\n".$post["content"]." was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
 
@@ -551,7 +554,7 @@ class ForumController extends AbstractController{
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
                 $subject = "Undeleted: ".Notification::textShortner($post["content"]);
-                $content = "A thread/post '".$post["content"]."' has been undeleted in thread, ".$thread_title;
+                $content = "In ".$full_course_name."\n\nThe following post was undeleted.\n\nThread: ".$thread_title."\n\n".$post["content"];
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
