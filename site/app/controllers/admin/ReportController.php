@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -531,23 +532,23 @@ class ReportController extends AbstractController {
             '.json';
 
         // Get the max time to wait before timing out
-        $maxWaitTime = self::MAX_AUTO_RG_WAIT_TIME;
+        $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
 
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($jobs_file) AND $maxWaitTime)
+        while(file_exists($jobs_file) AND $max_wait_time)
         {
             sleep(1);
-            $maxWaitTime--;
+            $max_wait_time--;
             clearstatcache();
         }
 
         // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
         // We must also wait for that file to be removed
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($processing_jobs_file) AND $maxWaitTime)
+        while(file_exists($processing_jobs_file) AND $max_wait_time)
         {
             sleep(1);
-            $maxWaitTime--;
+            $max_wait_time--;
             clearstatcache();
         }
 
@@ -557,12 +558,19 @@ class ReportController extends AbstractController {
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 
-        $debug_output = file_get_contents($debug_output_path);
-        $exceptionDetected = strpos($debug_output, 'Exception');
+        // Look over the output file to see if any part of the process failed
+        try
+        {
+            $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
+        }
+        catch (\Exception $e)
+        {
+            $failure_detected = true;
+        }
 
-        // If we finished the previous loops before maxWaitTime hit 0 then the file successfully left the jobs queue
+        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
         // implying that it finished
-        if($maxWaitTime AND $exceptionDetected === false)
+        if($max_wait_time AND $failure_detected == false)
         {
             $this->core->getOutput()->renderJsonSuccess("Success");
         }
