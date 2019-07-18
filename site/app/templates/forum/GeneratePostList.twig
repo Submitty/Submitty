@@ -1,5 +1,11 @@
+{% set show_unresolve = false %}
 <data id="current-thread" value="{{ post_data[0].thread_id }}"></data>
+
 {% for post_d in  post_data %}
+
+    {% if (post_d.userGroup <= 3 or post_d.post.author_user_id == post_d.current_user) and post_d.first %}
+        {% set show_unresolve = true %}
+    {% endif %}
 
     {% include "forum/CreatePost.twig" with {
         "classes" : post_d.classes,
@@ -31,10 +37,12 @@
         "csrf_token" : csrf_token,
         "activeThreadTitle" : activeThreadTitle,
         "thread_id": post_d.thread_id,
-        "parent_id": post_d.parent_id
+        "parent_id": post_d.parent_id,
+        "show_unresolve": show_unresolve
     } only %}
 
 {% endfor %}
+
 
 {% if (isThreadLocked != 1 or accessFullGrading) and includeReply %}
 
@@ -44,13 +52,14 @@
         <input type="hidden" name="thread_id" value="{{ thread_id }}" />
         <input type="hidden" name="parent_id" value="{{ first_post_id }}" />
         <input type="hidden" name="display_option" value="{{ display_option }}" />
-
         {% include "forum/ThreadPostForm.twig" with {
             "show_post" : true,
             "post_content_placeholder" : "Enter your reply to all here...",
             "show_merge_thread_button" : true,
             "post_box_id" : post_box_id,
             "attachment_script" : true,
+            "thread_resolve_state": thread_resolve_state,
+            "show_unresolve": show_unresolve,
             "show_anon" : true,
             "submit_label" : "Submit Reply to All",
         } %}
@@ -59,6 +68,8 @@
     <br/>
 
 {% endif %}
+
+
 
 {% if userGroup <= 3 %}
     {% include "forum/MergeThreadsForm.twig" with {

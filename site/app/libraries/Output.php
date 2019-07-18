@@ -78,6 +78,12 @@ class Output {
             'cache' => $debug ? false : $cache_path,
             'debug' => $debug
         ]);
+
+        if($debug){
+            $this->twig->addExtension(new \Twig\Extension\DebugExtension());
+        }
+        
+
         $this->twig->addGlobal("core", $this->core);
 
         $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
