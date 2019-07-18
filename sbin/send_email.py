@@ -42,7 +42,7 @@ for p in psutil.pids():
                 if p != my_pid:
                     print("ERROR!  Another copy of '" + my_program_name +
                           "' is already running on the server.  Exiting.")
-                    exit()
+                    sys.exit(1)
     except psutil.NoSuchProcess:
         # Whoops, the process ended before we could look at it.
         # But that's ok!
@@ -63,7 +63,7 @@ try:
 except Exception as config_fail_error:
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
-    exit(-1)
+    sys.exit(1)
 
 
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
@@ -94,7 +94,7 @@ except Exception as config_fail_error:
         str(datetime.datetime.now()), str(config_fail_error))
     LOG_FILE.write(e+"\n")
     print(e)
-    exit(-1)
+    sys.exit(1)
 
 
 def setup_db():
