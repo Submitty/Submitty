@@ -10,17 +10,17 @@ use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
 
-class RegradeController extends AbstractController {
+class GradeInquiryController extends AbstractController {
     public function run() {
         return null;
     }
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/new", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
      * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
      */
-    public function requestRegrade($gradeable_id) {
+    public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
 
@@ -68,10 +68,10 @@ class RegradeController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/post", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/post", methods={"POST"})
      * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
      */
-    public function makeRequestPost($gradeable_id) {
+    public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
 
@@ -120,10 +120,10 @@ class RegradeController extends AbstractController {
 
     /**
      * @param $gradeable_id
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/regrade/toggle_status", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/toggle_status", methods={"POST"})
      * @return Response|null null is for tryGetGradeable and tryGetGradedGradeable
      */
-    public function changeRequestStatus($gradeable_id) {
+    public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
 
