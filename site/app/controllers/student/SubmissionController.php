@@ -1680,6 +1680,8 @@ class SubmissionController extends AbstractController {
             if(!file_exists($json_path))
                 continue;
             $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
+            if($user === null)
+                continue;
             $file_contents = FileUtils::readJsonFile($json_path);
             $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
             $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
