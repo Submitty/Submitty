@@ -338,7 +338,7 @@ class User extends AbstractModel {
     }
 
     static public function constructNotificationSettings($details) {
-        $notification_settings = array();
+        $notification_settings = [];
         $notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
         $notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
         $notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;

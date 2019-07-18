@@ -99,6 +99,11 @@ class NotificationFactory {
     }
     // ***********************************TEAM NOTIFICATIONS***********************************
 
+    /**
+     * checks whether $recipients have correct team settings and sends the notification and email.
+     * @param array $event
+     * @param array $recipients
+     */
     public function onTeamEvent(array $event, array $recipients) {
         $notification_recipients = array();
         $email_recipients = array();

@@ -16,3 +16,5 @@ def up(config, database, semester, course):
     database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL")
     database.execute("ALTER TABLE notification_settings ADD COLUMN IF NOT EXISTS team_joined_email BOOLEAN DEFAULT TRUE NOT NULL")
 
+def down(config, conn, semester, course):
+    pass
