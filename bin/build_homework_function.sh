@@ -17,6 +17,7 @@ function clean_homework {
     rm -rf $course_dir/test_output/${3}
     rm -rf $course_dir/provided_code/${3}
     rm -rf $course_dir/instructor_solution/${3}
+    rm -rf $course_dir/generated_output/${3}
     rm -rf $course_dir/custom_validation_code/${3}
     rm -rf $course_dir/build/${3}
     rm -rf $course_dir/bin/${3}
@@ -66,6 +67,9 @@ function fix_permissions {
     find $course_dir/instructor_solution/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/instructor_solution/           -type f -exec chmod -f ug+rw,o= {} \;
     find $course_dir/instructor_solution/                   -exec chgrp -f ${course_group} {} \;
+    find $course_dir/generated_output/           -type d -exec chmod -f ug+rwx,g+s,o= {} \;
+    find $course_dir/generated_output/           -type f -exec chmod -f ug+rw,o= {} \;
+    find $course_dir/generated_output/                   -exec chgrp -f ${course_group} {} \;
     find $course_dir/test_input/              -type d -exec chmod -f ug+rwx,g+s,o= {} \;
     find $course_dir/test_input/              -type f -exec chmod -f ug+rw,o= {} \;
     find $course_dir/test_input/                      -exec chgrp -f ${course_group} {} \;
