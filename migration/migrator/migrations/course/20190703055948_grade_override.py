@@ -11,4 +11,4 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    pass
+    database.execute("DROP TABLE grade_override")
