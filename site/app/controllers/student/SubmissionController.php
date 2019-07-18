@@ -332,6 +332,9 @@ class SubmissionController extends AbstractController {
                     && $graded_gradeable->isTaGradingComplete()) {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
+                    if ($graded_gradeable->getSubmitter()->isTeam()) {
+                        $this->core->getQueries()->updateTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId());
+                    }
                 }
 
                 // Only show hidden test cases if the display version is the graded version (and grades are released)

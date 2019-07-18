@@ -1330,7 +1330,7 @@ end of styles used in the admin gradeable page
 /* styles for the colors for the electronic grader details page */
 /* color for no grader */
 .grader-NULL {
-    color: var(--default-white)
+    color: var(--default-white);
     text-shadow:
     -1px -1px 0 #000,
     1px -1px 0 #000,
@@ -1381,6 +1381,30 @@ end of styles used in the admin gradeable page
 /* prevents line break in the graded questions column */
 .td-graded-questions {
     white-space: nowrap;
+}
+
+#team-check-marks {
+    white-space: nowrap;
+    padding-right: 10px;
+}
+.viewed-green-check {
+    color: var(--standard-vibrant-green);
+    font-size: 1.5em;
+}
+
+.viewed-white-check {
+    color: var(--default-white);
+    font-size: 1.5em;
+    text-shadow:
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+}
+
+.viewed-red-x {
+    color: var(--badge-backgroud-red);
+    font-size: 1.5em;
 }
 
 /* color for nav page edit button for rebuild error on gradeable */

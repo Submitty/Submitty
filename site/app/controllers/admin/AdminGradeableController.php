@@ -556,7 +556,7 @@ class AdminGradeableController extends AbstractController {
             }
 
             if ($this->checkPathToConfigFile($dir)) {
-                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)+1),$dir];
+                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)),$dir];
             }
             else {
                 while($iter->valid()) {
