@@ -33,7 +33,13 @@
             Email:
             <input type="text" name="user_email" id="user_email" />
         </label>
-        <label for="registered_section">
+        {% if use_database %}
+            <label>
+                Password:
+                <input type="password" name="user_password" placeholder="New Password" />
+            </label>
+        {% endif %}
+        <label for="registered_section" class="full-width">
             Registration Section:
             <select name="registered_section" id="registered_section">
                 <option value="null">Not Registered</option>
@@ -42,19 +48,10 @@
                 {% endfor %}
             </select>
         </label>
-        <p id="user-form-student-error-message" class="red-message">
+        <p id="user-form-student-error-message" class="red-message full-width">
             Warning: Students with no registration section cannot login to the course
         </p>
-        <label for="user_group">
-            Group:
-            <select name="user_group" id="user_group">
-                <option value="1">Instructor</option>
-                <option value="2">Full Access Grader (Grad TA)</option>
-                <option value="3">Limited Access Grader (Mentor)</option>
-                <option value="4">Student</option>
-            </select>
-        </label>
-        <label for="rotating_section">
+        <label for="rotating_section" class="full-width">
             Rotating Section:
             <select name="rotating_section" id="rotating_section">
                 <option value="null">No Section</option>
@@ -63,11 +60,20 @@
                 {% endfor %}
             </select>
         </label>
-        <label for="manual_registration">
+        <label for="manual_registration" class="full-width">
             <input type="checkbox" id="manual_registration" name="manual_registration">
             Manually Registered User (no automatic updates)
         </label>
-        <div id="user-form-assigned-sections" hidden>
+        <label for="user_group" class="full-width">
+            Group:
+            <select name="user_group" id="user_group">
+                <option value="1">Instructor</option>
+                <option value="2">Full Access Grader (Grad TA)</option>
+                <option value="3">Limited Access Grader (Mentor)</option>
+                <option value="4">Student</option>
+            </select>
+        </label>
+        <div id="user-form-assigned-sections" class="full-width" hidden>
             <h3>Assigned Registration Sections for Grading</h3>
             {% for section in reg_sections %}
                 <label for="grs_{{ section.sections_registration_id }}">
@@ -76,12 +82,6 @@
                 </label>
             {% endfor %}
         </div>
-        {% if use_database %}
-            <label>
-                Password:
-                <input type="password" name="user_password" placeholder="New Password" />
-            </label>
-        {% endif %}
     </div>
 {% endblock %}
 {% block form %}
