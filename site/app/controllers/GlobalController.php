@@ -173,7 +173,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-address-book"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
+                    "href" => $this->core->buildNewCourseUrl(['sections']),
                     "title" => "Manage Sections",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-sections",

@@ -32,6 +32,7 @@ class UsersView extends AbstractView {
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
             'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
+            "return_url_upload_class_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
@@ -70,8 +71,8 @@ class UsersView extends AbstractView {
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
-            "return_url_grader_list" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'upload_grader_list')),
-            "return_url_assign_reg_sections" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'assign_registration_sections')),
+            "return_url_upload_grader_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
+            "return_url_assign_reg_sections" => $this->core->buildNewCourseUrl(['graders', 'assign_registration_sections']),
             'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
@@ -110,7 +111,6 @@ class UsersView extends AbstractView {
             foreach ($students as $student) {
                 $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
                 $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-                $grp = "";
                 switch ($student->getGroup()) {
                     case USER::GROUP_INSTRUCTOR:
                         $grp = 'Instructor';
@@ -165,7 +165,8 @@ class UsersView extends AbstractView {
         ]);
     }
 
-    public function rotatingSectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
+    public function sectionsForm($students, $reg_sections, $not_null_counts, $null_counts, $max_section) {
+        $this->core->getOutput()->addBreadcrumb('Manage Sections');
         $reg_sections_count = array();
         foreach ($students as $student) {
             $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
@@ -186,6 +187,8 @@ class UsersView extends AbstractView {
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
             "max_section" => $max_section,
+            "update_registration_sections_url" => $this->core->buildNewCourseUrl(['sections', 'registration_sections']),
+            "update_rotating_sections_url" => $this->core->buildNewCourseUrl(['sections', 'rotating_sections']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

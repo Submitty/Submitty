@@ -28,7 +28,7 @@
     <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_class_list'}) }}" enctype="multipart/form-data">
+    <form method="post" action="{{ return_url_upload_class_list }}" enctype="multipart/form-data">
         {{ parent() }}
     </form>
 {% endblock %}
