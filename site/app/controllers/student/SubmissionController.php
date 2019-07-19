@@ -3,20 +3,15 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
-use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
-use app\models\Notification;
-use app\models\Email;
-use app\controllers\grading\ElectronicGraderController;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
-use app\NotificationFactory;
 use Symfony\Component\Routing\Annotation\Route;
 
 
@@ -82,18 +77,6 @@ class SubmissionController extends AbstractController {
             case 'verify':
                 return $this->ajaxValidGradeable();
                 break;
-            case 'request_regrade':
-                return $this->requestRegrade();
-                break;
-            case 'make_request_post':
-                return $this->makeRequestPost();
-                break;
-            case 'delete_request':
-                return $this->deleteRequest();
-                break;
-            case 'change_request_status':
-                return $this->changeRequestStatus();
-                break;
             case 'stat_page':
                 return $this->showStats();
                 break;
@@ -107,176 +90,10 @@ class SubmissionController extends AbstractController {
                 break;
         }
     }
-    private function requestRegrade() {
-        $content = $_POST['replyTextArea'] ?? '';
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        if(!$gradeable->isRegradeAllowed()) {
-            $this->core->getOutput()->renderJsonFail('Grade inquiries are not enabled for this gradeable');
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
-            return;
-        }
-
-        try {
-            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
-            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new');
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function makeRequestPost() {
-        $content = str_replace("\r", "", $_POST['replyTextArea']);
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
-            return;
-        }
-
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
-            return;
-        }
-
-        try {
-            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
-            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function deleteRequest() {
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
-            return;
-        }
-
-        // TODO: add to access control method
-        if (!$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete grade inquiry');
-            return;
-        }
-
-        try {
-            $this->core->getQueries()->deleteRegradeRequest($graded_gradeable->getRegradeRequest());
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function changeRequestStatus() {
-        $content = str_replace("\r", "", $_POST['replyTextArea']);
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
-            return;
-        }
-
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$can_inquiry) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
-            return;
-        }
-
-        // toggle status
-        $status = $graded_gradeable->getRegradeRequest()->getStatus();
-        if ($status == -1) {
-            $status = 0;
-        }
-        else {
-            $status = -1;
-        }
-
-        try {
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
-            if ($content != "") {
-                $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
-            }
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
 
     /**
-     * @Route("/{_semester}/{_course}/student/{gradeable_id}")
-     * @Route("/{_semester}/{_course}/student/{gradeable_id}/{gradeable_version}")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}")
      * @return array
      */
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
@@ -318,7 +135,7 @@ class SubmissionController extends AbstractController {
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $url = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
+            $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
                 $this->core->getOutput()->renderOutput('Error',
@@ -1530,7 +1347,7 @@ class SubmissionController extends AbstractController {
 
         $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildNewCourseUrl(['student', $gradeable->getId()]);
+        $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
         if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
             $msg = "Invalid CSRF token. Refresh the page and try again.";
             $this->core->addErrorMessage($msg);
@@ -1704,78 +1521,5 @@ class SubmissionController extends AbstractController {
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
 
     }
-
-    private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type){
-      //TODO: send notification to grader per component
-      if($graded_gradeable->hasTaGradingInfo()){
-          $course = $this->core->getConfig()->getCourse();
-          $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-          $graders = $ta_graded_gradeable->getGraders();
-          $submitter = $graded_gradeable->getSubmitter();
-          $user_id = $this->core->getUser()->getId();
-
-          if ($type == 'new') {
-              // instructor/TA/Mentor submitted
-              if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A Instructor/TA/Mentor submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "An Instructor/TA/Mentor has made a new Grade Inquiry for ".$gradeable_id;
-              }
-              // student submitted
-              else {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A student has submitted a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A student has submitted a new grade inquiry for ".$gradeable_id;
-              }
-          } else if ($type == 'reply') {
-              if ($this->core->getUser()->accessGrading()) {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A Instructor/TA/Mentor made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "A instructor has replied to your Grade Inquiry for ".$gradeable_id;
-              }
-              // student submitted
-              else {
-                  $email_subject = "[Submitty $course] New Regrade Request";
-                  $email_body = "A student has made a post in a grade inquiry for gradeable $gradeable_id.\n$user_id writes:\n$content\n\nPlease visit Submitty to follow up on this request";
-                  $n_content = "New reply in Grade Inquiry for ".$gradeable_id;
-              }
-
-          }
-
-          // make graders' notifications and emails
-          $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
-          foreach ($graders as $grader) {
-              if ($grader->accessFullGrading() && $grader->getId() != $user_id){
-                  $details = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
-                  $notifications[] = Notification::createNotification($this->core, $details);
-                  $emails[] = new Email($this->core,$details);
-              }
-          }
-
-          // make students' notifications and emails
-          $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
-          if($submitter->isTeam()){
-              $submitting_team = $submitter->getTeam()->getMemberUsers();
-              foreach($submitting_team as $submitting_user){
-                  if($submitting_user->getId() != $user_id) {
-                      $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
-                      $notifications[] = Notification::createNotification($this->core, $details);
-                      $emails[] = new Email($this->core,$details);
-                  }
-              }
-          } else {
-              if ($submitter->getUser()->getId() != $user_id) {
-                  $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
-                  $notifications[] = Notification::createNotification($this->core, $details);
-                  $emails[] = new Email($this->core,$details);
-              }
-          }
-          $this->core->getNotificationFactory()->sendNotifications($notifications);
-          if ($this->core->getConfig()->isEmailEnabled()) {
-              $this->core->getNotificationFactory()->sendEmails($emails);
-          }
-      }
-    }
-
 
 }
