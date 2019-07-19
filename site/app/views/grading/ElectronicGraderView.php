@@ -232,7 +232,7 @@ class ElectronicGraderView extends AbstractView {
             "component_overall_percentage" => $component_overall_percentage,
             "individual_viewed_grade" => $individual_viewed_grade,
             "total_students_submitted" => $total_students_submitted,
-            "individual_viewed_percent" => $individual_viewed_percent,
+            "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests
         ]);
     }

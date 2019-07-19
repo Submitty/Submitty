@@ -47,7 +47,7 @@
             {% if show_all_sections_button %}
                 <a 
                     class="btn btn-default"
-                    href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort, 'view': view_all ? null : "all"}) }}"
+                    href="{{ grading_url }}?view=all&sort={{ sort }}"
                 >
                     {{ view_all ? "View Your Sections" : "View All Sections" }}
                 </a>
@@ -68,7 +68,7 @@
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
         <div class="column-wrapper">
             <label for="csvUpload">Upload CSV
-                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt"
+                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
             </label>
             <p>
                 The CSV file should be formatted as such: 
@@ -87,17 +87,17 @@
                 <th width="20"></th>
                 <th width="70">Section</th>
                 <th width="90" style="text-align: left">
-                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
+                    <a href="{{ grading_url }}?view={{ view }}&sort=id">
                         <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
                 <th width="110" style="text-align: left">
-                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
+                    <a href="{{ grading_url }}?view={{ view }}&sort=first">
                         <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
                 <th width="110" style="text-align: left">
-                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
+                    <a href="{{ grading_url }}?view={{ view }}&sort=last">
                         <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
@@ -149,14 +149,14 @@
                             {% endif %}
                             {# Print button #}
                             {% if action == 'lab' %}
-                                <a target=_blank href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
+                                <a target=_blank href="{{ print_lab_url }}?section={{ section_id }}&section_type={{ section_type }}&sort={{ sort }}">
                                     <i class="fas fa-print"></i>
                                 </a>
                             {% endif %}
                         </td>
                     </tr>
                     <tr class="info">
-                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)"">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
                             Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
                         </td>
                     </tr>
