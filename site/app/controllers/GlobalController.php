@@ -231,7 +231,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-calendar-plus"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
+                    "href" => $this->core->buildNewCourseUrl(['plagiarism']),
                     "title" => "Plagiarism Detection",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-plagiarism",
