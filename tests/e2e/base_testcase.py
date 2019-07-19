@@ -67,6 +67,7 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.driver = webdriver.Chrome(options=self.options)
+        self.driver.set_window_size(1024, 768)
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
@@ -110,7 +111,7 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_name('user_id').send_keys(user_id)
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
-        
+
         #OLD self.assertEqual(user_name, self.driver.find_element_by_id("login-id").get_attribute('innerText').strip(' \t\r\n'))
 
         #FIXME: WANT SOMETHING LIKE THIS...  WHEN WE HAVE JUST ONE ELEMENT WITH THIS ID
@@ -118,7 +119,7 @@ class BaseTestCase(unittest.TestCase):
 
         #instead, just make sure this element exists
         self.driver.find_element_by_id("logout")
-                    
+
         self.logged_in = True
 
     def log_out(self):
@@ -129,10 +130,11 @@ class BaseTestCase(unittest.TestCase):
 
     def click_class(self, course, course_name=None):
         if course_name is None:
-            course_name = course.upper()
+            course_name = course
+        course_name = course_name.title()
         self.driver.find_element_by_id(self.get_current_semester() + '_' + course).click()
         # print(self.driver.page_source)
-        WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is(course_name))
+        WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.title_is('Submitty ' + course_name + ' Gradeables'))
 
     # see Navigation.twig for html attributes to use as arguments
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
@@ -147,13 +149,11 @@ class BaseTestCase(unittest.TestCase):
     # clicks the navigation header text to 'go back' pages
     # for homepage, selector can be gradeable list
     def click_header_link_text(self, text, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='header-text']/div/h2[1]/a[text()='{}']".format(text)).click()
+        self.driver.find_element_by_xpath("//div[@id='breadcrumbs']/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
-
-
     def wait_after_ajax(self):
-        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))    
+        WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
 
     @staticmethod
     def wait_user_input():

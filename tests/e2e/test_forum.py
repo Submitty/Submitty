@@ -1,7 +1,10 @@
 import tempfile
 import os
 import urllib.request
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
 
@@ -102,7 +105,8 @@ class TestForum(BaseTestCase):
                 categories.append(element.text.strip())
             return {'categories': categories}
         div.click()
-        thread_title = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h3[contains(string(),'{}')]".format(title))
+        self.wait_after_ajax()
+        thread_title = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h2[contains(string(),'{}')]".format(title))
         assert len(thread_title) > 0
         thread_title_with_id = thread_title[0].text.strip()
         thread_title_pos = thread_title_with_id.index(')')+2
@@ -136,6 +140,11 @@ class TestForum(BaseTestCase):
         text_area.send_keys(newcontent)
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
+
+        x = submit_button.location['x'] + (submit_button.size['width']/2)
+        y = submit_button.location['y'] + (submit_button.size['height']/2)
+
+        hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
         # Test existence only

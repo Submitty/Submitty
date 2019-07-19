@@ -4,34 +4,46 @@
         <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
         <a onclick="newUserForm();
             $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
+		<a onclick="editRegistrationSectionsForm()" class="btn btn-primary">Assign Registration Sections for Grading</a>
     </div>
     <h1>Manage Graders</h1>
+    {# This is a data table #}
     <table class="table table-striped table-bordered persist-area">
+        <caption />
         <thead class="persist-thead">
-        <tr>
-            <td width="4%"></td>
-            <td width="20%" style="text-align: left">User ID</td>
-            <td width="30%" colspan="2">Name</td>
-            <td width="23%">User Group</td>
-            <td width="20%">Registration Sections</td>
-            <td width="3%"></td>
-        </tr>
+            <tr>
+                <th width="4%"></th>
+                <th width="20%" style="text-align: left">User ID</th>
+                <th width="30%" colspan="2">Name</th>
+                <th width="23%">User Group</th>
+                <th width="20%">Registration Sections</th>
+                <th width="3%"></th>
+            </tr>
         </thead>
         <tbody>
-        {% if graders|length > 0 %}
-            {% for grader in graders %}
-                <tr id="user-{{ grader.getId() }}">
-                    <td>{{ loop.index }}</td>
-                    <td style="text-align: left">{{ grader.getId() }}</td>
-                    <td style="text-align: left">{{ grader.getDisplayedFirstName() }}</td>
-                    <td style="text-align: left">{{ grader.getDisplayedLastName() }}</td>
-                    <td>{{ groups[grader.getGroup()].name }}</td>
-                    <td>
-                    {{ grader.getGradingRegistrationSections()|join(", ") }}
-                    </td>
-                    <td><a onclick="editUserForm('{{ grader.getId() }}');" aria-label="edit user {{ grader.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
-                </tr>
-            {% endfor %}
+        {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
+			{% for grading_group in 1..3 %}
+				{% if graders[grading_group]|length > 0 %}
+					<tr class="info persist-header">
+						<td colspan="8" style="text-align: center">{{groups[grading_group].name}}</td>
+					</tr>
+					{% for grader in graders[grading_group] %}
+						<tr id="user-{{ grader.getId() }}">
+							<td>{{ loop.index }}</td>
+							<td style="text-align: left">{{ grader.getId() }}</td>
+							<td style="text-align: left">{{ grader.getDisplayedFirstName() }}</td>
+							<td style="text-align: left">{{ grader.getDisplayedLastName() }}</td>
+							<td>{{ groups[grader.getGroup()].name }}</td>
+							<td>{{ grader.getGradingRegistrationSections()|join(", ") }}</td>
+							<td><a onclick="editUserForm('{{ grader.getId() }}');" aria-label="edit user {{ grader.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
+						</tr>
+					{% endfor %}
+				{% else %}
+					<tr class="info persist-header">
+						<td colspan="8" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
+					</tr>
+				{% endif %}
+			{% endfor %}
         {% else %}
             <tr>
                 <td colspan="3">No graders found</td>
@@ -42,3 +54,27 @@
 </div>
 {% include('admin/users/UserForm.twig') with {'action': 'update_grader'} %}
 {% include('admin/users/GraderListForm.twig') %}
+{% include('admin/users/RegistrationSectionsForm.twig') %}
+
+<script>
+
+    function fixCheckBoxes(grader_id,all_box) {
+
+        if(all_box) {
+            //update all check boxes for that user with the "all" box state
+            var value = $('#' + grader_id + '_all').is(':checked');
+            {% for section in reg_sections %}
+                $('#' + grader_id + '_' + '{{section['sections_registration_id']}}').prop('checked', value);
+            {% endfor %}
+        }
+        else { // if all boxes are checked, then check the 'all' box
+			var all_checked = true
+            {% for section in reg_sections %}
+                && $('#' + grader_id + '_' + '{{section['sections_registration_id']}}').is(':checked')
+            {% endfor %}
+            ;
+            $('#' + grader_id + '_all').prop('checked', all_checked);
+        }
+    }
+
+</script>

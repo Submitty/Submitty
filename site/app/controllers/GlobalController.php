@@ -7,6 +7,7 @@ namespace app\controllers;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Button;
+use app\models\User;
 
 class GlobalController extends AbstractController {
 
@@ -54,8 +55,9 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
+                $navigation_url = $this->core->buildNewCourseUrl();
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation')),
+                    "href" => $navigation_url,
                     "title" => "Gradeables",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-submitty",
@@ -65,7 +67,7 @@ class GlobalController extends AbstractController {
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
+                    "href" => $this->core->buildNewCourseUrl(['notifications']),
                     "title" => "Notifications",
                     "badge" => $unread_notifications_count,
                     "class" => "nav-row",
@@ -85,7 +87,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                    "href" => $this->core->buildNewCourseUrl(['config']),
                     "title" => "Course Settings",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-settings",
@@ -96,9 +98,9 @@ class GlobalController extends AbstractController {
             $course_path = $this->core->getConfig()->getCoursePath();
             $course_materials_path = $course_path . "/uploads/course_materials";
             $any_files = FileUtils::getAllFiles($course_materials_path);
-            if ($this->core->getUser()->getGroup() === 1 || !empty($any_files)) {
+            if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                    "href" => $this->core->buildNewCourseUrl(['course_materials']),
                     "title" => "Course Materials",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-materials",
@@ -183,10 +185,10 @@ class GlobalController extends AbstractController {
                 $images_course_path = $this->core->getConfig()->getCoursePath();
                 $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
                 $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
-                if ($this->core->getUser()->getGroup() === 1 && count($any_images_files) === 0) {
+                if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                        "href" => $this->core->buildNewCourseUrl(['student_photos']),
                         "title" => "Student Photos",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-photos",
@@ -194,10 +196,10 @@ class GlobalController extends AbstractController {
                     ]);
                 } else if (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
-                    if (!empty($sections) || $this->core->getUser()->getGroup() !== 3) {
+                    if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
                         $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                            "href" => $this->core->buildNewCourseUrl(['student_photos']),
                             "title" => "Student Photos",
                             "class" => "nav-row",
                             "id" => "nav-sidebar-photos",
@@ -215,14 +217,14 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
+                    "href" => $this->core->buildNewCourseUrl(['late_days']),
                     "title" => "Late Days Allowed",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-late-days-allowed",
                     "icon" => "fa-calendar-check"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
+                    "href" => $this->core->buildNewCourseUrl(['extensions']),
                     "title" => "Excused Absence Extensions",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-extensions",
@@ -236,7 +238,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-exclamation-triangle"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                    "href" => $this->core->buildNewCourseUrl(['reports']),
                     "title" => "Grade Reports",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-reports",
@@ -251,7 +253,7 @@ class GlobalController extends AbstractController {
             $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
             if ($display_rainbow_grades_summary) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
+                    "href" => $this->core->buildNewCourseUrl(['grades']),
                     "title" => "Rainbow Grades",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grades",
@@ -260,7 +262,7 @@ class GlobalController extends AbstractController {
             }
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+                "href" => $this->core->buildNewCourseUrl(['late_table']),
                 "title" => "My Late Days/Extensions",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-late-days",
@@ -284,7 +286,7 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout')),
+                "href" => $this->core->buildNewUrl(['authentication', 'logout']),
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
@@ -326,8 +328,33 @@ class GlobalController extends AbstractController {
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
         },  $wrapper_files);
+        // Get additional links to display in the global footer.
+        $footer_links = [];
+        $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
+        if (file_exists($footer_links_json_file)) {
+            $footer_links_json_data = file_get_contents($footer_links_json_file);
+            if ($footer_links_json_data !== false) {
+                $footer_links_json_data = json_decode($footer_links_json_data, true);
+                // Validate that every footer link ($row) has required columns: 'url' and 'title'.
+                // $row can also have an 'icon' column, but it is optional.
+                foreach ($footer_links_json_data as $row) {
+                    switch (false) {
+                        case array_key_exists('url', $row):
+                        case array_key_exists('title', $row):
+                            //Validation fail.  Exclude $row.
+                            continue 2;
+                        default:
+                            //Validation OK.  Include $row.
+                            if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                                $row['icon'] = "fa-" . $row['icon'];
+                            }
+                            $footer_links[] = $row;
+                    }
+                }
+            }
+        }
         $runtime = $this->core->getOutput()->getRunTime();
-        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls);
+        return $this->core->getOutput()->renderTemplate('Global', 'footer', $runtime, $wrapper_urls, $footer_links);
     }
 
     private function routeEquals(string $a, string $b) {

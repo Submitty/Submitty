@@ -1,14 +1,17 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-         <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_all_as_seen"}) }}" class="btn btn-primary">Mark all as seen</a>
+         <a href="{{ mark_all_as_seen_url }}" class="btn btn-primary">Mark all as seen</a>
         {% if show_all %}
-            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications"}) }}" class="btn btn-primary">Show unread only</a>
+            <a href="{{ notifications_url }}" class="btn btn-primary">Show unread only</a>
         {% else %}
-            <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "show_all": "1"}) }}" class="btn btn-primary">Show All</a>
+            <a href="{{ notifications_url }}?show_all=true" class="btn btn-primary">Show All</a>
         {% endif %}
-        <a onclick="$('#notification-settings').css('display', 'block');" href="#" class="btn btn-primary">Settings</a>
+        <a href="{{ notification_settings_url }}" class="btn btn-primary">Settings</a>
     </div>
     <h1>Notifications</h1>
+    {# This is a layout table #}
     <table class="table table-bordered persist-area">
                 <tr class="info persist-header">
                     <td colspan="8" style="text-align: center">
@@ -30,7 +33,7 @@
                             </td>
                             <td colspan="4">
                                 {% if hasLink %}
-                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "open_notification", "nid": notification.getId(), "seen": notification.isSeen() }) }}">
+                                    <a href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() }}">
                                 {% endif %}
                                     <div style="height: 100%; width: 100%;">
                                         {{ notification.getNotifyContent() }}
@@ -44,7 +47,7 @@
                             </td>
                             <td colspan="1">
                                 {% if not notification.isSeen() %}
-                                    <a href="{{ core.buildUrl({"component": "navigation", "page": "notifications", "action": "mark_as_seen", "nid": notification.getId() }) }}" title="Mark as seen">
+                                    <a href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen">
                                         <i class="fas fa-check" aria-hidden="true"></i>
                                     </a>
                                 {% endif %}
@@ -60,5 +63,3 @@
             {% endif %}        
     </table>
 </div>
-
-{% include 'NotificationsSettings.twig' with { 'notification_saves': notification_saves } %}

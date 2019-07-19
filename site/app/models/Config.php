@@ -23,6 +23,7 @@ use app\libraries\Utils;
  * @method string getCgiUrl()
  * @method string getSiteUrl()
  * @method string getSubmittyPath()
+ * @method string getCgiTmpPath()
  * @method string getCoursePath()
  * @method string getDatabaseDriver()
  * @method array getSubmittyDatabaseParams()
@@ -43,6 +44,7 @@ use app\libraries\Utils;
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
+ * @method bool isEmailEnabled()
  * @method string getRegradeMessage()
  * @method string getVcsBaseUrl()
  * @method string getCourseEmail()
@@ -52,6 +54,8 @@ use app\libraries\Utils;
  * @method string getRoomSeatingGradeableId()
  * @method bool isSeatingOnlyForInstructor()
  * @method array getCourseJson()
+ * @method string getSecretSession()
+ * @method string getAutoRainbowGrades()
  */
 
 class Config extends AbstractModel {
@@ -106,6 +110,8 @@ class Config extends AbstractModel {
     protected $submitty_log_path;
     /** @property @var bool */
     protected $log_exceptions;
+    /** @property @var string */
+    protected $cgi_tmp_path;
 
     /** @property @var string */
     protected $database_driver = "pgsql";
@@ -142,6 +148,9 @@ class Config extends AbstractModel {
 
     /** @property @var array */
     protected $wrapper_files = array();
+
+    /** @property @var bool */
+    protected $email_enabled;
 
     /** @property @var string */
     protected $course_name;
@@ -182,6 +191,10 @@ class Config extends AbstractModel {
     protected $seating_only_for_instructor;
     /** @property @var string|null */
     protected $room_seating_gradeable_id;
+    /** @property @var bool */
+    protected $auto_rainbow_grades;
+    /** @property @var string */
+    protected $secret_session;
 
     /**
      * Config constructor.
@@ -274,6 +287,8 @@ class Config extends AbstractModel {
             $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
         }
 
+        $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
+
         // Check that the paths from the config file are valid
         foreach(array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
@@ -292,6 +307,30 @@ class Config extends AbstractModel {
         if (!empty($this->semester) && !empty($this->course)) {
             $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
+
+        $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
+        if (!$secrets_json) {
+            throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
+        }
+
+        foreach(['session'] as $key) {
+            $var = "secret_{$key}";
+            $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
+            if (empty($secrets_json[$key])) {
+                throw new ConfigException("Missing secret var: {$key}");
+            }
+            else if (strlen($secrets_json[$key]) < 32) {
+                // enforce a minimum 32 bytes for the secrets
+                throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
+            }
+            $this->$var = $secrets_json[$key];
+        }
+
+        $email_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'email.json'));
+        if (!$email_json) {
+            throw new ConfigException("Could not find email config: {$this->config_path}/email.json");
+        }
+        $this->email_enabled = $email_json['email_enabled'];
     }
 
     public function loadCourseJson($course_json_path) {
@@ -314,7 +353,8 @@ class Config extends AbstractModel {
             'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
-            'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message'
+            'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message',
+            'auto_rainbow_grades'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -330,8 +370,6 @@ class Config extends AbstractModel {
                 $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/")."/";
             }
         }
-
-        $this->upload_message = Utils::prepareHtmlString($this->upload_message);
 
         foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
             $this->$key = intval($this->$key);
@@ -368,11 +406,6 @@ class Config extends AbstractModel {
             }
             $this->$key = $config[$section][$key];
         }
-    }
-
-    public function getHomepageUrl()
-    {
-        return $this->base_url."index.php?";
     }
 
     /**

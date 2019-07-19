@@ -21,11 +21,16 @@ class UsersView extends AbstractView {
             $sections[$registration][] = $student;
         }
 
+        $this->core->getOutput()->addInternalCss('studentlist.css');
+        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalJs('userform.js');
+
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
             "sections" => $sections,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
-            "use_database" => $use_database
+            "use_database" => $use_database,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -37,6 +42,8 @@ class UsersView extends AbstractView {
      * @return string
      */
     public function listGraders($graders, $reg_sections, $rot_sections, $use_database=false) {
+        $this->core->getOutput()->addInternalJs('userform.js');
+
         return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
             "graders" => $graders,
             "groups" => [
@@ -59,7 +66,10 @@ class UsersView extends AbstractView {
             ],
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
-            "use_database" => $use_database
+            "use_database" => $use_database,
+            "return_url_grader_list" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'upload_grader_list')),
+            "return_url_assign_reg_sections" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users','action' => 'assign_registration_sections')),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 
@@ -98,16 +108,13 @@ class UsersView extends AbstractView {
                 $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
                 $grp = "";
                 switch ($student->getGroup()) {
-                    case 0:
-                        $grp = 'Developer';
-                        break;
-                    case 1:
+                    case USER::GROUP_INSTRUCTOR:
                         $grp = 'Instructor';
                         break;
-                    case 2:
+                    case USER::GROUP_FULL_ACCESS_GRADER:
                         $grp = 'Full Access Grader (Grad TA)';
                         break;
-                    case 3:
+                    case USER::GROUP_LIMITED_ACCESS_GRADER:
                         $grp = 'Limited Access Grader (Mentor)';
                         break;
                     default:
@@ -123,19 +130,15 @@ class UsersView extends AbstractView {
             foreach ($graders as $grader) {
                 $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
                 switch ($grader->getGroup()) {
-                    case 0:
-                        $reg_sec = 'All';
-                        $grp = 'Developer';
-                        break;
-                    case 1:
+                    case USER::GROUP_INSTRUCTOR:
                         $reg_sec = 'All';
                         $grp = 'Instructor';
                         break;
-                    case 2:
+                    case USER::GROUP_FULL_ACCESS_GRADER:
                         $grp = 'Full Access Grader (Grad TA)';
                         $reg_sec = implode(',', $grader->getGradingRegistrationSections());
                         break;
-                    case 3:
+                    case USER::GROUP_LIMITED_ACCESS_GRADER:
                         $grp = 'Limited Access Grader (Mentor)';
                         $reg_sec = implode(',', $grader->getGradingRegistrationSections());
                         break;
@@ -170,13 +173,16 @@ class UsersView extends AbstractView {
             }
         }
 
+        $this->core->getOutput()->addInternalCss('rotatingsectionsform.css');
+
         return $this->core->getOutput()->renderTwigTemplate("admin/users/RotatingSectionsForm.twig", [
             "students" => $students,
             "reg_sections" => $reg_sections,
             "reg_sections_count" => $reg_sections_count,
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
-            "max_section" => $max_section
+            "max_section" => $max_section,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

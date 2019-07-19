@@ -124,6 +124,7 @@ CREATE TABLE electronic_gradeable (
     eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
+    eg_vcs_host_type integer DEFAULT(0) NOT NULL,
     eg_team_assignment boolean NOT NULL,
     --eg_inherit_teams_from character varying(255) NOT NULL,
     eg_max_team_size integer NOT NULL,
@@ -196,7 +197,7 @@ CREATE TABLE gradeable (
     g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
-    g_grade_by_registration boolean NOT NULL,
+    g_grader_assignment_method integer NOT NULL,
     g_ta_view_start_date timestamp(6) with time zone NOT NULL,
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
@@ -451,6 +452,7 @@ CREATE TABLE sessions (
 CREATE TABLE users (
     user_id character varying NOT NULL,
     anon_id character varying,
+    user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -459,9 +461,15 @@ CREATE TABLE users (
     user_group integer NOT NULL,
     registration_section character varying(255),
     rotating_section integer,
+    user_updated boolean NOT NULL DEFAULT false,
+    instructor_updated boolean NOT NULL DEFAULT false,
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
+);
+
+CREATE INDEX users_user_numeric_id_idx ON users using btree (
+    user_numeric_id ASC NULLS LAST
 );
 
 
@@ -484,7 +492,8 @@ CREATE TABLE gradeable_teams (
 CREATE TABLE teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
-    state integer NOT NULL
+    state integer NOT NULL,
+	last_viewed_time timestamp(6) with time zone DEFAULT NULL
 );
 
 
@@ -494,7 +503,7 @@ CREATE TABLE teams (
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
     g_id VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
     status INTEGER DEFAULT 0 NOT NULL
@@ -507,7 +516,12 @@ CREATE TABLE notification_settings (
 	all_new_threads BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 --
@@ -516,7 +530,7 @@ CREATE TABLE notification_settings (
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
     regrade_id INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL
@@ -525,7 +539,7 @@ CREATE TABLE regrade_discussion (
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
@@ -572,6 +586,7 @@ CREATE TABLE "threads" (
 	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
 	"status" int DEFAULT 0 NOT NULL,
+	"lock_thread_date" timestamp with time zone,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
@@ -605,7 +620,8 @@ CREATE TABLE "student_favorites" (
 CREATE TABLE "viewed_responses" (
 	"thread_id" int NOT NULL,
 	"user_id" character varying NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL
+	"timestamp" timestamp with time zone NOT NULL,
+    CONSTRAINT viewed_responses_pkey PRIMARY KEY ("thread_id", "user_id")
 );
 
 
@@ -1163,4 +1179,3 @@ ALTER TABLE ONLY regrade_requests
 --
 -- PostgreSQL database dump complete
 --
-

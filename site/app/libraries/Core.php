@@ -8,8 +8,13 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
+use app\libraries\routers\ClassicRouter;
 use app\models\Config;
+use app\models\forum\Forum;
 use app\models\User;
+use app\NotificationFactory;
+
+
 
 /**
  * Class Core
@@ -53,6 +58,18 @@ class Core {
     /** @var Access $access */
     private $access = null;
 
+    /** @var Forum $forum */
+    private $forum  = null;
+
+    /** @var ClassicRouter */
+    private $router;
+
+    /** @var NotificationFactory */
+    private $notification_factory;
+    /** @var bool */
+    private $redirect = true;
+
+
     /**
      * Core constructor.
      *
@@ -67,19 +84,27 @@ class Core {
         if(!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
-    
+
         // initialize our alert types if one of them doesn't exist
         foreach (array('error', 'notice', 'success') as $key) {
             if(!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
         }
-    
+
         // we cast each of our controller markers to lower to normalize our controller switches
         // and prevent any unexpected page failures for users in entering a capitalized controller
         foreach (array('component', 'page', 'action') as $key) {
             $_REQUEST[$key] = (isset($_REQUEST[$key])) ? strtolower($_REQUEST[$key]) : "";
         }
+        $this->notification_factory = new NotificationFactory($this);
+    }
+
+    /**
+     * Disable all redirects for API calls.
+     */
+    public function disableRedirects() {
+        $this->redirect = false;
     }
 
     /**
@@ -105,7 +130,10 @@ class Core {
                 $this->config->loadCourseJson($course_json_path);
             }
             else{
-              $message = "Unable to access configuration file " . $course_json_path . " for " . $semester . " " . $course . " please contact your system administrator.";
+                $message = "Unable to access configuration file " . $course_json_path . " for " .
+                  $semester . " " . $course . " please contact your system administrator.\n" .
+                  "If this is a new course, the error might be solved by restarting php-fpm:\n" .
+                  "sudo service php7.2-fpm restart";
                 $this->addErrorMessage($message);
             }
         }
@@ -143,6 +171,14 @@ class Core {
             $this->course_db->connect();
         }
         $this->database_queries = $database_factory->getQueries($this);
+    }
+
+    public function loadForum() {
+        if ($this->config === null) {
+            throw new \Exception("Need to load the config before we can create a forum instance.");
+        }
+
+        $this->forum = new Forum($this);
     }
 
     /**
@@ -201,7 +237,7 @@ class Core {
     /**
      * @return Config
      */
-    public function getConfig() {
+    public function getConfig(): ?Config {
         return $this->config;
     }
 
@@ -224,6 +260,13 @@ class Core {
      */
     public function getQueries() {
         return $this->database_queries;
+    }
+
+    /**
+     * @return Forum
+     */
+    public function getForum() {
+        return $this->forum;
     }
 
     /**
@@ -286,16 +329,35 @@ class Core {
 
     /**
      * Given a session id (which should be coming from a cookie or request header), the database is queried to find
-     * a session that matches the string, then returns the user that matches that row (if it exists). If no session
-     * is found that matches the given id, return false, otherwise return true and load the user.
+     * a session that matches the string, returning the user_id associated with it. The user_id is then checked to
+     * make sure it matches our expected one from our session token, and if that all passes, then we load the
+     * user into the core and returns true, else return false.
      *
-     * @param $session_id
+     * @param string $session_id
+     * @param string $expected_user_id
      *
      * @return bool
      */
-    public function getSession($session_id) {
+    public function getSession(string $session_id, string $expected_user_id): bool {
         $user_id = $this->session_manager->getSession($session_id);
-        if ($user_id === false) {
+        if ($user_id === false || $user_id !== $expected_user_id) {
+            return false;
+        }
+        $this->loadUser($user_id);
+        return true;
+    }
+
+    /**
+     * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
+     * a user id that matches the api key, and let the core load the user.
+     *
+     * @param string $api_key
+     *
+     * @return bool
+     */
+    public function loadApiUser(string $api_key): bool {
+        $user_id = $this->database_queries->getSubmittyUserByApiKey($api_key);
+        if ($user_id === null) {
             return false;
         }
         $this->loadUser($user_id);
@@ -320,20 +382,19 @@ class Core {
      *
      * @throws AuthenticationException
      */
-    public function authenticate($persistent_cookie = true) {
-        $auth = false;
+    public function authenticate(bool $persistent_cookie = true): bool {
         $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
-                $auth = true;
-                $session_id = $this->session_manager->newSession($user_id);
-                $cookie_id = 'submitty_session_id';
                 // Set the cookie to last for 7 days
-                $cookie_data = array('session_id' => $session_id);
-                $cookie_data['expire_time'] = ($persistent_cookie === true) ? time() + (7 * 24 * 60 * 60) : 0;
-                if (Utils::setCookie($cookie_id, $cookie_data, $cookie_data['expire_time']) === false) {
-                    return false;
-                }
+                $token = TokenManager::generateSessionToken(
+                    $this->session_manager->newSession($user_id),
+                    $user_id,
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession(),
+                    $persistent_cookie
+                );
+                return Utils::setCookie('submitty_session', (string) $token, $token->getClaim('expire_time'));
             }
         }
         catch (\Exception $e) {
@@ -344,7 +405,37 @@ class Core {
             }
             throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
-        return $auth;
+        return false;
+    }
+
+    /**
+     * Authenticates the user against user's api key. Returns the json web token generated for the user.
+     *
+     * @return string | null
+     *
+     * @throws AuthenticationException
+     */
+    public function authenticateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                $token = (string) TokenManager::generateApiToken(
+                    $this->database_queries->getSubmittyUserApiKey($user_id),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                return $token;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return null;
     }
 
     /**
@@ -381,10 +472,40 @@ class Core {
     }
 
     /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewUrl($parts=array()) {
+        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        return $url;
+    }
+
+    /**
+     * Given some URL parameters (parts), build a URL for the site using those parts.
+     * This function will add the semester and course to the beginning of the new URL by default,
+     * if you do not prepend this part (e.g. for authentication-related URLs), please set
+     * $prepend_course_info to false.
+     *
+     * @param array  $parts
+     *
+     * @return string
+     */
+    public function buildNewCourseUrl($parts=array()) {
+        array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
+        return $this->buildNewUrl($parts);
+    }
+
+    /**
      * @param     $url
      * @param int $status_code
      */
     public function redirect($url, $status_code = 302) {
+        if (!$this->redirect) {
+            return;
+        }
         header('Location: ' . $url, true, $status_code);
         die();
     }
@@ -440,7 +561,7 @@ class Core {
         }
         return $semester;
     }
-    
+
     /**
      * @return Output
      */
@@ -508,6 +629,13 @@ class Core {
         }
     }
 
+    public function setRouter(ClassicRouter $router) {
+        $this->router = $router;
+    }
+
+    public function getRouter(): ClassicRouter {
+        return $this->router;
+    }
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
      * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
@@ -518,5 +646,9 @@ class Core {
      */
     public function isTesting() {
         return false;
+    }
+
+    public function getNotificationFactory() {
+        return $this->notification_factory;
     }
 }

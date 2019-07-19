@@ -6,11 +6,14 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\Output;
 use app\libraries\Utils;
+use app\libraries\Access;
 use app\models\Config;
 use app\models\User;
 use ReflectionException;
 
+
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
+
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -22,7 +25,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return Core
      */
-    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array()) {
+    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -48,9 +51,14 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
-        $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
-            return new \DateTime('now', $config->getTimezone());
-        });
+        if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
+            $core->method('getDateTimeNow')->willReturn(new \DateTime(2001-01-01, $config->getTimezone()));
+        }else{
+            $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
+                return new \DateTime('now', $config->getTimezone());
+            });
+        }
+
 
         $core->method('getConfig')->willReturn($config);
 
@@ -67,35 +75,40 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $core->method('isTesting')->willReturn(true);
         }
 
+        $mock_access = $this->createMock(Access::class);
+        foreach ($access as $method => $value) {
+            $mock_access->method($method)->willReturn($value);
+        }
+        $core->method('getAccess')->willReturn($mock_access);
+
         $mock_queries = $this->createMock(DatabaseQueries::class);
         foreach ($queries as $method => $value) {
             $mock_queries->method($method)->willReturn($value);
         }
         $core->method('getQueries')->willReturn($mock_queries);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $user = $this->createMockModel(User::class);
-        $user->method('getId')->willReturn("testUser");
-        if (isset($user_config['access_grading'])) {
-            $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
-        }
-        else {
-            $user->method('accessGrading')->willReturn(false);
-        }
-        if (isset($user_config['access_full_grading'])) {
-            $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
-        }
-        else {
-            $user->method('accessFullGrading')->willReturn(false);
-        }
-        if (isset($user_config['access_admin'])) {
-            $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
-        }
-        else {
-            $user->method('accessAdmin')->willReturn(false);
-        }
+        if (!isset($user_config['no_user'])) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $user = $this->createMockModel(User::class);
+            $user->method('getId')->willReturn("testUser");
+            if (isset($user_config['access_grading'])) {
+                $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
+            } else {
+                $user->method('accessGrading')->willReturn(false);
+            }
+            if (isset($user_config['access_full_grading'])) {
+                $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
+            } else {
+                $user->method('accessFullGrading')->willReturn(false);
+            }
+            if (isset($user_config['access_admin'])) {
+                $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
+            } else {
+                $user->method('accessAdmin')->willReturn(false);
+            }
 
-        $core->method('getUser')->willReturn($user);
+            $core->method('getUser')->willReturn($user);
+        }
 
         /** @noinspection PhpParamsInspection */
         $output = new Output($core);

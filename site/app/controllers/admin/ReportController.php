@@ -3,11 +3,13 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\libraries\routers\AccessControl;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -16,30 +18,105 @@ use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
+use Symfony\Component\Routing\Annotation\Route;
+use app\models\GradeSummary;
+use app\models\RainbowCustomization;
+use app\exceptions\ValidationException;
 
 /**
  * Class ReportController
  * @package app\controllers\admin
- *
+ * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
+
+    const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
+                                            // wait for the job to complete before timing out and returning failure
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
-        }
+        return null;
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/reports")
+     */
     public function showReportPage() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+    }
+
+    /**
+     * Generates grade summary files for every user
+     *
+     * @Route("/{_semester}/{_course}/reports/summaries")
+     * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
+     */
+    public function generateGradeSummaries() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+        $g_sort_keys = [
+            'type',
+            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'user_id',
+        ];
+
+        // Generate the reports
+        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
+            $this->saveUserToFile($base_path, $a, $b, $c);
+            return null;
+        });
+        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
+        $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+        return $this->core->getOutput()->renderJsonSuccess();
+    }
+
+    /**
+     * Generates and offers download of CSV grade report
+     *
+     * @Route("/{_semester}/{_course}/reports/csv")
+     */
+    public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $g_sort_keys = [
+            'syllabus_bucket',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'registration_section',
+            'user_id',
+        ];
+
+        // Generate the reports
+        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
+            return $this->generateCSVRow($a, $b, $c);
+        });
+
+        // Concatenate the CSV
+        $csv = '';
+        if (count($rows) > 0) {
+            // Header row
+            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
+            // Content rows
+            foreach ($rows as $row) {
+                $csv .= implode(',', $row) . PHP_EOL;
+            }
+        }
+        //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
+        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
     /**
@@ -172,36 +249,6 @@ class ReportController extends AbstractController {
         return $results;
     }
 
-    /** Generates and offers download of CSV grade report */
-    public function generateCSVReport() {
-        $g_sort_keys = [
-            'syllabus_bucket',
-            'g_id',
-        ];
-        $gg_sort_keys = [
-            'registration_section',
-            'user_id',
-        ];
-
-        // Generate the reports
-        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
-            return $this->generateCSVRow($a, $b, $c);
-        });
-
-        // Concatenate the CSV
-        $csv = '';
-        if (count($rows) > 0) {
-            // Header row
-            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
-            // Content rows
-            foreach ($rows as $row) {
-                $csv .= implode(',', $row) . PHP_EOL;
-            }
-        }
-        //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
-        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
-    }
-
     /**
      * Generates a CSV row for a user
      * @param User $user The user the grades are for
@@ -234,27 +281,6 @@ class ReportController extends AbstractController {
             }
         }
         return $row;
-    }
-
-    /** Generates grade summary files for every user */
-    public function generateGradeSummaries() {
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
-        $g_sort_keys = [
-            'type',
-            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
-            'g_id',
-        ];
-        $gg_sort_keys = [
-            'user_id',
-        ];
-
-        // Generate the reports
-        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
-            $this->saveUserToFile($base_path, $a, $b, $c);
-            return null;
-        });
-        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
     /**
@@ -426,6 +452,132 @@ class ReportController extends AbstractController {
                 }
             default:
                 return 'ERROR';
+        }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
+    public function generateCustomization(){
+
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        //Build a new model, pull in defaults for the course
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+
+        if(isset($_POST["json_string"])){
+
+            //Handle user input (the form) being submitted
+            try {
+
+                $customization->processForm();
+
+                // Finally, send the requester back the information
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
+            } catch (ValidationException $e) {
+                //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
+                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+            } catch (\Exception $e) {
+                //Catches any other exceptions, should be "unexpected" issues
+                $this->core->getOutput()->renderJsonError($e->getMessage());
+            }
+        }
+        else{
+
+            $this->core->getOutput()->addInternalJs('rainbow-customization.js');
+            $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+
+            // Print the form
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+                "customization_data" => $customization->getCustomizationData(),
+                "available_buckets" => $customization->getAvailableBuckets(),
+                "used_buckets" => $customization->getUsedBuckets(),
+                'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
+                'bucket_percentages' => $customization->getBucketPercentages(),
+                'messages' => $customization->getMessages()
+            ]);
+
+        }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/auto_rg_status")
+     */
+    public function autoRainbowGradesStatus()
+    {
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        // Create path to the file we expect to find in the jobs queue
+        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Create path to 'processing' file in jobs queue
+        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Get the max time to wait before timing out
+        $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
+
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($jobs_file) AND $max_wait_time)
+        {
+            sleep(1);
+            $max_wait_time--;
+            clearstatcache();
+        }
+
+        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+        // We must also wait for that file to be removed
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($processing_jobs_file) AND $max_wait_time)
+        {
+            sleep(1);
+            $max_wait_time--;
+            clearstatcache();
+        }
+
+        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
+        $debug_output_path = '/var/local/submitty/courses/'.
+            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getCourse() .
+            '/rainbow_grades/auto_debug_output.txt';
+
+        // Look over the output file to see if any part of the process failed
+        try
+        {
+            $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
+        }
+        catch (\Exception $e)
+        {
+            $failure_detected = true;
+        }
+
+        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
+        // implying that it finished
+        if($max_wait_time AND $failure_detected == false)
+        {
+            $this->core->getOutput()->renderJsonSuccess("Success");
+        }
+        // Else we timed out or something else went wrong
+        else
+        {
+            $this->core->getOutput()->renderJsonFail('A failure occurred waiting for the job to finish');
         }
     }
 }

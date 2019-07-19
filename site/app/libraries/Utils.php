@@ -240,19 +240,23 @@ class Utils {
      * students_version is an array of user and their highest submitted version
      */
 
-    public static function getAutoFillData($students, $students_version = null){
+    public static function getAutoFillData($students, $students_version = null) {
         $students_full = array();
         $null_section = array();
-        $i = 0;
         foreach ($students as $student) {
-            if($student->getRegistrationSection() != null){
-                $student_entry = array('value' => $student->getId(),
-                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
-                if ($students_version != null && $students_version[$i][1] !== 0) {
-                    $student_entry['label'] .= ' (' . $students_version[$i][1] . ' Prev Submission)';
+            $student_entry = array('value' => $student->getId(),
+                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+
+            if($students_version !== null) {
+                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)) {
+                    if ($students_version[$student->getId()] !== 0) {
+                        $student_entry['label'] .= ' (' .
+                        $students_version[$student->getId()] . ' Prev Submission)';
+                    }
                 }
-                $students_full[] = $student_entry;
-            }else{
+            } 
+            $students_full[] = $student_entry;
+            if($students_version === null){
                 $null_entry = array('value' => $student->getId(),
                 'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
 
@@ -260,11 +264,55 @@ class Utils {
                 foreach ($null_section as $null_student) {
                     if($null_student['value'] === $student->getId()) $in_null_section = true;
                 }
-                if(!$in_null_section) $null_section[] = $null_entry;
+                if(!$in_null_section && $student->getRegistrationSection() == null) {
+                    $null_section[] = $null_entry; 
+                    $students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
+                } 
             }
-            $i++;
         }
         $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
         return json_encode($students_full);
     }
+    
+    /*
+     * Given a multidimensional array of students, key, and id, removeStudentWithId deletes matching student row(s).
+     */
+
+    public static function removeStudentWithId($students, $key, $id) {
+        foreach($students as $subKey => $student) {
+             if($student[$key] === $id) {
+                  unset($students[$subKey]);
+             }
+        }
+        return $students;
+   }
+
+   /**
+    * Convert the shorthand byte notation in php.ini to bytes.
+    * E.g : php returnBytes(ini_get('post_max_size'))
+    * Src : https://www.php.net/manual/en/function.ini-get.php
+    * @param string $size_str
+    * @return int 
+    */
+    public static function returnBytes ($size_str){
+        switch (substr ($size_str, -1)){
+            case 'M': case 'm': return (int)$size_str * 1048576;
+            case 'K': case 'k': return (int)$size_str * 1024;
+            case 'G': case 'g': return (int)$size_str * 1073741824;
+            default: return $size_str;
+        }
+    }
+
+    /**
+    * Convert bytes to a specified format thats human readable 
+    * E.g : MB, 10485760 => 10MB
+    * @param string $format
+    * @param int $bytes
+    * @return string
+    */
+    public static function formatBytes($format, $bytes){
+        $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
+        return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
+    }
+
 }

@@ -4,6 +4,7 @@ from unittest import skipIf
 from .base_testcase import BaseTestCase
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
@@ -115,7 +116,9 @@ class TestSubmission(BaseTestCase):
         self.accept_alerts(1)
 
         # wait until the page reloads to change the active version, completing the test
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version))))        
+        version_xpath = "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version)
+        ActionChains(self.driver).move_to_element(self.driver.find_element_by_xpath(version_xpath)).perform()
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, version_xpath)))
 
     # for test cases that require switching versions, make submissions to ensure they will
     def ensure_multiple_versions(self):

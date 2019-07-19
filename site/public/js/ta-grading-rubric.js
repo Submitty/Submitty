@@ -60,9 +60,6 @@ COUNT_DIRECTION_DOWN = -1;
 PDF_PAGE_NONE = 0;
 PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
-PDF_PAGE_HEIGHT = 841.89;
-PDF_BORDER_HEIGHT = 0;
-PDF_OFFSET = 0;
 
 /**
  * Whether ajax requests will be asynchronous or synchronous.  This
@@ -1446,7 +1443,7 @@ function getOverallCommentFromDOM() {
 function getOpenComponentIds() {
     let component_ids = [];
     $('.ta-rubric-table:visible').each(function () {
-        component_ids.push($(this).attr('data-component_id'));
+        component_ids.push(parseInt($(this).attr('data-component_id')));
     });
     return component_ids;
 }
@@ -1722,6 +1719,14 @@ function setCustomMarkError(component_id, show_error) {
         jquery.removeClass(c);
         jquery.prop('title', '');
     }
+}
+
+/**
+ * Changes the disabled state of the edit mode box
+ * @param disabled
+ */
+function disableEditModeBox(disabled) {
+    $('#edit-mode-enabled').prop('disabled', disabled);
 }
 
 
@@ -2013,25 +2018,42 @@ function onToggleEditMode(me) {
     // Get the open components so we know which one to open once they're all saved
     let open_component_ids = getOpenComponentIds();
     let reopen_component_id = NO_COMPONENT_ID;
+
+    // This prevents multiple sequential toggles from screwing things up
+    disableEditModeBox(true);
+
     if (open_component_ids.length !== 0) {
         reopen_component_id = open_component_ids[0];
+    } else {
+        updateEditModeEnabled();
+        disableEditModeBox(false);
+        return;
     }
 
-    closeAllComponents(true)
-        .catch(function (err) {
+    setComponentInProgress(reopen_component_id);
+
+    // Build a sequence to save open component
+    let sequence = Promise.resolve();
+    sequence = sequence.then(function () {
+        return saveComponent(reopen_component_id);
+    });
+    // Once components are saved, reload the component in edit mode
+    sequence.catch(function (err) {
             console.error(err);
-            alert('Error closing component! ' + err.message);
+            alert('Error saving component! ' + err.message);
         })
         .then(function () {
-            // Only update edit mode once the open components are all closed
             updateEditModeEnabled();
             if (reopen_component_id !== NO_COMPONENT_ID) {
-                return openComponent(reopen_component_id);
+                return reloadGradingComponent(reopen_component_id, isEditModeEnabled(), true);
             }
         })
         .catch(function (err) {
             console.error(err);
-            alert('Error re-opening component! ' + err.message);
+            alert('Error reloading component! ' + err.message);
+        })
+        .then(function () {
+            disableEditModeBox(false);
         });
 }
 
@@ -2271,21 +2293,31 @@ function reloadInstructorEditRubric(gradeable_id) {
 }
 
 /**
- * Reloads the provided component in grade mode
+ * Reloads the provided component with the grader view
  * @param {int} component_id
+ * @param {boolean} editable True to load component in edit mode
+ * @param {boolean} showMarkList True to show mark list as open
  * @returns {Promise}
  */
-function reloadGradingComponent(component_id) {
+function reloadGradingComponent(component_id, editable = false, showMarkList = false) {
     let component_tmp = null;
     let gradeable_id = getGradeableId();
     return ajaxGetComponentRubric(gradeable_id, component_id)
         .then(function (component) {
+            // Set the global mark list data for this component for conflict resolution
+            OLD_MARK_LIST[component_id] = component.marks;
+
             component_tmp = component;
             return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
         })
         .then(function (graded_component) {
-            return injectGradingComponent(component_tmp, graded_component, false, false);
-        })
+            // Set the global graded component list data for this component to detect changes
+            OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
+
+            // Render the grading component with edit mode if enabled,
+            //  and 'true' to show the mark list
+            return injectGradingComponent(component_tmp, graded_component, editable, showMarkList);
+        });
 }
 
 /**
@@ -2477,24 +2509,7 @@ function openComponentInstructorEdit(component_id) {
  * @return {Promise}
  */
 function openComponentGrading(component_id) {
-    let component_tmp = null;
-    let gradeable_id = getGradeableId();
-    return ajaxGetComponentRubric(gradeable_id, component_id)
-        .then(function (component) {
-            // Set the global mark list data for this component for conflict resolution
-            OLD_MARK_LIST[component_id] = component.marks;
-
-            component_tmp = component;
-            return ajaxGetGradedComponent(gradeable_id, component_id, getAnonId());
-        })
-        .then(function (graded_component) {
-            // Set the global graded component list data for this component to detect changes
-            OLD_GRADED_COMPONENT_LIST[component_id] = graded_component;
-            console.log()
-            // Render the grading component with edit mode if enabled,
-            //  and 'true' to show the mark list
-            return injectGradingComponent(component_tmp, graded_component, isEditModeEnabled(), true);
-        })
+    return reloadGradingComponent(component_id, isEditModeEnabled(), true)
         .then(function () {
             let page = getComponentPageNumber(component_id);
             if(page){
@@ -2512,9 +2527,21 @@ function openComponentGrading(component_id) {
 function scrollToPage(page_num){
     let files = $('.openable-element-submissions');
     for(let i = 0; i < files.length; i++){
-        let zoom = localStorage.getItem('scale') || 1;
+        let zoom = parseInt(localStorage.getItem('scale')) || 1;
         if(files[i].innerText.trim() == "upload.pdf"){
-            let scrollY = zoom*(page_num-1)*(PDF_PAGE_HEIGHT+PDF_OFFSET)+PDF_BORDER_HEIGHT;
+            let page1 = $(".page").filter(":first");
+            // default to 0 if no pages
+            let page_height = 0;
+            let page_margin_top = 0;
+            let page_margin_bot = 0;
+            if (page1.length) {
+                //get css attr, remove 'px' : 
+                page_height = parseInt(page1.css("height").slice(0, -2));
+                page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
+                page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
+            }
+            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
+            let scrollY = zoom*(page_num-1)*(page_height+page_margin_bot)+page_margin_top;
             if($("#file_view").is(":visible")){
                 $('#file_content').animate({scrollTop: scrollY}, 500);
             } else {
@@ -2591,57 +2618,24 @@ function closeComponentGrading(component_id, saveChanges) {
     let anon_id = getAnonId();
     let component_tmp = null;
 
-    if (!saveChanges) {
-        // We aren't saving changes, so fetch the up-to-date grade / rubric data
-        sequence = sequence
-            .then(function () {
-                return ajaxGetComponentRubric(gradeable_id, component_id);
-            })
-            .then(function (component) {
-                component_tmp = component;
-            });
-    } else {
-        // We are saving changes...
-        if (isEditModeEnabled()) {
-            // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
-            sequence = sequence
-                .then(function () {
-                    return saveMarkList(component_id);
-                })
-                .then(function () {
-                    return ajaxGetComponentRubric(gradeable_id, component_id);
-                })
-                .then(function (component) {
-                    component_tmp = component;
-                });
-        } else {
-            // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
-            //  so prompt the grader if this is what they really want since it will delete the text / score.
-            let gradedComponent = getGradedComponentFromDOM(component_id);
-            if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
-                if (!confirm("Are you sure you want to delete the custom mark?")) {
-                    return sequence;
-                }
-            }
-            // We're in grade mode, so save the graded component
-            sequence = sequence
-                .then(function () {
-                    return saveGradedComponent(component_id);
-                });
-        }
+    if (saveChanges) {
+        sequence = sequence.then(function () {
+            return saveComponent(component_id);
+        });
     }
 
     // Finally, render the graded component in non-edit mode with the mark list hidden
     return sequence
         .then(function () {
+            return ajaxGetComponentRubric(gradeable_id, component_id);
+        })
+        .then(function (component) {
+            component_tmp = component;
+        })
+        .then(function () {
             return ajaxGetGradedComponent(gradeable_id, component_id, anon_id);
         })
         .then(function (graded_component) {
-            // If this wasn't set (fetched from the remote), just load it from the DOM
-            if (component_tmp === null) {
-                component_tmp = getComponentFromDOM(component_id);
-            }
-
             return injectGradingComponent(component_tmp, graded_component, false, false);
         });
 }
@@ -2941,6 +2935,25 @@ function gradedComponentsEqual(gcDOM, gcOLD) {
         return gcDOM.score === gcOLD.score && gcDOM.comment === gcOLD.comment;
     } else {
         return gcOLD.score === 0.0 && gcOLD.comment === '';
+    }
+}
+
+function saveComponent(component_id) {
+    // We are saving changes...
+    if (isEditModeEnabled()) {
+        // We're in edit mode, so save the component and fetch the up-to-date grade / rubric data
+        return saveMarkList(component_id);
+    } else {
+        // The grader unchecked the custom mark, but didn't delete the text.  This shouldn't happen too often,
+        //  so prompt the grader if this is what they really want since it will delete the text / score.
+        let gradedComponent = getGradedComponentFromDOM(component_id);
+        if (gradedComponent.comment !== '' && !gradedComponent.custom_mark_selected) {
+            if (!confirm("Are you sure you want to delete the custom mark?")) {
+                return promise.reject();
+            }
+        }
+        // We're in grade mode, so save the graded component
+        return saveGradedComponent(component_id);
     }
 }
 
