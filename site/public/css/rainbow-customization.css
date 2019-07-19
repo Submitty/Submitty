@@ -1,0 +1,50 @@
+.customization_item
+{
+    border: 2px solid var(--viewed_content);
+    padding: 5px;
+    padding-left: 20px;
+    margin-top: 10px;
+    border-radius: 25px;
+}
+
+.customization_item h2
+{
+    margin-top: 3px;
+    margin-bottom: 3px;
+    font-size: 1.2em;
+    font-style: italic;
+}
+
+.customization_item h3
+{
+    font-size: 1.1em;
+}
+
+.collapsible_area
+{
+    margin-bottom: 10px;
+}
+
+#cust_messages_textarea
+{
+    width: 80%;
+    height: 10vh;
+}
+
+#buckets_available_list li{
+    font-weight: bold;
+    list-style-type: none;
+}
+
+#buckets_used_list li{
+    font-style: italic;
+    list-style-type: none;
+}
+
+.bucket_detail_div:nth-child(2n){
+    background-color: mediumorchid;
+}
+
+.bucket_detail_div:nth-child(2n+1){
+    background-color: lightskyblue;
+}

@@ -1,0 +1,85 @@
+select,
+textarea,
+input[type="text"],
+input[type="password"],
+input[type="datetime"],
+input[type="datetime-local"],
+input[type="date"],
+input[type="month"],
+input[type="time"],
+input[type="week"],
+input[type="number"],
+input[type="email"],
+input[type="url"],
+input[type="search"],
+input[type="tel"],
+input[type="color"] {
+    height: 30px;
+    padding: 4px 6px;
+    font-size: 14px;
+    line-height: 20px;
+    color: #555555;
+    vertical-align: middle;
+    border: 1px solid #ccc;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    width: auto;
+}
+
+input.readonly {
+    background-color: #f2f2f2;
+    cursor: not-allowed;
+}
+
+select {
+    padding: 5px 35px 5px 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    height: 34px;
+    background: #FFF;
+    background-size: 20px;
+}
+
+input[type="checkbox"]{
+    cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: #FFF;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #000000;
+    transition: all .2s linear;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+}
+
+input[type="checkbox"]:checked{
+    background-color: #3093FC;
+}
+
+/* this requires loading the FontAwesome CSS from the CDN before loading the server.css */
+input[type="checkbox"]:checked:before {
+    font-family: 'Font Awesome\ 5 Free';
+    content: "\f00c";
+    color: #FFF;
+    font-size: 18px;
+    font-weight: 900
+}
+
+.helpicon::before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f059";
+  color: #1E90FF;
+  font-weight: 300;
+  display: inline-block;
+}
+
+select.disabled,
+textarea.disabled,
+input.disabled {
+    background-color: lightgrey;
+}

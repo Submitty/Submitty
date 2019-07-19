@@ -52,10 +52,10 @@
                                                     date = new Date();
                                                     break;
                                                 case 1: 
-                                                    date = new Date("9999-01-01 00:00:00");
+                                                    date = new Date("9998-01-01 00:00:00");
                                                     break;
                                             }
-                                            fp.setDate(date);
+                                            fp.setDate(date, true);
                                         }
                                     }
                                 )],
@@ -106,6 +106,7 @@
 <div class="form-group row thread-attachment-container">
     {% if post_box_id %}
         <span class="inline-block">
+            {# uploadID and input_fileID required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
                 <input type="file" accept="image/*" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
@@ -160,10 +161,9 @@
         </select>
         {% endif %}
         {% if show_announcement and core.getUser().accessFullGrading() %}
-            <label class="inline-block" for="Announcement">Announcement?</label> <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
-        {% endif %}
-        {% if show_announcement and core.getUser().accessFullGrading() %}
-            <label class="inline-block" for="EmailAnnouncement">Send Email?</label> <input type="checkbox" class="email-announcement-checkbox" name="EmailAnnouncement" value="EmailAnnouncement" data-ays-ignore="true"/>
+            {% set announcement_text = email_enabled ? "Announcement?(w/ notification and email)" : "Announcement?(w/ notification)" %}
+            <label class="inline-block" for="Announcement">{{ announcement_text }}</label>
+            <input type="checkbox" class="thread-announcement-checkbox" name="Announcement" value="Announcement" data-ays-ignore="true"/>
         {% endif %}
         {% if show_cancel_edit_form %}
         <a onclick="$('#edit-user-post').css('display', 'none');
@@ -173,6 +173,11 @@
                      class="btn btn-default close-button">Cancel</a>
         {% endif %}
         <input type="submit" name="post" value="{{ submit_label }}" class="btn btn-primary inline-block" />
+
+        {% if thread_resolve_state == 1 and show_unresolve %}
+            <input type="hidden" name="thread_status" id="thread_status_input{{ post_box_id | length > 0 ? "_" ~ post_box_id : ""  }}" value="{{ thread_resolve_state }}" data-ays-ignore="true" />
+            <input type="submit" name="post_and_unresolve" class="submit_unresolve btn btn-primary inline-block" {{ post_box_id | length > 0 ? "post_box_id=" ~ post_box_id : ""  }} value="{{ submit_label }} and Unresolve" />
+        {% endif %}
     </span>
 </div>
 <br>
@@ -182,7 +187,5 @@
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
         });
-
-
     });
 </script>
