@@ -1678,27 +1678,31 @@ class SubmissionController extends AbstractController {
     public function showStats() {
         $course_path = $this->core->getConfig()->getCoursePath();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $json_path = $course_path . "/submissions/" . $gradeable_id . "/";
-        $path_reset = $json_path;
+        $base_path = $course_path . "/submissions/" . $gradeable_id . "/";
         $users = array();
-        if(!file_exists($json_path)) {
-            return;
-        }
-        $user_id_arr = array_slice(scandir($json_path), 2);
-        $user = $user_id_arr[0];
-        $users[$user] = array();
-        for($i = 0; $i < count($user_id_arr); ++$i) {
-            $files = scandir($json_path . $user_id_arr[$i]);
+        $user_id_arr = is_dir($base_path) ? array_slice(scandir($base_path), 2) : [];
+        for($i = 0; $i < count($user_id_arr); $i++) {
+            $user_path = $base_path . $user_id_arr[$i];
+            if(!is_dir($user_path))
+                continue;
+            $files = scandir($user_path);
             $num_files = count($files) - 3;
-            $json_path = $json_path . $user_id_arr[$i] . "/" . $num_files . "/bulk_upload_data.json";
-            $users[$user_id_arr[$i]]["first_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedFirstName();
-            $users[$user_id_arr[$i]]["last_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedLastName();
-            $users[$user_id_arr[$i]]['upload_time'] = json_decode(file_get_contents($json_path), true)['upload_timestamp'];
-            $users[$user_id_arr[$i]]['submit_time'] = json_decode(file_get_contents($json_path), true)['submit_timestamp'];
-            $users[$user_id_arr[$i]]['file'] = json_decode(file_get_contents($json_path), true)['filepath'];
-            $json_path = $path_reset;
+            $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
+            if(!file_exists($json_path))
+                continue;
+            $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
+            if($user === null)
+                continue;
+            $file_contents = FileUtils::readJsonFile($json_path);
+            $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
+            $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
+            $users[$user_id_arr[$i]]['upload_time'] = $file_contents['upload_timestamp'];
+            $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
+            $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];
         }
+        
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
+
     }
 
     private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type){
