@@ -8,7 +8,6 @@
  * Heavily stripped down bootstrap as we really don't
  * need everything that comes in it by default
  */
-@import "colors.css";
 .btn {
     display: inline-block;
     padding: 6px 12px;

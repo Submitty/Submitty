@@ -142,4 +142,25 @@ class DateUtils {
     public static function dateTimeToString(DateTime $date, bool $add_utc_offset = true) {
         return $date->format('Y-m-d H:i:s' . ($add_utc_offset ? 'O' : ''));
     }
+
+    /**
+     * Gets a json which contains the current server time broken up into specific fields
+     * Formatting the data in this manner makes it easier to work with when instantiating javascript Date() objects
+     *
+     * @param $core Application core
+     * @return object
+     */
+    public static function getServerTimeJson($core) {
+        $time = new \DateTime('now', $core->getConfig()->getTimezone());
+
+        $json = (object)[];
+        $json->year = $time->format('Y');
+        $json->month = $time->format('m');
+        $json->day = $time->format('j');
+        $json->hour = $time->format('G');
+        $json->minute = $time->format('i');
+        $json->second = $time->format('s');
+
+        return $json;
+    }
 }

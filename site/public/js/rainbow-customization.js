@@ -92,6 +92,11 @@ function getSection()
         var section = this.getAttribute('data-section').toString();
         var label = this.value;
 
+        if(label === "")
+        {
+            throw "All sections MUST have a label before saving"
+        }
+
         // Add to sections
         sections[section] = label;
     });
@@ -171,7 +176,10 @@ function getMessages()
 
     var message = $('#cust_messages_textarea').val();
 
-    messages.push(message);
+    if(message)
+    {
+        messages.push(message);
+    }
 
     return messages;
 }
@@ -192,32 +200,78 @@ function buildJSON(){
     return ret;
 }
 
-//This function attempts to create a new customization.json server-side based on form input
-function ajaxUpdateJSON(successCallback, errorCallback) {
-    $('#save_status').html('Saving...');
-
-    var url = buildNewCourseUrl(['rainbow_grades_customization']);
-
+function checkAutoRGStatus()
+{
+    // Send request
     $.getJSON({
         type: "POST",
-        url: url,
-        data: {json_string: buildJSON(), csrf_token: csrfToken},
+        url: buildNewCourseUrl(['auto_rg_status']),
+        data: {csrf_token: csrfToken},
         success: function (response) {
             if (response.status === 'success') {
-                $('#save_status').html('Saved successfully');
-                //successCallback(response.data);
+
+                $('#save_status').html('Rainbow grades successfully generated!');
+
             } else if (response.status === 'fail') {
-                $('#save_status').html('Failed to save');
-                //errorCallback(response.message, response.data);
+
+                $('#save_status').html('A failure occurred generating rainbow grades');
+
             } else {
-                alert('Internal server error');
+
+                $('#save_status').html('Internal Server Error');
                 console.error(response.message);
+
             }
         },
         error: function (response) {
             console.error('Failed to parse response from server: ' + response);
         }
     });
+}
+
+//This function attempts to create a new customization.json server-side based on form input
+function ajaxUpdateJSON(successCallback, errorCallback) {
+
+    try
+    {
+        $('#save_status').html('Saving...');
+
+        var url = buildNewCourseUrl(['rainbow_grades_customization']);
+
+        $.getJSON({
+            type: "POST",
+            url: url,
+            data: {json_string: buildJSON(), csrf_token: csrfToken},
+            success: function (response) {
+                if (response.status === 'success') {
+                    $('#save_status').html('Generating rainbow grades, please wait...');
+
+                    // Call the server to see if auto_rainbow_grades has completed
+                    checkAutoRGStatus();
+                    //successCallback(response.data);
+                } else if (response.status === 'fail') {
+                    $('#save_status').html('A failure occurred saving customization data');
+                    //errorCallback(response.message, response.data);
+                } else {
+                    $('#save_status').html('Internal Server Error');
+                    console.error(response.message);
+                }
+            },
+            error: function (response) {
+                console.error('Failed to parse response from server: ' + response);
+            }
+        });
+    }
+    catch(err)
+    {
+        $('#save_status').html(err);
+    }
+
+}
+
+function displayChangeDetectedMessage()
+{
+    $('#save_status').html('Changes detected, press "Save Changes" to save them.');
 }
 
 $(document).ready(function () {
@@ -239,4 +293,29 @@ $(document).ready(function () {
         $('#cust_messages_collapse').toggle();
     });
 
+    // Register change handlers to update the status message when form inputs change
+    $("input[name*='display_benchmarks']").change(function() {
+       displayChangeDetectedMessage();
+    });
+
+    $('#cust_messages_textarea').on("change keyup paste", function() {
+        displayChangeDetectedMessage();
+    });
+
+    $('.sections_and_labels').on("change keyup paste", function() {
+        displayChangeDetectedMessage();
+    });
+
+    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
+    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // select the target node
+    var target = document.querySelector('#buckets_used_list');
+    // create an observer instance
+    var observer = new MutationObserver(function(mutations) {
+        displayChangeDetectedMessage();
+    });
+    // configuration of the observer:
+    var config = { attributes: true, childList: true, characterData: true };
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
 });

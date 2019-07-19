@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
@@ -16,7 +17,6 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
-use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\GradeSummary;
@@ -29,6 +29,9 @@ use app\exceptions\ValidationException;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
+
+    const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
+                                            // wait for the job to complete before timing out and returning failure
     /**
      * @deprecated
      */
@@ -40,6 +43,10 @@ class ReportController extends AbstractController {
      * @Route("/{_semester}/{_course}/reports")
      */
     public function showReportPage() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
@@ -50,6 +57,10 @@ class ReportController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
      */
     public function generateGradeSummaries() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
         $g_sort_keys = [
             'type',
@@ -76,6 +87,10 @@ class ReportController extends AbstractController {
      * @Route("/{_semester}/{_course}/reports/csv")
      */
     public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
         $g_sort_keys = [
             'syllabus_bucket',
             'g_id',
@@ -489,6 +504,80 @@ class ReportController extends AbstractController {
                 'messages' => $customization->getMessages()
             ]);
 
+        }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/auto_rg_status")
+     */
+    public function autoRainbowGradesStatus()
+    {
+        // Only allow course admins to access this page
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        // Create path to the file we expect to find in the jobs queue
+        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Create path to 'processing' file in jobs queue
+        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Get the max time to wait before timing out
+        $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
+
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($jobs_file) AND $max_wait_time)
+        {
+            sleep(1);
+            $max_wait_time--;
+            clearstatcache();
+        }
+
+        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+        // We must also wait for that file to be removed
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($processing_jobs_file) AND $max_wait_time)
+        {
+            sleep(1);
+            $max_wait_time--;
+            clearstatcache();
+        }
+
+        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
+        $debug_output_path = '/var/local/submitty/courses/'.
+            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getCourse() .
+            '/rainbow_grades/auto_debug_output.txt';
+
+        // Look over the output file to see if any part of the process failed
+        try
+        {
+            $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
+        }
+        catch (\Exception $e)
+        {
+            $failure_detected = true;
+        }
+
+        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
+        // implying that it finished
+        if($max_wait_time AND $failure_detected == false)
+        {
+            $this->core->getOutput()->renderJsonSuccess("Success");
+        }
+        // Else we timed out or something else went wrong
+        else
+        {
+            $this->core->getOutput()->renderJsonFail('A failure occurred waiting for the job to finish');
         }
     }
 }

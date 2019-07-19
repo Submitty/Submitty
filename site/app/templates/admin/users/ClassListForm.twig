@@ -2,22 +2,30 @@
 {% block popup_id %}class-list-form{% endblock %}
 {% block title %}Upload Classlist{% endblock %}
 {% block body %}
-    <p>
-        Format your class list as an .xlsx or .csv file with {{ use_database ? 8 : 7 }} columns:<br>
-        &emsp;username, first name, last name, email, registration section, {{ use_database ? "password, " : "" }}preferred first name,<br>preferred last name<br>
-    </p>
-    <p>&emsp;</p>
-    <p>
+    <p>Format your class list as an .xlsx or .csv file with {{ use_database ? 8 : 7 }} columns:</p>
+    <ol class="full-list">
+        <li>username</li>
+        <li>first name</li>
+        <li>last name</li>
+        <li>email</li>
+        <li>registration section</li>
+        {% if use_database %}
+            <li>password</li>
+        {% endif %}
+        <li>preferred first name</li>
+        <li>preferred last name</li>
+    </ol>
+    <p class="std-margin">
         Preferred first and last names are optional.<br>
         Registration section can be null.<br>
-        Do not use a header row.<br>
+        Do not use a header row.
     </p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <label for="move_missing">Move students missing from the classlist to NULL section?</label><input type="checkbox" name="move_missing" id="move_missing" /><br>
-    <br />
-    <div>
-        <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
-    </div>
+    <label class="std-margin" for="move_missing">
+        Move students missing from the classlist to NULL section?
+        <input type="checkbox" name="move_missing" id="move_missing" />
+    </label>
+    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_class_list'}) }}" enctype="multipart/form-data">
