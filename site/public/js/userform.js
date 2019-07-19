@@ -27,6 +27,8 @@ function editUserForm(user_id) {
             var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
+            $("#edit-user-modal-title").css('display','block');
+            $("#new-user-modal-title").css('display','none');
             $('[name="edit_user"]', form).val("true");
             var user = $('[name="user_id"]', form);
             user.val(json['user_id']);
@@ -94,6 +96,8 @@ function newUserForm(grader_flag) {
     $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
+        $("#edit-user-modal-title").css('display','none');
+    $("#new-user-modal-title").css('display','block');
     $('[name="edit_user"]', form).val("false");
     $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
     $('[name="user_numeric_id"]', form).val("");

@@ -8,12 +8,13 @@ use app\views\AbstractView;
 class UsersView extends AbstractView {
     /**
      * @param User[] $students
+     * @param array $user_information
      * @param array  $reg_sections associative array representing registration sections in the system
      * @param array  $rot_sections associative array representing rotating sections in the system
      * @param bool   $use_database
      * @return string
      */
-    public function listStudents($students, $reg_sections, $rot_sections, $use_database=false) {
+    public function listStudents($students, $user_information, $reg_sections, $rot_sections, $use_database=false) {
         //Assemble students into sections
         $sections = [];
         foreach ($students as $student) {
@@ -27,6 +28,7 @@ class UsersView extends AbstractView {
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
             "sections" => $sections,
+            "user_information" => $user_information,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
@@ -36,12 +38,13 @@ class UsersView extends AbstractView {
 
     /**
      * @param User[] $graders
+     * @param array $user_information
      * @param array  $reg_sections associative array representing registration sections in the system
      * @param array  $rot_sections associative array representing rotating sections in the system
      * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders, $reg_sections, $rot_sections, $use_database=false) {
+    public function listGraders($graders, $user_information, $reg_sections, $rot_sections, $use_database=false) {
         $this->core->getOutput()->addInternalCss('studentlist.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('userform.js');
@@ -66,6 +69,7 @@ class UsersView extends AbstractView {
                     "all_sections" => false
                 ]
             ],
+            "user_information" => $user_information,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,

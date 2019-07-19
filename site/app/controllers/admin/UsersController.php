@@ -59,11 +59,12 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
+        $user_information = $this->getCourseAndSubmittyUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $reg_sections, $rot_sections, $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $user_information, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('user', $use_database);
     }
 
@@ -76,13 +77,31 @@ class UsersController extends AbstractController {
         foreach ($graders_unsorted as $grader){
             $graders[$grader->getGroup()][] =  $grader;
         }
-
+        $user_information = $this->getCourseAndSubmittyUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $user_information, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
+    }
+
+    private function getCourseAndSubmittyUsers() {
+        $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
+        $user_ids = array_keys($submitty_users);
+        $course_users = $this->core->getQueries()->getUsersById($user_ids);
+
+        //uses more thorough course information if it exists, if not uses database information
+        $user_information = array();
+        foreach ($user_ids as $user_id) {
+            if (array_key_exists($user_id,$course_users)) {
+                $user_information[$user_id] = $course_users[$user_id];
+            }
+            else {
+                $user_information[$user_id] = $submitty_users[$user_id];
+            }
+        }
+        return $user_information;
     }
 
     private function reassignRegistrationSections() {
