@@ -10,15 +10,14 @@ from pwd import getpwnam
 import glob
 
 from submitty_utils import dateutils
-from . import grade_item, grade_items_logging
+from . import grade_item, grade_items_logging, autograding_utils, CONFIG_PATH
 
 class SecureExecutionEnvironment():
-  def __init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, untrusted_execute_path):
+  def __init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, is_test_environment):
     self.directory = testcase_directory
     self.patterns = complete_config_obj['autograding']
     self.my_testcase = testcase_obj
     self.pre_commands = testcase_obj['pre_commands']
-    self.untrusted_execute_path = untrusted_execute_path
 
     self.tmp = autograding_directory
     self.tmp_work = os.path.join(autograding_directory, 'TMP_WORK')
@@ -27,6 +26,7 @@ class SecureExecutionEnvironment():
     self.tmp_logs = os.path.join(autograding_directory,"TMP_SUBMISSION","tmp_logs")
     self.checkout_path = os.path.join(self.tmp_submission, "checkout")
     self.checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
+    self.is_test_environment = is_test_environment
 
   def _run_pre_commands(self):
     for pre_command in self.pre_commands:
@@ -37,7 +37,9 @@ class SecureExecutionEnvironment():
 
       if command == 'cp':
         try:
-          pre_command_copy_file(source_testcase, source_directory, self.directory, destination, self.my_testcase.job_id, self.tmp_logs)
+          pre_command_copy_file(source_testcase, source_directory, self.directory, 
+                                destination, self.my_testcase.job_id, self.tmp_logs
+                                self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
         except Exception as e:
           self.my_testcase.log(message="Encountered an error while processing pre-command. See traces entry for more details.")
           self.my_testcase.log_stack_trace(traceback.format_exc())
@@ -58,18 +60,16 @@ class SecureExecutionEnvironment():
       pattern_copy("checkout_to_compilation",self.patterns['checkout_to_compilation'],checkout_subdir_path,self.directory,self.tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    copy_contents_into(self.my_testcase.job_id,provided_code_path,self.directory,self.tmp_logs)
+    copy_contents_into(self.my_testcase.job_id,provided_code_path,self.directory,self.tmp_logs, self.testcase.log_path, self.testcase.stack_trace_log_path)
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(self.directory,"my_compile.out"))
-    add_permissions(os.path.join(self.directory,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-    untrusted_grant_rwx_access(which_untrusted, self.directory)
-    add_permissions_recursive(self.directory,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
-    untrusted_grant_rwx_access(which_untrusted, tmp_work)          
+    
+    if not self.is_integration_test:
+      add_permissions(os.path.join(self.directory,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+      add_permissions_recursive(self.directory,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
   def _setup_single_directory_for_execution(self, directory):
     # Make the testcase folder
@@ -93,7 +93,7 @@ class SecureExecutionEnvironment():
 
     # copy input files
     test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
-    copy_contents_into(self.my_testcase.job_id, test_input_path, self.directory, self.tmp_logs)
+    copy_contents_into(self.my_testcase.job_id, test_input_path, self.directory, self.tmp_logs, self.testcase.log_path, self.testcase.stack_trace_log_path)
 
     # copy runner.out to the current directory
     bin_runner = os.path.join(self.tmp_autograding, "bin","run.out")
@@ -101,19 +101,21 @@ class SecureExecutionEnvironment():
     
     shutil.copy(bin_runner, my_runner)
 
-    add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    if not self.is_integration_test:
+      add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-    # Add the correct permissions to the target folder.
-    add_permissions_recursive(self.directory,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+      # Add the correct permissions to the target folder.
+      add_permissions_recursive(self.directory,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
   def _setup_single_directory_for_validation(self):
-    add_permissions_recursive(self.tmp_work,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
+    if not self.is_test_environment:
+      add_permissions_recursive(self.tmp_work,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
 
     submission_path = os.path.join(self.tmp_submission, 'submission')
 
@@ -129,21 +131,17 @@ class SecureExecutionEnvironment():
 
     # copy output files
     test_output_path = os.path.join(self.tmp_autograding, 'test_output')
-    copy_contents_into(self.my_testcase.job_id, test_output_path, self.directory, self.tmp_logs)
+    copy_contents_into(self.my_testcase.job_id, test_output_path, self.directory, self.tmp_logs, self.testcase.log_path, self.testcase.stack_trace_log_path)
 
     # copy any instructor instructor_solution code into the tmp work directory
     instructor_solution = os.path.join(self.tmp_autograding, 'instructor_solution')
-    copy_contents_into(self.my_testcase.job_id, instructor_solution, self.directory, self.tmp_logs)
+    copy_contents_into(self.my_testcase.job_id, instructor_solution, self.directory, self.tmp_logs, self.testcase.log_path, self.testcase.stack_trace_log_path)
 
     # copy any instructor custom validation code into the tmp work directory
     custom_validation_code_path = os.path.join(self.tmp_autograding, 'custom_validation_code')
-    copy_contents_into(self.my_testcase.job_id, custom_validation_code_path, self.directory, self.tmp_logs)
+    copy_contents_into(self.my_testcase.job_id, custom_validation_code_path, self.directory, self.tmp_logs, self.testcase.log_path, self.testcase.stack_trace_log_path)
 
-    add_permissions_recursive(self.tmp_work,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
+    
 
     # copy the runner
     bin_runner = os.path.join(self.tmp_autograding, "bin","validate.out")
@@ -151,7 +149,12 @@ class SecureExecutionEnvironment():
     
     shutil.copy(bin_runner, my_runner)
 
-    add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    if not self.is_test_environment:
+      add_permissions_recursive(self.tmp_work,
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+      add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
   def setup_for_compilation(self):
     os.chdir(self.tmp_work)
@@ -179,3 +182,26 @@ class SecureExecutionEnvironment():
   # Should start with a chdir and end with a chdir
   def execute(self, untrusted_user, executable, arguments, logfile):
     raise NotImplementedError
+
+  def verify_execution_status():
+
+    is_production = not self.is_test_environment
+
+    config_exists = os.path.isdir(CONFIG_PATH)
+
+    # If we are production but cannot access the config directory, throw an error
+    if config_exists == False and is_production:
+      raise Exception("ERROR: cannot find the submitty configuration directory.")
+
+    # If we are in a test environment, there should NOT be a config directory
+    if config_exists == True and self.is_test_environment:
+      raise Exception("ERROR: This script does not appear to truly be running in a test environment")
+
+    if config_exists and is_production:
+      with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+          OPEN_JSON = json.load(open_file)
+      DAEMON_UID = OPEN_JSON['daemon_uid']
+
+      print("If we are in production but we are not the daemon user, throw an error")
+      if int(os.getuid()) != int(DAEMON_UID):
+        raise Exception("ERROR: grade_item should be run by submitty_daemon in a production environment")

@@ -20,6 +20,7 @@ from . import insert_database_version_data, autograding_utils, CONFIG_PATH
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 SUBMISSION_URL = OPEN_JSON['submission_url']
+AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
 VCS_URL = OPEN_JSON['vcs_url']
 if VCS_URL is None or len(VCS_URL) == 0:
     VCS_URL = SUBMISSION_URL.rstrip('/') + '/{$vcs_type}'
@@ -42,7 +43,7 @@ def get_queue_time(next_directory,next_to_grade):
 def load_queue_file_obj(job_id,next_directory,next_to_grade):
     queue_file = os.path.join(next_directory,next_to_grade)
     if not os.path.isfile(queue_file):
-        autograding_utils.log_message(job_id,message="ERROR: the file does not exist " + queue_file)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,message="ERROR: the file does not exist " + queue_file)
         raise RuntimeError("ERROR: the file does not exist",queue_file)
     with open(queue_file, 'r') as infile:
         obj = json.load(infile)
@@ -127,7 +128,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
     submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
     if not os.path.isdir(submission_path):
-        autograding_utils.log_message(job_id, message="ERROR: the submission directory does not exist " + submission_path)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, message="ERROR: the submission directory does not exist " + submission_path)
         raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
     print(which_machine,which_untrusted,"prepare zip",submission_path)
     is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
@@ -139,7 +140,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     queue_time_longstring = dateutils.write_submitty_date(queue_time)
     grading_began = dateutils.get_current_time()
     waittime = (grading_began-queue_time).total_seconds()
-    autograding_utils.log_message(job_id,is_batch_job,"zip",item_name,"wait:",waittime,"")
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,is_batch_job,"zip",item_name,"wait:",waittime,"")
 
     # --------------------------------------------------------
     # various paths
@@ -153,10 +154,10 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     complete_config = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"config","complete_config","complete_config_"+obj["gradeable"]+".json")
 
     if not os.path.exists(form_json_config):
-        autograding_utils.log_message(job_id,message="ERROR: the form json file does not exist " + form_json_config)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,message="ERROR: the form json file does not exist " + form_json_config)
         raise RuntimeError("ERROR: the form json file does not exist ",form_json_config)
     if not os.path.exists(complete_config):
-        autograding_utils.log_message(job_id,message="ERROR: the complete config file does not exist " + complete_config)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,message="ERROR: the complete config file does not exist " + complete_config)
         raise RuntimeError("ERROR: the complete config file does not exist ",complete_config)
 
     # --------------------------------------------------------------------
@@ -210,7 +211,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         if os.path.isfile(vcs_checkout_logfile):
             shutil.move(vcs_checkout_logfile,tmp_logs)
         else:
-            autograding_utils.log_message(JOB_ID, message=str(my_name)+" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
 
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
@@ -294,7 +295,7 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
 
     print (which_machine,which_untrusted,"unzip",item_name, " in ", int(gradingtime), " seconds")
 
-    autograding_utils.log_message(job_id,is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
     return True
 
 

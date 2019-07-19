@@ -4,22 +4,17 @@ import subprocess
 import traceback
 
 from submitty_utils import dateutils
-from . import CONFIG_PATH
-
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-    SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+from . import autograding_utils
 
 class JailedSandbox(SecureExecutionEnvironment):
-  def __init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, untrusted_execute_path):
-     super().__init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, untrusted_execute_path)   
+  def __init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, is_test_environment):
+     super().__init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, is_test_environment)   
 
   def archive_results(self, overall_log):
     """
     Archive the results of an execution and validation.
     """
     self.setup_for_archival()
-    untrusted_grant_rwx_access(which_untrusted, self.directory)
 
     test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
 
@@ -34,15 +29,25 @@ class JailedSandbox(SecureExecutionEnvironment):
     os.mkdir(os.path.join(tmp_results,"results_public", self.directory))
     pattern_copy("work_to_public",self.patterns['work_to_public'], self.directory, os.path.join(tmp_results,"results_public", self.directory), self.tmp_logs)
 
-  def execute(self, untrusted_user, executable, arguments, logfile):
+  def execute(self, untrusted_user, script, arguments, logfile):
+    
     try:
-      success = subprocess.call([untrusted_execute_path,
-                                  untrusted_user,
-                                  executable]
-                                  + 
-                                  arguments,
-                                  stdout=logfile,
-                                  cwd=self.directory)
+      self.verify_execution_status():
+    except Exception as e:
+      return
+
+    if self.is_test_environment:
+      script = [script, ]
+    else:
+      script = [os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"), untrusted_user, script]
+
+
+    try:
+      success = subprocess.call(script
+                                + 
+                                arguments,
+                                stdout=logfile,
+                                cwd=self.directory)
     except Exception as e:
       self.my_testcase.log(message="ERROR. See traces entry for more details.")
       self.my_testcase.log_stack_trace(traceback.format_exc())

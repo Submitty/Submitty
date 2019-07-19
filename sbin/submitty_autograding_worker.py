@@ -27,6 +27,8 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
+AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
+AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['autograding_log_path'], 'stack_traces')
 
 JOB_ID = '~WORK~'
 
@@ -39,7 +41,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
-        autograding_utils.log_message(JOB_ID, message="ERROR: must be run by DAEMON_USER")
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: must be run by DAEMON_USER")
         raise SystemExit("ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER")
 
     # ignore keyboard interrupts in the worker processes
@@ -68,8 +70,8 @@ def worker_process(which_machine,address,which_untrusted,my_server):
                 with open(done_queue_file, 'w') as outfile:
                     json.dump(queue_obj, outfile, sort_keys=True, indent=4)        
             except Exception as e:
-                autograding_utils.log_message(JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + ". for more details, see traces entry.")
-                autograding_utils.log_stack_trace(JOB_ID,trace=traceback.format_exc())
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR attempting to unzip graded item: " + which_machine + " " + which_untrusted + ". for more details, see traces entry.")
+                autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, JOB_ID,trace=traceback.format_exc())
                 with contextlib.suppress(FileNotFoundError):
                     os.remove(autograding_zip)
                 with contextlib.suppress(FileNotFoundError):
@@ -118,7 +120,7 @@ def launch_workers(my_name, my_stats):
     if not int(os.getuid()) == int(DAEMON_UID):
         raise SystemExit("ERROR: the submitty_autograding_worker.py script must be run by the DAEMON_USER")
 
-    autograding_utils.log_message(JOB_ID, message="grade_scheduler.py launched")
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="grade_scheduler.py launched")
 
     # prepare a list of untrusted users to be used by the workers
     untrusted_users = multiprocessing.Queue()
@@ -147,14 +149,14 @@ def launch_workers(my_name, my_stats):
                 if processes[i].is_alive:
                     alive = alive+1
                 else:
-                    autograding_utils.log_message(JOB_ID, message="ERROR: process "+str(i)+" is not alive")
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+str(i)+" is not alive")
             if alive != num_workers:
-                autograding_utils.log_message(JOB_ID, message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: #workers="+str(num_workers)+" != #alive="+str(alive))
             #print ("workers= ",num_workers,"  alive=",alive)
             time.sleep(1)
 
     except KeyboardInterrupt:
-        autograding_utils.log_message(JOB_ID, message="grade_scheduler.py keyboard interrupt")
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="grade_scheduler.py keyboard interrupt")
 
         # just kill everything in this group id right now
         # NOTE:  this may be a bug if the grandchildren have a different group id and not be killed
@@ -174,7 +176,7 @@ def launch_workers(my_name, my_stats):
         for i in range(0,num_workers):
             processes[i].join()
 
-    autograding_utils.log_message(JOB_ID, message="grade_scheduler.py terminated")
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="grade_scheduler.py terminated")
 
 # ==================================================================================
 def read_autograding_worker_json():
@@ -185,7 +187,7 @@ def read_autograding_worker_json():
             name = list(name_and_stats.keys())[0]
             stats = name_and_stats[name]
     except Exception as e:
-        autograding_utils.log_stack_trace(trace=traceback.format_exc())
+        autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, trace=traceback.format_exc())
         raise SystemExit("ERROR loading autograding_worker.json file: {0}".format(e))
     return name, stats
 # ==================================================================================
