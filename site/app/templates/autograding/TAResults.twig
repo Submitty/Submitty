@@ -35,8 +35,7 @@
             <br />
             {% for file in uploaded_pdfs %}
                 {{ file.name }}
-                {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
-                <a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'pdf', 'page':'student_pdf_view', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a>
             {% endfor %}
         </div>
         {% endif %}
