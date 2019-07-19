@@ -1,4 +1,5 @@
 <div class="{% for class in classes %} {{ class }} {% endfor %}" id="{{ post_id }}" style="margin-left:{{ offset }}px;" reply-level="{{ reply_level }}">
+    <div class="float-right"><button class="markdown-toggle btn btn-xs btn-default" title="Render Markdown Toggle" onclick="$('#plaintext_{{ post_id }}').toggle();$('#markdown_{{ post_id }}').toggle();$(this).toggleClass('btn-default btn-success');">M</button></div>
     {% if first == true %}
         <h2 class="create-post-head">
 
@@ -32,7 +33,7 @@
 
     {% endif %}
 
-    <pre class='pre_forum'><span class="post_content pre-wrap">{% include "forum/RenderPost.twig" with { "post_content": post_content } only %}</span></pre>
+    <pre class='pre_forum'><span class="post_content pre-wrap" id="plaintext_{{ post_id }}">{{ post_content }}</span><span class="post_content pre-wrap" style="display: none" id="markdown_{{ post_id }}" >{% include "forum/RenderPost.twig" with { "post_content": post_content } only %}</span></pre>
 
     <hr style="margin-bottom: 3px;">
 
