@@ -542,7 +542,7 @@ CREATE TABLE regrade_discussion (
 CREATE TABLE grade_override (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
-    marks integer NOT NULL,
+    marks float NOT NULL,
     comment character varying 
 );
 

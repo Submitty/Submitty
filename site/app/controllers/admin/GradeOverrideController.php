@@ -65,7 +65,7 @@ class GradeOverrideController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail($error);
         }
         
-        if (((!isset($_POST['marks'])) || $_POST['marks'] == ""  || is_int($_POST['marks'])) ) {
+        if (((!isset($_POST['marks'])) || $_POST['marks'] == ""  || is_float($_POST['marks'])) ) {
             $error = "Marks be a integer";
             return $this->core->getOutput()->renderJsonFail($error);
         }
