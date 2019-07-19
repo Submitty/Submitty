@@ -20,6 +20,9 @@ class UsersController extends AbstractController {
             case 'get_user_details':
                 $this->ajaxGetUserDetails();
                 break;
+            case 'new_user_information':
+                $this->ajaxGetSubmittyUsers();
+                break;
             case 'update_student':
                 $this->updateUser('students');
                 break;
@@ -59,12 +62,10 @@ class UsersController extends AbstractController {
 
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
-        $user_information = $this->getCourseAndSubmittyUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $user_information, $reg_sections, $rot_sections, $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students,$reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('user', $use_database);
     }
 
@@ -77,16 +78,15 @@ class UsersController extends AbstractController {
         foreach ($graders_unsorted as $grader){
             $graders[$grader->getGroup()][] =  $grader;
         }
-        $user_information = $this->getCourseAndSubmittyUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $rot_sections = $this->core->getQueries()->getRotatingSections();
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $user_information, $reg_sections, $rot_sections, $use_database);
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
     }
 
-    private function getCourseAndSubmittyUsers() {
+    private function ajaxGetSubmittyUsers() {
         $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
         $user_ids = array_keys($submitty_users);
         $course_users = $this->core->getQueries()->getUsersById($user_ids);
@@ -94,14 +94,26 @@ class UsersController extends AbstractController {
         //uses more thorough course information if it exists, if not uses database information
         $user_information = array();
         foreach ($user_ids as $user_id) {
-            if (array_key_exists($user_id,$course_users)) {
-                $user_information[$user_id] = $course_users[$user_id];
-            }
-            else {
-                $user_information[$user_id] = $submitty_users[$user_id];
-            }
+            $already_in_course = array_key_exists($user_id,$course_users);
+            $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
+            $user_information[$user_id] = array(
+                'already_in_course' => $already_in_course,
+                'user_numeric_id' => $user->getNumericId(),
+                'user_firstname' => $user->getLegalFirstName(),
+                'user_lastname' => $user->getLegalLastName(),
+                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
+                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
+                'user_email' => $user->getEmail(),
+                'user_group' => $user->getGroup(),
+                'registration_section' => $user->getRegistrationSection(),
+                'rotating_section' => $user->getRotatingSection(),
+                'user_updated' => $user->isUserUpdated(),
+                'instructor_updated' => $user->isInstructorUpdated(),
+                'manual_registration' => $user->isManualRegistration(),
+                'grading_registration_sections' => $user->getGradingRegistrationSections()
+            );
         }
-        return $user_information;
+        $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
     private function reassignRegistrationSections() {
@@ -145,6 +157,7 @@ class UsersController extends AbstractController {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJsonSuccess(array(
             'user_id' => $user->getId(),
+            'already_in_course' => true,
             'user_numeric_id' => $user->getNumericId(),
             'user_firstname' => $user->getLegalFirstName(),
             'user_lastname' => $user->getLegalLastName(),

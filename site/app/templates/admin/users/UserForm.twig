@@ -5,13 +5,23 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="edit_user" value="false" />
     <div id="edit-user-form">
-        <label for="user_id">
+		<div type="hidden" id="user-form-already-exists-error-message">
+			<p class="red-message" >
+				User is already in this course. Click to edit.
+			</p>
+			<td>
+				<a id="redirect-link-icon" onclick="redirectToEdit();" aria-label="edit entered user">
+					<i class="fas fa-pencil-alt" aria-hidden="true"></i>
+				</a>
+			</td>
+        </div>
+		<label for="user_id">
             User ID:
             <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" />
         </label>
         <label for="user_numeric_id">
             User Numeric ID:
-            <input type="text" name="user_numeric_id" id="user_numeric_id" />
+            <input type="text" name="user_numeric_id" id="user_numeric_id" placeholder="Digits Only (Optional)" />
         </label>
         <label for="user_firstname">
             Legal First Name:
@@ -19,7 +29,7 @@
         </label>
         <label for="user_preferred_firstname">
             Preferred First Name:
-            <input type="text" name="user_preferred_firstname" id="user_preferred_firstname" />
+            <input type="text" name="user_preferred_firstname" id="user_preferred_firstname" placeholder="(Optional)" />
         </label>
         <label for="user_lastname">
             Legal Last Name:
@@ -27,11 +37,11 @@
         </label>
         <label for="user_preferred_lastname">
             Preferred Last Name:
-            <input type="text" name="user_preferred_lastname" id="user_preferred_lastname" />
+            <input type="text" name="user_preferred_lastname" id="user_preferred_lastname" placeholder="(Optional)" />
         </label>
         <label for="user_email">
             Email:
-            <input type="text" name="user_email" id="user_email" />
+            <input type="text" name="user_email" id="user_email" placeholder="(Optional)" />
         </label>
         <label for="registered_section">
             Registration Section:
@@ -90,6 +100,6 @@
     </form>
 {% endblock %}
 {% block buttons %}
-    {{ block('close_button') }}
+    <a onclick="closeButton()" class="btn btn-default close-button">Close</a>
     <input class="btn btn-primary" type="submit" value="Submit" />
 {% endblock %}
