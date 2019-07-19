@@ -5,6 +5,7 @@ namespace app\controllers\pdf;
 use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
 class PDFController extends AbstractController {
@@ -67,6 +68,7 @@ class PDFController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/annotations", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function savePDFAnnotation($gradeable_id){
         //Save the annotation layer to a folder.
@@ -114,6 +116,7 @@ class PDFController extends AbstractController {
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf")
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
     public function showGraderPDFEmbedded($gradeable_id){
         //This is the embedded pdf annotator that we built.
