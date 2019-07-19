@@ -739,24 +739,24 @@ class HomeworkView extends AbstractView {
         $this->core->getOutput()->addInternalJs('forum.js');
 
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
-        $request_regrade_url = $this->core->buildUrl(array(
-            'component' => 'student',
-            'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
-            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-            'action' => 'request_regrade'
-        ));
-        $change_request_status_url = $this->core->buildUrl(array(
-            'component' => 'student',
-            'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
-            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-            'action' => 'change_request_status'
-        ));
-        $make_regrade_post_url = $this->core->buildUrl(array(
-            'component' => 'student',
-            'gradeable_id' => $graded_gradeable->getGradeable()->getId(),
-            'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-            'action' => 'make_request_post'
-        ));
+        $request_regrade_url = $this->core->buildNewCourseUrl([
+            'gradeable',
+            $graded_gradeable->getGradeable()->getId(),
+            'grade_inquiry',
+            'new'
+        ]);
+        $change_request_status_url = $this->core->buildNewCourseUrl([
+            'gradeable',
+            $graded_gradeable->getGradeable()->getId(),
+            'grade_inquiry',
+            'toggle_status'
+        ]);
+        $make_regrade_post_url = $this->core->buildNewCourseUrl([
+            'gradeable',
+            $graded_gradeable->getGradeable()->getId(),
+            'grade_inquiry',
+            'post'
+        ]);
         if (!$graded_gradeable->hasSubmission()) {
             $grade_inquiry_status = "no_submission";
         }
@@ -809,7 +809,8 @@ class HomeworkView extends AbstractView {
             'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'regrade_message' => $regrade_message,
-            'can_inquiry' => $can_inquiry
+            'can_inquiry' => $can_inquiry,
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }

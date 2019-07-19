@@ -76,8 +76,8 @@
     <div style="padding:20px;">
         {% if grade_inquiry_status != 'no_submission' %}
             <form method="POST" id="reply-text-form" >
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
                 <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
-                <input type="hidden" id="gradeable_id" name="gradeable_id" value="{{ gradeable_id }}">
                 <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
                 {% if grade_inquiry_status == 'none' or grade_inquiry_status == 'resolved' %}
                     {% set text_area_label_text = 'Write an inquiry:' %}

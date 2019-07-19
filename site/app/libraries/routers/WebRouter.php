@@ -143,18 +143,18 @@ class WebRouter {
         $this->method_name = $this->parameters['_method'];
         $controller = new $this->controller_name($this->core);
 
-        foreach ($this->parameters as $key => $value) {
-            if (Utils::startsWith($key, "_")) {
-                unset($this->parameters[$key]);
+        $arguments = array();
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $method = new \ReflectionMethod($this->controller_name, $this->method_name);
+        foreach ($method->getParameters() as $param) {
+            $param_name = $param->getName();
+            $arguments[$param_name] = $this->parameters[$param_name] ?? null;
+            if (!isset($arguments[$param_name])) {
+                $arguments[$param_name] = $this->request->query->get($param_name);
             }
         }
 
-        // pass $_GET to controllers
-        // the user-specified $_GET should NOT override the controller name and method name matched
-        $this->request->query->remove('url');
-        $this->parameters = array_merge($this->parameters, $this->request->query->all());
-
-        return call_user_func_array([$controller, $this->method_name], $this->parameters);
+        return call_user_func_array([$controller, $this->method_name], $arguments);
     }
 
     private function loadCourses() {

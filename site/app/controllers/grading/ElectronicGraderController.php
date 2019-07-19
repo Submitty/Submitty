@@ -383,11 +383,13 @@ class ElectronicGraderController extends GradingController {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);
                 $no_team_users = $this->core->getQueries()->getUsersWithoutTeamByGradingSections($gradeable_id, $sections, $section_key);
                 $team_users = $this->core->getQueries()->getUsersWithTeamByGradingSections($gradeable_id, $sections, $section_key);
+                $individual_viewed_grade = $this->core->getQueries()->getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections);
             }
             else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $no_team_users = array();
                 $team_users = array();
+                $individual_viewed_grade = 0;
             }
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment());
@@ -472,7 +474,26 @@ class ElectronicGraderController extends GradingController {
 
         $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections, $component_averages, $autograded_average, $overall_scores, $overall_average, $total_submissions, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade, $section_key, $regrade_requests, $show_warnings);
+        if ($gradeable->isTeamAssignment()) {
+            $total_students_submitted = 0;
+            foreach ($order->getSortedGradedGradeables() as $g) {
+                $team = $g->getSubmitter()->getTeam();
+                $team_section = $gradeable->isGradeByRegistration() ? $team->getRegistrationSection() : $team->getRotatingSection();
+                if (array_key_exists($team_section,$total_users)) {
+                    if ($this->core->getQueries()->getActiveVersionForTeam($gradeable->getId(),$team->getId()) != 0) {
+                        $total_students_submitted += count($team->getMembers());
+                    }
+                }
+            }
+        }
+        else {
+            $total_students_submitted = 0;
+        }
+
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections,
+            $component_averages, $autograded_average, $overall_scores, $overall_average, $total_submissions, $individual_viewed_grade,
+            $total_students_submitted, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade,
+            $section_key, $regrade_requests, $show_warnings);
     }
 
     /**
@@ -1366,6 +1387,10 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the changes to the database
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
     }
 
     /**
@@ -2007,6 +2032,10 @@ class ElectronicGraderController extends GradingController {
 
         // Finally, save the graded gradeable
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
+        $submitter = $ta_graded_gradeable->getGradedGradeable()->getSubmitter();
+        if ($submitter->isTeam()) {
+            $this->core->getQueries()->clearTeamViewedTime($submitter->getId());
+        }
     }
 
     /**

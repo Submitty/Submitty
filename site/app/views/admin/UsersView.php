@@ -21,6 +21,11 @@ class UsersView extends AbstractView {
             $sections[$registration][] = $student;
         }
 
+        $this->core->getOutput()->addInternalCss('studentlist.css');
+        $this->core->getOutput()->addInternalCss('userform.css');
+        $this->core->getOutput()->addInternalCss('table.css');
+        $this->core->getOutput()->addInternalJs('userform.js');
+
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
             "sections" => $sections,
             "reg_sections" => $reg_sections,
@@ -38,6 +43,9 @@ class UsersView extends AbstractView {
      * @return string
      */
     public function listGraders($graders, $reg_sections, $rot_sections, $use_database=false) {
+        $this->core->getOutput()->addInternalCss('userform.css');
+        $this->core->getOutput()->addInternalJs('userform.js');
+
         return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
             "graders" => $graders,
             "groups" => [
