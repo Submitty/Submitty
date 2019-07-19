@@ -4,31 +4,31 @@ namespace app\controllers\admin;
 
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
-use app\libraries\Core;
-use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
+use app\libraries\response\RedirectResponse;
+use app\libraries\routers\AccessControl;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
 
+/**
+ * Class UsersController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
 class UsersController extends AbstractController {
     public function run() {
         switch ($_REQUEST['action']) {
-            case 'get_user_details':
-                $this->ajaxGetUserDetails();
-                break;
             case 'update_student':
                 $this->updateUser('students');
                 break;
             case 'update_grader':
                 $this->updateUser('graders');
-                break;
-            case 'graders':
-                $this->core->getOutput()->addBreadcrumb('Manage Graders');
-                $this->listGraders();
                 break;
             case 'assign_registration_sections':
                 $this->reassignRegistrationSections();
@@ -49,14 +49,12 @@ class UsersController extends AbstractController {
             case 'upload_class_list':
                 $this->uploadUserList("classlist");
                 break;
-            case 'students':
-            default:
-                $this->core->getOutput()->addBreadcrumb('Manage Students');
-                $this->listStudents();
-                break;
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/users", methods={"GET"})
+     */
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -67,6 +65,9 @@ class UsersController extends AbstractController {
         $this->renderDownloadForm('user', $use_database);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/graders", methods={"GET"})
+     */
     public function listGraders() {
         $graders_unsorted = $this->core->getQueries()->getAllGraders();
         // graders are split into groups based on grading permissions
@@ -86,8 +87,7 @@ class UsersController extends AbstractController {
     }
 
     private function reassignRegistrationSections() {
-        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
-            'action' => 'graders'));
+        $return_url = $this->core->buildNewCourseUrl(['users', 'graders']);
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
@@ -121,8 +121,10 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'downloadForm', $code, $students, $graders, $reg_sections, $use_database);
     }
 
-    public function ajaxGetUserDetails() {
-        $user_id = $_REQUEST['user_id'];
+    /**
+     * @Route("/{_semester}/{_course}/users/{user_id}", methods={"GET"})
+     */
+    public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJsonSuccess(array(
             'user_id' => $user->getId(),
@@ -142,13 +144,11 @@ class UsersController extends AbstractController {
         ));
     }
 
-    public function updateUser($action='students') {
-        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
-            'action' => $action), 'user-'.$_POST['user_id']);
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token.");
-            $this->core->redirect($return_url);
-        }
+    /**
+     * @Route("/{_semester}/{_course}/users", methods={"POST"})
+     */
+    public function updateUser($type='users') {
+        $return_url = $this->core->buildNewCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
 
@@ -647,7 +647,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * Upsert user list data to database
+     * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
      */
