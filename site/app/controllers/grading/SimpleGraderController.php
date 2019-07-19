@@ -30,20 +30,20 @@ class SimpleGraderController extends GradingController {
      * @param $gradeable_id
      * @param $section
      * @param $section_type
-     * @param $sort_by
+     * @param $sort
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return Response
      */
-    public function printLab($gradeable_id, $section = null, $section_type = null, $sort_by = "registration_section"){
+    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "registration_section"){
         //convert from id --> u.user_id etc for use by the database.
-        if ($sort_by === "id") {
-            $sort_by = "u.user_id";
+        if ($sort === "id") {
+            $sort = "u.user_id";
         }
-        else if($sort_by === "first"){
-            $sort_by = "coalesce(u.user_preferred_firstname, u.user_firstname)";
+        else if($sort === "first"){
+            $sort = "coalesce(u.user_preferred_firstname, u.user_firstname)";
         }
-        else if($sort_by === "last"){
-            $sort_by = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+        else if($sort === "last"){
+            $sort = "coalesce(u.user_preferred_lastname, u.user_lastname)";
         }
 
         //Figure out what section we are supposed to print
@@ -72,10 +72,10 @@ class SimpleGraderController extends GradingController {
 
         //Grab the students in section, sectiontype.
         if ($section_type === "rotating_section") {
-            $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRotatingSections(array($section), $sort);
         }
         elseif ($section_type === "registration_section") {
-            $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort_by);
+            $students = $this->core->getQueries()->getUsersByRegistrationSections(array($section), $sort);
         }
         else {
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
@@ -106,7 +106,7 @@ class SimpleGraderController extends GradingController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading", methods={"GET"})
      * @return Response
      */
-    public function grade($gradeable_id, $view = null, $sort = null) {
+    public function gradePage($gradeable_id, $view = null, $sort = null) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         } catch(\InvalidArgumentException $e) {
@@ -199,7 +199,7 @@ class SimpleGraderController extends GradingController {
     public function save($gradeable_id) {
         if (!isset($_POST['user_id'])) {
             return Response::JsonOnlyResponse(
-                JsonResponse::getFailResponse('Did not pass in g_id or user_id')
+                JsonResponse::getFailResponse('Did not pass in user_id')
             );
         }
         $user_id = $_POST['user_id'];

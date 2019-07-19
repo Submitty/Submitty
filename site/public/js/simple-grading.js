@@ -421,7 +421,7 @@ function setupNumericTextCells() {
         });
 
         submitAJAX(
-            buildNewCourseUrl('gradeable', row_el.data('gradeable'), 'grading'),
+            buildNewCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
                 'user_id': row_el.data("user"),
@@ -506,7 +506,7 @@ function setupNumericTextCells() {
                     }
                     if (!breakOut){
                         submitAJAX(
-                            buildNewCourseUrl(['grading', gradeable_id, 'grading', 'csv']),
+                            buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
                             {'csrf_token': csrfToken, 'users': user_ids,
                             'num_numeric' : num_numeric, 'big_file': reader.result},
                             function(returned_data) {
