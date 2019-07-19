@@ -56,7 +56,7 @@ class Email extends AbstractModel {
 
     //inject a "do not reply" note in the footer of the body
     private function formatBody($body){
-        return $body."\n--\nNOTE: This is an automated email.\nAny responses will not be looked at or responded to.";
+      return $body."\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     }
 
 }
