@@ -4,29 +4,32 @@ namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\RedirectResponse;
+use app\libraries\routers\AccessControl;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
-class GradeableController extends AbstractController {
+
+/**
+ * Class AutogradingConfigController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
+class AutogradingConfigController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'upload_config':
-                $this->upload_config();
-                break;
-            case 'process_upload_config':
-                $this->process_config_upload();
-                break;
-			case 'delete_config':
-			    $this->delete_config();
-				break;
-            case 'rename_config':
-                $this->rename_config();
-                break;
-            case 'check_being_used':
-                $this->configUsedBy();
-                break;
-        }
+        return null;
     }
 
-    public function upload_config() {
+    /**
+     * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
+     * @return Response
+     */
+    public function showConfig() {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
         $all_paths = array();
@@ -36,32 +39,40 @@ class GradeableController extends AbstractController {
         $inuse_config = array();
         foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
             foreach($all_paths as $path){
-                if(strpos($gradeable->getAutogradingConfigPath(), $path) !== false){
+                if($gradeable->getAutogradingConfigPath() === $path){
                     $inuse_config[] = $path;
                 }
             }
         }
-        $this->core->getOutput()->renderOutput(array('admin', 'Gradeable'), 'uploadConfigForm', $target_dir, $all_files, $inuse_config);
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                ['admin', 'Gradeable'],
+                'uploadConfigForm',
+                $target_dir,
+                $all_files,
+                $inuse_config
+            )
+        );
     }
 
-    public function process_config_upload() {
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Upload failed: Invalid CSRF token");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-                'action' => 'upload_config')));
-        }
-
+    /**
+     * @Route("/{_semester}/{_course}/autograding_config/upload", methods={"POST"})
+     * @return Response
+     */
+    public function uploadConfig() {
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-                'action' => 'upload_config')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+            );
         }
 
         $upload = $_FILES['config_upload'];
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
             $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
-            $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-                'action' => 'upload_config')));
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+            );
         }
 
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
@@ -85,28 +96,34 @@ class GradeableController extends AbstractController {
                 FileUtils::recursiveRmdir($target_dir);
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
                 $this->core->addErrorMessage("Upload failed: {$error_message}");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-                    'action' => 'upload_config')));
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+                );
             }
         }
         else {
             if (!@copy($upload['tmp_name'], FileUtils::joinPaths($target_dir, $upload['name']))) {
                 FileUtils::recursiveRmdir($target_dir);
                 $this->core->addErrorMessage("Upload failed: Could not copy file");
-                $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-                    'action' => 'upload_config')));
+                return Response::RedirectOnlyResponse(
+                    new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+                );
             }
         }
         $this->core->addSuccessMessage("Gradeable config uploaded");
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-            'action' => 'upload_config')));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+        );
     }
 
-    public function rename_config(){
+    /**
+     * @Route("/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
+     * @return Response
+     */
+    public function renameConfig(){
         $config_file_path = $_POST['curr_config_name'] ?? null;
         if($config_file_path == null){
             $this->core->addErrorMessage("Unable to find file");
-
         } else if (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
             $this->core->addErrorMessage("This action can't be completed.");
         } else {
@@ -114,7 +131,7 @@ class GradeableController extends AbstractController {
             if ($new_name === "") {
                 $this->core->addErrorMessage("Could not rename upload because no name was entered.");
             }
-            else if (!ctype_alnum(str_replace(['_','-'], '', $new_name))) {
+            elseif (!ctype_alnum(str_replace(['_','-'], '', $new_name))) {
                 $this->core->addErrorMessage("Name can only contain alphanumeric characters, dashes, and underscores.");
             }
             else {
@@ -126,15 +143,20 @@ class GradeableController extends AbstractController {
                 }
             }
         }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-            'action' => 'upload_config')));
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+        );
     }
 
-    public function delete_config(){
-        $config_path = $_GET['config'] ?? null;
+    /**
+     * @Route("/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
+     * @return Response
+     */
+    public function deleteConfig(){
+        $config_path = $_POST['config_path'] ?? null;
         $in_use = false;
         foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
-            if(strpos($gradeable->getAutogradingConfigPath(), $config_path) !== false){
+            if($gradeable->getAutogradingConfigPath() === $config_path){
                 $in_use = true;
                 break;
             }
@@ -146,50 +168,38 @@ class GradeableController extends AbstractController {
         } else if ($in_use){
             $this->core->addErrorMessage("This config is currently in use.");
         } else {
-            if($this->recursive_rmdir($config_path)){
+            if(FileUtils::recursiveRmdir($config_path)){
                 $this->core->addSuccessMessage("The config folder has been succesfully deleted");
             } else {
                 $this->core->addErrorMessage("Deleting config failed.");
             }
         }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'admin', 'page' => 'gradeable',
-            'action' => 'upload_config')));
-    }
-
-    private function configUsedBy() {
-        // Returns a list of gradeables that are using this config
-        $config_path = $_GET['config'] ?? null;
-        if (!$config_path == null) {
-            $inuse_config = array();
-            foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
-                if (strpos($gradeable->getAutogradingConfigPath(), $config_path) !== false) {
-                    $inuse_config[] = $gradeable->getId();
-                }
-            }
-            $this->core->getOutput()->renderJsonSuccess($inuse_config);
-        }
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+        );
     }
 
     /**
-     * @param $dir directory to remove
-     *
-     * This function is the same as rmdir, except it removes all the content inside as well.
-     *
-     * @return bool whether or not the dir is removed
+     * @param $config_path
+     * @Route("/{_semester}/{_course}/autograding_config/usage", methods={"GET"})
+     * @return Response
      */
-    private function recursive_rmdir($dir) {
-        if (is_dir($dir)) {
-            $objects = scandir($dir);
-            foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (is_dir($dir."/".$object))
-                        $this->recursive_rmdir($dir."/".$object);
-                    else
-                        unlink($dir."/".$object);
+    public function configUsedBy($config_path = null) {
+        $config_path = urldecode($config_path);
+        // Returns a list of gradeables that are using this config
+        if ($config_path) {
+            $inuse_config = array();
+            foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
+                if ($gradeable->getAutogradingConfigPath() === $config_path) {
+                    $inuse_config[] = $gradeable->getId();
                 }
             }
-            if(!rmdir($dir)) return false;
+            return Response::JsonOnlyResponse(
+                JsonResponse::getSuccessResponse($inuse_config)
+            );
         }
-        return true;
+        return Response::JsonOnlyResponse(
+            JsonResponse::getFailResponse("Config path can't be empty.")
+        );
     }
 }
