@@ -408,7 +408,8 @@ class AutoGradingView extends AbstractView {
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
             'can_download' =>$can_download,
-            'display_version' => $display_version
+            'display_version' => $display_version,
+            'student_pdf_view_url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'pdf'])
         ]);
     }
 }

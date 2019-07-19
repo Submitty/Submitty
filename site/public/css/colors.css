@@ -157,4 +157,9 @@
     /*tables*/
     --table-info: #d9edf7;
 
+    /*datepicker background colors*/
+    --date-picker-green: #87db88;
+    --date-picker-yellow: #ffeb54;
+    --date-picker-red: #f76c6c;
+
 }

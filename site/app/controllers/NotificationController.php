@@ -3,9 +3,12 @@
 namespace app\controllers;
 
 use app\libraries\Core;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
 use app\models\Notification;
-use app\controllers\AbstractController;
-use app\libraries\Output;
+use Symfony\Component\Routing\Annotation\Route;
 
 /**
  * Class NotificationController
@@ -40,62 +43,91 @@ class NotificationController extends AbstractController {
     }
 
     public function run() {
-        switch ($_REQUEST['page']) {
-            case 'notifications':
-                $this->notificationsHandler();
-                break;
-            case 'notification_settings':
-                $this->viewNotificationSettings();
-                break;
-        	case 'alter_notification_settings':
-        		$this->changeSettings();
-        		break;
-        }
+        return null;
     }
 
-    public function notificationsHandler() {
-        $user_id = $this->core->getUser()->getId();
-        if (!empty($_GET['action'])) {
-            if ($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
-                if (!$_GET['seen']) {
-                    $thread_id = Notification::getThreadIdIfExists($metadata);
-                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid'], $thread_id);
-                }
-                $this->core->redirect(Notification::getUrl($this->core, $metadata));
-            }
-            elseif ($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
-                $this->core->redirect($this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')));
-            }
-            elseif ($_GET['action'] == 'mark_all_as_seen') {
-                $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
-                $this->core->redirect($this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')));
-            }
-            else {
-                $this->core->redirect($this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')));
-            }
-        }
-        else {
-            // Show Notifications
-            $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
-            $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
-            $current_course = $this->core->getConfig()->getCourse();
-            $notification_saves = $this->core->getUser()->getNotificationSettings();
-            $this->core->getOutput()->renderOutput('Notification', 'showNotifications', $current_course, $show_all, $notifications, $notification_saves);
-        }
-    }
-
-    public function viewNotificationSettings() {
-        $this->core->getOutput()->renderOutput(
-            'Notification',
-            'showNotificationSettings',
-            $this->core->getUser()->getNotificationSettings()
+    /**
+     * @param $show_all
+     * @Route("/{_semester}/{_course}/notifications")
+     * @return Response
+     */
+    public function showNotifications($show_all = null) {
+        $show_all = isset($show_all) ? true : false;
+        $notifications = $this->core->getQueries()->getUserNotifications($this->core->getUser()->getId(), $show_all);
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                'Notification',
+                'showNotifications',
+                $this->core->getConfig()->getCourse(),
+                $show_all,
+                $notifications,
+                $this->core->getUser()->getNotificationSettings()
+            )
         );
     }
 
+    /**
+     * @param $nid
+     * @param $seen
+     * @Route("/{_semester}/{_course}/notifications/{nid}", requirements={"nid": "[1-9]\d*"})
+     * @return Response
+     */
+    public function openNotification($nid, $seen) {
+        $user_id = $this->core->getUser()->getId();
+        $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $nid)['metadata'];
+        if (!$seen) {
+            $thread_id = Notification::getThreadIdIfExists($metadata);
+            $this->core->getQueries()->markNotificationAsSeen($user_id, $nid, $thread_id);
+        }
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse(Notification::getUrl($this->core, $metadata))
+        );
+    }
+
+    /**
+     * @param $nid
+     * @Route("/{_semester}/{_course}/notifications/{nid}/seen", requirements={"nid": "[1-9]\d*"})
+     * @return Response
+     */
+    public function markNotificationAsSeen($nid) {
+        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/notifications/seen")
+     * @return Response
+     */
+    public function markAllNotificationsAsSeen() {
+        $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/notifications/settings", methods={"GET"})
+     * @return Response
+     */
+    public function viewNotificationSettings() {
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                'Notification',
+                'showNotificationSettings',
+                $this->core->getUser()->getNotificationSettings()
+            )
+        );
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/notifications/settings", methods={"POST"})
+     * @return Response
+     */
     public function changeSettings() {
-        //Change settings for the current user...
+        //Change settings for the current user.
+        unset($_POST['csrf_token']);
         $new_settings = $_POST;
 
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
@@ -104,10 +136,14 @@ class NotificationController extends AbstractController {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);
-            return $this->core->getOutput()->renderJsonSuccess('Notification settings have been saved.');
+            return Response::JsonOnlyResponse(
+                JsonResponse::getSuccessResponse('Notification settings have been saved.')
+            );
         }
         else {
-            return $this->core->getOutput()->renderJsonFail('Notification settings could not be saved. Please try again.');
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Notification settings could not be saved. Please try again.')
+            );
         }
     }
 

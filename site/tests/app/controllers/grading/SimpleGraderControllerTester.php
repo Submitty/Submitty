@@ -52,125 +52,90 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         return $graded_gradeable;
     }
 
-    public function testSaveMissingGradeableId() {
-        $_REQUEST['g_id'] = null;
-        $core = $this->createMockCore();
-        $controller = new SimpleGraderController($core);
-        $response = $controller->save();
-        $this->assertEquals(
-            [
-                'status' => 'fail',
-                'message' => 'Did not pass in g_id or user_id'
-            ],
-            $response
-        );
-    }
-
     public function testSaveMissingUserId() {
-        $_REQUEST['user_id'] = null;
+        $_POST['user_id'] = null;
         $core = $this->createMockCore();
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
-                'message' => 'Did not pass in g_id or user_id'
+                'message' => 'Did not pass in user_id'
             ],
-            $response
-        );
-    }
-
-    public function testSaveWrongCsrfToken() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
-        $core = $this->createMockCore(['csrf_token' => false]);
-        $controller = new SimpleGraderController($core);
-        $response = $controller->save();
-        $this->assertEquals(
-            [
-                'status' => 'fail',
-                'message' => 'Invalid CSRF token'
-            ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testSaveInvalidGradeable() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $core = $this->createMockCore(['csrf_token' => true], ['no_user' => true], ['getGradeableConfig' => null]);
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => 'Invalid gradeable ID'
             ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testSaveInvalidUser() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $gradeable = $this->createMockModel(Gradeable::class);
         $core = $this->createMockCore(['csrf_token' => true], ['no_user' => $gradeable], ['getGradeableConfig' => true]);
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => 'Invalid user ID'
             ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testSaveMissingScores() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $_POST['scores'] = '';
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockModel(Gradeable::class);
         $core = $this->createMockCore(['csrf_token' => true], [], ['getGradeableConfig' => $gradeable, 'getUserById' => $user]);
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => "Didn't submit any scores"
             ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testSaveNoAccess() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $_POST['scores'] = "123";
         $user = $this->createMockModel(User::class);
         $gradeable = $this->createMockModel(Gradeable::class);
         $core = $this->createMockCore(['csrf_token' => true], [], ['getGradeableConfig' => $gradeable, 'getUserById' => $user], ['canI' => false]);
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => "You do not have permission to do this."
             ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testExceedUpperClamp() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $_POST['scores'] = [5];
         $_POST['old_scores'] = [1];
         $user = $this->createMockModel(User::class);
@@ -183,20 +148,19 @@ class SimpleGraderControllerTester extends BaseUnitTest {
             ['canI' => true]
         );
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => "Save error: score must be a number less than the upper clamp"
             ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testStaleData() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $_POST['scores'] = [5];
         $_POST['old_scores'] = [1];
         $user = $this->createMockModel(User::class);
@@ -209,20 +173,19 @@ class SimpleGraderControllerTester extends BaseUnitTest {
             ['canI' => true]
         );
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'fail',
                 'message' => "Save error: displayed stale data (1) does not match database (2)"
             ],
-            $response
+            $response->json_response->json
         );
     }
 
     public function testSuccess() {
-        $_REQUEST['g_id'] = 'test';
-        $_REQUEST['user_id'] = 'test';
-        $_REQUEST['csrf_token'] = 'test';
+        $_POST['user_id'] = 'test';
+        $_POST['csrf_token'] = 'test';
         $_POST['scores'] = [5];
         $_POST['old_scores'] = [2];
         $user = $this->createMockModel(User::class);
@@ -235,13 +198,13 @@ class SimpleGraderControllerTester extends BaseUnitTest {
             ['canI' => true]
         );
         $controller = new SimpleGraderController($core);
-        $response = $controller->save();
+        $response = $controller->save('test');
         $this->assertEquals(
             [
                 'status' => 'success',
                 'data' => null
             ],
-            $response
+            $response->json_response->json
         );
     }
 }
