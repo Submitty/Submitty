@@ -17,6 +17,7 @@ nav {
     font-size: 1.5em;
     font-weight: bold;
     min-height: min-content;
+    min-height: -moz-min-content;
 }
 
 nav a,

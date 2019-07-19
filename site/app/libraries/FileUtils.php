@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+use app\exceptions\FileReadException;
 use app\libraries\Utils;
 
 /**
@@ -527,5 +528,42 @@ class FileUtils {
             });
         }
         return $return;
+    }
+
+
+    /**
+     * Search over a file to see if it contains specified words
+     *
+     * @param string $file Path to file to search through
+     * @param array $words An array of words to look for
+     * @throws FileReadException Unable to either locate or read the file
+     * @return bool true if any words in the $words array were found in the file, false otherwise
+     */
+    public static function areWordsInFile(string $file, array $words)
+    {
+        // Get file contents
+        $file_contents = file_get_contents($file);
+
+        // Check for failure
+        if($file_contents == false)
+        {
+            throw new FileReadException('Unable to either locate or read the file contents');
+        }
+
+        $words_detected = false;
+
+        // Foreach word in the words array check to see if it exist in the file
+        foreach ($words as $word)
+        {
+            $word_was_found = strpos($file_contents, $word);
+
+            if($word_was_found)
+            {
+                $words_detected = true;
+                break;
+            }
+        }
+
+        return $words_detected;
     }
 }
