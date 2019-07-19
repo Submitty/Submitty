@@ -1,3 +1,5 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div class="content">
     <h1>Course Settings</h1>
     <span class="pull-right">
@@ -64,7 +66,10 @@
             <div class="option-desc col-md-8">
                 <label for="private_repository">
                     <div class="option-title">Course Autograding Config Directory</div>
-                    <div class="option-alt">Use your own directory for storing gradeable configs. Will appear in the create/edit gradeable page.<br>Leave blank if you do not have a private repository for gradeable configurations.</div>
+                    <div class="option-alt">Use your own directories for storing gradeable configs. Will appear in the create/edit gradeable page.<br>
+					To enter multiple directories, type the full paths separated by a comma. <br>
+					Leave blank if you do not have a private repository for gradeable configurations.
+					</div>
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -83,23 +88,19 @@
         </div>
 
 
-        <fieldset>
-            <div class="option row">
-                <div class="option-desc col-md-8">
-                    <legend>
-                        <div class="option-title">Version Control System (VCS) Type</div>
-                        <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
-                    </legend>
-                </div>
-                <div class="option-input col-md-4">
-                    <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
-                    {#
-                    <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
-                    <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>
-                    #}
-                </div>
+        <div class="option row">
+            <div class="option-desc col-md-8">
+                <div class="option-title">Version Control System (VCS) Type</div>
+                <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
             </div>
-        </fieldset>
+            <div class="option-input col-md-4">
+                <input type="radio" name="vcs_type" id="vcs_type_git" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
+                {#
+                <input type="radio" name="vcs_type" id="vcs_type_svn" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
+                <input type="radio" name="vcs_type" id="vcs_type_mer" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>
+                #}
+            </div>
+        </div>
 
         <div class="option row">
             <div class="option-desc col-md-8">
@@ -203,7 +204,7 @@
                     <div class="option-title">Display Rainbow Grades Summary</div>
                     <div class="option-alt">Show Rainbow Grades summaries to students.
                     <strong>Note:</strong>
-                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/overview">
+                    <a target=_blank href="http://submitty.org/instructor/rainbow_grades/">
                     You must manually run rainbow grades. <i style="font-style:normal;" class="helpicon"></i></a>
                     </div>
                 </label>
@@ -217,7 +218,11 @@
                     <div class="option-title">Display Room Seating Guide</div>
                     <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
                      <div class="option-alt" style="margin-top: 15px" id="email_seating_assignment_label">Customize an email to send to each students.</div>
-                     <div class ="option-alt"> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment" style="margin-top: 25px">Email Seating Assignments</a> </div>
+                    {% if not email_enabled %}
+                        <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
+                    {% else %}
+                        <button class ="option-alt"> <a href="{{ email_room_seating_url }}" class="btn btn-primary" id="email_seating_assignment">Email Seating Assignments</a> </button>
+                    {% endif %}
                 </label>
             </div>
             <div class="option-input col-md-4">
@@ -229,7 +234,7 @@
                     {% endfor %}
                 </select>
                 <br>
-                <p style = "display: inline;" class="option-alt">Visible only to Instructors? </p>
+                <p style = "display: inline;" class="option-alt"><label for="seating_only_for_instructor">Visible only to Instructors?</label></p>
                 <input type="checkbox" name="seating_only_for_instructor" id="seating_only_for_instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
             </div>
 

@@ -16,6 +16,7 @@ class ImagesView extends AbstractView {
     public function listStudentImages($students, $grader_sections, $instructor_permission) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
 
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
@@ -58,13 +59,17 @@ class ImagesView extends AbstractView {
             }
         }
 
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")"; 
+
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
             "imageData" => $image_data,
             "errorImageData" => $error_image_data,
             "hasInstructorPermission" => $instructor_permission,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "max_size_string" => $max_size_string
         ]);
     }
 }

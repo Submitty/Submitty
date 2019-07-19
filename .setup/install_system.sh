@@ -447,10 +447,9 @@ if [ ${WORKER} == 0 ]; then
         rm /etc/apache2/sites*/000-default.conf
         rm /etc/apache2/sites*/default-ssl.conf
 
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-        # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+        cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require ip ${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
@@ -634,6 +633,8 @@ else
 
 
     1
+
+
     y
 
 
@@ -722,15 +723,26 @@ if [ ${WORKER} == 0 ]; then
         rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
 
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
         chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -741,12 +753,6 @@ if [ ${WORKER} == 0 ]; then
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then

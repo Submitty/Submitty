@@ -3,11 +3,13 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\libraries\routers\AccessControl;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -15,7 +17,6 @@ use app\models\gradeable\LateDayInfo;
 use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
-use app\models\RainbowCustomizationJSON;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\GradeSummary;
@@ -25,32 +26,17 @@ use app\exceptions\ValidationException;
 /**
  * Class ReportController
  * @package app\controllers\admin
- *
+ * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
 
-    const MAX_AUTO_RG_WAIT_TIME = 60;       // Time in seconds a call to autoRainbowGradesStatus should
+    const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'customization':
-                $this->generateCustomization();
-                break;
-            case 'check_autorg_status':
-                $this->autoRainbowGradesStatus();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
-        }
+        return null;
     }
 
     /**
@@ -469,6 +455,9 @@ class ReportController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     */
     public function generateCustomization(){
 
         // Only allow course admins to access this page
@@ -488,7 +477,7 @@ class ReportController extends AbstractController {
                 $customization->processForm();
 
                 // Finally, send the requester back the information
-                $this->core->getOutput()->renderJsonSuccess("Succesfully wrote customization.json file");
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
             } catch (ValidationException $e) {
                 //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
                 $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
@@ -518,6 +507,9 @@ class ReportController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/auto_rg_status")
+     */
     public function autoRainbowGradesStatus()
     {
         // Only allow course admins to access this page
@@ -539,35 +531,24 @@ class ReportController extends AbstractController {
             $this->core->getConfig()->getCourse() .
             '.json';
 
-        // Create path to output.html we expect to find in rainbow_grades directory
-        $rg_file = $this->core->getConfig()->getCoursePath();
-        $rg_file = FileUtils::joinPaths($rg_file, 'rainbow_grades', 'output.html');
-
         // Get the max time to wait before timing out
-        $maxWaitTime = self::MAX_AUTO_RG_WAIT_TIME;
-
-        // Wait for rainbow_grades directory to be populated if it isn't already
-        while(!file_exists($rg_file) AND $maxWaitTime)
-        {
-            sleep(1);
-            $maxWaitTime--;
-        }
+        $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
 
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($jobs_file) AND $maxWaitTime)
+        while(file_exists($jobs_file) AND $max_wait_time)
         {
             sleep(1);
-            $maxWaitTime--;
+            $max_wait_time--;
             clearstatcache();
         }
 
         // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
         // We must also wait for that file to be removed
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($processing_jobs_file) AND $maxWaitTime)
+        while(file_exists($processing_jobs_file) AND $max_wait_time)
         {
             sleep(1);
-            $maxWaitTime--;
+            $max_wait_time--;
             clearstatcache();
         }
 
@@ -577,12 +558,19 @@ class ReportController extends AbstractController {
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
 
-        $debug_output = file_get_contents($debug_output_path);
-        $exceptionDetected = strpos($debug_output, 'Exception');
+        // Look over the output file to see if any part of the process failed
+        try
+        {
+            $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
+        }
+        catch (\Exception $e)
+        {
+            $failure_detected = true;
+        }
 
-        // If we finished the previous loops before maxWaitTime hit 0 then the file successfully left the jobs queue
+        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
         // implying that it finished
-        if($maxWaitTime AND $exceptionDetected === false)
+        if($max_wait_time AND $failure_detected == false)
         {
             $this->core->getOutput()->renderJsonSuccess("Success");
         }

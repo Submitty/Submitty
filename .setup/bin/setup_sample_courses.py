@@ -146,6 +146,7 @@ def main():
                               user_lastname=user.lastname,
                               user_preferred_lastname=user.preferred_lastname,
                               user_email=user.email,
+                              user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     #Sort alphabetically extra students. Shouldn't affect randomness....
@@ -234,7 +235,7 @@ def generate_random_user_id(length=15):
 
 def generate_random_ta_comment():
     return get_random_text_from_file('TAComment.txt')
-    
+
 def generate_random_ta_note():
     return get_random_text_from_file('TANote.txt')
 
@@ -507,6 +508,7 @@ class User(object):
         group
         preferred_firstname
         preferred_lastname
+        access_level
         registration_section
         rotating_section
         unix_groups
@@ -522,6 +524,7 @@ class User(object):
         self.group = 4
         self.preferred_firstname = None
         self.preferred_lastname = None
+        self.access_level = 3
         self.registration_section = None
         self.rotating_section = None
         self.grading_registration_section = None
@@ -538,7 +541,12 @@ class User(object):
             self.email = user['user_email']
         if 'user_group' in user:
             self.group = user['user_group']
-        assert 0 <= self.group <= 4
+        if self.group < 1 or 4 < self.group:
+            raise SystemExit("ASSERT: user {}, user_group is not between 1 - 4. Check YML file.".format(self.id))
+        if 'user_access_level' in user:
+            self.access_level = user['user_access_level']
+        if self.access_level < 1 or 3 < self.access_level:
+            raise SystemExit("ASSERT: user {}, user_access_level is not between 1 - 3. Check YML file.".format(self.id))
         if 'registration_section' in user:
             self.registration_section = int(user['registration_section'])
         if 'rotating_section' in user:

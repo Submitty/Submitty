@@ -1,0 +1,19 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}delete_config_popup{% endblock %}
+{% block title %}Delete Gradeable Config{% endblock %}
+{% block body %}
+    <input type="hidden" name="config_path" id="config_path" value="">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    Are you sure you want to delete
+    <div name="delete-config-message">
+    </div><br />
+{% endblock %}
+{% block form %}
+    <form name="delete-form" method="post" action="{{ delete_url }}">
+        {{ parent() }}
+    </form>
+{% endblock %}
+{% block buttons %}
+    {{ block('close_button') }}
+    <input class="btn btn-primary" type="submit" value="Submit" />
+{% endblock %}

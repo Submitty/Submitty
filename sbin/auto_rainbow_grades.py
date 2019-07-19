@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Automatically generate rainbow grades.
@@ -19,19 +19,42 @@ import pwd
 import json
 
 # Constants
-RAINBOW_GRADES_PATH = '/usr/local/submitty/GIT_CHECKOUT/RainbowGrades'
-COURSES_PATH = '/var/local/submitty/courses'
-DEFAULT_USER = 'submitty_php'
 PROVIDED_JSON_NAME = 'custom_customization.json'
 
 # Verify correct number of command line arguments
 if len(sys.argv) != 3:
     raise Exception('You must pass 2 command line arguments')
 
-# Collect information
+# Get path to current file directory
+dir = os.path.dirname(__file__)
+
+# Collect other path information from configuration file
+config_file = dir + '/../config/submitty.json'
+
+if not os.path.exists(config_file):
+    raise Exception('Unable to locate submitty.json configuration file')
+
+with open(config_file, 'r') as file:
+    data = json.load(file)
+    install_dir = data['submitty_install_dir']
+    data_dir = data['submitty_data_dir']
+
+# Collect user information from configuration file
+config_file = dir + '/../config/submitty_users.json'
+
+if not os.path.exists(config_file):
+    raise Exception('Unable to locate submitty_users.json configuration file')
+
+with open(config_file, 'r') as file:
+    data = json.load(file)
+    daemon_user = data['daemon_user']
+
+# Configure variables
 semester = sys.argv[1]
 course = sys.argv[2]
-user = DEFAULT_USER
+user = daemon_user
+rainbow_grades_path = install_dir + '/GIT_CHECKOUT/RainbowGrades'
+courses_path = data_dir + '/courses'
 
 # Verify user exists
 users = pwd.getpwall()
@@ -46,7 +69,7 @@ if user_found is False:
     raise Exception('Unable to locate the specified user {}'.format(user))
 
 # Generate path information
-rg_course_path = os.path.join(COURSES_PATH, semester, course, 'rainbow_grades')
+rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
 
 # Verify that customization.json or custom_customization.json exist
 if os.path.exists(rg_course_path + '/customization.json') or \
@@ -63,7 +86,7 @@ if not os.path.exists(rg_course_path + '/Makefile'):
     # Copy Makefile from master rainbow grades directory
     # to course specific directory
     print('Copying initial files')
-    shutil.copyfile(RAINBOW_GRADES_PATH + '/SAMPLE_Makefile',
+    shutil.copyfile(rainbow_grades_path + '/SAMPLE_Makefile',
                     rg_course_path + '/Makefile')
 
     # Setup Makefile
@@ -77,7 +100,7 @@ if not os.path.exists(rg_course_path + '/Makefile'):
     # Replace the target strings
     filedata = filedata.replace('username', user)
     filedata = filedata.replace('/<PATH_TO_SUBMITTY_REPO>/RainbowGrades',
-                                RAINBOW_GRADES_PATH)
+                                rainbow_grades_path)
     filedata = filedata.replace('submitty.cs.rpi.edu', 'localhost')
     filedata = filedata.replace('<SEMESTER>/<COURSE>', '{}/{}'.format(semester, course))
 
@@ -171,7 +194,7 @@ cmd_output = os.popen('make push_test').read()
 print('Updating permissions')
 cmd_output = os.popen('chmod -R o-rwx ' + rg_course_path).read()
 
-summary_html_path = os.path.join(COURSES_PATH,
+summary_html_path = os.path.join(courses_path,
                                  semester,
                                  course,
                                  'reports',

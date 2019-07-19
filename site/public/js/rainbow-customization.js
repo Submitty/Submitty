@@ -205,11 +205,8 @@ function checkAutoRGStatus()
     // Send request
     $.getJSON({
         type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'reports',
-            'action': 'check_autorg_status'
-        }),
+        url: buildNewCourseUrl(['auto_rg_status']),
+        data: {csrf_token: csrfToken},
         success: function (response) {
             if (response.status === 'success') {
 
@@ -239,15 +236,12 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     {
         $('#save_status').html('Saving...');
 
+        var url = buildNewCourseUrl(['rainbow_grades_customization']);
 
         $.getJSON({
             type: "POST",
-            url: buildUrl({
-                'component': 'admin',
-                'page': 'reports',
-                'action': 'customization'
-            }),
-            data: {json_string: buildJSON()},
+            url: url,
+            data: {json_string: buildJSON(), csrf_token: csrfToken},
             success: function (response) {
                 if (response.status === 'success') {
                     $('#save_status').html('Generating rainbow grades, please wait...');
@@ -275,6 +269,11 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
 
 }
 
+function displayChangeDetectedMessage()
+{
+    $('#save_status').html('Changes detected, press "Save Changes" to save them.');
+}
+
 $(document).ready(function () {
 
     // Setup click handlers to handle collapsing and expanding each item
@@ -294,4 +293,29 @@ $(document).ready(function () {
         $('#cust_messages_collapse').toggle();
     });
 
+    // Register change handlers to update the status message when form inputs change
+    $("input[name*='display_benchmarks']").change(function() {
+       displayChangeDetectedMessage();
+    });
+
+    $('#cust_messages_textarea').on("change keyup paste", function() {
+        displayChangeDetectedMessage();
+    });
+
+    $('.sections_and_labels').on("change keyup paste", function() {
+        displayChangeDetectedMessage();
+    });
+
+    // https://stackoverflow.com/questions/15657686/jquery-event-detect-changes-to-the-html-text-of-a-div
+    // More Details https://developer.mozilla.org/en-US/docs/Web/API/MutationObserver
+    // select the target node
+    var target = document.querySelector('#buckets_used_list');
+    // create an observer instance
+    var observer = new MutationObserver(function(mutations) {
+        displayChangeDetectedMessage();
+    });
+    // configuration of the observer:
+    var config = { attributes: true, childList: true, characterData: true };
+    // pass in the target node, as well as the observer options
+    observer.observe(target, config);
 });

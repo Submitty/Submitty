@@ -170,107 +170,18 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     }
 }
 
-
-
-
 /**
- *
+ * Displays edit registration sections form on button press
  */
-function editUserForm(user_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'get_user_details', 'user_id': user_id});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            var json = JSON.parse(data)['data'];
-            var form = $("#edit-user-form");
-            form.css("display", "block");
-            $('[name="edit_user"]', form).val("true");
-            var user = $('[name="user_id"]', form);
-            user.val(json['user_id']);
-            user.attr('readonly', 'readonly');
-            if (!user.hasClass('readonly')) {
-                user.addClass('readonly');
-            }
-            $('[name="user_numeric_id"]', form).val(json['user_numeric_id']);
-            $('[name="user_firstname"]', form).val(json['user_firstname']);
-            if (json['user_preferred_firstname'] === null) {
-                json['user_preferred_firstname'] = "";
-            }
-            $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
-            $('[name="user_lastname"]', form).val(json['user_lastname']);
-            if (json['user_preferred_lastname'] === null) {
-                json['user_preferred_lastname'] = "";
-            }
-            $('[name="user_preferred_lastname"]', form).val(json['user_preferred_lastname']);
-            $('[name="user_email"]', form).val(json['user_email']);
-            var registration_section;
-            if (json['registration_section'] === null) {
-                registration_section = "null";
-            }
-            else {
-                registration_section = json['registration_section'].toString();
-            }
-            var rotating_section;
-            if (json['rotating_section'] === null) {
-                rotating_section = "null";
-            }
-            else {
-                rotating_section = json['rotating_section'].toString();
-            }
-            $('[name="registered_section"] option[value="' + registration_section + '"]', form).prop('selected', true);
-            $('[name="rotating_section"] option[value="' + rotating_section + '"]', form).prop('selected', true);
-            $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
-            $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
-            $("[name='grading_registration_section[]']").prop('checked', false);
-            if (json['grading_registration_sections'] !== null && json['grading_registration_sections'] !== undefined) {
-                json['grading_registration_sections'].forEach(function(val) {
-                    $('#grs_' + val).prop('checked', true);
-                });
-            }
-            if(registration_section === 'null' && json['user_group'] === 4) {
-                $('#user-form-student-error-message').css('display', 'block');
-            }
-            else {
-                $('#user-form-student-error-message').css('display', 'none');
-            }
-            if(json['user_group'] == 4) {
-                $('#user-form-assigned-sections').css('display', 'none');
-            }
-            else {
-                $('#user-form-assigned-sections').css('display', 'block');
-            }
-
-        },
-        error: function() {
-            alert("Could not load user data, please refresh the page and try again.");
-        }
-    })
-}
-
-function newUserForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-user-form");
-    form.css("display", "block");
-    $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
-    $('[name="user_numeric_id"]', form).val("");
-    $('[name="user_firstname"]', form).val("");
-    $('[name="user_preferred_firstname"]', form).val("");
-    $('[name="user_lastname"]', form).val("");
-    $('[name="user_email"]', form).val("");
-    $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="manual_registration"]', form).prop('checked', true);
-    $('[name="user_group"] option[value="4"]', form).prop('selected', true);
-    $("[name='grading_registration_section[]']").prop('checked', false);
-    $('#user-form-student-error-message').css('display', 'block');
-    $('#user-form-assigned-sections').css('display', 'none');
+function editRegistrationSectionsForm() {
+    var form = $("#registration-sections-form");
+    form.css("display","block");
 }
 
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
-    form[0].outerHTML = json['popup'];
+    form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
 }
 
@@ -404,6 +315,24 @@ function newUploadCourseMaterialsForm() {
 
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
+
+}
+
+function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
+
+    $('.popup-form').css('display', 'none');
+
+    var form = $("#set-folder-release-form");
+
+    form.css("display", "block");
+
+    $('[id="release_title"]',form).attr('data-path',changeActionVariable);
+    $('[name="release_date"]', form).val(releaseDates);
+    $('[name="release_date"]',form).attr('data-fp',changeActionVariable);
+
+    inDir = JSON.stringify(inDir);
+    $('[name="submit"]',form).attr('data-iden',id);
+    $('[name="submit"]',form).attr('data-inDir',inDir);
 
 }
 
@@ -1213,11 +1142,11 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path) {
+function downloadFile(file, path, dir) {
     window.location = buildUrl({
         'component': 'misc',
         'page': 'download_file',
-        'dir': 'submissions',
+        'dir': dir,
         'file': file,
         'path': path});
 }
@@ -1289,11 +1218,55 @@ function openDivForCourseMaterials(num) {
         elem.hide();
         elem.removeClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
     }
     else {
         elem.show();
         elem.addClass('open');
         $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
+    }
+    return false;
+}
+
+function openAllDivForCourseMaterials() {
+    var elem = $("[id ^= 'div_viewer_']");
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
+    }
+    return false;
+}
+function closeDivForCourseMaterials(num) {
+    var elem = $('#div_viewer_' + num);
+    elem.hide();
+    elem.removeClass('open');
+    $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+    return 'closed';
+
+
+}
+function openAllDivForCourseMaterials() {
+    var elem = $("[id ^= 'div_viewer_']");
+    if (elem.hasClass('open')) {
+        elem.hide();
+        elem.removeClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder-open').addClass('fa-folder');
+        return 'closed';
+    }
+    else {
+        elem.show();
+        elem.addClass('open');
+        $($($(elem.parent().children()[0]).children()[0]).children()[0]).removeClass('fa-folder').addClass('fa-folder-open');
+        return 'open';
     }
     return false;
 }
@@ -1482,7 +1455,7 @@ function enableTabsInTextArea(jQuerySelector) {
 
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
+    var url = buildNewCourseUrl(['extensions', 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1532,7 +1505,7 @@ function updateHomeworkExtensions(data) {
 }
 
 function loadHomeworkExtensions(g_id, due_date) {
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    var url = buildNewCourseUrl(['extensions', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1571,7 +1544,7 @@ function refreshOnResponseLateDays(json) {
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
+    var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
         url: url,
         type: "POST",
@@ -1607,7 +1580,7 @@ function updateLateDays(data) {
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'delete_late'});
+    var url = buildNewCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1679,10 +1652,12 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filename) + '&checked=' + checked;
+    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
 
     $.ajax({
+        type: "POST",
         url: url,
+        data: {'fn':filename,csrf_token: csrfToken},
         success: function(data) {},
         error: function(e) {
             alert("Encounter saving the checkbox state.");
@@ -1690,15 +1665,88 @@ function changePermission(filename, checked) {
     })
 }
 
-function changeNewDateTime(filename, newdatatime) {
+function changeFolderPermission(filenames, checked,handleData) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
 
     $.ajax({
+        type: "POST",
         url: url,
-        success: function(data) {},
+        data: {'fn':filenames,csrf_token: csrfToken},
+        success: function(data) {
+            if(handleData){
+                handleData(data);
+            }
+        },
+        error: function(e) {
+            alert("Encounter saving the checkbox state.");
+        }
+    })
+}
+
+function updateToServerTime(fp) {
+    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {csrf_token: csrfToken},
+        success: function(data) {
+            var time = JSON.parse(data);
+            time = new Date(parseInt(time.year),
+                            parseInt(time.month) - 1,
+                            parseInt(time.day),
+                            parseInt(time.hour),
+                            parseInt(time.minute),
+                            parseInt(time.second));
+            fp.setDate(time,true);
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+
+function changeNewDateTime(filename, newdatatime,handleData) {
+    // send to server to handle file date/time change
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    var tbr;
+    tbr=false;
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'fn':filename,csrf_token: csrfToken},
+        success: function(data) {
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+        },
         error: function(e) {
             alert("Encounter saving the NewDateTime.");
+
+        }
+    })
+}
+
+function changeFolderNewDateTime(filenames, newdatatime,handleData) {
+    // send to server to handle folder date/time change
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    var tbr;
+    tbr=false;
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {'fn':filenames,csrf_token: csrfToken},
+        success: function(data) {
+            tbr=true;
+            if(handleData){
+                handleData(data);
+            }
+        },
+        error: function(e) {
+            alert("Encounter saving the NewDateTime.");
+
         }
     })
 }
@@ -1719,19 +1767,17 @@ $.fn.isInViewport = function() {                                        // jQuer
 function checkSidebarCollapse() {
     var size = $(document.body).width();
     if (size < 1000) {
-        $("#sidebar").toggleClass("collapsed", true);
+        $("aside").toggleClass("collapsed", true);
     }
     else{
-        $("#sidebar").toggleClass("collapsed", false);
+        $("aside").toggleClass("collapsed", false);
     }
 }
 
 //Called from the DOM collapse button, toggle collapsed and save to localStorage
 function toggleSidebar() {
-    var sidebar = $("#sidebar");
+    var sidebar = $("aside");
     var shown = sidebar.hasClass("collapsed");
-
-    sidebar.addClass("animate");
 
     localStorage.sidebar = !shown;
     sidebar.toggleClass("collapsed", !shown);
@@ -1742,7 +1788,7 @@ $(document).ready(function() {
     $('[data-toggle="tooltip"]').tooltip({
         position: { my: "right+0 bottom+0" },
         content: function () {
-            if($("#sidebar").hasClass("collapsed")) {
+            if($("aside").hasClass("collapsed")) {
                 if ($(this).attr("title") === "Collapse Sidebar") {
                     return "Expand Sidebar";
                 }
@@ -1757,7 +1803,7 @@ $(document).ready(function() {
     //Remember sidebar preference
     if (localStorage.sidebar !== "") {
         //Apparently !!"false" === true and if you don't cast this to bool then it will animate??
-        $("#sidebar").toggleClass("collapsed", localStorage.sidebar === "true");
+        $("aside").toggleClass("collapsed", localStorage.sidebar === "true");
     }
 
     //If they make their screen too small, collapse the sidebar to allow more horizontal space

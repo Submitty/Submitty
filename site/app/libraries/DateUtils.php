@@ -96,6 +96,7 @@ class DateUtils {
                 $date = new \DateTime($date, $time_zone);
             } catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
+                $date =  new \DateTime("9998-12-31 23:59:59", $time_zone);
             }
         } else if (!($date instanceof \DateTime)) {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
@@ -140,5 +141,26 @@ class DateUtils {
      */
     public static function dateTimeToString(DateTime $date, bool $add_utc_offset = true) {
         return $date->format('Y-m-d H:i:s' . ($add_utc_offset ? 'O' : ''));
+    }
+
+    /**
+     * Gets a json which contains the current server time broken up into specific fields
+     * Formatting the data in this manner makes it easier to work with when instantiating javascript Date() objects
+     *
+     * @param $core Application core
+     * @return object
+     */
+    public static function getServerTimeJson($core) {
+        $time = new \DateTime('now', $core->getConfig()->getTimezone());
+
+        $json = (object)[];
+        $json->year = $time->format('Y');
+        $json->month = $time->format('m');
+        $json->day = $time->format('j');
+        $json->hour = $time->format('G');
+        $json->minute = $time->format('i');
+        $json->second = $time->format('s');
+
+        return $json;
     }
 }

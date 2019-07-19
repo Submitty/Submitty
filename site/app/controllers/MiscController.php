@@ -3,9 +3,11 @@
 namespace app\controllers;
 
 
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\models\CourseMaterial;
 
 class MiscController extends AbstractController {
     public function run() {
@@ -40,7 +42,23 @@ class MiscController extends AbstractController {
             case 'check_bulk_progress':
                 $this->checkBulkProgress();
                 break;
+            case 'get_server_time':
+                $this->getServerTime();
+                break;
         }
+    }
+
+    /**
+     * Get the current server time
+     *
+     * Returns a json string which contains the current server time broken up into year, month, day, hour, minute,
+     * second
+     */
+    private function getServerTime() {
+
+        $json = DateUtils::getServerTimeJson($this->core);
+        $this->core->getOutput()->renderJson($json);
+
     }
 
     private function encodePDF(){
@@ -87,10 +105,24 @@ class MiscController extends AbstractController {
                 return false;
             }
         } else {
+
+            // Check access through Access library
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
+
+            // If attempting to obtain course materials
+            if($dir == 'course_materials')
+            {
+                // If the user attempting to access the file is not at least a grader then ensure the file has been released
+                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                {
+                    $this->core->getOutput()->showError("You may not access this file until it is released.");
+                    return false;
+                }
+            }
+
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
@@ -155,9 +187,21 @@ class MiscController extends AbstractController {
                 return false;
             }
         } else {
+
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
+            }
+
+            // If attempting to obtain course materials
+            if($dir == 'course_materials')
+            {
+                // If the user attempting to access the file is not at least a grader then ensure the file has been released
+                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                {
+                    $this->core->getOutput()->showError("You may not access this file until it is released.");
+                    return false;
+                }
             }
         }
 
