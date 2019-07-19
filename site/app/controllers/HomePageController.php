@@ -168,7 +168,7 @@ class HomePageController extends AbstractController {
         }
 
         $semester = $_POST['course_semester'];
-        $course_title = $_POST['course_title'];
+        $course_title = strtolower($_POST['course_title']);
         $head_instructor = $_POST['head_instructor'];
 
         if ($user->getAccessLevel() === User::LEVEL_FACULTY && $head_instructor !== $user->getId()) {
