@@ -2861,7 +2861,7 @@ AND gc_id IN (
         $row_string = "(?, ?, ?, current_timestamp, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query("
-            INSERT INTO emails(recipient, subject, body, created, user_id)
+            INSERT INTO emails(subject, body, created, user_id)
             VALUES ".$value_param_string, $flattened_emails);
     }
 
