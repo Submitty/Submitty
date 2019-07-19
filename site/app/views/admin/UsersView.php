@@ -187,8 +187,8 @@ class UsersView extends AbstractView {
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
             "max_section" => $max_section,
-            "update_registration_sections_url" => $this->core->buildNewCourseUrl(['sections', 'registration_sections']),
-            "update_rotating_sections_url" => $this->core->buildNewCourseUrl(['sections', 'rotating_sections']),
+            "update_registration_sections_url" => $this->core->buildNewCourseUrl(['sections', 'registration']),
+            "update_rotating_sections_url" => $this->core->buildNewCourseUrl(['sections', 'rotating']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

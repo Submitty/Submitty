@@ -268,7 +268,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections/registration_sections", methods={"POST"})
+     * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
      */
     public function updateRegistrationSections() {
         $return_url = $this->core->buildNewCourseUrl(['sections']);
@@ -312,7 +312,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/sections/rotating_sections", methods={"POST"})
+     * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
      */
     public function updateRotatingSections() {
         $return_url = $this->core->buildNewCourseUrl(['sections']);
