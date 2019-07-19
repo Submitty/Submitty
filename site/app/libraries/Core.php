@@ -272,14 +272,14 @@ class Core {
     }
 
     /**
-     * @return AbstractDatabase
+     * @return string
      */
     public function getLatestCommit() {
       return $this->latest_commit;
     }
 
     /**
-     * @return AbstractDatabase
+     * @return string
      */
     public function getLatestTag() {
       return $this->latest_tag;
