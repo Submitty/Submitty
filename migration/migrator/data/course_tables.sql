@@ -492,7 +492,8 @@ CREATE TABLE gradeable_teams (
 CREATE TABLE teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
-    state integer NOT NULL
+    state integer NOT NULL,
+	last_viewed_time timestamp(6) with time zone DEFAULT NULL
 );
 
 

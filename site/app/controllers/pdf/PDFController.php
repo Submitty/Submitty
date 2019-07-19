@@ -4,8 +4,9 @@ namespace app\controllers\pdf;
 
 use app\libraries\Core;
 use app\controllers\AbstractController;
-use app\models\PDFGenerator;
 use app\libraries\FileUtils;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
 
 class PDFController extends AbstractController {
 
@@ -14,34 +15,15 @@ class PDFController extends AbstractController {
     }
 
     public function run() {
-        switch ($_REQUEST['page']) {
-            case 'student_pdf_view':
-                $this->showStudentPDF();
-                break;
-            case 'grader_fullpage':
-                //Currently not in use
-                $this->showGraderPDFFullpage();
-                break;
-            case 'grader_embedded':
-                $this->showGraderPDFEmbedded();
-                break;
-            case 'download_annotated_pdf':
-                $this->downloadAnnotatedPdf();
-                return;
-            case 'save_pdf_annotation':
-                $this->savePDFAnnotation();
-                break;
-        }
+        return null;
     }
 
-    private function downloadAnnotatedPdf(){
-        $PDFGenerator = new PDFGenerator($this->core);
-        return "test";
-    }
-
-    private function showStudentPDF(){
-        $gradeable_id = $_GET['gradeable_id'] ?? NULL;
-        $filename = $_GET['file_name'] ?? NULL;
+    /**
+     * @param $gradeable_id
+     * @param $filename
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")
+     */
+    public function showStudentPDF($gradeable_id, $filename = null){
         $filename = html_entity_decode($filename);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -79,10 +61,16 @@ class PDFController extends AbstractController {
             "is_student" => true,
             "page_num" => 1
         ];
+
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }
 
-    private function savePDFAnnotation(){
+    /**
+     * @param $gradeable_id
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/annotations", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     */
+    public function savePDFAnnotation($gradeable_id){
         //Save the annotation layer to a folder.
         $annotation_layer = $_POST['annotation_layer'];
         $annotation_info = $_POST['GENERAL_INFORMATION'];
@@ -90,7 +78,7 @@ class PDFController extends AbstractController {
         $course_path = $this->core->getConfig()->getCoursePath();
         $user_id = $annotation_info['user_id'];
 
-        $gradeable = $this->tryGetGradeable($annotation_info['gradeable_id'] ?? null);
+        $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return false;
         }
@@ -125,9 +113,13 @@ class PDFController extends AbstractController {
         return true;
     }
 
-    private function showGraderPDFEmbedded(){
+    /**
+     * @param $gradeable_id
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf")
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     */
+    public function showGraderPDFEmbedded($gradeable_id){
         //This is the embedded pdf annotator that we built.
-        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         //User can be a team
         $id = $_POST['user_id'] ?? NULL;
         $filename = $_POST['filename'] ?? NULL;
@@ -172,6 +164,9 @@ class PDFController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('PDF'), 'showPDFEmbedded', $params);
     }
 
+    /**
+     * NOT IN USE
+     */
     private function showGraderPDFFullpage(){
         //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
         //a full-sized annotator, so keeping this in for now.

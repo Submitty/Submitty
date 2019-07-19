@@ -48,3 +48,27 @@
 .bucket_detail_div:nth-child(2n+1){
     background-color: lightskyblue;
 }
+
+#save_status_container
+{
+    display: inline-block;
+    width: 100%;
+    background-color: lightgrey;
+    border: none;
+}
+
+#save_status
+{
+    display: inline-block;
+}
+
+#status_label
+{
+    font-weight: bold;
+}
+
+#save_status_button
+{
+    margin-top: 10px;
+    display: block;
+}

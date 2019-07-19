@@ -83,7 +83,7 @@ class Notification extends AbstractModel {
         $instance = new self($core);
         $instance->setComponent($event['component']);
         $instance->setNotifyMetadata($event['metadata']);
-        $instance->setNotifyContent($event['content']);
+        $instance->setNotifyContent($event['subject']);
         $instance->setNotifySource($event['sender_id']);
         $instance->setNotifyTarget($event['to_user_id']);
         return $instance;
