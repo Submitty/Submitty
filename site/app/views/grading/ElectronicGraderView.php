@@ -38,6 +38,8 @@ class ElectronicGraderView extends AbstractView {
         $overall_scores,
         $overall_average,
         int $total_submissions,
+        int $individual_viewed_grade,
+        int $total_students_submitted,
         int $registered_but_not_rotating,
         int $rotating_but_not_registered,
         int $viewed_grade,
@@ -143,6 +145,8 @@ class ElectronicGraderView extends AbstractView {
                 if ($gradeable->isTaGradeReleased()) {
                     $viewed_total = $total/$num_components;
                     $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
+                    $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
+                        number_format(($individual_viewed_grade/$total_students_submitted)*100,1);
                 }
             }
             if(!$peer) {
@@ -226,6 +230,9 @@ class ElectronicGraderView extends AbstractView {
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
             "component_overall_percentage" => $component_overall_percentage,
+            "individual_viewed_grade" => $individual_viewed_grade,
+            "total_students_submitted" => $total_students_submitted,
+            "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests
         ]);
     }
@@ -578,12 +585,38 @@ HTML;
             ];
         }
 
+        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : array();
+        foreach ($team_gradeable_view_history as $team_id => $team) {
+            $not_viewed_yet = true;
+            $hover_over_string = "";
+            ksort($team_gradeable_view_history[$team_id]);
+            ksort($team);
+                foreach ($team as $user => $value) {
+                    if ($value != null) {
+                        $not_viewed_yet = false;
+                        $date_object = new \DateTime($value);
+                        $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
+                    }
+                    else {
+                        $hover_over_string.= "Not viewed by ".$user."\n";
+                    }
+                }
+
+                if ($not_viewed_yet) {
+                    $team_gradeable_view_history[$team_id]['hover_string'] = '';
+                }
+                else {
+                    $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+                }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
             "empty_team_info" => $empty_team_info,
+            "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
@@ -625,7 +658,7 @@ HTML;
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
@@ -652,7 +685,7 @@ HTML;
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderInformationPanel', $graded_gradeable, $display_version_instance);
         }
         if ($this->core->getConfig()->isRegradeEnabled()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable);
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
         if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
@@ -915,11 +948,13 @@ HTML;
     /**
      * Render the Grade Inquiry panel
      * @param GradedGradeable $graded_gradeable
+     * @param bool $can_inquiry
      * @return string
      */
-    public function renderRegradePanel(GradedGradeable $graded_gradeable) {
+    public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
         return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
-            "graded_gradeable" => $graded_gradeable
+            "graded_gradeable" => $graded_gradeable,
+            "can_inquiry" =>$can_inquiry
         ]);
     }
 

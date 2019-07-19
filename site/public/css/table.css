@@ -2,13 +2,6 @@ table.mobile-table {
     width: 100%;
 }
 
-.mobile-table th,
-.mobile-table td {
-    border: 1px solid black;
-    text-align: center;
-    padding: 5px;
-} 
-
 @media (max-width: 800px) {
     table.mobile-table, 
     .mobile-table thead, 
@@ -34,6 +27,7 @@ table.mobile-table {
 
     .mobile-table tr {
         margin-top: 1em;
+        background: none !important;
     }
 
     .mobile-table td { 
@@ -45,11 +39,11 @@ table.mobile-table {
     }
 
     .mobile-table tr:nth-child(even) td {
-        background: #EEE;
+        background: var(--standard-hover-light-gray);
     }
-
+    
     .mobile-table tr:nth-child(odd) td {
-        background: #DDD;
+        background: var(--standard-light-gray);
     }
 
     .mobile-table td:before { 

@@ -1,7 +1,7 @@
 {% import _self as self %}
 
 <div class="content">
-    <h1>Upload Gradeable Config</h1>
+    <h1>Upload Autograding Config</h1>
     <br><br>
     <p>
         Following the assignment configuration specifications:<br>
@@ -14,14 +14,14 @@
 
     <br><br>
     <p>
-        Prepare your assignment configuration as a single <code>config.json</code> file.<br>
+        Prepare your autograding configuration as a single <code>config.json</code> file.<br>
         Or as a zip of the <code>config.json</code>, and the directories <code>provided_code</code>,
         <code>test_input</code>, <code>instructor_solution</code>, <code>test_output</code>, and/or <code>custom_validation_code</code>.
     </p>
 
     <br><br>
 
-    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'process_upload_config'}) }}" method="POST" enctype="multipart/form-data">
+    <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         Upload Config: <input type="file" name="config_upload" /><br />
         <input type="submit" value="Upload" />
@@ -36,7 +36,7 @@
     <br>&nbsp;<br>
     <script>
         function openRenamePopup(file_path){
-            var url = buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'check_being_used', 'config': file_path});
+            let url = buildNewCourseUrl(['autograding_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
             $('#alert_in_use').html('');
             $('#gradeables_using_config').empty();
             $.ajax({
@@ -50,9 +50,17 @@
                         }
                     }
                 }
-            })
+            });
             $('#rename_config_popup').css('display', 'block');
             $('#curr_config_name').val(file_path);
+        }
+
+        function openDeletePopup(file_path) {
+            let message = $('[name="delete-config-message"]');
+            message.html('');
+            message.append('<b>'+file_path+'</b>');
+            $('[name="config_path"]').val(file_path);
+            $('#delete_config_popup').css("display", "block");
         }
     </script>
     <ul>
@@ -71,7 +79,7 @@
                 {% if indent == 1 %}
                     <a class="fas fa-pencil-alt" onclick="openRenamePopup('{{ file.path }}')"></a>
                     {% if file.path not in inuse_config %}
-                        <a class="fas fa-trash" href="{{core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'delete_config', 'config': file.path})}}"></a>
+                        <a class="fas fa-trash" onclick="openDeletePopup('{{ file.path }}')"></a>
                     {% endif %}
                 {% endif %}
                 <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
@@ -92,3 +100,4 @@
 {% endmacro %}
 
 {% include('admin/RenameConfigPopup.twig')%}
+{% include('admin/DeleteConfigPopup.twig')%}

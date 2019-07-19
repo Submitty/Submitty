@@ -102,7 +102,7 @@
                 {# Student list #}
                 <tbody>
                     {% for info in section.rows %}
-                        {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns) }}
+                        {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
                     {% endfor %}
                     {% for info in section.teamless_users %}
                         {{ self.render_teamless_user(self, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
@@ -144,7 +144,7 @@
     </table>
 </div>
 
-{% macro render_student(self, section, graded_gradeable, index, info, columns) %}
+{% macro render_student(self, section, graded_gradeable, index, info, columns, team_gradeable_view_history) %}
     <tr
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
@@ -190,7 +190,7 @@
             {% elseif column.function == "user_last" %}
                 {{ self.render_column_user_last(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "viewed_grade" %}
-                {{ self.render_column_viewed_grade(self, section, graded_gradeable, index, info, column) }}
+                {{ self.render_column_viewed_grade(self, section, graded_gradeable, index, info, column, team_gradeable_view_history) }}
             {% endif %}
         {% endfor %}
     </tr>
@@ -281,9 +281,9 @@
 {# Graded Questions #}
 {% macro render_column_graded_questions(self, section, graded_gradeable, index, info, column) %}
     <td class="td-graded-questions">
-        {%- for group in info.graded_groups -%}
+        {%- for index in 0..info.graded_groups|length-1 -%}
             {%- if loop.index0 != 0 %}&nbsp;{% endif -%}
-            <i class="fas fa-circle grader-{{- group -}}"></i>
+            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
         {%- endfor -%}
     </td>
 {% endmacro %}
@@ -482,12 +482,28 @@
 {% endmacro %}
 
 {# Viewed Grade #}
-{% macro render_column_viewed_grade(self, section, graded_gradeable, index, info, column) %}
-    {% if graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate() == null %}
-        <td title="" style="color: red; font-size: 1.5em;">&#10008;</td>
-    {% else %}
-        <td title="Last Viewed: {{ graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate()|date }}" style="color: #5cb85c; font-size: 1.5em;">&#x2714;</td>
-    {% endif %}
+{% macro render_column_viewed_grade(self, section, graded_gradeable, index, info, column, team_gradeable_view_history) %}
+	{% if graded_gradeable.getSubmitter().isTeam() %}
+		{% if team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] == '' %}
+			<td class="viewed-red-x" title="">&#10008;</td>
+		{% else %}
+			<td class="td-viewed-grade" id="team-check-marks" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
+				{% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'hover_string' %}
+					{% if time == null %}
+						<i class="viewed-white-check">&#x2714;</i>
+					{% else %}
+						<i class="viewed-green-check">&#x2714;</i>
+					{% endif %}
+				{% endfor %}
+			</td>
+		{% endif %}
+	{% else %}
+	    {% if graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate() == null %}
+			<td class="viewed-red-x" title="">&#10008;</td>
+		{% else %}
+			<td class="viewed-green-check" title="Last Viewed: {{ graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate()|date }}">&#x2714;</td>
+		{% endif %}
+	{% endif %}
 {% endmacro %}
 
 {# /Column functions #}
