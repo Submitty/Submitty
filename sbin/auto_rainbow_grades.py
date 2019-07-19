@@ -89,7 +89,7 @@ if not os.path.exists(rg_course_path + '/Makefile'):
     shutil.copyfile(rainbow_grades_path + '/SAMPLE_Makefile',
                     rg_course_path + '/Makefile')
 
-    # Setup Makefile
+    # Setup Makefile path
     print('Configuring Makefile')
     makefile_path = os.path.join(rg_course_path, 'Makefile')
 
@@ -118,65 +118,79 @@ if os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
 # Change directory to course specific directory
 os.chdir(rg_course_path)
 
-# Tell submitty to generate grade reports
 # Verify submitty_admin file exists
-creds_file = '/usr/local/submitty/config/submitty_admin.json'
+creds_file = dir + '/../config/submitty_admin.json'
 
 if not os.path.exists(creds_file):
-    raise Exception('Unable to locate submitty_admin credentials file')
+    raise Exception('Unable to locate submitty_admin.json credentials file')
 
 # Load credentials out of admin file
 with open(creds_file, 'r') as file:
     creds = json.load(file)
 
 # Collect the host name that will be called
-config_file = '/usr/local/submitty/config/submitty.json'
+config_file = dir + '/../config/submitty.json'
 
 if not os.path.exists(config_file):
-    raise Exception('Unable to locate submitty configuration file')
+    raise Exception('Unable to locate submitty.json configuration file')
 
 with open(config_file, 'r') as file:
     data = json.load(file)
     host_name = data['submission_url']
 
-# Construct request string
-request = 'curl -d "user_id={}&password={}" -X POST {}/api/token'.format(
-    creds['submitty_admin_username'],
-    creds['submitty_admin_password'],
-    host_name
-)
+# Construct request list
+request = [
+    'curl',
+    '-d',
+    'user_id={}&password={}'.format(creds['submitty_admin_username'],
+                                    creds['submitty_admin_password']),
+    '-X',
+    'POST',
+    '{}/api/token'.format(host_name)
+]
 
 # Using the credentials call the API to obtain an auth token
 print('Obtaining auth token')
-response = os.popen(request).read()
+response = subprocess.run(request, stdout=subprocess.PIPE)
+
+# Check the return code of the 'curl' execution
+if response.returncode != 0:
+    raise Exception('Failure during curl server call to obtain auth token.')
 
 # Verify a token was successfully received
-response_json = json.loads(response)
+response_json = json.loads(response.stdout)
 
+# Take this path if we DID NOT get an auth token
 if response_json['status'] != 'success':
-    raise Exception('Failure obtaining auth token')
 
-try:
+    # We may still continue execution if grade summaries had been previously manually
+    # generated, Check grade summaries directory to see if it contains any summaries
+    reports_path = os.path.join(courses_path, semester, course, 'reports', 'all_grades')
+    file_count = sum([len(files) for r, d, files in os.walk(reports_path)])
+
+    if file_count == 0:
+        raise Exception('Failure - The grade summaries directory is empty')
+
+# Take this path if we DID get an auth token
+else:
 
     # Construct cmd string
     cmd = [
-        '/usr/local/submitty/sbin/generate_grade_summaries.py',
+        '{}/sbin/generate_grade_summaries.py'.format(install_dir),
         semester,
         course,
         host_name,
         response_json['data']['token']
     ]
 
-    # Call generate_grade_summaries script to generate grade summaries for the course
+    # Call generate_grade_summaries.py script to generate grade summaries for the
+    # course
     print('Generating grade summaries')
     cmd_return_code = subprocess.call(cmd)
 
+    # Check return code of generate_grade_summaries.py execution
     if cmd_return_code != 0:
-        raise Exception('Error')
-
-except Exception:
-
-    raise Exception('There was a failure generating grade summaries')
+        raise Exception('Failure generating grade summaries')
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
 print('Pulling in grade reports')
