@@ -4,7 +4,7 @@ import tempfile
 import shutil
 import subprocess
 
-from . import CONFIG_PATH, autograding_utils
+from . import CONFIG_PATH, autograding_utils, testcase
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -65,13 +65,14 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
     # LOAD THE TESTCASES
     testcases = list()
+    testcase_num = 1
     for t in complete_config_obj['testcases']:
         testcase_folder = os.path.join("test{:02}".format(testcase_num))
-        tmp_test = testcase.testcase(testcase_folder, queue_obj, complete_config_obj, t,
-                                     which_untrusted, is_vcs, job_id, is_batch_job, tmp, testcases,
-                                     submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH,
-                                     is_test_environment=False)
+        tmp_test = Testcase.Testcase(testcase_folder, queue_obj, complete_config_obj, t,
+                                     which_untrusted, is_vcs, job_id, is_batch_job, working_directory, testcases,
+                                     submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
         testcases.append( tmp_test )
+        testcase_num += 1
 
     with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
         os.chdir(tmp_work)

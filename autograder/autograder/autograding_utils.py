@@ -16,6 +16,7 @@ import zipfile
 import stat
 import subprocess
 import shutil
+import glob
 
 def just_write_grade_history(json_file,assignment_deadline,submission_time,
                              seconds_late,queue_time,batch_regrade,grading_began,

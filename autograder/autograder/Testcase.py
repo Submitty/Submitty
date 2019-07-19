@@ -12,12 +12,9 @@ import glob
 from submitty_utils import dateutils
 from . import autograding_utils, CONFIG_PATH, JailedSandbox
 
-with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
-    OPEN_JSON = json.load(open_file)
-    SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 
 class Testcase():
-  def __init__(name, queue_obj, complete_config_obj, testcase_info, untrusted_user,
+  def __init__(self, name, queue_obj, complete_config_obj, testcase_info, untrusted_user,
                is_vcs, job_id, is_batch, autograding_directory, previous_testcases, submission_string, 
                log_path, stack_trace_log_path, is_test_environment):
     self.name = name
@@ -33,11 +30,10 @@ class Testcase():
     self.submission_string = submission_string
     self.log_path = log_path
     self.stack_trace_log_path = stack_trace_log_path
-
     # if complete_config_obj.get("autograding_method", "") == "docker":
     #   self.secure_environment = ContainerNetwork(self.parent_directory, self.testcase_directory, self.log, testcase_info)
     # else:
-    self.secure_environment = JailedSandbox.JailedSandbox(self.testcase_directory, complete_config_obj, self, autograding_directory, is_test_environment)
+    self.secure_environment = JailedSandbox.JailedSandbox(self.testcase_directory, complete_config_obj, testcase_info.get('pre_commands', list()), self, autograding_directory, is_test_environment)
     
   
   def _run_execution(self):
@@ -72,19 +68,19 @@ class Testcase():
   
   def _run_compilation(self):
     self.secure_environment.setup_for_compilation_testcase()
-    with open(os.path.join(self.tmp_logs,"compilation_log.txt"), 'a') as logfile:
+    with open(os.path.join(self.secure_environment.tmp_logs,"compilation_log.txt"), 'a') as logfile:
         arguments = [
           self.queue_obj['gradeable'],
           self.queue_obj['who'],
           str(self.queue_obj['version']),
           self.submission_string,
-          '--testcase', str(name)
+          '--testcase', str(self.name)
         ]
         return self.secure_environment.execute(self.untrusted_user, 'my_compile.out', arguments, logfile)
 
   def execute(self):
     if self.type in ['Compilation', 'FileCheck']:
-        succes = self._run_compilation()
+        success = self._run_compilation()
     else:
         success = self._run_execution()
     

@@ -4,11 +4,11 @@ import subprocess
 import traceback
 
 from submitty_utils import dateutils
-from . import autograding_utils
+from . import autograding_utils, SecureExecutionEnvironment
 
-class JailedSandbox(SecureExecutionEnvironment):
-  def __init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, is_test_environment):
-     super().__init__(testcase_directory, complete_config_obj, testcase_obj, autograding_directory, is_test_environment)   
+class JailedSandbox(SecureExecutionEnvironment.SecureExecutionEnvironment):
+  def __init__(self, testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment):
+     super().__init__(testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment)   
 
   def archive_results(self, overall_log):
     """
@@ -32,16 +32,21 @@ class JailedSandbox(SecureExecutionEnvironment):
   def execute(self, untrusted_user, script, arguments, logfile):
     
     try:
-      self.verify_execution_status():
+      self.verify_execution_status()
     except Exception as e:
+      self.my_testcase.log_stack_trace(traceback.format_exc())
+      self.my_testcase.log("ERROR: Could not verify execution mode status.")
       return
 
     if self.is_test_environment:
       script = [script, ]
     else:
       script = [os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"), untrusted_user, script]
+    
+    subprocess.call(['ls', '-l', self.directory])
 
-
+    print(script+arguments)
+    print('cwd='+self.directory)
     try:
       success = subprocess.call(script
                                 + 
