@@ -171,8 +171,8 @@ class NavigationView extends AbstractView {
                     "id" => $gradeable->getId(),
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
-                    "can_delete" => $this->core->getUser()->accessAdmin() && $gradeable->canDelete(),
-                    "buttons_justedit" => $this->getButtonsJustEdit($gradeable),
+                    "edit_buttons" => $this->getAllEditButtons($gradeable),
+                    "delete_buttons" => $this->getAllDeleteButtons($gradeable),
                     "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
                     "has_build_error" => $gradeable->anyBuildErrors()
                 ];
@@ -228,12 +228,28 @@ class NavigationView extends AbstractView {
      * @param Gradeable $gradeable
      * @return array
      */
-    private function getButtonsJustEdit(Gradeable $gradeable): array {
+    private function getAllEditButtons(Gradeable $gradeable): array {
         $buttons = [];
 
         //Admin buttons
         if ($this->core->getUser()->accessAdmin()) {
             $buttons[] = $this->hasEditButton() ? $this->getEditButton($gradeable) : null;
+        }
+
+        return $buttons;
+    }
+
+    /**
+     * Get a list with the edit buttons (if applicable) to display to the user for a Gradeable
+     * @param Gradeable $gradeable
+     * @return array
+     */
+    private function getAllDeleteButtons(Gradeable $gradeable): array {
+        $buttons = [];
+
+        //Admin buttons
+        if ($this->core->getUser()->accessAdmin()) {
+            $buttons[] = $gradeable->canDelete() ? $this->getDeleteButton($gradeable) : null;
         }
 
         return $buttons;
@@ -643,6 +659,27 @@ class NavigationView extends AbstractView {
             "class" => "fas fa-pencil-alt",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getTitle()}"
+        ]);
+        return $button;
+    }
+
+        /**
+     * @param Gradeable $gradeable
+     * @return Button|null
+     */
+    private function getDeleteButton(Gradeable $gradeable) {
+        $button = new Button($this->core, [
+            "title" => "Delete Gradeable",
+            "href" => "javascript:newDeleteGradeableForm('" . 
+                $this->core->buildUrl(array(
+                    'component' => 'admin', 
+                    'page' => 'admin_gradeable', 
+                    'action' => 'delete_gradeable', 
+                    'id' => $gradeable->getId()))
+                . "', '{$gradeable->getTitle()}');",
+            "class" => "fas fa-trash fa-fw",
+            "title_on_hover" => true,
+            "aria_label" => "Delete {$gradeable->getTitle()}"
         ]);
         return $button;
     }

@@ -1562,7 +1562,7 @@ end of styles used in the admin gradeable page
 }
 
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
-.fa-trash:focus {
+.custom-focus:focus {
     outline: var(--standard-focus-cornflowe-blue);
 }
 
@@ -1590,6 +1590,7 @@ end of styles used in the admin gradeable page
     width: 108px;
     border: 2px solid #2627ee;
     height: min-content;
+    height: -moz-min-content;
     position: absolute;
     z-index: 999;
 }
@@ -1758,6 +1759,8 @@ header > * {
         min-width: 680px;
         max-width: 80%;
         height: min-content;
+        height: -moz-min-content;
         width: min-content;
+        width: -moz-min-content;
     }
 }
