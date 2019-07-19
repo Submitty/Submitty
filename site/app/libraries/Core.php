@@ -112,8 +112,6 @@ class Core {
      * @throws \Exception
      */
     public function loadSubmittyVersionConfig() {
-        $this->latest_tag = "xx";
-        $this->latest_commit = "yy";
         $version_path = FileUtils::joinPaths('/', 'usr','local','submitty','config','version.json');
         if (file_exists($version_path)) {
           $contents = json_decode(file_get_contents($version_path),true);
