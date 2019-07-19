@@ -505,6 +505,7 @@ class ElectronicGraderController extends GradingController {
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
         $view_all = isset($_GET['view']) && $_GET['view'] === 'all';
+        $view_random = isset($_GET['sort']) && $_GET['sort'] === 'random';
 
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -594,7 +595,7 @@ class ElectronicGraderController extends GradingController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $view_random, $sort, $direction);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
