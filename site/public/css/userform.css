@@ -9,6 +9,10 @@
     min-width: 200px;
 }
 
+#edit-user-form > label.full-width {
+    flex: 1 0 70%;
+}
+
 #edit-user-form label input[type="text"], 
 #edit-user-form label input[type="password"], 
 #edit-user-form label select {
