@@ -1,43 +1,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
 <div class="content">
-    <div style="float: right; margin-bottom: 20px;">
-        <a onclick="newDownloadForm()" class="btn btn-primary">Download Users</a>
-        <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
-        <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
-    </div>
-    <h1>Manage Students</h1>
+    <header>
+        <h1>Manage Students</h1>
+        <div class="btn-wrapper">
+            <a onclick="newDownloadForm()" class="btn btn-primary">Download Users</a>
+            <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
+            <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
+        </div>
+    </header>
     {# This is a data table #}
-    <table class="table table-striped table-bordered persist-area">
-        <caption />
-        <thead class="persist-thead">
-            <tr>
-                <th width="4%"></th>
-                <th width="15%">Registration Section</th>
-                <th width="20%" style="text-align: left">User ID</th>
-                <th width="30%" colspan="2">Name</th>
-                <th width="15%">Rotating Section</th>
-                <th width="13%">Manual Registration</th>
-                <th width="3%"></th>
-            </tr>
-        </thead>
-        {% if sections|length > 0 %}
-            {% for registration, students in sections %}
-                <tr class="info persist-header">
-                    <td colspan="8" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</td>
+    {% if sections|length > 0 %}
+        <table id="student-table" class="table table-striped mobile-table">
+            <caption>Students Enrolled</caption>
+            <thead>
+                <tr>
+                    <th>Registration Section</th>
+                    <th>User ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Rotating Section</th>
+                    <th>Manual Registration</th>
+                    <th>Edit Student</th>
                 </tr>
+            </thead>
+            {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
+                    <tr class="info persist-header">
+                        <th class="section-break" colspan="8">Students Enrolled in Registration Section {{ registration }}</td>
+                    </tr>
                     {% for student in students %}
-                        <tr id="user-{{ student.getId() }}"
-                            {% if student.accessGrading() %}
-                                style='background: #7bd0f7;'
-                            {% endif %}
-                        >
-                            <td>{{ loop.index }}</td>
+                        {% set class = "" %}
+                        {% if student.accessGrading() %}
+                            {% set class = "access-grading" %}
+                        {% endif %}
+                        <tr id="user-{{ student.getId() }}" class="{{ class }}">
                             <td>{{ registration }}</td>
-                            <td style="text-align: left">{{ student.getId() }}</td>
-                            <td style="text-align: left">{{ student.getDisplayedFirstName() }}</td>
-                            <td style="text-align: left">{{ student.getDisplayedLastName() }}</td>
+                            <td class="align-left">{{ student.getId() }}</td>
+                            <td class="align-left">{{ student.getDisplayedFirstName() }}</td>
+                            <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
                             <td><a onclick="editUserForm('{{ student.getId() }}');" aria-label="edit user {{ student.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
@@ -45,12 +46,10 @@
                     {% endfor %}
                 </tbody>
             {% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="8">No students found</td>
-            </tr>
-        {% endif %}
-    </table>
+        </table>
+    {% else %}
+        <p class="warning">No students found</p>
+    {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
 {% include('admin/users/ClassListForm.twig') %}

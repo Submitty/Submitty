@@ -251,18 +251,21 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
+
+# ------------------------------------------------------------------------
+# Create the logs directories that exist on both primary & worker machines
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-
-#Make site logging directories if not in worker mode.
+# Create the logs directories that only exist on the primary machine
 if [ "${WORKER}" == 0 ]; then
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
+# ------------------------------------------------------------------------
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
@@ -278,23 +281,31 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
-#Set up permissions on the logs directory. If in worker mode, PHP_USER does not exist.
-if [ "${WORKER}" == 0 ]; then
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
-    chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
-else
-    chown  -R root:${COURSE_BUILDERS_GROUP}           ${SUBMITTY_DATA_DIR}/logs
-    chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
-fi
 
+# ------------------------------------------------------------------------
+# Set owner/group of the top level logs directory
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
+# Set owner/group for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
+# Set owner/group for logs directories that exist only on the primary machine
+if [ "${WORKER}" == 0 ]; then
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
+fi
+# Set permissions of all files in the logs directories
+find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
+# Set permissions of all logs subdirectires
+find ${SUBMITTY_DATA_DIR}/logs/ -type d -mindepth 1 -exec chmod 750 {} \;
+# Created files in the logs subdirectories should inherit the group of the parent directory
+find ${SUBMITTY_DATA_DIR}/logs/ -type d -mindepth 1 -exec chmod g+s {} \;
+# Set permissions of the top level logs directory
+chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emails
+# ------------------------------------------------------------------------
 
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
