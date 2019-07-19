@@ -4,7 +4,8 @@
     }
 </style>
 <div class="content">
-    <form method="post" action="{{ core.buildUrl({'component': 'notification', 'page': 'alter_notification_settings'}) }}" id="form_notification_settings">
+    <form method="post" action="{{ update_settings_url }}" id="form_notification_settings">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div id="config">
             {% if email_enabled %}
                 {% set header = "Notification/Email Settings" %}

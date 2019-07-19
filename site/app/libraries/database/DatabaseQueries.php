@@ -1108,6 +1108,50 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         return intval($this->course_db->row()['cnt']);
     }
 
+    /**
+     * Finds the number of users who has a non NULL last_viewed_time for team assignments
+     * NULL times represent unviewed, non-null represent the user has viewed the latest version already
+     * @param $gradeable
+     * @param $sections
+     * @return integer
+     */
+    public function getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections) {
+        $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+
+        $params = array($gradeable->getId());
+
+        $sections_query = "";
+        if (count($sections) > 0) {
+            $sections_query= "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $params = array_merge($sections, $params);
+        }
+
+        $this->course_db->query("
+            SELECT COUNT(*) as cnt
+            FROM teams AS tm
+            INNER JOIN (
+                SELECT u.team_id, u.{$grade_type}_section FROM gradeable_teams AS u
+                WHERE u.{$sections_query} and u.g_id = ?
+            ) AS u
+            ON tm.team_id=u.team_id
+            WHERE tm.last_viewed_time IS NOT NULL
+        ", $params);
+
+        return intval($this->course_db->row()['cnt']);
+    }
+
+    /**
+     * @param $gradeable_id
+     * @param $team_id
+     * @return integer
+     */
+    public function getActiveVersionForTeam($gradeable_id,$team_id) {
+        $params = array($gradeable_id,$team_id);
+        $this->course_db->query("SELECT active_version FROM electronic_gradeable_version WHERE g_id = ? and team_id = ?",$params);
+        $query_result = $this->course_db->row();
+        return array_key_exists('active_version',$query_result) ? $query_result['active_version'] : 0;
+    }
+
     public function getNumUsersGraded($g_id) {
         $this->course_db->query("
 SELECT COUNT(*) as cnt FROM gradeable_data
@@ -1699,6 +1743,63 @@ WHERE gcm_id=?", $params);
         } else {
             return false;
         }
+    }
+
+    /**
+     * Finds the viewed time for a specific user on a team.
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $team_id
+     * @param $user_id
+     */
+    public function getTeamViewedTime($team_id,$user_id) {
+        $this->course_db->query("SELECT last_viewed_time FROM teams WHERE team_id = ? and user_id=?",array($team_id,$user_id));
+        return $this->course_db->rows()[0]['last_viewed_time'];
+    }
+
+    /**
+     * Updates the viewed time to now for a specific user on a team.
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $team_id
+     * @param $user_id
+     */
+    public function updateTeamViewedTime($team_id, $user_id) {
+        $this->course_db->query("UPDATE teams SET last_viewed_time = NOW() WHERE team_id=? and user_id=?",
+                array($team_id,$user_id));
+    }
+
+    /**
+     * Updates the viewed time to NULL for all users on a team.
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $team_id
+     */
+    public function clearTeamViewedTime($team_id) {
+        $this->course_db->query("UPDATE teams SET last_viewed_time = NULL WHERE team_id=?",
+            array($team_id));
+    }
+
+    /**
+     * Finds all teams for a gradeable and creates a map for each with key => user_id ; value => last_viewed_tim
+     * Assumes team_ids are unique (cannot be used for 2 different gradeables)
+     * @param $gradeable
+     * @return array
+     */
+    public function getAllTeamViewedTimesForGradeable($gradeable) {
+        $params = array($gradeable->getId());
+        $this->course_db->query("SELECT team_id,user_id,last_viewed_time FROM teams WHERE 
+                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
+
+        $user_viewed_info = [];
+        foreach ($this->course_db->rows() as $row){
+            $team = $row['team_id'];
+            $user = $row['user_id'];
+            $time = $row['last_viewed_time'];
+
+            if (!array_key_exists($team,$user_viewed_info)) {
+                $user_viewed_info[$team] = array();
+            }
+            $user_viewed_info[$team][$user] = $time;
+        }
+        return $user_viewed_info;
     }
 
     /**
