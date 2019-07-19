@@ -287,14 +287,14 @@
         var newDateTime = $(me).val();
         changeNewDateTime(path, newDateTime);
 
-        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+        var url = buildNewUrl(['misc', 'server_time']);
 
         $.ajax({
             type: "POST",
             url: url,
             data: {csrf_token: csrfToken},
             success: function(data) {
-                var now = JSON.parse(data);
+                var now = JSON.parse(data)['data'];
                 now = new Date(parseInt(now.year),
                     parseInt(now.month) - 1,
                     parseInt(now.day),
@@ -352,7 +352,7 @@
 
     function handleTimeZones() {
 
-        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+        var url = buildNewUrl(['misc', 'server_time']);
 
         $.ajax({
             type: "POST",
@@ -361,7 +361,7 @@
             success: function(data) {
 
                 // Collect server time
-                var server_time = JSON.parse(data);
+                var server_time = JSON.parse(data)['data'];
                 server_time = new Date(parseInt(server_time.year),
                     parseInt(server_time.month) - 1,
                     parseInt(server_time.day),

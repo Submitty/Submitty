@@ -6,8 +6,12 @@ namespace app\controllers;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\Core;
 use app\models\CourseMaterial;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+
 
 class MiscController extends AbstractController {
     public function run() {
@@ -42,9 +46,6 @@ class MiscController extends AbstractController {
             case 'check_bulk_progress':
                 $this->checkBulkProgress();
                 break;
-            case 'get_server_time':
-                $this->getServerTime();
-                break;
         }
     }
 
@@ -53,15 +54,22 @@ class MiscController extends AbstractController {
      *
      * Returns a json string which contains the current server time broken up into year, month, day, hour, minute,
      * second
+     *
+     * @Route("/misc/server_time")
+     * @return Response
      */
-    private function getServerTime() {
-
+    public function getServerTime() {
         $json = DateUtils::getServerTimeJson($this->core);
-        $this->core->getOutput()->renderJson($json);
-
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($json)
+        );
     }
 
-    private function encodePDF(){
+    /**
+     * @Route("/misc/encode_pdf")
+     * @return Response
+     */
+    public function encodePDF(){
         $gradeable_id = $_POST['gradeable_id'] ?? NULL;
         $id = $_POST['user_id'] ?? NULL;
         $file_name = $_POST['filename'] ?? NULL;
@@ -78,25 +86,32 @@ class MiscController extends AbstractController {
         //See if we are allowed to access this path
         $path = $this->core->getAccess()->resolveDirPath($dir, $path);
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path, "gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
-            $this->core->getOutput()->renderJsonError("You do not have access to this file");
-            return false;
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse("You do not have access to this file")
+            );
         }
 
         $pdf64 = base64_encode(file_get_contents($path));
-        $this->core->getOutput()->renderJson($pdf64);
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($pdf64)
+        );
     }
 
-    private function displayFile() {
+    /**
+     * @Route("/misc/display_file")
+     *
+     * TODO:NOT FINISHED NEEDS TO GO THROUGH ALL URLS
+     */
+    public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
         //Is this per-gradeable?
-        $dir = $_REQUEST["dir"];
-        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
 
-        if (array_key_exists('gradeable_id', $_REQUEST)) {
+        if (!is_null($gradeable_id)) {
             $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id'], false);
             if ($gradeable === false) {
                 return false;
             }
-            $graded_gradeable =  $this->tryGetGradedGradeable($gradeable, $_REQUEST['user_id'], false);
+            $graded_gradeable =  $this->tryGetGradedGradeable($gradeable, $user_id, false);
             if ($graded_gradeable === false) {
                 return false;
             }
@@ -138,7 +153,7 @@ class MiscController extends AbstractController {
         }
         else {
             $contents = file_get_contents($corrected_name);
-            if (array_key_exists('ta_grading', $_REQUEST) && $_REQUEST['ta_grading'] === "true") {
+            if (!is_null($ta_grading) && $ta_grading === "true") {
                 $this->core->getOutput()->renderOutput('Misc', 'displayCode', $file_type, $corrected_name, $contents);
             }
             else {
@@ -147,9 +162,9 @@ class MiscController extends AbstractController {
         }
     }
 
-    private function readFile() {
+    public function readFile() {
         $dir = $_REQUEST["dir"];
-        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($_REQUEST['path'])));
 
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
@@ -168,10 +183,10 @@ class MiscController extends AbstractController {
         readfile($path);
     }
 
-    private function downloadFile($download_with_any_role = false) {
+    public function downloadFile($download_with_any_role = false) {
         // security check
         $dir = $_REQUEST["dir"];
-        $path = $this->core->getAccess()->resolveDirPath($dir, $_REQUEST["path"]);
+        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($_REQUEST['path'])));
 
         if (array_key_exists('gradeable_id', $_REQUEST)) {
             $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id']);
@@ -214,7 +229,7 @@ class MiscController extends AbstractController {
         readfile($path);
     }
 
-    private function downloadZip() {
+    public function downloadZip() {
         $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['gradeable_id']);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
@@ -308,7 +323,7 @@ class MiscController extends AbstractController {
         unlink($zip_name); //deletes the random zip file
     }
 
-    private function downloadAssignedZips() {
+    public function downloadAssignedZips() {
         // security check
         if (!($this->core->getUser()->accessGrading())) {
             $message = "You do not have access to that page.";

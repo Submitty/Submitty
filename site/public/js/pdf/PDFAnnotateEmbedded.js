@@ -42,7 +42,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
     window.RENDER_OPTIONS.userId = grader_id;
     if(url === ""){
-        url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
+        url = buildNewUrl(['misc', 'encode_pdf']);
     }
     $.ajax({
         type: 'POST',
@@ -58,7 +58,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
 
             let pdfData;
             try {
-                pdfData = JSON.parse(data);
+                pdfData = JSON.parse(data)['data'];
                 pdfData = atob(pdfData);
             } catch (err){
                 alert("Something went wrong, please try again later.");

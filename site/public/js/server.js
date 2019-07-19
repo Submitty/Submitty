@@ -1685,14 +1685,14 @@ function changeFolderPermission(filenames, checked,handleData) {
 }
 
 function updateToServerTime(fp) {
-    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+    var url = buildNewUrl(['misc', 'server_time']);
 
     $.ajax({
         type: "POST",
         url: url,
         data: {csrf_token: csrfToken},
         success: function(data) {
-            var time = JSON.parse(data);
+            var time = JSON.parse(data)['data'];
             time = new Date(parseInt(time.year),
                             parseInt(time.month) - 1,
                             parseInt(time.day),
