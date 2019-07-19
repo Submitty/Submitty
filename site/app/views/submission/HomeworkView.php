@@ -636,34 +636,13 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        $cancel_url = $this->core->buildUrl([
-            'component' => 'student',
-            'action' => 'update',
-            'gradeable_id' => $gradeable->getId(),
-            'new_version' => 0
-        ]);
+        $cancel_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), '0']);
 
-        $change_version_url = $this->core->buildUrl([
-            'component' => 'student',
-            'action' => 'update',
-            'gradeable_id' => $gradeable->getId(),
-            'new_version' => $display_version
-        ]);
+        $change_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version]);
 
-        $view_version_url = $this->core->buildUrl([
-            'component' => 'student',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => ''
-        ]);
+        $view_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
 
-        $check_refresh_submission_url = $this->core->buildUrl([
-            'component' => 'student',
-            'page' => 'submission',
-            'action' => 'check_refresh',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => $display_version
-        ]);
-        // $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+        $check_refresh_submission_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),

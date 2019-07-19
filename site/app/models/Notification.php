@@ -116,6 +116,9 @@ class Notification extends AbstractModel {
         if(is_null($metadata)) {
             return null;
         }
+        if (key_exists('url', $metadata)) {
+            return $metadata['url'];
+        }
         $parts = $metadata[0];
         $hash = $metadata[1] ?? null;
         return $core->buildUrl($parts, $hash);

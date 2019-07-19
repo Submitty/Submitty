@@ -783,48 +783,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
-    public function testErrorNotSetCsrfToken() {
-        $_POST['csrf_token'] = null;
-        $return = $this->runController();
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid CSRF token.", $return['message']);
-        $this->assertFalse($return['status'] == 'success');
-    }
-
-    /**
-     * Test that one must have at least full grading access to change the active submission version a user
-     */
-    public function testUpdateSubmissionVersionPermission() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['ta'] = 'true';
-        $return = $this->runController($this->createMockCore($user_config = array('access_full_grading' => false)));
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("You do not have access to that page.", $return['message']);
-        unset($_REQUEST['ta']);
-    }
-
-    /**
-     * Test that one must be at least a full access grader to delete split items
-     */
-    public function testDeleteSplitItemPermission() {
-        $_REQUEST['action'] = 'delete_split';
-        $return = $this->runController($this->createMockCore(array('csrf_token' => true), array('access_full_grading' => false)));
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertFalse($return['status'] == 'success');
-        $this->assertEquals("You do not have access to that page.", $return['message']);
-    }
-
-
-    public function testErrorInvalidCsrfToken() {
-        $config = $this->config;
-        $config['csrf_token'] = false;
-        $core = $this->createMockCore($config);
-        $return = $this->runController($core);
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid CSRF token.", $return['message']);
-        $this->assertFalse($return['status'] == 'success');
-    }
-
     /**
      * Test that error is thrown when trying to upload to a gradeable id that does not exist in
      * our gradeable list
@@ -1222,22 +1180,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController($core);
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
-    }
-
-    public function testUpdateSubmissionNoId() {
-        $_REQUEST['gradeable_id'] = null;
-        $_REQUEST['action'] = 'update';
-        $return = $this->runController();
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid gradeable id.", $return['message']);
-    }
-
-    public function testUpdateSubmissionNoCsrfToken() {
-        $_POST['csrf_token'] = null;
-        $_REQUEST['action'] = 'update';
-        $return = $this->runController();
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid CSRF token. Refresh the page and try again.", $return['message']);
     }
 
     public function testUpdateNegativeVersion() {
