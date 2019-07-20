@@ -637,6 +637,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
+    formData.append('csrf_token', csrfToken);
 
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
@@ -756,7 +757,7 @@ function gatherInputAnswersByType(type){
 function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
 
-    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, upload]) + "?merge=" + merge_previous + "&clobber=" + clobber;
+    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
     var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
 
     var message = "";

@@ -151,7 +151,7 @@
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
+                   href="{{ bulk_stats_url }}">
                     Bulk Upload Forensics
                 </a>
             {% endif %}

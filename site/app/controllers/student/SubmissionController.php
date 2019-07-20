@@ -99,7 +99,7 @@ class SubmissionController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
      * @return array
      */
     public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
@@ -1299,7 +1299,7 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{new_version}", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
      */
     public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null) {
         $ta = $ta === "true" ?? false;
@@ -1418,7 +1418,7 @@ class SubmissionController extends AbstractController {
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
      *
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
      */
     public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);

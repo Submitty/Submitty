@@ -636,11 +636,11 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        $cancel_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), '0']);
+        $cancel_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'version' ,'0']);
 
-        $change_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version]);
+        $change_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'version', $display_version]);
 
-        $view_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
+        $view_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]) . '/';
 
         $check_refresh_submission_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
 
