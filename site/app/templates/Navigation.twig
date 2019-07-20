@@ -44,8 +44,11 @@
                 <tbody id="{{ info.section_id }}_tbody">
                     {% for g_info in info.gradeables %}
                     <tr class="gradeable_row" id="{{ g_info.id }}">
-                        {% for button in g_info.buttons_justedit %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
+                        {% for button in g_info.edit_buttons %}
+                            <td style="padding: 0 5px 0 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
+                        {% endfor %}
+                        {% for button in g_info.delete_buttons %}
+                            <td style="padding: 0 20px 0 5px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Delete' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
                         {% endfor %}
                         <td>
                             {{ g_info.name }}
@@ -53,9 +56,6 @@
                                 <a class="external" href="{{ g_info.url }}" target="_blank" aria-label="Go to instructions for {{ g_info.name }}">
                                     <i style="margin-left: 10px;" class="fas fa-external-link-alt"></i>
                                 </a>
-                            {% endif %}
-                            {% if g_info.can_delete %}
-                                <i class="fas fa-trash fa-fw" style="cursor:pointer;" aria-label="Delete {{ g_info.name }}" title="Delete Gradeable" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
                             {% endif %}
                         </td>
                         {% for button in g_info.buttons %}

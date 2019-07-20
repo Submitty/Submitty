@@ -4,59 +4,31 @@ namespace app\controllers\admin;
 
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
-use app\libraries\Core;
-use app\libraries\Output;
-use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\User;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
 
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
 
+/**
+ * Class UsersController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
 class UsersController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'get_user_details':
-                $this->ajaxGetUserDetails();
-                break;
-            case 'update_student':
-                $this->updateUser('students');
-                break;
-            case 'update_grader':
-                $this->updateUser('graders');
-                break;
-            case 'graders':
-                $this->core->getOutput()->addBreadcrumb('Manage Graders');
-                $this->listGraders();
-                break;
-            case 'assign_registration_sections':
-                $this->reassignRegistrationSections();
-                break;
-            case 'rotating_sections':
-                $this->core->getOutput()->addBreadcrumb('Manage Sections');
-                $this->rotatingSectionsForm();
-                break;
-            case 'update_registration_sections':
-                $this->updateRegistrationSections();
-                break;
-            case 'update_rotating_sections':
-                $this->updateRotatingSections();
-                break;
-            case 'upload_grader_list':
-                $this->uploadUserList("graderlist");
-                break;
-            case 'upload_class_list':
-                $this->uploadUserList("classlist");
-                break;
-            case 'students':
-            default:
-                $this->core->getOutput()->addBreadcrumb('Manage Students');
-                $this->listStudents();
-                break;
-        }
+        return null;
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/users", methods={"GET"})
+     */
     public function listStudents() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -67,6 +39,9 @@ class UsersController extends AbstractController {
         $this->renderDownloadForm('user', $use_database);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/graders", methods={"GET"})
+     */
     public function listGraders() {
         $graders_unsorted = $this->core->getQueries()->getAllGraders();
         // graders are split into groups based on grading permissions
@@ -85,9 +60,11 @@ class UsersController extends AbstractController {
         $this->renderDownloadForm('grader', $use_database);
     }
 
-    private function reassignRegistrationSections() {
-        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
-            'action' => 'graders'));
+    /**
+     * @Route("/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
+     */
+    public function reassignRegistrationSections() {
+        $return_url = $this->core->buildNewCourseUrl(['graders']);
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
@@ -121,8 +98,10 @@ class UsersController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'downloadForm', $code, $students, $graders, $reg_sections, $use_database);
     }
 
-    public function ajaxGetUserDetails() {
-        $user_id = $_REQUEST['user_id'];
+    /**
+     * @Route("/{_semester}/{_course}/users/{user_id}", methods={"GET"})
+     */
+    public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJsonSuccess(array(
             'user_id' => $user->getId(),
@@ -142,13 +121,11 @@ class UsersController extends AbstractController {
         ));
     }
 
-    public function updateUser($action='students') {
-        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
-            'action' => $action), 'user-'.$_POST['user_id']);
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token.");
-            $this->core->redirect($return_url);
-        }
+    /**
+     * @Route("/{_semester}/{_course}/users", methods={"POST"})
+     */
+    public function updateUser($type='users') {
+        $return_url = $this->core->buildNewCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
 
@@ -262,11 +239,13 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    public function rotatingSectionsForm() {
+    /**
+     * @Route("/{_semester}/{_course}/sections", methods={"GET"})
+     */
+    public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
-
 
         //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
         $sections_with_students = array();
@@ -282,29 +261,18 @@ class UsersController extends AbstractController {
             }
         }
 
-
-
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'sectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
+     */
     public function updateRegistrationSections() {
-        $return_url = $this->core->buildUrl(
-            array('component' => 'admin',
-                  'page' => 'users',
-                  'action' => 'rotating_sections')
-        );
+        $return_url = $this->core->buildNewCourseUrl(['sections']);
 
-        if (!$this->core->checkCsrfToken()) {
-            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
-            $this->core->redirect($return_url);
-        }
-
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $students = $this->core->getQueries()->getAllUsers();
-        $graders = $this->core->getQueries()->getAllGraders();
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
                 // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation.
@@ -343,49 +311,43 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
+     */
     public function updateRotatingSections() {
-        $return_url = $this->core->buildUrl(
-            array('component' => 'admin',
-                  'page' => 'users',
-                  'action' => 'rotating_sections')
-        );
+        $return_url = $this->core->buildNewCourseUrl(['sections']);
 
-        if (!$this->core->checkCsrfToken()) {
-            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
-            $this->core->redirect($return_url);
-        }
-
-        if (!isset($_REQUEST['sort_type'])) {
+        if (!isset($_POST['sort_type'])) {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_REQUEST['sort_type'] === "drop_null") {
+        else if ($_POST['sort_type'] === "drop_null") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $this->core->addSuccessMessage("Non registered students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_REQUEST['sort_type'] === "drop_all") {
+        else if ($_POST['sort_type'] === "drop_all") {
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
 
-        if (isset($_REQUEST['rotating_type']) && in_array($_REQUEST['rotating_type'], array('random', 'alphabetically'))) {
-            $type = $_REQUEST['rotating_type'];
+        if (isset($_POST['rotating_type']) && in_array($_POST['rotating_type'], array('random', 'alphabetically'))) {
+            $type = $_POST['rotating_type'];
         }
         else {
             $type = 'random';
         }
 
-        $section_count = intval($_REQUEST['sections']);
+        $section_count = intval($_POST['sections']);
         if ($section_count < 1) {
             $this->core->addErrorMessage("You must have at least one rotating section");
             $this->core->redirect($return_url);
         }
 
-        if (in_array($_REQUEST['sort_type'], array('redo', 'fewest')) && $type == "random") {
-            $sort = $_REQUEST['sort_type'];
+        if (in_array($_POST['sort_type'], array('redo', 'fewest')) && $type == "random") {
+            $sort = $_POST['sort_type'];
         }
         else {
             $sort = 'redo';
@@ -647,9 +609,10 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * Upsert user list data to database
+     * Upload user list data to database
      *
      * @param string $list_type "classlist" or "graderlist"
+     * @Route("/{_semester}/{_course}/users/upload", methods={"POST"})
      */
     public function uploadUserList($list_type = "classlist") {
         // A few places have different behaviors depending on $list_type.
@@ -757,7 +720,7 @@ class UsersController extends AbstractController {
         $set_return_url_action_function = function() use ($list_type) {
             switch($list_type) {
             case "classlist":
-                return "students";
+                return "users";
             case "graderlist":
                 return "graders";
             default:
@@ -765,13 +728,8 @@ class UsersController extends AbstractController {
             }
         };
 
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>$set_return_url_action_function()));
+        $return_url = $this->core->buildNewCourseUrl([$set_return_url_action_function()]);
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
-        }
 
         if ($_FILES['upload']['name'] == "") {
             $this->core->addErrorMessage("No input file specified");
