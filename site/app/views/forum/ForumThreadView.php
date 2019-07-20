@@ -779,6 +779,7 @@ class ForumThreadView extends AbstractView {
         $offset = min(($reply_level - 1) * 30, 180);
 
         $post_content = $post['content'];
+        $markdown = $post["render_markdown"];
 
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $userAccessFullGrading = $this->core->getUser()->accessFullGrading();
@@ -896,6 +897,7 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
             "parent_id" => $post_id,
+            "render_markdown" => $markdown
         ];
 
 		return $return;

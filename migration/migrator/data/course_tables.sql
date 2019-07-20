@@ -573,6 +573,7 @@ CREATE TABLE "posts" (
 	"endorsed_by" varchar,
 	"type" int NOT NULL,
   "has_attachment" BOOLEAN NOT NULL,
+  "render_markdown" BOOLEAN NOT NULL DEFAULT 'false',
 	CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 

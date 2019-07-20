@@ -434,6 +434,12 @@ class ForumController extends AbstractController{
             $this->changeThreadStatus($_POST['thread_status'], $thread_id);
         }
 
+        $markdown = false;
+
+        if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
+            $markdown = true;
+        }
+
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
@@ -453,7 +459,7 @@ class ForumController extends AbstractController{
             if($hasGoodAttachment[0] == -1){
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
-                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
+                $post_id = $this->core->getQueries()->createPost($markdown, $current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if(!is_dir($thread_dir)) {
