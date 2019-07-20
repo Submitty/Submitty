@@ -22,8 +22,8 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row position-relative">
-        <button type="button" class="markdown-toggle btn btn-default" style="margin-right:10px;" title="Render Markdown Toggle" onclick="$('#markdown_button_{{ post_box_id }}').toggle(); $(this).toggleClass('btn-default btn-success');">M</button>
-        <span style="display: none" id="markdown_button_{{ post_box_id }}">
+        <div role="button" class="markdown-toggle" style="margin-right:10px;padding: unset;cursor: pointer; " title="Render Markdown Toggle" onclick="$('#markdown_buttons_{{ post_box_id }}').toggle(); $(this).toggleClass('markdown-active');"><i class="fab fa-markdown fa-2x"></i></div>
+        <span style="display: none" id="markdown_buttons_{{ post_box_id }}">
             <button id="link_btn" type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fas fa-link fa-1x"></i></button>
             <button id="code_btn" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fas fa-code fa-1x"></i></button>
         </span>
