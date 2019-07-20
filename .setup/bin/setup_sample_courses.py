@@ -242,6 +242,15 @@ def generate_random_ta_note():
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
 
+def generate_random_marks():
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.txt')) as f:
+        content = f.readlines()
+    temp = dict((line.strip()).split("=") for line in content)
+    marks = []
+    for key in temp: 
+        marks.append(dict({'gcm_note':key, 'gcm_points':int(temp[key])})) 
+    return marks
+
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
         return original_value
@@ -1628,6 +1637,11 @@ class Component(object):
             for i in range(len(component['marks'])):
                 mark = component['marks'][i]
                 self.marks.append(Mark(mark, i))
+        else:
+            # returns a list of mark objects of the form {'gcm_note':'', 'gcm_points':0}
+            marks = generate_random_marks()
+            for pos, mark in enumerate(marks):
+                self.marks.append(Mark(mark, pos)) 
 
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
