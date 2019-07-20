@@ -339,6 +339,12 @@ class ForumController extends AbstractController{
             return $this->core->getOutput()->getOutput();
         }
 
+        $markdown = false;
+
+        if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
+            $markdown = true;
+        }
+
         $current_user_id = $this->core->getUser()->getId();
         $result = array();
         $thread_title = trim($_POST["title"]);
@@ -369,7 +375,7 @@ class ForumController extends AbstractController{
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($current_user_id, $thread_title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
 
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
