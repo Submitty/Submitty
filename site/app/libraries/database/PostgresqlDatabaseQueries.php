@@ -169,7 +169,7 @@ SET
   user_lastname=?, user_preferred_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
 WHERE user_id=?
-/* AUTH: {$logged_in} */", $params);
+/* AUTH: \"{$logged_in}\" */", $params);
 
         if (!empty($semester) && !empty($course)) {
             $params = array($user->getGroup(), $user->getRegistrationSection(),
