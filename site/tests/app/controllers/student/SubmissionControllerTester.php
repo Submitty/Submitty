@@ -758,7 +758,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testVcsUpload() {
         $_POST['git_repo_id'] = "some_repo_id";
-        $_REQUEST['vcs_checkout'] = "true";
+        $_POST['vcs_checkout'] = "true";
         $return = $this->runController();
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
@@ -1025,7 +1025,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorCreateVcsFile() {
         $_POST['git_repo_id'] = "some_repo_id";
-        $_REQUEST['vcs_checkout'] = "true";
+        $_POST['vcs_checkout'] = "true";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
         $return = $this->runController();
