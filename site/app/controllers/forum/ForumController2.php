@@ -363,7 +363,7 @@ class ForumController2 extends AbstractController {
                     $any_changes = true;
                 } else {
                     $isError = true;
-                    $messageString = "{$type} updation failed. Please try again.";
+                    $messageString = "{$type} update failed. Please try again.";
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
@@ -375,10 +375,10 @@ class ForumController2 extends AbstractController {
                     $isError = true;
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
-                        $messageString = "{$type} updated successfully. {$type_opposite} updation failed. Please try again.";
+                        $messageString = "{$type} updated successfully. {$type_opposite} update failed. Please try again.";
                         $any_changes = true;
                     } else {
-                        $messageString = "Thread and Post updation failed. Please try again.";
+                        $messageString = "Thread and Post update failed. Please try again.";
                     }
                 }
             }
