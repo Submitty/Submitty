@@ -62,3 +62,8 @@
     </div>
     </form>
 </div>
+<script>
+    $("#user_id").autocomplete({
+        source: {{ student_full|raw }}
+    });
+</script>
