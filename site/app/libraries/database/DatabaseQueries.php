@@ -431,7 +431,7 @@ class DatabaseQueries {
         return $rows;
     }
 
-    public function createThread($user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date){
+    public function createThread($markdown, $user, $title, $content, $anon, $prof_pinned, $status, $hasAttachment, $categories_ids, $lock_thread_date){
 
         $this->course_db->beginTransaction();
 
@@ -451,7 +451,7 @@ class DatabaseQueries {
             $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($id, $category_id));
         }
 
-        $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment);
+        $post_id = $this->createPost($markdown, $user, $content, $id, $anon, 0, true, $hasAttachment);
 
         $this->course_db->commit();
 
