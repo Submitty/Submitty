@@ -129,6 +129,11 @@ function publishFormWithAttachments(form, test_category, error_message) {
     }
     var submit_url = form.attr('action');
 
+    for (var pair of formData.entries())
+    {
+        console.log(pair[0]+ ', '+ pair[1]);
+    }
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -144,7 +149,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
                     $('#messages').append(message);
                     return;
                 }
-
             } catch (err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);

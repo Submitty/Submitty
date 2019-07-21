@@ -465,7 +465,7 @@ class ForumController extends AbstractController{
             if($hasGoodAttachment[0] == -1){
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
-                $post_id = $this->core->getQueries()->createPost($markdown, $current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
+                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $parent_id);
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if(!is_dir($thread_dir)) {
