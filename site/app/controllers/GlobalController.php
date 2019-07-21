@@ -110,7 +110,7 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getConfig()->isForumEnabled()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
+                    "href" => $this->core->buildNewCourseUrl(['forum', 'threads']),
                     "title" => "Discussion Forum",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-forum",
