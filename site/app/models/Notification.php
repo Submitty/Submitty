@@ -117,20 +117,11 @@ class Notification extends AbstractModel {
             return null;
         }
         if (key_exists('url', $metadata)) {
-            return $metadata['url'];
+            return $metadata->url;
         }
         $parts = $metadata[0];
         $hash = $metadata[1] ?? null;
         return $core->buildUrl($parts, $hash);
-    }
-
-    public static function getThreadIdIfExists($metadata_json) {
-        $metadata = json_decode($metadata_json, true);
-        if(is_null($metadata)) {
-            return null;
-        }
-        $thread_id = array_key_exists('thread_id', $metadata[0]) ? $metadata[0]['thread_id'] : -1;
-        return $thread_id;
     }
 
     /**
@@ -149,7 +140,8 @@ class Notification extends AbstractModel {
     }
 
     public function hasEmptyMetadata() {
-        return count(json_decode($this->getNotifyMetadata())) == 0;
+        $metadata = json_decode($this->getNotifyMetadata());
+        return !key_exists('url', $metadata) && count($metadata) == 0;
     }
 
     /**
