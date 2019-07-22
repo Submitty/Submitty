@@ -143,13 +143,15 @@ CREATE TABLE electronic_gradeable (
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_is_gi_per_component boolean DEFAULT false NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}' NOT NULL,
     eg_has_discussion boolean DEFAULT FALSE NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
-    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000'))
+    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_is_gi_per_component CHECK (eg_regrade_allowed is true or eg_is_gi_per_component is false)
 );
 
 
@@ -533,7 +535,8 @@ CREATE TABLE regrade_discussion (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
-    deleted BOOLEAN DEFAULT FALSE NOT NULL
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    gc_id integer
 );
 
 --
@@ -1158,6 +1161,7 @@ ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk2" FOREIGN KEY
 
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
+ALTER TABLE regrade_discussion ADD CONSTRAINT gradeable_component_id_fk FOREIGN KEY (gc_id) REFERENCES gradeable_component (gc_id);
 
 ALTER TABLE ONLY categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
