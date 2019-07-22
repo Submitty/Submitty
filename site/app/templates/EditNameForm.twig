@@ -2,18 +2,22 @@
 {% block popup_id %}edit-username-form{% endblock %}
 {% block title %}Specify Preferred Names{% endblock %}
 {% block body %}
-    <p>{{ change_name_text }}</p>
-    <p>&emsp;</p>
-    <p>Your instructor and the system administrators reserve the right to remove
-       a preferred name if it contains inappropriate or offensive language,
-       or is being used for misrepresentation.</p>
-    <p>&emsp;</p>
+    <p class="std-margin">{{ change_name_text }}</p>
+    <p class="std-margin">
+        Your instructor and the system administrators reserve the right to remove
+        a preferred name if it contains inappropriate or offensive language,
+        or is being used for misrepresentation.
+    </p>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <div>
-    	<label for="user_firstname_change">Preferred First Name:&emsp;</label>
-        <input type="text" name="user_firstname_change" value="{{ user_first }}" id="user_firstname_change" /><br /><br />
-    	<label for="user_lastname_change">Preferred Last Name:&emsp;</label>
-        <input value="{{ user_last }}" type="text" name="user_lastname_change" id="user_lastname_change" />
+    <div class="flex-col">
+    	<label for="user_firstname_change">
+            Preferred First Name:&emsp;
+            <input type="text" name="user_firstname_change" value="{{ user_first }}" id="user-firstname-change" />
+        </label>
+    	<label for="user_lastname_change">
+            Preferred Last Name:&emsp;
+            <input value="{{ user_last }}" type="text" name="user_lastname_change" id="user-lastname-change" />
+        </label>
     </div>
 {% endblock %}
 {% block form %}

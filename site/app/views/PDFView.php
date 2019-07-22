@@ -26,6 +26,7 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
 
