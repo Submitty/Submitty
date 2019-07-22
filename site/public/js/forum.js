@@ -1137,3 +1137,31 @@ function clearForumFilter(){
     $('#filter_names').empty().text("None");
     $('#forum_filters').css('display', 'none');
 }
+
+function loadFilterHandlers(){
+    $('#thread_category option, #thread_status_select option').mousedown(function(e) {
+        e.preventDefault();
+        var current_selection = $(this).prop('selected');
+        $(this).prop('selected', !current_selection);
+        var filter_text = $(this).text();
+        filters_applied.toggleElement(filter_text, function(e) {
+            return e === filter_text;
+        });
+        if(filters_applied.length == 0){
+            clearForumFilter();
+        }
+        else {
+            $('#filter_names').empty().text(filters_applied.join(", "));
+
+            $('#forum_filters').css('display', 'inline-block');
+        }
+        updateThreads(true, null);
+        return true;
+    });
+
+    $('#unread').change(function(e) {
+        e.preventDefault();
+        updateThreads(true,null);
+        return true;
+    });
+}

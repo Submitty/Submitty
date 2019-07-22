@@ -25,38 +25,8 @@
         }
 
         $( document ).ready(function() {
-            $('#thread_category option, #thread_status_select option').mousedown(function(e) {
-                e.preventDefault();
+            loadFilterHandlers();
 
-                var current_selection = $(this).prop('selected');
-                $(this).prop('selected', !current_selection);
-
-                var filter_text = $(this).text();
-
-                filters_applied.toggleElement(filter_text, function(e) {
-                    return e === filter_text;
-                });
-
-                if(filters_applied.length == 0){
-                    clearForumFilter();
-                }
-                else {
-                    $('#filter_names').empty().text(filters_applied.join(", "));
-
-                    $('#forum_filters').css('display', 'inline-block');
-                }
-
-                updateThreads(true, null);
-
-
-                return true;
-            });
-
-            $('#unread').change(function(e) {
-                e.preventDefault();
-                updateThreads(true,null);
-                return true;
-            });
             {% for category in cookie_selected_categories %}
             $('#thread_category option[value="{{ category }}"]').prop('selected', true);
             filters_applied.toggleElement($('#thread_category option[value="{{ category }}"]').text(), function(e) {
@@ -71,8 +41,6 @@
             {% endfor %}
 
             if(filters_applied.length > 0){
-                clearForumFilter();
-
                 $('#filter_names').empty().text(filters_applied.join(", "));
 
                 $('#forum_filters').css('display', 'inline-block');
@@ -84,7 +52,6 @@
             $("#{{ display_option }}").prop("checked", true);
             $("#{{display_option }}_label").addClass('active');
             {% endif %}
-
 
         });
     </script>
