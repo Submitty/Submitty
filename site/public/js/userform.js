@@ -53,7 +53,7 @@ function newUserForm(grader_flag) {
     $("#new-user-modal-title").css('display','block');
     $("#user-form-already-exists-error-message").css('display','none');
     $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false);
     $('[name="manual_registration"]', form).prop('checked', true);
 
     if (grader_flag) {
@@ -101,6 +101,7 @@ function autoCompleteOnUserId(user_information) {
 function closeButton() {
     $('#edit-user-form').css('display', 'none');
     if($('[name="edit_user"]').val() == 'true') {
+        $('[name="user_id"]', $("#edit-user-form")).val("");
         clearUserFormInformation();
     }
 }
