@@ -67,7 +67,7 @@ class GlobalController extends AbstractController {
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'notification', 'page' => 'notifications')),
+                    "href" => $this->core->buildNewCourseUrl(['notifications']),
                     "title" => "Notifications",
                     "badge" => $unread_notifications_count,
                     "class" => "nav-row",
@@ -159,21 +159,21 @@ class GlobalController extends AbstractController {
             if ($this->core->getUser()->accessAdmin()) {
                 $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
+                    "href" => $this->core->buildNewCourseUrl(['users']),
                     "title" => "Manage Students",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-students",
                     "icon" => "fa-user-graduate"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
+                    "href" => $this->core->buildNewCourseUrl(['graders']),
                     "title" => "Manage Graders",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-graders",
                     "icon" => "fa-address-book"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
+                    "href" => $this->core->buildNewCourseUrl(['sections']),
                     "title" => "Manage Sections",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-sections",

@@ -139,6 +139,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         );
         $config = array_replace($config,$extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
+
+        // Create version json
+        $config = array(
+            "installed_commit" => "d150131c19e3e8084b25cddcc32e6c40a8e93a2b",
+            "short_installed_commit" => "d150131c",
+            "most_recent_git_tag" => "v19.07.00"
+        );
+        $config = array_replace($config,$extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
+
     }
 
     public function testConfig() {

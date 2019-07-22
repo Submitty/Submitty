@@ -2,7 +2,7 @@
 <div class="popup-form" id="{% block popup_id %}#popup-form{% endblock %}" style="display: none;">
     {% block form %}
         {# This lets us center the window #}
-        <div class="popup-box" onclick="event.stopPropagation(); closePopup(this);">
+        <div class="popup-box" onclick="event.stopPropagation(); closePopup();">
             {# Actual displayed window #}
             <div class="popup-window" onclick="event.stopPropagation();">
                 {% block title_panel %}
@@ -22,7 +22,7 @@
                         <div class="form-button-container">
                             {% block buttons %}
                                 {% block close_button %}
-                                   <a onclick="$('#{{ block('popup_id') }}').css('display', 'none'); event.stopPropagation();" class="btn btn-default close-button">Close</a>
+                                   <a href="javascript:closePopup('{{ block('popup_id') }}')" class="btn btn-default close-button">Close</a>
                                 {% endblock %}
                             {% endblock %}
                         </div>
@@ -35,4 +35,8 @@
 
 <script>
     $(".popup-window").draggable();
+
+    function closePopup(id) {
+        $('#' + id).hide(); 
+    }
 </script>
