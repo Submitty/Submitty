@@ -77,7 +77,7 @@ a > i.far {
     color: var(--text-black);
 }
 
-a.btn {
+a.btn, a.icon {
     text-decoration: none;
 }
 
