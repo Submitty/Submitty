@@ -143,7 +143,7 @@ CREATE TABLE electronic_gradeable (
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
-    eg_is_gi_per_component boolean DEFAULT false NOT NULL,
+    eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}' NOT NULL,
     eg_has_discussion boolean DEFAULT FALSE NOT NULL,
@@ -151,7 +151,7 @@ CREATE TABLE electronic_gradeable (
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
     CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000')),
-    CONSTRAINT eg_is_gi_per_component CHECK (eg_regrade_allowed is true or eg_is_gi_per_component is false)
+    CONSTRAINT eg_regrade_allowed_true CHECK (eg_regrade_allowed is true or eg_grade_inquiry_per_component_allowed is false)
 );
 
 
