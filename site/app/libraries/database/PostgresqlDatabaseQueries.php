@@ -1387,6 +1387,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_team_lock_date AS team_lock_date,
                   eg_regrade_request_date AS regrade_request_date,
                   eg_regrade_allowed AS regrade_allowed,
+                  eg_grade_inquiry_per_component_allowed AS grade_inquiry_per_component_allowed,
                   eg_thread_ids AS discussion_thread_ids,
                   eg_has_discussion AS discussion_based,
                   eg_use_ta_grading AS ta_grading,
