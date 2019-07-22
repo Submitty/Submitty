@@ -14,7 +14,7 @@
                 <input class="option-input" type="text" name="user_id" id="user_id">
             </label>
             <label for="datestamp">
-                Datestamp (MM/DD/YY):
+                Datestamp (MM/DD/YYYY):
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
@@ -77,4 +77,34 @@
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
+    flatpickr("#datestamp", {
+            plugins: [ShortcutButtonsPlugin(
+                    {
+                        button: [
+                            {
+                                label: "Now"
+                            }, 
+                            {
+                                label: "End of time"
+                            }
+                        ],
+                        label: "or",
+                        onClick: (index, fp) => {
+                            let date;
+                            switch (index) {
+                                case 0: 
+                                    date = new Date();
+                                    break;
+                                case 1: 
+                                    date = new Date("01/01/9998");
+                                    break;
+                            }
+                            fp.setDate(date, true);
+                        }
+                    }
+                )],
+            allowInput: true,
+            dateFormat: "Y-m-d"
+        });
+
 </script>

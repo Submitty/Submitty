@@ -31,14 +31,18 @@
             <li><b>Username:</b> {{ user.getId() }}</li>
             <li class="flex-row">
                 <span><b>First Name:</b>&nbsp;{{ user.getDisplayedFirstName() }}</span>
-                <a onclick="userNameChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+                <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Change preferred names" title="Change preferred names">
+                    <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                </a>
             </li>
             <li><b>Last Name:</b> {{ user.getDisplayedLastName() }}</li>
             <li><b>Email:</b> {{ user.getEmail() }}</li>
             {% if show_change_password %}
                 <li class="flex-row">
                     <b>Change Password</b>
-                    <a onclick="passwordChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+                    <a class="icon" tabindex="0" href="javascript:passwordChange()" aria-label="Change password" title="Change password">
+                        <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                    </a>
                 </li>
             {% endif %}
         </ul>

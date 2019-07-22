@@ -20,7 +20,7 @@ function userFormChange() {
 }
 
 function editUserForm(user_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'get_user_details', 'user_id': user_id});
+    var url = buildNewCourseUrl(['users', user_id]);
     $.ajax({
         url: url,
         success: function(data) {

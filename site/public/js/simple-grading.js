@@ -211,11 +211,10 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 
     // Update the buttons to reflect that they were clicked
     submitAJAX(
-        buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_lab'}),
+        buildNewCourseUrl(['gradeable', g_id, 'grading']),
         {
           'csrf_token': csrfToken,
           'user_id': user_id,
-          'g_id': g_id,
           'old_scores': old_scores,
           'scores': new_scores
         },
@@ -422,11 +421,10 @@ function setupNumericTextCells() {
         });
 
         submitAJAX(
-            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'save_numeric'}),
+            buildNewCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
                 'user_id': row_el.data("user"),
-                'g_id': row_el.data('gradeable'),
                 'old_scores': old_scores,
                 'scores': scores
             },
@@ -508,9 +506,9 @@ function setupNumericTextCells() {
                     }
                     if (!breakOut){
                         submitAJAX(
-                            buildUrl({'component': 'grading', 'page': 'simple', 'action': 'upload_csv_numeric'}),
-                            {'csrf_token': csrfToken, 'g_id': gradeable_id, 'users': user_ids, 'component_ids' : component_ids,
-                            'num_numeric' : num_numeric, 'num_text' : num_text, 'big_file': reader.result},
+                            buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
+                            {'csrf_token': csrfToken, 'users': user_ids,
+                            'num_numeric' : num_numeric, 'big_file': reader.result},
                             function(returned_data) {
                                 $('.cell-all').each(function() {
                                     for (var x = 0; x < returned_data['data'].length; x++) {
@@ -567,7 +565,7 @@ function setupNumericTextCells() {
                     }
 
                     if (breakOut) {
-                        alert("CVS upload failed! Format file incorrect.");
+                        alert("CSV upload failed! Format file incorrect.");
                     }
                 }
             }
