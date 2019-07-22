@@ -30,12 +30,29 @@ Required Input:
     <span class="col-no-gutters mark-points"
           data-points="{{ mark.points }}">
         {% if edit_marks_enabled %}
-            <input type="number"
+            <input id="mark-editor-{{ mark.id }}"
+                    type="number"
                    onchange="onMarkPointsChange(this)"
                    onmouseup="onMarkPointsChange(this)"
                    step="{{ precision }}"
                    value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
+            <script>
+                if(document.getElementById("grade_by_count_up").checked==true){
+                    {% if mark.points <0 %}
+                        console.log({{ mark.points }}," id: ", {{ mark.id }}," count up");
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                    {% endif %}
+
+                }
+                else {
+                    {% if mark.points >0 %}
+                        console.log({{ mark.points }}," id: ", {{ mark.id }}," count down");
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                    {% endif %}
+
+                }
+            </script>
         {% else %}
             {{ mark.points }}
         {% endif %}
