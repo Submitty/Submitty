@@ -5,23 +5,30 @@ namespace app\controllers\admin;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
+use app\libraries\response\JsonResponse;
+use app\libraries\routers\AccessControl;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class ConfigurationController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
 class ConfigurationController extends AbstractController {
 
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'view':
-                $this->viewConfiguration();
-                break;
-            case 'update':
-                $this->updateConfiguration();
-                break;
-            default:
-                $this->core->getOutput()->showError("Invalid page request for controller");
-                break;
-        }
+        return null;
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/config")
+     * @return Response
+     */
     public function viewConfiguration()
     {
         $fields = array(
@@ -46,48 +53,32 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
 
-        if (isset($_SESSION['request'])) {
-            foreach (array('upload_message', 'course_email', 'regrade_message') as $key) {
-                if (isset($_SESSION['request'][$key])) {
-                    $fields[$key] = htmlentities($_SESSION['request'][$key]);
-                }
-            }
-
-            foreach (array('default_hw_late_days', 'default_student_late_days') as $key) {
-                if (isset($_SESSION['request'][$key])) {
-                    $fields[$key] = intval($_SESSION['request'][$key]);
-                }
-            }
-
-            foreach (array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-                         'display_custom_message', 'regrade_enabled') as $key) {
-                if (isset($_SESSION['request'][$key])) {
-                    $fields[$key] = ($_SESSION['request'][$key] == true) ? true : false;
-                }
-            }
-
-            unset($_SESSION['request']);
-        }
-
-        $gradeable_seating_options = $this->getGradeableSeatingOptions();
-        $config_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'wrapper'));
-        $email_room_seating_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'email_room_seating'));
-
-        $this->core->getOutput()->renderOutput(array('admin', 'Configuration'), 'viewConfig', $fields, $gradeable_seating_options, $config_url, $email_room_seating_url);
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                ['admin', 'Configuration'],
+                'viewConfig',
+                $fields,
+                $this->getGradeableSeatingOptions()
+            )
+        );
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/config/update", methods={"POST"})
+     * @return Response
+     */
     public function updateConfiguration() {
-        if (!$this->core->checkCsrfToken()) {
-            return $this->core->getOutput()->renderJsonFail('Invalid CSRF token');
-        }
-
         if(!isset($_POST['name'])) {
-            return $this->core->getOutput()->renderJsonFail('Name of config value not provided');
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Name of config value not provided')
+            );
         }
         $name = $_POST['name'];
 
         if(!isset($_POST['entry'])) {
-            return $this->core->getOutput()->renderJsonFail('Name of config entry not provided');
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Name of config entry not provided')
+            );
         }
         $entry = $_POST['entry'];
 
@@ -98,12 +89,16 @@ class ConfigurationController extends AbstractController {
                 $gradeable_ids[] = $option['g_id'];
             }
             if(!in_array($entry, $gradeable_ids)) {
-                return $this->core->getOutput()->renderJsonFail('Invalid gradeable chosen for seating');
+                return Response::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Invalid gradeable chosen for seating')
+                );
             }
         }
         else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
             if(!ctype_digit($entry)) {
-                return $this->core->getOutput()->renderJsonFail('Must enter a number for this field');
+                return Response::JsonOnlyResponse(
+                    JsonResponse::getFailResponse('Must enter a number for this field')
+                );
             }
             $entry = intval($entry);
         }
@@ -116,7 +111,9 @@ class ConfigurationController extends AbstractController {
         }
         else if($name == "course_home_url") {
             if(!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)){
-                return $this->core->getOutput()->renderJsonFail($entry . ' is not a valid URL');
+                return Response::JsonOnlyResponse(
+                    JsonResponse::getFailResponse($entry . ' is not a valid URL')
+                );
             }
         }
 
@@ -137,12 +134,16 @@ class ConfigurationController extends AbstractController {
 
         $config_ini = $this->core->getConfig()->getCourseJson();
         if(!isset($config_ini['course_details'][$name])) {
-            return $this->core->getOutput()->renderJsonFail('Not a valid config name');
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Not a valid config name')
+            );
         }
         $config_ini['course_details'][$name] = $entry;
         $this->core->getConfig()->saveCourseJson(['course_details' => $config_ini['course_details']]);
 
-        return $this->core->getOutput()->renderJsonSuccess();
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse(null)
+        );
     }
 
     private function getGradeableSeatingOptions() {

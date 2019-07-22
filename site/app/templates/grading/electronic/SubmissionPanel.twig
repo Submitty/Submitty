@@ -167,12 +167,12 @@
             $('#save_status').show();
             return $.ajax({
                 type: 'POST',
-                url: buildUrl({'component': 'pdf', 'page': 'grader_embedded'}),
+                url: buildNewCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
                 data: {
-                    'gradeable_id': '{{ gradeable_id }}',
                     'user_id': '{{ submitter_id }}',
                     'filename': name,
-                    'page_num': page_num
+                    'page_num': page_num,
+                    'csrf_token': csrfToken
                 },
                 success: function(data){
                     $('#file_content').append(data);
