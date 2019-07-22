@@ -70,8 +70,11 @@
                 <div class="option-title">Version Control System (VCS) Type</div>
                 <div class="option-alt">Choose the type of VCS if students are submitting via VCS repository.</div>
             </legend>
-            <div class="option-input">
-                <input type="radio" name="vcs_type" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> <label for="vcs_type_git">Git</label>
+            <div id="vcs-options" class="option-input flex-row">
+                <label for="vcs_type_git">
+                    <input type="radio" name="vcs_type" value="git" {{ (fields['vcs_type'] == 'git') ? 'checked' : '' }}/> 
+                    Git
+                </label>
                 {#
                 <input type="radio" name="vcs_type" value="svn" {{ (fields['vcs_type'] == 'svn') ? 'checked' : '' }}/> <label for="vcs_type_svn">SVN</label>
                 <input type="radio" name="vcs_type" value="mer" {{ (fields['vcs_type'] == 'mer') ? 'checked' : '' }}/> <label for="vcs_type_mer">Mercurial</label>

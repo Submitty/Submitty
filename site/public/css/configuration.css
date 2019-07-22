@@ -52,6 +52,12 @@
     flex: none !important;
 }
 
+#vcs-options label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+}
+
 @media (min-width: 541px) {
     #forum-enabled-message,
     #room-seating-gradeable-id {
