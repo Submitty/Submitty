@@ -6,6 +6,7 @@ they match the expected reports (minus time-specific fields), that Rainbow Grade
 grade summaries that are written out by Rainbow Grades match expectations. It does not currently check that a make push
 will succeed or result in the correct website behavior, but this should be added in the future.
 """
+import json
 import sys
 import os
 import tempfile
@@ -14,10 +15,23 @@ import subprocess
 from datetime import datetime
 
 # Get paths required for testing
-repository_path = "__INSTALL__FILLIN__SUBMITTY_REPOSITORY__"
-script_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "test_suite", "rainbowGrades")
-runner_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "to_be_graded_queue")
-rainbow_path = os.path.join("__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__", "GIT_CHECKOUT", "RainbowGrades")
+# this file is at SUBMITTY_INSTALL_DIR/test_suite/rainbowGrades
+SUBMITTY_INSTALL_DIR = os.path.realpath(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
+)
+
+# Verify that this has been installed by just checking that this file is located in
+# a directory next to the config directory which has submitty.json in it
+if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
+    raise SystemExit('You must install the test suite before being able to run it.')
+
+with open(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')) as open_file:
+    SUBMITTY_JSON = json.load(open_file)
+
+repository_path = SUBMITTY_JSON['submitty_repository']
+script_path = os.path.join(SUBMITTY_JSON['submitty_data_dir'], "test_suite", "rainbowGrades")
+runner_dir = os.path.join(SUBMITTY_JSON['submitty_data_dir'], "to_be_graded_queue")
+rainbow_path = os.path.join(SUBMITTY_INSTALL_DIR, "GIT_CHECKOUT", "RainbowGrades")
 
 
 def get_current_semester():
