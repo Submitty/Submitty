@@ -262,8 +262,8 @@ class TestForum(BaseTestCase):
         self.init_and_enable_discussion()
 
         # Check multiple categories
-        # assert not self.thread_exists(title1)
-        # assert not self.thread_exists(title2)
+        assert not self.thread_exists(title1)
+        assert not self.thread_exists(title2)
         self.create_thread(title1, content1, categories_list = [('Question', True), ('Comment', False), ('Tutorials', True)])
         self.create_thread(title2, content2, categories_list = [('Question', False), ('Comment', True), ('Tutorials', False)])
         # Creation Failed
