@@ -2,21 +2,26 @@
 {% block popup_id %}upload-images-form{% endblock %}
 {% block title %}Upload Student Photos{% endblock %}
 {% block body %}
-    <p>
-        Instructions to download images of students: 
-        <a class="helpicon" target=_blank href="http://submitty.org/instructor/student_photos"></a>
-        <br><br>
-        Upload png images by zipping up multiple course sections together,<br>
-        zipping up each course section, or uploading the png image(s).<br><br>
-        Total files cannot exceed {{ max_size_string }} .<br><br>
-    </p>
-    <br/>
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
-        <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
-            <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
-            <input type="file" name="files" id="input_file1" style="display: none" onchange="addFilesFromInput(1,false)" multiple />
+    <div class="flex-col flex-col-space">
+        <p>
+            Instructions to download images of students: 
+            <a class="helpicon" target=_blank href="http://submitty.org/instructor/student_photos"></a>
+        </p>
+        <p>
+            Upload png images by zipping up multiple course sections together,<br />
+            zipping up each course section, or uploading the png image(s).
+        </p>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div id="upload-boxes">
+            {# upload1 and input_file1 required for drag-and-drop.js #}
+            <div id="upload1" class="file-input">
+                <label class="label" for="input-file">"Drag your file(s) here or click to open file browser"</label>
+                <input type="file" name="files" id="input_file1" onchange="addFilesFromInput(1,false)" multiple />
+            </div>
         </div>
+        <p>
+            Total files cannot exceed {{ max_size_string }}.
+        </p>
     </div>
     <script type="text/javascript">
         function makeSubmission() {
