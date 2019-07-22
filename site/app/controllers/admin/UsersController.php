@@ -5,6 +5,8 @@ namespace app\controllers\admin;
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\Response;
 use app\models\User;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -56,36 +58,6 @@ class UsersController extends AbstractController {
 
         $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
         $this->renderDownloadForm('grader', $use_database);
-    }
-
-    private function ajaxGetSubmittyUsers() {
-        $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
-        $user_ids = array_keys($submitty_users);
-        $course_users = $this->core->getQueries()->getUsersById($user_ids);
-
-        //uses more thorough course information if it exists, if not uses database information
-        $user_information = array();
-        foreach ($user_ids as $user_id) {
-            $already_in_course = array_key_exists($user_id,$course_users);
-            $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
-            $user_information[$user_id] = array(
-                'already_in_course' => $already_in_course,
-                'user_numeric_id' => $user->getNumericId(),
-                'user_firstname' => $user->getLegalFirstName(),
-                'user_lastname' => $user->getLegalLastName(),
-                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
-                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
-                'user_email' => $user->getEmail(),
-                'user_group' => $user->getGroup(),
-                'registration_section' => $user->getRegistrationSection(),
-                'rotating_section' => $user->getRotatingSection(),
-                'user_updated' => $user->isUserUpdated(),
-                'instructor_updated' => $user->isInstructorUpdated(),
-                'manual_registration' => $user->isManualRegistration(),
-                'grading_registration_sections' => $user->getGradingRegistrationSections()
-            );
-        }
-        $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
     /**
@@ -148,6 +120,39 @@ class UsersController extends AbstractController {
             'manual_registration' => $user->isManualRegistration(),
             'grading_registration_sections' => $user->getGradingRegistrationSections()
         ));
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/user_information", methods={"GET"})
+     */
+    public function ajaxGetSubmittyUsers() {
+        $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
+        $user_ids = array_keys($submitty_users);
+        $course_users = $this->core->getQueries()->getUsersById($user_ids);
+
+        //uses more thorough course information if it exists, if not uses database information
+        $user_information = array();
+        foreach ($user_ids as $user_id) {
+            $already_in_course = array_key_exists($user_id,$course_users);
+            $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
+            $user_information[$user_id] = array(
+                'already_in_course' => $already_in_course,
+                'user_numeric_id' => $user->getNumericId(),
+                'user_firstname' => $user->getLegalFirstName(),
+                'user_lastname' => $user->getLegalLastName(),
+                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
+                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
+                'user_email' => $user->getEmail(),
+                'user_group' => $user->getGroup(),
+                'registration_section' => $user->getRegistrationSection(),
+                'rotating_section' => $user->getRotatingSection(),
+                'user_updated' => $user->isUserUpdated(),
+                'instructor_updated' => $user->isInstructorUpdated(),
+                'manual_registration' => $user->isManualRegistration(),
+                'grading_registration_sections' => $user->getGradingRegistrationSections()
+            );
+        }
+        $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
     /**

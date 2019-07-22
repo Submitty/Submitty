@@ -69,7 +69,7 @@ function newUserForm(grader_flag) {
 }
 
 $("#edit-user-form").ready(function() {
-    var url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'new_user_information'});
+    var url = buildNewCourseUrl(['user_information']);
     $.ajax({
         url: url,
         success: function(data) {
