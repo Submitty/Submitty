@@ -38,7 +38,7 @@
 			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
 			<div class="row">
 				<div class="col-7">
-					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required />
+					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				</div>
 				<div class="col-4">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
@@ -93,7 +93,7 @@
 	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
 	            More <span class="caret"></span>
 	        </a>
-			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownLabel">
 			{% for more in more_data|slice(1) %}
 				{% if user_group <= more.required_rank %}
 					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
