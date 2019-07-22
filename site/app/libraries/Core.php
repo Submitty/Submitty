@@ -108,28 +108,6 @@ class Core {
     }
 
     /**
-     * Load the Submitty software version configuration.
-     * @throws \Exception
-     */
-    public function loadSubmittyVersionConfig() {
-        $version_path = FileUtils::joinPaths('/', 'usr','local','submitty','config','version.json');
-        if (file_exists($version_path)) {
-          $contents = json_decode(file_get_contents($version_path),true);
-          if ($contents === null ||
-              !isset($contents['most_recent_git_tag']) ||
-              !isset($contents['short_installed_commit'])) {
-            throw new Exception("Error parsing version.json file");
-          }
-          $this->latest_tag = $contents['most_recent_git_tag'];
-          $this->latest_commit = $contents['short_installed_commit'];
-        }
-        else{
-          $message = "Unable to access version configuration file " . $version_path;
-          $this->addErrorMessage($message);
-        }
-    }
-
-    /**
      * Load the config details for the application. This takes in a file from the ../../../config as well as
      * then a config.json contained in {$SUBMITTY_DATA_DIR}/courses/{$SEMESTER}/{$COURSE}/config directory. These
      * files contain details about how the database, location of files, late days settings, etc.
@@ -193,7 +171,6 @@ class Core {
             $this->course_db->connect();
         }
         $this->database_queries = $database_factory->getQueries($this);
-        $this->loadSubmittyVersionConfig();
     }
 
     public function loadForum() {
@@ -269,20 +246,6 @@ class Core {
      */
     public function getSubmittyDB() {
         return $this->submitty_db;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLatestCommit() {
-      return $this->latest_commit;
-    }
-
-    /**
-     * @return string
-     */
-    public function getLatestTag() {
-      return $this->latest_tag;
     }
 
     /**
