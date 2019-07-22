@@ -356,7 +356,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $view_random, $sort, $direction) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -618,7 +618,6 @@ HTML;
             "empty_team_info" => $empty_team_info,
             "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
-            "view_random" => $view_random,
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
             "show_export_teams_button" => $show_export_teams_button,
@@ -729,7 +728,6 @@ HTML;
         $home_url = $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null, 'sort' => $sort, 'direction' => $direction]);
 
         //Go home if there's nobody left
-        // TODO: Modify to new routing scheme
         $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $prev_id, 'sort' => $sort, 'direction' => $direction]);
         $next_student_url = $next_id === "" ? $home_url : $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id, 'sort' => $sort, 'direction' => $direction]);
 

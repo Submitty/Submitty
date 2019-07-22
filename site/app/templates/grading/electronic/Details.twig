@@ -34,12 +34,26 @@
             {% if show_all_sections_button %}
                 <div style="display:flex; flex-direction: column; justify-self: flex-end;flex-wrap: wrap;margin-left: 5px">
                     <a class="btn btn-default"
-                       href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'details', 'gradeable_id': gradeable.getId(), 'view': view_all ? null : "all", 'sort': view_random ? 'random' : null}) }}">
+                       href="{{ core.buildUrl({'component': 'grading',
+                           'page': 'electronic',
+                           'action': 'details',
+                           'gradeable_id': gradeable.getId(),
+                           'view': view_all ? null : "all",
+                           'sort': sort,
+                           'direction': sort == 'random' ? null : direction
+                       }) }}">
                         {{ view_all ? "View Your Sections" : "View All" }}
                     </a>
                     <a style="margin-top: 10px" class="btn btn-default"
-                       href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'details', 'gradeable_id': gradeable.getId(), 'view': view_all ? "all" : null, 'sort': view_random ? null : 'random'}) }}">
-                        {{ view_random ? "Default Order" : "Random Order" }}
+                       href="{{ core.buildUrl({'component': 'grading',
+                           'page': 'electronic',
+                           'action': 'details',
+                           'gradeable_id': gradeable.getId(),
+                           'view': view_all ? "all" : null,
+                           'sort': sort == 'random' ? null : 'random',
+                           'direction': null
+                       }) }}">
+                        {{ sort == 'random' ? "Default Order" : "Random Order" }}
                     </a>
                 </div>
             {% endif %}
@@ -82,7 +96,8 @@
                                 'gradeable_id': gradeable.getId(),
                                 'view': (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null,
                                 'sort': column.sort_type,
-                                'direction': sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC'
+                                'direction': sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC',
+                                'view': view_all ? 'all' : null
                             }) }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
