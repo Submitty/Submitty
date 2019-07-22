@@ -72,6 +72,8 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method bool isGradeInquiryPerComponentAllowed()
+ * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
  * @method bool isDiscussionBased()
  * @method void setDiscussionBased($discussion_based)
  * @method string  getDiscussionThreadId()
@@ -200,9 +202,11 @@ class Gradeable extends AbstractModel {
     protected $regrade_request_date = null;
     /** @property @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
-    /** @property @var bool does this assignmennt have a discussion component*/
+    /** @property @var bool are grade inquiries for specific components enabled for this assignment*/
+    protected $grade_inquiry_per_component_allowed = false;
+    /** @property @var bool does this assignment have a discussion component*/
     protected $discussion_based = false;
-    /** @property @var string thread id for cooresponding to discussion forum thread*/
+    /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
 
 
@@ -243,6 +247,7 @@ class Gradeable extends AbstractModel {
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((boolean)$details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
         }
@@ -1064,6 +1069,10 @@ class Gradeable extends AbstractModel {
 
             // This line brings me great pain
             throw $e;
+        }
+        // make sure grade_inquiry_per_component_allowed is false when regrade allowed is false
+        if (!$regrade_allowed) {
+            $this->grade_inquiry_per_component_allowed = false;
         }
     }
 
