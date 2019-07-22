@@ -536,6 +536,13 @@ class ForumController extends AbstractController{
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
         $post = $this->core->getQueries()->getPost($post_id);
         $current_user_id = $this->core->getUser()->getId();
+
+        $markdown = false;
+
+        if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
+            $markdown = true;
+        }
+
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 $this->core->getOutput()->renderJson(['error' => 'You do not have permissions to do that.']);
                 return;
@@ -543,7 +550,7 @@ class ForumController extends AbstractController{
         if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $_POST['edit_thread_id'])));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        } else if($this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->getOutput()->renderJson(['error' => 'Thread is locked']);
             return;
         }
@@ -589,6 +596,7 @@ class ForumController extends AbstractController{
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
+
             $any_changes = false;
             $type = null;
             $isError = false;
@@ -738,7 +746,14 @@ class ForumController extends AbstractController{
             if(!$this->modifyAnonymous($original_creator)) {
                 $anon = $original_post["anonymous"] ? 1 : 0;
             }
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
+
+            $markdown = 0;
+
+            if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
+                $markdown = 1;
+            }
+
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown);
         }
         return null;
     }
