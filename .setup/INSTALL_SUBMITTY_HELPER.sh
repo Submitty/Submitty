@@ -263,9 +263,9 @@ fi
 # Set permissions of all files in the logs directories
 find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
 # Set permissions of all logs subdirectires
-find ${SUBMITTY_DATA_DIR}/logs/ -type d -mindepth 1 -exec chmod 750 {} \;
+find ${SUBMITTY_DATA_DIR}/logs/ -mindepth 1 -type d -exec chmod 750 {} \;
 # Created files in the logs subdirectories should inherit the group of the parent directory
-find ${SUBMITTY_DATA_DIR}/logs/ -type d -mindepth 1 -exec chmod g+s {} \;
+find ${SUBMITTY_DATA_DIR}/logs/ -mindepth 1 -type d -exec chmod g+s {} \;
 # Set permissions of the top level logs directory
 chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
