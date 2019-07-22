@@ -31,7 +31,7 @@ Required Input:
           data-points="{{ mark.points }}">
         {% if edit_marks_enabled %}
             <input id="mark-editor-{{ mark.id }}"
-                    type="number"
+                   type="number"
                    onchange="onMarkPointsChange(this)"
                    onmouseup="onMarkPointsChange(this)"
                    step="{{ precision }}"
