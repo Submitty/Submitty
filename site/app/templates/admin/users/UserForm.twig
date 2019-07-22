@@ -5,19 +5,19 @@
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="edit_user" value="false" />
     <div id="edit-user-form">
-		<div type="hidden" id="user-form-already-exists-error-message">
-			<p class="red-message" >
-				User is already in this course. Click to edit.
+		<label for="user-form-already-exists-error-message" class="red-message full-width">
+			<p id="user-form-already-exists-error-message">
+				User is already in this course. Click to edit:
+				<td>
+					<a id="redirect-link-icon" onclick="redirectToEdit();" aria-label="edit entered user">
+						<i class="fas fa-pencil-alt" aria-hidden="true"></i>
+					</a>
+				</td>
 			</p>
-			<td>
-				<a id="redirect-link-icon" onclick="redirectToEdit();" aria-label="edit entered user">
-					<i class="fas fa-pencil-alt" aria-hidden="true"></i>
-				</a>
-			</td>
-        </div>
+		</label>
 		<label for="user_id">
             User ID:
-            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" />
+            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" data='' />
         </label>
         <label for="user_numeric_id">
             User Numeric ID:

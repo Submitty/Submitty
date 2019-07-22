@@ -90,7 +90,6 @@ function autoCompleteOnUserId(user_information) {
         var user = user_information[$('#user_id').val()];
         var user_already_exists = user['already_in_course'] ? 'block' : 'none';
         $("#user-form-already-exists-error-message").css('display',user_already_exists);
-
         completeUserFormInformation(user);
     }
     else {
