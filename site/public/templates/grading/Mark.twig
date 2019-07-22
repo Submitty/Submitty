@@ -32,22 +32,20 @@ Required Input:
         {% if edit_marks_enabled %}
             <input id="mark-editor-{{ mark.id }}"
                    type="number"
-                   onchange="onMarkPointsChange(this)"
-                   onmouseup="onMarkPointsChange(this)"
+                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('grade_by_count_up').checked)"
+                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('grade_by_count_up').checked)"
                    step="{{ precision }}"
                    value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
             <script>
                 if(document.getElementById("grade_by_count_up").checked==true){
                     {% if mark.points <0 %}
-                        console.log({{ mark.points }}," id: ", {{ mark.id }}," count up");
                         document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
                     {% endif %}
 
                 }
                 else {
                     {% if mark.points >0 %}
-                        console.log({{ mark.points }}," id: ", {{ mark.id }}," count down");
                         document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
                     {% endif %}
 
@@ -92,3 +90,23 @@ Required Input:
         {% endif %}
     {% endif %}
 </div>
+<script>
+    function changeMarkColor(me,countUp) {
+        if(countUp==true){
+            if(me.value<0){
+                me.style.backgroundColor="var(--standard-vibrant-yellow)";
+            }
+            else {
+                me.style.backgroundColor="var(--default-white)";
+            }
+        }
+        else {
+            if(me.value>0){
+                me.style.backgroundColor="var(--standard-vibrant-yellow)";
+            }
+            else{
+                me.style.backgroundColor="var(--default-white)";
+            }
+        }
+    }
+</script>

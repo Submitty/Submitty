@@ -2068,7 +2068,6 @@ function onClickCountUp(me) {
     $.get('Mark.twig',null,function(){
         $("input[id^='mark-editor-']").each(function () {
             if(this.value<0){
-                console.log(this.value);
                 this.style.backgroundColor = "var(--standard-vibrant-yellow)";
             }
             else{
@@ -2089,7 +2088,6 @@ function onClickCountDown(me) {
     $.get('Mark.twig',null,function(){
         $("input[id^='mark-editor-']").each(function () {
             if(this.value>0){
-                console.log(this.value);
                 this.style.backgroundColor = "var(--standard-vibrant-yellow)";
             }
             else{
