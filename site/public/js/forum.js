@@ -204,16 +204,18 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
+function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+
     $.ajax({
         url: url,
         type: "POST",
         data: {
             post_id: post_id,
             thread_id: thread_id,
+            render_markdown: render_markdown,
             csrf_token: csrf_token
         },
         success: function(data){
@@ -259,6 +261,18 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
             $('#edit-user-post').css('display', 'block');
 
             $(".cat-buttons input").prop('checked', false);
+
+            if(json.markdown === true){
+                $('#markdown_input_').val("1");
+                $('#markdown_toggle_').addClass('markdown-active');
+                $('#markdown_buttons_').show();
+            }
+            else{
+                $('#markdown_input_').val("0");
+                $('#markdown_toggle_').removeClass('markdown-active');
+                $('#markdown_buttons_').hide();
+            }
+
             // If first post of thread
             if(shouldEditThread) {
                 var thread_title = json.title;
@@ -270,6 +284,7 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
                 $("#title").val(thread_title);
                 $("#thread_status").val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
+
                 // Categories
                 $(".cat-buttons").removeClass('cat-selected');
                 $.each(categories_ids, function(index, category_id) {

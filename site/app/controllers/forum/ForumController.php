@@ -355,6 +355,8 @@ class ForumController extends AbstractController{
         } else {
             $lock_thread_date = null;
         }
+
+
         $thread_status = $_POST["thread_status"];
 
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
@@ -445,6 +447,8 @@ class ForumController extends AbstractController{
         if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
             $markdown = true;
         }
+
+        setcookie("markdown_enabled", ($markdown?1:0), time() + (86400 * 30), "/");
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -959,6 +963,7 @@ class ForumController extends AbstractController{
                 $output['anon'] = $result['anonymous'];
                 $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
                 $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
+                $output['markdown'] = $result['render_markdown'];
                 if(isset($_POST["thread_id"])) {
                     $this->getThreadContent($_POST["thread_id"], $output);
                 }

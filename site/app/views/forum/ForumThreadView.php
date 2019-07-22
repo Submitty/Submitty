@@ -327,6 +327,11 @@ class ForumThreadView extends AbstractView {
 
         $return = "";
 
+        $markdown_enabled = 0;
+        if(isset($_COOKIE['markdown_enabled'])){
+            $markdown_enabled = $_COOKIE['markdown_enabled'];
+        }
+
         if(!$ajax) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
                 "categories" => $categories,
@@ -342,6 +347,7 @@ class ForumThreadView extends AbstractView {
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
                 "display_option" => $display_option,
+                "render_markdown" => $markdown_enabled,
                 "csrf_token" => $this->core->getCsrfToken()
             ]);
         }
