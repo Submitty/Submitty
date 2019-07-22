@@ -396,7 +396,8 @@ class HomeworkView extends AbstractView {
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            'has_overridden_grades' => $graded_gradeable->hasOverriddenGrades(),
         ]);
     }
 
