@@ -268,15 +268,17 @@ class ReportController extends AbstractController {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-
-            // Check if the score should be a zero
-            if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
-                if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
-                    // Version conflict or incomplete grading, so zero score
-                    $row[$gg->getGradeableId()] = 0;
-                } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
-                    // BAD submission, so zero score
-                    $row[$gg->getGradeableId()] = 0;
+            
+            if ($late_days->getLateDayInfoByGradeable(!$gg->hasOverriddenGrades()) ){
+                // Check if the score should be a zero
+                if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+                    if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
+                        // Version conflict or incomplete grading, so zero score
+                        $row[$gg->getGradeableId()] = 0;
+                    } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                        // BAD submission, so zero score
+                        $row[$gg->getGradeableId()] = 0;
+                    }
                 }
             }
         }
@@ -304,7 +306,7 @@ class ReportController extends AbstractController {
 
         foreach ($ggs as $gg) {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
-            $user_data[$bucket][] = $this->generateGradeSummary($gg, $late_days);
+            $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
@@ -315,7 +317,7 @@ class ReportController extends AbstractController {
      * @param LateDays $ld
      * @return array
      */
-    public function generateGradeSummary(GradedGradeable $gg, LateDays $ld) {
+    public function generateGradeSummary(GradedGradeable $gg,User $user, LateDays $ld) {
         $g = $gg->getGradeable();
 
         $entry = [
@@ -333,100 +335,106 @@ class ReportController extends AbstractController {
 
         $entry['score'] = $gg->getTotalScore();
 
-        // Add information special to electronic file submissions
-        if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
-            // Add information based on late day status
-            $ldi = $ld->getLateDayInfoByGradeable($g);
-            if ($ldi !== null) {
-                // Zero score if BAD status
-                if ($ldi->getStatus() === LateDayInfo::STATUS_BAD) {
-                    $entry['score'] = 0;
-                }
+        $ldi = $ld->getLateDayInfoByGradeable($g);
 
-                // The report needs this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
-                $entry['status'] = $this->getLateStatusMessage($ldi);
-
-                // Only include late day info if the submission was late
-                $late_days_charged = $ldi->getLateDaysCharged();
-                if ($late_days_charged > 0) {
-                    $entry['days_after_deadline'] = $ldi->getDaysLate();
-                    $entry['extensions'] = $ldi->getLateDayException();
-                    $entry['days_charged'] = $late_days_charged;
-                }
-            }
-
-            // Add score breakdown
-            $ta_gg = $gg->getOrCreateTaGradedGradeable();
-            $entry['overall_comment'] = $ta_gg->getOverallComment();
-
-            // Only split up scores if electronic gradeables
-            $entry['autograding_score'] = $gg->getAutoGradingScore();
-            $entry['tagrading_score'] = $gg->getTaGradingScore();
-
-            // If the grading isn't complete or there are conflicts in which version is graded,
-            //  let the user know that
-            if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
-                $entry['score'] = 0;
-                $entry['autograding_score'] = 0;
-                $entry['tagrading_score'] = 0;
-                if (!$gg->getSubmitter()->isTeam() && $gg->getGradeable()->isTeamAssignment()) {
-                    // This is sort of a hack.  Submitters for team assignments should always be teams,
-                    //  but to keep the rest of the report generation sane, they can be users if the
-                    //  user is not on a team
-                    $entry['note'] = 'User is not on a team';
-                } else if (!$ta_gg->isComplete()) {
-                    $entry['note'] = 'This has not been graded yet.';
-                } else {
-                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                }
-            }
+        if ($gg->hasOverriddenGrades()){
+            $entry['status'] = 'Overridden';
+            $entry['comment'] = $gg->getOverriddenComment(); 
         }
-
-        // Component/marks
-        $entry['components'] = [];
-        foreach ($g->getComponents() as $component) {
-            $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
-
-            // We need to convert to the old model single-grader format for rainbow grades
-            $gc = null;
-            foreach ($gcc->getGradedComponents() as $gc_) {
-                $gc = $gc_;
-                // Get the only graded component and short circuit
-                break;
-            }
-            //
-            // For each $gc in $gcc
-            //
-
-            $inner = [
-                'title' => $component->getTitle()
-            ];
-            if ($component->isText()) {
-                $inner['comment'] = $gc !== null ? $gc->getComment() : '';
-            } else {
-                $inner['score'] = $gc !== null ? $gc->getTotalScore() : 0.0;
-                $inner['default_score'] = $component->getDefault();
-                $inner['upper_clamp'] = $component->getUpperClamp();
-                $inner['lower_clamp'] = $component->getLowerClamp();
-            }
-
+        else {
+            // Add information special to electronic file submissions
             if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
-                $marks = [];
-                if ($gc !== null) {
-                    $marks = array_map(function (Mark $m) {
-                        return ['points' => $m->getPoints(), 'note' => $m->getTitle()];
-                    }, $gc->getMarks());
+                if ($ldi !== null) {
+                    // Zero score if BAD status
+                    if ($ldi->getStatus() === LateDayInfo::STATUS_BAD) {
+                        $entry['score'] = 0;
+                    }
 
-                    if ($gc->hasCustomMark()) {
-                        $marks[] = ['points' => $gc->getScore(), 'note' => $gc->getComment()];
+                    // The report needs this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
+                    $entry['status'] = $this->getLateStatusMessage($ldi);
+
+                    // Only include late day info if the submission was late
+                    $late_days_charged = $ldi->getLateDaysCharged();
+                    if ($late_days_charged > 0) {
+                        $entry['days_after_deadline'] = $ldi->getDaysLate();
+                        $entry['extensions'] = $ldi->getLateDayException();
+                        $entry['days_charged'] = $late_days_charged;
                     }
                 }
 
-                $inner['marks'] = $marks;
-            }
-            $entry['components'][] = $inner;
+                // Add score breakdown
+                $ta_gg = $gg->getOrCreateTaGradedGradeable();
+                $entry['overall_comment'] = $ta_gg->getOverallComment();
 
-            // end for
+                // Only split up scores if electronic gradeables
+                $entry['autograding_score'] = $gg->getAutoGradingScore();
+                $entry['tagrading_score'] = $gg->getTaGradingScore();
+
+                // If the grading isn't complete or there are conflicts in which version is graded,
+                //  let the user know that
+                if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
+                    $entry['score'] = 0;
+                    $entry['autograding_score'] = 0;
+                    $entry['tagrading_score'] = 0;
+                    if (!$gg->getSubmitter()->isTeam() && $gg->getGradeable()->isTeamAssignment()) {
+                        // This is sort of a hack.  Submitters for team assignments should always be teams,
+                        //  but to keep the rest of the report generation sane, they can be users if the
+                        //  user is not on a team
+                        $entry['note'] = 'User is not on a team';
+                    } else if (!$ta_gg->isComplete()) {
+                        $entry['note'] = 'This has not been graded yet.';
+                    } else {
+                        $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                    }
+                }
+            }
+
+            // Component/marks
+            $entry['components'] = [];
+            foreach ($g->getComponents() as $component) {
+                $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
+
+                // We need to convert to the old model single-grader format for rainbow grades
+                $gc = null;
+                foreach ($gcc->getGradedComponents() as $gc_) {
+                    $gc = $gc_;
+                    // Get the only graded component and short circuit
+                    break;
+                }
+                //
+                // For each $gc in $gcc
+                //
+
+                $inner = [
+                    'title' => $component->getTitle()
+                ];
+                if ($component->isText()) {
+                    $inner['comment'] = $gc !== null ? $gc->getComment() : '';
+                } else {
+                    $inner['score'] = $gc !== null ? $gc->getTotalScore() : 0.0;
+                    $inner['default_score'] = $component->getDefault();
+                    $inner['upper_clamp'] = $component->getUpperClamp();
+                    $inner['lower_clamp'] = $component->getLowerClamp();
+                }
+
+                if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
+                    $marks = [];
+                    if ($gc !== null) {
+                        $marks = array_map(function (Mark $m) {
+                            return ['points' => $m->getPoints(), 'note' => $m->getTitle()];
+                        }, $gc->getMarks());
+
+                        if ($gc->hasCustomMark()) {
+                            $marks[] = ['points' => $gc->getScore(), 'note' => $gc->getComment()];
+                        }
+                    }
+
+                    $inner['marks'] = $marks;
+                }
+                $entry['components'][] = $inner;
+
+                // end for
+            }
         }
         return $entry;
     }

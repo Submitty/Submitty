@@ -1203,10 +1203,6 @@ class Course(object):
                 print_grades = True if g_type != 0 or (gradeable.submission_open_date < NOW) else False
                 release_grades = (gradeable.grade_released_date < NOW)
 
-                # Another spot where if INSTALL_SUBMITTY_HELPER.sh is used we could use fill-in paths
-                # gradeable_config_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
-                #                                    get_current_semester(), "sample", "config", "complete_config")
-
                 gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
                                                     "config", "complete_config")
 
