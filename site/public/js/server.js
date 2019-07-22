@@ -271,29 +271,6 @@ function confirmExtension(option){
     $('input[name="option"]').val(-1);
 }
 
-function userNameChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-username-form");
-    form.css("display", "block");
-    $('[name="user_name_change"]', form).val("");
-}
-
-function passwordChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#change-password-form");
-    form.css("display", "block");
-    $('[name="new_password"]', form).val("");
-    $('[name="confirm_new_password"]', form).val("");
-}
-
-function closePopup(popup) {
-    //See if we have a close button that lets us click to close
-    var closer = $(popup).find(".close-button");
-    if (closer.length) {
-        closer.click();
-    }
-}
-
 function newUploadCourseMaterialsForm() {
 
     createArray(1);
