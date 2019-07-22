@@ -108,6 +108,10 @@ if not os.path.exists(rg_course_path + '/Makefile'):
     with open(makefile_path, 'w') as file:
         file.write(filedata)
 
+else:
+
+    print('Previously configured Makefile detected')
+
 # Determine if the instructor has provided a custom_customization.json
 # If so make a copy of that and rename as 'customization.json' so it will be used
 if os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
@@ -162,6 +166,10 @@ response_json = json.loads(response.stdout)
 
 # Take this path if we DID NOT get an auth token
 if response_json['status'] != 'success':
+
+    print('Failed to obtain an auth token.')
+    print('Check submitty_admin.json contains valid credentials')
+    print('Attempting to continue with previously generated grade summaries')
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
