@@ -1,39 +1,34 @@
-function showEmailSeatingOption() {
-    $('#email-seating-assignment').show();
-    $('#email-seating-assignment_label').show();
-}
-
-function hideEmailSeatingOption() {
-    $('#email-seating-assignment').hide();
-    $('#email-seating-assignment-label').hide();
-}
-
-var selected_seating_gradeable = $('#room-seating-gradeable-id').val();
-if(!selected_seating_gradeable) {
-    hideEmailSeatingOption();
-}
-
 $(document).ready(function() {
     updateForumMessage();
+    updateEmailSeatingOption();
 
     function updateForumMessage() {
-        if ($('#forum-enabled').is(":checked")) {
-            $('#forum-enabled-message').show();
+        if ($("#forum-enabled").is(":checked")) {
+            $("#forum-enabled-message").show();
         } else {
-            $('#forum-enabled-message').hide();
+            $("#forum-enabled-message").hide();
         }
     }
 
-    $(document).on('change', '#forum-enabled', updateForumMessage);
-    
-    $(document).on('change', '#room-seating-gradeable-id', function(){
-            var selected_seating_gradeable = $('#room-seating-gradeable-id').val();
+    $(document).on("change", "#forum-enabled", updateForumMessage);
 
-            if(!selected_seating_gradeable){
-                hideEmailSeatingOption();
-            }
-            else{
+    function showEmailSeatingOption() {
+        $("#email-seating-assignment").show();
+        $("#email-seating-assignment_label").show();
+    }
+    
+    function hideEmailSeatingOption() {
+        $("#email-seating-assignment").hide();
+        $("#email-seating-assignment-label").hide();
+    }
+
+    function updateEmailSeatingOption() {
+        if ($("#room-seating-gradeable-id").val()) {
             showEmailSeatingOption();
+        } else {
+            hideEmailSeatingOption();
         }
-    });
+    }
+    
+    $(document).on("change", "#room-seating-gradeable-id", updateEmailSeatingOption);
 });
