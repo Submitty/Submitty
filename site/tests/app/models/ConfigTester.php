@@ -139,6 +139,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         );
         $config = array_replace($config,$extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
+
+        // Create version json
+        $config = array(
+            "installed_commit" => "d150131c19e3e8084b25cddcc32e6c40a8e93a2b",
+            "short_installed_commit" => "d150131c",
+            "most_recent_git_tag" => "v19.07.00"
+        );
+        $config = array_replace($config,$extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
+
     }
 
     public function testConfig() {
@@ -269,7 +279,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'system_message' => 'Some system message',
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
-            'auto_rainbow_grades' => false
+            'auto_rainbow_grades' => false,
+            'latest_commit' => 'd150131c',
+            'latest_tag' => 'v19.07.00'
         );
         $actual = $config->toArray();
 

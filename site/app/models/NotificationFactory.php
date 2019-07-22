@@ -167,7 +167,6 @@ class NotificationFactory {
         }
         // parameterize email array
         foreach ($emails as $email) {
-            $flattened_emails[] = $email->getRecipient();
             $flattened_emails[] = $email->getSubject();
             $flattened_emails[] = $email->getBody();
             $flattened_emails[] = $email->getUserId();
