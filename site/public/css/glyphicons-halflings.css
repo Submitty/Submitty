@@ -1,4 +1,3 @@
-@import "colors.css";
 .icon-ok {
     background: url('../img/glyphicons-halflings.png') no-repeat -288px 0px;
     color: var(--standard-deep-dark-gray);
