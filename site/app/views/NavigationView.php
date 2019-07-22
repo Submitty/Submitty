@@ -542,11 +542,10 @@ class NavigationView extends AbstractView {
         }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable->getId()));
-        } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
-            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'lab', 'g_id' => $gradeable->getId(), 'view' => $view));
-        } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            $href = $this->core->buildUrl(array('component' => 'grading', 'page' => 'simple', 'action' => 'numeric', 'g_id' => $gradeable->getId(), 'view' => $view));
-        } else {
+        } else if ($gradeable->getType() === GradeableType::CHECKPOINTS || $gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+            $href = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading']) . '?view=' . $view;
+        }
+        else {
             //Unknown type of gradeable
             $href = "";
         }
