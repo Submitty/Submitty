@@ -687,22 +687,29 @@ HTML;
         if ($this->core->getConfig()->isRegradeEnabled()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
-        if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+
+        if ($graded_gradeable->hasOverriddenGrades()) {
+            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "message" => "Overridden grades"
+            ]);
+        }
+        else if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#FF8040", // mango orange
+                    "color" => "var(--standard-creamsicle-orange)", // mango orange
                     "message" => "Cancelled Submission"
                 ]);
             } else {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#C38189", // lipstick pink (purple)
+                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
                     "message" => "No Submission"
                 ]);
             }
         } else {
             if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#F62817", // fire engine red
+                    "color" => "var(--standard-red-orange)", // fire engine red
                     "message" => "Late Submission"
                 ]);
             }
@@ -921,6 +928,7 @@ HTML;
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
+        $has_overriden_grades = $graded_gradeable->hasOverriddenGrades();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -936,6 +944,7 @@ HTML;
             "can_verify" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
+            "has_overriden_grades" => $has_overriden_grades,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
             "show_silent_edit" => $show_silent_edit,

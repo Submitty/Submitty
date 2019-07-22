@@ -153,6 +153,11 @@ class Config extends AbstractModel {
     protected $email_enabled;
 
     /** @property @var string */
+    protected $latest_tag;
+    /** @property @var string */
+    protected $latest_commit;
+
+    /** @property @var string */
     protected $course_name;
     /** @property @var string */
     protected $course_home_url;
@@ -331,6 +336,18 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find email config: {$this->config_path}/email.json");
         }
         $this->email_enabled = $email_json['email_enabled'];
+
+
+        $version_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'version.json'));
+        if (!$version_json) {
+            throw new ConfigException("Could not find version file: {$this->config_path}/version.json");
+        }
+        if (!isset($version_json['most_recent_git_tag']) ||
+            !isset($version_json['short_installed_commit'])) {
+            throw new ConfigException("Error parsing version information: {$this->config_path}/version.json");
+        }
+        $this->latest_tag = $version_json['most_recent_git_tag'];
+        $this->latest_commit = $version_json['short_installed_commit'];
     }
 
     public function loadCourseJson($course_json_path) {
