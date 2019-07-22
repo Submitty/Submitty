@@ -25,6 +25,7 @@ use app\models\User;
 use app\models\Notification;
 use app\models\Email;
 use app\models\SimpleLateUser;
+use app\models\SimpleGradeOverridenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
@@ -2266,6 +2267,49 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
+     * Return an array of users with overriden Grades
+     * @param string $gradeable_id
+     * @return SimpleGradeOverridenUser[]
+     */
+    public function getUsersWithOverridenGrades($gradeable_id) {
+        $this->course_db->query("
+        SELECT u.user_id, user_firstname,
+          user_preferred_firstname, user_lastname, marks, comment
+        FROM users as u
+        FULL OUTER JOIN grade_override as g
+          ON u.user_id=g.user_id
+        WHERE g_id=?
+          AND marks IS NOT NULL
+        ORDER BY user_email ASC;", array($gradeable_id));
+
+        $return = array();
+        foreach($this->course_db->rows() as $row){
+            $return[] = new SimpleGradeOverridenUser($this->core, $row);
+        }
+        return $return;
+    }
+
+    /**
+     * Return a user with overriden Grades for specific gradable and user_id
+     * @param string $gradeable_id
+     * @param string $user_id
+     * @return SimpleGradeOverridenUser[]
+     */
+    public function getAUserWithOverridenGrades($gradeable_id, $user_id) {
+        $this->course_db->query("
+        SELECT u.user_id, user_firstname,
+          user_preferred_firstname, user_lastname, marks, comment
+        FROM users as u
+        FULL OUTER JOIN grade_override as g
+          ON u.user_id=g.user_id
+        WHERE g_id=?
+          AND marks IS NOT NULL
+          AND u.user_id=?", array($gradeable_id,$user_id));
+
+          return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverridenUser($this->core, $this->course_db->row()) : null;
+    }
+
+    /**
      * "Upserts" a given user's late days allowed effective at a given time.
      *
      * About $csv_options:
@@ -2315,6 +2359,39 @@ ORDER BY gt.{$section_key}", $params);
             (user_id, g_id, late_day_exceptions)
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
+    }
+
+    /**
+     * Updates overriden grades for given homework
+     * @param string $user_id
+     * @param string $g_id
+     * @param integer $marks
+     * @param string $comment
+     */
+    public function updateGradeOverride($user_id, $g_id, $marks, $comment){
+        $this->course_db->query("
+          UPDATE grade_override
+          SET marks=?, comment=?
+          WHERE user_id=?
+            AND g_id=?;", array($marks, $comment, $user_id, $g_id));
+        if ($this->course_db->getRowCount() === 0) {
+            $this->course_db->query("
+            INSERT INTO grade_override
+            (user_id, g_id, marks, comment)
+            VALUES(?,?,?,?)", array($user_id, $g_id, $marks, $comment));
+        }
+    }
+
+    /**
+     * Delete a given overriden grades for specific user for specific gradeable
+     * @param string $user_id
+     * @param string $g_id
+     */
+    public function deleteOverridenGrades($user_id, $g_id){
+        $this->course_db->query("
+          DELETE FROM grade_override
+          WHERE user_id=?
+          AND g_id=?", array($user_id, $g_id));
     }
 
     /**
