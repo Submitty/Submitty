@@ -7,12 +7,14 @@ use app\libraries\FileUtils;
 class PlagiarismView extends AbstractView {
 
     public function plagiarismMainPage($semester, $course, $gradeables_with_plagiarism_result, $refresh_page, $nightly_rerun_info) {
+        $this->core->getOutput()->addBreadcrumb('Plagiarism Detection');
+
         $return = "";
         $return .= <<<HTML
 <div class="content">
     <h1>Plagiarism Detection -- WORK IN PROGRESS</h1><br>
     <div class="nav-buttons">
-        <a class="btn btn-primary" href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'semester' => $semester, 'course'=> $course, 'action' => 'configure_new_gradeable_for_plagiarism_form'))}">+ Configure New Gradeable for Plagiarism Detection</a>
+        <a class="btn btn-primary" href="{$this->core->buildNewCourseUrl(['plagiarism', 'configuration', 'new'])}">+ Configure New Gradeable for Plagiarism Detection</a>
     </div><br /><br />
     <div class="sub">
     <center>
@@ -23,7 +25,7 @@ HTML;
             $title = $gradeable['g_title'];
             $id = $gradeable['g_id'];
         
-            $delete_form_action = $this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'delete_plagiarism_result_and_config', 'gradeable_id' => $id));
+            $delete_form_action = $this->core->buildNewCourseUrl(['plagiarism', 'gradeable', $id, 'delete']);
             
             if(file_exists($course_path."/lichen/ranking/".$id.".txt")) {
                 $timestamp = date("F d Y H:i:s.",filemtime($course_path."/lichen/ranking/".$id.".txt"));
@@ -107,15 +109,15 @@ HTML;
                     
                     $return .= <<<HTML
         <tr>
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'show_plagiarism_result', 'gradeable_id' => $id))}">$title</a>
+            <td><a href="{$this->core->buildNewCourseUrl(['plagiarism', 'gradeable', $id])}">$title</a>
             </td>
 HTML;
                 }
                 
                 $return .= <<<HTML
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'edit_plagiarism_saved_config', 'gradeable_id' => $id))}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildNewCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
             </td>
-            <td><a href="{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 're_run_plagiarism', 'gradeable_id' => $id))}"><i class="fas fa-sync" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildNewCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}"><i class="fas fa-sync" aria-hidden="true"></i></a>
             </td>
             <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-hidden="true"></i></a>
             </td>
@@ -129,7 +131,7 @@ HTML;
                 $matches_and_topmatch
             </td>
             <td>
-                <label><input type="checkbox" onclick='window.location.href = buildUrl({"component":"admin", "page" :"plagiarism", "course":"{$course}", "semester": "{$semester}", "action": "toggle_nightly_rerun", "gradeable_id":"{$id}"});' {$night_rerun_status} >Nightly Re-run </label>
+                <label><input type="checkbox" onclick='window.location.href = buildNewCourseUrl(["plagiarism", "gradeable", "{$id}", "nightly_rerun"]);' {$night_rerun_status} >Nightly Re-run </label>
             </td>
         </tr>
 HTML;
@@ -144,7 +146,7 @@ HTML;
 
         $return .= <<<HTML
 <script type="text/javascript">
-    checkRefreshLichenMainPage("{$this->core->buildUrl(array('component' => 'admin', 'semester' => $semester, 'course'=> $course, 'page' => 'plagiarism', 'action' => 'check_refresh_lichen_mainpage'))}" ,"{$semester}", "{$course}");
+    checkRefreshLichenMainPage("{$this->core->buildNewCourseUrl(['plagiarism', 'check_refresh'])}" ,"{$semester}", "{$course}");
 </script>
 HTML;
         #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
@@ -161,6 +163,7 @@ HTML;
     }
 
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
+        $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildNewCourseUrl(['plagiarism']));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
 
@@ -424,6 +427,8 @@ HTML;
     }
 
     public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles = null, $prior_term_gradeables, $saved_config = null) {
+        $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildNewCourseUrl(['plagiarism']));
+        $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -485,7 +490,7 @@ HTML;
 HTML;
         $return .= <<<HTML
     <div id="save-configuration-form" style="overflow:auto;">
-        <form method="post" action="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester, 'new_or_edit'=> $new_or_edit , 'action' => 'save_new_plagiarism_configuration', 'gradeable_id' => $gradeable_id))}" enctype="multipart/form-data">
+        <form method="post" action="{$this->core->buildNewCourseUrl(['plagiarism', 'configuration', 'new'])}?new_or_edit={$new_or_edit}&gradeable_id={$gradeable_id}" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="{$this->core->getCsrfToken()}" />
             <input type="hidden" name="prior_term_gradeables_number" value="{$prior_term_gradeables_number}" />
             <input type="hidden" name="ignore_submission_number" value="{$ignore_submission_number}" /><br />
@@ -712,7 +717,7 @@ HTML;
                 </div>    
             </div><br /><br />
             <div style="float: right; width: auto; margin-top: 5px;">
-                <a href="{$this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism', 'course' => $course, 'semester' => $semester))}" class="btn btn-danger">Cancel</a>
+                <a href="{$this->core->buildNewCourseUrl(['plagiarism'])}" class="btn btn-danger">Cancel</a>
                 <input class="btn btn-primary" type="submit" value="Save Configuration" />
             </div><br /><br /><br />
         </form>

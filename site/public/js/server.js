@@ -173,44 +173,11 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 /**
  * Displays edit registration sections form on button press
  */
-function editRegistrationSectionsForm() {
-    var form = $("#registration-sections-form");
-    form.css("display","block");
-}
-
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
     form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
-}
-
-function newDownloadForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $('#download-form');
-    form.css('display', 'block');
-    $("#download-form input:checkbox").each(function() {
-        if ($(this).val() === 'NULL') {
-            $(this).prop('checked', false);
-        } else {
-            $(this).prop('checked', true);
-        }
-    });
-}
-
-function newGraderListForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#grader-list-form");
-    form.css("display", "block");
-    $('[name="upload"]', form).val(null);
-}
-
-function newClassListForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#class-list-form");
-    form.css("display", "block");
-    $('[name="move_missing"]', form).prop('checked', false);
-    $('[name="upload"]', form).val(null);
 }
 
 function newDeleteGradeableForm(form_action, gradeable_name) {
@@ -360,8 +327,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -407,8 +373,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     }
                 })
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matching_users',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -438,8 +403,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
+                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=&version_user_2=`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -468,8 +432,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
+                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=${user_id_2}&version_user_2=${version_user_2}`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -518,8 +481,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
 
-    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
+    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'clicked_match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&start=${user_1_match_start.line}&end=${user_1_match_end.line}`;
 
     //console.log(user_1_match_start.line);
 
@@ -1099,18 +1061,18 @@ function checkRefreshLichenMainPage(url, semester, course) {
 }
 
 function check_lichen_jobs(url, semester, course) {
-    $.post(url,
+    $.get(url,
         function(data) {
             var last_data = localStorage.getItem("last_data");
             if (data == "REFRESH_ME") {
                 last_data= "REFRESH_ME";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+                window.location.href = buildNewCourseUrl(['plagiarism']);
             }
             else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+                window.location.href = buildNewCourseUrl(['plagiarism']);
             }
             else {
                 checkRefreshLichenMainPage(url, semester, course);
@@ -1481,6 +1443,43 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
+function updateGradeOverride(data) {
+    var fd = new FormData($('#gradeOverrideForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'update'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverridenGrades(json);
+            $('#user_id').val(this.defaultValue);
+            $('#marks').val(this.defaultValue);
+            $('#comment').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overriden Grades for ' + json['data']['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
+
 function loadHomeworkExtensions(g_id, due_date) {
     var url = buildNewCourseUrl(['extensions', g_id]);
     $.ajax({
@@ -1506,6 +1505,31 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
+function loadOverridenGrades(g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'get_overriden_grades', 'g_id': g_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverridenGrades(json);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
 function refreshOnResponseLateDays(json) {
     $('#late_day_table tr:gt(0)').remove();
     if(json['data']['users'].length === 0){
@@ -1516,6 +1540,22 @@ function refreshOnResponseLateDays(json) {
         var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
         $('#late_day_table').append(bits.join('</td><td>'));
     });
+}
+
+function refreshOnResponseOverridenGrades(json) {
+    var form = $("#load-overriden-grades");
+    $('#my_table tr:gt(0)').remove();
+    var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+    $('#title').replaceWith(title);
+    if(json['data']['users'].length === 0){
+        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+    } else {
+        json['data']['users'].forEach(function(elem){
+            var delete_button = "<a onclick=\"deleteOverridenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#my_table').append(bits.join('</td><td>'));
+        });
+    }
 }
 
 function updateLateDays(data) {
@@ -1586,6 +1626,38 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+
+function deleteOverridenGrades(user_id, g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'delete_grades'});
+    var confirm = window.confirm("Are you sure you would like to delete this entry?");
+    if (confirm) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                user_id: user_id,
+                g_id: g_id
+            },
+            success: function(data) {
+                var json = JSON.parse(data);
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overriden Grades deleted .</div>';
+                $('#messages').append(message);
+                refreshOnResponseOverridenGrades(json);
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
+    return false;
+}
+
 function toggleRegradeRequests(){
     var element = document.getElementById("regradeBoxSection");
     if (element.style.display === 'block') {

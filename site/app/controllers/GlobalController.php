@@ -231,7 +231,14 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-calendar-plus"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
+                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'grade_override', 'action' => 'view_overriden_grades')),
+                    "title" => "Grade Override",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-grade-override",
+                    "icon" => "fa-eraser"
+                ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildNewCourseUrl(['plagiarism']),
                     "title" => "Plagiarism Detection",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-plagiarism",
