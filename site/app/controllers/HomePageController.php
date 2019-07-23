@@ -214,6 +214,35 @@ class HomePageController extends AbstractController {
             $base_course_title = $_POST['base_course_title'];
         }
 
+        try {
+            $group_check = $this->core->curlRequest(
+                $this->core->getConfig()->getCgiUrl() . "group_check.cgi" . "?" . http_build_query(
+                    [
+                        'head_instructor' => $head_instructor,
+                        'base_path' => "/var/local/submitty/courses/" . $base_course_semester . "/" . $base_course_title
+                    ]
+                )
+            );
+            if (json_decode($group_check, true)['status'] === 'fail') {
+                $error = "The instructor is not in the correct Linux group.\n Please contact sysadmin for more information.";
+                $this->core->addErrorMessage($error);
+                return new Response(
+                    JsonResponse::getFailResponse($error),
+                    null,
+                    new RedirectResponse($this->core->buildNewUrl(['home']))
+                );
+            }
+        }
+        catch (\Exception $e) {
+            $error = "Server error.";
+            $this->core->addErrorMessage($error);
+            return new Response(
+                JsonResponse::getErrorResponse($error),
+                null,
+                new RedirectResponse($this->core->buildNewUrl(['home']))
+            );
+        }
+
         $json = [
             "job" => 'CreateCourse',
             'semester' => $semester,
