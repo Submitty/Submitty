@@ -1733,6 +1733,10 @@ header > * {
     text-align: left !important;
 }
 
+.hide {
+    display: none;
+}
+
 @media (min-width: 541px) {
     .content {
     margin: 30px;
