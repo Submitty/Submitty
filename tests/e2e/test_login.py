@@ -14,7 +14,7 @@ class TestLogin(BaseTestCase):
         you'll be taken to the login screen, and then once logged in,
         taken to that original page you had requested.
         """
-        url = "/" + self.semester + "/sample/student/open_homework"
+        url = "/" + self.semester + "/sample/gradeable/open_homework"
         self.log_in(url, title='Submitty')
         self.assertEqual(self.test_url + url, self.driver.current_url)
         cookies = list(filter(lambda x: x['name'] == 'submitty_token', self.driver.get_cookies()))

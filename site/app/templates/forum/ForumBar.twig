@@ -37,7 +37,7 @@
 			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
 			<div class="row">
 				<div class="col-7">
-					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required />
+					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				</div>
 				<div class="col-4">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
@@ -61,7 +61,6 @@
 						{% endif %}
 					{% endfor %}
 
-					<span id="forum_filters">Filters: <span id="filter_names">None</span> &middot; <a onclick="clearForumFilter()" id="filter_close">Clear </a></span>
 				</div>
 
 			</div>
@@ -98,7 +97,7 @@
 	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
 	            More <span class="caret"></span>
 	        </a>
-			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownLabel">
 			{% for more in more_data|slice(1) %}
 				{% if user_group <= more.required_rank %}
 					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
@@ -107,16 +106,17 @@
 	          	{% endif %}
 	        {% endfor %}
 	          <li class="dropdown-divider"></li>
-	              <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
-				  <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
+	              <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree')" href="#">Hierarchical</a></li>
+	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time')">Chronological  <i class="fas fa-angle-up"></i> </a></li>
+				  <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time')">Chronological  <i class="fas fa-angle-down"></i> </a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
-	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
+	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha')">Alphabetical</a></li>
 	              {% endif %}
 	        </ul>
 	    </div>
 	{% endif %}
 	</div>
+	<div id="forum_filters">Filters: <span id="filter_names">None</span> &middot; <a onclick="clearForumFilter()" id="filter_close">Clear </a></div>
 </div>
 </div>
 <hr/>

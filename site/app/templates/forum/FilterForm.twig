@@ -4,13 +4,13 @@
 {% block body %}
     <i>Please unselect all options for removing filter.</i><br/>
     <div class="text-center">
-        <select id="thread_category" name="thread_category" class="form-control height-auto" multiple size="10" data-ays-ignore="true">
+        <select id="thread_category" name="thread_category" class="form-control height-auto" aria-label="Select thread category" multiple size="10" data-ays-ignore="true">
         {% for category in categories %}
                 <option value="{{ category.category_id }}" style="color: {{ category.color }}">{{ category.category_desc }}</option>
             {% endfor %}
         </select>
         &nbsp;
-        <select id="thread_status_select" class="form-control height-auto" multiple data-ays-ignore="true">
+        <select id="thread_status_select" class="form-control height-auto" multiple aria-label="Select thread status" data-ays-ignore="true">
             <option value="0">Comment</option>
             <option value="-1">Unresolved</option>
             <option value="1">Resolved</option>
@@ -25,45 +25,9 @@
         }
 
         $( document ).ready(function() {
+            loadFilterHandlers();
 
-            if(!(window.location.hash === "#filtered")){
-                console.log(window.location.hash);
-                clearForumFilter();
-            }
 
-            $('#thread_category option, #thread_status_select option').mousedown(function(e) {
-                e.preventDefault();
-
-                var current_selection = $(this).prop('selected');
-                $(this).prop('selected', !current_selection);
-
-                var filter_text = $(this).text();
-
-                filters_applied.toggleElement(filter_text, function(e) {
-                    return e === filter_text;
-                });
-
-                if(filters_applied.length == 0){
-                    window.location.hash = "all";
-                    clearForumFilter();
-                }
-                else {
-                    window.location.hash = "filtered";
-
-                    $('#filter_names').empty().text(filters_applied.join(", "));
-
-                    $('#forum_filters').css('display', 'inline-block');
-                }
-
-                updateThreads(true, null);
-                return true;
-            });
-
-            $('#unread').change(function(e) {
-                e.preventDefault();
-                updateThreads(true,null);
-                return true;
-            });
             {% for category in cookie_selected_categories %}
             $('#thread_category option[value="{{ category }}"]').prop('selected', true);
             filters_applied.toggleElement($('#thread_category option[value="{{ category }}"]').text(), function(e) {
@@ -78,9 +42,6 @@
             {% endfor %}
 
             if(filters_applied.length > 0){
-
-                window.location.hash = "filtered";
-
                 $('#filter_names').empty().text(filters_applied.join(", "));
 
                 $('#forum_filters').css('display', 'inline-block');
@@ -92,6 +53,7 @@
             $("#{{ display_option }}").prop("checked", true);
             $("#{{display_option }}_label").addClass('active');
             {% endif %}
+
         });
     </script>
 {% endblock %}
