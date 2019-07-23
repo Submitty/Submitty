@@ -13,6 +13,8 @@
         {% endif %}
     </div>
 
+    {{ dump() }}
+
     {% if show_no_late_submission_warning %}
         <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
@@ -213,8 +215,6 @@
                     {# Handle if cell is image #}
                     {% elseif cell.type == "image" %}
 
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
-
                         <img src="{{ attribute(image_data, cell.image) }}"
 
                         {% if cell.width > 0 %}
@@ -231,15 +231,15 @@
 
                         >
 
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
+
                     {# Handle if cell is short_answer #}
                     {% elseif cell.type == "short_answer" %}
-
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                         {# If programming language not defined render regular text boxes #}
                         {% if cell.programming_language is not defined %}
 
-                            {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
+                            {{ self.render_short_answer(cell, num_short_answer, highest_version, testcase_messages) }}
                             {% set num_short_answer = num_short_answer + 1 %}
 
                         {# Else render a codebox #}
@@ -307,8 +307,6 @@
                     {# Handle if cell is multiple choice #}
                     {% elseif cell.type == "multiple_choice" %}
 
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
-
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
                                   {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
@@ -320,6 +318,9 @@
                                         You may select many:
                                     {% endif %}
                                 </legend>
+
+                                {{ self.render_testcase_messages(cell, testcase_messages) }}
+
                                 {% for choice in cell.choices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         <input type="checkbox"
@@ -339,6 +340,9 @@
                                         Select one:
                                     {% endif %}
                                 </legend>
+
+                                {{ self.render_testcase_messages(cell, testcase_messages) }}
+
                                 {% for choice in cell.choices %}                                      
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         <input type="radio"
@@ -631,44 +635,61 @@
 
 {% endmacro %}
 
-{% macro render_short_answer(short_answer, index, version) %}
+{% macro render_short_answer(short_answer, index, version, testcase_messages) %}
     <p class="short-answer">
         {% if short_answer.rows == 0 %}
             <label>
-                {% if short_answer.label %}
-                    {{ short_answer.label | markdown }}
-                {% else %}
-                    Write your answer below:
-                {% endif %}
+                <div>
+                    {% if short_answer.label %}
+                        {{ short_answer.label | markdown }}
+                    {% else %}
+                        Write your answer below:
+                    {% endif %}
+                </div>
+
+                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
+
+                <input
+                    type="text"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    class="sa-box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    {% if core.getConfig().keepPreviousFiles() %}
+                        value="{{ short_answer.recent_submission }}"
+                    {% else %}
+                        value="{{ short_answer.initial_value }}"
+                    {% endif %}
+                    onKeyPress="handle_input_keypress();"
+                />
             </label>
-            <input
-                type="text"
-                name="short_answer_{{ index }}"
-                id="short_answer_{{ index }}"
-                class="sa-box"
-                data-initial_value="{{ short_answer.initial_value }}"
-                data-recent_submission="{{ short_answer.recent_submission }}"
-                {% if core.getConfig().keepPreviousFiles() %}
-                    value="{{ short_answer.recent_submission }}"
-                {% else %}
-                    value="{{ short_answer.initial_value }}"
-                {% endif %}
-                onKeyPress="handle_input_keypress();"
-            >
         {% else %}
-            <label>Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.</label>
-            {# Single line to prevent whitespace from being captured #}
-            <textarea
-                rows="{{ short_answer.rows }}"
-                cols="50"
-                name="short_answer_{{ index }}"
-                id="short_answer_{{ index }}"
-                class="sa-box"
-                data-initial_value="{{ short_answer.initial_value }}"
-                data-recent_submission="{{ short_answer.recent_submission }}"
-                onKeyPress="handle_input_keypress()"
-            >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}
-            </textarea>
+            <label>
+                <div>
+                    {% if short_answer.label %}
+                        {{ short_answer.label | markdown }}
+                    {% else %}
+                        Write your answer below:
+                    {% endif %}
+                    Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
+                </div>
+
+                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
+
+                {# Single line to prevent whitespace from being captured #}
+                <textarea
+                    rows="{{ short_answer.rows }}"
+                    cols="50"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    class="sa-box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    onKeyPress="handle_input_keypress()"
+                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}
+                </textarea>
+            </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
