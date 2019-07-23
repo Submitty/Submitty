@@ -196,14 +196,24 @@ def add_all_permissions(folder):
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
-def remove_read_permissions(top_dir):
-    for root, dirs, files in os.walk(top_dir):
+def remove_permissions_for_others_and_groups(top_dir):
+    if os.getuid() == os.stat(top_dir).st_uid:
+        for root, dirs, files in os.walk(top_dir):
+            os.chmod(root,os.stat(root).st_mode  & ~stat.S_IRGRP & ~stat.S_IROTH & ~stat.S_IXGRP & ~stat.S_IXOTH & ~stat.S_IWGRP & ~stat.S_IWOTH)
+            for d in dirs:
+                os.chmod(os.path.join(root, d),os.stat(os.path.join(root, d)).st_mode & ~stat.S_IRGRP & ~stat.S_IROTH & ~stat.S_IXGRP & ~stat.S_IXOTH & ~stat.S_IWGRP & ~stat.S_IWOTH )
+            for f in files:
+                os.chmod(os.path.join(root, f),os.stat(os.path.join(root, f)).st_mode & ~stat.S_IRGRP & ~stat.S_IROTH & ~stat.S_IXGRP & ~stat.S_IXOTH & ~stat.S_IWGRP & ~stat.S_IWOTH )
+
+def set_ownership_daemon_user(top_dir):
+    tmp_work_gid = os.stat(top_dir).st_gid
+    for root, dirs, files in os.walk(top_dir):    
         for d in dirs:
-            os.chmod(os.path.join(root, d),os.stat(os.path.join(root, d)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
+            os.chown(os.path.join(root,d),int(DAEMON_UID),tmp_work_gid)
         for f in files:
-            if os.getuid() == os.stat(os.path.join(root, f)).st_uid:
-                os.chmod(os.path.join(root, f),os.stat(os.path.join(root, f)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
+            os.chown(os.path.join(root,f),int(DAEMON_UID),tmp_work_gid)
    
+
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
     os.chdir(SUBMITTY_DATA_DIR)
@@ -524,6 +534,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print ("====================================\nRUNNER STARTS", file=f)
         
     os.chdir(tmp_work)
+
+    if os.path.isdir(os.path.join(tmp_work,"random_input")):
+        set_ownership_daemon_user(os.path.join(tmp_work,"random_input"))
 
     # move all executable files from the compilation directory to the main tmp directory
     # Note: Must preserve the directory structure of compiled files (esp for Java)

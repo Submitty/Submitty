@@ -170,7 +170,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
                     setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1],testcase_num)
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
-                    grade_item.remove_read_permissions(os.path.join(tmp_work,"random_input")) 
+                    grade_item.remove_permissions_for_others_and_groups(os.path.join(tmp_work,"random_input")) 
 
                     display_sys_variable = os.environ.get('DISPLAY', None)
                     display_line = [] if display_sys_variable is None else ['--display', str(display_sys_variable)]
