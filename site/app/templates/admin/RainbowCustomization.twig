@@ -1,12 +1,13 @@
 <div class="content">
     <h2>Rainbow Grades Customization -- Work In Progress</h2>
 
-    <a target=_blank href="https://submitty.org/instructor/rainbow_grades/">More information on Rainbow Grades Customization <i style="font-style:normal;" class="helpicon"></i></a>
-
-    <div id="save_status">
-        No changes to save
+    <div id="save_status_container" class="customization_item">
+        <span id="status_label">Status: </span>
+        <div id="save_status">
+            No changes to save
+        </div>
+        <input id="save_status_button" type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
     </div>
-    <input type="button" value="Save Changes" onclick="ajaxUpdateJSON();" />
 
     <div id="list_wrapper">
         <div id="display_benchmarks" class="customization_item">

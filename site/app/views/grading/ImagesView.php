@@ -16,6 +16,7 @@ class ImagesView extends AbstractView {
     public function listStudentImages($students, $grader_sections, $instructor_permission) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
 
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];

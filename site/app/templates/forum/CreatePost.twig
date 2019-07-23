@@ -99,19 +99,23 @@
 </div>
 
 {% if isThreadLocked != 1 or userAccessFullGrading %}
-    <form class="reply-box post_reply_from" id="{{ post_id }}-reply" onsubmit="post.disabled=true; post.value='Submitting post...'; return true;" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data">
+    <form class="reply-box post_reply_from" id="{{ post_id }}-reply" style="margin-left:{{ offset }}px" method="POST" action="{{ form_post_url }}" enctype="multipart/form-data">
         <input type="hidden" name="thread_id" value="{{ thread_id }}" />
         <input type="hidden" name="parent_id" value="{{ post_id }}" />
         <br/>
 
         {%  include "forum/ThreadPostForm.twig" with {
             "show_post" : true,
-            "post_content_placeholder" : "Enter your reply to " ~ visible_username ~ "here...",
+            "post_content_placeholder" : "Enter your reply to " ~ visible_username ~ " here...",
             "show_merge_thread_button" : false,
             "post_box_id" : post_box_id,
             "show_anon" : true,
+            "thread_resolve_state": thread_resolve_state,
+            "show_unresolve": show_unresolve,
+            "visible_username" : visible_username,
             "submit_label" : "Submit Reply to " ~ visible_username,
         } %}
+
     </form>
 {% endif %}
 

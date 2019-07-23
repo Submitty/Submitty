@@ -1,11 +1,10 @@
-@import "colors.css";
 #bar_wrapper {
      position: absolute;
      height: 41px;
      width: 650px;
      top: -90px;
      left: 45%;
-     background-color: var(--standard-pale-blue-gray)
+     background-color: var(--standard-pale-blue-gray);
      cursor: move;
      z-index:40;
      border: solid 6px var(--important-post);

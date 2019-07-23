@@ -63,7 +63,7 @@
             items : '.category-sortable',
             handle: ".handle",
             update: function (event, ui) {
-                reorderCategories();
+                reorderCategories('{{ csrf_token }}');
             }
         });
         $("#ui-category-list").find(".fa-trash").click(function() {

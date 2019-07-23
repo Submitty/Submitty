@@ -293,7 +293,8 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
 }
 
 
-function changeDisplayOptions(option, thread_id){
+function changeDisplayOptions(option){
+    thread_id = $('#current-thread').val();
     document.cookie = "forum_display_option=" + option + ";";
     window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
 }
@@ -816,8 +817,9 @@ function refreshCategories() {
     $(".cat-buttons").trigger("eventChangeCatClass");
 }
 
-function reorderCategories(){
+function reorderCategories(csrf_token) {
     var data = $('#ui-category-list').sortable('serialize');
+    data += "&csrf_token=" + csrf_token;
     var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
     $.ajax({
         url: url,
@@ -1101,5 +1103,21 @@ function loadThreadHandler(){
                 window.alert("Something went wrong while trying to display thread details. Please try again.");
             }
         });
+    });
+}
+
+function thread_post_handler(){
+    $('.submit_unresolve').click(function(event){
+        var post_box_id = $(this).attr("post_box_id");
+        $('#thread_status_input_'+post_box_id).val(-1);
+        return true;
+    });
+
+    $('.post_reply_from').submit(function(){
+        var post = $(this).find("[name=post]");
+        var post_unresolve = $(this).find("[name=post_and_unresolve]");
+        post.attr("disabled", "true").val('Submitting post...');
+        post_unresolve.attr("disabled", "true").val('Submitting post...');
+        return true;
     });
 }
