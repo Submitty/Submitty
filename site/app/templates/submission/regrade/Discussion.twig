@@ -61,9 +61,11 @@
     </div>
 {% endif %}
 {% if can_inquiry %}
+    {% if grade_inquiry_per_component_allowed %}
+        {% include "submission/regrade/ComponentTabs.twig" with { 'gradeable_components': gradeable_components } only %}
+    {% endif %}
     {% for post in posts %}
-        <div style="margin-top: 20px;">
-            <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
+            <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="margin-top:20px; padding:20px;" data-component_id="{{ post.gc_id }}">
                 <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
                 <hr>
                 <div style="float:right">
@@ -71,7 +73,6 @@
                     {{ post.date }}
                 </div>
             </div>
-        </div>
     {% endfor %}
     <div style="padding:20px;">
         {% if grade_inquiry_status != 'no_submission' %}
@@ -79,6 +80,7 @@
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
                 <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
                 <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
+                <input type="hidden" id="gc_id" name="gc_id">
                 {% if grade_inquiry_status == 'none' or grade_inquiry_status == 'resolved' %}
                     {% set text_area_label_text = 'Write an inquiry:' %}
                 {% elseif grade_inquiry_status == 'pending' or grade_inquiry_status == 'pending_grading' %}

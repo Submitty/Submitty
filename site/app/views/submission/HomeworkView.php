@@ -789,11 +789,13 @@ class HomeworkView extends AbstractView {
                 $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
                 $date = DateUtils::parseDateTime($thread['timestamp'], $this->core->getConfig()->getTimezone());
                 $content = $thread['content'];
+                $gc_id = $thread['gc_id'];
                 $posts[] = [
                     'is_staff' => $is_staff,
                     'date' => date_format($date, 'm/d/Y g:i A'),
                     'name' => $name,
-                    'content' => $content
+                    'content' => $content,
+                    'gc_id' => $gc_id
                 ];
 
             }
@@ -810,6 +812,8 @@ class HomeworkView extends AbstractView {
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
+            'grade_inquiry_per_component_allowed' => $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed(),
+            'gradeable_components' => $graded_gradeable->getGradeable()->getComponents(),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
