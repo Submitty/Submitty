@@ -159,7 +159,7 @@ response = subprocess.run(request, stdout=subprocess.PIPE)
 
 # Check the return code of the 'curl' execution
 if response.returncode != 0:
-    raise Exception('Failure during curl server call to obtain auth token.')
+    raise Exception('Failure during curl server call to obtain auth token')
 
 # Verify a token was successfully received
 response_json = json.loads(response.stdout)
