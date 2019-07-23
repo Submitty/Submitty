@@ -402,9 +402,9 @@ class DatabaseQueries {
 
     public function removeNotificationsPost($post_id) {
         //Deletes all children notifications i.e. this posts replies
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>thread_id = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>'thread_id' = ?", array($post_id));
         //Deletes parent notification i.e. this post is a reply
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>post_id = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>'post_id' = ?", array($post_id));
     }
 
     public function isStaffPost($author_id){
@@ -573,7 +573,7 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>thread_id = ? and metadata::json->>post_id = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
