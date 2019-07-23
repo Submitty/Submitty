@@ -115,7 +115,7 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
         $this->submitty_db->query("
 SELECT *
 FROM users
-WHERE user_access_level = ?
+WHERE user_access_level <= ?
 ORDER BY user_id", [User::LEVEL_FACULTY]);
         $return = array();
         foreach ($this->submitty_db->rows() as $user) {

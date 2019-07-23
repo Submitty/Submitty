@@ -3053,6 +3053,17 @@ AND gc_id IN (
 
     }
 
+    public function checkIsInstructorInCourse($user_id, $course, $semester) {
+        $this->submitty_db->query("
+            SELECT
+                CASE WHEN user_group=1 THEN TRUE
+                ELSE FALSE
+                END
+            AS is_instructor
+            FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
+        return $this->submitty_db->row()['is_instructor'];
+    }
+
     public function getRegradeRequestStatus($user_id, $gradeable_id){
         $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", array($user_id, $gradeable_id));
         $result = ($this->course_db->row()) ? $row['status'] : 0;

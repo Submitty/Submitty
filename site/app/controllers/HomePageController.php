@@ -90,28 +90,41 @@ class HomePageController extends AbstractController {
 
     /**
      * @param $user_id
+     * @param $as_instructor
      * @Route("/api/courses", methods={"GET"})
      * @Route("/api/courses/{user_id}", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
      * @Route("/home/courses/{user_id}", methods={"GET"}, requirements={"user_id": "^(?!new)[^\/]+"})
      * @return Response
      */
-    public function getCourses($user_id = null) {
+    public function getCourses($user_id = null, $as_instructor = false) {
+        if ($as_instructor === 'true') {
+            $as_instructor = true;
+        }
+
         $user = $this->core->getUser();
         if (is_null($user_id) || $user->getAccessLevel() !== User::LEVEL_SUPERUSER) {
             $user_id = $user->getId();
         }
+
         $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user_id);
         $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user_id);
 
         // Filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
 
-        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user_id) {
-            return $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
+        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user_id, $as_instructor) {
+            return $as_instructor ?
+                $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
+                :
+                $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
         });
-        $archived_courses = array_filter($archived_courses, function(Course $course) use($user_id) {
-            return $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
+
+        $archived_courses = array_filter($archived_courses, function(Course $course) use($user_id, $as_instructor) {
+            return $as_instructor ?
+                $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
+                :
+                $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
         });
 
         return Response::JsonOnlyResponse(
