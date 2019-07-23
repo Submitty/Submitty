@@ -59,7 +59,7 @@ class HomePageView extends AbstractView {
             User::LEVEL_FACULTY     => "faculty",
             User::LEVEL_SUPERUSER   => "superuser"
         ];
-
+        $this->core->getOutput()->addInternalJs('homepage.js');
         $this->core->getOutput()->addInternalCss('homepage.css');
         return $this->core->getOutput()->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
