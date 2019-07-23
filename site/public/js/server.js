@@ -173,44 +173,11 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 /**
  * Displays edit registration sections form on button press
  */
-function editRegistrationSectionsForm() {
-    var form = $("#registration-sections-form");
-    form.css("display","block");
-}
-
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
     form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
-}
-
-function newDownloadForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $('#download-form');
-    form.css('display', 'block');
-    $("#download-form input:checkbox").each(function() {
-        if ($(this).val() === 'NULL') {
-            $(this).prop('checked', false);
-        } else {
-            $(this).prop('checked', true);
-        }
-    });
-}
-
-function newGraderListForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#grader-list-form");
-    form.css("display", "block");
-    $('[name="upload"]', form).val(null);
-}
-
-function newClassListForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#class-list-form");
-    form.css("display", "block");
-    $('[name="move_missing"]', form).prop('checked', false);
-    $('[name="upload"]', form).val(null);
 }
 
 function newDeleteGradeableForm(form_action, gradeable_name) {
