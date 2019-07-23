@@ -1085,6 +1085,8 @@ function loadThreadHandler(){
                     return;
                 }
 
+                $(obj).find(".thread_box").css("background", "white");
+
                 $('.thread_box').removeClass('active');
 
                 $(obj).children("div.thread_box").addClass('active');
