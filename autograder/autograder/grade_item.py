@@ -68,7 +68,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     testcase_num = 1
     for t in complete_config_obj['testcases']:
         testcase_folder = os.path.join("test{:02}".format(testcase_num))
-        tmp_test = Testcase.Testcase(testcase_folder, queue_obj, complete_config_obj, t,
+        tmp_test = Testcase.Testcase(testcase_num, testcase_folder, queue_obj, complete_config_obj, t,
                                      which_untrusted, is_vcs, job_id, is_batch_job, working_directory, testcases,
                                      submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
         testcases.append( tmp_test )

@@ -14,9 +14,10 @@ from . import autograding_utils, CONFIG_PATH, JailedSandbox
 
 
 class Testcase():
-  def __init__(self, name, queue_obj, complete_config_obj, testcase_info, untrusted_user,
+  def __init__(self, number, name, queue_obj, complete_config_obj, testcase_info, untrusted_user,
                is_vcs, job_id, is_batch, autograding_directory, previous_testcases, submission_string, 
                log_path, stack_trace_log_path, is_test_environment):
+    self.number = number
     self.name = name
     self.queue_obj = queue_obj
     self.untrusted_user = untrusted_user
@@ -35,11 +36,10 @@ class Testcase():
     # else:
     self.secure_environment = JailedSandbox.JailedSandbox(self.testcase_directory, complete_config_obj, testcase_info.get('pre_commands', list()), self, autograding_directory, is_test_environment)
     
-  
   def _run_execution(self):
     self.secure_environment.setup_for_execution_testcase()
     
-    with open(os.path.join(tmp_logs,"runner_log.txt"), 'a') as logfile:
+    with open(os.path.join(self.secure_environment.tmp_logs,"runner_log.txt"), 'a') as logfile:
       print ("LOGGING BEGIN my_runner.out",file=logfile)
 
       # Used in graphics gradeables
@@ -48,11 +48,11 @@ class Testcase():
 
       logfile.flush()
       arguments = [
-        queue_obj["gradeable"],
-        queue_obj["who"],
-        str(queue_obj["version"]),
-        submission_string,
-        '--testcase', str(testcase_num)]
+        self.queue_obj["gradeable"],
+        self.queue_obj["who"],
+        str(self.queue_obj["version"]),
+        self.submission_string,
+        '--testcase', str(self.number)]
       arguments += display_line
 
       try:
@@ -74,7 +74,7 @@ class Testcase():
           self.queue_obj['who'],
           str(self.queue_obj['version']),
           self.submission_string,
-          '--testcase', str(self.name)
+          '--testcase', str(self.number)
         ]
         return self.secure_environment.execute(self.untrusted_user, 'my_compile.out', arguments, logfile)
 
@@ -88,22 +88,10 @@ class Testcase():
       print(self.machine, self.untrusted_user, "{0} OK".format(self.type.upper()))
     else:
       print(self.machine, self.untrusted_user, "{0} FAILURE".format(self.type.upper()))
-      self.log_message("{0} FAILURE".format(self.type.upper()))
+      self.log_message("{0} FAILURE".format(self.type.upper()))   
 
-  def validate(self):
-    with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
-      arguments = [self.queue_obj["gradeable"],
-                   self.queue_obj["who"],
-                   str(self.queue_obj["version"]),
-                   self.submission_string]
-      success = self.secure_environment.execute(self.untrusted_user, 'my_validator.out', arguments, logfile)
-
-      if success == 0:
-          print (self.machine, self.untrusted_user,"VALIDATOR OK")
-      else:
-          print (self.which_machine, self.which_untrusted,"VALIDATOR FAILURE")
-          self.log_message("VALIDATION FAILURE")
-    return success
+  def archive(self, overall_log):
+    self.secure_environment.archive_results(overall_log)
 
   def log_message(self, message):
     autograding_utils.log_message(self.log_path,

@@ -116,6 +116,65 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
             print("Could not gain a lock on the log file.")
 
 
+
+# ==================================================================================
+#
+#  VALIDATION FUNCTIONS
+#
+# ==================================================================================
+
+def setup_for_validation(working_directory, complete_config, is_vcs, testcases, job_id, log_path, stack_trace_log_path):
+    
+    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
+    tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
+    tmp_work = os.path.join(working_directory,"TMP_WORK")
+    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
+    tmp_results = os.path.join(working_directory,"TMP_RESULTS")
+    submission_path = os.path.join(tmp_submission, "submission")
+
+    patterns = complete_config['autograding']
+
+    add_permissions_recursive(tmp_work,
+                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
+
+    # copy results files from compilation...
+    pattern_copy("submission_to_validation", patterns['submission_to_validation'], submission_path, tmp_work, tmp_logs)
+    if is_vcs:
+        checkout_subdir_path = os.path.join(self.tmp_submission, 'checkout', self.checkout_subdirectory)
+        pattern_copy("checkout_to_validation", patterns['submission_to_validation'],checkout_subdir_path,tmp_work,tmp_logs)
+    
+    for c in testcases:
+        if c.type == 'Compilation':
+            pattern_copy("compilation_to_validation", patterns['compilation_to_validation'], c.secure_environment.directory, tmp_work, tmp_logs)
+
+    # copy output files
+    test_output_path = os.path.join(tmp_autograding, 'test_output')
+    copy_contents_into(job_id, test_output_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
+
+    # copy any instructor instructor_solution code into the tmp work directory
+    instructor_solution = os.path.join(tmp_autograding, 'instructor_solution')
+    copy_contents_into(job_id, instructor_solution, tmp_work, tmp_logs, log_path, stack_trace_log_path)
+
+    # copy any instructor custom validation code into the tmp work directory
+    custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
+    copy_contents_into(job_id, custom_validation_code_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
+
+    
+
+    # copy the runner
+    bin_runner = os.path.join(tmp_autograding, "bin","validate.out")
+    my_runner  = os.path.join(tmp_work, "my_validator.out")
+    
+    shutil.copy(bin_runner, my_runner)
+
+    add_permissions_recursive(tmp_work,
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
 # ==================================================================================
 #
 #  ARCHIVAL AND PERMISSIONS FUNCTIONS
@@ -153,7 +212,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
         allow_only_one_part(tmp_submission, 'submission', os.path.join(tmp_logs, "overall.txt"))
 
 
-def archive_autograding_results(working_directory, queue_obj, log_path, stack_trace_log_path, owner_uid):
+def archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
 
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
@@ -161,18 +220,22 @@ def archive_autograding_results(working_directory, queue_obj, log_path, stack_tr
     tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
+    
+    partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
+    item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
 
     # grab the submission time
     with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
 
-    # remove the test_input directory, so we don't archive it!
-    shutil.rmtree(os.path.join(tmp_work,"test_input"))
-
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
-    if os.path.isfile(history_file_tmp):
+    if os.path.isfile(history_file_tmp) and is_test_environment:
+        with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
+            OPEN_JSON = json.load(open_file)
+        DAEMON_UID = OPEN_JSON['daemon_uid']
+
         shutil.move(history_file_tmp,history_file)
         # fix permissions
         ta_group_id = os.stat(tmp_results).st_gid
@@ -188,6 +251,21 @@ def archive_autograding_results(working_directory, queue_obj, log_path, stack_tr
             print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
         log_message(log_path, job_id, is_batch_job, which_untrusted, item_name, message="ERROR: grade.txt does not exist")
         log_stack_trace(stack_trace_log_path, job_id, is_batch_job, which_untrusted, item_name, trace=traceback.format_exc())
+
+    grade_result = ""
+    try:
+        with open(os.path.join(tmp_work,"grade.txt")) as f:
+            lines = f.readlines()
+            for line in lines:
+                line = line.rstrip('\n')
+                if line.startswith("Automatic grading total:"):
+                    grade_result = line
+    except:
+        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+            print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
+            log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
+            log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+
 
     gradeable_deadline_string = gradeable_config_obj["date_due"]
     
@@ -209,6 +287,7 @@ def archive_autograding_results(working_directory, queue_obj, log_path, stack_tr
     queue_obj["gradingtime"]=gradingtime
     queue_obj["grade_result"]=grade_result
     queue_obj["which_untrusted"]=which_untrusted
+    waittime = queue_obj["waittime"]
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
@@ -221,18 +300,18 @@ def archive_autograding_results(working_directory, queue_obj, log_path, stack_tr
             log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
             log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
 
-    autograding_utils.just_write_grade_history(history_file,
-                                                 gradeable_deadline_longstring,
-                                                 submission_longstring,
-                                                 seconds_late,
-                                                 queue_obj["queue_time"],
-                                                 "BATCH" if is_batch_job else "INTERACTIVE",
-                                                 grading_began_longstring,
-                                                 int(waittime),
-                                                 grading_finished_longstring,
-                                                 int(gradingtime),
-                                                 grade_result,
-                                                 queue_obj.get("revision", None))
+    just_write_grade_history(history_file,
+                             gradeable_deadline_longstring,
+                             submission_longstring,
+                             seconds_late,
+                             queue_obj["queue_time"],
+                             "BATCH" if is_batch_job else "INTERACTIVE",
+                             grading_began_longstring,
+                             int(waittime),
+                             grading_finished_longstring,
+                             int(gradingtime),
+                             grade_result,
+                             queue_obj.get("revision", None))
 
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         f.write("FINISHED GRADING!\n")
@@ -286,8 +365,7 @@ def allow_only_one_part(path, log_path=os.devnull):
 
 # go through the testcase folder (e.g. test01/) and remove anything
 # that matches the test input (avoid archiving copies of these files!)
-def remove_test_input_files(overall_log,testcase_folder):
-    test_input_path = os.path.join(tmp_autograding, "test_input")
+def remove_test_input_files(overall_log, test_input_path, testcase_folder):
     for path, subdirs, files in os.walk(test_input_path):
         for name in files:
             relative = path[len(test_input_path)+1:]
