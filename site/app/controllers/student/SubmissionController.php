@@ -496,6 +496,7 @@ class SubmissionController extends AbstractController {
         $user_id = reset($user_ids);
 
         $path = $_POST['path'];
+
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
@@ -573,11 +574,20 @@ class SubmissionController extends AbstractController {
 
         $path = rawurldecode(htmlspecialchars_decode($path));
 
-        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
-            $gradeable->getId(), $path);
-
+        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $gradeable->getId(), $path);
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
         $uploaded_file_base_name = "upload.pdf";
+
+        //get any and all images associated with this PDF if they exist.
+        //images are order <original>_<split-number>_<page-number>, so grab everuthing with the same suffixes
+        preg_match("/\d*$/", pathinfo($path, PATHINFO_FILENAME), $matches) ;
+        $split_number = count($matches) >= 1 ? reset($matches) : "-1";
+        $image_files = glob(FileUtils::joinPaths(  dirname($uploaded_file)   , "*.*"));
+
+        $regex = "/.*_{$split_number}_\d*\.\w*$/";
+        $image_files = preg_grep($regex, $image_files);
+
+        $image_extension = count($image_files) > 0 ? pathinfo(reset($image_files), PATHINFO_EXTENSION) : "";
 
         if (isset($uploaded_file)) {
             // if we are merging in the previous submission (TODO check folder support)
@@ -593,9 +603,18 @@ class SubmissionController extends AbstractController {
                         $parts[0] .= "_version_".$old_version;
                         $file_base_name = implode(".", $parts);
                     }
+
+                    $image_name = pathinfo($file, PATHINFO_FILENAME);
+                    preg_match("/\d*$/", $image_name, $matches);
+                    $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
+
+                    if(!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0 ){
+                        $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                    }
+
                     $move_here = FileUtils::joinPaths($version_path, $file_base_name);
                     if (!@copy($file, $move_here)){
-                        return $this->uploadResult("Failed to merge previous version.", false);
+                        return $this->uploadResult("Failed to merge previous version on file {$file_base_name}", false);
                     }
                 }
             }
@@ -608,6 +627,18 @@ class SubmissionController extends AbstractController {
             }
             if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
                 return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+            }
+            //do the same thing for images
+            $i = 1;
+            foreach ($image_files as $image) {
+                // copy over the uploaded image
+                if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension ))) {
+                    return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
+                }
+                if (!@unlink($image)) {
+                    return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
+                }
+                $i++;
             }
 
         }
