@@ -20,6 +20,7 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('userform.js');
+        $this->core->getOutput()->addInternalJs('directory.js');
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
             "sections" => $sorted_students,
@@ -45,6 +46,7 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalJs('userform.js');
+        $this->core->getOutput()->addInternalJs('directory.js');
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
             "graders" => $graders_sorted,

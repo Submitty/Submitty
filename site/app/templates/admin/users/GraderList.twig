@@ -1,10 +1,9 @@
 <div class="content">
     <div style="float: right; margin-bottom: 20px;">
-        <a onclick="newDownloadForm()" class="btn btn-primary">Download Graders</a>
-        <a onclick="newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
-        <a onclick="newUserForm();
-            $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);" class="btn btn-primary">New Grader</a>
-		<a onclick="editRegistrationSectionsForm()" class="btn btn-primary">Assign Registration Sections for Grading</a>
+        <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Graders</a>
+        <a href="javascript:newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
+        <a href="javascript:newGraderForm()" class="btn btn-primary">New Grader</a>
+		<a href="javascript:editRegistrationSectionsForm()" class="btn btn-primary">Assign Registration Sections for Grading</a>
     </div>
     <h1>Manage Graders</h1>
     {# This is a data table #}
