@@ -57,9 +57,15 @@ class UsersController extends AbstractController {
                     $grp = 'Student';
                     break;
             }
-            $first_name = str_replace("'", "&#039;", $student->getDisplayedFirstName());
-            $last_name = str_replace("'", "&#039;", $student->getDisplayedLastName());
-            array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $student->getId(), 'email' => $student->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => "$grp"]);
+            array_push($download_info, [
+                'first_name' => $student->getDisplayedFirstName(),
+                'last_name' => $student->getDisplayedLastName(),
+                'user_id' => $student->getId(),
+                'email' => $student->getEmail(),
+                'reg_section' => $reg_sec,
+                'rot_section' => $rot_sec,
+                'group' => $grp
+            ]);
         }
 
         return new Response(
@@ -114,9 +120,15 @@ class UsersController extends AbstractController {
                     $reg_sec = "";
                     break;
             }
-            $first_name = str_replace("'", "&#039;", $grader->getDisplayedFirstName());
-            $last_name = str_replace("'", "&#039;", $grader->getDisplayedLastName());
-            array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $grader->getId(), 'email' => $grader->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => $grp]);
+            array_push($download_info, [
+                'first_name' => $grader->getDisplayedFirstName(),
+                'last_name' => $grader->getDisplayedLastName(),
+                'user_id' => $grader->getId(),
+                'email' => $grader->getEmail(),
+                'reg_section' => $reg_sec,
+                'rot_section' => $rot_sec,
+                'group' => $grp
+            ]);
         }
 
         return new Response(
