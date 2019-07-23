@@ -440,3 +440,11 @@ body {min-width: 925px;}
     display: block;
     margin-bottom: 0.25em;
 }
+
+.post_content pre{
+    white-space: pre-wrap;
+}
+
+.post_content p img{
+    max-width: 100%;
+}
