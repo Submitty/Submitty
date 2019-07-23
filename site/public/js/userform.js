@@ -108,4 +108,10 @@ function newUserForm() {
     $("[name='grading_registration_section[]']").prop('checked', false);
     $('#user-form-student-error-message').css('display', 'block');
     $('#user-form-assigned-sections').css('display', 'none');
+    $("#user_id").focus();
+}
+
+function newGraderForm() {
+    newUserForm();
+    $('[name=\'user_group\'] option[value=\'3\']').prop('selected', true);
 }
