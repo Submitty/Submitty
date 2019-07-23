@@ -402,9 +402,9 @@ class DatabaseQueries {
 
     public function removeNotificationsPost($post_id) {
         //Deletes all children notifications i.e. this posts replies
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>1 = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>thread_id = ?", array($post_id));
         //Deletes parent notification i.e. this post is a reply
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>2 = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>post_id = ?", array($post_id));
     }
 
     public function isStaffPost($author_id){
@@ -2995,14 +2995,14 @@ AND gc_id IN (
     /**
      * Marks $user_id notifications as seen
      *
-     * @param sting $user_id
+     * @param string $user_id
      * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
      */
     public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1){
         $parameters = array();
         $parameters[] = $user_id;
         if($thread_id != -1) {
-        	$id_query = "metadata::json->0->>'thread_id' = ?";
+        	$id_query = "metadata::json->>'thread_id' = ?";
         	$parameters[] = $thread_id;
         } else if($notification_id == -1) {
             $id_query = "true";
