@@ -85,12 +85,12 @@ if not os.path.exists(rg_course_path + '/Makefile'):
 
     # Copy Makefile from master rainbow grades directory
     # to course specific directory
-    print('Copying initial files')
+    print('Copying initial files', flush=True)
     shutil.copyfile(rainbow_grades_path + '/SAMPLE_Makefile',
                     rg_course_path + '/Makefile')
 
     # Setup Makefile path
-    print('Configuring Makefile')
+    print('Configuring Makefile', flush=True)
     makefile_path = os.path.join(rg_course_path, 'Makefile')
 
     # Read in the file
@@ -110,7 +110,7 @@ if not os.path.exists(rg_course_path + '/Makefile'):
 
 else:
 
-    print('Previously configured Makefile detected')
+    print('Previously configured Makefile detected', flush=True)
 
 # Determine if the instructor has provided a custom_customization.json
 # If so make a copy of that and rename as 'customization.json' so it will be used
@@ -154,7 +154,7 @@ request = [
 ]
 
 # Using the credentials call the API to obtain an auth token
-print('Obtaining auth token')
+print('Obtaining auth token', flush=True)
 response = subprocess.run(request, stdout=subprocess.PIPE)
 
 # Check the return code of the 'curl' execution
@@ -167,9 +167,9 @@ response_json = json.loads(response.stdout)
 # Take this path if we DID NOT get an auth token
 if response_json['status'] != 'success':
 
-    print('Failed to obtain an auth token.')
-    print('Check submitty_admin.json contains valid credentials')
-    print('Attempting to continue with previously generated grade summaries')
+    print('Failed to obtain an auth token.', flush=True)
+    print('Check submitty_admin.json contains valid credentials', flush=True)
+    print('Attempting to continue with previously generated grade summaries', flush=True)
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
@@ -193,7 +193,7 @@ else:
 
     # Call generate_grade_summaries.py script to generate grade summaries for the
     # course
-    print('Generating grade summaries')
+    print('Generating grade summaries', flush=True)
     cmd_return_code = subprocess.call(cmd)
 
     # Check return code of generate_grade_summaries.py execution
@@ -201,26 +201,26 @@ else:
         raise Exception('Failure generating grade summaries')
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
-print('Pulling in grade reports')
+print('Pulling in grade reports', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
 # Run make
-print('Compiling rainbow grades')
+print('Compiling rainbow grades', flush=True)
 cmd_output = os.popen('make').read()
 
 # Run make push_test
-print('Exporting to summary_html')
+print('Exporting to summary_html', flush=True)
 cmd_output = os.popen('make push_test').read()
 
 # Recursively update permissions for all files in the rainbow_grades directory
-print('Updating permissions')
-cmd_output = os.popen('chmod -R o-rwx ' + rg_course_path).read()
+print('Updating permissions', flush=True)
+cmd_output = os.popen('chmod -R --silent o-rwx ' + rg_course_path).read()
 
 summary_html_path = os.path.join(courses_path,
                                  semester,
                                  course,
                                  'reports',
                                  'summary_html')
-cmd_output = os.popen('chmod -R o-rwx ' + summary_html_path).read()
+cmd_output = os.popen('chmod -R --silent o-rwx ' + summary_html_path).read()
 
-print('Done')
+print('Done', flush=True)
