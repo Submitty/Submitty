@@ -24,7 +24,7 @@
     "pdfjs-dist": "^2.1.266",
     "shortcut-buttons-flatpickr": "^0.3.0",
     "twig": "^1.13.3",
-    "mermaid": "~8.1.0"
+    "mermaid": "~8.2.3"
   },
   "devDependencies": {}
 }
