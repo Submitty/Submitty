@@ -69,12 +69,6 @@ function newUserForm(grader_flag) {
 }
 
 $("#edit-user-form").ready(function() {
-    $(window).keydown(function(event){
-        if((event.keyCode == 13)) {
-            event.preventDefault();
-        }
-    });
-
     var url = buildNewCourseUrl(['user_information']);
     $.ajax({
         url: url,
@@ -99,10 +93,10 @@ function checkValidEntries() {
         case "user_id":
             var valid_expression = /^[a-z0-9_\-]*$/;
             if (!$('#user-form-already-exists-error-message').is(':hidden') || !(valid_expression.test(input.val()))) {
-                input.css("background-color", "#f76c6c");  //--date-picker-red
+                input[0].setCustomValidity(input.val()+" is not a valid "+input.prop('id'));
             }
             else {
-                input.css("background-color", "transparent");
+                input[0].setCustomValidity("");
             }
             break;
         case "user_numeric_id":
@@ -126,14 +120,18 @@ function checkValidEntries() {
             setRedOrTransparent(input,valid_expression);
             break;
     }
+
+    $(":text",$("#edit-user-form")).each( function() {
+        console.log(this.checkValidity());
+    });
 }
 
 function setRedOrTransparent(input,reg_expression) {
     if (!reg_expression.test(input.val())) {
-        input.css("background-color", "#f76c6c");  //--date-picker-red
+        input[0].setCustomValidity(input.val()+" is not a valid "+input.prop('id'));
     }
     else {
-        input.css("background-color", "transparent");
+        input[0].setCustomValidity("");
     }
 }
 

@@ -31,5 +31,5 @@ input[type=text]:valid {
  }
 
 input[type=text]:invalid {
-    background-color: blue;
+    background-color: var(--date-picker-red);
 }

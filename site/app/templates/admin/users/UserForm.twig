@@ -41,7 +41,7 @@
         </label>
         <label for="user_email">
             Email:
-            <input type="text" name="user_email" id="user_email" placeholder="(Optional)" "valid" />
+            <input type="text" name="user_email" id="user_email" placeholder="(Optional)" />
         </label>
         {% if use_database %}
             <label>
@@ -95,7 +95,7 @@
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ update_url }}" onchange="userFormChange()">
+    <form method="post" action="{{ update_url }}" onchange="userFormChange()" >
         {{ parent() }}
     </form>
 {% endblock %}
