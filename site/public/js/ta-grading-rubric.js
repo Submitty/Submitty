@@ -2067,6 +2067,7 @@ function onClickCountUp(me) {
     setMarkTitle(mark_id, 'No Credit');
     $.get('Mark.twig',null,function(){
         $("input[id^='mark-editor-']").each(function () {
+            $(this).attr("overall","No Credit");
             if(this.value<0){
                 this.style.backgroundColor = "var(--standard-vibrant-yellow)";
             }
@@ -2087,6 +2088,7 @@ function onClickCountDown(me) {
     setMarkTitle(mark_id, 'Full Credit');
     $.get('Mark.twig',null,function(){
         $("input[id^='mark-editor-']").each(function () {
+            $(this).attr("overall","Full Credit");
             if(this.value>0){
                 this.style.backgroundColor = "var(--standard-vibrant-yellow)";
             }

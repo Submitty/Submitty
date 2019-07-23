@@ -53,7 +53,7 @@ Required inputs:
 
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
-    {% set ref = component.marks[1].points %}
+    {% set f_mark = component.marks|first %}
     {% if not edit_marks_enabled %}
         <div class="custom-mark-container mark-container row"
              data-mark_id="0">
@@ -65,20 +65,14 @@ Required inputs:
             </span>
             <script>
                 function changeExtraColor(ref,me){
-                    if(ref<0 && me.value > 0){
-                        console.log("neg ",ref," ",me.value," ",me.style.backgroundColor);
+                    if(ref == "Full Credit" && me.value > 0){
                         me.style.backgroundColor = "var(--standard-vibrant-yellow)";
-                        console.log(me.style.backgroundColor);
                     }
-                    else if(ref>0 && me.value<0){
-                        console.log("pos ",ref," ",me.value," ",me.style.backgroundColor);
+                    else if(ref == "No Credit" && me.value<0){
                         me.style.backgroundColor = "var(--standard-vibrant-yellow)";
-                        console.log(me.style.backgroundColor);
                     }
                     else{
-                        console.log("match ",ref," ",me.value," ",me.style.backgroundColor);
                         me.style.backgroundColor = "var(--default-white)";
-                        console.log(me.style.backgroundColor);
                     }
                 }
             </script>
@@ -87,14 +81,14 @@ Required inputs:
                        type="number"
                        step="{{ precision }}"
                        style="background-color:var(--default-white)"
-                       onchange="onCustomMarkChange(this),changeExtraColor({{ ref }},this)"
+                       onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
                         <script>
-                            {% if ref<0 %}
+                            {% if f_mark.title == "Full Credit" %}
                                 if(document.getElementById("extra-mark-{{ component.id }}").value>0){
                                     document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
                                 }
-                            {% elseif ref>0 %}
+                            {% elseif f_mark.title == "No Credit" %}
                                 if(document.getElementById("extra-mark-{{ component.id }}").value<0){
                                     document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
                                 }

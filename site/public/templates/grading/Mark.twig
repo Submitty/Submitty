@@ -32,23 +32,30 @@ Required Input:
         {% if edit_marks_enabled %}
             <input id="mark-editor-{{ mark.id }}"
                    type="number"
-                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('grade_by_count_up').checked)"
-                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('grade_by_count_up').checked)"
+                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
+                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    step="{{ precision }}"
+                   data-overall=""
                    value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
             <script>
-                if(document.getElementById("grade_by_count_up").checked==true){
-                    {% if mark.points <0 %}
+                {% if first_mark %}
+                    var overall_title = "{{ mark.title  }}";
+                {% endif %}
+                document.getElementById("mark-editor-{{ mark.id }}").setAttribute("overall",overall_title);
+                if(document.getElementById("mark-editor-{{ mark.id }}").getAttribute("overall")=="Full Credit"){
+                    {% if mark.points > 0 %}
                         document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                    {% else %}
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--default-white)";
                     {% endif %}
-
                 }
-                else {
-                    {% if mark.points >0 %}
+                else{
+                    {% if mark.points < 0 %}
                         document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                    {% else %}
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--default-white)";
                     {% endif %}
-
                 }
             </script>
         {% else %}
@@ -92,7 +99,7 @@ Required Input:
 </div>
 <script>
     function changeMarkColor(me,countUp) {
-        if(countUp==true){
+        if(countUp=="No Credit"){
             if(me.value<0){
                 me.style.backgroundColor="var(--standard-vibrant-yellow)";
             }
