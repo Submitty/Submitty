@@ -26,7 +26,7 @@
 		<br />
 			
 		{# text box with the path to the current config file, hidden but still used in js #}
-		<input style='width: 83%' type='hidden' id='input_provide_full_path' name='autograding_config_path' 
+		<input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path' 
 			value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
 
@@ -123,7 +123,7 @@
 
     function onConfigPathChange() {
 		data=getConfigData();
-	    let full_path_obj = $('#input_provide_full_path');
+	    let full_path_obj = $('#input-provide-full-path');
 		let current_val = $('#config_search').val();
 		
 		//if a name is entered change to the path

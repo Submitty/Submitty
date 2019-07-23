@@ -3,6 +3,7 @@
 namespace app\controllers;
 
 
+use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\Core;
@@ -41,7 +42,23 @@ class MiscController extends AbstractController {
             case 'check_bulk_progress':
                 $this->checkBulkProgress();
                 break;
+            case 'get_server_time':
+                $this->getServerTime();
+                break;
         }
+    }
+
+    /**
+     * Get the current server time
+     *
+     * Returns a json string which contains the current server time broken up into year, month, day, hour, minute,
+     * second
+     */
+    private function getServerTime() {
+
+        $json = DateUtils::getServerTimeJson($this->core);
+        $this->core->getOutput()->renderJson($json);
+
     }
 
     private function encodePDF(){

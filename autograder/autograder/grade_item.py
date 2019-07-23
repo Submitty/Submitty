@@ -198,7 +198,6 @@ def add_all_permissions(folder):
 
 def remove_read_permissions(top_dir):
     for root, dirs, files in os.walk(top_dir):
-        os.chmod(root,os.stat(root).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
         for d in dirs:
             os.chmod(os.path.join(root, d),os.stat(os.path.join(root, d)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
         for f in files:

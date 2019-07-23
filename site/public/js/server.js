@@ -178,104 +178,10 @@ function editRegistrationSectionsForm() {
     form.css("display","block");
 }
 
-/**
- *
- */
-function editUserForm(user_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'users', 'action': 'get_user_details', 'user_id': user_id});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            var json = JSON.parse(data)['data'];
-            var form = $("#edit-user-form");
-            form.css("display", "block");
-            $('[name="edit_user"]', form).val("true");
-            var user = $('[name="user_id"]', form);
-            user.val(json['user_id']);
-            user.attr('readonly', 'readonly');
-            if (!user.hasClass('readonly')) {
-                user.addClass('readonly');
-            }
-            $('[name="user_numeric_id"]', form).val(json['user_numeric_id']);
-            $('[name="user_firstname"]', form).val(json['user_firstname']);
-            if (json['user_preferred_firstname'] === null) {
-                json['user_preferred_firstname'] = "";
-            }
-            $('[name="user_preferred_firstname"]', form).val(json['user_preferred_firstname']);
-            $('[name="user_lastname"]', form).val(json['user_lastname']);
-            if (json['user_preferred_lastname'] === null) {
-                json['user_preferred_lastname'] = "";
-            }
-            $('[name="user_preferred_lastname"]', form).val(json['user_preferred_lastname']);
-            $('[name="user_email"]', form).val(json['user_email']);
-            var registration_section;
-            if (json['registration_section'] === null) {
-                registration_section = "null";
-            }
-            else {
-                registration_section = json['registration_section'].toString();
-            }
-            var rotating_section;
-            if (json['rotating_section'] === null) {
-                rotating_section = "null";
-            }
-            else {
-                rotating_section = json['rotating_section'].toString();
-            }
-            $('[name="registered_section"] option[value="' + registration_section + '"]', form).prop('selected', true);
-            $('[name="rotating_section"] option[value="' + rotating_section + '"]', form).prop('selected', true);
-            $('[name="manual_registration"]', form).prop('checked', json['manual_registration']);
-            $('[name="user_group"] option[value="' + json['user_group'] + '"]', form).prop('selected', true);
-            $("[name='grading_registration_section[]']").prop('checked', false);
-            if (json['grading_registration_sections'] !== null && json['grading_registration_sections'] !== undefined) {
-                json['grading_registration_sections'].forEach(function(val) {
-                    $('#grs_' + val).prop('checked', true);
-                });
-            }
-            if(registration_section === 'null' && json['user_group'] === 4) {
-                $('#user-form-student-error-message').css('display', 'block');
-            }
-            else {
-                $('#user-form-student-error-message').css('display', 'none');
-            }
-            if(json['user_group'] == 4) {
-                $('#user-form-assigned-sections').css('display', 'none');
-            }
-            else {
-                $('#user-form-assigned-sections').css('display', 'block');
-            }
-
-        },
-        error: function() {
-            alert("Could not load user data, please refresh the page and try again.");
-        }
-    })
-}
-
-function newUserForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-user-form");
-    form.css("display", "block");
-    $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false).val("");
-    $('[name="user_numeric_id"]', form).val("");
-    $('[name="user_firstname"]', form).val("");
-    $('[name="user_preferred_firstname"]', form).val("");
-    $('[name="user_lastname"]', form).val("");
-    $('[name="user_email"]', form).val("");
-    $('[name="registered_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
-    $('[name="manual_registration"]', form).prop('checked', true);
-    $('[name="user_group"] option[value="4"]', form).prop('selected', true);
-    $("[name='grading_registration_section[]']").prop('checked', false);
-    $('#user-form-student-error-message').css('display', 'block');
-    $('#user-form-assigned-sections').css('display', 'none');
-}
-
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
-    form[0].outerHTML = json['popup'];
+    form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
 }
 
@@ -363,29 +269,6 @@ function confirmExtension(option){
     $('input[name="option"]').val(option);
     $('#excusedAbsenceForm').submit();
     $('input[name="option"]').val(-1);
-}
-
-function userNameChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-username-form");
-    form.css("display", "block");
-    $('[name="user_name_change"]', form).val("");
-}
-
-function passwordChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#change-password-form");
-    form.css("display", "block");
-    $('[name="new_password"]', form).val("");
-    $('[name="confirm_new_password"]', form).val("");
-}
-
-function closePopup(popup) {
-    //See if we have a close button that lets us click to close
-    var closer = $(popup).find(".close-button");
-    if (closer.length) {
-        closer.click();
-    }
 }
 
 function newUploadCourseMaterialsForm() {
@@ -1549,7 +1432,7 @@ function enableTabsInTextArea(jQuerySelector) {
 
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_extension'});
+    var url = buildNewCourseUrl(['extensions', 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1598,8 +1481,45 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
+function updateGradeOverride(data) {
+    var fd = new FormData($('#gradeOverrideForm').get(0));
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'update'});
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverridenGrades(json);
+            $('#user_id').val(this.defaultValue);
+            $('#marks').val(this.defaultValue);
+            $('#comment').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overriden Grades for ' + json['data']['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
+
 function loadHomeworkExtensions(g_id, due_date) {
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'get_extension_details', 'g_id': g_id});
+    var url = buildNewCourseUrl(['extensions', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1623,6 +1543,31 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
+function loadOverridenGrades(g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'get_overriden_grades', 'g_id': g_id});
+    $.ajax({
+        url: url,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverridenGrades(json);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    });
+}
+
 function refreshOnResponseLateDays(json) {
     $('#late_day_table tr:gt(0)').remove();
     if(json['data']['users'].length === 0){
@@ -1635,10 +1580,26 @@ function refreshOnResponseLateDays(json) {
     });
 }
 
+function refreshOnResponseOverridenGrades(json) {
+    var form = $("#load-overriden-grades");
+    $('#my_table tr:gt(0)').remove();
+    var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+    $('#title').replaceWith(title);
+    if(json['data']['users'].length === 0){
+        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+    } else {
+        json['data']['users'].forEach(function(elem){
+            var delete_button = "<a onclick=\"deleteOverridenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#my_table').append(bits.join('</td><td>'));
+        });
+    }
+}
+
 function updateLateDays(data) {
     var fd = new FormData($('#lateDayForm').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'update_late', 'csv_option': selected_csv_option});
+    var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
         url: url,
         type: "POST",
@@ -1674,7 +1635,7 @@ function updateLateDays(data) {
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildUrl({'component': 'admin', 'page': 'late', 'action': 'delete_late'});
+    var url = buildNewCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1703,6 +1664,38 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+
+function deleteOverridenGrades(user_id, g_id) {
+    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'delete_grades'});
+    var confirm = window.confirm("Are you sure you would like to delete this entry?");
+    if (confirm) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                user_id: user_id,
+                g_id: g_id
+            },
+            success: function(data) {
+                var json = JSON.parse(data);
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                    $('#messages').append(message);
+                    return;
+                }
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overriden Grades deleted .</div>';
+                $('#messages').append(message);
+                refreshOnResponseOverridenGrades(json);
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
+    return false;
+}
+
 function toggleRegradeRequests(){
     var element = document.getElementById("regradeBoxSection");
     if (element.style.display === 'block') {
@@ -1746,7 +1739,7 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filename) + '&checked=' + checked;
+    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
 
     $.ajax({
         type: "POST",
@@ -1761,7 +1754,7 @@ function changePermission(filename, checked) {
 
 function changeFolderPermission(filenames, checked,handleData) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filename=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
+    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
 
     $.ajax({
         type: "POST",
@@ -1778,9 +1771,32 @@ function changeFolderPermission(filenames, checked,handleData) {
     })
 }
 
+function updateToServerTime(fp) {
+    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: {csrf_token: csrfToken},
+        success: function(data) {
+            var time = JSON.parse(data);
+            time = new Date(parseInt(time.year),
+                            parseInt(time.month) - 1,
+                            parseInt(time.day),
+                            parseInt(time.hour),
+                            parseInt(time.minute),
+                            parseInt(time.second));
+            fp.setDate(time,true);
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
-    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
     var tbr;
     tbr=false;
     $.ajax({
@@ -1802,7 +1818,7 @@ function changeNewDateTime(filename, newdatatime,handleData) {
 
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
-    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filename=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
     var tbr;
     tbr=false;
     $.ajax({

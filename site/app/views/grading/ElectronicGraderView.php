@@ -38,6 +38,8 @@ class ElectronicGraderView extends AbstractView {
         $overall_scores,
         $overall_average,
         int $total_submissions,
+        int $individual_viewed_grade,
+        int $total_students_submitted,
         int $registered_but_not_rotating,
         int $rotating_but_not_registered,
         int $viewed_grade,
@@ -143,6 +145,8 @@ class ElectronicGraderView extends AbstractView {
                 if ($gradeable->isTaGradeReleased()) {
                     $viewed_total = $total/$num_components;
                     $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
+                    $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
+                        number_format(($individual_viewed_grade/$total_students_submitted)*100,1);
                 }
             }
             if(!$peer) {
@@ -226,6 +230,9 @@ class ElectronicGraderView extends AbstractView {
             "component_overall_score" => $component_overall_score,
             "component_overall_max" => $component_overall_max,
             "component_overall_percentage" => $component_overall_percentage,
+            "individual_viewed_grade" => $individual_viewed_grade,
+            "total_students_submitted" => $total_students_submitted,
+            "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests
         ]);
     }
@@ -578,12 +585,38 @@ HTML;
             ];
         }
 
+        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : array();
+        foreach ($team_gradeable_view_history as $team_id => $team) {
+            $not_viewed_yet = true;
+            $hover_over_string = "";
+            ksort($team_gradeable_view_history[$team_id]);
+            ksort($team);
+                foreach ($team as $user => $value) {
+                    if ($value != null) {
+                        $not_viewed_yet = false;
+                        $date_object = new \DateTime($value);
+                        $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
+                    }
+                    else {
+                        $hover_over_string.= "Not viewed by ".$user."\n";
+                    }
+                }
+
+                if ($not_viewed_yet) {
+                    $team_gradeable_view_history[$team_id]['hover_string'] = '';
+                }
+                else {
+                    $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+                }
+        }
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
             "graders" => $graders,
             "empty_teams" => $empty_teams,
             "empty_team_info" => $empty_team_info,
+            "team_gradeable_view_history" => $team_gradeable_view_history,
             "view_all" => $view_all,
             "show_all_sections_button" => $show_all_sections_button,
             "show_import_teams_button" => $show_import_teams_button,
@@ -654,22 +687,29 @@ HTML;
         if ($this->core->getConfig()->isRegradeEnabled()) {
             $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRegradePanel', $graded_gradeable, $can_inquiry);
         }
-        if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+
+        if ($graded_gradeable->hasOverriddenGrades()) {
+            $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
+                "color" => "var(--standard-vibrant-yellow)", // canary yellow
+                "message" => "Overridden grades"
+            ]);
+        }
+        else if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#FF8040", // mango orange
+                    "color" => "var(--standard-creamsicle-orange)", // mango orange
                     "message" => "Cancelled Submission"
                 ]);
             } else {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#C38189", // lipstick pink (purple)
+                    "color" => "var(--standard-light-pink)", // lipstick pink (purple)
                     "message" => "No Submission"
                 ]);
             }
         } else {
             if ($late_status != LateDayInfo::STATUS_GOOD && $late_status != LateDayInfo::STATUS_LATE) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
-                    "color" => "#F62817", // fire engine red
+                    "color" => "var(--standard-red-orange)", // fire engine red
                     "message" => "Late Submission"
                 ]);
             }
@@ -888,6 +928,7 @@ HTML;
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
+        $has_overriden_grades = $graded_gradeable->hasOverriddenGrades();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -903,6 +944,7 @@ HTML;
             "can_verify" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
+            "has_overriden_grades" => $has_overriden_grades,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
             "show_silent_edit" => $show_silent_edit,

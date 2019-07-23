@@ -55,7 +55,7 @@ class JsonResponse extends AbstractResponse {
      * @param mixed|null $data
      * @return JsonResponse
      */
-    public static function getSuccessResponse($data) {
+    public static function getSuccessResponse($data = null) {
         return new self('success', $data);
     }
 
