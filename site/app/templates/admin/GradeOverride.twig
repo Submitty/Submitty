@@ -1,0 +1,69 @@
+<div class="content" >
+    <h1>Grade Override</h1>
+
+    <p>Use this form to
+    <a target=_blank href="https://submitty.org/instructor/grade_override">
+    override the total score
+    <i style="font-style:normal;" class="helpicon"></i></a>
+    for a student on a specific assignment or test.
+
+    <br>
+    <br>
+
+    This is useful for recording the grade on a makeup exam that used a different rubric, <br>
+    or to assign a grade in extenuating circumstances; e.g., unable to submit work on time, plagiarism, etc.
+    </p>
+
+    <br>
+    <br>
+
+    <form id="gradeOverrideForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateGradeOverride($(this));">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="option" value="-1" />
+        <div class="option">
+            <div class="option"><label for="g_id">Select Gradeable:</label><br>
+                <select name="g_id" id="g_id" style="margin-top: 10px; width: 50%">
+                    <option disabled selected value> -- select an option -- </option>
+                    {% for index, value in gradeables %}
+                        <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="button" class="btn btn-primary" style="margin-top: 10px" onclick="loadOverridenGrades($('#g_id').val())"> Apply Changes </button>
+            </div>
+        </div>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div class="option-title">Single Student Entry<br></div>
+        <div class="option" style="width:25%; display:inline-block;"><label for="user_id">Student ID:</label><br>
+            <input class="option-input" type="text" name="user_id" id="user_id" style="float:left">
+        </div>
+        <div class="option" style="width:25%; display:inline-block;"><label for="marks">Overriden marks:</label><br>
+            <input class="option-input" type="text" name="marks" id="marks" style="float:left" >
+        </div>
+        <div class="option" style="width:25%; display:inline-block;"><label for="comment">Comments (optional)</label><br>
+            <textarea name="comment" id="comment" class="option-input" type="text" style="float:left"></textarea>
+        </div>
+        <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" value="Submit" style="float:left"></div>
+        <div id="load-overriden-grades" align="center">
+        {# This is a data table #}
+            <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
+                <div class="option-title" id="title"></div>
+                <div>
+                    <caption />
+                    <thead class="persist-thead">
+                        <th>Student ID</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Marks</th>
+                        <th>Comments</th>
+                        <th>Delete</th>
+                    </thead>
+                </div>
+            </table>
+    </div>
+    </form>
+</div>
+<script>
+    $("#user_id").autocomplete({
+        source: {{ student_full|raw }}
+    });
+</script>
