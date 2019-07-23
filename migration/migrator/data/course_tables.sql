@@ -540,13 +540,13 @@ CREATE TABLE regrade_discussion (
 );
 
 --
--- Name: grade_override; Type: TABLE; Schema: 
+-- Name: grade_override; Type: TABLE; Schema:
 --
 CREATE TABLE grade_override (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
     marks float NOT NULL,
-    comment character varying 
+    comment character varying
 );
 
 --
@@ -1190,10 +1190,10 @@ ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("g_id") REFERENCES "gradeable"("g_id");
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk2" FOREIGN KEY ("team_id") REFERENCES "gradeable_teams"("team_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk3" FOREIGN KEY ("gc_id") REFERENCES "gradeable_component"("gc_id");
 
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
-ALTER TABLE regrade_discussion ADD CONSTRAINT gradeable_component_id_fk FOREIGN KEY (gc_id) REFERENCES gradeable_component (gc_id);
 
 ALTER TABLE ONLY categories_list
     ADD CONSTRAINT category_unique UNIQUE (category_desc);
@@ -1204,11 +1204,11 @@ ALTER TABLE ONLY thread_categories
 ALTER TABLE ONLY student_favorites
     ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
 
-ALTER TABLE ONLY regrade_requests
-    ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id);
+CREATE UNIQUE INDEX gradeable_user_unique ON regrade_requests(user_id, g_id) WHERE gc_id IS NULL;
+CREATE UNIQUE INDEX gradeable_team_unique ON regrade_requests(team_id, g_id) WHERE gc_id IS NULL;
 
-ALTER TABLE ONLY regrade_requests
-    ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id);
+ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
+ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
 
 -- End Forum Key relationships
 
