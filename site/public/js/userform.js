@@ -69,6 +69,12 @@ function newUserForm(grader_flag) {
 }
 
 $("#edit-user-form").ready(function() {
+    $(window).keydown(function(event){
+        if((event.keyCode == 13)) {
+            event.preventDefault();
+        }
+    });
+
     var url = buildNewCourseUrl(['user_information']);
     $.ajax({
         url: url,
@@ -77,12 +83,59 @@ $("#edit-user-form").ready(function() {
             $('[name="user_id"]').change(function() {
                 autoCompleteOnUserId(json);
             });
+            $(":text",$("#edit-user-form")).change(checkValidEntries);
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
         }
     })
 });
+
+function checkValidEntries() {
+    var form = $("#edit-user-form");
+    var input = $(this);
+
+    switch(input.prop("id")) {
+        case "user_id":
+            var valid_expression = /^[a-z0-9_\-]*$/;
+            if (!$('#user-form-already-exists-error-message').is(':hidden') || !(valid_expression.test(input.val()))) {
+                input.css("background-color", "#f76c6c");  //--date-picker-red
+            }
+            else {
+                input.css("background-color", "transparent");
+            }
+            break;
+        case "user_numeric_id":
+            break;
+        case "user_firstname":
+        case "user_lastname":
+            var valid_expression = /^[a-zA-Z'`\-\.\(\)]*$/;
+            setRedOrTransparent(input,valid_expression);
+            break;
+        case "user_preferred_firstname":
+        case "user_preferred_lastname":
+            var valid_expression = /^[a-zA-Z'`\-\.\(\) ]{0,30}$/;
+            setRedOrTransparent(input,valid_expression);
+            break;
+        case "user_email":
+            if (input.val() == '') {
+                input.css("background-color", "transparent");
+                break;
+            }
+            var valid_expression = /^[^(),:;<>@\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$/;
+            setRedOrTransparent(input,valid_expression);
+            break;
+    }
+}
+
+function setRedOrTransparent(input,reg_expression) {
+    if (!reg_expression.test(input.val())) {
+        input.css("background-color", "#f76c6c");  //--date-picker-red
+    }
+    else {
+        input.css("background-color", "transparent");
+    }
+}
 
 function autoCompleteOnUserId(user_information) {
     var form = $("#edit-user-form");
