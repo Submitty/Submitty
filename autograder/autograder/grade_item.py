@@ -122,14 +122,12 @@ def zip_my_directory(path,zipfilename):
             zipf.write(os.path.join(root,my_file),os.path.join(relpath,my_file))
     zipf.close()
 
-
 def unzip_this_file(zipfilename,path):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
     zip_ref = zipfile.ZipFile(zipfilename,'r')
     zip_ref.extractall(path)
     zip_ref.close()
-
 
 def allow_only_one_part(path, log_path=os.devnull):
     """
@@ -197,12 +195,7 @@ def add_all_permissions(folder):
                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
 def remove_read_permissions(top_dir):
-    for root, dirs, files in os.walk(top_dir):
-        for d in dirs:
-            os.chmod(os.path.join(root, d),os.stat(os.path.join(root, d)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
-        for f in files:
-            if os.getuid() == os.stat(os.path.join(root, f)).st_uid:
-                os.chmod(os.path.join(root, f),os.stat(os.path.join(root, f)).st_mode & ~stat.S_IRUSR & ~stat.S_IRGRP & ~stat.S_IROTH )
+    os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
    
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
