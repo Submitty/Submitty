@@ -62,6 +62,13 @@ class ReportController extends AbstractController {
         }
 
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+
+        // Check that the directory is writable, fail if not
+        if(!is_writable($base_path)) {
+            $this->core->addErrorMessage('Unable to write to the grade summaries directory');
+            $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+        }
+
         $g_sort_keys = [
             'type',
             'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
