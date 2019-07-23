@@ -1,0 +1,15 @@
+.component-tabs {
+    display: flex;
+    justify-content: space-evenly;
+    width: 100%;
+}
+.component-tab {
+    border-color: var(--standard-gray-black);
+    background-color: var(--default-white);
+    color: var(--text-black)
+}
+
+#component-tab-selected {
+    background-color: var(--standard-gray-black);
+    color: var(--text-white);
+}
