@@ -250,7 +250,6 @@ function clearUserFormInformation() {
     $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
     $('[name="manual_registration"]', form).prop('checked', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
-
     clearValidityWarnings();
 }
 

@@ -1706,6 +1706,19 @@ class Gradeable extends AbstractModel {
     }
 
     /**
+     * Gets if a user has a overriden grades for this gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function hasOverriddenGrades(Submitter $submitter) {
+        $userWithOverridenGrades = $this->core->getQueries()->getAUserWithOverridenGrades($this->getId(),$submitter->getId());
+        if($userWithOverridenGrades === null ){
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * Gets the number of days late this gradeable would be if submitted now
      * @return int
      */

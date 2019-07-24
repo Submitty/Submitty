@@ -25,6 +25,7 @@ use app\models\User;
 use app\models\Notification;
 use app\models\Email;
 use app\models\SimpleLateUser;
+use app\models\SimpleGradeOverridenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
@@ -100,6 +101,14 @@ class DatabaseQueries {
     public function getSubmittyUserApiKey($user_id) {
         $this->submitty_db->query("SELECT api_key FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['api_key'] : null;
+    }
+
+    /**
+     * Refreshes some user's api key from the submitty database given a user_id.
+     * @param $user_id
+     */
+    public function refreshUserApiKey($user_id) {
+        $this->submitty_db->query("UPDATE users SET api_key=encode(gen_random_bytes(16), 'hex') WHERE user_id=?", array($user_id));
     }
 
     /**
@@ -412,9 +421,9 @@ class DatabaseQueries {
 
     public function removeNotificationsPost($post_id) {
         //Deletes all children notifications i.e. this posts replies
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>1 = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>'thread_id' = ?", array($post_id));
         //Deletes parent notification i.e. this post is a reply
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>2 = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>'post_id' = ?", array($post_id));
     }
 
     public function isStaffPost($author_id){
@@ -583,7 +592,7 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
@@ -2277,6 +2286,49 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
+     * Return an array of users with overriden Grades
+     * @param string $gradeable_id
+     * @return SimpleGradeOverridenUser[]
+     */
+    public function getUsersWithOverridenGrades($gradeable_id) {
+        $this->course_db->query("
+        SELECT u.user_id, user_firstname,
+          user_preferred_firstname, user_lastname, marks, comment
+        FROM users as u
+        FULL OUTER JOIN grade_override as g
+          ON u.user_id=g.user_id
+        WHERE g_id=?
+          AND marks IS NOT NULL
+        ORDER BY user_email ASC;", array($gradeable_id));
+
+        $return = array();
+        foreach($this->course_db->rows() as $row){
+            $return[] = new SimpleGradeOverridenUser($this->core, $row);
+        }
+        return $return;
+    }
+
+    /**
+     * Return a user with overriden Grades for specific gradable and user_id
+     * @param string $gradeable_id
+     * @param string $user_id
+     * @return SimpleGradeOverridenUser[]
+     */
+    public function getAUserWithOverridenGrades($gradeable_id, $user_id) {
+        $this->course_db->query("
+        SELECT u.user_id, user_firstname,
+          user_preferred_firstname, user_lastname, marks, comment
+        FROM users as u
+        FULL OUTER JOIN grade_override as g
+          ON u.user_id=g.user_id
+        WHERE g_id=?
+          AND marks IS NOT NULL
+          AND u.user_id=?", array($gradeable_id,$user_id));
+
+          return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverridenUser($this->core, $this->course_db->row()) : null;
+    }
+
+    /**
      * "Upserts" a given user's late days allowed effective at a given time.
      *
      * About $csv_options:
@@ -2326,6 +2378,39 @@ ORDER BY gt.{$section_key}", $params);
             (user_id, g_id, late_day_exceptions)
             VALUES(?,?,?)", array($user_id, $g_id, $days));
         }
+    }
+
+    /**
+     * Updates overriden grades for given homework
+     * @param string $user_id
+     * @param string $g_id
+     * @param integer $marks
+     * @param string $comment
+     */
+    public function updateGradeOverride($user_id, $g_id, $marks, $comment){
+        $this->course_db->query("
+          UPDATE grade_override
+          SET marks=?, comment=?
+          WHERE user_id=?
+            AND g_id=?;", array($marks, $comment, $user_id, $g_id));
+        if ($this->course_db->getRowCount() === 0) {
+            $this->course_db->query("
+            INSERT INTO grade_override
+            (user_id, g_id, marks, comment)
+            VALUES(?,?,?,?)", array($user_id, $g_id, $marks, $comment));
+        }
+    }
+
+    /**
+     * Delete a given overriden grades for specific user for specific gradeable
+     * @param string $user_id
+     * @param string $g_id
+     */
+    public function deleteOverridenGrades($user_id, $g_id){
+        $this->course_db->query("
+          DELETE FROM grade_override
+          WHERE user_id=?
+          AND g_id=?", array($user_id, $g_id));
     }
 
     /**
@@ -2869,10 +2954,10 @@ AND gc_id IN (
      */
     public function insertEmails(array $flattened_emails, int $email_count){
         // PDO Placeholders
-        $row_string = "(?, ?, ?, current_timestamp, ?)";
+        $row_string = "(?, ?, current_timestamp, ?)";
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query("
-            INSERT INTO emails(recipient, subject, body, created, user_id)
+            INSERT INTO emails(subject, body, created, user_id)
             VALUES ".$value_param_string, $flattened_emails);
     }
 
@@ -2929,14 +3014,14 @@ AND gc_id IN (
     /**
      * Marks $user_id notifications as seen
      *
-     * @param sting $user_id
+     * @param string $user_id
      * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
      */
     public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1){
         $parameters = array();
         $parameters[] = $user_id;
         if($thread_id != -1) {
-        	$id_query = "metadata::json->0->>'thread_id' = ?";
+        	$id_query = "metadata::json->>'thread_id' = ?";
         	$parameters[] = $thread_id;
         } else if($notification_id == -1) {
             $id_query = "true";
