@@ -76,7 +76,8 @@ class NotificationController extends AbstractController {
         $user_id = $this->core->getUser()->getId();
         $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $nid)['metadata'];
         if (!$seen) {
-            $this->core->getQueries()->markNotificationAsSeen($user_id, $nid);
+            $thread_id = Notification::getThreadIdIfExists($metadata);
+            $this->core->getQueries()->markNotificationAsSeen($user_id, $nid, $thread_id);
         }
         return Response::RedirectOnlyResponse(
             new RedirectResponse(Notification::getUrl($this->core, $metadata))
