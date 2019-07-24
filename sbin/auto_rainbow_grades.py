@@ -169,7 +169,8 @@ if response_json['status'] != 'success':
 
     print('Failed to obtain an auth token.', flush=True)
     print('Check submitty_admin.json contains valid credentials', flush=True)
-    print('Attempting to continue with previously generated grade summaries', flush=True)
+    print('Attempting to continue with previously generated grade summaries', 
+          flush=True)
 
     # We may still continue execution if grade summaries had been previously manually
     # generated, Check grade summaries directory to see if it contains any summaries
