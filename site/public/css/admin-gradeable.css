@@ -56,8 +56,7 @@ select {
 .tab-bar-wrapper {
     border-bottom: 1px solid gray;
     display: flex;
-    height: 40px;
-    align-items: end;
+    height: 35px;
 }
 
 a.nav-bar {
