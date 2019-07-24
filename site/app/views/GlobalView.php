@@ -53,6 +53,8 @@ class GlobalView extends AbstractView {
             "submitty_queries" => $this->core->getConfig()->isDebug() && $this->core->getSubmittyDB() ? $this->core->getSubmittyDB()->getPrintQueries() : [],
             "course_queries" => $this->core->getConfig()->isDebug() && $this->core->getCourseDB() ? $this->core->getCourseDB()->getPrintQueries() : [],
             "wrapper_urls" => $wrapper_urls,
+            "latest_tag" => $this->core->getConfig()->getLatestTag(),
+            "latest_commit" => $this->core->getConfig()->getLatestCommit(),
             "footer_links" => $footer_links
         ]);
     }

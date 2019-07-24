@@ -42,7 +42,7 @@
         Assigning grading <em>by registration section</em> facilitates routine grading of the <em>same set of students</em> throughout the term.
     </p>
     <br />
-    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_registration_sections'}) }}" method="POST">
+    <form action="{{ update_registration_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
             <div class="box col-md-6">
@@ -127,7 +127,7 @@
         The rotating assignments for each gradeable are made via the "Create/Edit Gradeable" page for the specific gradeable.
     </p>
 
-    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'update_rotating_sections'}) }}" method="POST">
+    <form action="{{ update_rotating_sections_url }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div class="row">
             <div class="box col-md-6" id="left_box">

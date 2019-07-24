@@ -9,7 +9,7 @@
 
     {% if show_title %}
     <span class="edit_thread">
-        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" required/>
+        Title: <input type="text" size="45" placeholder="Title" name="title" id="title" aria-label="Edit thread title" required/>
     </span>
     {% endif %}
 
@@ -72,7 +72,7 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required></textarea>
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea"></textarea>
     </div>
 <br/>
 {% endif %}
@@ -80,7 +80,7 @@
 {% if show_categories %}
 
     <div id="category-selection-container" class="form-group row thread-category-container inline-block">
-        <label for="cat" id="cat_label">Categories</label>
+        <label id="cat_label">Categories</label>
         <br />
 
         {% if categories | length == 0 %}
@@ -91,8 +91,8 @@
         <div id='categories-pick-list'>
 
         {% for category in categories %}
-            <a class="btn cat-buttons" cat-color="{{ category.color }}" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
-                <input type="checkbox" name="cat[]" value="{{ category.category_id }}">
+            <a class="btn cat-buttons" cat-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
+                <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
             </a>
         {% endfor %}
     </div>
@@ -109,7 +109,7 @@
             {# uploadID and input_fileID required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
-                <input type="file" accept="image/*" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
             </div>
         </span>
@@ -151,10 +151,10 @@
     {% endif %}
     <span class="inline-block right-zero position-absolute">
         {% if show_anon %}
-            <label for="Anon">Anonymous (to class)?</label> <input type="checkbox" class="thread-anon-checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" name="Anon" value="Anon" data-ays-ignore="true"/>
+            <label>Anonymous (to class)? <input type="checkbox" class="thread-anon-checkbox" id="{{ anon_edit_post_id | default('thread_post_anon') }}" aria-label="Anonymous (to class)?" name="Anon" value="Anon" data-ays-ignore="true"/></label>
         {% endif %}
         {% if show_thread_status %}
-        <select id="thread_status" name="thread_status" data-ays-ignore="true">
+        <select id="thread_status" name="thread_status" data-ays-ignore="true" aria-label="Select thread status">
             <option value="0">Comment</option>
             <option value="-1" selected="selected">Unresolved</option>
             <option value="1">Resolved</option>
