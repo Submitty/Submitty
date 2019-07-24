@@ -285,6 +285,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
         ksort($expected);
         ksort($actual);
+
+        unset($actual['latest_commit']);
+        unset($actual['latest_tag']);
         $this->assertEquals($expected, $actual);
     }
 
