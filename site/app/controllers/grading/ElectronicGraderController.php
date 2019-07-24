@@ -133,7 +133,7 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Route for verifying the grader of a graded component
      * @param bool verify all components or not
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
      * @AccessControl(permission="grading.electronic.verify_grader")
      */
      public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
@@ -535,7 +535,7 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
+        $return_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']) . '?view=all';
 
         if (!$this->core->getAccess()->canI("grading.electronic.import_teams", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to do that.");
@@ -622,7 +622,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Exports team into a csv file and displays it to the user
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/teams/export")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/teams/export")
      */
     public function exportTeams($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
