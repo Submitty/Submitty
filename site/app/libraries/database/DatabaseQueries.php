@@ -93,6 +93,14 @@ class DatabaseQueries {
     }
 
     /**
+     * Refreshes some user's api key from the submitty database given a user_id.
+     * @param $user_id
+     */
+    public function refreshUserApiKey($user_id) {
+        $this->submitty_db->query("UPDATE users SET api_key=encode(gen_random_bytes(16), 'hex') WHERE user_id=?", array($user_id));
+    }
+
+    /**
      * Gets a user from their api key.
      * @param $api_key
      *
