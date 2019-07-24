@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\Utils;
 
 /**
  * Class Notification
@@ -107,21 +106,28 @@ class Notification extends AbstractModel {
     /**
      * Returns the corresponding url based on metadata
      *
-     * @param  Core     core
-     * @param  string   metadata
-     * @return string   url
+     * @param  Core     $core
+     * @param  string   $metadata_json
+     * @return string   $url
      */
     public static function getUrl($core, $metadata_json) {
-        $metadata = json_decode($metadata_json);
+        $metadata = json_decode($metadata_json, true);
+        if (empty($metadata)) {
+            return null;
+        }
+        if (!isset($metadata['url'])) {
+            return $core->buildNewCourseUrl();
+        }
+        return $metadata['url'];
+    }
+
+    public static function getThreadIdIfExists($metadata_json) {
+        $metadata = json_decode($metadata_json, true);
         if(is_null($metadata)) {
             return null;
         }
-        if (key_exists('url', $metadata)) {
-            return $metadata->url;
-        }
-        $parts = $metadata[0];
-        $hash = $metadata[1] ?? null;
-        return $core->buildUrl($parts, $hash);
+        $thread_id = $metadata['thread_id'] ?? -1;
+        return $thread_id;
     }
 
     /**
@@ -140,8 +146,7 @@ class Notification extends AbstractModel {
     }
 
     public function hasEmptyMetadata() {
-        $metadata = json_decode($this->getNotifyMetadata());
-        return !key_exists('url', $metadata) && count($metadata) == 0;
+        return empty(json_decode($this->getNotifyMetadata()));
     }
 
     /**
