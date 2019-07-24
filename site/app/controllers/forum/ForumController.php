@@ -414,7 +414,7 @@ class ForumController extends AbstractController{
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
-                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]), , 'thread_id' => $thread_id));
+                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
 
                 $subject = "New Reply: ".Notification::textShortner($thread_title);
                 $content = "A new message was posted in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nNew Reply:\n\n".$post_content;
