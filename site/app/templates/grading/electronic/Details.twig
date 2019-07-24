@@ -34,7 +34,7 @@
             {% if show_all_sections_button %}
                 <div style="justify-self: flex-end;flex-wrap: wrap;margin-left: 5px">
                     <a class="btn btn-default"
-                       href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'details', 'gradeable_id': gradeable.getId(), 'view': view_all ? null : "all"}) }}">
+                       href="{{ view_all ? details_url : details_view_all_url }}">
                         {{ view_all ? "View Your Sections" : "View All" }}
                     </a>
                 </div>
@@ -55,8 +55,7 @@
 		{% if past_grade_start_date %}
 			<Button style="float: left;" class="btn btn-default" onclick="randomizeRotatingGroupsButton()"> Randomly Re-Assign Teams to Rotating Sections</Button>
 		{% else %}
-			<a style="float: left;" class="btn btn-default" href="{{ core.buildUrl({'component': 'grading', 'page': 
-				'electronic', 'action': 'randomize_team_rotating_sections', 'gradeable_id': gradeable.getId()}) }}"> Randomly Re-Assign Teams to Rotating Sections</a>
+			<a style="float: left;" class="btn btn-default" href="{{ randomize_team_rotating_sections_url }}"> Randomly Re-Assign Teams to Rotating Sections</a>
 		{% endif %}
 	{% endif %}
 	
@@ -102,7 +101,7 @@
                 {# Student list #}
                 <tbody>
                     {% for info in section.rows %}
-                        {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
+                        {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, grade_url) }}
                     {% endfor %}
                     {% for info in section.teamless_users %}
                         {{ self.render_teamless_user(self, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
@@ -144,7 +143,7 @@
     </table>
 </div>
 
-{% macro render_student(self, section, graded_gradeable, index, info, columns, team_gradeable_view_history) %}
+{% macro render_student(self, section, graded_gradeable, index, info, columns, team_gradeable_view_history, grade_url) %}
     <tr
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
@@ -164,9 +163,9 @@
             {% elseif column.function == "graded_questions" %}
                 {{ self.render_column_graded_questions(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "grading" %}
-                {{ self.render_column_grading(self, section, graded_gradeable, index, info, column) }}
+                {{ self.render_column_grading(self, section, graded_gradeable, index, info, column, grade_url) }}
             {% elseif column.function == "grading_peer" %}
-                {{ self.render_column_grading_peer(self, section, graded_gradeable, index, info, column) }}
+                {{ self.render_column_grading_peer(self, section, graded_gradeable, index, info, column, grade_url) }}
             {% elseif column.function == "index" %}
                 {{ self.render_column_index(self, section, graded_gradeable, index, info, column) }}
             {% elseif column.function == "section" %}
@@ -289,7 +288,7 @@
 {% endmacro %}
 
 {# Grading Button #}
-{% macro render_column_grading(self, section, graded_gradeable, index, info, column) %}
+{% macro render_column_grading(self, section, graded_gradeable, index, info, column, grade_url) %}
     {% if  graded_gradeable.hasOverriddenGrades() %}
         {% set contents = "Overridden" %}
         {% set btn_class = "btn-default" %}
@@ -326,7 +325,7 @@
         {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': graded_gradeable.getGradeableId(), 'who_id': graded_gradeable.getSubmitter().getId()}) }}">
+        <a class="btn {{ btn_class }}" href="{{ grade_url }}?who_id={{ graded_gradeable.getSubmitter().getId() }}">
             {{ contents }}
         </a>
     </td>
