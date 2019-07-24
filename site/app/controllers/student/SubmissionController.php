@@ -1281,7 +1281,7 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
 
             // notify other team members that a submission has been made
-            $metadata = json_encode(array(array('student',$gradeable_id),null,true));
+            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
             $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();

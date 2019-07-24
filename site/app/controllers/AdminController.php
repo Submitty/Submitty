@@ -4,7 +4,6 @@ namespace app\controllers;
 
 use app\controllers\admin\AdminGradeableController;
 use app\controllers\admin\GradeOverrideController;
-use app\controllers\admin\PlagiarismController;
 
 class AdminController extends AbstractController {
     public function run() {
@@ -20,9 +19,6 @@ class AdminController extends AbstractController {
                 break;
             case 'admin_gradeable':
                 $controller = new AdminGradeableController($this->core);
-                break;
-            case 'plagiarism':
-                $controller = new PlagiarismController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));

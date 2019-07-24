@@ -112,6 +112,9 @@ class NotificationFactory {
             $user_settings_row = array_filter($users_settings, function($v, $k) use ($recipient) {
                 return $v['user_id'] === $recipient;
             }, ARRAY_FILTER_USE_BOTH);
+            if (!empty($user_settings_row)) {
+                $user_settings_row = $user_settings_row[0];
+            }
             $user_settings = User::constructNotificationSettings($user_settings_row);
             if ($user_settings[$event['type']]) {
                 $notification_recipients[] = $recipient;
