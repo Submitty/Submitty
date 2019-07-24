@@ -1548,7 +1548,7 @@ class SubmissionController extends AbstractController {
             $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
             $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];
         }
-        
+
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
 
     }
