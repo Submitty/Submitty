@@ -80,7 +80,7 @@ class NotificationController extends AbstractController {
             $this->core->getQueries()->markNotificationAsSeen($user_id, $nid, $thread_id);
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse(Notification::getUrl($metadata))
+            new RedirectResponse(Notification::getUrl($this->core, $metadata))
         );
     }
 
