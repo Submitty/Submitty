@@ -1639,11 +1639,6 @@ end of styles used in the admin gradeable page
     align-items: center;
 }
 
-.flex-row > * {
-    display: inherit;
-    align-items: inherit;
-}
-
 .flex-col {
     display: flex;
     justify-content: space-between;
@@ -1652,6 +1647,11 @@ end of styles used in the admin gradeable page
 
 .flex-col-space > * {
     margin: 10px 0;
+}
+
+.flex-line {
+    display: flex;
+    align-items: center;
 }
 
 .shadow {
@@ -1747,6 +1747,14 @@ header > * {
 
 .align-left {
     text-align: left !important;
+}
+
+.bare-button {
+    border: none;
+    padding: 0;
+    font-size: 1em;
+    background: unset;
+    color: unset;
 }
 
 @media (min-width: 541px) {
