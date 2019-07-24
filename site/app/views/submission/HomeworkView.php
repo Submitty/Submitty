@@ -645,6 +645,8 @@ class HomeworkView extends AbstractView {
 
         $check_refresh_submission_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
 
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
             'hide_submitted_files' => $gradeable->getAutogradingConfig()->getHideSubmittedFiles(),

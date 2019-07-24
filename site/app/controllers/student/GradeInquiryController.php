@@ -213,7 +213,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
+            $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId()])]);
             foreach ($graders as $grader) {
                 if ($grader->accessFullGrading() && $grader->getId() != $user_id){
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];

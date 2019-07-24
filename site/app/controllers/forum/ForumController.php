@@ -388,7 +388,7 @@ class ForumController extends AbstractController{
 
                 }
                 $full_course_name = $this->core->getFullCourseName();
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]), 'thread_id' => $thread_id]);
                 // notify on a new announcement
                 if ($announcement) {
                     $subject = "New Announcement: ".Notification::textShortner($thread_title);
@@ -474,7 +474,7 @@ class ForumController extends AbstractController{
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+                $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]), 'thread_id' => $thread_id]);
 
                 $subject = "New Reply: ".Notification::textShortner($thread_title);
                 $content = "A new message was posted in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nNew Reply:\n\n".$post_content;
@@ -560,7 +560,7 @@ class ForumController extends AbstractController{
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
+                $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
                 $subject = "Undeleted: ".Notification::textShortner($post["content"]);
                 $content = "In ".$full_course_name."\n\nThe following post was undeleted.\n\nThread: ".$thread_title."\n\n".$post["content"];
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -611,7 +611,7 @@ class ForumController extends AbstractController{
             if($any_changes) {
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id));
+                $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id]);
                 if ($type == "Post") {
                     $post_content = $_POST["thread_post_content"];
                     $subject = "Post Edited: ".Notification::textShortner($post_content);
@@ -665,7 +665,7 @@ class ForumController extends AbstractController{
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
                     $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $metadata = json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post));
+                    $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id]) . '#' . (string)$child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post]);
                     $subject = "Thread Merge: ".Notification::textShortner($child_thread_title);
                     $content = "Two threads were merged in:\n".$full_course_name."\n\nAll messages posted in Merged Thread:\n".$child_thread_title."\n\nAre now contained within Parent Thread:\n".$parent_thread_title;
                     $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
