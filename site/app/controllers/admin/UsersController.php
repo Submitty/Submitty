@@ -87,7 +87,6 @@ class UsersController extends AbstractController {
      * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
      * @return Response
      */
-
     public function getGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
         $graders_sorted = [

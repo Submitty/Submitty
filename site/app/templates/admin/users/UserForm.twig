@@ -93,7 +93,7 @@
             <h3>Assigned Registration Sections for Grading</h3>
             {% for section in reg_sections %}
                 <label for="grs_{{ section.sections_registration_id }}">
-                     <input type="checkbox" id="grs_{{ section.sections_registration_id }}" name="grading_registration_section[]" value="{{ section.sections_registration_id }}">
+                    <input type="checkbox" id="grs_{{ section.sections_registration_id }}" name="grading_registration_section[]" value="{{ section.sections_registration_id }}">
                     Section {{ section.sections_registration_id }}
                 </label>
             {% endfor %}
@@ -101,7 +101,7 @@
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ update_url }}" onchange="userFormChange()" >
+    <form method="post" action="{{ update_url }}" onchange="userFormChange()">
         {{ parent() }}
     </form>
 {% endblock %}

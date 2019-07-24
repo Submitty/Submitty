@@ -81,6 +81,10 @@ class DatabaseQueries {
         return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
 
+    /**
+     * Gets all users from the submitty database, except nulls out password
+     * @return User[]
+     */
     public function getAllSubmittyUsers() {
         $this->submitty_db->query("SELECT * FROM users");
 

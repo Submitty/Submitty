@@ -1,24 +1,68 @@
-function userFormChange() {
-    var user_elem = $("select[name='user_group']")[0];
-    var is_student = user_elem.options[user_elem.selectedIndex].text === "Student";
+$("#edit-user-form").ready(function() {
+    var form = $("#edit-user-form");
+    var url = buildNewCourseUrl(['user_information']);
+    $.ajax({
+        url: url,
+        success: function(data) {
+            var json = JSON.parse(data)['data'];
+            $('[name="user_id"]').change(function() {
+                autoCompleteOnUserId(json);
+            });
 
-    var regis_elem = $("select[name='registered_section']")[0];
-    var is_no_regis = regis_elem.options[regis_elem.selectedIndex].text === "Not Registered";
+            $('[name="user_id"]', form).autocomplete({
+                source: Object.keys(json)
+            });
+            $('[name="user_id"]', form).autocomplete( "option", "appendTo", form);
 
-    if(is_student && is_no_regis) {
-        $("#user-form-student-error-message").show();
-    }
-    else {
-        $("#user-form-student-error-message").hide();
-    }
-    if(is_student) {
-        $("#user-form-assigned-sections").hide();
-    }
-    else {
-        $("#user-form-assigned-sections").show();
-    }
+            $(":text",$("#edit-user-form")).change(checkValidEntries);
+        },
+        error: function() {
+            alert("Could not load user data, please refresh the page and try again.");
+        }
+    })
+});
+
+//opens modal with initial settings for new student
+function newStudentForm() {
+    $('[name="user_group"] option[value="4"]').prop('selected', true);
+    $('#user-form-assigned-sections').hide();
+    $('#user-form-student-error-message').show();
+    newUserForm();
 }
 
+//opens modal with initial settings for new grader
+function newGraderForm() {
+    $('[name="user_group"] option[value="3"]').prop('selected', true);
+    $('#user-form-student-error-message').hide();
+    $('#user-form-assigned-sections').show();
+    newUserForm();
+}
+
+//opens modal with initial settings for new user (student and grader)
+function newUserForm() {
+    $('.popup-form').css('display', 'none');
+    var form = $("#edit-user-form");
+    form.css("display", "block");
+    $("#edit-user-modal-title").css('display','none');
+    $("#new-user-modal-title").css('display','block');
+    $("#user-form-already-exists-error-message").css('display','none');
+    $('[name="edit_user"]', form).val("false");
+    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false);
+    $('[name="manual_registration"]', form).prop('checked', true);
+
+    if ($("#user_id").val() == "") {
+        $("#user_id")[0].setCustomValidity("user_id is required");
+    }
+    if ($("#user_firstname").val() == "") {
+        $("#user_firstname")[0].setCustomValidity("user_firstname is required");
+    }
+    if ($("#user_lastname").val() == "") {
+        $("#user_lastname")[0].setCustomValidity("user_lastname is required");
+    }
+    checkValidEntries();
+}
+
+//opens modal with initial settings for edit user
 function editUserForm(user_id) {
     var url = buildNewCourseUrl(['users', user_id]);
     $.ajax({
@@ -46,62 +90,27 @@ function editUserForm(user_id) {
     })
 }
 
-function newUserForm(grader_flag) {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-user-form");
-    form.css("display", "block");
-    $("#edit-user-modal-title").css('display','none');
-    $("#new-user-modal-title").css('display','block');
-    $("#user-form-already-exists-error-message").css('display','none');
-    $('[name="edit_user"]', form).val("false");
-    $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false);
-    $('[name="manual_registration"]', form).prop('checked', true);
 
-    if ($("#user_id").val() == "") {
-        $("#user_id")[0].setCustomValidity("user_id is required");
-    }
-    if ($("#user_firstname").val() == "") {
-        $("#user_firstname")[0].setCustomValidity("user_firstname is required");
-    }
-    if ($("#user_lastname").val() == "") {
-        $("#user_lastname")[0].setCustomValidity("user_lastname is required");
-    }
-    checkValidEntries();
-    if (grader_flag) {
-        $('[name="user_group"] option[value="3"]', form).prop('selected', true);
-        $('#user-form-student-error-message').hide();
-        $('#user-form-assigned-sections').show();
+function userFormChange() {
+    var user_elem = $("select[name='user_group']")[0];
+    var is_student = user_elem.options[user_elem.selectedIndex].text === "Student";
+
+    var regis_elem = $("select[name='registered_section']")[0];
+    var is_no_regis = regis_elem.options[regis_elem.selectedIndex].text === "Not Registered";
+
+    if(is_student && is_no_regis) {
+        $("#user-form-student-error-message").show();
     }
     else {
-        $('[name="user_group"] option[value="4"]', form).prop('selected', true);
-        $('#user-form-assigned-sections').hide();
-        $('#user-form-student-error-message').show();
+        $("#user-form-student-error-message").hide();
+    }
+    if(is_student) {
+        $("#user-form-assigned-sections").hide();
+    }
+    else {
+        $("#user-form-assigned-sections").show();
     }
 }
-
-$("#edit-user-form").ready(function() {
-    var form = $("#edit-user-form");
-    var url = buildNewCourseUrl(['user_information']);
-    $.ajax({
-        url: url,
-        success: function(data) {
-            var json = JSON.parse(data)['data'];
-            $('[name="user_id"]').change(function() {
-                autoCompleteOnUserId(json);
-            });
-
-            $('[name="user_id"]', form).autocomplete({
-                source: Object.keys(json)
-            });
-            $('[name="user_id"]', form).autocomplete( "option", "appendTo", form);
-
-            $(":text",$("#edit-user-form")).change(checkValidEntries);
-        },
-        error: function() {
-            alert("Could not load user data, please refresh the page and try again.");
-        }
-    })
-});
 
 function checkValidEntries() {
     var form = $("#edit-user-form");
@@ -141,6 +150,7 @@ function checkValidEntries() {
             break;
         }
 
+    //disable submit button if anythiing is invalid
     var has_invalid_entry = false;
     $(":text",$("#edit-user-form")).each( function() {
         if (!this.checkValidity()) {
@@ -175,18 +185,6 @@ function autoCompleteOnUserId(user_information) {
     else {
         $("#user-form-already-exists-error-message").css('display','none');
     }
-}
-
-function closeButton() {
-    $('#edit-user-form').css('display', 'none');
-    if($('[name="edit_user"]').val() == 'true') {
-        $('[name="user_id"]', $("#edit-user-form")).val("");
-        clearUserFormInformation();
-    }
-}
-
-function redirectToEdit() {
-    editUserForm($('#user_id').val());
 }
 
 function completeUserFormInformation(user) {
@@ -258,4 +256,16 @@ function clearValidityWarnings() {
         $(this)[0].setCustomValidity("");
     });
     $("#user-form-submit").prop('disabled',false);
+}
+
+function closeButton() {
+    $('#edit-user-form').css('display', 'none');
+    if($('[name="edit_user"]').val() == 'true') {
+        $('[name="user_id"]', $("#edit-user-form")).val("");
+        clearUserFormInformation();
+    }
+}
+
+function redirectToEdit() {
+    editUserForm($('#user_id').val());
 }
