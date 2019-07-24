@@ -38,6 +38,7 @@ function editUserForm(user_id) {
                 user.addClass('readonly');
             }
             completeUserFormInformation(json);
+            clearValidityWarnings();
         },
         error: function() {
             alert("Could not load user data, please refresh the page and try again.");
@@ -56,6 +57,16 @@ function newUserForm(grader_flag) {
     $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false);
     $('[name="manual_registration"]', form).prop('checked', true);
 
+    if ($("#user_id").val() == "") {
+        $("#user_id")[0].setCustomValidity("user_id is required");
+    }
+    if ($("#user_firstname").val() == "") {
+        $("#user_firstname")[0].setCustomValidity("user_firstname is required");
+    }
+    if ($("#user_lastname").val() == "") {
+        $("#user_lastname")[0].setCustomValidity("user_lastname is required");
+    }
+    checkValidEntries();
     if (grader_flag) {
         $('[name="user_group"] option[value="3"]', form).prop('selected', true);
         $('#user-form-student-error-message').hide();
@@ -69,6 +80,7 @@ function newUserForm(grader_flag) {
 }
 
 $("#edit-user-form").ready(function() {
+    var form = $("#edit-user-form");
     var url = buildNewCourseUrl(['user_information']);
     $.ajax({
         url: url,
@@ -77,6 +89,12 @@ $("#edit-user-form").ready(function() {
             $('[name="user_id"]').change(function() {
                 autoCompleteOnUserId(json);
             });
+
+            $('[name="user_id"]', form).autocomplete({
+                source: Object.keys(json)
+            });
+            $('[name="user_id"]', form).autocomplete( "option", "appendTo", form);
+
             $(":text",$("#edit-user-form")).change(checkValidEntries);
         },
         error: function() {
@@ -88,22 +106,24 @@ $("#edit-user-form").ready(function() {
 function checkValidEntries() {
     var form = $("#edit-user-form");
     var input = $(this);
-
     switch(input.prop("id")) {
         case "user_id":
+            if (input.val() == "") {
+                input[0].setCustomValidity(input.prop('id')+" is required");
+                break;
+            }
             var valid_expression = /^[a-z0-9_\-]*$/;
-            if (!$('#user-form-already-exists-error-message').is(':hidden') || !(valid_expression.test(input.val()))) {
-                input[0].setCustomValidity(input.val()+" is not a valid "+input.prop('id'));
-            }
-            else {
-                input[0].setCustomValidity("");
-            }
+            setRedOrTransparent(input,valid_expression);
             break;
         case "user_numeric_id":
             break;
         case "user_firstname":
         case "user_lastname":
-            var valid_expression = /^[a-zA-Z'`\-\.\(\)]*$/;
+            if (input.val() == "") {
+                input[0].setCustomValidity(input.prop('id')+" is required");
+                break;
+            }
+            var valid_expression = /^[a-zA-Z'`\-\.\(\) ]*$/;
             setRedOrTransparent(input,valid_expression);
             break;
         case "user_preferred_firstname":
@@ -116,14 +136,23 @@ function checkValidEntries() {
                 input.css("background-color", "transparent");
                 break;
             }
-            var valid_expression = /^[^(),:;<>@\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$/;
+            var valid_expression = /^[^(),:;\<\>@\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?!\-)(\.[a-zA-Z0-9]+)+$/;
             setRedOrTransparent(input,valid_expression);
             break;
-    }
+        }
 
+    var has_invalid_entry = false;
     $(":text",$("#edit-user-form")).each( function() {
-        console.log(this.checkValidity());
+        if (!this.checkValidity()) {
+            has_invalid_entry = true;
+        }
     });
+    if (has_invalid_entry) {
+        $("#user-form-submit").prop('disabled',true);
+    }
+    else {
+        $("#user-form-submit").prop('disabled',false);
+    }
 }
 
 function setRedOrTransparent(input,reg_expression) {
@@ -145,7 +174,6 @@ function autoCompleteOnUserId(user_information) {
     }
     else {
         $("#user-form-already-exists-error-message").css('display','none');
-        clearUserFormInformation();
     }
 }
 
@@ -222,4 +250,13 @@ function clearUserFormInformation() {
     $('[name="rotating_section"] option[value="null"]', form).prop('selected', true);
     $('[name="manual_registration"]', form).prop('checked', true);
     $("[name='grading_registration_section[]']").prop('checked', false);
+
+    clearValidityWarnings();
+}
+
+function clearValidityWarnings() {
+    $(":text",$("#edit-user-form")).each( function() {
+        $(this)[0].setCustomValidity("");
+    });
+    $("#user-form-submit").prop('disabled',false);
 }
