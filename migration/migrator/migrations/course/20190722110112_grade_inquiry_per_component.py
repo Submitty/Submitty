@@ -14,7 +14,7 @@ def up(config, database, semester, course):
     # add constraints to make sure no two rows have the user_id or team_id, g_id and gc_id
     #
     # this is all done in single transaction to avoid the possibility of an insert making a change that does not follow
-    # a constraint for the small amount of time the contraint is dropped or not yet implemented
+    # a constraint for the small amount of time the constraint is dropped or not yet implemented
     database.execute("""
         ALTER TABLE regrade_requests ADD COLUMN IF NOT EXISTS gc_id integer;
 
