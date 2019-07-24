@@ -43,7 +43,7 @@
     </div>
     {# Import+Export teams buttons #}
     {% if show_import_teams_button %}
-        <a style="float: right;" class="btn btn-primary" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'export_teams', 'gradeable_id': gradeable.getId()}) }}">Export Teams Members</a>
+        <a style="float: right;" class="btn btn-primary" href="{{ export_teams_url }}">Export Teams Members</a>
     {% endif %}
     {% if show_export_teams_button %}
         <button style="float: right;" class="btn btn-primary" onclick="importTeamForm();">Import Teams Members</button>

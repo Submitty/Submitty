@@ -18,25 +18,17 @@ use app\libraries\Logger;
 use app\models\GradingOrder;
 use app\models\User;
 use app\libraries\FileUtils;
-use app\controllers\GradingController;
+use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
 
-class ElectronicGraderController extends GradingController {
+class ElectronicGraderController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'load_student_file':
-                $this->ajaxGetStudentOutput();
-                break;
-            case 'remove_empty':
-                $this->ajaxRemoveEmpty();
-                break;
-            default:
-                $this->showStatus();
-                break;
-        }
+        return null;
     }
-
 
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
@@ -66,23 +58,24 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Route for getting whitespace information for the diff viewer
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output/remove")
      */
-    public function ajaxRemoveEmpty() {
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['who_id'] ?? '';
-        $index = $_REQUEST['index'] ?? '';
-        $option = $_REQUEST['option'] ?? 'original';
-        $version = $_REQUEST['version'] ?? '';
-        $type = $_REQUEST['which'] ?? 'actual';
-        $autocheck_cnt = $_REQUEST['autocheck_cnt'] ?? '0';
-
+    public function ajaxRemoveEmpty(
+        $gradeable_id,
+        $who_id='',
+        $index='',
+        $option='original',
+        $version='',
+        $which='actual',
+        $autocheck_cnt='0'
+    ) {
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
         if (!$this->validateDiffViewerOption($option)) {
             return;
         }
 
         // Type can be either 'actual' or 'expected'
-        if (!$this->validateDiffViewerType($type)) {
+        if (!$this->validateDiffViewerType($which)) {
             return;
         }
 
@@ -93,7 +86,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -117,7 +110,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         try {
-            $results = $this->removeEmpty($autocheck, $option, $type);
+            $results = $this->removeEmpty($autocheck, $option, $which);
             $this->core->getOutput()->renderJsonSuccess($results);
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
@@ -207,10 +200,9 @@ class ElectronicGraderController extends GradingController {
     /**
      * Shows statistics for the grading status of a given electronic submission. This is shown to all full access
      * graders. Limited access graders will only see statistics for the sections they are assigned to.
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/status")
      */
-    public function showStatus() {
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-
+    public function showStatus($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid gradeable id');
@@ -222,7 +214,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
-        $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
+        $gradeableUrl = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
         $peer = false;
@@ -434,7 +426,7 @@ class ElectronicGraderController extends GradingController {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
-        $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
+        $gradeableUrl = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
 
         $this->core->getOutput()->addBreadcrumb('Student Index');
@@ -845,7 +837,7 @@ class ElectronicGraderController extends GradingController {
             $peer = true;
         }
 
-        $gradeableUrl = $this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'gradeable_id' => $gradeable_id));
+        $gradeableUrl = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
         $this->core->getOutput()->addBreadcrumb('Student Index', $indexUrl);
@@ -920,7 +912,7 @@ class ElectronicGraderController extends GradingController {
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
-            $this->core->redirect($this->core->buildUrl(array('component'=>'grading', 'page'=>'electronic', 'gradeable_id' => $gradeable_id)));
+            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
 
         $show_verify_all = false;
@@ -1032,7 +1024,7 @@ class ElectronicGraderController extends GradingController {
      * Gets a component and all of its marks
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components")
      */
-    public function ajaxGetComponent($component_id) {
+    public function ajaxGetComponent($gradeable_id, $component_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -1065,7 +1057,7 @@ class ElectronicGraderController extends GradingController {
      * Route for getting information about a individual grader
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable")
      */
-    public function ajaxGetGradedGradeable($gradeable_id, $annon_id='') {
+    public function ajaxGetGradedGradeable($gradeable_id, $anon_id='') {
         $grader = $this->core->getUser();
 
         // Get the gradeable
@@ -1722,13 +1714,9 @@ class ElectronicGraderController extends GradingController {
 
     /**
      * Route for getting the student's program output for the diff-viewer
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output")
      */
-    public function ajaxGetStudentOutput() {
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['who_id'] ?? '';
-        $version = $_REQUEST['version'] ?? '';
-        $index = $_REQUEST['index'] ?? '';
-
+    public function ajaxGetStudentOutput($gradeable_id, $who_id='', $version='', $index='') {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -1736,7 +1724,7 @@ class ElectronicGraderController extends GradingController {
         }
 
         // Get the graded gradeable
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id);
         if ($graded_gradeable === false) {
             return;
         }
@@ -1766,7 +1754,7 @@ class ElectronicGraderController extends GradingController {
             $popup_css = "diff-viewer.css";
             $this->core->getOutput()->renderJsonSuccess(
                 $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
-                    $graded_gradeable, $version_instance, $testcase, $popup_css, $submitter_id, $can_view_hidden)
+                    $graded_gradeable, $version_instance, $testcase, $popup_css, $who_id, $can_view_hidden)
             );
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());

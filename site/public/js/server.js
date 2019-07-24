@@ -54,8 +54,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
-    var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'version': version, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
@@ -63,20 +61,20 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
-        args['option'] = 'unicode'
+        var option = 'unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
-        args['option'] = 'escape'
+        var option = 'escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
-        args['option'] = 'original'
+        var option = 'original'
     }
     //Insert actual and expected one at a time
-    args['which'] = 'expected';
-    var url = buildUrl(args);
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
+        `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
     let assertSuccess = function(data) {
         if (data.status === 'fail') {
@@ -100,8 +98,8 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             }
             $(expected_div).empty();
             $(expected_div).html(response.data.html);
-            args['which'] = 'actual';
-            url = buildUrl(args);
+            url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
+                `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
             $.getJSON({
                 url: url,
                 success: function (response) {
@@ -144,8 +142,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
-        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
+        var url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-in-progress").show();
