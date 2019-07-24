@@ -23,7 +23,6 @@ class GradeInquiryController extends AbstractController {
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
-        $gc_id = $_POST['gc_id'] ?? null;
 
         $user = $this->core->getUser();
 
@@ -51,7 +50,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         try {
-            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
+            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new');
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
@@ -75,7 +74,6 @@ class GradeInquiryController extends AbstractController {
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
-        $gc_id = $_POST['gc_id'] ?? null;
 
         $user = $this->core->getUser();
 
@@ -103,7 +101,7 @@ class GradeInquiryController extends AbstractController {
         }
 
         try {
-            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content, $gc_id);
+            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             return Response::JsonOnlyResponse(
@@ -128,7 +126,6 @@ class GradeInquiryController extends AbstractController {
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
-        $gc_id = $_POST['gc_id'] ?? null;
 
         $user = $this->core->getUser();
 
@@ -162,7 +159,7 @@ class GradeInquiryController extends AbstractController {
             $graded_gradeable->getRegradeRequest()->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             if ($content != "") {
-                $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content, $gc_id);
+                $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
             }
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
@@ -216,7 +213,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
+            $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId()])]);
             foreach ($graders as $grader) {
                 if ($grader->accessFullGrading() && $grader->getId() != $user_id){
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'content' => $n_content, 'body' => $email_body, 'subject' => $email_subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
@@ -226,7 +223,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make students' notifications and emails
-            $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
+            $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'student', 'gradeable_id' => $gradeable_id])]);
             if($submitter->isTeam()){
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach($submitting_team as $submitting_user){

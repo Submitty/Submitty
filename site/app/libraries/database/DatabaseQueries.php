@@ -402,9 +402,9 @@ class DatabaseQueries {
 
     public function removeNotificationsPost($post_id) {
         //Deletes all children notifications i.e. this posts replies
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>1 = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>'thread_id' = ?", array($post_id));
         //Deletes parent notification i.e. this post is a reply
-        $this->course_db->query("DELETE FROM notifications where metadata::json->>2 = ?", array($post_id));
+        $this->course_db->query("DELETE FROM notifications where metadata::json->>'post_id' = ?", array($post_id));
     }
 
     public function isStaffPost($author_id){
@@ -573,7 +573,7 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ? where id = ?", array($content, $anon, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>1 = ? and metadata::json->>2 = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
@@ -2995,14 +2995,14 @@ AND gc_id IN (
     /**
      * Marks $user_id notifications as seen
      *
-     * @param sting $user_id
+     * @param string $user_id
      * @param int $notification_id  if $notification_id != -1 then marks corresponding as seen else mark all notifications as seen
      */
     public function markNotificationAsSeen($user_id, $notification_id, $thread_id = -1){
         $parameters = array();
         $parameters[] = $user_id;
         if($thread_id != -1) {
-        	$id_query = "metadata::json->0->>'thread_id' = ?";
+        	$id_query = "metadata::json->>'thread_id' = ?";
         	$parameters[] = $thread_id;
         } else if($notification_id == -1) {
             $id_query = "true";
@@ -3045,13 +3045,13 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, int $gc_id){
+    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message) {
         $params = array($graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE);
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status) VALUES (?, current_timestamp, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
+            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
         } catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) $this->course_db->rollback();
             throw $dbException;
@@ -3070,9 +3070,9 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradePost($regrade_id, $user_id, $content, $gc_id){
-        $params = array($regrade_id, $user_id, $content, $gc_id);
-        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
+    public function insertNewRegradePost($regrade_id, $user_id, $content){
+        $params = array($regrade_id, $user_id, $content);
+        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
@@ -3631,7 +3631,6 @@ AND gc_id IN (
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
-                    $this->course_db->convertBoolean($gradeable->isGradeInquiryPerComponentAllowed()),
                     $gradeable->getDiscussionThreadId(),
                     $this->course_db->convertBoolean($gradeable->isDiscussionBased()),
                     $gradeable->getId()
@@ -3660,7 +3659,6 @@ AND gc_id IN (
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
                       eg_regrade_allowed=?,
-                      eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
                       eg_has_discussion=?
                     WHERE g_id=?", $params);
