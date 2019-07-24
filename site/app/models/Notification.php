@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\Utils;
 
 /**
  * Class Notification
@@ -107,6 +106,7 @@ class Notification extends AbstractModel {
     /**
      * Returns the corresponding url based on metadata
      *
+     * @param  Core     $core
      * @param  string   $metadata_json
      * @return string   $url
      */
