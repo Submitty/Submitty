@@ -108,7 +108,9 @@ class ForumThreadView extends AbstractView {
 		that have been created after applying filter and to be
 		displayed in the left panel.
 	*/
-    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $ajax=false) {
+
+    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $ajax=false) {
+
         if(!$this->forumAccess()){
             $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
             return;
@@ -338,6 +340,7 @@ class ForumThreadView extends AbstractView {
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
                 "generate_post_content" => $generatePostContent,
+                "thread_resolve_state" => $thread_resolve_state,
                 "display_option" => $display_option,
                 "csrf_token" => $this->core->getCsrfToken()
             ]);
@@ -356,6 +359,7 @@ class ForumThreadView extends AbstractView {
                 "thread_id" => $generatePostContent["thread_id"],
                 "first_post_id" => $generatePostContent["first_post_id"],
                 "form_action_link" => $generatePostContent["form_action_link"],
+                "thread_resolve_state" => $thread_resolve_state,
                 "merge_thread_content" => $generatePostContent["merge_thread_content"],
                 "csrf_token" => $generatePostContent["csrf_token"],
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
@@ -966,6 +970,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildUrl(array('component' => 'forum', 'page' => 'show_categories')));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
+        $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addVendorJs('flatpickr/flatpickr.js');
         $this->core->getOutput()->addVendorJs('jquery.are-you-sure/jquery.are-you-sure.js');
 

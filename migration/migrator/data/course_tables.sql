@@ -492,7 +492,8 @@ CREATE TABLE gradeable_teams (
 CREATE TABLE teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
-    state integer NOT NULL
+    state integer NOT NULL,
+	last_viewed_time timestamp(6) with time zone DEFAULT NULL
 );
 
 
@@ -533,6 +534,16 @@ CREATE TABLE regrade_discussion (
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
     deleted BOOLEAN DEFAULT FALSE NOT NULL
+);
+
+--
+-- Name: grade_override; Type: TABLE; Schema: 
+--
+CREATE TABLE grade_override (
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    marks float NOT NULL,
+    comment character varying 
 );
 
 --
@@ -814,6 +825,12 @@ ALTER TABLE ONLY gradeable_teams
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (team_id, user_id);
 
+--
+-- Name: grade_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_pkey PRIMARY KEY (user_id, g_id);
 
 --
 -- Name: electronic_gradeable_data_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -1107,6 +1124,22 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
+-- Name: grade_override_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grade_override_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 
 --
 -- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -

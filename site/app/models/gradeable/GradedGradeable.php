@@ -189,7 +189,21 @@ class GradedGradeable extends AbstractModel {
      * @return float max(0.0, auto_score + ta_score)
      */
     public function getTotalScore() {
-        return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
+        if ($this->hasOverriddenGrades()){
+            $userWithOverridenGrades = $this->core->getQueries()->getAUserWithOverridenGrades($this->gradeable->getId(),$this->submitter->getId());
+            return floatval(max(0.0, $userWithOverridenGrades->getMarks()));
+        } else {
+            return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
+        }
+    }
+
+    public function getOverriddenComment() {
+        $overridden_comment = "";
+        $userWithOverridenGrades = $this->core->getQueries()->getAUserWithOverridenGrades($this->gradeable->getId(),$this->submitter->getId());
+        if ($userWithOverridenGrades !== null){
+            $overridden_comment = $userWithOverridenGrades->getComment();
+        }
+        return $overridden_comment;
     }
 
     /**
@@ -329,6 +343,9 @@ class GradedGradeable extends AbstractModel {
         return $this->gradeable->hasSubmission($this->submitter);
     }
 
+    public function hasOverriddenGrades() {
+        return $this->gradeable->hasOverriddenGrades($this->submitter);
+    }
     /* Intentionally Unimplemented accessor methods */
 
     /** @internal */
