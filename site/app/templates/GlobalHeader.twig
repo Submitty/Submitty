@@ -130,7 +130,7 @@
                         id="{{ [mobile ? 'mobile-' : '', button.getId()]|join }}"
                     {% endif %}
                 >
-                    <span> {# col in flex-row #}
+                    <span class="flex-line"> {# col in flex-row #}
                         {% if button.getIcon() != null %}
                             <i class="fa {{ button.getIcon() }}"></i>
                         {% endif %}
@@ -152,7 +152,7 @@
                         data-toggle="tooltip"
                     {% endif %}
                 >
-                    <span> {# col in flex-row #}
+                    <span class="flex-line"> {# col in flex-row #}
                         {% if button.getIcon() != null %}
                             <i class="fa {{ button.getIcon() }}"></i>
                         {% endif %}
