@@ -51,6 +51,6 @@
         <p class="warning">No students found</p>
     {% endif %}
 </div>
-{% include('admin/users/UserForm.twig') with {'mode': 'student'} %}
+{% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
 {% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}

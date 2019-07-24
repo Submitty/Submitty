@@ -27,6 +27,8 @@ function newStudentForm() {
     $('[name="user_group"] option[value="4"]').prop('selected', true);
     $('#user-form-assigned-sections').hide();
     $('#user-form-student-error-message').show();
+    $("#new-student-modal-title").css('display','block');
+    $("#new-grader-modal-title").css('display','none');
     newUserForm();
 }
 
@@ -35,6 +37,8 @@ function newGraderForm() {
     $('[name="user_group"] option[value="3"]').prop('selected', true);
     $('#user-form-student-error-message').hide();
     $('#user-form-assigned-sections').show();
+    $("#new-student-modal-title").css('display','none');
+    $("#new-grader-modal-title").css('display','block');
     newUserForm();
 }
 
@@ -43,8 +47,8 @@ function newUserForm() {
     $('.popup-form').css('display', 'none');
     var form = $("#edit-user-form");
     form.css("display", "block");
-    $("#edit-user-modal-title").css('display','none');
-    $("#new-user-modal-title").css('display','block');
+    $("#edit-student-modal-title").css('display','none');
+    $("#edit-grader-modal-title").css('display','none');
     $("#user-form-already-exists-error-message").css('display','none');
     $('[name="edit_user"]', form).val("false");
     $('[name="user_id"]', form).removeClass('readonly').prop('readonly', false);
@@ -71,8 +75,16 @@ function editUserForm(user_id) {
             var json = JSON.parse(data)['data'];
             var form = $("#edit-user-form");
             form.css("display", "block");
-            $("#edit-user-modal-title").css('display','block');
-            $("#new-user-modal-title").css('display','none');
+            if (json['user_group'] == 4) {
+                $("#edit-student-modal-title").css('display','block');
+                $("#edit-grader-modal-title").css('display','none');
+            }
+            else {
+                $("#edit-student-modal-title").css('display','none');
+                $("#edit-grader-modal-title").css('display','block');
+            }
+            $("#new-student-modal-title").css('display','none');
+            $("#new-grader-modal-title").css('display','none');
             $("#user-form-already-exists-error-message").css('display','none');
             $('[name="edit_user"]', form).val("true");
             var user = $('[name="user_id"]', form);

@@ -1,11 +1,10 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-user-form{% endblock %}
 {% block title %}
-{% if mode == 'grader' %}
-	<div id="edit-user-modal-title">Edit Grader</div> <div id="new-user-modal-title">New Grader</div>
-{% else %}
-	<div id="edit-user-modal-title">Edit Student</div> <div id="new-user-modal-title">New Student</div>
-{% endif %}
+	<div id="edit-grader-modal-title">Edit Grader</div> 
+	<div id="new-grader-modal-title">New Grader</div>
+	<div id="edit-student-modal-title">Edit Student</div> 
+	<div id="new-student-modal-title">New Student</div>
 {% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
