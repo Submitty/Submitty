@@ -221,6 +221,11 @@ tr.info, tr.info td, tr.info th {
     background-color: var(--table-info);
 }
 
+td>a.active-sort {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
 .floating-thead,
 .floating-header {
     position: fixed;
