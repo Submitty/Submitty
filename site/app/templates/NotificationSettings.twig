@@ -14,8 +14,7 @@
             {% endif %}
             <div><h1>{{ header }}</h1></div>
             <div class="row">
-                <div class="heading col-md-4">
-                </div>
+                <div class="heading col-md-4"></div>
                 <div class="heading col-md-3">
                     <h2>Notification Settings</h2>
                 </div>
@@ -24,8 +23,13 @@
                         <h2>Email Settings</h2>
                     </div>
                 {% endif %}
-
             </div>
+
+            <div class="heading">
+                <h2>Forum</h2>
+                <hr>
+            </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -38,6 +42,7 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
                 {% endif %}
             </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -50,6 +55,7 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
                 {% endif %}
             </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -62,6 +68,7 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" disabled checked></div>
                 {% endif %}
             </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -74,6 +81,7 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -86,6 +94,7 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -98,6 +107,7 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
+
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -106,11 +116,11 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
-
                 {% if email_enabled %}
                     <div class="option-input col-md-5"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
+
             {% if core.getUser().accessFullGrading() %}
                 <div class="option row">
                     <div class="option-desc col-md-4">
@@ -125,8 +135,66 @@
                     {% endif %}
                 </div>
             {% endif %}
+
+            <div class="heading">
+                <h2>Grade Inquiry</h2>
+                <hr>
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry has been submitted</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has submitted a grade inquiry on work you graded" : "Receive a notification when a grader or a team member makes a grade inquiry on your work" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry post has been made</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has submitted a post on their grade inquiry" : "Receive a notification when a grader or a team member makes a post on your grade inquiry" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked></div>
+                <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked></div>
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry has been resolved</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has closed their grade inquiry" : "Receive a notification when a grader or a team member resolves your grade inquiry" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry has been reopened</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has reopened their grade inquiry" : "Receive a notification when a grader or a team member reopened your grade inquiry" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
+                {% endif %}
+            </div>
         </div>
-        {#<input class="btn btn-primary" type="submit" value="Save" />#}
     </form>
     <script>
         $('#form_notification_settings').on("change",function(e) {

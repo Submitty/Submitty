@@ -80,11 +80,9 @@
                 sequenceDiagram
                 {{ element.src |escape}}
               </div>
-              {% if 1 == 0 %}
               <script>
-                //mermaid.init( { "useMaxWidth" : false, "startOnLoad" : false }, "#div_{{ index }}_{{ check_index }}");
+                mermaid.init( { "useMaxWidth" : false, "startOnLoad" : false }, "#div_{{ index }}_{{ check_index }}");
               </script>
-              {% endif %}
             {% endif %}
         </div>
     </div>
