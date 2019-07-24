@@ -61,6 +61,8 @@ class Testcase():
         self.log_message("ERROR thrown by main runner. See traces entry for more details.")
         self.log_stack_trace(traceback.format_exc())
         success = -1
+      finally:
+        self.secure_environment.lockdown_directory_after_execution()
 
       logfile.flush()
 
@@ -76,7 +78,16 @@ class Testcase():
           self.submission_string,
           '--testcase', str(self.number)
         ]
-        return self.secure_environment.execute(self.untrusted_user, 'my_compile.out', arguments, logfile)
+        
+        try:
+            success = self.secure_environment.execute(self.untrusted_user, 'my_compile.out', arguments, logfile)
+        except Exception as e:
+            success = -1
+            self.log_message("ERROR thrown by main compile. See traces entry for more details.")
+            self.log_stack_trace(traceback.format_exc())
+        finally:
+            self.secure_environment.lockdown_directory_after_execution()
+        return success
 
   def execute(self):
     if self.type in ['Compilation', 'FileCheck']:
@@ -90,8 +101,8 @@ class Testcase():
       print(self.machine, self.untrusted_user, "{0} FAILURE".format(self.type.upper()))
       self.log_message("{0} FAILURE".format(self.type.upper()))   
 
-  def archive(self, overall_log):
-    self.secure_environment.archive_results(overall_log)
+  def setup_for_archival(self, overall_log):
+    self.secure_environment.setup_for_archival(overall_log)
 
   def log_message(self, message):
     autograding_utils.log_message(self.log_path,

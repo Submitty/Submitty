@@ -21,16 +21,9 @@ DAEMON_UID = OPEN_JSON['daemon_uid']
 def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, submission_zip_file):
 
     os.chdir(SUBMITTY_DATA_DIR)
-    
-    if os.path.exists(working_directory):
-        untrusted_grant_rwx_access(which_untrusted, working_directory)
-        add_permissions_recursive(working_directory,
-                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     autograding_utils.prepare_directory_for_autograding(working_directory, which_untrusted, 
-                                                        autograding_zip_file, submission_zip_file)
+                                                        autograding_zip_file, submission_zip_file, False)
 
     os.remove(autograding_zip_file)
     os.remove(submission_zip_file)
@@ -50,7 +43,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     
     item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "submissions", 
                              queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
-    autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,is_batch_job,which_untrusted,item_name,"wait:",waittime,"")
+    autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "")
 
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)

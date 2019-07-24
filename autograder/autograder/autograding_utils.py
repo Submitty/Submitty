@@ -181,8 +181,24 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
 #
 # ==================================================================================
 
-def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file):
+def add_all_permissions(folder):
+    add_permissions_recursive(folder,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+def lock_down_folder_permissions(top_dir):
+    os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
+   
+
+def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment):
     # clean up old usage of this directory
+
+    if os.path.exists(working_directory) and not is_test_environment:
+        untrusted_grant_rwx_access(user_id_of_runner, working_directory)
+    
+    add_all_permissions(working_directory)
+
     shutil.rmtree(working_directory,ignore_errors=True)
     os.mkdir(working_directory)
 
@@ -205,6 +221,9 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     except:
         raise
 
+    lock_down_folder_permissions(tmp_autograding)
+    lock_down_folder_permissions(tmp_submission)
+
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
@@ -212,7 +231,7 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
         allow_only_one_part(tmp_submission, 'submission', os.path.join(tmp_logs, "overall.txt"))
 
 
-def archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
+def archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj, gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
 
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
@@ -223,11 +242,20 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
+    results_public_dir = os.path.join(tmp_results,"results_public")
+    results_details_dir = os.path.join(tmp_results, "details")
+    patterns = complete_config_obj['autograding']
+
+    # Copy work to details
+    pattern_copy("work_to_details", patterns['work_to_details'], tmp_work, results_details_dir, tmp_logs)
+    
+    # Copy work to public
+    if 'work_to_public' in patterns:
+        pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
     # grab the submission time
     with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
-
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
@@ -321,7 +349,6 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 
 
-# Only used here.
 def allow_only_one_part(path, log_path=os.devnull):
     """
     Given a path to a directory, iterate through the directory and detect folders that start with
@@ -372,6 +399,7 @@ def remove_test_input_files(overall_log, test_input_path, testcase_folder):
             my_file = os.path.join(testcase_folder, relative, name)
             if os.path.isfile(my_file):
                 print ("removing (likely) stale test_input file: ", my_file, file=overall_log)
+                overall_log.flush()
                 os.remove(my_file)
 
 
@@ -425,10 +453,11 @@ def copy_contents_into(job_id,source,target,tmp_logs, log_path, stack_trace_log_
 
 # copy files that match one of the patterns from the source directory
 # to the target directory.  
-def pattern_copy(what,patterns,source,target,tmp_logs):
+def pattern_copy(what, patterns, source, target, tmp_logs):
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
         print (what," pattern copy ", patterns, " from ", source, " -> ", target, file=f)
         for pattern in patterns:
+            print(os.path.join(source,pattern))
             for my_file in glob.glob(os.path.join(source,pattern),recursive=True):
                 if (os.path.isfile(my_file)):
                     # grab the matched name

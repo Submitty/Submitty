@@ -69,10 +69,13 @@ class SecureExecutionEnvironment():
     shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(directory,"my_compile.out"))
     
     autograding_utils.add_permissions(os.path.join(directory,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-    autograding_utils.add_permissions_recursive(directory,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    autograding_utils.add_all_permissions(directory)
+
+  def lockdown_directory_after_execution(self):
+    if self.is_test_environment == False:
+        autograding_utils.untrusted_grant_rwx_access(self.my_testcase.untrusted_user, self.directory)
+    autograding_utils.add_all_permissions(self.directory)
+    autograding_utils.lock_down_folder_permissions(self.directory)
 
   def _setup_single_directory_for_execution(self, directory):
     # Make the testcase folder
@@ -107,10 +110,7 @@ class SecureExecutionEnvironment():
     autograding_utils.add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # Add the correct permissions to the target folder.
-    autograding_utils.add_permissions_recursive(directory,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    autograding_utils.add_all_permissions(directory)
 
   def setup_for_compilation_testcase(self):
     os.chdir(self.tmp_work)
@@ -126,7 +126,15 @@ class SecureExecutionEnvironment():
   def setup_for_testcase_archival(self):
     os.makedirs(os.path.join(self.tmp_results,"details"), exist_ok=True)
     os.makedirs(os.path.join(self.tmp_results,"results_public"), exist_ok=True)
-    os.chdir(self.tmp)
+    os.chdir(self.tmp_work)
+    
+    test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
+    public_dir = os.path.join(self.tmp_results,"results_public", self.name)
+    details_dir = os.path.join(self.tmp_results, "details", self.name)
+
+    os.mkdir(details_dir)
+    os.mkdir(public_dir)
+
 
   def archive_results(self, overall_log):
     raise NotImplementedError
