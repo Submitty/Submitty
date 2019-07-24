@@ -4,7 +4,6 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
-use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
 
 class ForumThreadView extends AbstractView {
 
