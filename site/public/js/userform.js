@@ -133,6 +133,10 @@ function checkValidEntries() {
                 input[0].setCustomValidity(input.prop('id')+" is required");
                 break;
             }
+            if (!$('#user-form-already-exists-error-message').is(':hidden')) {
+                input[0].setCustomValidity(input.prop('id')+" already exists");
+                break;
+            }
             var valid_expression = /^[a-z0-9_\-]*$/;
             setRedOrTransparent(input,valid_expression);
             break;
@@ -204,10 +208,15 @@ function completeUserFormInformation(user) {
 
     $('[name="user_numeric_id"]', form).val(user['user_numeric_id']);
     $('[name="user_firstname"]', form).val(user['user_firstname']);
+    $('[name="user_firstname"]').change();
     $('[name="user_preferred_firstname"]', form).val(user['user_preferred_firstname']);
+    $('[name="user_preferred_firstname"]').change();
     $('[name="user_lastname"]', form).val(user['user_lastname']);
+    $('[name="user_lastname"]').change();
     $('[name="user_preferred_lastname"]', form).val(user['user_preferred_lastname']);
+    $('[name="user_preferred_lastname"]').change();
     $('[name="user_email"]', form).val(user['user_email']);
+    $('[name="user_email"]').change();
     var registration_section;
     if (user['registration_section'] === null) {
         registration_section = "null";
