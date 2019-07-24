@@ -7,21 +7,15 @@ use app\views\AbstractView;
 
 class UsersView extends AbstractView {
     /**
-     * @param User[] $students
+     * @param array  $sorted_students students sorted by registration sections
      * @param array  $reg_sections associative array representing registration sections in the system
      * @param array  $rot_sections associative array representing rotating sections in the system
+     * @param array  $download_info user information for downloading
      * @param bool   $use_database
      * @return string
      */
-    public function listStudents($students, $reg_sections, $rot_sections, $use_database=false) {
+    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $use_database=false) {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
-        //Assemble students into sections
-        $sections = [];
-        foreach ($students as $student) {
-            $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
-            $sections[$registration][] = $student;
-        }
-
         $this->core->getOutput()->addInternalCss('studentlist.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
@@ -29,45 +23,43 @@ class UsersView extends AbstractView {
         $this->core->getOutput()->addInternalJs('directory.js');
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/StudentList.twig", [
-            "sections" => $sections,
+            "sections" => $sorted_students,
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
             'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
             "return_url_upload_class_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "download_info_json" => json_encode($download_info)
         ]);
     }
 
     /**
-     * @param User[] $graders
+     * @param array  $graders_sorted graders sorted by roles
      * @param array  $reg_sections associative array representing registration sections in the system
      * @param array  $rot_sections associative array representing rotating sections in the system
+     * @param array  $download_info grader information for downloading
      * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders, $reg_sections, $rot_sections, $use_database=false) {
+    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database=false) {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');
 
         return $this->core->getOutput()->renderTwigTemplate("admin/users/GraderList.twig", [
-            "graders" => $graders,
+            "graders" => $graders_sorted,
             "groups" => [
-                0 => [
-                    "name" => "Developer",
-                    "all_sections" => true
-                ],
-                1 => [
+                User::GROUP_INSTRUCTOR => [
                     "name" => "Instructor",
                     "all_sections" => true
                 ],
-                2 => [
+                User::GROUP_FULL_ACCESS_GRADER => [
                     "name" => "Full Access Grader (Grad TA)",
                     "all_sections" => false
                 ],
-                3 => [
+                User::GROUP_LIMITED_ACCESS_GRADER => [
                     "name" => "Limited Access Grader (Mentor)",
                     "all_sections" => false
                 ]
@@ -78,7 +70,8 @@ class UsersView extends AbstractView {
             "return_url_upload_grader_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
             "return_url_assign_reg_sections" => $this->core->buildNewCourseUrl(['graders', 'assign_registration_sections']),
             'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "download_info_json" => json_encode($download_info)
         ]);
     }
 
@@ -96,76 +89,6 @@ class UsersView extends AbstractView {
             "rot_sections" => $rot_sections,
             "action" => $action,
             "use_database" => $use_database
-        ]);
-    }
-
-
-    /**
-     * Creates the form box to be displayed when copying or downloading emails on the students/graders pages
-     * @param string $code to specify whether it is grader tab or student tab
-     * @param User[] $students
-     * @param User[] $graders
-     * @param array  $reg_sections associative array representing registration sections in the system
-     * @param bool   $use_database
-     * @return string
-     */
-    public function downloadForm($code, $students, $graders, $reg_sections, $use_database=false) {
-        $download_info = array();
-        if ($code === 'user') {
-            foreach ($students as $student) {
-                $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
-                $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
-                switch ($student->getGroup()) {
-                    case USER::GROUP_INSTRUCTOR:
-                        $grp = 'Instructor';
-                        break;
-                    case USER::GROUP_FULL_ACCESS_GRADER:
-                        $grp = 'Full Access Grader (Grad TA)';
-                        break;
-                    case USER::GROUP_LIMITED_ACCESS_GRADER:
-                        $grp = 'Limited Access Grader (Mentor)';
-                        break;
-                    default:
-                        $grp = 'Student';
-                        break;
-                }
-                $first_name = str_replace("'", "&#039;", $student->getDisplayedFirstName());
-                $last_name = str_replace("'", "&#039;", $student->getDisplayedLastName());
-                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $student->getId(), 'email' => $student->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => "$grp"]);
-            }
-        }
-        else if ($code === 'grader') {
-            foreach ($graders as $grader) {
-                $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
-                switch ($grader->getGroup()) {
-                    case USER::GROUP_INSTRUCTOR:
-                        $reg_sec = 'All';
-                        $grp = 'Instructor';
-                        break;
-                    case USER::GROUP_FULL_ACCESS_GRADER:
-                        $grp = 'Full Access Grader (Grad TA)';
-                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
-                        break;
-                    case USER::GROUP_LIMITED_ACCESS_GRADER:
-                        $grp = 'Limited Access Grader (Mentor)';
-                        $reg_sec = implode(',', $grader->getGradingRegistrationSections());
-                        break;
-                    default:
-                        $grp = 'UNKNOWN';
-                        $reg_sec = "";
-                        break;
-                }
-                $first_name = str_replace("'", "&#039;", $grader->getDisplayedFirstName());
-                $last_name = str_replace("'", "&#039;", $grader->getDisplayedLastName());
-                array_push($download_info, ['first_name' => $first_name, 'last_name' => $last_name, 'user_id' => $grader->getId(), 'email' => $grader->getEmail(), 'reg_section' => "$reg_sec", 'rot_section' => "$rot_sec", 'group' => $grp]);
-            }
-        }
-        $download_info_json = json_encode($download_info);
-        return $this->core->getOutput()->renderTwigTemplate("admin/users/DownloadForm.twig", [
-            "reg_sections" => $reg_sections,
-            "use_database" => $use_database,
-            "code" => $code,
-            "download_info_json" => $download_info_json
         ]);
     }
 

@@ -327,8 +327,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -374,8 +373,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     }
                 })
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matching_users',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -405,8 +403,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
+                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=&version_user_2=`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -435,8 +432,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
+                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=${user_id_2}&version_user_2=${version_user_2}`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -485,8 +481,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
 
-    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
+    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'clicked_match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&start=${user_1_match_start.line}&end=${user_1_match_end.line}`;
 
     //console.log(user_1_match_start.line);
 
@@ -1066,18 +1061,18 @@ function checkRefreshLichenMainPage(url, semester, course) {
 }
 
 function check_lichen_jobs(url, semester, course) {
-    $.post(url,
+    $.get(url,
         function(data) {
             var last_data = localStorage.getItem("last_data");
             if (data == "REFRESH_ME") {
                 last_data= "REFRESH_ME";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+                window.location.href = buildNewCourseUrl(['plagiarism']);
             }
             else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+                window.location.href = buildNewCourseUrl(['plagiarism']);
             }
             else {
                 checkRefreshLichenMainPage(url, semester, course);
