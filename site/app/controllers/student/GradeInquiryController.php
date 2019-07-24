@@ -233,7 +233,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(array(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId())));
+            $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId()])]);
             foreach ($graders as $grader) {
                 if ($grader->accessFullGrading() && $grader->getId() != $user_id) {
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
@@ -243,8 +243,8 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make students' notifications and emails
-            $metadata = json_encode(array(array('component' => 'student', 'gradeable_id' => $gradeable_id)));
-            if ($submitter->isTeam()) {
+            $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'student', 'gradeable_id' => $gradeable_id])]);
+            if($submitter->isTeam()){
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {
                     if ($submitting_user->getId() != $user_id) {

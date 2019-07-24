@@ -47,7 +47,9 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->showError("This account cannot access admin pages");
         }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates', $grade_summaries_last_run);
     }
 
     /**
@@ -62,6 +64,13 @@ class ReportController extends AbstractController {
         }
 
         $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+
+        // Check that the directory is writable, fail if not
+        if(!is_writable($base_path)) {
+            $this->core->addErrorMessage('Unable to write to the grade summaries directory');
+            $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+        }
+
         $g_sort_keys = [
             'type',
             'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
@@ -79,6 +88,38 @@ class ReportController extends AbstractController {
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
         $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
         return $this->core->getOutput()->renderJsonSuccess();
+    }
+
+
+    public function getGradeSummariesLastRun() {
+
+        // Build path to the grade summaries folder
+        $summaries_dir = $this->core->getConfig()->getCoursePath() . '/reports/all_grades';
+
+        // Get contents of directory
+        $files = scandir($summaries_dir);
+
+        // Get file count
+        // Subtract 2 to account for '.' and '..'
+        $file_count = count($files) - 2;
+
+        // If folder is empty return never
+        if($file_count == 0)
+        {
+            return 'Never';
+        }
+        // Else folder has contents return the time stamp off the first file
+        else
+        {
+            // Get file modification time of first student json
+            $time_stamp = filemtime($summaries_dir . '/' . $files[2]);
+
+            // Format it
+            $time_stamp = date("F d Y - g:i:s A", $time_stamp);
+            $time_stamp = $time_stamp . ' - ' . $this->core->getConfig()->getTimezone()->getName();
+
+            return $time_stamp;
+        }
     }
 
     /**
