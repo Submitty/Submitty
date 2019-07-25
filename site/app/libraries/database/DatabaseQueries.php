@@ -2847,11 +2847,17 @@ AND gc_id IN (
             'all_new_posts',
             'all_modifications_forum',
             'reply_in_post_thread',
+            'team_invite',
+            'team_joined_email',
+            'team_member_submission',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
             'all_modifications_forum_email',
-            'reply_in_post_thread_email'
+            'reply_in_post_thread_email',
+            'team_invite_email',
+            'team_joined_email',
+            'team_member_submission_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -2859,6 +2865,19 @@ AND gc_id IN (
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query);
         }
         return $this->rowsToArray($this->course_db->rows());
+    }
+
+    /**
+     * Gets the user's row in the notification settings table
+     * @param string $column
+     * @param string $user_id
+     */
+    public function getUsersNotificationSettings(array $user_ids) {
+        $params = $user_ids;
+        $user_id_query = $this->createParamaterList(count($user_ids));
+        $query = "SELECT * FROM notification_settings WHERE user_id in ".$user_id_query;
+        $this->course_db->query($query,$params);
+        return $this->course_db->rows();
     }
 
     /**

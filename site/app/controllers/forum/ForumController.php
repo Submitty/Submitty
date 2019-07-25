@@ -33,7 +33,7 @@ class ForumController extends AbstractController{
      */
     public function run() {
         return null;
-    } 
+    }
 
     private function showDeleted() {
         return ($this->core->getUser()->accessGrading() && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
