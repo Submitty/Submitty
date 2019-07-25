@@ -54,17 +54,17 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath,inDir) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,inDir) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url) %}
     {# Files on top #}
 
     {% for dir, path in files|filter((path,dir) => path is not iterable) %}
         {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup,inDir) }}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url) }}
         {% endif %}
     {% endfor %}
 
@@ -75,7 +75,7 @@
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup,inDir) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url) %}
     <div>
         <div class="file-viewer">
 
@@ -83,9 +83,9 @@
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                 <a target="_blank" href="{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=course_materials&file={{ dir }}&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>

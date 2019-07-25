@@ -233,7 +233,8 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_grade" => $individual_viewed_grade,
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
-            "regrade_requests" => $regrade_requests
+            "regrade_requests" => $regrade_requests,
+            "download_zip_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip'])
         ]);
     }
 
@@ -863,7 +864,8 @@ HTML;
             "results_public" => $results_public,
             "site_url" => $this->core->getConfig()->getSiteUrl(),
             "active_version" => $display_version,
-            'toolbar_css' => $toolbar_css
+            'toolbar_css' => $toolbar_css,
+            "display_file_url" => $this->core->buildNewUrl(['misc', 'display_file'])
         ]);
     }
 
