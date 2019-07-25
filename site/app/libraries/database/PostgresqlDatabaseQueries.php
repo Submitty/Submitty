@@ -1042,9 +1042,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               egv.active_version,
 
               /* Grade inquiry data */
-              rr.id AS regrade_request_id,
-              rr.status AS regrade_request_status,
-              rr.timestamp AS regrade_request_timestamp,
+             rr.array_grade_inquiries,
 
               {$submitter_data_inject}
 
@@ -1140,7 +1138,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
               /* Join grade inquiry */
-              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}={$submitter_type_ext} AND rr.g_id=g.g_id
+              LEFT JOIN (
+  				SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
+  				FROM regrade_requests AS rr
+  				GROUP BY rr.user_id, rr.team_id, rr.g_id
+  			  ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
             WHERE $selector
             $order";
 
@@ -1200,17 +1202,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
 
-            if (isset($row['regrade_request_id'])) {
-                $regrade_request_properties = [
-                    'id',
-                    'status',
-                    'timestamp'
-                ];
-                $regrade_request_arr = array_combine($regrade_request_properties, array_map(function($prop) use($row) {
-                    return $row['regrade_request_'.$prop];
-                }, $regrade_request_properties));
+            if (isset($row['array_grade_inquiries'])) {
+                $grade_inquiries = json_decode($row['array_grade_inquiries'],true);
+                $grade_inquiries_arr = array();
+                foreach ($grade_inquiries as $grade_inquiry) {
+                    $grade_inquiries_arr[] = new RegradeRequest($this->core, $grade_inquiry);
+                }
 
-                $graded_gradeable->setRegradeRequest(new RegradeRequest($this->core, $regrade_request_arr));
+                $graded_gradeable->setRegradeRequests($grade_inquiries_arr);
             }
 
             $graded_components_by_id = [];

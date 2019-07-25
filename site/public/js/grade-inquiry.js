@@ -1,3 +1,8 @@
+$( document ).ready(function () {
+  // select first tab with a regrade request
+  $('.component-0').click();
+});
+
 function onComponentTabClicked(tab) {
   var component_id = tab.data("component_id");
   // deselect previous selected tab and select clicked tab
@@ -11,7 +16,7 @@ function onComponentTabClicked(tab) {
 
 
   // show posts that pertain to this component_id
-  $(".post_box").each(function(){
+  $(".grade-inquiry").each(function(){
     if ($(this).data("component_id") !== component_id) {
       $(this).hide();
     } else {

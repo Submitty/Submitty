@@ -758,63 +758,78 @@ class HomeworkView extends AbstractView {
             'grade_inquiry',
             'post'
         ]);
-        if (!$graded_gradeable->hasSubmission()) {
-            $grade_inquiry_status = "no_submission";
-        }
-        else if (!$graded_gradeable->hasRegradeRequest() || !$can_inquiry) {
-            $grade_inquiry_status = 'none';
-        }
-        elseif ($graded_gradeable->hasActiveRegradeRequest()) {
-            if ($this->core->getUser()->accessGrading()) {
-                $grade_inquiry_status = 'pending_grading';
-            }
-            else {
-                $grade_inquiry_status = 'pending';
-            }
-        }
-        else {
-            if ($this->core->getUser()->accessGrading()) {
-                $grade_inquiry_status = 'resolved_grading';
-            }
-            else {
-                $grade_inquiry_status = 'resolved';
-            }
-        }
 
-        $posts = [];
-        if ($graded_gradeable->hasRegradeRequest()) {
-            $threads = $this->core->getQueries()->getRegradeDiscussion($graded_gradeable->getRegradeRequest());
-            foreach ($threads as $thread) {
-                if (empty($threads)) break;
-                $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
-                $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
-                $date = DateUtils::parseDateTime($thread['timestamp'], $this->core->getConfig()->getTimezone());
-                $content = $thread['content'];
-                $gc_id = $thread['gc_id'];
+        $grade_inquiries = $graded_gradeable->getRegradeRequests();
+        $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+        $grade_inquiries_twig_array = array();
+        foreach($grade_inquiries as $grade_inquiry) {
+            $gc_id = $grade_inquiry->getGcId() ?? 0;
+            $posts = [];
+            foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
+                if (empty($post)) break;
+                $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+                $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
+                $content = $post['content'];
                 $posts[] = [
                     'is_staff' => $is_staff,
                     'date' => date_format($date, 'm/d/Y g:i A'),
                     'name' => $name,
-                    'content' => $content,
-                    'gc_id' => $gc_id
+                    'content' => $content
                 ];
-
             }
+            $grade_inquiry_twig_object = [
+                'id' => $grade_inquiry->getId(),
+                'gc_id' => $gc_id,
+                'status' => $grade_inquiry->getStatus(),
+                'posts' => $posts
+            ];
+            $grade_inquiries_twig_array[$gc_id] = $grade_inquiry_twig_object;
         }
 
+        $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
+        $components_twig_array = [];
+        foreach ($gradeable_components as $component) {
+            $component_object = [
+                'id' => $component->getId(),
+                'title' => $component->getTitle(),
+            ];
+            $components_twig_array[] = $component_object;
+        }
+        $components_twig_array[] = ['id' => 0, 'title' => 'General'];
+
+//        $posts = [];
+//        if ($graded_gradeable->hasRegradeRequest()) {
+//            $threads = $this->core->getQueries()->getRegradeDiscussions($graded_gradeable->getRegradeRequest());
+//            foreach ($threads as $thread) {
+//                if (empty($threads)) break;
+//                $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
+//                $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
+//                $date = DateUtils::parseDateTime($thread['timestamp'], $this->core->getConfig()->getTimezone());
+//                $content = $thread['content'];
+//                $posts[] = [
+//                    'is_staff' => $is_staff,
+//                    'date' => date_format($date, 'm/d/Y g:i A'),
+//                    'name' => $name,
+//                    'content' => $content
+//                ];
+//
+//            }
+//        }
+
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
-            'grade_inquiry_status' => $grade_inquiry_status,
+            'grade_inquiries' => $grade_inquiries_twig_array,
             'request_regrade_url' => $request_regrade_url,
             'change_request_status_url' => $change_request_status_url,
             'make_request_post_url' => $make_regrade_post_url,
-            'posts' => $posts,
+            'has_submission' => $graded_gradeable->hasSubmission(),
             'gradeable_id' => $graded_gradeable->getGradeableId(),
-            'thread_id' => $graded_gradeable->hasRegradeRequest() ? $graded_gradeable->getRegradeRequest()->getId() : 0,
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
+            'is_grading' => $this->core->getUser()->accessGrading(),
             'grade_inquiry_per_component_allowed' => $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed(),
-            'gradeable_components' => $graded_gradeable->getGradeable()->getComponents(),
+            'gradeable_components' => $components_twig_array,
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

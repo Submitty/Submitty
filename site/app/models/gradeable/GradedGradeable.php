@@ -17,7 +17,7 @@ use app\exceptions\IOException;
  * @method string getGradeableId()
  * @method AutoGradedGradeable getAutoGradedGradeable()
  * @method TaGradedGradeable|null getTaGradedGradeable()
- * @method RegradeRequest|null getRegradeRequest()
+ * @method array|null getRegradeRequests()
  * @method Submitter getSubmitter()
  * @method array getLateDayExceptions()
  */
@@ -33,8 +33,8 @@ class GradedGradeable extends AbstractModel {
     protected $ta_graded_gradeable = null;
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @property @var RegradeRequest|null The grade inquiry for this submitter/gradeable  */
-    protected $regrade_request = null;
+    /** @property @var array|null The grade inquiries for this submitter/gradeable  */
+    protected $regrade_requests = null;
 
     /** @property @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
@@ -65,6 +65,7 @@ class GradedGradeable extends AbstractModel {
         $this->submitter = $submitter;
 
         $this->late_day_exceptions = $details['late_day_exceptions'] ?? [];
+
     }
 
     /**
@@ -121,10 +122,32 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Sets the grade inquiry for this graded gradeable
-     * @param RegradeRequest $regrade_request
+     * @param array $regrade_requests
      */
-    public function setRegradeRequest(RegradeRequest $regrade_request) {
-        $this->regrade_request = $regrade_request;
+    public function setRegradeRequests(array $regrade_requests) {
+        $this->regrade_requests = $regrade_requests;
+        foreach ($this->regrade_requests as $grade_inquiry) {
+            $this->setGradeInquiryStringStatus($grade_inquiry);
+        }
+    }
+
+    private function setGradeInquiryStringStatus(RegradeRequest $grade_inquiry) {
+        if ($this->hasActiveRegradeRequest()) {
+            if ($this->core->getUser()->accessGrading()) {
+                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_PENDING_GRADING);
+            }
+            else {
+                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_PENDING);
+            }
+        }
+        else {
+            if ($this->core->getUser()->accessGrading()) {
+                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_RESOLVED_GRADING);
+            }
+            else {
+                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_RESOLVED);
+            }
+        }
     }
 
     /**
@@ -132,7 +155,7 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function hasRegradeRequest() {
-        return $this->regrade_request !== null;
+        return $this->regrade_requests !== null && count($this->regrade_requests) > 0;
     }
 
     /**
@@ -140,7 +163,11 @@ class GradedGradeable extends AbstractModel {
      * @return bool
      */
     public function hasActiveRegradeRequest() {
-        return $this->hasRegradeRequest() && $this->regrade_request->getStatus();
+        return $this->hasRegradeRequest() &&
+            array_reduce($this->regrade_requests, function ($carry, RegradeRequest $item) {
+                $carry = $item->getStatus() || $carry;
+                return $carry;
+            });
     }
 
     /**
