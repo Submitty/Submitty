@@ -851,7 +851,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <input id="remove_member_'+i+'" class = "btn btn-danger" type="submit" value="Remove" onclick="removeTeamMemberInput('+i+');" \
+                <input id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
