@@ -805,6 +805,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var form = $("#admin-team-form");
     form.css("display", "block");
 
+    $("#admin-team-form-submit").prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
     $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
     $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
@@ -838,6 +839,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
+            $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
         members_div.find('[name="reg_section"]').val(reg_section);
         members_div.find('[name="rot_section"]').val(rot_section);
@@ -894,6 +896,34 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
 
     }
+    $(":text",form).change(function() {
+        var found = false;
+        for (var i = 0; i < student_full.length; i++) {
+            if (student_full[i]['value'] == $(this).val()) {
+                found = true;
+                break;
+            }
+        }
+        if (found || $(this).val() == '') {
+            $(this)[0].setCustomValidity('');
+        }
+        else {
+            $(this)[0].setCustomValidity("Invalid user_id");
+        }
+
+        var invalid_entry = false;
+        $(":text",form).each( function() {
+            if (!this.checkValidity())  {
+                invalid_entry = true;
+            }
+        });
+        if (invalid_entry) {
+            $("#admin-team-form-submit").prop('disabled',true);
+        }
+        else {
+            $("#admin-team-form-submit").prop('disabled',false);
+        }
+    });
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
