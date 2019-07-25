@@ -1145,7 +1145,7 @@ div.full_height {
 
 .popup-form .form-body {
     flex-grow: 1;
-    overflow-y: auto;
+    overflow-y: scroll;
 }
 
 .popup-form .form-buttons {
