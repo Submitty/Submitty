@@ -614,6 +614,7 @@ HTML;
                 }
         }
 
+        $details_base_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -631,6 +632,11 @@ HTML;
             "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_team_rotating_sections']),
             "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "peer" => $peer,
+            "details_base_url" => $details_base_url,
+            "view_all_toggle_url" => $details_base_url . '?' .
+                http_build_query(['view' => $view_all ? null : 'all', 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction]),
+            "order_toggle_url" => $details_base_url . '?' .
+                http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random']),
             "sort" => $sort,
             "direction" => $direction
         ]);

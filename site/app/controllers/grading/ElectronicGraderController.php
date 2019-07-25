@@ -414,7 +414,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null) {
+    public function showDetails($gradeable_id, $view = null, $sort="id", $direction="ASC") {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -442,8 +442,6 @@ class ElectronicGraderController extends AbstractController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = $view_all && $can_show_all;
 
-        $sort = $_GET['sort'] ?? "id";
-        $direction = $_GET['direction'] ?? "ASC";
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
         $order->sort($sort, $direction);
 
@@ -825,7 +823,7 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null) {
+    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null, $sort="id", $direction="ASC") {
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -907,8 +905,6 @@ class ElectronicGraderController extends AbstractController {
             $progress = round(($graded / $total_submitted) * 100, 1);
         }
 
-        $sort = $_GET['sort'] ?? "id";
-        $direction = $_GET['direction'] ?? "ASC";
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
         $order->sort($sort, $direction);
 

@@ -34,26 +34,11 @@
             {% if show_all_sections_button %}
                 <div style="display:flex; flex-direction: column; justify-self: flex-end;flex-wrap: wrap;margin-left: 5px">
                     <a class="btn btn-default"
-                       href="{{ view_all ? details_url : details_view_all_url }}">
-                       href="{{ core.buildUrl({'component': 'grading',
-                           'page': 'electronic',
-                           'action': 'details',
-                           'gradeable_id': gradeable.getId(),
-                           'view': view_all ? null : "all",
-                           'sort': sort,
-                           'direction': sort == 'random' ? null : direction
-                       }) }}">
+                       href="{{ view_all_toggle_url }}">
                         {{ view_all ? "View Your Sections" : "View All" }}
                     </a>
                     <a style="margin-top: 10px" class="btn btn-default"
-                       href="{{ core.buildUrl({'component': 'grading',
-                           'page': 'electronic',
-                           'action': 'details',
-                           'gradeable_id': gradeable.getId(),
-                           'view': view_all ? "all" : null,
-                           'sort': sort == 'random' ? null : 'random',
-                           'direction': null
-                       }) }}">
+                       href="{{ order_toggle_url }}">
                         {{ sort == 'random' ? "Default Order" : "Random Order" }}
                     </a>
                 </div>
@@ -91,16 +76,11 @@
                 {% for column in columns %}
                     {% if column.sort_type %}
                         <td width="{{ column.width }}">
-                            <a href="{{ core.buildUrl({
-                                'component': 'grading',
-                                'page': 'electronic',
-                                'action': 'details',
-                                'gradeable_id': gradeable.getId(),
-                                'view': (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null,
-                                'sort': column.sort_type,
-                                'direction': sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC',
-                                'view': view_all ? 'all' : null
-                            }) }}"
+                            <a href="{{ details_base_url }}
+                                ?view={{ (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null }}
+                                &sort={{ column.sort_type }}
+                                &direction={{ 'direction': sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}
+                            "
                             {% if sort == column.sort_type %}
                                 class="active-sort"
                             {% endif %}
@@ -373,8 +353,7 @@
         {% set btn_class = "btn-primary" %}
     {% endif %}
     <td>
-        <a class="btn {{ btn_class }}" href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': graded_gradeable.getGradeableId(), 'who_id': graded_gradeable.getSubmitter().getId(), 'sort': context.sort, 'direction': context.direction}) }}">
-        <a class="btn {{ btn_class }}" href="{{ grade_url }}?who_id={{ graded_gradeable.getSubmitter().getId() }}">
+        <a class="btn {{ btn_class }}" href="{{ grade_url }}?who_id={{ graded_gradeable.getSubmitter().getId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
         </a>
     </td>
