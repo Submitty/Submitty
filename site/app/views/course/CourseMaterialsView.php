@@ -135,7 +135,7 @@ class CourseMaterialsView extends AbstractView {
             "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
             'server_time' => $server_time,
-            "display_file_url" => $this->core->buildNewUrl(['misc', 'display_file'])
+            "display_file_url" => $this->core->buildNewCourseUrl(['display_file'])
         ]);
     }
 }

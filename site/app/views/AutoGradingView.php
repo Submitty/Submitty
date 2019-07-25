@@ -143,7 +143,7 @@ class AutoGradingView extends AbstractView {
                     "pdf" => true,
                     "name" => $file_name,
                     "path" => $file_path,
-                    "url" => $this->core->buildNewUrl(['misc', 'display_file']) . '?' . http_build_query([
+                    "url" => $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                         "dir" => $public ? "results_public": "results",
                         "file" => $file_name,
                         "path" => $file_path

@@ -865,7 +865,7 @@ HTML;
             "site_url" => $this->core->getConfig()->getSiteUrl(),
             "active_version" => $display_version,
             'toolbar_css' => $toolbar_css,
-            "display_file_url" => $this->core->buildNewUrl(['misc', 'display_file'])
+            "display_file_url" => $this->core->buildNewCourseUrl(['display_file'])
         ]);
     }
 

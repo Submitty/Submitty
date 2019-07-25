@@ -38,11 +38,10 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/misc/encode_pdf")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return Response
      */
-    public function encodePDF(){
-        $gradeable_id = $_POST['gradeable_id'] ?? NULL;
+    public function encodePDF($gradeable_id){
         $id = $_POST['user_id'] ?? NULL;
         $file_name = $_POST['filename'] ?? NULL;
         $file_name = html_entity_decode($file_name);
@@ -70,14 +69,14 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/misc/display_file")
+     * @Route("/{_semester}/{_course}/display_file")
      */
     public function displayFile($dir, $path, $gradeable_id = null, $user_id = null, $ta_grading = null) {
         //Is this per-gradeable?
         $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
 
         if (!is_null($gradeable_id)) {
-            $gradeable = $this->tryGetGradeable($_REQUEST['gradeable_id'], false);
+            $gradeable = $this->tryGetGradeable($gradeable_id, false);
             if ($gradeable === false) {
                 return false;
             }

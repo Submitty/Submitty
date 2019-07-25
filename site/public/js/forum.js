@@ -30,7 +30,7 @@ function categoriesFormEvents(){
 }
 
 function openFileForum(directory, file, path ){
-    var url = buildNewUrl(['misc', 'display_file']) + '?dir=' + directory + '&file=' + file + '&path=' + path;
+    var url = buildNewCourseUrl(['display_file']) + '?dir=' + directory + '&file=' + file + '&path=' + path;
     window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
 }
 
