@@ -442,7 +442,10 @@ class ElectronicGraderController extends AbstractController {
         $can_show_all = $this->core->getAccess()->canI("grading.electronic.details.show_all");
         $show_all = $view_all && $can_show_all;
 
+        $sort = $_GET['sort'] ?? "id";
+        $direction = $_GET['direction'] ?? "ASC";
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), $show_all);
+        $order->sort($sort, $direction);
 
         $section_submitters = $order->getSectionSubmitters();
         $section_key = $order->getSectionKey();
@@ -476,6 +479,9 @@ class ElectronicGraderController extends AbstractController {
         /** @var GradedGradeable $g */
         foreach ($order->getSortedGradedGradeables() as $g) {
             $graded_gradeables[] = $g;
+            if($gradeable->isTeamAssignment()) {
+                $user_ids = array_merge($user_ids, $g->getSubmitter()->getTeam()->getMemberUserIds());
+            }
         }
         $teamless_users = [];
         if ($gradeable->isTeamAssignment()) {
@@ -502,7 +508,7 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -901,7 +907,11 @@ class ElectronicGraderController extends AbstractController {
             $progress = round(($graded / $total_submitted) * 100, 1);
         }
 
+        $sort = $_GET['sort'] ?? "id";
+        $direction = $_GET['direction'] ?? "ASC";
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
+        $order->sort($sort, $direction);
+
         $prev = $order->getPrevSubmitter($graded_gradeable->getSubmitter());
         $next = $order->getNextSubmitter($graded_gradeable->getSubmitter());
 
@@ -967,7 +977,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('forum.css');
         $this->core->getOutput()->addInternalJs('forum.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $sort, $direction);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');

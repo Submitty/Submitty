@@ -1967,6 +1967,17 @@ function onClickCountUp(me) {
     let component_id = getComponentIdFromDOMElement(me);
     let mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'No Credit');
+    $.get('Mark.twig',null,function(){
+        $("input[id^='mark-editor-']").each(function () {
+            $(this).attr("overall","No Credit");
+            if(this.value<0){
+                this.style.backgroundColor = "var(--standard-vibrant-yellow)";
+            }
+            else{
+                this.style.backgroundColor = "var(--default-white)";
+            }
+        });
+    });
 }
 
 /**
@@ -1977,6 +1988,17 @@ function onClickCountDown(me) {
     let component_id = getComponentIdFromDOMElement(me);
     let mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'Full Credit');
+    $.get('Mark.twig',null,function(){
+        $("input[id^='mark-editor-']").each(function () {
+            $(this).attr("overall","Full Credit");
+            if(this.value>0){
+                this.style.backgroundColor = "var(--standard-vibrant-yellow)";
+            }
+            else{
+                this.style.backgroundColor = "var(--default-white)";
+            }
+        });
+    });
 }
 
 /**
