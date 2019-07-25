@@ -981,7 +981,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for fetching a gradeable's rubric information
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rubric")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"GET"})
      */
     public function ajaxGetGradeableRubric($gradeable_id) {
         $grader = $this->core->getUser();
