@@ -567,6 +567,7 @@ class DatabaseQueries {
 
     public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown){
         try {
+            $markdown = $markdown?1:0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
             // forum_posts_history will store all history state of the post(if edited at any point of time)
             $this->course_db->beginTransaction();

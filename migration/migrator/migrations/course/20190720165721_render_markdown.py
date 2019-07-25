@@ -2,9 +2,7 @@
 
 
 def up(config, database, semester, course):
-    if not database.table_has_column('posts', 'render_markdown'):
-        database.execute('ALTER TABLE posts ADD COLUMN render_markdown BOOLEAN NOT NULL DEFAULT false')
-    pass
+    database.execute('ALTER TABLE posts ADD COLUMN IF NOT EXISTS render_markdown BOOLEAN NOT NOLL DEFAULT false')
 
 
 def down(config, database, semester, course):

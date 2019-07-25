@@ -339,11 +339,7 @@ class ForumController extends AbstractController{
             return $this->core->getOutput()->getOutput();
         }
 
-        $markdown = false;
-
-        if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
-            $markdown = true;
-        }
+        $markdown = !empty($_POST['markdown_status']);
 
         $current_user_id = $this->core->getUser()->getId();
         $result = array();
@@ -442,11 +438,7 @@ class ForumController extends AbstractController{
             $this->changeThreadStatus($_POST['thread_status'], $thread_id);
         }
 
-        $markdown = false;
-
-        if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
-            $markdown = true;
-        }
+        $markdown = !empty($_POST['markdown_status']);
 
         setcookie("markdown_enabled", ($markdown?1:0), time() + (86400 * 30), "/");
 
@@ -537,11 +529,7 @@ class ForumController extends AbstractController{
         $post = $this->core->getQueries()->getPost($post_id);
         $current_user_id = $this->core->getUser()->getId();
 
-        $markdown = false;
-
-        if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
-            $markdown = true;
-        }
+        $markdown = !empty($_POST['markdown_status']);
 
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 $this->core->getOutput()->renderJson(['error' => 'You do not have permissions to do that.']);
@@ -747,11 +735,7 @@ class ForumController extends AbstractController{
                 $anon = $original_post["anonymous"] ? 1 : 0;
             }
 
-            $markdown = 0;
-
-            if(isset($_POST['markdown_status']) && ($_POST['markdown_status']=="1")){
-                $markdown = 1;
-            }
+            $markdown = !empty($_POST['markdown_status']);
 
             return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown);
         }
