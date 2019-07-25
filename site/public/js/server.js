@@ -1090,7 +1090,7 @@ function downloadFile(file, path, dir) {
         'path': path});
 }
 
-function downloadZip(grade_id, user_id, version = null) {
+function downloadZip(grade_id, user_id, version = null, origin = null) {
     var url_components = {
         'component': 'misc',
         'page': 'download_zip',
@@ -1102,6 +1102,11 @@ function downloadZip(grade_id, user_id, version = null) {
     if(version !== null) {
         url_components['version'] = version;
     }
+
+    if(origin !== null) {
+        url_components['origin'] = origin;
+    }
+
     window.location = buildUrl(url_components);
     return false;
 }
