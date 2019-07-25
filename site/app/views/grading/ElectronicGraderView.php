@@ -891,7 +891,7 @@ HTML;
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
         $version_change_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
-            . http_build_query(['who_id'=>$graded_gradeable->getSubmitter()->getId()]);
+            . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getId()]) . '&gradeable_version=';
         $onChange = "versionChange('{$version_change_url}', this)";
 
         $tables = [];
