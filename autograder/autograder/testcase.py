@@ -10,7 +10,8 @@ from pwd import getpwnam
 import glob
 
 from submitty_utils import dateutils
-from . import autograding_utils, CONFIG_PATH, JailedSandbox
+from . import autograding_utils, CONFIG_PATH
+from .execution_environments import jailed_sandbox
 
 
 class Testcase():
@@ -34,7 +35,7 @@ class Testcase():
     # if complete_config_obj.get("autograding_method", "") == "docker":
     #   self.secure_environment = ContainerNetwork(self.parent_directory, self.testcase_directory, self.log, testcase_info)
     # else:
-    self.secure_environment = JailedSandbox.JailedSandbox(self.testcase_directory, complete_config_obj, testcase_info.get('pre_commands', list()), self, autograding_directory, is_test_environment)
+    self.secure_environment = jailed_sandbox.JailedSandbox(self.testcase_directory, complete_config_obj, testcase_info.get('pre_commands', list()), self, autograding_directory, is_test_environment)
     
   def _run_execution(self):
     self.secure_environment.setup_for_execution_testcase()

@@ -10,7 +10,7 @@ from pwd import getpwnam
 import glob
 
 from submitty_utils import dateutils
-from . import autograding_utils, CONFIG_PATH
+from .. import autograding_utils, CONFIG_PATH
 
 class SecureExecutionEnvironment():
   def __init__(self, testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment):
@@ -31,7 +31,7 @@ class SecureExecutionEnvironment():
     self.directory = os.path.join(self.tmp_work, testcase_directory)
 
     if is_test_environment == False:
-      from . import CONFIG_PATH
+      from .. import CONFIG_PATH
       with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
         OPEN_JSON = json.load(open_file)
       self.SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']

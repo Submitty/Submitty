@@ -4,9 +4,10 @@ import subprocess
 import traceback
 
 from submitty_utils import dateutils
-from . import autograding_utils, SecureExecutionEnvironment
+from . import secure_execution_environment
+from .. import autograding_utils
 
-class JailedSandbox(SecureExecutionEnvironment.SecureExecutionEnvironment):
+class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
   def __init__(self, testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment):
      super().__init__(testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment)   
 

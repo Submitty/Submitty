@@ -6,7 +6,8 @@ import subprocess
 import socket
 import traceback
 
-from . import CONFIG_PATH, autograding_utils, Testcase, JailedSandbox
+from . import CONFIG_PATH, autograding_utils, testcase
+from .execution_environments import jailed_sandbox
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -65,7 +66,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     testcase_num = 1
     for t in complete_config_obj['testcases']:
         testcase_folder = os.path.join("test{:02}".format(testcase_num))
-        tmp_test = Testcase.Testcase(testcase_num, testcase_folder, queue_obj, complete_config_obj, t,
+        tmp_test = testcase.Testcase(testcase_num, testcase_folder, queue_obj, complete_config_obj, t,
                                      which_untrusted, is_vcs, job_id, is_batch_job, working_directory, testcases,
                                      submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
         testcases.append( tmp_test )
@@ -77,9 +78,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         # COMPILE THE SUBMITTED CODE
         print("====================================\nCOMPILATION STARTS", file=overall_log)
         overall_log.flush()
-        for testcase in testcases:
-            if testcase.type != 'Execution':
-                testcase.execute()
+        for tc in testcases:
+            if tc.type != 'Execution':
+                tc.execute()
         overall_log.flush()
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
@@ -87,9 +88,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         # EXECUTE
         print ("====================================\nRUNNER STARTS", file=overall_log)
         overall_log.flush()
-        for testcase in testcases:
-            if testcase.type == 'Execution':
-                testcase.execute()
+        for tc in testcases:
+            if tc.type == 'Execution':
+                tc.execute()
 
                 killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
@@ -108,7 +109,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
 
-        validation_environment = JailedSandbox.JailedSandbox(tmp_work, complete_config_obj, list(), None, working_directory, False)
+        validation_environment = jailed_sandbox.JailedSandbox(tmp_work, complete_config_obj, list(), None, working_directory, False)
         # VALIDATION
         print ("====================================\nVALIDATION STARTS", file=overall_log)
         overall_log.flush()
@@ -137,9 +138,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         # ARCHIVE
         print ("====================================\nARCHIVING STARTS", file=overall_log)
         overall_log.flush()
-        for testcase in testcases:
+        for tc in testcases:
             print('archival')
-            testcase.setup_for_archival(overall_log)
+            tc.setup_for_archival(overall_log)
         print('begin big archive')
         try:
             autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
