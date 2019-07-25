@@ -10,8 +10,8 @@ def up(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("ALTER TABLE ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
-    database.execute("ALTER TABLE ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;")
+    database.execute("ALTER TABLE IF EXISTS ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
+    database.execute("ALTER TABLE IF EXISTS ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE ON DELETE CASCADE;")
 
     database.execute("""
 CREATE OR REPLACE FUNCTION sync_delete_user() RETURNS TRIGGER AS $$
@@ -91,5 +91,5 @@ def down(config, database):
     database.execute("DROP TRIGGER IF EXISTS before_delete_sync_delete_user ON courses_users;")
     database.execute("DROP FUNCTION IF EXISTS sync_delete_user_cleanup();")
     database.execute("DROP FUNCTION IF EXISTS sync_delete_user();")
-    database.execute("ALTER TABLE ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
-    database.execute("ALTER TABLE ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
+    database.execute("ALTER TABLE IF EXISTS ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
+    database.execute("ALTER TABLE IF EXISTS ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
