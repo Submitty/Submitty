@@ -278,6 +278,7 @@
     </div>
 </div>
 <div class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
 </div>
 {% endif %}
@@ -465,16 +466,9 @@
         // Event handler for the gradeable template selection change
         $('[name="gradeable_template"]').change(
         function() {
-            // TODO: what if this.value === ''?
-            let arrayUrlParts = [];
-            arrayUrlParts["component"]   = ["admin"];
-            arrayUrlParts["page"]        = ["admin_gradeable"];
-            arrayUrlParts["action"]      = ["upload_new_template"];
-            arrayUrlParts["template_id"] = [this.value];
-
             // Redirect user to the same page, but in the process,
             //  fetch the data from the template gradeable
-            window.location.href = buildUrl(arrayUrlParts);
+            window.location.href = buildNewCourseUrl(['gradeable']) + `?template_id=${this.value}`;
         });
 
         //

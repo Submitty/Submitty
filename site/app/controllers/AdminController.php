@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-use app\controllers\admin\AdminGradeableController;
 use app\controllers\admin\GradeOverrideController;
 
 class AdminController extends AbstractController {
@@ -16,9 +15,6 @@ class AdminController extends AbstractController {
         switch ($_REQUEST['page']) {
             case 'grade_override':
                 $controller = new GradeOverrideController($this->core);
-                break;
-            case 'admin_gradeable':
-                $controller = new AdminGradeableController($this->core);
                 break;
             default:
                 $this->core->getOutput()->showError("Invalid page request for controller ".get_class($this));
