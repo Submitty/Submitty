@@ -57,7 +57,8 @@ function updatePdfPageSettings() {
 
 function onPrecisionChange() {
     ajaxUpdateGradeableProperty(getGradeableId(), {
-        'precision': $('#point_precision_id').val()
+        'precision': $('#point_precision_id').val(),
+        'csrf_token': csrfToken
     }, function () {
         // Clear errors by just removing red background
         clearError('precision');
@@ -112,7 +113,7 @@ $(document).ready(function () {
             return;
         }
 
-        let data = {};
+        let data = {'csrf_token': csrfToken};
         data[this.name] = $(this).val();
         let addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {

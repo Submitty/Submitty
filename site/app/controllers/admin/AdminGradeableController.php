@@ -887,7 +887,7 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
-
+        unset($_POST['csrf_token']);
         try {
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
