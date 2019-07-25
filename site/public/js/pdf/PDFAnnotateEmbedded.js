@@ -50,7 +50,8 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
         data: {
             gradeable_id: gradeable_id,
             user_id: user_id,
-            filename: file_name
+            filename: file_name,
+            csrf_token: csrfToken
         },
         success: (data) => {
             PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(GENERAL_INFORMATION.grader_id));
