@@ -749,11 +749,11 @@ HTML;
      * @return string
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer, $sort, $direction) {
-        $home_url = $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null, 'sort' => $sort, 'direction' => $direction]);
+        $home_url = $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction ]);
 
         //Go home if there's nobody left
-        $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $prev_id, 'sort' => $sort, 'direction' => $direction]);
-        $next_student_url = $next_id === "" ? $home_url : $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id, 'sort' => $sort, 'direction' => $direction]);
+        $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $prev_id ]);
+        $next_student_url = $next_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $next_id ]);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
