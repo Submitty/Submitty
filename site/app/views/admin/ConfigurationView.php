@@ -7,6 +7,8 @@ use app\views\AbstractView;
 class ConfigurationView extends AbstractView {
     public function viewConfig($fields, $gradeable_seating_options) {
         $this->core->getOutput()->addInternalJs("course-settings.js");
+        $this->core->getOutput()->addInternalJs("configuration.js");
+        $this->core->getOutput()->addInternalCss("configuration.css");
         $this->core->getOutput()->addBreadcrumb('Course Settings');
         return $this->core->getOutput()->renderTwigTemplate("admin/Configuration.twig", [
             "fields" => $fields,
