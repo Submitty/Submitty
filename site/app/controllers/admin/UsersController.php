@@ -5,6 +5,9 @@ namespace app\controllers\admin;
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
 use app\models\User;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
@@ -28,36 +31,118 @@ class UsersController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
+     * @return Response
      */
-    public function listStudents() {
+    public function getStudents() {
         $students = $this->core->getQueries()->getAllUsers();
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+        //Assemble students into sections
+        $sorted_students = [];
+        $download_info = [];
+        foreach ($students as $student) {
+            $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
+            $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $sorted_students[$reg_sec][] = $student;
+            switch ($student->getGroup()) {
+                case User::GROUP_INSTRUCTOR:
+                    $grp = 'Instructor';
+                    break;
+                case User::GROUP_FULL_ACCESS_GRADER:
+                    $grp = 'Full Access Grader (Grad TA)';
+                    break;
+                case User::GROUP_LIMITED_ACCESS_GRADER:
+                    $grp = 'Limited Access Grader (Mentor)';
+                    break;
+                default:
+                    $grp = 'Student';
+                    break;
+            }
+            array_push($download_info, [
+                'first_name' => $student->getDisplayedFirstName(),
+                'last_name' => $student->getDisplayedLastName(),
+                'user_id' => $student->getId(),
+                'email' => $student->getEmail(),
+                'reg_section' => $reg_sec,
+                'rot_section' => $rot_sec,
+                'group' => $grp
+            ]);
+        }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $reg_sections, $rot_sections, $use_database);
-        $this->renderDownloadForm('user', $use_database);
+        return new Response(
+            JsonResponse::getSuccessResponse($download_info),
+            new WebResponse(
+                ['admin', 'Users'],
+                'listStudents',
+                $sorted_students,
+                $this->core->getQueries()->getRegistrationSections(),
+                $this->core->getQueries()->getRotatingSections(),
+                $download_info,
+                $this->core->getAuthentication() instanceof DatabaseAuthentication
+            )
+        );
     }
 
     /**
      * @Route("/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
+     * @return Response
      */
-    public function listGraders() {
-        $graders_unsorted = $this->core->getQueries()->getAllGraders();
-        // graders are split into groups based on grading permissions
-        $graders = array('1' => array(),
-                         '2' => array(),
-                         '3' => array());
-        foreach ($graders_unsorted as $grader){
-            $graders[$grader->getGroup()][] =  $grader;
+    public function getGraders() {
+        $graders = $this->core->getQueries()->getAllGraders();
+        $graders_sorted = [
+            User::GROUP_INSTRUCTOR => [],
+            User::GROUP_FULL_ACCESS_GRADER => [],
+            User::GROUP_LIMITED_ACCESS_GRADER => []
+        ];
+
+        $download_info = [];
+
+        foreach ($graders as $grader) {
+            $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
+            switch ($grader->getGroup()) {
+                case User::GROUP_INSTRUCTOR:
+                    $reg_sec = 'All';
+                    $grp = 'Instructor';
+                    $graders_sorted[User::GROUP_INSTRUCTOR][] = $grader;
+                    break;
+                case User::GROUP_FULL_ACCESS_GRADER:
+                    $grp = 'Full Access Grader (Grad TA)';
+                    $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                    $graders_sorted[User::GROUP_FULL_ACCESS_GRADER][] = $grader;
+                    break;
+                case User::GROUP_LIMITED_ACCESS_GRADER:
+                    $grp = 'Limited Access Grader (Mentor)';
+                    $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                    $graders_sorted[User::GROUP_LIMITED_ACCESS_GRADER][] = $grader;
+                    break;
+                default:
+                    $grp = 'UNKNOWN';
+                    $reg_sec = "";
+                    break;
+            }
+            array_push($download_info, [
+                'first_name' => $grader->getDisplayedFirstName(),
+                'last_name' => $grader->getDisplayedLastName(),
+                'user_id' => $grader->getId(),
+                'email' => $grader->getEmail(),
+                'reg_section' => $reg_sec,
+                'rot_section' => $rot_sec,
+                'group' => $grp
+            ]);
         }
 
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
-        $this->renderDownloadForm('grader', $use_database);
+        return new Response(
+            JsonResponse::getSuccessResponse($download_info),
+            new WebResponse(
+                ['admin', 'Users'],
+                'listGraders',
+                $graders_sorted,
+                $this->core->getQueries()->getRegistrationSections(),
+                $this->core->getQueries()->getRotatingSections(),
+                $download_info,
+                $this->core->getAuthentication() instanceof DatabaseAuthentication
+            )
+        );
     }
 
     /**
@@ -89,13 +174,6 @@ class UsersController extends AbstractController {
         }
 
         $this->core->redirect($return_url);
-    }
-
-    private function renderDownloadForm($code, $use_database) {
-        $students = $this->core->getQueries()->getAllUsers();
-        $graders = $this->core->getQueries()->getAllGraders();
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'downloadForm', $code, $students, $graders, $reg_sections, $use_database);
     }
 
     /**

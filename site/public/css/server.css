@@ -221,6 +221,11 @@ tr.info, tr.info td, tr.info th {
     background-color: var(--table-info);
 }
 
+td>a.active-sort {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
 .floating-thead,
 .floating-header {
     position: fixed;
@@ -299,6 +304,10 @@ tr.info, tr.info td, tr.info th {
     padding-bottom: 20px;
 }
 
+.content.overridden_message {
+    background-color: var(--important-post);
+    color: black;
+}
 
 .content h1 {
     margin-bottom: 20px;
@@ -448,31 +457,31 @@ tr.info, tr.info td, tr.info th {
 .green-message {
     font-style: italic;
     font-weight: bold;
-    color: #008800;
+    color: var(--standard-dark-green);
 }
 
 .blue-message {
     font-style: italic;
     font-weight: bold;
-    color: #0a6496;
+    color: var(--standard-vibrant-dark-blue);
 }
 
 .red-message {
     font-style: italic;
     font-weight: bold;
-    color: #af0000;
+    color: var(--error-alert-dark-red);
 }
 
 .yellow-message {
     font-style: italic;
     font-weight: bold;
-    color: #ff9900;
+    color: var(--standard-vibrant-orange);
 }
 
 .black-message {
     font-style: italic;
     font-weight: bold;
-    color: #000000;
+    color: var(--text-black);
 }
 
 .sub-text {
@@ -1332,10 +1341,10 @@ end of styles used in the admin gradeable page
 .grader-NULL {
     color: var(--default-white);
     text-shadow:
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+    -1px -1px 0 var(--text-black),
+    1px -1px 0 var(--text-black),
+    -1px 1px 0 var(--text-black),
+    1px 1px 0 var(--text-black);
 }
 
 /* color for limited access graders who were verifed */
@@ -1371,11 +1380,11 @@ end of styles used in the admin gradeable page
 }
 
 .grader-invalid{
-   color: #d9534f;
+   color: var(--standard-light-red);
 }
 
 .grader-invalid{
-   color: #d9534f;
+   color: var(--standard-light-red);
 }
 
 /* prevents line break in the graded questions column */
@@ -1600,13 +1609,13 @@ end of styles used in the admin gradeable page
 }
 
 .warning {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--alert-border-bronze);
+    color: var(--standard-bronze);
 }
 
 .danger {
     background: #f2dede;
-    color: #b94a48;
+    color: var(--alert-danger-red);
 }
 
 .black-btn, .black-btn > i.fas {
@@ -1620,19 +1629,14 @@ end of styles used in the admin gradeable page
 }
 
 .black-btn:active, .black-btn > i.fas:active {
-    color: #991313 !important;
-    border-color: #991313 !important;
+    color: var(--external-link-active) !important;
+    border-color: var(--external-link-active) !important;
 }
 
 .flex-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.flex-row > * {
-    display: inherit;
-    align-items: inherit;
 }
 
 .flex-col {
@@ -1645,9 +1649,21 @@ end of styles used in the admin gradeable page
     margin: 10px 0;
 }
 
+.flex-line {
+    display: flex;
+    align-items: center;
+}
+
 .shadow {
-    box-shadow: 0 2px 15px -5px #888888;
+    box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     border-radius: 3px;
+}
+
+.content {
+    margin: 10px;;
+    padding: 30px;
+    background-color: var(--default-white);
+    flex-grow: 1;
 }
 
 .screen-reader {
@@ -1735,6 +1751,14 @@ header > * {
 
 .hide {
     display: none;
+}
+
+.bare-button {
+    border: none;
+    padding: 0;
+    font-size: 1em;
+    background: unset;
+    color: unset;
 }
 
 @media (min-width: 541px) {

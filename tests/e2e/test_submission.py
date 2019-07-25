@@ -15,7 +15,7 @@ class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Open Homework']")):
+    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Open Homework']")):
         self.log_in()
         self.click_class("sample", "SAMPLE")
         self.click_nav_submit_button(gradeable_category, gradeable_id, button_name, loaded_selector)
@@ -136,7 +136,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(autograding=True), autograding=True)
 
@@ -145,7 +145,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(autograding=True), drag_and_drop=True, autograding=True)
 
@@ -154,7 +154,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(multiple=True, autograding=True), autograding=True)
 
@@ -163,7 +163,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(multiple=True, autograding=True), drag_and_drop=True, autograding=True)
 
