@@ -79,8 +79,7 @@
                             <a href="{{ details_base_url }}
                                 ?view={{ (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null }}
                                 &sort={{ column.sort_type }}
-                                &direction={{ 'direction': sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}
-                            "
+                                &direction={{ sort == column.sort_type ? (direction == 'ASC' ? 'DESC' : 'ASC') : 'ASC' }}"
                             {% if sort == column.sort_type %}
                                 class="active-sort"
                             {% endif %}
@@ -129,7 +128,6 @@
                 <tbody>
                     {% for info in section.rows %}
                         {{ self.render_student(self, _context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
-                        {{ self.render_student(self, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history, grade_url) }}
                     {% endfor %}
                     {% for info in section.teamless_users %}
                         {{ self.render_teamless_user(self, _context, section, info.user, info.new_team_onclick, loop.index+section.rows|length) }}
