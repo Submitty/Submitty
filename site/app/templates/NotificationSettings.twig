@@ -136,6 +136,65 @@
             {% endif %}
 
             <div class="heading">
+                <h2>Grade Inquiry</h2>
+                <hr>
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry has been submitted</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has submitted a grade inquiry on work you graded" : "Receive a notification when a grader or a team member makes a grade inquiry on your work" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry post has been made</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has submitted a post on their grade inquiry" : "Receive a notification when a grader or a team member makes a post on your grade inquiry" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked></div>
+                <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked></div>
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry has been resolved</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has closed their grade inquiry" : "Receive a notification when a grader or a team member resolves your grade inquiry" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">A Grade Inquiry has been reopened</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has reopened their grade inquiry" : "Receive a notification when a grader or a team member reopened your grade inquiry" %}
+                        <div class="option-alt">{{ notification_setting_text }}</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
+                {% endif %}
+            </div>
+
+            <div class="heading">
                 <h2>Team</h2>
                 <hr>
             </div>
@@ -178,7 +237,6 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
-
         </div>
     </form>
     <script>
@@ -206,7 +264,6 @@
                     $('#messages').append(message);
                 }
             });
-
         });
     </script>
 </div>

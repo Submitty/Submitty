@@ -53,6 +53,7 @@ Required inputs:
 
 {% block extra_mark_rows %}
     {# Custom mark (only display in non-edit mode #}
+    {% set f_mark = component.marks|first %}
     {% if not edit_marks_enabled %}
         <div class="custom-mark-container mark-container row"
              data-mark_id="0">
@@ -62,11 +63,38 @@ Required inputs:
                       onclick="onToggleCustomMark(this)">
                 </span>
             </span>
+            <script>
+                function changeExtraColor(ref,me){
+                    if(ref == "Full Credit" && me.value > 0){
+                        me.style.backgroundColor = "var(--standard-vibrant-yellow)";
+                    }
+                    else if(ref == "No Credit" && me.value<0){
+                        me.style.backgroundColor = "var(--standard-vibrant-yellow)";
+                    }
+                    else{
+                        me.style.backgroundColor = "var(--default-white)";
+                    }
+                }
+            </script>
             <span class="col-no-gutters mark-points">
-                <input type="number"
+                <input id = "extra-mark-{{ component.id }}"
+                       type="number"
                        step="{{ precision }}"
-                       onchange="onCustomMarkChange(this)"
+                       style="background-color:var(--default-white)"
+                       onchange="onCustomMarkChange(this),changeExtraColor('{{ f_mark.title }}',this)"
                        value="{{ graded_component.score | default('0')}}">
+                        <script>
+                            {% if f_mark.title == "Full Credit" %}
+                                if(document.getElementById("extra-mark-{{ component.id }}").value>0){
+                                    document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                                }
+                            {% elseif f_mark.title == "No Credit" %}
+                                if(document.getElementById("extra-mark-{{ component.id }}").value<0){
+                                    document.getElementById("extra-mark-{{ component.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                                }
+                            {% endif %}
+                        </script>
+
             </span>
             <span class="col-sm mark-title">
                 Custom:
