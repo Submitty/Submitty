@@ -419,6 +419,7 @@ class Core {
         $user_id = $this->authentication->getUserId();
         try {
             if ($this->authentication->authenticate()) {
+                $this->database_queries->refreshUserApiKey($user_id);
                 $token = (string) TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id),
                     $this->getConfig()->getBaseUrl(),

@@ -517,11 +517,17 @@ CREATE TABLE notification_settings (
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
 	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission BOOLEAN DEFAULT TRUE NOT NULL,
 	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL
 );
 
 --
@@ -537,9 +543,19 @@ CREATE TABLE regrade_discussion (
 );
 
 --
+-- Name: grade_override; Type: TABLE; Schema: 
+--
+CREATE TABLE grade_override (
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    marks float NOT NULL,
+    comment character varying 
+);
+
+--
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading', 'team');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
@@ -816,6 +832,12 @@ ALTER TABLE ONLY gradeable_teams
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (team_id, user_id);
 
+--
+-- Name: grade_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_pkey PRIMARY KEY (user_id, g_id);
 
 --
 -- Name: electronic_gradeable_data_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -1109,6 +1131,22 @@ ALTER TABLE ONLY teams
 
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+--
+-- Name: grade_override_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grade_override_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
 
 --
 -- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
