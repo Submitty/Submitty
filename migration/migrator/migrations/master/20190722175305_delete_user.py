@@ -68,7 +68,7 @@ EXCEPTION WHEN duplicate_object THEN
 END;
 $$ LANGUAGE plpgsql;""")
 
-database.execute("""
+    database.execute("""
 DO $$
 BEGIN
     CREATE TRIGGER after_delete_sync_delete_user_cleanup AFTER DELETE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_delete_user_cleanup();
