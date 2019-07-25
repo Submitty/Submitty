@@ -159,6 +159,7 @@ class NavigationView extends AbstractView {
         // ======================================================================================
 
         $render_sections = [];
+        $max_buttons = 0;
         foreach ($sections_to_list as $list_section => $gradeable_list) {
             /** @var Gradeable[] $gradeable_list */
 
@@ -167,15 +168,20 @@ class NavigationView extends AbstractView {
                 /** @var Gradeable $gradeable */
 
                 $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
+                $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]);
                 $render_gradeables[] = [
                     "id" => $gradeable->getId(),
                     "name" => $gradeable->getTitle(),
                     "url" => $gradeable->getInstructionsUrl(),
                     "edit_buttons" => $this->getAllEditButtons($gradeable),
                     "delete_buttons" => $this->getAllDeleteButtons($gradeable),
-                    "buttons" => $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]),
+                    "buttons" => $buttons,
                     "has_build_error" => $gradeable->anyBuildErrors()
                 ];
+
+                if (count($buttons) > $max_buttons) {
+                    $max_buttons = count($buttons);
+                }
             }
 
             //Copy
@@ -184,10 +190,14 @@ class NavigationView extends AbstractView {
 
             $render_sections[] = $render_section;
         }
+
+        $this->core->getOutput()->addInternalCss("navigation.css");
+
         return $this->core->getOutput()->renderTwigTemplate("Navigation.twig", [
             "course_name" => $this->core->getConfig()->getCourseName(),
             "course_id" => $this->core->getConfig()->getCourse(),
             "sections" => $render_sections,
+            "max_buttons" => $max_buttons,
             "message_file_details" => $message_file_details,
             "display_custom_message" => $display_custom_message,
             "user_seating_details" => $user_seating_details,
@@ -655,7 +665,7 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Edit Gradeable Configuration",
             "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'edit_gradeable_page', 'id' => $gradeable->getId())),
-            "class" => "fas fa-pencil-alt",
+            "class" => "fas fa-pencil-alt black-btn",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getTitle()}"
         ]);
@@ -676,7 +686,7 @@ class NavigationView extends AbstractView {
                     'action' => 'delete_gradeable', 
                     'id' => $gradeable->getId()))
                 . "', '{$gradeable->getTitle()}');",
-            "class" => "fas fa-trash fa-fw",
+            "class" => "fas fa-trash fa-fw black-btn",
             "title_on_hover" => true,
             "aria_label" => "Delete {$gradeable->getTitle()}"
         ]);

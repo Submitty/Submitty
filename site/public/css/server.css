@@ -1612,6 +1612,7 @@ end of styles used in the admin gradeable page
 .black-btn, .black-btn > i.fas {
     color: #000 !important;
     border-color: #000 !important;
+    text-decoration: none;
 }
 
 .black-btn:hover, .black-btn > i.fas:hover {
