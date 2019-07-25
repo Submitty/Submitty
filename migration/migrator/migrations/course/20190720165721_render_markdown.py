@@ -2,7 +2,7 @@
 
 
 def up(config, database, semester, course):
-    database.execute('ALTER TABLE posts ADD COLUMN IF NOT EXISTS render_markdown BOOLEAN NOT NOLL DEFAULT false')
+    database.execute('ALTER TABLE posts ADD COLUMN IF NOT EXISTS render_markdown BOOLEAN NOT NLL DEFAULT false')
 
 
 def down(config, database, semester, course):
