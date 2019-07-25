@@ -57,18 +57,36 @@
     border: none;
 }
 
-#save_status
-{
-    display: inline-block;
-}
-
 #status_label
 {
     font-weight: bold;
 }
 
-#save_status_button
+#save_status
 {
+    display: inline;
+}
+
+#save_status_buttons
+{
+    display: flex;
+    flex-direction: row;
     margin-top: 10px;
-    display: block;
+}
+
+#save_status_buttons input
+{
+    margin-right: 10px;
+}
+
+#show_log_button
+{
+    display: none;
+}
+
+#save_status_log
+{
+    display: none;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

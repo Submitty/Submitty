@@ -550,6 +550,15 @@ if [ ! -d "${nlohmann_dir}" ]; then
     git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
 fi
 
+#####################################
+# Update permissions for RainbowGrades and vendor repos
+
+chmod 0555 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
+chmod 0444 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades/*
+chmod 0555 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor
+
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+x {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
 # Build & Install Lichen Modules
