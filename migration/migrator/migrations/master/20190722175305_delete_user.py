@@ -87,7 +87,7 @@ def down(config, database):
     :param database: Object for interacting with given database for environment
     :type database: migrator.db.Database
     """
-    database.execute("DROP TRIGGER IF EXISTS after_delete_sync_user_delete_cleanup ON courses_users;")
+    database.execute("DROP TRIGGER IF EXISTS after_delete_sync_delete_user_cleanup ON courses_users;")
     database.execute("DROP TRIGGER IF EXISTS before_delete_sync_user_delete ON courses_users;")
     database.execute("DROP FUNCTION IF EXISTS sync_delete_user_cleanup();")
     database.execute("DROP FUNCTION IF EXISTS sync_delete_user();")
