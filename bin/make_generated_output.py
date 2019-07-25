@@ -42,14 +42,27 @@ def main():
         # ONLY ELECTRONIC GRADEABLES HAVE A CONFIG PATH
         if "config_path" in obj:
             g_id = obj["gradeable_id"]
+            config_file_path = obj["config_path"]
+            with open(config_file_path,'r') as infile:
+                config_file = json.load(infile)
+            required_capabilities = config_file.get('required_capabilities','default')
+            testcases = config_file.get('testcases',[])
             graded_file = {
                 "semester": args.semester,
                 "course": args.course,
                 "gradeable": g_id,
-                "required_capabilities": "default",
+                "required_capabilities": required_capabilities,
                 "queue_time": time.localtime(),
                 "generate_output": True,
             }
-            path_grading_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", "__".join([args.semester, args.course, g_id]))
-            with open(path_grading_file, 'a') as grading_file:
-                json.dump(graded_file, grading_file)
+            should_generated_output = False
+            for testcase in testcases:
+                input_generation_commands = testcase.get('input_generation_commands',[])
+                if input_generation_commands
+                    should_generated_output = True
+                    break
+
+            if should_generated_output:
+                path_grading_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", "__".join([args.semester, args.course, g_id]))
+                with open(path_grading_file, 'a') as grading_file:
+                    json.dump(graded_file, grading_file)

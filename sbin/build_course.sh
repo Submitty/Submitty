@@ -31,6 +31,9 @@ $SUBMITTY_INSTALL_DIR/bin/make_assignments_txt_file.py $MY_COURSE_DIR/config/for
 # pull in the homeworks from an auto-generated file
 . $MY_COURSE_DIR/ASSIGNMENTS.txt
 
+#Add grading files in "to_be_graded_queue"
+$SUBMITTY_INSTALL_DIR/bin/make_generated_output.py $MY_COURSE_DIR/config/form $semester $course
+
 echo "--------------------------------------------------------------------------------------"
 echo "done building course=$course semester=$semester"
 date
