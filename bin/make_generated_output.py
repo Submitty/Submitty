@@ -58,7 +58,7 @@ def main():
             should_generated_output = False
             for testcase in testcases:
                 input_generation_commands = testcase.get('input_generation_commands',[])
-                if input_generation_commands
+                if input_generation_commands:
                     should_generated_output = True
                     break
 
