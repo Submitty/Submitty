@@ -22,22 +22,22 @@ class TestForum(BaseTestCase):
         self.forum_page_url = self.driver.current_url
 
     def switch_to_page_create_thread(self):
-        if 'page=create_thread' in self.driver.current_url:
+        if '/threads/new' in self.driver.current_url:
             pass
-        elif 'page=view_thread' in self.driver.current_url:
+        elif '/threads' in self.driver.current_url:
             self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
         else:
             assert False
-        assert 'page=create_thread' in self.driver.current_url
+        assert '/threads/new' in self.driver.current_url
 
     def switch_to_page_view_thread(self):
-        if 'page=view_thread' in self.driver.current_url:
-            pass
-        elif 'page=create_thread' in self.driver.current_url:
+        if '/threads/new' in self.driver.current_url:
             self.driver.find_element_by_xpath("//a[contains(text(),'Back to Threads')]").click()
+        elif '/threads' in self.driver.current_url:
+            pass
         else:
             assert False
-        assert 'page=view_thread' in self.driver.current_url
+        assert '/threads' in self.driver.current_url
 
     def upload_attachment(self, upload_button):
         tfname = self.create_dummy_file()
@@ -45,14 +45,14 @@ class TestForum(BaseTestCase):
         return os.path.basename(tfname)
 
     def select_categories(self, categories_list):
-        assert 'page=create_thread' in self.driver.current_url
+        assert '/threads/new' in self.driver.current_url
         for category, set_it in categories_list:
             category_button = self.driver.find_element_by_xpath("//a[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
             if ('cat-selected' in category_button.get_attribute('class')) ^ set_it:
                 category_button.click()
 
     def create_thread(self, title, first_post, ignore_if_exists = False, upload_attachment = False, categories_list = [("Question",True)]):
-        assert 'page=view_thread' in self.driver.current_url
+        assert '/threads' in self.driver.current_url
         if ignore_if_exists and self.thread_exists(title):
             return
         attachment_file = None
@@ -71,11 +71,11 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
             return None
         self.wait_after_ajax()
-        assert 'page=view_thread' in self.driver.current_url
+        assert '/threads' in self.driver.current_url
         return attachment_file
 
     def thread_exists(self, title):
-        assert 'page=view_thread' in self.driver.current_url
+        assert '/threads' in self.driver.current_url
         target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)
         self.driver.execute_script('$("#thread_list").scrollTop(0);')
         thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
@@ -96,7 +96,7 @@ class TestForum(BaseTestCase):
         return len(self.driver.find_elements_by_xpath(target_xpath)) > 0
 
     def view_thread(self, title, return_info = False):
-        assert 'page=view_thread' in self.driver.current_url
+        assert '/threads' in self.driver.current_url
         assert self.thread_exists(title)
         div = self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
         if return_info:

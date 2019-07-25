@@ -21,7 +21,10 @@ class NotificationController extends AbstractController {
         'all_new_threads',
         'all_new_posts',
         'all_modifications_forum',
-        'reply_in_post_thread'
+        'reply_in_post_thread',
+        'team_invite',
+        'team_joined',
+        'team_member_submission'
     ];
 
 	const EMAIL_SELECTIONS = [
@@ -29,7 +32,10 @@ class NotificationController extends AbstractController {
         'all_new_threads_email',
         'all_new_posts_email',
         'all_modifications_forum_email',
-        'reply_in_post_thread_email'
+        'reply_in_post_thread_email',
+        'team_invite_email',
+        'team_joined_email',
+        'team_member_submission_email',
     ];
 
 	protected $selections;

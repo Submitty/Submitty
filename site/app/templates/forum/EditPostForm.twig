@@ -29,7 +29,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form id="thread_form" method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'edit_post'}) }}">
+    <form id="thread_form" method="post" action="{{ edit_url }}">
         {{ parent() }}
     </form>
 {% endblock %}
