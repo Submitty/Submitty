@@ -29,30 +29,6 @@ caption {
     background: var(--standard-focus-cornflowe-blue) !important;
 }
 
-#edit-user-form {
-    display: flex;
-    flex-wrap: wrap;
-}
-
-#edit-user-form > label {
-    flex: 1 0 34%;
-    margin: 6px;
-    min-width: 200px;
-}
-
-#edit-user-form label input[type="text"], 
-#edit-user-form label input[type="password"], 
-#edit-user-form label select {
-    display: flex;
-    width: 100%;
-}
-
-#user-form-assigned-sections {
-    display: flex;
-    flex-direction: column;
-    margin: 6px 0;
-}
-
 @media (max-width: 800px) {
     #student-table {
         border: none;

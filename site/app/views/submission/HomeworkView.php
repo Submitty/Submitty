@@ -396,7 +396,8 @@ class HomeworkView extends AbstractView {
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            'has_overridden_grades' => $graded_gradeable->hasOverriddenGrades(),
         ]);
     }
 
@@ -657,7 +658,7 @@ class HomeworkView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'gradeable_version' => $display_version
         ]);
-        // $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
