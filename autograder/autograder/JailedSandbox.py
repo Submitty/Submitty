@@ -38,7 +38,7 @@ class JailedSandbox(SecureExecutionEnvironment.SecureExecutionEnvironment):
     if self.is_test_environment:
       full_script = [script, ]
     else:
-      full_script = [os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"), untrusted_user, script]
+      full_script = [os.path.join(self.SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"), untrusted_user, script]
 
     success = False
     try:

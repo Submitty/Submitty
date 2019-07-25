@@ -57,7 +57,7 @@ def worker_process(which_machine,address,which_untrusted,my_server):
         if os.path.exists(todo_queue_file):
             try:
                 working_directory = os.path.join("/var/local/submitty/autograding_tmp/",which_untrusted,"tmp")
-                results_zip_tmp = grade_item.grade_from_zip(working_directory, which_untrusted, autograding_zip,submission_zip)
+                results_zip_tmp = grade_item.grade_from_zip(working_directory, which_untrusted, autograding_zip, submission_zip)
                 results_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_results.zip")
                 done_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_DONE",servername_workername+"_"+which_untrusted+"_queue.json")
                 #move doesn't inherit the permissions of the destination directory. Copyfile does.

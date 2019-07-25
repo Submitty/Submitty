@@ -30,9 +30,13 @@ class SecureExecutionEnvironment():
     self.is_test_environment = is_test_environment
     self.directory = os.path.join(self.tmp_work, testcase_directory)
 
+    if is_test_environment == False:
+      from . import CONFIG_PATH
+      with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+        OPEN_JSON = json.load(open_file)
+      self.SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 
-
-  def _run_pre_commands(self, directory):
+  def _run_pre_commands(self):
     for pre_command in self.pre_commands:
       command = pre_command['command']
       source_testcase   = pre_command["testcase"]
@@ -41,14 +45,14 @@ class SecureExecutionEnvironment():
 
       if command == 'cp':
         try:
-          pre_command_copy_file(source_testcase, source_directory, directory, 
-                                destination, self.my_testcase.job_id, self.tmp_logs,
-                                self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
+          autograding_utils.pre_command_copy_file(source_testcase, source_directory, self.directory, 
+                                                  destination, self.my_testcase.job_id, self.tmp_logs,
+                                                  self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
         except Exception as e:
-          self.my_testcase.log(message="Encountered an error while processing pre-command. See traces entry for more details.")
+          self.my_testcase.log_message("Encountered an error while processing pre-command. See traces entry for more details.")
           self.my_testcase.log_stack_trace(traceback.format_exc())
       else:
-        self.my_testcase.log(message="Encountered an error while processing pre-command. See traces entry for more details.")
+        self.my_testcase.log_message("Encountered an error while processing pre-command. See traces entry for more details.")
         print("Invalid pre-command '{0}'".format(command))
 
   def _setup_single_directory_for_compilation(self, directory):
@@ -64,7 +68,7 @@ class SecureExecutionEnvironment():
       autograding_utils.pattern_copy("checkout_to_compilation",self.patterns['checkout_to_compilation'],checkout_subdir_path, directory,self.tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    autograding_utils.copy_contents_into(self.my_testcase.job_id,provided_code_path, directory,self.tmp_logs, self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
+    autograding_utils.copy_contents_into(self.my_testcase.job_id, provided_code_path, directory, self.tmp_logs, self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(directory,"my_compile.out"))
     
@@ -73,7 +77,7 @@ class SecureExecutionEnvironment():
 
   def lockdown_directory_after_execution(self):
     if self.is_test_environment == False:
-        autograding_utils.untrusted_grant_rwx_access(self.my_testcase.untrusted_user, self.directory)
+        autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.my_testcase.untrusted_user, self.directory)
     autograding_utils.add_all_permissions(self.directory)
     autograding_utils.lock_down_folder_permissions(self.directory)
 
@@ -98,7 +102,7 @@ class SecureExecutionEnvironment():
                          c.secure_environment.directory, directory, self.tmp_logs)
 
     # copy input files
-    test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
+    test_input_path = os.path.join(self.tmp_work, 'test_input')
     autograding_utils.copy_contents_into(self.my_testcase.job_id, test_input_path, directory, self.tmp_logs, self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
 
     # copy runner.out to the current directory
@@ -110,18 +114,21 @@ class SecureExecutionEnvironment():
     autograding_utils.add_permissions(my_runner, stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
 
     # Add the correct permissions to the target folder.
+    if self.is_test_environment == False:
+      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.my_testcase.untrusted_user, self.directory)
+
     autograding_utils.add_all_permissions(directory)
 
   def setup_for_compilation_testcase(self):
     os.chdir(self.tmp_work)
     self._setup_single_directory_for_compilation(self.directory)
     # Run any necessary pre_commands
-    self._run_pre_commands(self.directory)
+    self._run_pre_commands()
 
   def setup_for_execution_testcase(self):
     os.chdir(self.tmp_work)
     self._setup_single_directory_for_execution(self.directory)
-    self._run_pre_commands(self.directory)
+    self._run_pre_commands()
 
   def setup_for_testcase_archival(self):
     os.makedirs(os.path.join(self.tmp_results,"details"), exist_ok=True)
@@ -162,6 +169,6 @@ class SecureExecutionEnvironment():
           OPEN_JSON = json.load(open_file)
       DAEMON_UID = OPEN_JSON['daemon_uid']
 
-      print("If we are in production but we are not the daemon user, throw an error")
+      # If we are in production but we are not the daemon user, throw an error
       if int(os.getuid()) != int(DAEMON_UID):
         raise Exception("ERROR: grade_item should be run by submitty_daemon in a production environment")

@@ -3,14 +3,17 @@ import os
 import tempfile
 import shutil
 import subprocess
+import socket
+import traceback
 
-from . import CONFIG_PATH, autograding_utils, testcase
+from . import CONFIG_PATH, autograding_utils, Testcase, JailedSandbox
 
 with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
     OPEN_JSON = json.load(open_file)
 AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
 AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['autograding_log_path'], 'stack_traces')
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
+SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
@@ -22,8 +25,9 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
     os.chdir(SUBMITTY_DATA_DIR)
 
-    autograding_utils.prepare_directory_for_autograding(working_directory, which_untrusted, 
-                                                        autograding_zip_file, submission_zip_file, False)
+    autograding_utils.prepare_directory_for_autograding(working_directory, which_untrusted, autograding_zip_file,
+                                                        submission_zip_file, False, AUTOGRADING_LOG_PATH,
+                                                        AUTOGRADING_STACKTRACE_PATH, SUBMITTY_INSTALL_DIR)
 
     os.remove(autograding_zip_file)
     os.remove(submission_zip_file)
@@ -72,53 +76,86 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
         # COMPILE THE SUBMITTED CODE
         print("====================================\nCOMPILATION STARTS", file=overall_log)
+        overall_log.flush()
         for testcase in testcases:
             if testcase.type != 'Execution':
                 testcase.execute()
-                subprocess.call(['ls', '-lR', self.directory], stdout=overall_log)
-
+        overall_log.flush()
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+        overall_log.flush()
+        
         # EXECUTE
         print ("====================================\nRUNNER STARTS", file=overall_log)
+        overall_log.flush()
         for testcase in testcases:
             if testcase.type == 'Execution':
                 testcase.execute()
-                subprocess.call(['ls', '-lR', self.directory], stdout=overall_log)
 
                 killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
                                                    os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
-                                                   stdout=logfile)
+                                                   stdout=overall_log)
+                overall_log.flush()
       
-                print ("LOGGING END my_runner.out",file=logfile)
+                print ("LOGGING END my_runner.out",file=overall_log)
                 if killall_success != 0:
-                    self.log_message('RUNNER ERROR: had to kill {} process(es)'.format(killall_success))
+                    print('RUNNER ERROR: had to kill {} process(es)'.format(killall_success))
                 else:
-                    print ("KILLALL COMPLETE my_runner.out",file=logfile)
+                    print ("KILLALL COMPLETE my_runner.out",file=overall_log)
+                overall_log.flush()
+        
+        
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+        overall_log.flush()
 
-        # VALIDATE
-        for testcase in testcases:
-            print ("====================================\nVALIDATION STARTS", file=overall_log)
-            testcase.validate()
-            subprocess.call(['ls', '-lR', self.directory], stdout=overall_log)
+        validation_environment = JailedSandbox.JailedSandbox(tmp_work, complete_config_obj, list(), None, working_directory, False)
+        # VALIDATION
+        print ("====================================\nVALIDATION STARTS", file=overall_log)
+        overall_log.flush()
+        autograding_utils.setup_for_validation(working_directory, complete_config_obj, is_vcs,
+                                               testcases, job_id, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH)
+
+        with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
+            arguments = [queue_obj["gradeable"],
+                         queue_obj["who"],
+                         str(queue_obj["version"]),
+                         submission_string]
+            success = validation_environment.execute(which_untrusted, 'my_validator.out', arguments, logfile, cwd=tmp_work)
+
+            if success == 0:
+                print (socket.gethostname(), which_untrusted,"VALIDATOR OK")
+            else:
+                print (socket.gethostname(), which_untrusted,"VALIDATOR FAILURE")
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+        overall_log.flush()
 
         os.chdir(working_directory)
+        autograding_utils.untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, tmp_work)
+        autograding_utils.add_all_permissions(tmp_work)
+        subprocess.call(['ls', '-lR', '.'])
 
         # ARCHIVE
         print ("====================================\nARCHIVING STARTS", file=overall_log)
+        overall_log.flush()
         for testcase in testcases:
-            testcase.archive_results(overall_log)
-        subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+            print('archival')
+            testcase.setup_for_archival(overall_log)
+        print('begin big archive')
+        try:
+            autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
+                                                  gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+        except Exception as e:
+            traceback.print_exc()
+        print('big archive')
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
-    
-    autograding_utils.archive_autograding_results(working_directory, queue_obj, AUTOGRADING_LOG_PATH,
-                                                  AUTOGRADING_STACKTRACE_PATH, DAEMON_UID)
     
     # zip up results folder
     filehandle, my_results_zip_file = tempfile.mkstemp()
     autograding_utils.zip_my_directory(tmp_results, my_results_zip_file)
     os.close(filehandle)
     shutil.rmtree(working_directory)
-    return output_zip_file
+    return my_results_zip_file
 
 if __name__ == "__main__":
     raise SystemExit('ERROR: Do not call this script directly')
