@@ -17,7 +17,6 @@ def up(config, database):
 CREATE OR REPLACE FUNCTION sync_delete_user() RETURNS TRIGGER AS $$
 -- BEFORE DELETE trigger function to DELETE users from course DB.
 DECLARE
-    user_courses INTEGER;
     db_conn VARCHAR;
     query_string TEXT;
 BEGIN
