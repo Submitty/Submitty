@@ -9,18 +9,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']) {
-            case 'view_images_page':
-                $this->viewImagesPage();
-                break;
-            case 'upload_images_files':
-                $this->ajaxUploadImagesFiles();
-                break;
-            default:
-                $this->viewImagesPage();
-                break;
-        }
+        return null;
     }
 
     /**

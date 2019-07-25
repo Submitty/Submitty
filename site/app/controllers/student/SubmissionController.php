@@ -1475,9 +1475,8 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage($msg);
         }
         if($ta) {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
-                                                    'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
-                                                    'who_id'=>$who, 'gradeable_version' => $new_version)));
+            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
+                . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
