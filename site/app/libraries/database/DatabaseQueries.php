@@ -3045,13 +3045,13 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message) {
+    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message, int $gc_id){
         $params = array($graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE);
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status) VALUES (?, current_timestamp, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
-            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
+            $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message, $gc_id);
         } catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) $this->course_db->rollback();
             throw $dbException;
@@ -3070,9 +3070,9 @@ AND gc_id IN (
         return $result;
     }
 
-    public function insertNewRegradePost($regrade_id, $user_id, $content){
-        $params = array($regrade_id, $user_id, $content);
-        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content) VALUES (?, current_timestamp, ?, ?)", $params);
+    public function insertNewRegradePost($regrade_id, $user_id, $content, $gc_id){
+        $params = array($regrade_id, $user_id, $content, $gc_id);
+        $this->course_db->query("INSERT INTO regrade_discussion(regrade_id, timestamp, user_id, content, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
     }
 
     public function saveRegradeRequest(RegradeRequest $regrade_request) {
@@ -3631,6 +3631,7 @@ AND gc_id IN (
                     $gradeable->getPeerGradeSet(),
                     DateUtils::dateTimeToString($gradeable->getRegradeRequestDate()),
                     $this->course_db->convertBoolean($gradeable->isRegradeAllowed()),
+                    $this->course_db->convertBoolean($gradeable->isGradeInquiryPerComponentAllowed()),
                     $gradeable->getDiscussionThreadId(),
                     $this->course_db->convertBoolean($gradeable->isDiscussionBased()),
                     $gradeable->getId()
@@ -3659,6 +3660,7 @@ AND gc_id IN (
                       eg_peer_grade_set=?,
                       eg_regrade_request_date=?,
                       eg_regrade_allowed=?,
+                      eg_grade_inquiry_per_component_allowed=?,
                       eg_thread_ids=?,
                       eg_has_discussion=?
                     WHERE g_id=?", $params);
