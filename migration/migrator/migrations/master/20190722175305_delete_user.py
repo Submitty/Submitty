@@ -89,6 +89,7 @@ def down(config, database):
     """
     database.execute("DROP TRIGGER IF EXISTS after_delete_sync_user_delete_cleanup ON courses_users;")
     database.execute("DROP TRIGGER IF EXISTS before_delete_sync_user_delete ON courses_users;")
+    database.execute("DROP FUNCTION IF EXISTS sync_delete_user_cleanup();")
     database.execute("DROP FUNCTION IF EXISTS sync_delete_user();")
     database.execute("ALTER TABLE ONLY emails DROP CONSTRAINT IF EXISTS emails_user_id_fk;")
     database.execute("ALTER TABLE ONLY emails ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;")
