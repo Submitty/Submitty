@@ -383,6 +383,33 @@ class AutoGradingView extends AbstractView {
             }
         }
         $can_download = !$gradeable->isVcs();
+
+        //trying something
+        $gradeable_id = $gradeable->getId();
+        $id = $this->core->getUser()->getId();
+        if($gradeable->isTeamAssignment()){
+            $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+        }
+        $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
+        $annotated_file_names = [];
+        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
+            $first_file = scandir($annotation_path)[2];
+            $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
+            if(is_file($annotation_path)) {
+                $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
+                foreach ($dir_iter as $fileinfo) {
+                    if (!$fileinfo->isDot()) {
+                        $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
+                        $pdf_info = explode('_', $no_extension);
+                        $pdf_id = $pdf_info[0];
+                        if(file_get_contents($fileinfo->getPathname())!=""){
+                            $pdf_id=$pdf_id.'.pdf';
+                            $annotated_file_names[]=$pdf_id;
+                        }
+                    }
+                }
+            }
+        }
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
             'files'=> array_merge($files['submissions'], $files['checkout']),
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
@@ -409,7 +436,8 @@ class AutoGradingView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'can_download' =>$can_download,
             'display_version' => $display_version,
-            'student_pdf_view_url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'pdf'])
+            'student_pdf_view_url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            "annotated_file_names" =>  $annotated_file_names
         ]);
     }
 }
