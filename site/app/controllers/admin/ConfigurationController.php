@@ -102,7 +102,7 @@ class ConfigurationController extends AbstractController {
             }
             $entry = intval($entry);
         }
-        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'auto_rainbow_grades',
                                       'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
             $entry = $entry === "true" ? true : false;
         }
