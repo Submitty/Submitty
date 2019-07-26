@@ -82,7 +82,7 @@
 
                 if($(this).data('type')=="post" || $(this).data('type')=="thread"){
                     var id = $(this).data('thread_id');
-                    var url = buildUrl({'component' : 'forum', 'page' : 'view_thread', 'thread_id' : id});
+                    var url = buildNewCourseUrl(['forum', 'threads', 'id']);
                     window.open(url);
                 }
 
