@@ -297,7 +297,7 @@ class GlobalController extends AbstractController {
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
-                "icon" => "fa-sign-out-alt"
+                "icon" => "fa-power-off"
             ]);
         }
 
