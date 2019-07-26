@@ -189,6 +189,14 @@ class TeamController extends AbstractController {
         }
 
         $this->core->getQueries()->sendTeamInvitation($team->getId(), $invite_id);
+
+        // send invited user a notification
+        $metadata = json_encode(['url' => $this->core->buildNewCourseUrl([$gradeable_id,'team'])]);
+        $subject = "New Team Invitation: ".$graded_gradeable->getGradeable()->getTitle();
+        $content = "You have received a new invitation to join a team from $user_id";
+        $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'sender_id' => $user_id];
+        $this->core->getNotificationFactory()->onTeamEvent($event,[$invite_id]);
+
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
@@ -248,9 +256,19 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
+        $team_members = $accept_team->getMembers();
+
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+
+        // send notification to team members that user joined
+        $metadata =  json_encode(['url' => $this->core->buildNewCourseUrl([$gradeable_id,'team'])]);
+        $subject = "New Team Member: ".$gradeable->getTitle();
+        $content = "A new team member with the user name, $user_id, joined your team for gradeable, ".$gradeable->getTitle();
+        $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_joined', 'sender_id' => $user_id];
+        $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
+
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
 
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();

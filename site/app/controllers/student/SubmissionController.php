@@ -157,15 +157,15 @@ class SubmissionController extends AbstractController {
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
                 $show_hidden = false;
                 if ($graded_gradeable != NULL) {
-                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 }
-                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
 
                 // If we get here, then we can safely construct the old model w/o checks
                 $this->core->getOutput()->addInternalCss('forum.css');
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -1310,6 +1310,18 @@ class SubmissionController extends AbstractController {
 
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
+
+            // notify other team members that a submission has been made
+            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
+            $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
+            $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
+            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+            // remove submitting user from recipient list
+            if (($key = array_search($original_user_id, $team_members)) !== false) {
+                array_splice($team_members, $key, 1);
+            }
+            $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
+            $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
@@ -1463,9 +1475,8 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage($msg);
         }
         if($ta) {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
-                                                    'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
-                                                    'who_id'=>$who, 'gradeable_version' => $new_version)));
+            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
+                . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
@@ -1550,7 +1561,6 @@ class SubmissionController extends AbstractController {
         }
 
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
-
     }
 
 }
