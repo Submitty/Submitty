@@ -377,7 +377,7 @@ BEGIN
 -- No rows processed will indicate that deletion had an error and did not occur.
 EXCEPTION WHEN integrity_constraint_violation THEN
     -- Show that an exception occurred, and what was the exception.
-    RAISE NOTICE 'User still has existing data in course DB ''%''', substring(db_conn FROM 8);
+    RAISE NOTICE 'User ''%'' still has existing data in course DB ''%''', OLD.user_id, substring(db_conn FROM 8);
     RAISE NOTICE '%', SQLERRM;
     -- Return NULL so we do not proceed with original triggering DELETE query.
     RETURN NULL;
