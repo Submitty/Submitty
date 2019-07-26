@@ -157,15 +157,15 @@ class SubmissionController extends AbstractController {
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
                 $show_hidden = false;
                 if ($graded_gradeable != NULL) {
-                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 }
-                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
 
                 // If we get here, then we can safely construct the old model w/o checks
                 $this->core->getOutput()->addInternalCss('forum.css');
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
