@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 
-"""Script to be called by cron job, easily schedules auto rainbow grade jobs."""
+"""
+Script to be called by cron job, easily schedules auto rainbow grade jobs.
+
+This script scans over all courses and reads the course config.json file to determine
+if the auto_rainbow_grades bool is set to true.  If true the script will add a job to
+the jobs daemon to automatically build or update rainbow grades for that course.
+"""
 
 import os
 import json
