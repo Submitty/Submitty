@@ -27,3 +27,11 @@
 .grade_inquiry {
     display: none;
 }
+
+.post_box {
+    padding: 20px;
+}
+
+.reply-text-form {
+    margin-top: 10px;
+}

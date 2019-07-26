@@ -15,13 +15,8 @@ function onComponentTabClicked(tab) {
   var component_id = $(tab).data("component_id");
   var g_id = $('.component-tabs').data("g_id");
   // deselect previous selected tab and select clicked tab
-  if ($(tab).attr('id') === "component-tab-selected") {
-    $(tab).removeAttr('id');
-    component_id = null;
-  } else {
-    $("#component-tab-selected").removeAttr('id');
-    $(tab).attr("id","component-tab-selected");
-  }
+  $("#component-tab-selected").removeAttr('id');
+  $(tab).attr("id","component-tab-selected");
 
 
   // show posts that pertain to this component_id

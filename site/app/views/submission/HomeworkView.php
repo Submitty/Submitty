@@ -760,6 +760,7 @@ class HomeworkView extends AbstractView {
         ]);
 
         $grade_inquiries = $graded_gradeable->getRegradeRequests();
+        $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
         // initialize grade inquiries array with all posts grade inquiry
         $grade_inquiries_twig_array = [];
         if (!is_null($grade_inquiries)) {
@@ -767,6 +768,10 @@ class HomeworkView extends AbstractView {
             $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
+                $gc_title = $gc_id != 0 ? array_reduce($gradeable_components, function($c,$component) use ($gc_id) {
+                    $c .= $component->getId() == $gc_id ? $component->getTitle() : '';
+                    return $c;
+                }) : '';
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
@@ -780,7 +785,7 @@ class HomeworkView extends AbstractView {
                         'date' => date_format($date, 'm/d/Y g:i A'),
                         'name' => $name,
                         'content' => $content,
-                        'gc_id' => $gc_id
+                        'gc_title' => $gc_title
                     ];
                 }
 
@@ -805,7 +810,6 @@ class HomeworkView extends AbstractView {
         }
 
         // construct components array for tabs
-        $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
         $components_twig_array = [];
         if ($grade_inquiry_per_component_allowed) {
             foreach ($gradeable_components as $component) {
