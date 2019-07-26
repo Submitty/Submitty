@@ -127,7 +127,7 @@
                         {{ self.render_student(self, _context, section, info.graded_gradeable, loop.index, info, columns, team_gradeable_view_history) }}
                     {% endfor %}
                     {% for info in section.teamless_users %}
-                        {{ self.render_teamless_user(self, _context, section, info.user, info.new_team_onclick, loop.index+section.rows|length) }}
+                        {{ self.render_teamless_user(self, _context, section, info.user, info.new_team_onclick, loop.index+section.rows|length, columns) }}
                     {% endfor %}
                 </tbody>
                 {# /Student list #}
