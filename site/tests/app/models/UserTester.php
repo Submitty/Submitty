@@ -144,8 +144,23 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'anon_id' => "TestAnonymous",
             'user_updated' => false,
             'instructor_updated' => false,
-            'notification_settings' => array('reply_in_post_thread' => false, 'merge_threads' => false, 'all_new_threads' => false, 'all_new_posts' => false, 'all_modifications_forum' => false,
-            'reply_in_post_thread_email' => false, 'merge_threads_email' => false, 'all_new_threads_email' => false, 'all_new_posts_email' => false, 'all_modifications_forum_email' => false)
+            'notification_settings' => array(
+                'reply_in_post_thread' => false,
+                'merge_threads' => false,
+                'all_new_threads' => false,
+                'all_new_posts' => false,
+                'all_modifications_forum' => false,
+                'team_invite' => true,
+                'team_joined' => true,
+                'team_member_submission' => true,
+                'reply_in_post_thread_email' => false,
+                'merge_threads_email' => false,
+                'all_new_threads_email' => false,
+                'all_new_posts_email' => false,
+                'all_modifications_forum_email' => false,
+                'team_invite_email' => true,
+                'team_joined_email' => true,
+                'team_member_submission_email' => true)
         );
         $this->assertEquals($expected, $actual);
     }

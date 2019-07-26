@@ -5,7 +5,7 @@ namespace app\controllers\grading;
 use app\libraries\response\RedirectResponse;
 use app\models\gradeable\GradedGradeable;
 use app\models\User;
-use app\controllers\GradingController;
+use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\Response;
@@ -18,7 +18,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @package app\controllers\grading
  * @AccessControl(permission="grading.simple")
  */
-class SimpleGraderController extends GradingController {
+class SimpleGraderController extends AbstractController {
     /**
      * @deprecated
      */
