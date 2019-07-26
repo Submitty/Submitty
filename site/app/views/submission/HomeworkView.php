@@ -737,7 +737,7 @@ class HomeworkView extends AbstractView {
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
 
-        $this->core->getOutput()->addInternalJs('forum.js');
+        $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
 
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         $request_regrade_url = $this->core->buildNewCourseUrl([
@@ -760,43 +760,63 @@ class HomeworkView extends AbstractView {
         ]);
 
         $grade_inquiries = $graded_gradeable->getRegradeRequests();
-        $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
-        $grade_inquiries_twig_array = array();
-        foreach($grade_inquiries as $grade_inquiry) {
-            $gc_id = $grade_inquiry->getGcId() ?? 0;
-            $posts = [];
-            foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
-                if (empty($post)) break;
-                $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
-                $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
-                $content = $post['content'];
-                $posts[] = [
-                    'is_staff' => $is_staff,
-                    'date' => date_format($date, 'm/d/Y g:i A'),
-                    'name' => $name,
-                    'content' => $content
-                ];
+        // initialize grade inquiries array with all posts grade inquiry
+        $grade_inquiries_twig_array = [];
+        if (!is_null($grade_inquiries)) {
+            $grade_inquiries_twig_array[0] = ['posts' => []];
+            $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+            foreach ($grade_inquiries as $grade_inquiry) {
+                $gc_id = $grade_inquiry->getGcId() ?? 0;
+                // format posts
+                $posts = [];
+                foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
+                    if (empty($post)) break;
+                    $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+                    $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
+                    $content = $post['content'];
+                    $posts[] = [
+                        'is_staff' => $is_staff,
+                        'date' => date_format($date, 'm/d/Y g:i A'),
+                        'name' => $name,
+                        'content' => $content,
+                        'gc_id' => $gc_id
+                    ];
+                }
+
+                if ($gc_id != 0) {
+                    // grade inquiry object
+                    $grade_inquiry_twig_object = [
+                        'id' => $grade_inquiry->getId(),
+                        'gc_id' => $gc_id,
+                        'status' => $grade_inquiry->getStatus(),
+                        'posts' => $posts
+                    ];
+                    // add grade inquiry to grade inquiries array
+                    $grade_inquiries_twig_array[$gc_id] = $grade_inquiry_twig_object;
+                } else {
+                    $grade_inquiries_twig_array[0]['id'] = $grade_inquiry->getId();
+                    $grade_inquiries_twig_array[0]['gc_id'] = $gc_id;
+                    $grade_inquiries_twig_array[0]['status'] = $grade_inquiry->getStatus();
+                }
+                // add posts to all component
+                $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
             }
-            $grade_inquiry_twig_object = [
-                'id' => $grade_inquiry->getId(),
-                'gc_id' => $gc_id,
-                'status' => $grade_inquiry->getStatus(),
-                'posts' => $posts
-            ];
-            $grade_inquiries_twig_array[$gc_id] = $grade_inquiry_twig_object;
         }
 
+        // construct components array for tabs
         $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
         $components_twig_array = [];
-        foreach ($gradeable_components as $component) {
-            $component_object = [
-                'id' => $component->getId(),
-                'title' => $component->getTitle(),
-            ];
-            $components_twig_array[] = $component_object;
+        if ($grade_inquiry_per_component_allowed) {
+            foreach ($gradeable_components as $component) {
+                $component_object = [
+                    'id' => $component->getId(),
+                    'title' => $component->getTitle(),
+                ];
+                $components_twig_array[] = $component_object;
+            }
         }
-        $components_twig_array[] = ['id' => 0, 'title' => 'General'];
+        $components_twig_array[] = ['id' => 0, 'title' => 'All'];
 
 //        $posts = [];
 //        if ($graded_gradeable->hasRegradeRequest()) {
@@ -829,7 +849,7 @@ class HomeworkView extends AbstractView {
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
             'is_grading' => $this->core->getUser()->accessGrading(),
-            'grade_inquiry_per_component_allowed' => $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed(),
+            'grade_inquiry_per_component_allowed' => $grade_inquiry_per_component_allowed,
             'gradeable_components' => $components_twig_array,
             "csrf_token" => $this->core->getCsrfToken()
         ]);

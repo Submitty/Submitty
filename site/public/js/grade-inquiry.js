@@ -55,7 +55,7 @@ function onGradeInquirySubmitClicked(button) {
   // check double submission
   var button_clicked = $(button);
   var component_selected = $('#component-tab-selected');
-  var component_id = component_selected.data('component_id');
+  var component_id = component_selected.length ? component_selected.data('component_id') : 0;
   var form = $("#reply-text-form-"+component_id);
   if (form.data("submitted") === true) {
     return;
