@@ -128,7 +128,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
         formData.append('file_input[]', files[i], files[i].name);
     }
     var submit_url = form.attr('action');
-
+    
     $.ajax({
         url: submit_url,
         data: formData,
@@ -144,7 +144,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
                     $('#messages').append(message);
                     return;
                 }
-
             } catch (err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
@@ -201,7 +200,7 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
+function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
     var url = buildNewCourseUrl(['forum', 'posts', 'get']);
@@ -211,6 +210,7 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
         data: {
             post_id: post_id,
             thread_id: thread_id,
+            render_markdown: render_markdown,
             csrf_token: csrf_token
         },
         success: function(data){
@@ -256,6 +256,18 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
             $('#edit-user-post').css('display', 'block');
 
             $(".cat-buttons input").prop('checked', false);
+
+            if(json.markdown === true){
+                $('#markdown_input_').val("1");
+                $('#markdown_toggle_').addClass('markdown-active');
+                $('#markdown_buttons_').show();
+            }
+            else{
+                $('#markdown_input_').val("0");
+                $('#markdown_toggle_').removeClass('markdown-active');
+                $('#markdown_buttons_').hide();
+            }
+
             // If first post of thread
             if(shouldEditThread) {
                 var thread_title = json.title;
@@ -267,6 +279,7 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
                 $("#title").val(thread_title);
                 $("#thread_status").val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
+
                 // Categories
                 $(".cat-buttons").removeClass('cat-selected');
                 $.each(categories_ids, function(index, category_id) {

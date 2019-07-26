@@ -441,9 +441,13 @@ body {min-width: 925px;}
     margin-bottom: 0.25em;
 }
 
-#forum_filter_bar{
+#forum_filter_bar {
     margin-left: 15px;
     margin-top: 10px;
     font-size: small;
-    /*display: none;*/
+    display: none;
+}
+
+.markdown-active{
+    color: green;
 }

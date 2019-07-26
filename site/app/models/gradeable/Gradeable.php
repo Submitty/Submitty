@@ -1706,13 +1706,13 @@ class Gradeable extends AbstractModel {
     }
 
     /**
-     * Gets if a user has a overriden grades for this gradeable
+     * Gets if a user has a overridden grades for this gradeable
      * @param Submitter $submitter
      * @return bool
      */
     public function hasOverriddenGrades(Submitter $submitter) {
-        $userWithOverridenGrades = $this->core->getQueries()->getAUserWithOverridenGrades($this->getId(),$submitter->getId());
-        if($userWithOverridenGrades === null ){
+        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(),$submitter->getId());
+        if($userWithOverriddenGrades === null ){
             return false;
         }
         return true;
