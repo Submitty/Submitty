@@ -90,9 +90,6 @@
 			{% endif %}
 		{% endfor %}
 
-
-
-
 	{% if show_more %}
 	    <div class="dropdown more-dropdown">
 	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
@@ -117,7 +114,60 @@
 	    </div>
 	{% endif %}
 	</div>
-	<div id="forum_filters">Filters: <span id="filter_names">None</span> &middot; <a onclick="clearForumFilter()" id="filter_close">Clear </a></div>
+	<div id="forum_filter_bar">
+		<label class="inline-block" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
+
+		<div id="thread_category" aria-label="Select thread category" data-ays-ignore="true">
+
+			{% for category in categories %}
+				<button type="button" cat-id="{{ category.category_id }}" style="color: {{ category.color }}" btn-selected="false">{{ category.category_desc }}</button>
+			{% endfor %}
+		</div>
+
+		<div id="thread_status_select" aria-label="Select thread status" data-ays-ignore="true">
+			<button sel-id="0" btn-selected="false">Comment</button>
+			<button sel-id="-1" btn-selected="false">Unresolved</button>
+			<button sel-id="1" btn-selected="false">Resolved</button>
+		</div>
+	</div>
 </div>
 </div>
 <hr/>
+<script type="text/javascript">
+	function updateThreads(loadFirstPage, success_callback) {
+		{% if thread_exists %}
+		modifyThreadList({{ current_thread }}, '{{ current_category_ids|join("|") }}', '{{ current_course }}', loadFirstPage, success_callback);
+		{% endif %}
+	}
+
+	$( document ).ready(function() {
+		loadFilterHandlers();
+
+		{% for category in cookie_selected_categories %}
+		$('#thread_category button[cat-id="{{ category }}"]').attr('selected', true);
+		filters_applied.toggleElement($('#thread_category button[cat-id="{{ category }}"]').text(), function(e) {
+			return e === $('#thread_category button[cat-id="{{ category }}"]').text();
+		});
+		{% endfor %}
+		{% for status in cookie_selected_thread_status %}
+		$('#thread_status_select button[cat-id="{{ status }}"]').attr('selected', true);
+		filters_applied.toggleElement($('#thread_status_select button[cat-id="{{ status }}"]').text(), function(e) {
+			return e === $('#thread_status_select button[cat-id="{{ status }}"]').text();
+		});
+		{% endfor %}
+
+		if(filters_applied.length > 0){
+			// $('#filter_names').empty().text(filters_applied.join(", "));
+
+			$('#forum_filter_bar').css('display', 'inline-block');
+		}
+
+		$('#unread').prop('checked', {{cookie_selected_unread_value}});
+		$("#tree").prop("checked", true);
+		{% if display_option in ['tree', 'time', 'alpha'] %}
+		$("#{{ display_option }}").attr("checked", true);
+		$("#{{display_option }}_label").addClass('active');
+		{% endif %}
+
+	});
+</script>

@@ -299,7 +299,7 @@ class ForumThreadView extends AbstractView {
                     "link" => array(false),
                     "optional_class" => '',
                     "title" => 'Filter Threads based on Categories',
-                    "onclick" => array(true, "$('#category_wrapper').css('display','block');")
+                    "onclick" => array(true, "forumFilterBar()")
                 )
             );
 
