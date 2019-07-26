@@ -1,10 +1,19 @@
 $( document ).ready(function () {
-  // select first tab with a regrade request
-  $('.component-0').click();
+  // open last opened grade inquiry or open first component with grade inquiry
+  var g_id = $('.component-tabs').data('g_id');
+  var component_cookie = document.cookie.match('(^|;) ?' + g_id + '_component_id' + '=([^;]*)(;|$)');
+  var component_id = component_cookie ? component_cookie[2] : null;
+  if (component_id === null) {
+    $('.component-tab:first').click();
+  } else {
+    $('.component-'+component_id).click();
+  }
+
 });
 
 function onComponentTabClicked(tab) {
   var component_id = $(tab).data("component_id");
+  var g_id = $('.component-tabs').data("g_id");
   // deselect previous selected tab and select clicked tab
   if ($(tab).attr('id') === "component-tab-selected") {
     $(tab).removeAttr('id');
@@ -23,6 +32,12 @@ function onComponentTabClicked(tab) {
       $(this).show();
     }
   });
+
+  // set cookie for selected component
+  var date = new Date();
+  date.setTime(date.getTime()+(60*1000));
+  var expires = "; expires="+date.toGMTString();
+  document.cookie = g_id+"_component_id"+"="+component_id+expires+"; path=/";
 }
 
 function onReplyTextAreaKeyUp(textarea) {
@@ -39,7 +54,8 @@ function onReplyTextAreaKeyUp(textarea) {
 function onGradeInquirySubmitClicked(button) {
   // check double submission
   var button_clicked = $(button);
-  var component_id = $('#component-tab-selected').data('component_id');
+  var component_selected = $('#component-tab-selected');
+  var component_id = component_selected.data('component_id');
   var form = $("#reply-text-form-"+component_id);
   if (form.data("submitted") === true) {
     return;

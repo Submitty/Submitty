@@ -1,4 +1,4 @@
-<div class="component-tabs">
+<div class="component-tabs" data-g_id="{{ g_id }}" >
     {% for component in gradeable_components %}
         <button class="component-tab component-{{ component.id }} btn" data-component_id="{{ component.id }}" onclick="onComponentTabClicked(this)">{{ component.title }}</button>
     {% endfor %}

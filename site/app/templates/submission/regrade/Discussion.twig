@@ -5,7 +5,7 @@
 {% endif %}
 {% if can_inquiry and has_submission %}
     {% if grade_inquiry_per_component_allowed %}
-        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components } only %}
+        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'g_id': g_id } only %}
     {% endif %}
     <div class='grade-inquiries'>
         {% for component in gradeable_components %}
@@ -13,7 +13,7 @@
                 <div class="grade-inquiry-header">
                     <h3>Grade Inquiry</h3>
                     {% if grade_inquiries[component.id].status == -1 and is_grading %}
-                        <span>
+                        <span class="grade-inquiry-status">
                             <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
                             <span class="red-message">Unresolved Grade Inquiry</span>
                         </span>
@@ -21,12 +21,12 @@
                         <script type="text/javascript">
                             $("#regradeBoxSection").show();
                         </script>
-                        <span>
+                        <span class="grade-inquiry-status">
                             <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
                             <span class="red-message">Grade Inquiry Under Review</span>
                         </span>
                     {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == 0 and is_grading %}
-                        <span>
+                        <span class="grade-inquiry-status">
                             <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>
                             <span class="green-message">Grade Inquiry Has Been Resolved</span>
                         </span>
@@ -34,7 +34,7 @@
                         <script type="text/javascript">
                             $("#regradeBoxSection").show();
                         </script>
-                        <span>
+                        <span class="grade-inquiry-status">
                             <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>
                             <span class="green-message">Grade Inquiry Has Been Resolved</span>
                         </span>

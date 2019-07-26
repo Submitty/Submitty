@@ -1,4 +1,5 @@
 .component-tabs {
+    margin-top: 10px;
     display: flex;
     justify-content: space-evenly;
     width: 100%;
@@ -12,4 +13,17 @@
 #component-tab-selected {
     background-color: var(--standard-gray-black);
     color: var(--text-white);
+}
+
+.grade-inquiry-header {
+    display: flex;
+    margin-top: 10px;
+}
+
+.grade-inquiry-status {
+    margin-left: 5px;
+}
+
+.grade_inquiry {
+    display: none;
 }

@@ -825,6 +825,7 @@ class HomeworkView extends AbstractView {
             'has_submission' => $graded_gradeable->hasSubmission(),
             'gradeable_id' => $graded_gradeable->getGradeableId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
+            'g_id' =>$graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
             'is_grading' => $this->core->getUser()->accessGrading(),
