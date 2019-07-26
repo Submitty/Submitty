@@ -1480,7 +1480,7 @@ function updateHomeworkExtensions(data) {
 
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'update'});
+    var url = buildNewCourseUrl(['grade_override', $('#g_id').val(), 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1501,11 +1501,11 @@ function updateGradeOverride(data) {
                 $('#messages').append(message);
                 return;
             }
-            refreshOnResponseOverridenGrades(json);
+            refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
             $('#comment').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overriden Grades for ' + json['data']['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overridden Grades for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -1540,8 +1540,8 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function loadOverridenGrades(g_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'get_overriden_grades', 'g_id': g_id});
+function loadOverriddenGrades(g_id) {
+    var url = buildNewCourseUrl(['grade_override', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1557,7 +1557,7 @@ function loadOverridenGrades(g_id) {
                 $('#messages').append(message);
                 return;
             }
-            refreshOnResponseOverridenGrades(json);
+            refreshOnResponseOverriddenGrades(json);
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1577,16 +1577,16 @@ function refreshOnResponseLateDays(json) {
     });
 }
 
-function refreshOnResponseOverridenGrades(json) {
-    var form = $("#load-overriden-grades");
+function refreshOnResponseOverriddenGrades(json) {
+    var form = $("#load-overridden-grades");
     $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
     $('#title').replaceWith(title);
     if(json['data']['users'].length === 0){
         $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
     } else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverridenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
             var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#my_table').append(bits.join('</td><td>'));
         });
@@ -1662,8 +1662,8 @@ function deleteLateDays(user_id, datestamp) {
     return false;
 }
 
-function deleteOverridenGrades(user_id, g_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'delete_grades'});
+function deleteOverriddenGrades(user_id, g_id) {
+    var url = buildNewCourseUrl(['grade_override', g_id, 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1671,8 +1671,7 @@ function deleteOverridenGrades(user_id, g_id) {
             type: "POST",
             data: {
                 csrf_token: csrfToken,
-                user_id: user_id,
-                g_id: g_id
+                user_id: user_id
             },
             success: function(data) {
                 var json = JSON.parse(data);
@@ -1681,9 +1680,9 @@ function deleteOverridenGrades(user_id, g_id) {
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overriden Grades deleted .</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overridden Grades deleted .</div>';
                 $('#messages').append(message);
-                refreshOnResponseOverridenGrades(json);
+                refreshOnResponseOverriddenGrades(json);
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
