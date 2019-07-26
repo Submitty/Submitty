@@ -29,7 +29,6 @@
                 <h2>Forum</h2>
                 <hr>
             </div>
-
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
@@ -77,6 +76,7 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
+
                 {% if email_enabled %}
                     <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
@@ -132,8 +132,7 @@
                     <div class="option-input col-md-3"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
                     {% if email_enabled %}
                         <div class="option-input col-md-5"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
-                    {% endif %}
-                </div>
+                    {% endif %}                </div>
             {% endif %}
 
             <div class="heading">
@@ -194,6 +193,50 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
                 {% endif %}
             </div>
+
+            <div class="heading">
+                <h2>Team</h2>
+                <hr>
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">New team invites</div>
+                        <div class="option-alt">Receive a notification when you get an invitation to join a team</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">New team member</div>
+                        <div class="option-alt">Receive a notification when a new now member joins your team</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
+            </div>
+
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">New team member submission</div>
+                        <div class="option-alt">Receive a notification when a team member makes a submission to your gradeable</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
+            </div>
         </div>
     </form>
     <script>
@@ -221,7 +264,6 @@
                     $('#messages').append(message);
                 }
             });
-
         });
     </script>
 </div>

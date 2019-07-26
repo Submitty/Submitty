@@ -26,10 +26,10 @@ if len(sys.argv) != 3:
     raise Exception('You must pass 2 command line arguments')
 
 # Get path to current file directory
-dir = os.path.dirname(__file__)
+current_dir = os.path.dirname(__file__)
 
 # Collect other path information from configuration file
-config_file = dir + '/../config/submitty.json'
+config_file = os.path.join(current_dir, '..', 'config', 'submitty.json')
 
 if not os.path.exists(config_file):
     raise Exception('Unable to locate submitty.json configuration file')
@@ -38,14 +38,15 @@ with open(config_file, 'r') as file:
     data = json.load(file)
     install_dir = data['submitty_install_dir']
     data_dir = data['submitty_data_dir']
+    host_name = data['submission_url']
 
 # Collect user information from configuration file
-config_file = dir + '/../config/submitty_users.json'
+users_config_file = os.path.join(install_dir, 'config', 'submitty_users.json')
 
-if not os.path.exists(config_file):
+if not os.path.exists(users_config_file):
     raise Exception('Unable to locate submitty_users.json configuration file')
 
-with open(config_file, 'r') as file:
+with open(users_config_file, 'r') as file:
     data = json.load(file)
     daemon_user = data['daemon_user']
 
@@ -53,8 +54,8 @@ with open(config_file, 'r') as file:
 semester = sys.argv[1]
 course = sys.argv[2]
 user = daemon_user
-rainbow_grades_path = install_dir + '/GIT_CHECKOUT/RainbowGrades'
-courses_path = data_dir + '/courses'
+rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
+courses_path = os.path.join(data_dir, 'courses')
 
 # Verify user exists
 users = pwd.getpwall()
@@ -123,7 +124,7 @@ if os.path.exists(rg_course_path + '/' + PROVIDED_JSON_NAME):
 os.chdir(rg_course_path)
 
 # Verify submitty_admin file exists
-creds_file = dir + '/../config/submitty_admin.json'
+creds_file = os.path.join(install_dir, 'config', 'submitty_admin.json')
 
 if not os.path.exists(creds_file):
     raise Exception('Unable to locate submitty_admin.json credentials file')
@@ -131,16 +132,6 @@ if not os.path.exists(creds_file):
 # Load credentials out of admin file
 with open(creds_file, 'r') as file:
     creds = json.load(file)
-
-# Collect the host name that will be called
-config_file = dir + '/../config/submitty.json'
-
-if not os.path.exists(config_file):
-    raise Exception('Unable to locate submitty.json configuration file')
-
-with open(config_file, 'r') as file:
-    data = json.load(file)
-    host_name = data['submission_url']
 
 # Construct request list
 request = [
