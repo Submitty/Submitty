@@ -9,6 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
+use app\models\RainbowCustomizationJSON;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -17,6 +18,12 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
+
+    // The message that should be returned to the user if they fail the required validation to enable the nightly
+    // rainbow grades build checkbox
+    const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
+    'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
+    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory';
 
     /**
      * @deprecated
@@ -102,7 +109,7 @@ class ConfigurationController extends AbstractController {
             }
             $entry = intval($entry);
         }
-        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary', 'auto_rainbow_grades',
+        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
                                       'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
             $entry = $entry === "true" ? true : false;
         }
@@ -115,6 +122,31 @@ class ConfigurationController extends AbstractController {
                     JsonResponse::getFailResponse($entry . ' is not a valid URL')
                 );
             }
+        }
+        // Special validation for auto_rainbow_grades checkbox
+        else if($name === 'auto_rainbow_grades') {
+
+            // Get a new customization json object
+            $customization_json = new RainbowCustomizationJSON($this->core);
+
+            // If a custom_customization.json does not exist, then check for the presence of a regular one
+            if(!$customization_json->doesCustomCustomizationExist())
+            {
+                // Attempt to populate it from the customization.json in the course rainbow_grades directory
+                try {
+                    $customization_json->loadFromJsonFile();
+                }
+                // If no file exists do not allow user to enable this check mark until one is supplied
+                catch (\Exception $e) {
+
+                    return Response::JsonOnlyResponse(
+                        JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
+                    );
+
+                }
+            }
+
+            $entry = $entry === "true" ? true : false;
         }
 
         if($name === 'forum_enabled') {

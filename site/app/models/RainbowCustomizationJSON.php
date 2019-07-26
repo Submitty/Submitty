@@ -89,6 +89,20 @@ class RainbowCustomizationJSON extends AbstractModel
     }
 
     /**
+     * Determine the existence of a custom_customization.json inside the course rainbow_grades directory
+     *
+     * @return bool Indicates if a custom_customization.json exists
+     */
+    public function doesCustomCustomizationExist()
+    {
+        // Get path to custom_customization.json
+        $course_path = $this->core->getConfig()->getCoursePath();
+        $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
+
+        return file_exists($file_path);
+    }
+
+    /**
      * Loads the data from the course's rainbow grades customization.json into this php object
      *
      * @throws FileReadException Failure to read the contents of the file
