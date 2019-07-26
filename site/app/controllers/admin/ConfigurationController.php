@@ -23,7 +23,7 @@ class ConfigurationController extends AbstractController {
     // rainbow grades build checkbox
     const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
     'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
-    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory';
+    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
      * @deprecated
