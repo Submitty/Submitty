@@ -124,7 +124,7 @@ class RainbowCustomizationJSON extends AbstractModel
         // Validate file read
         if($file_contents === False)
         {
-            throw new FileReadException('An error occured trying to read the contents of customization file.');
+            throw new FileReadException('An error occurred trying to read the contents of customization file.');
         }
 
         $json = json_decode($file_contents);
