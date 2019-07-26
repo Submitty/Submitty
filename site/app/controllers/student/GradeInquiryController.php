@@ -23,7 +23,7 @@ class GradeInquiryController extends AbstractController {
     public function requestGradeInquiry($gradeable_id) {
         $content = $_POST['replyTextArea'] ?? '';
         $submitter_id = $_POST['submitter_id'] ?? '';
-        $gc_id = $_POST['gc_id'] ?? null;
+        $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
 
         $user = $this->core->getUser();
 
@@ -75,7 +75,7 @@ class GradeInquiryController extends AbstractController {
     public function makeGradeInquiryPost($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
-        $gc_id = $_POST['gc_id'] ?? null;
+        $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
 
         $user = $this->core->getUser();
 
@@ -102,10 +102,14 @@ class GradeInquiryController extends AbstractController {
             );
         }
 
+        $grade_inquiry = array_filter($graded_gradeable->getRegradeRequests(), function($grade_inquiry) use ($gc_id) {
+            return $grade_inquiry->getGcId() == $gc_id;
+        });
+        $grade_inquiry_id = array_values($grade_inquiry)[0]->getId();
+
         try {
-            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content, $gc_id);
+            $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
             $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
@@ -128,7 +132,7 @@ class GradeInquiryController extends AbstractController {
     public function changeGradeInquiryStatus($gradeable_id) {
         $content = str_replace("\r", "", $_POST['replyTextArea']);
         $submitter_id = $_POST['submitter_id'] ?? '';
-        $gc_id = $_POST['gc_id'] ?? null;
+        $gc_id = $_POST['gc_id'] == 0 ? null : intval($_POST['gc_id']);
 
         $user = $this->core->getUser();
 
@@ -155,14 +159,18 @@ class GradeInquiryController extends AbstractController {
             );
         }
 
+        $grade_inquiry = array_filter($graded_gradeable->getRegradeRequests(), function($grade_inquiry) use ($gc_id) {
+            return $grade_inquiry->getGcId() == $gc_id;
+        });
+        $grade_inquiry = array_values($grade_inquiry)[0];
         // toggle status
-        $status = $graded_gradeable->getRegradeRequest()->getStatus() === -1 ? 0 : -1;
+        $status = $grade_inquiry->getStatus() === -1 ? 0 : -1;
 
         try {
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
+            $grade_inquiry->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
             if ($content != "") {
-                $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content, $gc_id);
+                $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
             }
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()

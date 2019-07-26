@@ -3046,7 +3046,7 @@ AND gc_id IN (
     }
 
 
-    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message,int $gc_id) {
+    public function insertNewRegradeRequest(GradedGradeable $graded_gradeable, User $sender, string $initial_message,$gc_id) {
         $params = array($graded_gradeable->getGradeableId(), $graded_gradeable->getSubmitter()->getId(), RegradeRequest::STATUS_ACTIVE, $gc_id);
         $submitter_col = $graded_gradeable->getSubmitter()->isTeam() ? 'team_id' : 'user_id';
         try {

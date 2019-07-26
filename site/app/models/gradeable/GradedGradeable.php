@@ -126,28 +126,6 @@ class GradedGradeable extends AbstractModel {
      */
     public function setRegradeRequests(array $regrade_requests) {
         $this->regrade_requests = $regrade_requests;
-        foreach ($this->regrade_requests as $grade_inquiry) {
-            $this->setGradeInquiryStringStatus($grade_inquiry);
-        }
-    }
-
-    private function setGradeInquiryStringStatus(RegradeRequest $grade_inquiry) {
-        if ($this->hasActiveRegradeRequest()) {
-            if ($this->core->getUser()->accessGrading()) {
-                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_PENDING_GRADING);
-            }
-            else {
-                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_PENDING);
-            }
-        }
-        else {
-            if ($this->core->getUser()->accessGrading()) {
-                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_RESOLVED_GRADING);
-            }
-            else {
-                $grade_inquiry->setStringStatus(RegradeRequest::STRING_STATUS_RESOLVED);
-            }
-        }
     }
 
     /**
