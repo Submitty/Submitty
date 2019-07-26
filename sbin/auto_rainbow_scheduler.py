@@ -54,8 +54,6 @@ for semester in os.listdir(courses_path):
                 'course': course
             }
 
-            jobs_json = json.dumps(jobs_json)
-
             # Prepare filename
             job_filename = 'auto_scheduled_rainbow_' + semester + '_' + course + '.json'
 
