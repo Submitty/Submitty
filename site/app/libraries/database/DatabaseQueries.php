@@ -82,6 +82,21 @@ class DatabaseQueries {
     }
 
     /**
+     * Gets all users from the submitty database, except nulls out password
+     * @return User[]
+     */
+    public function getAllSubmittyUsers() {
+        $this->submitty_db->query("SELECT * FROM users");
+
+        $users = array();
+        foreach ($this->submitty_db->rows() as $user) {
+            $user['user_password'] = null;
+            $users[$user['user_id']] = new User($this->core, $user);
+        }
+        return $users;
+    }
+
+    /**
      * Gets some user's api key from the submitty database given a user_id.
      * @param $user_id
      *

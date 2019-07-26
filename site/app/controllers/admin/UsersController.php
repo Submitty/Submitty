@@ -183,6 +183,7 @@ class UsersController extends AbstractController {
         $user = $this->core->getQueries()->getUserById($user_id);
         $this->core->getOutput()->renderJsonSuccess(array(
             'user_id' => $user->getId(),
+            'already_in_course' => true,
             'user_numeric_id' => $user->getNumericId(),
             'user_firstname' => $user->getLegalFirstName(),
             'user_lastname' => $user->getLegalLastName(),
@@ -197,6 +198,39 @@ class UsersController extends AbstractController {
             'manual_registration' => $user->isManualRegistration(),
             'grading_registration_sections' => $user->getGradingRegistrationSections()
         ));
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/user_information", methods={"GET"})
+     */
+    public function ajaxGetSubmittyUsers() {
+        $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
+        $user_ids = array_keys($submitty_users);
+        $course_users = $this->core->getQueries()->getUsersById($user_ids);
+
+        //uses more thorough course information if it exists, if not uses database information
+        $user_information = array();
+        foreach ($user_ids as $user_id) {
+            $already_in_course = array_key_exists($user_id,$course_users);
+            $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
+            $user_information[$user_id] = array(
+                'already_in_course' => $already_in_course,
+                'user_numeric_id' => $user->getNumericId(),
+                'user_firstname' => $user->getLegalFirstName(),
+                'user_lastname' => $user->getLegalLastName(),
+                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
+                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
+                'user_email' => $user->getEmail(),
+                'user_group' => $user->getGroup(),
+                'registration_section' => $user->getRegistrationSection(),
+                'rotating_section' => $user->getRotatingSection(),
+                'user_updated' => $user->isUserUpdated(),
+                'instructor_updated' => $user->isInstructorUpdated(),
+                'manual_registration' => $user->isManualRegistration(),
+                'grading_registration_sections' => $user->getGradingRegistrationSections()
+            );
+        }
+        $this->core->getOutput()->renderJsonSuccess($user_information);
     }
 
     /**
@@ -309,6 +343,7 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
+                $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
