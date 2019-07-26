@@ -122,7 +122,6 @@ int main(int argc, char *argv[]) {
                 new_filename += ".txt";
               }
               execute("/bin/cp "+old_filename+" "+new_filename,
-                      false,
                       actions,
                       dispatcher_actions,
                       "/dev/null",
@@ -159,7 +158,6 @@ int main(int argc, char *argv[]) {
         int exit_no = execute(commands[j] +
                               " 1> STDOUT" + which + ".txt" +
                               " 2> STDERR" + which + ".txt",
-                              false,
                               actions,
                               dispatcher_actions,
                               "execute_logfile.txt",

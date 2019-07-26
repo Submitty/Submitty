@@ -16,7 +16,7 @@
 
 
 int main(int argc, char *argv[]) {
-   std::cout << "Running User Code..." << std::endl;
+  std::cout << "Running User Code..." << std::endl;
   std::string hw_id = "";
   std::string rcsid = "";
   int subnum = -1;
@@ -25,16 +25,21 @@ int main(int argc, char *argv[]) {
   //If test_case_to_run isn't passed in as a parameter, all testcases are run.
   int test_case_to_run = -1;
   std::string display_variable = "";
-
+  std::string generation_type = "";
+  system("find . -type f -exec ls -sh {} +");
 
   TCLAP::CmdLine cmd("Submitty's main runner program.", ' ', "0.9");
+  system("find . -type f -exec ls -sh {} +");
   TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
-  TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", true, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", false, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
   TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
   TCLAP::ValueArg<int> testcase_to_run_argument("t", "testcase", "The testcase to run. Pass -1 to run all testcases.", false, -1, "int", cmd);
   TCLAP::ValueArg<std::string> docker_name_argument("c", "container_name", "The name of the container this attempt is being run in.", false, "", "string", cmd);
   TCLAP::ValueArg<std::string> display_variable_argument("d", "display", "The display to be used for this testcase.", false, "NO_DISPLAY_SET", "string", cmd);
+  TCLAP::ValueArg<std::string> generation_type_argument("g", "generation_type", "The type of generation", false, "", "string", cmd);
+  
+  
 
   //parse arguments.
   try {
@@ -46,13 +51,17 @@ int main(int argc, char *argv[]) {
     docker_name = docker_name_argument.getValue();
     test_case_to_run = testcase_to_run_argument.getValue();
     display_variable = display_variable_argument.getValue();
+    generation_type = generation_type_argument.getValue();
   }
   catch (TCLAP::ArgException &e)  // catch any exceptions
   { 
+    std::cout << "Sorry parser is not working" << std::endl;
     std::cerr << "INCORRECT ARGUMENTS TO RUNNER" << std::endl;
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
     return 1;
   }
+
+  std::cout << generation_type << std::endl;
 
   // LOAD HW CONFIGURATION JSON
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
@@ -71,6 +80,9 @@ int main(int argc, char *argv[]) {
   // Run each test case and create output files
   std::vector<std::string> required_capabilities = stringOrArrayOfStrings(config_json, "required_capabilities");
   
+  std::vector<nlohmann::json> actions;
+  std::vector<nlohmann::json> dispatcher_actions;
+
   bool windowed = false;
   if (std::find(required_capabilities.begin(), required_capabilities.end(), "windowed") != required_capabilities.end()){
     windowed = true;
@@ -98,48 +110,101 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    std::cout << "========================================================" << std::endl;
-    std::cout << "TEST #" << i << std::endl;
-
-    std::vector<std::string> commands = my_testcase.getCommands();
-
-    std::vector<nlohmann::json> actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
-    std::vector<nlohmann::json> dispatcher_actions = mapOrArrayOfMaps((*tc)[i-1],"dispatcher_actions");
-
-    assert (commands.size() > 0);
-
-    std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+    if ( generation_type == "output" ) {
     
-    for (int x = 0; x < commands.size(); x++) {
-      std::cout << "COMMAND " << commands[x] << std::endl;
+    for (int i = 0; i < my_testcase.numFileGraders(); i++ ){
+        
+        std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(i), "command");
+        
+        if ( outputGeneratorCommandsForValidation.size() > 0 ) {
+          std::cout << "========================================================" << std::endl;
 
-      assert (commands[x] != "MISSING COMMAND");
-      assert (commands[x] != "");
-      
-      std::string which = "";
-      if (commands.size() > 1) {
-        which = "_" + std::to_string(x);
+          std::cout << "TEST #" << i << std::endl;
+          std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+        
+          for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
+            int exit_no = execute(outputGeneratorCommandsForValidation[j],
+                                  actions,
+                                  dispatcher_actions,
+                                  "execute_logfile.txt",
+                                  my_testcase.get_test_case_limits(),
+                                  config_json.value("resource_limits",nlohmann::json()),
+                                  config_json,
+                                  false,
+                                  "");
+          }
+          std::cout << "========================================================" << std::endl;
+          std::cout << "FINISHED TEST #" << i << std::endl;
+        }
       }
+    } else if ( generation_type == "input" ) {
+      std::vector <std::string> inputGeneratorCommands = my_testcase.getInputGeneratorCommands();
+      if ( inputGeneratorCommands.size() > 0 ) {
+       
+        std::cout << "========================================================" << std::endl;
+
+        std::cout << "TEST #" << i << std::endl;
+        std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+        
+        for (int i = 0; i < inputGeneratorCommands.size(); i++ ) {
+          int exit_no = execute(inputGeneratorCommands[i],
+                                  actions,
+                                  dispatcher_actions,
+                                  "execute_logfile.txt",
+                                  my_testcase.get_test_case_limits(),
+                                  config_json.value("resource_limits",nlohmann::json()),
+                                  config_json,
+                                  false,
+                                  "");
+        }
+
+        std::cout << "========================================================" << std::endl;
+        std::cout << "FINISHED TEST #" << i << std::endl;
+
+      }
+    } else {
+      std::cout << "========================================================" << std::endl;
+      std::cout << "TEST #" << i << std::endl;
+
+      std::vector<std::string> commands = my_testcase.getCommands();
+
+      actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
+      dispatcher_actions = mapOrArrayOfMaps((*tc)[i-1],"dispatcher_actions");
+
+      assert (commands.size() > 0);
+
+      std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
       
-      
-      std::string logfile = "execute_logfile.txt";
-      // run the command, capturing STDOUT & STDERR
-      int exit_no = execute(commands[x]
-                            +
-                            " 1>" + "STDOUT" + which + ".txt" +
-                            " 2>" + "STDERR" + which + ".txt",
-                            false,
-                            actions,
-                            dispatcher_actions,
-                            logfile,
-                            my_testcase.get_test_case_limits(),
-                            config_json.value("resource_limits",nlohmann::json()),
-                            config_json,
-                            windowed,
-                            display_variable); 
+      for (int x = 0; x < commands.size(); x++) {
+        std::cout << "COMMAND " << commands[x] << std::endl;
+
+        assert (commands[x] != "MISSING COMMAND");
+        assert (commands[x] != "");
+        
+        std::string which = "";
+        if (commands.size() > 1) {
+          which = "_" + std::to_string(x);
+        }
+        
+        
+        std::string logfile = "execute_logfile.txt";
+        // run the command, capturing STDOUT & STDERR
+        int exit_no = execute(commands[x]
+                              +
+                              " 1>" + "STDOUT" + which + ".txt" +
+                              " 2>" + "STDERR" + which + ".txt",
+                              actions,
+                              dispatcher_actions,
+                              logfile,
+                              my_testcase.get_test_case_limits(),
+                              config_json.value("resource_limits",nlohmann::json()),
+                              config_json,
+                              windowed,
+                              display_variable); 
+      }
+      std::cout << "========================================================" << std::endl;
+      std::cout << "FINISHED TEST #" << i << std::endl;
     }
-    std::cout << "========================================================" << std::endl;
-    std::cout << "FINISHED TEST #" << i << std::endl;
   }
   return 0;
 }

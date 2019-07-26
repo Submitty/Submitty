@@ -478,27 +478,27 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             copy_contents_into(job_id,instructor_solution_path,random_input_testcase_folder,tmp_logs)
             
             # copy compile.out to the current directory
-            shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(random_input_testcase_folder,"my_solution_runner.out"))
-            add_permissions(os.path.join(random_input_testcase_folder,"my_solution_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
+            shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(random_input_testcase_folder,"my_runner.out"))
+            add_permissions(os.path.join(random_input_testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
             untrusted_grant_rwx_access(which_untrusted, random_input_testcase_folder)
             add_all_permissions(random_input_testcase_folder)
             
-            inout_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+            input_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                 which_untrusted,
-                                                os.path.join(random_input_testcase_folder,"my_solution_runner.out"),
+                                                os.path.join(random_input_testcase_folder,"my_runner.out"),
                                                 queue_obj["gradeable"],
                                                 queue_obj["who"],
                                                 str(queue_obj["version"]),
                                                 submission_string,
-                                                "input",
-                                                '--testcase', str(testcase_num)],
+                                                '--testcase', str(testcase_num),
+                                                '--generation_type','input'],
                                                 stdout=logfile, 
                                                 cwd=random_input_testcase_folder)
             # remove the compilation program
             untrusted_grant_rwx_access(which_untrusted, random_input_testcase_folder)
-            os.remove(os.path.join(random_input_testcase_folder,"my_solution_runner.out"))
+            os.remove(os.path.join(random_input_testcase_folder,"my_runner.out"))
 
-        if inout_generator_success == 0:
+        if input_generator_success == 0:
             print (which_machine,which_untrusted,"INPUT GENERATOR OK")
         else:
             print (which_machine,which_untrusted,"INPUT GENERATOR FAILURE")
@@ -551,7 +551,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
-    # copy runner.out to the current directory
+    # copy run.out to the current directory
     shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
     #set the appropriate permissions for the newly created directories 
@@ -604,25 +604,25 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             pattern_copy("random_input_to_runner",["*.txt"],random_input_testcase_folder,testcase_folder,tmp_logs)
             
             # copy compile.out to the current directory
-            shutil.copy (os.path.join(bin_path,"solution_runner.out"),os.path.join(testcase_folder,"my_solution_runner.out"))
-            add_permissions(os.path.join(testcase_folder,"my_solution_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
+            shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(testcase_folder,"my_runner.out"))
+            add_permissions(os.path.join(testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
             add_all_permissions(testcase_folder)
 
             output_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                 which_untrusted,
-                                                os.path.join(testcase_folder,"my_solution_runner.out"),
+                                                os.path.join(testcase_folder,"my_runner.out"),
                                                 queue_obj["gradeable"],
                                                 queue_obj["who"],
                                                 str(queue_obj["version"]),
                                                 submission_string,
-                                                "output",
-                                                '--testcase', str(testcase_num)],
+                                                '--testcase', str(testcase_num),
+                                                '--generation_type','output'],
                                                 stdout=logfile, 
                                                 cwd=testcase_folder)
             # remove the compilation program
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
-            os.remove(os.path.join(testcase_folder,"my_solution_runner.out"))
+            os.remove(os.path.join(testcase_folder,"my_runner.out"))
 
         if output_generator_success == 0:
             print (which_machine,which_untrusted,"OUTPUT GENERATION OK")

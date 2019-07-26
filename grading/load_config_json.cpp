@@ -1001,7 +1001,7 @@ void AddDefaultGrader(const std::string &command,
   if (filename.find("STDOUT") != std::string::npos) {
     j["description"] = "Standard Output ("+filename+")";
   } else if (filename.find("STDERR") != std::string::npos) {
-    std::string program_name = get_program_name(command,false,whole_config);
+    std::string program_name = get_program_name(command,whole_config);
     if (program_name == "/usr/bin/python") {
       j["description"] = "syntax error output from running python";
     } else if (program_name.find("java") != std::string::npos) {
