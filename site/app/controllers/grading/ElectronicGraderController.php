@@ -405,7 +405,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections,
-            $component_averages, $autograded_average, $overall_scores, $overall_average, $total_submissions, $individual_viewed_grade,
+            $component_averages, $autograded_average, $overall_scores, $overall_average, $total_submissions, $individual_viewed_grade ?? 0,
             $total_students_submitted, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade,
             $section_key, $regrade_requests, $show_warnings);
     }
