@@ -551,11 +551,10 @@ if [ ! -d "${nlohmann_dir}" ]; then
 fi
 
 #####################################
-# Update permissions for RainbowGrades and vendor repos
+# Add read & traverse permissions for RainbowGrades and vendor repos
 
-chmod 0555 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades
-chmod 0444 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades/*
-chmod 0555 ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type f -exec chmod o+r {} \;
 
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+x {} \;
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
