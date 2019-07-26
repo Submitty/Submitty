@@ -66,3 +66,6 @@ def main():
                 path_grading_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", "__".join([args.semester, args.course, g_id]))
                 with open(path_grading_file, 'a') as grading_file:
                     json.dump(graded_file, grading_file)
+
+if __name__ == "__main__":
+    main()
