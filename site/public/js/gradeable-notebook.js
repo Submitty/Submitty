@@ -147,7 +147,7 @@ $(document).ready(function () {
     });
 
     // Setup click events for short answer buttons
-    $(".sa_clear_reset").click(function() {
+    $(".sa-clear-reset").click(function() {
 
         // Collect the id of the button and split it apart to find out which short answer it is bound to
         // and which action it preforms
