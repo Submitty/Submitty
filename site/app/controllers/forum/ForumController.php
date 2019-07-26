@@ -277,6 +277,12 @@ class ForumController extends AbstractController{
      * @AccessControl(permission="forum.publish")
      */
     public function publishThread(){
+        if(!$this->core->getAccess()->canI("forum.publish")) {
+            $this->core->getOutput()->renderJson(['error' => "Invalid CSRF token"]);
+            return $this->core->getOutput()->getOutput();
+        }
+
+        $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = array();
         $thread_title = trim($_POST["title"]);
@@ -287,6 +293,8 @@ class ForumController extends AbstractController{
         } else {
             $lock_thread_date = null;
         }
+
+
         $thread_status = $_POST["thread_status"];
 
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
@@ -307,7 +315,7 @@ class ForumController extends AbstractController{
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($current_user_id, $thread_title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
 
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
@@ -374,6 +382,10 @@ class ForumController extends AbstractController{
             $this->changeThreadStatus($_POST['thread_status'], $thread_id);
         }
 
+        $markdown = !empty($_POST['markdown_status']);
+
+        setcookie("markdown_enabled", ($markdown?1:0), time() + (86400 * 30), "/");
+
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
@@ -393,7 +405,7 @@ class ForumController extends AbstractController{
             if($hasGoodAttachment[0] == -1){
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
-                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
+                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $parent_id);
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if(!is_dir($thread_dir)) {
@@ -465,6 +477,9 @@ class ForumController extends AbstractController{
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
         $post = $this->core->getQueries()->getPost($post_id);
         $current_user_id = $this->core->getUser()->getId();
+
+        $markdown = !empty($_POST['markdown_status']);
+
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 $this->core->getOutput()->renderJson(['error' => 'You do not have permissions to do that.']);
                 return;
@@ -472,7 +487,7 @@ class ForumController extends AbstractController{
         if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildNewCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        } else if($this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->getOutput()->renderJson(['error' => 'Thread is locked']);
             return;
         }
@@ -518,6 +533,7 @@ class ForumController extends AbstractController{
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
+
             $any_changes = false;
             $type = null;
             $isError = false;
@@ -667,7 +683,10 @@ class ForumController extends AbstractController{
             if(!$this->modifyAnonymous($original_creator)) {
                 $anon = $original_post["anonymous"] ? 1 : 0;
             }
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
+
+            $markdown = !empty($_POST['markdown_status']);
+
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown);
         }
         return null;
     }
@@ -906,6 +925,7 @@ class ForumController extends AbstractController{
                 $output['anon'] = $result['anonymous'];
                 $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
                 $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
+                $output['markdown'] = $result['render_markdown'];
                 if(isset($_POST["thread_id"])) {
                     $this->getThreadContent($_POST["thread_id"], $output);
                 }

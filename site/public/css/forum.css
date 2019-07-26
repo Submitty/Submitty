@@ -442,9 +442,12 @@ body {min-width: 925px;}
 }
 
 #forum_filters{
-    /*position: absolute;*/
     margin-left: 15px;
     margin-top: 10px;
     font-size: small;
     display: none;
+}
+
+.markdown-active{
+    color: green;
 }
