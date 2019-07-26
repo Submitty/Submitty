@@ -364,7 +364,6 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var next_url = urlPattern.replace("{{#}}", load_page);
 
-    // var categories_value = $("#thread_category").val();
     var categories_value = [];
     $('#thread_category button').each(function(){
        if($(this).attr("btn-selected")==="true"){
