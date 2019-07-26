@@ -144,13 +144,13 @@
 		loadFilterHandlers();
 
 		{% for category in cookie_selected_categories %}
-		$('#thread_category button[cat-id="{{ category }}"]').attr('selected', true);
+		$('#thread_category button[cat-id="{{ category }}"]').attr('btn-selected', "true");
 		filters_applied.toggleElement($('#thread_category button[cat-id="{{ category }}"]').text(), function(e) {
 			return e === $('#thread_category button[cat-id="{{ category }}"]').text();
 		});
 		{% endfor %}
 		{% for status in cookie_selected_thread_status %}
-		$('#thread_status_select button[cat-id="{{ status }}"]').attr('selected', true);
+		$('#thread_status_select button[sel-id="{{ status }}"]').attr('btn-selected', "true");
 		filters_applied.toggleElement($('#thread_status_select button[cat-id="{{ status }}"]').text(), function(e) {
 			return e === $('#thread_status_select button[cat-id="{{ status }}"]').text();
 		});
@@ -169,5 +169,6 @@
 		$("#{{display_option }}_label").addClass('active');
 		{% endif %}
 
+		window.csrfToken = "{{ csrf_token }}" ;
 	});
 </script>

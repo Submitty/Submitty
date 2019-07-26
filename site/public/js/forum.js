@@ -364,8 +364,22 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var next_url = urlPattern.replace("{{#}}", load_page);
 
-    var categories_value = $("#thread_category").val();
-    var thread_status_value = $("#thread_status_select").val();
+    // var categories_value = $("#thread_category").val();
+    var categories_value = [];
+    $('#thread_category button').each(function(){
+       if($(this).attr("btn-selected")==="true"){
+           categories_value.push($(this).attr("cat-id"));
+       }
+    });
+
+    var thread_status_value = [];
+    $('#thread_status_select button').each(function(){
+        if($(this).attr("btn-selected")==="true"){
+            thread_status_value.push($(this).attr("sel-id"));
+        }
+    });
+
+    // var thread_status_value = $("#thread_status_select").val();
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
@@ -378,7 +392,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             unread_select: unread_select_value,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
-            csrf_token: csrfToken
+            csrf_token: window.csrfToken
         },
         success: function(r){
             var x = JSON.parse(r);
@@ -473,18 +487,20 @@ function alterShowMergeThreadStatus(newStatus, course) {
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
     var categories_value = [];
     $('#thread_category button').each(function(){
-       if($(this).attr("btn-selected")){
-           categories_value.push($(this).attr("cat-id").toString());
+       if($(this).attr("btn-selected")==="true"){
+           categories_value.push($(this).attr("cat-id"));
        }
     });
+
     var thread_status_value = [];
     $('#thread_status_select button').each(function(){
-        if($(this).attr("btn-selected")){
+        if($(this).attr("btn-selected")==="true"){
             thread_status_value.push($(this).attr("sel-id"));
         }
     });
 
     console.log(categories_value);
+    console.log(thread_status_value);
 
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -1164,16 +1180,14 @@ function loadFilterHandlers(){
         e.preventDefault();
         var current_selection = $(this).attr('btn-selected');
 
-        alert(current_selection);
+        // $(this).attr('btn-selected', !current_selection);
 
-        // if(current_selection === "0") {
-        //     $(this).attr('btn-selected', "1");
-        // }
-        // else{
-        //     $(this).attr('btn-selected', "0");
-        // }
-
-        $(this).attr('btn-selected', !current_selection);
+        if(current_selection==="true"){
+            $(this).attr('btn-selected', "false");
+        }
+        else{
+            $(this).attr('btn-selected', "true");
+        }
 
         var filter_text = $(this).text();
 
