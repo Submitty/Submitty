@@ -32,7 +32,7 @@
 
     {% endif %}
 
-    <pre class='pre_forum'><span class="post_content pre-wrap">{% include "forum/RenderPost.twig" with { "post_content": post_content } only %}</span></pre>
+    <pre class='pre_forum'><span class="post_content pre-wrap" >{% include "forum/RenderPost.twig" with { "post_content": post_content, "render_markdown": render_markdown } only %}</span></pre>
 
     <hr style="margin-bottom: 3px;">
 
@@ -76,7 +76,7 @@
                 {#pass#}
             {% else %}
                 <a class="post_button delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}" aria-hidden="true"></i></a>
-                <a class="post_button edit-post-button" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit" aria-hidden="true"></i></a>
+                <a class="post_button edit-post-button" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit" aria-hidden="true"></i></a>
             {% endif %}
         {% endif %}
 

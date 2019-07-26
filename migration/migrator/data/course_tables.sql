@@ -578,18 +578,19 @@ CREATE TABLE notifications (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-	"id" serial NOT NULL,
-	"thread_id" int NOT NULL,
-	"parent_id" int DEFAULT '-1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEXT NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
-	"anonymous" BOOLEAN NOT NULL,
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"endorsed_by" varchar,
-	"type" int NOT NULL,
-  "has_attachment" BOOLEAN NOT NULL,
-	CONSTRAINT posts_pk PRIMARY KEY ("id")
+        "id" serial NOT NULL,
+        "thread_id" int NOT NULL,
+        "parent_id" int DEFAULT '-1',
+        "author_user_id" character varying NOT NULL,
+        "content" TEXT NOT NULL,
+        "timestamp" timestamp with time zone NOT NULL,
+        "anonymous" BOOLEAN NOT NULL,
+        "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+        "endorsed_by" varchar,
+        "type" int NOT NULL,
+        "has_attachment" BOOLEAN NOT NULL,
+        "render_markdown" BOOLEAN NOT NULL DEFAULT 'false',
+        CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
