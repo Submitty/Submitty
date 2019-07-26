@@ -203,6 +203,7 @@ function buildJSON(){
 function showLogButton(responseData)
 {
     $('#show_log_button').show();
+    $('#save_status_log').empty();
     $('#save_status_log').append('<pre>' + responseData + '</pre>');
 }
 
