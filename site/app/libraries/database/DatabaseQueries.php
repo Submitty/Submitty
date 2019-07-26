@@ -82,6 +82,21 @@ class DatabaseQueries {
     }
 
     /**
+     * Gets all users from the submitty database, except nulls out password
+     * @return User[]
+     */
+    public function getAllSubmittyUsers() {
+        $this->submitty_db->query("SELECT * FROM users");
+
+        $users = array();
+        foreach ($this->submitty_db->rows() as $user) {
+            $user['user_password'] = null;
+            $users[$user['user_id']] = new User($this->core, $user);
+        }
+        return $users;
+    }
+
+    /**
      * Gets some user's api key from the submitty database given a user_id.
      * @param $user_id
      *
@@ -90,6 +105,14 @@ class DatabaseQueries {
     public function getSubmittyUserApiKey($user_id) {
         $this->submitty_db->query("SELECT api_key FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['api_key'] : null;
+    }
+
+    /**
+     * Refreshes some user's api key from the submitty database given a user_id.
+     * @param $user_id
+     */
+    public function refreshUserApiKey($user_id) {
+        $this->submitty_db->query("UPDATE users SET api_key=encode(gen_random_bytes(16), 'hex') WHERE user_id=?", array($user_id));
     }
 
     /**
@@ -2839,11 +2862,17 @@ AND gc_id IN (
             'all_new_posts',
             'all_modifications_forum',
             'reply_in_post_thread',
+            'team_invite',
+            'team_joined_email',
+            'team_member_submission',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
             'all_modifications_forum_email',
-            'reply_in_post_thread_email'
+            'reply_in_post_thread_email',
+            'team_invite_email',
+            'team_joined_email',
+            'team_member_submission_email'
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -2851,6 +2880,19 @@ AND gc_id IN (
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query);
         }
         return $this->rowsToArray($this->course_db->rows());
+    }
+
+    /**
+     * Gets the user's row in the notification settings table
+     * @param string $column
+     * @param string $user_id
+     */
+    public function getUsersNotificationSettings(array $user_ids) {
+        $params = $user_ids;
+        $user_id_query = $this->createParamaterList(count($user_ids));
+        $query = "SELECT * FROM notification_settings WHERE user_id in ".$user_id_query;
+        $this->course_db->query($query,$params);
+        return $this->course_db->rows();
     }
 
     /**

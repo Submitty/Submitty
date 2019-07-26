@@ -23,7 +23,7 @@
             {% if can_download and files|length > 1 %}
                 <br />
                 <br />
-                Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'><i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
+                Download all files: <a onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}", "submission")'><i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></a>
             {% endif %}
         </div>
         <div class="box col-md-6">

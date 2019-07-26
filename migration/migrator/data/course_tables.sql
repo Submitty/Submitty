@@ -517,11 +517,17 @@ CREATE TABLE notification_settings (
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
 	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission BOOLEAN DEFAULT TRUE NOT NULL,
 	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL
 );
 
 --
@@ -549,7 +555,7 @@ CREATE TABLE grade_override (
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading', 'team');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
