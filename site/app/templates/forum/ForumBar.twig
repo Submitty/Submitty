@@ -115,19 +115,17 @@
 	{% endif %}
 	</div>
 	<div id="forum_filter_bar">
-		<label class="inline-block" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
-
-		<div id="thread_category" aria-label="Select thread category" data-ays-ignore="true">
-
+		<button class="btn btn-default btn-sm inline-block" style="background-color: #ff5555; color: white;" label="Clear Filters" onclick="clearForumFilter()">Clear Filters</button>
+		<label  id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" style="display: none;" name="unread" data-ays-ignore="true"/>
+		<div id="thread_category" aria-label="Select thread category" style="display: inline-block;" data-ays-ignore="true">
 			{% for category in categories %}
-				<button type="button" cat-id="{{ category.category_id }}" style="color: {{ category.color }}" btn-selected="false">{{ category.category_desc }}</button>
+				<button class="btn btn-sm filter-inactive" type="button" cat-id="{{ category.category_id }}" style="color: {{ category.color }}; border: 1px solid {{ category.color }}"  btn-selected="false">{{ category.category_desc }}</button>
 			{% endfor %}
 		</div>
-
-		<div id="thread_status_select" aria-label="Select thread status" data-ays-ignore="true">
-			<button sel-id="0" btn-selected="false">Comment</button>
-			<button sel-id="-1" btn-selected="false">Unresolved</button>
-			<button sel-id="1" btn-selected="false">Resolved</button>
+		<div id="thread_status_select" aria-label="Select thread status" style="display: inline-block;" data-ays-ignore="true">
+			<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
+			<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
+			<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
 		</div>
 	</div>
 </div>
@@ -143,24 +141,31 @@
 	$( document ).ready(function() {
 		loadFilterHandlers();
 
+		$('#num_filtered').text({{ display_thread_count }});
+
 		{% for category in cookie_selected_categories %}
-		$('#thread_category button[cat-id="{{ category }}"]').attr('btn-selected', "true");
+		$('#thread_category button[cat-id="{{ category }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
 		filters_applied.toggleElement($('#thread_category button[cat-id="{{ category }}"]').text(), function(e) {
 			return e === $('#thread_category button[cat-id="{{ category }}"]').text();
 		});
 		{% endfor %}
 		{% for status in cookie_selected_thread_status %}
-		$('#thread_status_select button[sel-id="{{ status }}"]').attr('btn-selected', "true");
+		$('#thread_status_select button[sel-id="{{ status }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
 		filters_applied.toggleElement($('#thread_status_select button[cat-id="{{ status }}"]').text(), function(e) {
-			return e === $('#thread_status_select button[cat-id="{{ status }}"]').text();
+			return e === $('#thread_status_select button[sel-id="{{ status }}"]').text();
 		});
 		{% endfor %}
 
-		if(filters_applied.length > 0){
+		var unread_marked = false;
+
+		$('#unread').prop("checked", {{cookie_selected_unread_value}});
+		if($('#unread').prop("checked")){
+			unread_marked = true;
+			$('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
+		}
+		if(filters_applied.length > 0 || unread_marked ){
 			$('#forum_filter_bar').css('display', 'inline-block');
 		}
-
-		$('#unread').prop('checked', {{cookie_selected_unread_value}});
 		$("#tree").prop("checked", true);
 		{% if display_option in ['tree', 'time', 'alpha'] %}
 		$("#{{ display_option }}").attr("checked", true);

@@ -497,6 +497,7 @@ function alterShowMergeThreadStatus(newStatus, course) {
 }
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
+
     var categories_value = [];
     $('#thread_category button').each(function(){
        if($(this).attr("btn-selected")==="true"){
@@ -510,9 +511,6 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             thread_status_value.push($(this).attr("sel-id"));
         }
     });
-
-    console.log(categories_value);
-    console.log(thread_status_value);
 
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
@@ -535,6 +533,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
         success: function(r){
             var x = JSON.parse(r);
             var page_number = parseInt(x.page_number);
+            var threadCount = parseInt(x.count);
             x = x.html;
             x = `${x}`;
             var jElement = $("#thread_list");
@@ -551,6 +550,9 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                 $("#thread_list .fa-caret-up").show();
                 $("#thread_list .fa-caret-down").hide();
             }
+
+            $('#num_filtered').text(threadCount);
+            
             dynamicScrollLoadIfScrollVisible(jElement);
             loadThreadHandler();
             if(success_callback != null) {
@@ -1181,13 +1183,16 @@ Array.prototype.toggleElement = function(element, comparer) {
 
 function clearForumFilter(){
     window.filters_applied = [];
-    $('#thread_category button, #thread_status_select button').attr('btn-selected', false);
+    $('#thread_category button, #thread_status_select button').attr('btn-selected', "false");
     updateThreads(true, null);
-    // $('#filter_names').empty().text("None");
-    // $('#forum_filters').css('display', 'none');
 }
 
 function loadFilterHandlers(){
+
+    $('#filter_unread_btn').mousedown(function (e) {
+        $(this).toggleClass('filter-inactive filter-active');
+    });
+
     $('#thread_category button, #thread_status_select button').mousedown(function(e) {
         e.preventDefault();
         var current_selection = $(this).attr('btn-selected');
@@ -1195,10 +1200,10 @@ function loadFilterHandlers(){
         // $(this).attr('btn-selected', !current_selection);
 
         if(current_selection==="true"){
-            $(this).attr('btn-selected', "false");
+            $(this).attr('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
         }
         else{
-            $(this).attr('btn-selected', "true");
+            $(this).attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
         }
 
         var filter_text = $(this).text();

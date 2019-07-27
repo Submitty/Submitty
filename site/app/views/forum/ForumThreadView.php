@@ -245,8 +245,7 @@ class ForumThreadView extends AbstractView {
             "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
             "cookie_selected_unread_value" => $cookieSelectedUnread,
             "display_option" => $display_option,
-            "thread_exists" => $threadExists,
-            "display_option" => $display_option
+            "thread_exists" => $threadExists
         );
 
         $next_page = 0;
@@ -294,7 +293,7 @@ class ForumThreadView extends AbstractView {
             $other_buttons = array(
                 array(
                     "required_rank" => 4,
-                    "display_text" => 'Filter',
+                    "display_text" => 'Filter (<span id="num_filtered">0</span>)',
                     "style" => 'display:inline-block;',
                     "link" => array(false),
                     "optional_class" => '',
@@ -343,6 +342,7 @@ class ForumThreadView extends AbstractView {
                 "prev_page" => $prev_page,
                 "arrowup_visibility" => $arrowup_visibility,
                 "display_thread_content" => $displayThreadContent,
+                "display_thread_count" => count($displayThreadContent["thread_content"]),
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
                 "generate_post_content" => $generatePostContent,

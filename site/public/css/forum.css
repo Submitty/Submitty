@@ -451,3 +451,11 @@ body {min-width: 925px;}
 .markdown-active{
     color: green;
 }
+
+.filter-active{
+    background: #fffa90;
+}
+
+.filter-inactive{
+    background: #fff;
+}
