@@ -58,8 +58,6 @@ int main(int argc, char *argv[]) {
     return 1;
   }
 
-  std::cout << generation_type << std::endl;
-
   // LOAD HW CONFIGURATION JSON
   nlohmann::json config_json = LoadAndProcessConfigJSON(rcsid);
 
