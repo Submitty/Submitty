@@ -491,7 +491,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                 str(queue_obj["version"]),
                                                 submission_string,
                                                 '--testcase', str(testcase_num),
-                                                '--generation_type','input'],
+                                                '--generation_type',str('input')],
                                                 stdout=logfile, 
                                                 cwd=random_input_testcase_folder)
             # remove the compilation program
@@ -617,7 +617,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
                                                 str(queue_obj["version"]),
                                                 submission_string,
                                                 '--testcase', str(testcase_num),
-                                                '--generation_type','output'],
+                                                '--generation_type',str('output')],
                                                 stdout=logfile, 
                                                 cwd=testcase_folder)
             # remove the compilation program

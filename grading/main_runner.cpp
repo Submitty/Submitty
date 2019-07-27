@@ -26,12 +26,10 @@ int main(int argc, char *argv[]) {
   int test_case_to_run = -1;
   std::string display_variable = "";
   std::string generation_type = "";
-  system("find . -type f -exec ls -sh {} +");
 
   TCLAP::CmdLine cmd("Submitty's main runner program.", ' ', "0.9");
-  system("find . -type f -exec ls -sh {} +");
   TCLAP::UnlabeledValueArg<std::string> homework_id_argument("homework_id", "The unique id for this gradeable", true, "", "string" , cmd);
-  TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", false, "", "string" , cmd);
+  TCLAP::UnlabeledValueArg<std::string> student_id_argument("student_id", "The unique id for this student", true, "", "string" , cmd);
   TCLAP::UnlabeledValueArg<int> submission_number_argument("submission_number", "The numeric value for this assignment attempt", true, -1, "integer" , cmd);
   TCLAP::UnlabeledValueArg<std::string> submission_time_argument("submission_time", "The time at which this submissionw as made", true, "", "string" , cmd);
   TCLAP::ValueArg<int> testcase_to_run_argument("t", "testcase", "The testcase to run. Pass -1 to run all testcases.", false, -1, "int", cmd);
@@ -55,7 +53,6 @@ int main(int argc, char *argv[]) {
   }
   catch (TCLAP::ArgException &e)  // catch any exceptions
   { 
-    std::cout << "Sorry parser is not working" << std::endl;
     std::cerr << "INCORRECT ARGUMENTS TO RUNNER" << std::endl;
     std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl; 
     return 1;
