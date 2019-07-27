@@ -35,7 +35,8 @@
 		{% if thread_exists %}
 
 
-			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
+			<form id="search_block" method="post" action="{{ search_url }}">
+				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 			<div class="row">
 				<div class="col-7">
 					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />

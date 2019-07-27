@@ -16,7 +16,7 @@
         "show_cancel_edit_form": true,
         "show_lock_date": true,
         "submit_label": "Update Post",
-        "categories" : categories
+        "categories" : categories,
     } %}
     <script type="text/javascript">
         $("#thread_form").submit(function() {
@@ -29,7 +29,7 @@
     </script>
 {% endblock %}
 {% block form %}
-    <form id="thread_form" method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'edit_post'}) }}">
+    <form id="thread_form" method="post" action="{{ edit_url }}">
         {{ parent() }}
     </form>
 {% endblock %}

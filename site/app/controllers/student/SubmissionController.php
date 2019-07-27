@@ -157,15 +157,15 @@ class SubmissionController extends AbstractController {
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
                 $show_hidden = false;
                 if ($graded_gradeable != NULL) {
-                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 }
-                $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
 
                 // If we get here, then we can safely construct the old model w/o checks
                 $this->core->getOutput()->addInternalCss('forum.css');
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -496,6 +496,7 @@ class SubmissionController extends AbstractController {
         $user_id = reset($user_ids);
 
         $path = $_POST['path'];
+
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
@@ -573,11 +574,20 @@ class SubmissionController extends AbstractController {
 
         $path = rawurldecode(htmlspecialchars_decode($path));
 
-        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
-            $gradeable->getId(), $path);
-
+        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $gradeable->getId(), $path);
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
         $uploaded_file_base_name = "upload.pdf";
+
+        //get any and all images associated with this PDF if they exist.
+        //images are order <original>_<split-number>_<page-number>, so grab everuthing with the same suffixes
+        preg_match("/\d*$/", pathinfo($path, PATHINFO_FILENAME), $matches) ;
+        $split_number = count($matches) >= 1 ? reset($matches) : "-1";
+        $image_files = glob(FileUtils::joinPaths(  dirname($uploaded_file)   , "*.*"));
+
+        $regex = "/.*_{$split_number}_\d*\.\w*$/";
+        $image_files = preg_grep($regex, $image_files);
+
+        $image_extension = count($image_files) > 0 ? pathinfo(reset($image_files), PATHINFO_EXTENSION) : "";
 
         if (isset($uploaded_file)) {
             // if we are merging in the previous submission (TODO check folder support)
@@ -593,9 +603,18 @@ class SubmissionController extends AbstractController {
                         $parts[0] .= "_version_".$old_version;
                         $file_base_name = implode(".", $parts);
                     }
+
+                    $image_name = pathinfo($file, PATHINFO_FILENAME);
+                    preg_match("/\d*$/", $image_name, $matches);
+                    $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
+
+                    if(!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0 ){
+                        $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                    }
+
                     $move_here = FileUtils::joinPaths($version_path, $file_base_name);
                     if (!@copy($file, $move_here)){
-                        return $this->uploadResult("Failed to merge previous version.", false);
+                        return $this->uploadResult("Failed to merge previous version on file {$file_base_name}", false);
                     }
                 }
             }
@@ -608,6 +627,18 @@ class SubmissionController extends AbstractController {
             }
             if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
                 return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
+            }
+            //do the same thing for images
+            $i = 1;
+            foreach ($image_files as $image) {
+                // copy over the uploaded image
+                if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension ))) {
+                    return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
+                }
+                if (!@unlink($image)) {
+                    return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
+                }
+                $i++;
             }
 
         }
@@ -1279,6 +1310,18 @@ class SubmissionController extends AbstractController {
 
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
+
+            // notify other team members that a submission has been made
+            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
+            $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
+            $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
+            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+            // remove submitting user from recipient list
+            if (($key = array_search($original_user_id, $team_members)) !== false) {
+                array_splice($team_members, $key, 1);
+            }
+            $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
+            $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
@@ -1432,9 +1475,8 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage($msg);
         }
         if($ta) {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
-                                                    'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
-                                                    'who_id'=>$who, 'gradeable_version' => $new_version)));
+            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
+                . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
         }
         else {
             $this->core->redirect($this->core->buildUrl(array('component' => 'student',
@@ -1517,9 +1559,8 @@ class SubmissionController extends AbstractController {
             $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
             $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];
         }
-        
-        $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
 
+        $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
 
 }
