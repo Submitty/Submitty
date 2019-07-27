@@ -553,14 +553,7 @@ class ForumThreadView extends AbstractView {
 	public function contentMarkdownToPlain($str){
         $str = preg_replace("/\[[^)]+\]/","",$str);
         $str = preg_replace('/\(([^)]+)\)/s', '$1', $str);
-
-        $matches = [];
-
-        preg_match_all('/```([a-z]+)(.*)```/s', $str, $matches);
-
-        if(count($matches[0])>0){
-            $str = $matches[2][0];
-        }
+        $str = str_replace("```","", $str);
         return $str;
     }
 
