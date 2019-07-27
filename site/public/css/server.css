@@ -1626,17 +1626,17 @@ end of styles used in the admin gradeable page
     color: var(--alert-danger-red);
 }
 
-.black-btn, .black-btn > i.fas {
+.black-btn, .black-btn > i {
     color: #000 !important;
     border-color: #000 !important;
 }
 
-.black-btn:hover, .black-btn > i.fas:hover {
+.black-btn:hover, .black-btn:hover > i, .black-btn > i:hover {
     color: #405E90 !important;
     border-color: #405E90 !important;
 }
 
-.black-btn:active, .black-btn > i.fas:active {
+.black-btn:active, .black-btn:active > i, .black-btn > i:active {
     color: var(--external-link-active) !important;
     border-color: var(--external-link-active) !important;
 }
