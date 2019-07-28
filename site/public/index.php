@@ -304,10 +304,6 @@ elseif (!$supported_by_new_router) {
             $control = new app\controllers\AdminController($core);
             $control->run();
             break;
-        case 'grading':
-            $control = new app\controllers\GradingController($core);
-            $control->run();
-            break;
         case 'student':
             $control = new app\controllers\StudentController($core);
             $control->run();

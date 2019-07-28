@@ -14,9 +14,6 @@ class AdminController extends AbstractController {
         //$this->core->getOutput()->addBreadcrumb('Admin');
         $controller = null;
         switch ($_REQUEST['page']) {
-            case 'grade_override':
-                $controller = new GradeOverrideController($this->core);
-                break;
             case 'admin_gradeable':
                 $controller = new AdminGradeableController($this->core);
                 break;
