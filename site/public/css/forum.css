@@ -15,11 +15,6 @@ body {min-width: 925px;}
     display: flex;
 }
 
-.pre_forum {
-    font-family: inherit;
-    max-width: 70vw;
-}
-
 .content h2 {
     margin-bottom: 10px;
 }
@@ -176,10 +171,6 @@ body {min-width: 925px;}
 .not-active-thread-announcement i.fas, .pinned-thread i.fas{
     color: #e0e0e0;
     -webkit-text-stroke: 1px black;
-}
-
-.pre-wrap{
-    white-space: pre-wrap;
 }
 
 .text-decoration-none{
@@ -460,7 +451,7 @@ body {min-width: 925px;}
     color: green;
 }
 
-#clear_filter_button{
+#clear_filter_button, #unread{
     display: none;
 }
 
@@ -473,3 +464,4 @@ body {min-width: 925px;}
     background: #fff;
     color: var(--actionable-blue);
 }
+

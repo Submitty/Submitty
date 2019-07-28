@@ -511,7 +511,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             thread_status_value.push($(this).attr("sel-id"));
         }
     });
-    
+
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");

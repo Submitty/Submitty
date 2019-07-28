@@ -62,7 +62,7 @@
 						{% endif %}
 					{% endfor %}
 
-					<a id="clear_filter_button" class="inline-block text-decoration-none" style="color: blue;" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+					<a id="clear_filter_button" class="inline-block text-decoration-none" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
 
 				</div>
 
@@ -131,13 +131,13 @@
 			{% endfor %}
 		</style>
 		<div id="forum_filter_bar">
-			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" style="display: none;" name="unread" data-ays-ignore="true"/>
-			<div id="thread_category" aria-label="Select thread category" style="display: inline-block;" data-ays-ignore="true">
+			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
+			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
 				{% for category in categories %}
 					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" cat-id="{{ category.category_id }}" btn-selected="false">{{ category.category_desc }}</button>
 				{% endfor %}
 			</div>
-			<div id="thread_status_select" aria-label="Select thread status" style="display: inline-block;" data-ays-ignore="true">
+			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
 				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
 				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
 				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
@@ -183,6 +183,7 @@
 			$('#forum_filter_bar').css('display', 'inline-block');
 			$('#clear_filter_button').css('display', 'inline-block');
 		}
+
 		$("#tree").prop("checked", true);
 		{% if display_option in ['tree', 'time', 'alpha'] %}
 		$("#{{ display_option }}").attr("checked", true);
