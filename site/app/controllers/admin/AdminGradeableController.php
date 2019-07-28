@@ -682,7 +682,7 @@ class AdminGradeableController extends AbstractController {
             }
             $this->redirectToEdit($gradeable_id);
         } catch (\Exception $e) {
-            $this->core->addErrorMessage($e);
+            $this->core->addErrorMessage($e->getMessage());
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
     }
