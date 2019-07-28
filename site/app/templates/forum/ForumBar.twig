@@ -29,18 +29,17 @@
 
 	<div class="row">
 
-	<div class="col-8">
-
+	<div class="col-9">
 
 		{% if thread_exists %}
 
 			<form id="search_block" method="post" action="{{ search_url }}">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 			<div class="row">
-				<div class="col-7">
+				<div class="col-6">
 					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				</div>
-				<div class="col-4">
+				<div class="col-5">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 		  				Search
 					</button>
@@ -74,7 +73,7 @@
 
 		</div>
 		
-	<div class="col-4">
+	<div class="col-3">
 
 		{% for button in forum_bar_buttons_right %}
 			{% if user_group <= button.required_rank %}
