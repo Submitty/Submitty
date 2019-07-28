@@ -4,7 +4,7 @@ namespace app\models;
 
 use app\libraries\Core;
 
-class SimpleGradeOverridenUser extends AbstractModel {
+class SimpleGradeOverriddenUser extends AbstractModel {
 
     /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;

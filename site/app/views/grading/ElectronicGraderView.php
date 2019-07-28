@@ -195,6 +195,7 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
+        $details_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
@@ -235,6 +236,9 @@ class ElectronicGraderView extends AbstractView {
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests,
             "bulk_stats_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats'])
+            "details_url" => $details_url,
+            "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
+            "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
         ]);
     }
 
@@ -357,7 +361,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -389,7 +393,7 @@ HTML;
                     $columns[] = ["width" => "2%",  "title" => "",                 "function" => "index"];
                     $columns[] = ["width" => "8%",  "title" => "Section",          "function" => "section"];
                     $columns[] = ["width" => "5%",  "title" => "Edit Teams",       "function" => "team_edit"];
-                    $columns[] = ["width" => "10%", "title" => "Team Id",          "function" => "team_id"];
+                    $columns[] = ["width" => "10%", "title" => "Team Id",          "function" => "team_id", "sort_type" => "id"];
                     $columns[] = ["width" => "32%", "title" => "Team Members",     "function" => "team_members"];
                 } else {
                     $columns[] = ["width" => "3%",  "title" => "",                 "function" => "index"];
@@ -399,9 +403,9 @@ HTML;
             } else {
                 $columns[]     = ["width" => "2%",  "title" => "",                 "function" => "index"];
                 $columns[]     = ["width" => "8%", "title" => "Section",          "function" => "section"];
-                $columns[]     = ["width" => "13%", "title" => "User ID",          "function" => "user_id"];
-                $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first"];
-                $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last"];
+                $columns[]     = ["width" => "13%", "title" => "User ID",          "function" => "user_id", "sort_type" => "id"];
+                $columns[]     = ["width" => "15%", "title" => "First Name",       "function" => "user_first", "sort_type" => "first"];
+                $columns[]     = ["width" => "15%", "title" => "Last Name",        "function" => "user_last", "sort_type" => "last"];
             }
             if ($gradeable->getAutogradingConfig()->getTotalNonExtraCredit() !== 0) {
                 $columns[]     = ["width" => "9%",  "title" => "Autograding",      "function" => "autograding"];
@@ -611,6 +615,7 @@ HTML;
                 }
         }
 
+        $details_base_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -624,7 +629,17 @@ HTML;
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $columns,
-            "peer" => $peer
+            "export_teams_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
+            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_team_rotating_sections']),
+            "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "peer" => $peer,
+            "details_base_url" => $details_base_url,
+            "view_all_toggle_url" => $details_base_url . '?' .
+                http_build_query(['view' => $view_all ? null : 'all', 'sort' => $sort, 'direction' => $sort === 'random' ? null : $direction]),
+            "order_toggle_url" => $details_base_url . '?' .
+                http_build_query(['view' => $view_all ? 'all' : null, 'sort' => $sort === 'random' ? null : 'random']),
+            "sort" => $sort,
+            "direction" => $direction
         ]);
     }
 
@@ -638,28 +653,31 @@ HTML;
             "view" => isset($_REQUEST["view"]) ? $_REQUEST["view"] : null,
             "all_reg_sections" => $all_reg_sections,
             "all_rot_sections" => $all_rot_sections,
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "team_submit_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'new'])
         ]);
     }
 
     public function importTeamForm(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
             "gradeable_id" => $gradeable->getId(),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "team_import_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'import'])
         ]);
     }
 
 
     public function randomizeButtonWarning(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
-            "gradeable_id" => $gradeable->getId()
+            "gradeable_id" => $gradeable->getId(),
+            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_team_rotating_sections'])
         ]);
     }
 
 
     //The student not in section variable indicates that an full access grader is viewing a student that is not in their
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
-    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status) {
+    public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $sort, $direction) {
         $peer = false;
         if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
@@ -669,7 +687,7 @@ HTML;
         $display_version_instance = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($display_version);
 
         $return = "";
-        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer);
+        $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderNavigationBar', $graded_gradeable, $progress, $prev_id, $next_id, $not_in_my_section, $peer, $sort, $direction);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderAutogradingPanel', $display_version_instance, $show_hidden_cases);
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderSubmissionPanel', $graded_gradeable, $display_version);
         //If TA grading isn't enabled, the rubric won't actually show up, but the template should be rendered anyway to prevent errors, as the code references the rubric panel
@@ -727,16 +745,24 @@ HTML;
      * @param string $next_id
      * @param bool $not_in_my_section
      * @param bool $peer
+     * @param string $sort
+     * @param string $direction
      * @return string
      */
-    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer) {
+    public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer, $sort, $direction) {
+        $home_url = $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
+
+        //Go home if there's nobody left
+        $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $prev_id ]);
+        $next_student_url = $next_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $next_id ]);
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
             "progress" => $progress,
             "peer" => $peer,
-            "prev_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $prev_id]),
-            "next_student_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'who_id' => $next_id]),
-            "home_url" => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'details', 'gradeable_id' => $graded_gradeable->getGradeableId(), 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null]),
+            "prev_student_url" => $prev_student_url,
+            "next_student_url" => $next_student_url,
+            "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),
             'discussion_based' => $graded_gradeable->getGradeable()->isDiscussionBased()
@@ -779,7 +805,7 @@ HTML;
             }
 
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $threadId))}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
+                    <a href="{$this->core->buildNewCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
 
@@ -865,7 +891,9 @@ HTML;
      */
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
-        $onChange = "versionChange('{$this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable->getId(), 'who_id'=>$graded_gradeable->getSubmitter()->getId(), 'gradeable_version' => ""))}', this)";
+        $version_change_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
+            . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getId()]) . '&gradeable_version=';
+        $onChange = "versionChange('{$version_change_url}', this)";
 
         $tables = [];
 
@@ -935,7 +963,7 @@ HTML;
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
-        $has_overriden_grades = $graded_gradeable->hasOverriddenGrades();
+        $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -951,7 +979,7 @@ HTML;
             "can_verify" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
-            "has_overriden_grades" => $has_overriden_grades,
+            "has_overridden_grades" => $has_overridden_grades,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
             "show_silent_edit" => $show_silent_edit,

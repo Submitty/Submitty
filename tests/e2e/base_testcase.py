@@ -67,7 +67,7 @@ class BaseTestCase(unittest.TestCase):
 
     def setUp(self):
         self.driver = webdriver.Chrome(options=self.options)
-        self.driver.set_window_size(1024, 768)
+        self.driver.set_window_size(1600, 900)
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
             self.log_in()
@@ -139,11 +139,11 @@ class BaseTestCase(unittest.TestCase):
     # see Navigation.twig for html attributes to use as arguments
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
     def click_nav_grade_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
-        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[contains(@class, 'btn-nav-grade')]".format(gradeable_category, gradeable_id, button_name)).click()
+        self.driver.find_element_by_xpath("//div[@id='{}']/div[@class='course-button-wrapper']/div[@class='course-button']/a[contains(@class, 'btn-nav-grade')]".format(gradeable_id)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     def click_nav_submit_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
-        self.driver.find_element_by_xpath("//tbody[@id='{}_tbody']/tr[@id='{}']/td/a[contains(@class, 'btn-nav-submit')]".format(gradeable_category, gradeable_id, button_name)).click()
+        self.driver.find_element_by_xpath("//div[@id='{}']/div[@class='course-button-wrapper']/div[@class='course-button']/a[contains(@class, 'btn-nav-submit')]".format(gradeable_id)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     # clicks the navigation header text to 'go back' pages

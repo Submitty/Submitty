@@ -125,17 +125,17 @@
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             <a class="btn btn-primary"
-                    {% if core.getUser().accessAdmin() %}
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : 'all' }) }}">
+                {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
+                    href="{{ details_view_all_url }}">
                 {% else %}
-                    href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
+                    href="{{ details_url }}">
                 {% endif %}
 
                 Index of Grading Details for All Students
             </a>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable_id}) }}">
+                   href="{{ grade_url }}">
                     Grade Next Student
                 </a>
                 <a class="btn btn-primary"
