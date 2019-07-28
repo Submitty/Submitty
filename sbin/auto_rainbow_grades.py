@@ -159,7 +159,7 @@ response_json = json.loads(response.stdout)
 if response_json['status'] != 'success':
 
     print('Failed to obtain an auth token.', flush=True)
-    print('Ask your sysadmin to confirm that '+creds_file+
+    print('Ask your sysadmin to confirm that ' + creds_file +
           ' contains valid credentials', flush=True)
     print('Attempting to continue with previously generated grade summaries',
           flush=True)
