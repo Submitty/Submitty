@@ -62,6 +62,8 @@
 						{% endif %}
 					{% endfor %}
 
+					<a id="clear_filter_button" class="inline-block text-decoration-none" style="color: blue;" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+
 				</div>
 
 			</div>
@@ -114,23 +116,38 @@
 	    </div>
 	{% endif %}
 	</div>
-	<div id="forum_filter_bar">
-		<button class="btn btn-default btn-sm inline-block" style="background-color: #ff5555; color: white;" label="Clear Filters" onclick="clearForumFilter()">Clear Filters</button>
-		<label  id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" style="display: none;" name="unread" data-ays-ignore="true"/>
-		<div id="thread_category" aria-label="Select thread category" style="display: inline-block;" data-ays-ignore="true">
+	{% if thread_exists %}
+		<style>
 			{% for category in categories %}
-				<button class="btn btn-sm filter-inactive" type="button" cat-id="{{ category.category_id }}" style="color: {{ category.color }}; border: 1px solid {{ category.color }}"  btn-selected="false">{{ category.category_desc }}</button>
+				{{ "#categoryid_" ~ category.category_id }}.filter-inactive{
+					color: {{ category.color }};
+					border: 1px solid {{ category.color }}
+				}
+
+				{{ "#categoryid_" ~ category.category_id }}.filter-active{
+					color: white;
+					background-color: {{ category.color }}
+				}
 			{% endfor %}
+		</style>
+		<div id="forum_filter_bar">
+			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" style="display: none;" name="unread" data-ays-ignore="true"/>
+			<div id="thread_category" aria-label="Select thread category" style="display: inline-block;" data-ays-ignore="true">
+				{% for category in categories %}
+					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" cat-id="{{ category.category_id }}" btn-selected="false">{{ category.category_desc }}</button>
+				{% endfor %}
+			</div>
+			<div id="thread_status_select" aria-label="Select thread status" style="display: inline-block;" data-ays-ignore="true">
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
+			</div>
 		</div>
-		<div id="thread_status_select" aria-label="Select thread status" style="display: inline-block;" data-ays-ignore="true">
-			<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
-			<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
-			<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
-		</div>
-	</div>
+	{% endif %}
 </div>
 </div>
 <hr/>
+{% if thread_exists %}
 <script type="text/javascript">
 	function updateThreads(loadFirstPage, success_callback) {
 		{% if thread_exists %}
@@ -159,12 +176,12 @@
 		var unread_marked = false;
 
 		$('#unread').prop("checked", {{cookie_selected_unread_value}});
-		if($('#unread').prop("checked")){
-			unread_marked = true;
-			$('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
-		}
+
+		unread_marked = checkUnread();
+
 		if(filters_applied.length > 0 || unread_marked ){
 			$('#forum_filter_bar').css('display', 'inline-block');
+			$('#clear_filter_button').css('display', 'inline-block');
 		}
 		$("#tree").prop("checked", true);
 		{% if display_option in ['tree', 'time', 'alpha'] %}
@@ -175,3 +192,4 @@
 		window.csrfToken = "{{ csrf_token }}" ;
 	});
 </script>
+{% endif %}

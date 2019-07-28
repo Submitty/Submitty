@@ -460,10 +460,16 @@ body {min-width: 925px;}
     color: green;
 }
 
+#clear_filter_button{
+    display: none;
+}
+
 .filter-active{
-    background: #fffa90;
+    background: var(--actionable-blue);
+    color: white;
 }
 
 .filter-inactive{
     background: #fff;
+    color: var(--actionable-blue);
 }
