@@ -1,65 +1,65 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
 <div class="content">
-    <div style="float: right; margin-bottom: 20px;">
-         <a href="{{ mark_all_as_seen_url }}" class="btn btn-primary">Mark all as seen</a>
-        {% if show_all %}
-            <a href="{{ notifications_url }}" class="btn btn-primary">Show unread only</a>
+    <header>
+        <h1>Notifications</h1>
+        <div class="btn-wrapper">
+            <a href="{{ mark_all_as_seen_url }}" class="btn btn-primary">Mark all as seen</a>
+            {% if show_all %}
+                <a href="{{ notifications_url }}" class="btn btn-primary">Show unread only</a>
+            {% else %}
+                <a href="{{ notifications_url }}?show_all=true" class="btn btn-primary">Show All</a>
+            {% endif %}
+            <a href="{{ notification_settings_url }}" class="btn btn-primary">Settings</a>
+        </div>
+    </header>
+    <div id="notifications">
+        <h2 id="notifications-caption">
+            {% if show_all %}
+                All notifications
+            {% else %}
+                New notifications
+            {% endif %}
+        </h2>
+        {% if notifications is empty %}
+            <h3>No notifications.</h3>
         {% else %}
-            <a href="{{ notifications_url }}?show_all=true" class="btn btn-primary">Show All</a>
-        {% endif %}
-        <a href="{{ notification_settings_url }}" class="btn btn-primary">Settings</a>
+            <div id="notification-header" class="notification">
+                <div>&NegativeMediumSpace;</div> {# Notification type has empty header #}
+                <div>Notification</div>
+                <div>Time</div>
+                <div class="notification-seen">Mark As Seen</div>
+            </div>
+            {% for notification in notifications %}
+                {% set hasLink = not notification.hasEmptyMetadata() %}
+                <div class="notification">
+                    {% if notification.getComponent() == "forum" %}
+                        <i class="fas fa-comments notification-type" title="Forum"></i>
+                    {% else %}
+                        <div>&NegativeMediumSpace;</div>
+                    {% endif %}
+                    {% if hasLink %}
+                        <a class="notification-link" href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() }}">
+                    {% endif %}
+                    <div class="notification-contents">
+                        {{ notification.getNotifyContent() }}
+                        <div class="mobile-notification-time">
+                            {{ notification.getNotifyTime() }}
+                        </div>
+                    </div>
+                    {% if hasLink %}
+                        </a>
+                    {% endif %}
+                    <div class="notification-time">
+                        {{ notification.getNotifyTime() }}
+                    </div>
+                    {% if not notification.isSeen() %}
+                        <a class="notification-seen black-btn" href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen">
+                            <i class="far fa-envelope-open" aria-hidden="true"></i>
+                        </a>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endif %}     
     </div>
-    <h1>Notifications</h1>
-    {# This is a layout table #}
-    <table class="table table-bordered persist-area">
-                <tr class="info persist-header">
-                    <td colspan="8" style="text-align: center">
-                        {% if show_all %}
-                            All notifications
-                        {% else %}
-                            New notifications
-                        {% endif %}
-                    </td>
-                </tr>
-                <tbody style="text-align: left;">
-                    {% for notification in notifications %}
-                        {% set hasLink = not notification.hasEmptyMetadata() %}
-                        <tr>
-                            <td colspan="1">
-                                {% if notification.getComponent() == "forum" %}
-                                    <i class="fas fa-comments" title="Forum"></i>
-                                {% endif %}
-                            </td>
-                            <td colspan="4">
-                                {% if hasLink %}
-                                    <a href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() }}">
-                                {% endif %}
-                                    <div style="height: 100%; width: 100%;">
-                                        {{ notification.getNotifyContent() }}
-                                    </div>
-                                {% if hasLink %}
-                                    </a>
-                                {% endif %}
-                            </td>
-                            <td colspan="2">
-                                {{ notification.getNotifyTime() }}
-                            </td>
-                            <td colspan="1">
-                                {% if not notification.isSeen() %}
-                                    <a href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen">
-                                        <i class="fas fa-check" aria-hidden="true"></i>
-                                    </a>
-                                {% endif %}
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-
-            {% if notifications is empty %}
-            <tr>
-                <td colspan="8">No notifications.</td>
-            </tr>
-            {% endif %}        
-    </table>
 </div>

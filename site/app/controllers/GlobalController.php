@@ -231,7 +231,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-calendar-plus"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'grade_override', 'action' => 'view_overriden_grades')),
+                    "href" => $this->core->buildNewCourseUrl(['grade_override']),
                     "title" => "Grade Override",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grade-override",
@@ -297,7 +297,7 @@ class GlobalController extends AbstractController {
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
-                "icon" => "fa-sign-out-alt"
+                "icon" => "fa-power-off"
             ]);
         }
 

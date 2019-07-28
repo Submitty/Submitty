@@ -93,12 +93,7 @@ function ajaxGetGradeableRubric(gradeable_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_gradeable_rubric',
-                'gradeable_id': gradeable_id
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'rubric']),
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable rubric: ' + response.message);
@@ -134,14 +129,9 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_component'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'save']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
                 'ta_comment': ta_comment,
@@ -180,13 +170,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_component_rubric',
-                'gradeable_id': gradeable_id,
-                'component_id': component_id,
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components']) + `?component_id=${component_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component rubric: ' + response.message);
@@ -214,13 +198,7 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_graded_gradeable',
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable grade: ' + response.message);
@@ -249,14 +227,7 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_graded_component',
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id,
-                'component_id': component_id
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']) + `?anon_id=${anon_id}&component_id=${component_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component grade: ' + response.message);
@@ -294,14 +265,9 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_graded_component'
-            }),
+            url:  buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
                 'graded_version': graded_version,
@@ -335,17 +301,10 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
 function ajaxGetOverallComment(gradeable_id, anon_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
-            type: "POST",
+            type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_overall_comment'
-            }),
-            data: {
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id
-            },
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']) + `?anon_id=${anon_id}`,
+            data: null,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable comment: ' + response.message);
@@ -374,11 +333,7 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_overall_comment'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']),
             data: {
                 'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
@@ -415,14 +370,9 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points, publish) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'add_new_mark'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'add']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
                 'points': points,
@@ -456,14 +406,9 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'delete_mark'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'delete']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id
             },
@@ -498,14 +443,9 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_mark'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id,
                 'points': points,
@@ -540,15 +480,11 @@ function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_mark_stats'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'stats']),
             data: {
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
-                'mark_id': mark_id
+                'mark_id': mark_id,
+                'csrf_token': csrfToken
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -578,14 +514,9 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_mark_order'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'order': JSON.stringify(order)
             },
@@ -616,14 +547,9 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_component_pages'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'save_pages']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'pages': JSON.stringify(pages)
             },
             success: function (response) {
@@ -653,14 +579,9 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_component_order'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'order']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'order': JSON.stringify(order)
             },
             success: function (response) {
@@ -689,14 +610,9 @@ function ajaxAddComponent(gradeable_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'add_component'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -725,14 +641,9 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'delete_component'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'delete']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id
             },
             success: function (response) {
@@ -763,14 +674,9 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'verify_component'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'verify']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
             },
@@ -801,15 +707,11 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'verify_all_components'
-            }),
+            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'verify']) + '?verify_all=true',
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id
+                'component_id': component_id,
+                'anon_id': anon_id,
             },
             success: function (response) {
                 if (response.status !== "success") {

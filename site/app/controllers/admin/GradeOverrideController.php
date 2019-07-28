@@ -3,61 +3,57 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\libraries\DateUtils;
-use app\libraries\FileUtils;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class GradeOverrideController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
 class GradeOverrideController extends AbstractController {
+    /**
+     * @deprecated
+     */
     public function run() {
-        switch ($_REQUEST['action']){
-            case 'view_overriden_grades':
-                $this->viewOverridenGrades();
-                $this->core->getOutput()->addBreadcrumb('Grades Override');
-                break;
-            case 'update':
-                $this->update(false);
-                break;
-            case 'delete_grades':
-                $this->update(true);
-                break;
-            case 'get_overriden_grades':
-                $this->getOverridenGrades($_REQUEST['g_id']);
-                break;
-            default:
-                $this->core->getOutput()->showError("Invalid page request for controller");
-                break;
-        }
+        return null;
     }
 
-    public function viewOverridenGrades() {
+    /**
+     * @Route("/{_semester}/{_course}/grade_override")
+     */
+    public function viewOverriddenGrades() {
         $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $this->core->getOutput()->renderOutput(array('admin','GradeOverride'), 'displayOverridenGrades', $gradeables);
+        $this->core->getOutput()->renderOutput(array('admin','GradeOverride'), 'displayOverriddenGrades', $gradeables);
     }
 
-    public function getOverridenGrades($g_id) {
-        $users = $this->core->getQueries()->getUsersWithOverridenGrades($g_id);
+    /**
+     * @Route("/{_semester}/{_course}/grade_override/{gradeable_id}")
+     */
+    public function getOverriddenGrades($gradeable_id) {
+        $users = $this->core->getQueries()->getUsersWithOverriddenGrades($gradeable_id);
         $user_table = array();
         foreach($users as $user){
             $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'marks' => $user->getMarks(), 'comment' => $user->getComment());
         }
         return $this->core->getOutput()->renderJsonSuccess(array(
-            'gradeable_id' => $g_id,
+            'gradeable_id' => $gradeable_id,
             'users' => $user_table,
         )); 
     }
 
-    public function update($delete) {
-        if($delete){
-            $this->core->getQueries()->deleteOverridenGrades($_POST['user_id'], $_POST['g_id']);
-            $this->getOverridenGrades($_POST['g_id']);
-        } else {
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $error = "Invalid CSRF token. Try again.";
-            return $this->core->getOutput()->renderJsonFail($error);
-        }
-        if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" )) {
-            $error = "Please choose a gradeable_id";
-            return $this->core->getOutput()->renderJsonFail($error);
-        }
+    /**
+     * @Route("/{_semester}/{_course}/grade_override/{gradeable_id}/delete", methods={"POST"})
+     */
+    public function deleteOverriddenGrades($gradeable_id) {
+        $this->core->getQueries()->deleteOverriddenGrades($_POST['user_id'], $gradeable_id);
+        return $this->getOverriddenGrades($gradeable_id);
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/grade_override/{gradeable_id}/update", methods={"POST"})
+     */
+    public function updateOverriddenGrades($gradeable_id) {
         $user = $this->core->getQueries()->getSubmittyUser($_POST['user_id']);
         $isUserNotInCourse = empty($this->core->getQueries()->getUsersById(array($_POST['user_id'])));
         if (!isset($_POST['user_id']) || $_POST['user_id'] == "" || $isUserNotInCourse || $user->getId() !== $_POST['user_id']) {
@@ -70,9 +66,7 @@ class GradeOverrideController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail($error);
         }
         
-        $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $_POST['g_id'], $_POST['marks'], $_POST['comment']);
-        $this->getOverridenGrades($_POST['g_id']);
-        }
-    
+        $this->core->getQueries()->updateGradeOverride($_POST['user_id'], $gradeable_id, $_POST['marks'], $_POST['comment']);
+        $this->getOverriddenGrades($gradeable_id);
     }
 }

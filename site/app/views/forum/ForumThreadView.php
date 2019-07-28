@@ -5,7 +5,6 @@ use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
-
 class ForumThreadView extends AbstractView {
 
 	public function forumAccess(){
@@ -328,6 +327,11 @@ class ForumThreadView extends AbstractView {
 
         $return = "";
 
+        $markdown_enabled = 0;
+        if(isset($_COOKIE['markdown_enabled'])){
+            $markdown_enabled = $_COOKIE['markdown_enabled'];
+        }
+
         if(!$ajax) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
                 "categories" => $categories,
@@ -343,6 +347,7 @@ class ForumThreadView extends AbstractView {
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
                 "display_option" => $display_option,
+                "render_markdown" => $markdown_enabled,
                 "csrf_token" => $this->core->getCsrfToken(),
                 "edit_url" => $this->core->buildNewCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 "search_url" => $this->core->buildNewCourseUrl(['forum', 'search']),
@@ -545,6 +550,13 @@ class ForumThreadView extends AbstractView {
 		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
 	}
 
+	public function contentMarkdownToPlain($str){
+        $str = preg_replace("/\[[^)]+\]/","",$str);
+        $str = preg_replace('/\(([^)]+)\)/s', '$1', $str);
+        $str = str_replace("```","", $str);
+        return $str;
+    }
+
     public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render)
     {
         $used_active = false; //used for the first one if there is not thread_id set
@@ -594,13 +606,16 @@ class ForumThreadView extends AbstractView {
             //fix legacy code
             $titleDisplay = $thread['title'];
 
-
             //replace tags from displaying in sidebar
             $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
             $temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
 
             if (!empty($temp_first_post_content)) {
                 $first_post_content = $temp_first_post_content;
+            }
+
+            if($first_post['render_markdown']==1) {
+                $first_post_content = $this->contentMarkdownToPlain($first_post_content);
             }
 
             $sizeOfContent = strlen($first_post_content);
@@ -785,6 +800,7 @@ class ForumThreadView extends AbstractView {
         $offset = min(($reply_level - 1) * 30, 180);
 
         $post_content = $post['content'];
+        $markdown = $post["render_markdown"];
 
         $isThreadLocked = $this->core->getQueries()->isThreadLocked($thread_id);
         $userAccessFullGrading = $this->core->getUser()->accessFullGrading();
@@ -902,6 +918,7 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
             "parent_id" => $post_id,
+            "render_markdown" => $markdown
         ];
 
 		return $return;
