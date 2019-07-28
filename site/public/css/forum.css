@@ -455,7 +455,7 @@ body {min-width: 925px;}
     display: none;
 }
 
-.filter-active{
+.filter-active, .filter-active:hover{
     background: var(--actionable-blue);
     color: white;
 }
