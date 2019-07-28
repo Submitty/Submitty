@@ -1018,7 +1018,7 @@ function addMarkdownCode(type, divTitle){
     if(type == 1) {
         insert = "[display text](url)";
     } else if(type == 0){
-        insert = "```language" +
+        insert = "```" +
             "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));

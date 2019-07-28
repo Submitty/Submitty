@@ -1,5 +1,7 @@
 {% import _self as self %}
 
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 {% if display_custom_message %}
     <div class="content">
         {# This is a layout table #}
@@ -20,74 +22,71 @@
     </div>
 {% endif %}
 
-
 <div class="content">
     <h1>Gradeables</h1>
-    {# This is a layout table #}
-    <table class="gradeable_list" style="width:100%;">
-        {% if sections|length > 0 %}
-            {% for list_section, info in sections %}
-                <tr class="bar">
-                    <td colspan="10">{# spacing #}</td>
-                </tr>
-                <tr class="colspan nav-title-row" id="{{ info.section_id }}">
-                    <td colspan="4">
-                        {{ info.title }}
-                        {% if info.subtitle != "" %}
-                            &nbsp;&nbsp; <em>{{ info.subtitle }}</em>
+    {% if sections|length > 0 %}
+        {% for list_section, info in sections %}
+            <div id="{{ info.section_id }}" class="course-section-heading">
+                {{ info.title }}
+                {% if info.subtitle != "" %}
+                    &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                {% endif %}
+            </div>
+
+            <div id="{{ info.section_id }}-section" class="course-section">
+                {% for g_info in info.gradeables %}
+                <div id="{{ g_info.id }}" class="gradeable-row">
+                    <div class="course-main">
+                        {% if g_info.edit_buttons or g_info.delete_buttons %}
+                            {% for button in g_info.edit_buttons %}
+                                {{ self.renderButton(button, g_info.has_build_error) }}
+                            {% endfor %}
+                            {% for button in g_info.delete_buttons %}
+                                {{ self.renderButton(button, g_info.has_build_error) }}
+                            {% endfor %}
                         {% endif %}
-                    </td>
-                </tr>
-                <tr class="colspan">
-                    <td colspan="10" class="hr">{# hr #}</td>
-                </tr>
-                <tbody id="{{ info.section_id }}_tbody">
-                    {% for g_info in info.gradeables %}
-                    <tr class="gradeable_row" id="{{ g_info.id }}">
-                        {% for button in g_info.edit_buttons %}
-                            <td style="padding: 0 5px 0 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
-                        {% endfor %}
-                        {% for button in g_info.delete_buttons %}
-                            <td style="padding: 0 20px 0 5px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Delete' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
-                        {% endfor %}
-                        <td>
+                        <div class="course-title">
                             {{ g_info.name }}
                             {% if g_info.url|trim != "" %}
                                 <a class="external" href="{{ g_info.url }}" target="_blank" aria-label="Go to instructions for {{ g_info.name }}">
-                                    <i style="margin-left: 10px;" class="fas fa-external-link-alt"></i>
+                                    <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}
-                        </td>
+                        </div>
+                    </div>
+                    <div class="course-button-wrapper">
                         {% for button in g_info.buttons %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
+                            <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
                         {% endfor %}
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            {% endfor %}
-        {% else %}
-            <div class="container">
-                <p>There are currently no assignments posted.  Please check back later.</p>
+                    </div>
+                </div>
+                {% endfor %}
             </div>
-        {% endif %}
-    </table>
+        {% endfor %}
+    {% else %}
+        <div class="container">
+            <p>There are currently no assignments posted.  Please check back later.</p>
+        </div>
+    {% endif %}
 </div>
 
 {% macro renderButton(button) %}
-    {% if button != null %}
-        <a class="{{ button.getClass() }}"
+    {% if button is null %}
+        <div class="button-placeholder"></div>
+    {% else %}
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}"
             {% if button.getTitle() != null %}
                 name="{{ button.getTitle()|lower }}_button"
             {% endif %}
             {% if button.isDisabled() %}
                 disabled
             {% else %}
-				{# assigns the href unless button has onclick affect #}
-				{% if not button.hasOnclick() %}
-					href="{{ button.getHref() }}"
-				{% else %}
-					onclick="{{ button.getOnclick() }}"
-				{% endif %}
+                {# assigns the href unless button has onclick affect #}
+                {% if not button.hasOnclick() %}
+                    href="{{ button.getHref() }}"
+                {% else %}
+                    onclick="{{ button.getOnclick() }}"
+                {% endif %}
             {% endif %}
             {% if button.isTitleOnHover %}
                 title="{{ button.getTitle() }}"
@@ -117,3 +116,60 @@
         {% endif %}
     {% endif %}
 {% endmacro %}
+
+{# Requires twig variables, so we need this here #}
+<style>
+    /* sidebar 60 + content padding 60 + content margin right 30 + button 220 = 350 */
+    /* button 220 + margin 40 = 260 */
+    @media (min-width: {{ 350 + max_buttons * 260 }}px) {
+        .course-section-heading {
+            border-bottom: 1px solid var(--standard-light-gray);
+            margin: 0;
+            padding: 0;
+        }
+
+        .gradeable-row {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .course-main, .course-button-wrapper {
+            flex: 1 auto;
+        }
+        
+        .course-main {
+            padding: 0;
+        }
+
+        .course-button-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+
+        .course-button {
+            margin: 0 20px;
+        }
+
+        .btn-nav {
+            min-height: auto;
+        }
+
+        .btn-nav-open {
+            display: inline-block;
+            width: 100px;
+            min-width: 0 !important;
+        }
+        
+        .course-main .button-placeholder {
+            display: block;
+            min-width: 22.5px;
+            margin: 0 5px;
+        }
+        
+        .course-button-wrapper .button-placeholder {
+            display: block;
+            min-width: 100px;
+        }
+    }
+</style>
