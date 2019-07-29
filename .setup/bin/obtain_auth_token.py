@@ -6,9 +6,12 @@ import os
 import json
 import subprocess
 
+# Get path to current file directory
+current_dir = os.path.dirname(__file__)
+
 # Collect other path information from configuration file
-config_file = os.path.join('.', '..', '..', 'config', 'submitty.json')
-admin_file = os.path.join('.', '..', '..', 'config', 'submitty_admin.json')
+config_file = os.path.join(current_dir, '..', '..', 'config', 'submitty.json')
+admin_file = os.path.join(current_dir, '..', '..', 'config', 'submitty_admin.json')
 
 if not os.path.exists(config_file):
     raise Exception('Unable to locate submitty.json configuration file')
