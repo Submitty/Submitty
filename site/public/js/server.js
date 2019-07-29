@@ -1071,7 +1071,7 @@ function checkRefreshPage(url) {
 }
 
 function check_server(url) {
-    $.post(url,
+    $.get(url,
         function(data) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
