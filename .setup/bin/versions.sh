@@ -14,7 +14,6 @@ export Pdf_Annotate_Js_Version=v.18.10.00
 # JAVA
 export JUNIT_VERSION=4.12
 export HAMCREST_VERSION=1.3
-export EMMA_VERSION=2.0.5312
 export JACOCO_VERSION=0.8.0
 
 # DR. MEMORY
