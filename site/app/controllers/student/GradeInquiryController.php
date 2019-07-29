@@ -208,11 +208,18 @@ class GradeInquiryController extends AbstractController {
      * @param int|null $gc_id
      */
     private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id) {
-        //TODO: send notification to grader per component
         if ($graded_gradeable->hasTaGradingInfo()) {
             $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
+            $submitter = $graded_gradeable->getSubmitter();
+            $user_id = $this->core->getUser()->getId();
+            $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
+
             $graders = [];
-            if ($graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed()) {
+            if (!is_null($gc_id)) {
+                $component = $graded_gradeable->getGradeable()->getComponent($gc_id);
+                $component_title = $component->getTitle();
+                $component_string = " and for component, $component_title";
+
                 $graded_component_containers = $graded_gradeable->getTaGradedGradeable()->getGradedComponentContainers();
                 foreach ($graded_component_containers as $graded_component_container) {
                     if ($graded_component_container->getComponent()->getId() == $gc_id) {
@@ -222,15 +229,6 @@ class GradeInquiryController extends AbstractController {
             }
             else {
                 $graders = $ta_graded_gradeable->getGraders();
-            }
-            $submitter = $graded_gradeable->getSubmitter();
-            $user_id = $this->core->getUser()->getId();
-            $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
-
-            if (!is_null($gc_id)) {
-                $component = $graded_gradeable->getGradeable()->getComponent($gc_id);
-                $component_title = $component->getTitle();
-                $component_string = " and for component, $component_title";
             }
 
             if ($type == 'new') {

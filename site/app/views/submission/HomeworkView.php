@@ -771,10 +771,8 @@ class HomeworkView extends AbstractView {
 
         // initialize grade inquiries array with all posts grade inquiry to aggregate all posts
         $grade_inquiries_twig_array = [];
-        if (!is_null($grade_inquiries)) {
-            if ($grade_inquiry_per_component_allowed) {
-                $grade_inquiries_twig_array[0] = ['posts' => []];
-            }
+        if (!empty($grade_inquiries)) {
+            $grade_inquiries_twig_array[0] = ['posts' => []];
             $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
@@ -817,20 +815,13 @@ class HomeworkView extends AbstractView {
                     $grade_inquiries_twig_array[0]['gc_id'] = $gc_id;
                     $grade_inquiries_twig_array[0]['status'] = $grade_inquiry->getStatus();
                 }
-                // add posts to all component
-                if ($grade_inquiry_per_component_allowed) {
-                    $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
-                } else {
-                    $grade_inquiries_twig_array[0]['posts'] = $posts;
-                }
+                $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
             }
         }
-        // sort by most recent posts for all tab
-        if ($grade_inquiry_per_component_allowed) {
-            usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
-                return strtotime($a['date']) - strtotime($b['date']);
-            });
-        }
+        // sort by most recent posts
+        usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
 
 
         // construct components array for tabs

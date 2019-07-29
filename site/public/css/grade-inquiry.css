@@ -5,6 +5,14 @@
     width: 100%;
 }
 
+.component-tab-icon.fa-exclamation {
+    color: var(--error-alert-dark-red);
+}
+
+.component-tab-icon.fa-check {
+    color: var(--standard-dark-green);
+}
+
 .grade-inquiry-header-div {
     display: flex;
     margin-top: 10px;
