@@ -158,7 +158,9 @@ defaults = {'database_host': 'localhost',
             'email_sender': 'submitty@myuniversity.edu',
             'email_reply_to': 'submitty_do_not_reply@myuniversity.edu',
             'email_server_hostname': 'mail.myuniversity.edu',
-            'email_server_port': 25}
+            'email_server_port': 25,
+            'course_code_requirements': "Please follow your school's convention for course code."
+}
 
 loaded_defaults = {}
 if os.path.isfile(CONFIGURATION_JSON):
