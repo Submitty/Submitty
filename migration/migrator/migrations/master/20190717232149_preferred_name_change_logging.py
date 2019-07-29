@@ -31,6 +31,7 @@ BEGIN
     END IF;
     -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
     IF preferred_name_change_details IS NOT NULL THEN
+        preferred_name_change_details := format('USER_ID: "%s" %s', NEW.user_id, preferred_name_change_details);
         RAISE LOG USING MESSAGE = 'PREFERRED_NAME DATA UPDATE', DETAIL = preferred_name_change_details;
     END IF;
     -- Propagate UPDATE to course DBs
