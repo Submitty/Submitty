@@ -36,13 +36,14 @@ my_pid = os.getpid()
 for p in psutil.pids():
     try:
         cmdline = psutil.Process(p).cmdline()
+        if (len(cmdline) < 2):
+            continue
         # if anything on the command line matches the name of the program
-        for i in cmdline:
-            if i.find(my_program_name) != -1:
-                if p != my_pid:
-                    print("ERROR!  Another copy of '" + my_program_name +
-                          "' is already running on the server.  Exiting.")
-                    exit()
+        if cmdline[0].find("python") != -1 and cmdline[1].find(my_program_name) != -1:
+            if p != my_pid:
+                print("ERROR!  Another copy of '" + my_program_name +
+                      "' is already running on the server.  Exiting.")
+                sys.exit(1)
     except psutil.NoSuchProcess:
         # Whoops, the process ended before we could look at it.
         # But that's ok!
@@ -63,7 +64,7 @@ try:
 except Exception as config_fail_error:
     print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
-    exit(-1)
+    sys.exit(1)
 
 
 DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
@@ -94,7 +95,7 @@ except Exception as config_fail_error:
         str(datetime.datetime.now()), str(config_fail_error))
     LOG_FILE.write(e+"\n")
     print(e)
-    exit(-1)
+    sys.exit(1)
 
 
 def setup_db():

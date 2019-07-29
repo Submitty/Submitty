@@ -4,9 +4,9 @@
     <header>
         <h1>Manage Students</h1>
         <div class="btn-wrapper">
-            <a onclick="newDownloadForm()" class="btn btn-primary">Download Users</a>
-            <a onclick="newClassListForm()" class="btn btn-primary">Upload Classlist</a>
-            <a onclick="newUserForm()" class="btn btn-primary">New Student</a>
+            <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Users</a>
+            <a href="javascript:newClassListForm()" class="btn btn-primary">Upload Classlist</a>
+            <a href="javascript:newStudentForm()" class="btn btn-primary">New Student</a>
         </div>
     </header>
     {# This is a data table #}
@@ -51,5 +51,6 @@
         <p class="warning">No students found</p>
     {% endif %}
 </div>
-{% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
+{% include('admin/users/UserForm.twig') %}
 {% include('admin/users/ClassListForm.twig') %}
+{% include('admin/users/DownloadForm.twig') with { 'code': 'user' } %}

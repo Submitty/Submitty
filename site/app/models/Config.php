@@ -41,6 +41,7 @@ use app\libraries\Utils;
  * @method bool isCourseLoaded()
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
+ * @method string getCourseCodeRequirements()
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
@@ -137,6 +138,13 @@ class Config extends AbstractModel {
      */
     protected $username_change_text = "";
 
+    /**
+     * The text to be shown when an instructor enters a course code for a new course.
+     * @var string
+     * @property
+     */
+    protected $course_code_requirements = "";
+
     /** @property @var string Text shown to all users for system announcement */
     protected $system_message = '';
 
@@ -151,6 +159,11 @@ class Config extends AbstractModel {
 
     /** @property @var bool */
     protected $email_enabled;
+
+    /** @property @var string */
+    protected $latest_tag;
+    /** @property @var string */
+    protected $latest_commit;
 
     /** @property @var string */
     protected $course_name;
@@ -266,6 +279,10 @@ class Config extends AbstractModel {
             $this->username_change_text = $submitty_json['username_change_text'];
         }
 
+        if (isset($submitty_json['course_code_requirements'])) {
+            $this->course_code_requirements = $submitty_json['course_code_requirements'];
+        }
+
         if (isset($submitty_json['system_message'])) {
             $this->system_message = strval($submitty_json['system_message']);
         }
@@ -331,6 +348,18 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find email config: {$this->config_path}/email.json");
         }
         $this->email_enabled = $email_json['email_enabled'];
+
+
+        $version_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'version.json'));
+        if (!$version_json) {
+            throw new ConfigException("Could not find version file: {$this->config_path}/version.json");
+        }
+        if (!isset($version_json['most_recent_git_tag']) ||
+            !isset($version_json['short_installed_commit'])) {
+            throw new ConfigException("Error parsing version information: {$this->config_path}/version.json");
+        }
+        $this->latest_tag = $version_json['most_recent_git_tag'];
+        $this->latest_commit = $version_json['short_installed_commit'];
     }
 
     public function loadCourseJson($course_json_path) {

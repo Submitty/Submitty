@@ -139,14 +139,15 @@ window.onbeforeunload = function() {
 
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
-        let url = buildUrl({'component': 'PDF','page': 'save_pdf_annotation'});
+        let url = buildNewCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
             url: url,
             data: {
                 annotation_layer,
-                GENERAL_INFORMATION
+                GENERAL_INFORMATION,
+                'csrf_token': csrfToken
             },
             success: function(data){
                 let response = JSON.parse(data);
