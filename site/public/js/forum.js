@@ -313,6 +313,26 @@ function changeDisplayOptions(option){
     window.location.replace(buildNewCourseUrl(['forum', 'threads', thread_id]) + `?option=${option}`);
 }
 
+function readCategoryValues(){
+    var categories_value = [];
+    $('#thread_category button').each(function(){
+        if($(this).attr("btn-selected")==="true"){
+            categories_value.push($(this).attr("cat-id"));
+        }
+    });
+    return categories_value;
+}
+
+function readThreadStatusValues(){
+    var thread_status_value = [];
+    $('#thread_status_select button').each(function(){
+        if($(this).attr("btn-selected")==="true"){
+            thread_status_value.push($(this).attr("sel-id"));
+        }
+    });
+    return thread_status_value;
+}
+
 function dynamicScrollLoadPage(element, atEnd) {
     var load_page = $(element).attr(atEnd?"next_page":"prev_page");
     if(load_page == 0) {
@@ -377,19 +397,8 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var next_url = urlPattern.replace("{{#}}", load_page);
 
-    var categories_value = [];
-    $('#thread_category button').each(function(){
-       if($(this).attr("btn-selected")==="true"){
-           categories_value.push($(this).attr("cat-id"));
-       }
-    });
-
-    var thread_status_value = [];
-    $('#thread_status_select button').each(function(){
-        if($(this).attr("btn-selected")==="true"){
-            thread_status_value.push($(this).attr("sel-id"));
-        }
-    });
+    var categories_value = readCategoryValues();
+    var thread_status_value = readThreadStatusValues();
 
     // var thread_status_value = $("#thread_status_select").val();
     var unread_select_value = $("#unread").is(':checked');
@@ -498,19 +507,8 @@ function alterShowMergeThreadStatus(newStatus, course) {
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
 
-    var categories_value = [];
-    $('#thread_category button').each(function(){
-       if($(this).attr("btn-selected")==="true"){
-           categories_value.push($(this).attr("cat-id"));
-       }
-    });
-
-    var thread_status_value = [];
-    $('#thread_status_select button').each(function(){
-        if($(this).attr("btn-selected")==="true"){
-            thread_status_value.push($(this).attr("sel-id"));
-        }
-    });
+    var categories_value = readCategoryValues();
+    var thread_status_value = readThreadStatusValues();
 
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
