@@ -469,6 +469,7 @@ function displayPreviousSubmissionOptions(callback){
             localStorage.setItem("instructor-submit-option", "2");
         }
         form.css("display", "none");
+        callback(-1);
     });
 
     $('.popup-form').css('display', 'none');
