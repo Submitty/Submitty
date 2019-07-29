@@ -221,6 +221,11 @@ tr.info, tr.info td, tr.info th {
     background-color: var(--table-info);
 }
 
+td>a.active-sort {
+    text-decoration: underline;
+    font-weight: bold;
+}
+
 .floating-thead,
 .floating-header {
     position: fixed;
@@ -1411,6 +1416,14 @@ end of styles used in the admin gradeable page
     font-size: 1.5em;
 }
 
+[name^="user_id_"]:valid {
+    background-color: transparent;
+}
+
+[name^="user_id_"] {
+    background-color: var(--alert-invalid-entry-pink);
+}
+
 /* color for nav page edit button for rebuild error on gradeable */
 .edit-build-error {
     color: var(--badge-backgroud-red);
@@ -1613,17 +1626,18 @@ end of styles used in the admin gradeable page
     color: var(--alert-danger-red);
 }
 
-.black-btn, .black-btn > i.fas {
+.black-btn, .black-btn > i {
     color: #000 !important;
     border-color: #000 !important;
+    text-decoration: none;
 }
 
-.black-btn:hover, .black-btn > i.fas:hover {
+.black-btn:hover, .black-btn:hover > i, .black-btn > i:hover {
     color: #405E90 !important;
     border-color: #405E90 !important;
 }
 
-.black-btn:active, .black-btn > i.fas:active {
+.black-btn:active, .black-btn:active > i, .black-btn > i:active {
     color: var(--external-link-active) !important;
     border-color: var(--external-link-active) !important;
 }
@@ -1634,11 +1648,6 @@ end of styles used in the admin gradeable page
     align-items: center;
 }
 
-.flex-row > * {
-    display: inherit;
-    align-items: inherit;
-}
-
 .flex-col {
     display: flex;
     justify-content: space-between;
@@ -1647,6 +1656,11 @@ end of styles used in the admin gradeable page
 
 .flex-col-space > * {
     margin: 10px 0;
+}
+
+.flex-line {
+    display: flex;
+    align-items: center;
 }
 
 .shadow {
@@ -1742,6 +1756,14 @@ header > * {
 
 .align-left {
     text-align: left !important;
+}
+
+.bare-button {
+    border: none;
+    padding: 0;
+    font-size: 1em;
+    background: unset;
+    color: unset;
 }
 
 @media (min-width: 541px) {

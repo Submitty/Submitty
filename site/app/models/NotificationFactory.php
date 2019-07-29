@@ -2,10 +2,10 @@
 
 namespace app;
 
-use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\models\Email;
 use app\models\Notification;
+use app\models\User;
 use LogicException;
 
 /**
@@ -96,6 +96,40 @@ class NotificationFactory {
             $emails = $this->createEmailsArray($event,$email_recipients);
             $this->sendEmails($emails);
         }
+    }
+    // ***********************************TEAM NOTIFICATIONS***********************************
+
+    /**
+     * checks whether $recipients have correct team settings and sends the notification and email.
+     * @param array $event
+     * @param array $recipients
+     */
+    public function onTeamEvent(array $event, array $recipients) {
+        $notification_recipients = array();
+        $email_recipients = array();
+        $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
+        foreach ($recipients as $recipient) {
+            $user_settings_row = array_filter($users_settings, function($v, $k) use ($recipient) {
+                return $v['user_id'] === $recipient;
+            }, ARRAY_FILTER_USE_BOTH);
+            if (!empty($user_settings_row)) {
+                $user_settings_row = $user_settings_row[0];
+            }
+            $user_settings = User::constructNotificationSettings($user_settings_row);
+            if ($user_settings[$event['type']]) {
+                $notification_recipients[] = $recipient;
+            }
+            if ($user_settings[$event['type'].'_email']) {
+                $email_recipients[] = $recipient;
+            }
+        }
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
+        $this->sendNotifications($notifications);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $emails = $this->createEmailsArray($event,$email_recipients);
+            $this->sendEmails($emails);
+        }
+
     }
 
     // ***********************************HELPERS***********************************

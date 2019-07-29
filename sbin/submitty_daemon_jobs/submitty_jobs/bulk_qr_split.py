@@ -80,17 +80,11 @@ def main(args):
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
 
-                    page.save('{}_{}.jpg'.format(prev_file[:-4], i),
-                              "JPEG", quality=100)
-
                 if id_index == 1:
                     # correct first pdf's page count and print file
                     output[prev_file]['page_count'] = page_count
                     with open(prev_file, 'wb') as out:
                         pdf_writer.write(out)
-
-                    page.save('{}_{}.jpg'.format(prev_file[:-4], i),
-                              "JPEG", quality=100)
 
                 # start a new pdf and grab the cover
                 cover_writer = PdfFileWriter()
@@ -108,6 +102,11 @@ def main(args):
                 id_index += 1
                 page_count = 1
                 prev_file = output_filename
+
+                # save page as image, start indexing at 1
+                page.save(prev_file[:-4] + '_' + str(page_count).zfill(2) + '.jpg',
+                          "JPEG", quality=100)
+
             else:
                 # the first pdf page doesn't have a qr code
                 if i == 0:
@@ -130,6 +129,10 @@ def main(args):
                 # add pages to current split_pdf
                 page_count += 1
                 pdf_writer.addPage(pdfPages.getPage(i))
+                # save page as image, start indexing at 1
+                page.save(prev_file[:-4] + '_' + str(page_count).zfill(2) + '.jpg',
+                          "JPEG", quality=100)
+
             i += 1
 
         buff += "Finished splitting into {} files\n".format(id_index)

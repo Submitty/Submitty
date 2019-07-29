@@ -4,27 +4,27 @@ from .base_testcase import BaseTestCase
 class TestNavigationPageStudent(BaseTestCase):
     def test_navigation_page(self):
         self.click_class('sample')
-        elements = self.driver.find_elements_by_class_name('nav-title-row')
+        elements = self.driver.find_elements_by_class_name('course-section-heading')
         self.assertEqual(4, len(elements))
         self.assertEqual("open", elements[0].get_attribute('id'))
         self.assertEqual(2, len(self.driver
-                                .find_element_by_id('open_tbody')
-                                .find_elements_by_class_name("gradeable_row")))
+                                .find_element_by_id('open-section')
+                                .find_elements_by_class_name("gradeable-row")))
         self.assertEqual("closed", elements[1].get_attribute('id'))
         self.assertEqual(2, len(self.driver
-                                .find_element_by_id('closed_tbody')
-                                .find_elements_by_class_name("gradeable_row")))
+                                .find_element_by_id('closed-section')
+                                .find_elements_by_class_name("gradeable-row")))
         self.assertEqual("items_being_graded", elements[2].get_attribute('id'))
         self.assertEqual(2, len(self.driver
-                                .find_element_by_id('items_being_graded_tbody')
-                                .find_elements_by_class_name("gradeable_row")))
+                                .find_element_by_id('items_being_graded-section')
+                                .find_elements_by_class_name("gradeable-row")))
         self.assertEqual("graded", elements[3].get_attribute('id'))
         self.assertEqual(7, len(self.driver
-                                .find_element_by_id('graded_tbody')
-                                .find_elements_by_class_name("gradeable_row")))
+                                .find_element_by_id('graded-section')
+                                .find_elements_by_class_name("gradeable-row")))
 
-        self.assertEqual(3, len(self.driver.find_element_by_class_name(
-            'gradeable_row').find_elements_by_tag_name('td')))
+        self.assertEqual(2, len(self.driver.find_element_by_class_name(
+            'course-button-wrapper').find_elements_by_class_name('course-button')))
 
 
 if __name__ == "__main__":

@@ -200,6 +200,13 @@ function buildJSON(){
     return ret;
 }
 
+function showLogButton(responseData)
+{
+    $('#show_log_button').show();
+    $('#save_status_log').empty();
+    $('#save_status_log').append('<pre>' + responseData + '</pre>');
+}
+
 function checkAutoRGStatus()
 {
     // Send request
@@ -211,15 +218,17 @@ function checkAutoRGStatus()
             if (response.status === 'success') {
 
                 $('#save_status').html('Rainbow grades successfully generated!');
+                showLogButton(response.data);
 
             } else if (response.status === 'fail') {
 
                 $('#save_status').html('A failure occurred generating rainbow grades');
+                showLogButton(response.message);
 
             } else {
 
                 $('#save_status').html('Internal Server Error');
-                console.error(response.message);
+                console.log(response);
 
             }
         },
@@ -318,4 +327,9 @@ $(document).ready(function () {
     var config = { attributes: true, childList: true, characterData: true };
     // pass in the target node, as well as the observer options
     observer.observe(target, config);
+
+    // Display auto rainbow grades log on button click
+    $('#show_log_button').click(function() {
+        $('#save_status_log').toggle();
+    })
 });
