@@ -184,7 +184,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("RPI", $config->getInstitutionName());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
-        $this->assertEquals("Please follow your school's convension for course code.", $config->getCourseCodeRequirements());
+        $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
         $config->loadCourseJson($this->course_json_path);
