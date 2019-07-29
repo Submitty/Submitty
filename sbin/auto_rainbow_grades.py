@@ -137,6 +137,7 @@ with open(creds_file, 'r') as file:
 if 'token' not in creds or not creds['token']:
 
     print('No auth token found', flush=True)
+    print('Running with limited functionality', flush=True)
     print('Attempting to continue with previously generated grade summaries',
           flush=True)
 
