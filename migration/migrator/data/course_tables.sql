@@ -508,7 +508,8 @@ CREATE TABLE regrade_requests (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
-    status INTEGER DEFAULT 0 NOT NULL
+    status INTEGER DEFAULT 0 NOT NULL,
+    gc_id INTEGER
 );
 
 
