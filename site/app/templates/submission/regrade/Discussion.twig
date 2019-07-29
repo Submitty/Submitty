@@ -7,7 +7,7 @@
 {% endif %}
 {% if can_inquiry and has_submission %}
     {% if grade_inquiry_per_component_allowed %}
-        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'g_id': g_id } only %}
+        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries, 'g_id': g_id } only %}
     {% endif %}
     <div class='grade-inquiries'>
         {% for component in gradeable_components %}

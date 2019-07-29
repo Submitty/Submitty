@@ -1,4 +1,7 @@
 $( document ).ready(function () {
+  // style component tabs
+  $('.component-tab').bind('eventChangeSelectedTab', changeColorClass);
+
   // open last opened grade inquiry or open first component with grade inquiry
   var g_id = $('.component-tabs').data('g_id');
   var component_cookie = document.cookie.match('(^|;) ?' + g_id + '_component_id' + '=([^;]*)(;|$)');
@@ -14,10 +17,6 @@ $( document ).ready(function () {
 function onComponentTabClicked(tab) {
   var component_id = $(tab).data("component_id");
   var g_id = $('.component-tabs').data("g_id");
-  // deselect previous selected tab and select clicked tab
-  $("#component-tab-selected").removeAttr('id');
-  $(tab).attr("id","component-tab-selected");
-
 
   // show posts that pertain to this component_id
   $(".grade-inquiry").each(function(){
@@ -27,6 +26,13 @@ function onComponentTabClicked(tab) {
       $(this).show();
     }
   });
+
+  var component_tabs = $('.component-tab');
+  component_tabs.removeClass("btn-selected");
+  $(tab).addClass("btn-selected");
+
+  // style components
+  component_tabs.trigger('eventChangeSelectedTab');
 
   // set cookie for selected component
   var date = new Date();
@@ -49,7 +55,7 @@ function onReplyTextAreaKeyUp(textarea) {
 function onGradeInquirySubmitClicked(button) {
   // check double submission
   var button_clicked = $(button);
-  var component_selected = $('#component-tab-selected');
+  var component_selected = $('.btn-selected');
   var component_id = component_selected.length ? component_selected.data('component_id') : 0;
   var form = $("#reply-text-form-"+component_id);
   if (form.data("submitted") === true) {
