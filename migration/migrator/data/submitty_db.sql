@@ -51,7 +51,6 @@ CREATE TABLE courses (
 CREATE TABLE emails (
     id serial NOT NULL,
     user_id character varying NOT NULL,
-    recipient  varchar(255) NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
     created TIMESTAMP WITHOUT TIME zone NOT NULL,
