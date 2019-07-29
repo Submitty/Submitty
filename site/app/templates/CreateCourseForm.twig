@@ -8,9 +8,10 @@
                 <label for="course_semester">
                     <div class="option-title">Term</div>
                     <div class="option-alt">
-                    What is the term of the new course?<br>
-                    Contact the system administrator to if the desired term is not available from the drop down menu.
-                    <p style="color:red">(Required)</p></div>
+                    <p>What is the term for the new course?</p>
+                    <p>Note: Contact the system administrator to if the desired term is not available from the drop down menu.</p>
+                    <p style="color:red">(Required)</p>
+                    </div>
                 </label>
             </div>
             <div class="option-input col-md-6">
@@ -30,10 +31,11 @@
                 <label for="course_title">
                     <div class="option-title">Course Code</div>
                     <div class="option-alt">
-                    What is the course code for the new course?<br>
-                    Please follow your school's convention for course code.<br>
-                    This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.
-                    <p style="color:red">(Required)</p></div>
+                    <p>What is the course code for the new course?<br>
+                    {{ course_code_requirements }} </p>
+                    <p>Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</p>
+                    <p style="color:red">(Required)</p>
+                    </div>
                 </label>
             </div>
             <div class="option-input col-md-6">
@@ -68,10 +70,12 @@
         <div class="option row">
             <div class="option-desc col-md-6">
                 <label for="base_course">
-                    <div class="option-title">Base Course</div>
-                    <div class="option-alt">What course is the new course based on?<br>
-                        Note that instructors and graders with access to the base course files on linux will be able to see the content of the new course as well.
-                        <p style="color:red">(Required)</p></div>
+                    <div class="option-title">Prior Course Offering</div>
+                    <div class="option-alt">Select a prior offering of this course from the dropdown menu.</br>
+                        Note: Instructors and graders with access to the prior course files on GNU/Linux will be able to see the content of the new course as well.<br>
+                        Contact the system administrator if this course should not share a GNU/Linux group with any prior course.
+                        <p style="color:red">(Required)</p>
+                    </div>
                 </label>
             </div>
 
