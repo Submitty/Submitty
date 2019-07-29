@@ -173,7 +173,7 @@ function build_homework {
     fi
 
     # generate queue file for generated_output
-    $SUBMITTY_INSTALL_DIR/bin/make_generated_output.py $hw_source $semester $course
+    $SUBMITTY_INSTALL_DIR/bin/make_generated_output.py $hw_source $assignment $semester $course
 
 
     # build (in parallel, 8 threads)
