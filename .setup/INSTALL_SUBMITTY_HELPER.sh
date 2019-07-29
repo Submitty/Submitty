@@ -561,6 +561,11 @@ find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
+# Obtain API auth token for submitty-admin user
+
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/obtain_auth_token.py
+
+#####################################
 # Build & Install Lichen Modules
 
 /bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh

@@ -59,4 +59,4 @@ for semester in os.listdir(courses_path):
 
             # Drop job into jobs queue
             with open(os.path.join(daemon_directory, job_filename), 'w') as file:
-                json.dump(jobs_json, file)
+                json.dump(jobs_json, file, indent=4)
