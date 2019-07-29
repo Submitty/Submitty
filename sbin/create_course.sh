@@ -142,14 +142,11 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__PHP_USER__|$PHP_USER|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__DAEMON_USER__|$DAEMON_USER|g" $1
 
     sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
 
-    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_DATABASE_NAME__|$DATABASE_NAME|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_COURSE_FILES_LOCATION__|$course_dir|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__DATABASE_NAME__|$DATABASE_NAME|g" $1
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -246,7 +243,7 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/up
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/uploads/split_pdf
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/uploads/seating
-create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/rainbow_grades
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/rainbow_grades
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code

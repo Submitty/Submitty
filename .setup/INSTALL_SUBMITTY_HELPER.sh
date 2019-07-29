@@ -130,14 +130,11 @@ COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${SUBMITTY_INSTALL_DIR}/c
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 FIRST_UNTRUSTED_GID=$(jq -r '.first_untrusted_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-NUM_GRADING_SCHEDULER_WORKERS=$(jq -r '.num_grading_scheduler_workers' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMON_USER=$(jq -r '.daemon_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMON_GROUP=${DAEMON_USER}
 DAEMON_UID=$(jq -r '.daemon_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMON_GID=$(jq -r '.daemon_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-PHP_UID=$(jq -r '.php_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
-PHP_GID=$(jq -r '.php_gid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
@@ -150,14 +147,8 @@ echo -e "\nBeginning installation of Submitty\n"
 
 #this function takes a single argument, the name of the file to be edited
 function replace_fillin_variables {
-    sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_REPOSITORY__|$SUBMITTY_REPOSITORY|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__INSTALL__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__CGI_USER__|$CGI_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__PHP_USER__|$PHP_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__DAEMON_USER__|$DAEMON_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__DAEMONPHP_GROUP__|$DAEMONPHP_GROUP|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__COURSE_BUILDERS_GROUP__|$COURSE_BUILDERS_GROUP|g" $1
 
     sed -i -e "s|__INSTALL__FILLIN__NUM_UNTRUSTED__|$NUM_UNTRUSTED|g" $1
     sed -i -e "s|__INSTALL__FILLIN__FIRST_UNTRUSTED_UID__|$FIRST_UNTRUSTED_UID|g" $1
@@ -165,32 +156,6 @@ function replace_fillin_variables {
 
     sed -i -e "s|__INSTALL__FILLIN__DAEMON_UID__|$DAEMON_UID|g" $1
     sed -i -e "s|__INSTALL__FILLIN__DAEMON_GID__|$DAEMON_GID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__PHP_UID__|$PHP_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__PHP_GID__|$PHP_GID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__CGI_UID__|$CGI_UID|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__CGI_GID__|$CGI_GID|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__TIMEZONE__|$TIMEZONE|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__DATABASE_HOST__|$DATABASE_HOST|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__DATABASE_USER__|$DATABASE_USER|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__DATABASE_PASSWORD__|$DATABASE_PASSWORD|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__VCS_URL__|$VCS_URL|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__CGI_URL__|$CGI_URL|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__SITE_LOG_PATH__|$SITE_LOG_PATH|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__AUTHENTICATION_METHOD__|${AUTHENTICATION_METHOD}|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__INSTITUTION__NAME__|$INSTITUTION_NAME|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__INSTITUTION__HOMEPAGE__|$INSTITUTION_HOMEPAGE|g" $1
-    sed -i -e "s|__INSTALL__FILLIN__USERNAME__TEXT__|$USERNAME_CHANGE_TEXT|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__DEBUGGING_ENABLED__|$DEBUGGING_ENABLED|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__AUTOGRADING_LOG_PATH__|$AUTOGRADING_LOG_PATH|g" $1
-
-    sed -i -e "s|__INSTALL__FILLIN__NUM_GRADING_SCHEDULER_WORKERS__|$NUM_GRADING_SCHEDULER_WORKERS|g" $1
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -251,18 +216,21 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
+
+# ------------------------------------------------------------------------
+# Create the logs directories that exist on both primary & worker machines
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-
-#Make site logging directories if not in worker mode.
+# Create the logs directories that only exist on the primary machine
 if [ "${WORKER}" == 0 ]; then
-    mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
+# ------------------------------------------------------------------------
 
 # set the permissions of these directories
 chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
@@ -278,23 +246,31 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
-#Set up permissions on the logs directory. If in worker mode, PHP_USER does not exist.
-if [ "${WORKER}" == 0 ]; then
-    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}  ${SUBMITTY_DATA_DIR}/logs
-    chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
-else
-    chown  -R root:${COURSE_BUILDERS_GROUP}           ${SUBMITTY_DATA_DIR}/logs
-    chmod  -R u+rwx,g+rxs,o+x                         ${SUBMITTY_DATA_DIR}/logs
-fi
 
+# ------------------------------------------------------------------------
+# Set owner/group of the top level logs directory
+chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
+# Set owner/group for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/autograding
+# Set owner/group for logs directories that exist only on the primary machine
+if [ "${WORKER}" == 0 ]; then
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
+    chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
+fi
+# Set permissions of all files in the logs directories
+find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
+# Set permissions of all logs subdirectires
+find ${SUBMITTY_DATA_DIR}/logs/ -mindepth 1 -type d -exec chmod 750 {} \;
+# Created files in the logs subdirectories should inherit the group of the parent directory
+find ${SUBMITTY_DATA_DIR}/logs/ -mindepth 1 -type d -exec chmod g+s {} \;
+# Set permissions of the top level logs directory
+chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/emails
+# ------------------------------------------------------------------------
 
-chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
-chmod  -R u+rwx,g+rxs                             ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
 
 #Set up shipper grading directories if not in worker mode.
 if [ "${WORKER}" == 0 ]; then
@@ -453,7 +429,6 @@ chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
-replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload_old_assignments.py
 
 ########################################################################################################################
 ########################################################################################################################
@@ -575,6 +550,14 @@ if [ ! -d "${nlohmann_dir}" ]; then
     git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
 fi
 
+#####################################
+# Add read & traverse permissions for RainbowGrades and vendor repos
+
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type f -exec chmod o+r {} \;
+
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
 # Build & Install Lichen Modules
@@ -747,10 +730,9 @@ if [ "${WORKER}" == 0 ]; then
         echo -e "Install Autograding Test Suite..."
         rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
         mkdir -p ${SUBMITTY_INSTALL_DIR}/test_suite/log
-        replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/lib.py
 
         # add a symlink to conveniently run the test suite or specific tests without the full reinstall
-        ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py
+        ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/sbin/run_test_suite.py
 
         echo -e "\nRun Autograding Test Suite...\n"
 
@@ -774,7 +756,6 @@ if [ "${WORKER}" == 0 ]; then
         # copy the directory tree and replace variables
         echo -e "Install Rainbow Grades Test Suite..."
         rsync -rtz  ${SUBMITTY_REPOSITORY}/tests/  ${SUBMITTY_INSTALL_DIR}/test_suite
-        replace_fillin_variables ${SUBMITTY_INSTALL_DIR}/test_suite/rainbowGrades/test_sample.py
 
         # add a symlink to conveniently run the test suite or specific tests without the full reinstall
         #ln -sf  ${SUBMITTY_INSTALL_DIR}/test_suite/integrationTests/run.py  ${SUBMITTY_INSTALL_DIR}/bin/run_test_suite.py

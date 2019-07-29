@@ -6,14 +6,21 @@ import os
 import subprocess
 import traceback
 import sys
-from pprint import pprint
-import traceback
 import shutil
-# global variable available to be used by the test suite modules
-SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
 
-GRADING_SOURCE_DIR =  SUBMITTY_INSTALL_DIR + "/src/grading"
+# global variable available to be used by the test suite modules
+# this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
+SUBMITTY_INSTALL_DIR = os.path.realpath(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
+)
+
+# Verify that this has been installed by just checking that this file is located in
+# a directory next to the config directory which has submitty.json in it
+if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
+    raise SystemExit('You must install the test suite before being able to run it.')
+
+SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
+GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
 
 LOG_FILE = None
 LOG_DIR = SUBMITTY_INSTALL_DIR + "/test_suite/log"

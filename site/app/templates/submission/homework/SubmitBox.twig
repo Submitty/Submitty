@@ -5,13 +5,17 @@
     <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
 {% endif %}
 
+{% if has_overridden_grades %}
+    <div class='content overridden_message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
+{% endif %}
+
 <div class="content">
-    <div class="upperinfo">
-        <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
+    <header>
+        <h1>New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
-            <h2 class="upperinfo-right">Due: {{ formatted_due_date }}</h2>
+            <h2>Due: {{ formatted_due_date }}</h2>
         {% endif %}
-    </div>
+    </header>
 
     {% if show_no_late_submission_warning %}
         <div>
@@ -318,22 +322,22 @@
                                 {% if cell.allow_multiple == true %}
                                     <input type="checkbox"
                                            name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                            value="{{ choice.value }}"
                                            onclick="handle_input_keypress();" />
 
-                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         {{ choice.description | markdown }}
                                     </label>
 
                                 {% else %}
                                     <input type="radio"
                                            name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}"
+                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                            value="{{ choice.value }}"
                                            onclick="handle_input_keypress();" />
 
-                                    <label for="multiple_choice_{{ num_multiple_choice }}">
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         {{ choice.description | markdown }}
                                     </label>
 
@@ -387,6 +391,7 @@
         <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
             {# Submit boxes #}
             {% for part in part_names %}
+                {# uploadIndex and input_fileIndex required for drag-and-drop.js #}
                 <div tabindex="0"
                      id="upload{{ loop.index }}"
                      onkeypress="clicked_on_box(event)"
