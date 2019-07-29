@@ -133,34 +133,10 @@ if not os.path.exists(creds_file):
 with open(creds_file, 'r') as file:
     creds = json.load(file)
 
-# Construct request list
-request = [
-    'curl',
-    '-d',
-    'user_id={}&password={}'.format(creds['submitty_admin_username'],
-                                    creds['submitty_admin_password']),
-    '-X',
-    'POST',
-    '{}/api/token'.format(host_name)
-]
-
-# Using the credentials call the API to obtain an auth token
-print('Obtaining auth token', flush=True)
-response = subprocess.run(request, stdout=subprocess.PIPE)
-
-# Check the return code of the 'curl' execution
-if response.returncode != 0:
-    raise Exception('Failure during curl server call to obtain auth token')
-
-# Verify a token was successfully received
-response_json = json.loads(response.stdout)
-
 # Take this path if we DID NOT get an auth token
-if response_json['status'] != 'success':
+if 'token' not in creds or not creds['token']:
 
-    print('Failed to obtain an auth token.', flush=True)
-    print('Ask your sysadmin to confirm that ' + creds_file +
-          ' contains valid credentials', flush=True)
+    print('No auth token found', flush=True)
     print('Attempting to continue with previously generated grade summaries',
           flush=True)
 
@@ -181,7 +157,7 @@ else:
         semester,
         course,
         host_name,
-        response_json['data']['token']
+        creds['token']
     ]
 
     # Call generate_grade_summaries.py script to generate grade summaries for the
