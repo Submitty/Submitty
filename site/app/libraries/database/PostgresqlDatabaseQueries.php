@@ -116,6 +116,30 @@ ORDER BY SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.reg
         return $return;
     }
 
+    public function getAllFaculty() {
+        $this->submitty_db->query("
+SELECT *
+FROM users
+WHERE user_access_level <= ?
+ORDER BY user_id", [User::LEVEL_FACULTY]);
+        $return = array();
+        foreach ($this->submitty_db->rows() as $user) {
+            $return[] = new User($this->core, $user);
+        }
+        return $return;
+    }
+
+    public function getAllUnarchivedSemester() {
+        $this->submitty_db->query("
+SELECT DISTINCT semester
+FROM courses
+WHERE status = 1");
+        $return = array();
+        foreach ($this->submitty_db->rows() as $row) {
+            $return[] = $row['semester'];
+        }
+        return $return;
+    }
 
     public function insertSubmittyUser(User $user) {
         $array = array($user->getId(), $user->getPassword(), $user->getNumericId(),

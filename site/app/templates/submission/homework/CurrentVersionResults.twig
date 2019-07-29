@@ -12,8 +12,8 @@
 
                 {# download icon if student can download files #}
                 {% if can_download %}
-                    <a onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}", "submissions")'>
-                        <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+                    <button class = 'btn btn-primary' onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}", "submissions")'> Download
+                        <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></button>
                 {% endif %}
 
                 {% if loop.index != files|length %}

@@ -25,7 +25,7 @@ use app\models\User;
 use app\models\Notification;
 use app\models\Email;
 use app\models\SimpleLateUser;
-use app\models\SimpleGradeOverridenUser;
+use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
@@ -155,6 +155,20 @@ class DatabaseQueries {
      * @return User[]
      */
     public function getAllGraders() {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * @return User[]
+     */
+    public function getAllFaculty() {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAllUnarchivedSemester() {
         throw new NotImplementedException();
     }
 
@@ -2295,11 +2309,11 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Return an array of users with overriden Grades
+     * Return an array of users with overridden Grades
      * @param string $gradeable_id
-     * @return SimpleGradeOverridenUser[]
+     * @return SimpleGradeOverriddenUser[]
      */
-    public function getUsersWithOverridenGrades($gradeable_id) {
+    public function getUsersWithOverriddenGrades($gradeable_id) {
         $this->course_db->query("
         SELECT u.user_id, user_firstname,
           user_preferred_firstname, user_lastname, marks, comment
@@ -2312,18 +2326,18 @@ ORDER BY gt.{$section_key}", $params);
 
         $return = array();
         foreach($this->course_db->rows() as $row){
-            $return[] = new SimpleGradeOverridenUser($this->core, $row);
+            $return[] = new SimpleGradeOverriddenUser($this->core, $row);
         }
         return $return;
     }
 
     /**
-     * Return a user with overriden Grades for specific gradable and user_id
+     * Return a user with overridden Grades for specific gradable and user_id
      * @param string $gradeable_id
      * @param string $user_id
-     * @return SimpleGradeOverridenUser[]
+     * @return SimpleGradeOverriddenUser[]
      */
-    public function getAUserWithOverridenGrades($gradeable_id, $user_id) {
+    public function getAUserWithOverriddenGrades($gradeable_id, $user_id) {
         $this->course_db->query("
         SELECT u.user_id, user_firstname,
           user_preferred_firstname, user_lastname, marks, comment
@@ -2334,7 +2348,7 @@ ORDER BY gt.{$section_key}", $params);
           AND marks IS NOT NULL
           AND u.user_id=?", array($gradeable_id,$user_id));
 
-          return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverridenUser($this->core, $this->course_db->row()) : null;
+          return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverriddenUser($this->core, $this->course_db->row()) : null;
     }
 
     /**
@@ -2390,7 +2404,7 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Updates overriden grades for given homework
+     * Updates overridden grades for given homework
      * @param string $user_id
      * @param string $g_id
      * @param integer $marks
@@ -2411,11 +2425,11 @@ ORDER BY gt.{$section_key}", $params);
     }
 
     /**
-     * Delete a given overriden grades for specific user for specific gradeable
+     * Delete a given overridden grades for specific user for specific gradeable
      * @param string $user_id
      * @param string $g_id
      */
-    public function deleteOverridenGrades($user_id, $g_id){
+    public function deleteOverriddenGrades($user_id, $g_id){
         $this->course_db->query("
           DELETE FROM grade_override
           WHERE user_id=?
@@ -3084,6 +3098,17 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
         return $this->submitty_db->row()['active'];
 
+    }
+
+    public function checkIsInstructorInCourse($user_id, $course, $semester) {
+        $this->submitty_db->query("
+            SELECT
+                CASE WHEN user_group=1 THEN TRUE
+                ELSE FALSE
+                END
+            AS is_instructor
+            FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
+        return $this->submitty_db->row()['is_instructor'];
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id){

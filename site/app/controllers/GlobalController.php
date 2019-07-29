@@ -64,6 +64,15 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-star"
                 ]);
             }
+            elseif ($this->core->getUser()->accessFaculty()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildNewUrl(['home', 'courses', 'new']),
+                    "title" => "New Course",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-new-course",
+                    "icon" => "fa-plus-square"
+                ]);
+            }
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -231,7 +240,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-calendar-plus"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'grade_override', 'action' => 'view_overriden_grades')),
+                    "href" => $this->core->buildNewCourseUrl(['grade_override']),
                     "title" => "Grade Override",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grade-override",

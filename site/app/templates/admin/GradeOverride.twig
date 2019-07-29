@@ -28,7 +28,7 @@
                         <option value="{{value['g_id']}}" >{{ value['g_title'] }}</option>
                     {% endfor %}
                 </select>
-                <button type="button" class="btn btn-primary" style="margin-top: 10px" onclick="loadOverridenGrades($('#g_id').val())"> Apply Changes </button>
+                <button type="button" class="btn btn-primary" style="margin-top: 10px" onclick="loadOverriddenGrades($('#g_id').val())"> Apply Changes </button>
             </div>
         </div>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -36,14 +36,14 @@
         <div class="option" style="width:25%; display:inline-block;"><label for="user_id">Student ID:</label><br>
             <input class="option-input" type="text" name="user_id" id="user_id" style="float:left">
         </div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="marks">Overriden marks:</label><br>
+        <div class="option" style="width:25%; display:inline-block;"><label for="marks">Overridden marks:</label><br>
             <input class="option-input" type="text" name="marks" id="marks" style="float:left" >
         </div>
         <div class="option" style="width:25%; display:inline-block;"><label for="comment">Comments (optional)</label><br>
             <textarea name="comment" id="comment" class="option-input" type="text" style="float:left"></textarea>
         </div>
         <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" value="Submit" style="float:left"></div>
-        <div id="load-overriden-grades" align="center">
+        <div id="load-overridden-grades" align="center">
         {# This is a data table #}
             <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
                 <div class="option-title" id="title"></div>
