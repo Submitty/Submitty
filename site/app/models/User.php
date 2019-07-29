@@ -25,6 +25,7 @@ use app\exceptions\ValidationException;
  * @method string getEmail()
  * @method void setEmail(string $email)
  * @method int getGroup()
+ * @method int getAccessLevel()
  * @method void setGroup(integer $group)
  * @method string getRegistrationSection()
  * @method int getRotatingSection()
@@ -49,6 +50,13 @@ class User extends AbstractModel {
     const GROUP_STUDENT               = 4;
     /** Logged out */
     const GROUP_NONE                  = 5;
+
+    /**
+     * Access levels, lower level means more access
+     */
+    const LEVEL_SUPERUSER             = 1;
+    const LEVEL_FACULTY               = 2;
+    const LEVEL_USER                  = 3;
 
     /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
@@ -81,7 +89,8 @@ class User extends AbstractModel {
     protected $email;
     /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
-
+    /** @property @var int The access level of the user (ex: superuser, faculty, user) */
+    protected $access_level;
     /** @property @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
     /** @property @var int What is the assigned rotating section for the user */
@@ -158,6 +167,10 @@ class User extends AbstractModel {
         if ($this->group > 4 || $this->group < 0) {
             $this->group = 4;
         }
+        $this->access_level = isset($details['user_access_level']) ? intval($details['user_access_level']) : 3;
+        if ($this->access_level > 3 || $this->access_level < 1) {
+            $this->access_level = 3;
+        }
 
         $this->user_updated = isset($details['user_updated']) && $details['user_updated'] === true;
         $this->instructor_updated = isset($details['instructor_updated']) && $details['instructor_updated'] === true;
@@ -195,6 +208,14 @@ class User extends AbstractModel {
      */
     public function accessAdmin() {
         return $this->group === 1;
+    }
+
+    /**
+     * Gets whether the user is allowed to access the faculty interface
+     * @return bool
+     */
+    public function accessFaculty() {
+        return $this->access_level < 3;
     }
 
     public function setPassword($password) {

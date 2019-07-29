@@ -159,6 +159,20 @@ class DatabaseQueries {
     }
 
     /**
+     * @return User[]
+     */
+    public function getAllFaculty() {
+        throw new NotImplementedException();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAllUnarchivedSemester() {
+        throw new NotImplementedException();
+    }
+
+    /**
      * @param User $user
      */
     public function insertSubmittyUser(User $user) {
@@ -3084,6 +3098,17 @@ AND gc_id IN (
             FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
         return $this->submitty_db->row()['active'];
 
+    }
+
+    public function checkIsInstructorInCourse($user_id, $course, $semester) {
+        $this->submitty_db->query("
+            SELECT
+                CASE WHEN user_group=1 THEN TRUE
+                ELSE FALSE
+                END
+            AS is_instructor
+            FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
+        return $this->submitty_db->row()['is_instructor'];
     }
 
     public function getRegradeRequestStatus($user_id, $gradeable_id){

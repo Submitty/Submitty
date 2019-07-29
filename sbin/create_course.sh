@@ -243,7 +243,7 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/up
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/uploads/split_pdf
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/uploads/seating
-create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/rainbow_grades
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/rainbow_grades
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code
@@ -300,7 +300,7 @@ echo -e "\nSUCCESS!\n\n"
 ########################################################################################################################
 
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
-echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/index.php?semester=${semester}&course=${course}"
+echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/${semester}/${course}"
 
 ########################################################################################################################
 ########################################################################################################################
