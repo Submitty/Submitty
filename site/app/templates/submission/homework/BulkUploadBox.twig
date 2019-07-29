@@ -98,6 +98,7 @@
     var is_team_assignment = "{{ team_assignment }}" === "1";
     //autofill data
     $(function(){
+        $("#messages").empty();
         if(sessionStorage.getItem("expected_count"))
             document.getElementById("expected_pages_input").value = sessionStorage.getItem("expected_count");
 
@@ -105,6 +106,10 @@
             source: students_full 
         });
         highlightPageCount();
+    });
+
+    window.addEventListener('onbeforeunload', function(e) {
+        $("#messages").empty();
     });
 
     //highlight pages that don't match the expected, also save the expected page count in session storage
@@ -131,6 +136,9 @@
         var submit_btn = document.getElementById("bulk_submit_" + String(index));
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
         var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
+
+        if(!submit_btn || !delete_btn || !user_id_textarea)
+            return;
 
         submit_btn.disabled = disable;
         delete_btn.disabled = disable;
@@ -201,10 +209,17 @@
                 uploadSplitHelper(user_id,path, index);
             }else{
                 //user_id has previous submission give options to user first
+                let has_been_called = false;
                 var option = displayPreviousSubmissionOptions(getSubmissionOption);
+                
+                return;
 
                 //callback function once user actually picks something
                 function getSubmissionOption(option){
+                    if(has_been_called)
+                        return;
+
+                    has_been_called = true;
                     //user closes do nothing
                     if(option === -1){
                         toggleButtons(index, false);
@@ -226,7 +241,6 @@
                         merge_previous = true;
                         clobber = true;
                     }
-
                     uploadSplitHelper(user_id,path,index,merge_previous,clobber);
                 }
             }
