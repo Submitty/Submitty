@@ -128,7 +128,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
         formData.append('file_input[]', files[i], files[i].name);
     }
     var submit_url = form.attr('action');
-
+    
     $.ajax({
         url: submit_url,
         data: formData,
@@ -144,7 +144,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
                     $('#messages').append(message);
                     return;
                 }
-
             } catch (err){
                 var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
                 $('#messages').append(message);
@@ -170,12 +169,13 @@ function publishPost() {
 }
 
 function changeThreadStatus(thread_id) {
-    var url = buildUrl({'component': 'forum', 'page': 'change_thread_status_resolve'});
+    var url = buildNewCourseUrl(['forum', 'threads', 'status']) + '?status=1';
     $.ajax({
         url: url,
         type: "POST",
         data: {
-            thread_id: thread_id
+            thread_id: thread_id,
+            csrf_token: csrfToken
         },
         success: function(data) {
             try {
@@ -200,16 +200,17 @@ function changeThreadStatus(thread_id) {
     });
 }
 
-function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
+function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
     if(!checkAreYouSureForm()) return;
     var form = $("#thread_form");
-    var url = buildUrl({'component': 'forum', 'page': 'get_edit_post_content'});
+    var url = buildNewCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
         url: url,
         type: "POST",
         data: {
             post_id: post_id,
             thread_id: thread_id,
+            render_markdown: render_markdown,
             csrf_token: csrf_token
         },
         success: function(data){
@@ -255,6 +256,18 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
             $('#edit-user-post').css('display', 'block');
 
             $(".cat-buttons input").prop('checked', false);
+
+            if(json.markdown === true){
+                $('#markdown_input_').val("1");
+                $('#markdown_toggle_').addClass('markdown-active');
+                $('#markdown_buttons_').show();
+            }
+            else{
+                $('#markdown_input_').val("0");
+                $('#markdown_toggle_').removeClass('markdown-active');
+                $('#markdown_buttons_').hide();
+            }
+
             // If first post of thread
             if(shouldEditThread) {
                 var thread_title = json.title;
@@ -266,6 +279,7 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
                 $("#title").val(thread_title);
                 $("#thread_status").val(thread_status);
                 $('#lock_thread_date').val(thread_lock_date);
+
                 // Categories
                 $(".cat-buttons").removeClass('cat-selected');
                 $.each(categories_ids, function(index, category_id) {
@@ -296,7 +310,7 @@ function editPost(post_id, thread_id, shouldEditThread, csrf_token) {
 function changeDisplayOptions(option){
     thread_id = $('#current-thread').val();
     document.cookie = "forum_display_option=" + option + ";";
-    window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'option': option, 'thread_id': thread_id}));
+    window.location.replace(buildNewCourseUrl(['forum', 'threads', thread_id]) + `?option=${option}`);
 }
 
 function dynamicScrollLoadPage(element, atEnd) {
@@ -377,6 +391,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             unread_select: unread_select_value,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
+            csrf_token: csrfToken
         },
         success: function(r){
             var x = JSON.parse(r);
@@ -477,7 +492,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
     document.cookie = course + "_forum_categories=" + categories_value + ";";
     document.cookie = "forum_thread_status=" + thread_status_value + ";";
     document.cookie = "unread_select_value=" + unread_select_value + ";";
-    var url = buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number': (loadFirstPage?'1':'-1')});
+    var url = buildNewCourseUrl(['forum', 'threads']) + `?page_number=${(loadFirstPage?'1':'-1')}`;
     $.ajax({
         url: url,
         type: "POST",
@@ -487,6 +502,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             unread_select: unread_select_value,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
+            csrf_token: csrfToken
         },
         success: function(r){
             var x = JSON.parse(r);
@@ -555,12 +571,13 @@ function generateCodeMirrorBlocks(container_element) {
 }
 
 function showHistory(post_id) {
-    var url = buildUrl({'component': 'forum', 'page': 'get_history'});
+    var url = buildNewCourseUrl(['forum', 'posts', 'history']);
     $.ajax({
         url: url,
         type: "POST",
         data: {
-            post_id: post_id
+            post_id: post_id,
+            csrf_token: csrfToken
         },
         success: function(data){
             try {
@@ -611,7 +628,7 @@ function showHistory(post_id) {
 
 function addNewCategory(csrf_token){
     var newCategory = $("#new_category_text").val();
-    var url = buildUrl({'component': 'forum', 'page': 'add_category'});
+    var url = buildNewCourseUrl(['forum', 'categories', 'new']);
     $.ajax({
         url: url,
         type: "POST",
@@ -659,7 +676,7 @@ function addNewCategory(csrf_token){
 }
 
 function deleteCategory(category_id, category_desc, csrf_token){
-    var url = buildUrl({'component': 'forum', 'page': 'delete_category'});
+    var url = buildNewCourseUrl(['forum', 'categories', 'delete']);
     $.ajax({
         url: url,
         type: "POST",
@@ -702,7 +719,7 @@ function editCategory(category_id, category_desc, category_color, csrf_token) {
     if(category_color !== null) {
         data['category_color'] = category_color;
     }
-    var url = buildUrl({'component': 'forum', 'page': 'edit_category'});
+    var url = buildNewCourseUrl(['forum', 'categories', 'edit']);
     $.ajax({
         url: url,
         type: "POST",
@@ -822,7 +839,7 @@ function changeColorClass(){
 function reorderCategories(csrf_token) {
     var data = $('#ui-category-list').sortable('serialize');
     data += "&csrf_token=" + csrf_token;
-    var url = buildUrl({'component': 'forum', 'page': 'reorder_categories'});
+    var url = buildNewCourseUrl(['forum', 'categories', 'reorder']);
     $.ajax({
         url: url,
         type: "POST",
@@ -908,12 +925,12 @@ function hidePosts(text, id) {
 
 function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
     if(!checkAreYouSureForm()) return;
-    var page = (isDeletion?"delete_post":"undelete_post");
+    var type = (isDeletion ? '0' : '2');
     var message = (isDeletion?"delete":"undelete");
 
     var confirm = window.confirm("Are you sure you would like to " + message + " this post?: \n\nWritten by:  " + author + "  @  " + time + "\n\nPlease note: The replies to this comment will also be " + message + "d. \n\nIf you are " + message + " the first post in a thread this will " + message + " the entire thread.");
     if(confirm){
-        var url = buildUrl({'component': 'forum', 'page': page});
+        var url = buildNewCourseUrl(['forum', 'posts', 'modify']) + `?modify_type=${type}`;
         $.ajax({
             url: url,
             type: "POST",
@@ -939,11 +956,11 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                 switch(json['type']){
                     case "thread":
                     default:
-                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread'});
+                        new_url = buildNewCourseUrl(['forum', 'threads']);
                         break;
 
                     case "post":
-                        new_url = buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id});
+                        new_url = buildNewCourseUrl(['forum', 'threads', thread_id]);
                         break;
                 }
                 window.location.replace(new_url);
@@ -955,10 +972,10 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
     }
 }
 
-function alterAnnouncement(thread_id, confirmString, url, csrf_token){
+function alterAnnouncement(thread_id, confirmString, type, csrf_token){
     var confirm = window.confirm(confirmString);
     if(confirm){
-        var url = buildUrl({'component': 'forum', 'page': url});
+        var url = buildNewCourseUrl(['forum', 'announcements']) + `?type=${type}`;
         $.ajax({
             url: url,
             type: "POST",
@@ -968,7 +985,7 @@ function alterAnnouncement(thread_id, confirmString, url, csrf_token){
 
             },
             success: function(data){
-                window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+                window.location.replace(buildNewCourseUrl(['forum', 'threads', thread_id]));
             },
             error: function(){
                 window.alert("Something went wrong while trying to remove announcement. Please try again.");
@@ -977,16 +994,17 @@ function alterAnnouncement(thread_id, confirmString, url, csrf_token){
     }
 }
 
-function pinThread(thread_id, url){
-    var url = buildUrl({'component': 'forum', 'page': url});
+function pinThread(thread_id, type){
+    var url = buildNewCourseUrl(['forum', 'threads', 'pin']) + `?type=${type}`;
     $.ajax({
         url: url,
         type: "POST",
         data: {
-            thread_id: thread_id
+            thread_id: thread_id,
+            csrf_token: csrfToken
         },
         success: function(data){
-            window.location.replace(buildUrl({'component': 'forum', 'page': 'view_thread', 'thread_id': thread_id}));
+            window.location.replace(buildNewCourseUrl(['forum', 'threads', thread_id]));
         },
         error: function(){
             window.alert("Something went wrong while trying on pin/unpin thread. Please try again.");
@@ -1002,7 +1020,7 @@ function addMarkdownCode(type, divTitle){
     if(type == 1) {
         insert = "[display text](url)";
     } else if(type == 0){
-        insert = "```language" +
+        insert = "```" +
             "\ncode\n```";
     }
     $(divTitle).val(text.substring(0, cursor) + insert + text.substring(cursor));
@@ -1065,13 +1083,14 @@ function loadThreadHandler(){
 
         var thread_id = $(obj).attr("data");
 
-        var url = buildUrl({'component': 'forum', 'page': 'view_thread'}) + "&thread_id=" + thread_id;
+        var url = buildNewCourseUrl(['forum', 'threads', thread_id]);
         $.ajax({
             url: url,
             type: "POST",
             data: {
                 thread_id: thread_id,
-                ajax: "true"
+                ajax: "true",
+                csrf_token: csrfToken
             },
             success: function(data){
                 try {
@@ -1086,6 +1105,8 @@ function loadThreadHandler(){
                     $('#messages').append(message);
                     return;
                 }
+
+                $(obj).find('.thread_box').removeClass('new_thread');
 
                 $('.thread_box').removeClass('active');
 

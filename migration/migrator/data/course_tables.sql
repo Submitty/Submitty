@@ -519,11 +519,17 @@ CREATE TABLE notification_settings (
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
 	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission BOOLEAN DEFAULT TRUE NOT NULL,
 	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL
 );
 
 --
@@ -552,7 +558,7 @@ CREATE TABLE grade_override (
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading', 'team');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
@@ -575,18 +581,19 @@ CREATE TABLE notifications (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-	"id" serial NOT NULL,
-	"thread_id" int NOT NULL,
-	"parent_id" int DEFAULT '-1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEXT NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
-	"anonymous" BOOLEAN NOT NULL,
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"endorsed_by" varchar,
-	"type" int NOT NULL,
-  "has_attachment" BOOLEAN NOT NULL,
-	CONSTRAINT posts_pk PRIMARY KEY ("id")
+        "id" serial NOT NULL,
+        "thread_id" int NOT NULL,
+        "parent_id" int DEFAULT '-1',
+        "author_user_id" character varying NOT NULL,
+        "content" TEXT NOT NULL,
+        "timestamp" timestamp with time zone NOT NULL,
+        "anonymous" BOOLEAN NOT NULL,
+        "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+        "endorsed_by" varchar,
+        "type" int NOT NULL,
+        "has_attachment" BOOLEAN NOT NULL,
+        "render_markdown" BOOLEAN NOT NULL DEFAULT 'false',
+        CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (

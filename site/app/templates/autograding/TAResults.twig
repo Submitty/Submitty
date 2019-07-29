@@ -12,8 +12,9 @@
     <h3>Grading not complete, please contact an instructor/grader</h3>
 {% else %}
     <div class="sub">
+
         {# Overview #}
-        <div class="box half" style="padding: 10px; width: 40%; word-break: break-word;">
+        <div class="box half" style="padding: 10px; width: 30%; word-break: break-word;">
             <p>Version #{{ ta_graded_version }} graded by: {{ grader_names|join(", ") }}</p>
             {% if regrade_available %}
                 <i>Grade inquiries are due by {{ regrade_date }}</i>
@@ -26,18 +27,77 @@
             {% endif %}
             </p>
         </div>
-        {% if any_late_days_used %}
-            <a name="show_late_table" style="float:right" class="btn btn-primary" href="{{ late_days_url }}">Show my late days information</a>
-        {% endif %}
+
         {% if uploaded_pdfs|length >= 1 %}
-        <div class="box half" style="float: right; width: 25%; word-break: break-word">
-            View/Download submission with feedback:
-            <br />
-            {% for file in uploaded_pdfs %}
-                {{ file.name }}
-                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a>
-            {% endfor %}
-        </div>
+            <div class = "row" style="float: right">
+                    <div class="col-sm-2" style=" padding: 10px; width: 25%; word-break: break-word; display: inline-block">
+                        <p style="text-align:center">File Name:</p>
+                    </div>
+                    <div class="col-sm-3" style="text-align:center; padding: 10px; width: 25%; word-break: break-word; display: inline-block">
+                        <p style="text-align:center">&nbsp;&nbsp;Original:</p>
+                    </div>
+                    <div class="col-sm-3" style="text-align:center; padding: 10px; width: 25%; word-break: break-word; display: inline-block">
+                        <p style="text-align:center"> &nbsp;&nbsp;&nbsp;&nbsp;Grader Feedback:</p>
+                    </div>
+                <div class="row">
+                    <div class="box col-sm-3" style="float: right; padding: 20px; width: 25%; word-break: break-word; display: inline-block">
+                        {% for file in files %}
+                            {% if loop.index != uploaded_pdfs|length %}
+                                <div style="margin-bottom: 2em">
+                                    {{ file.relative_name }}
+                                </div>
+                            {% else %}
+                                {{ file.relative_name }}
+                            {% endif %}
+
+                        {% endfor %}
+                    </div>
+                    <div class="box col-sm-6" style="padding: 10px; width: 40%; word-break: break-word; display: inline-block">
+                        {% for file in files %}
+                            <p style="text-align:center">
+                                {# download icon if student can download files #}
+                                {% if can_download %}
+                                    <button class = 'btn btn-default' onclick='downloadFile("{{ file.relative_name|url_encode }}","{{ file.path|url_encode }}", "submissions")'> Download
+                                        <i class="fas fa-download" aria-hidden="true" title="Download the file"></i></button>
+                                {% endif %}
+                                <a class="btn btn-primary" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.relative_name }}')">View Popup <i class="fas fa-window-restore"></i></a>
+                            </p>
+                            {% if loop.index != files|length %}
+                                <br />
+                            {% endif %}
+                        {% endfor %}
+                        {% if can_download and files|length > 1 %}
+                            <hr>
+                            <p style="text-align:center">
+                                Download all files: <button class = "btn btn-default" onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'> Download Zip
+                                    <i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></button>
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="box col-sm-3" style="padding: 10px; width: 30%; word-break: break-word; display: inline-block">
+                        {% for file in uploaded_pdfs %}
+                            {% if file.name in annotated_file_names %}
+                                {% if loop.index != uploaded_pdfs|length %}
+                                    <div style="margin-bottom: 1.28em">
+                                        <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
+                                            <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
+                                    </div>
+                                {% else %}
+                                    <p style="text-align:center"> {#<a class="btn btn-primary" onclick="openUrl('{{ core.buildUrl({'component':'student', 'page':'PDF', 'action':'download_annotated_pdf', 'gradeable_id': gradeable_id, 'file_name': file.name}) }}')">Download <i class="fas fa-download"></i></a>#}
+                                        <a class="btn btn-success" onclick="openUrl('{{ student_pdf_view_url }}?filename={{ file.name }}')">View Popup <i class="fas fa-window-restore"></i></a></p>
+                                {% endif %}
+                            {% else %}
+                                {% if loop.index != uploaded_pdfs|length %}
+                                    <div style="margin-bottom: 3.4em"></div>
+                                {% endif %}
+                            {% endif %}
+
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+
         {% endif %}
         {# /Overview #}
 
