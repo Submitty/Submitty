@@ -34,6 +34,9 @@ function onComponentTabClicked(tab) {
   // style components
   component_tabs.trigger('eventChangeSelectedTab');
 
+  // update header
+  $(".grade-inquiry-header").text("Grade Inquiry: " + $(tab).text());
+
   // set cookie for selected component
   var date = new Date();
   date.setTime(date.getTime()+(60*1000));
