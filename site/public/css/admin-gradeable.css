@@ -167,3 +167,33 @@ div.btn-container {
 #team-settings-container {
     margin-top: 10px;
 }
+
+#modal-header-top-block {
+    display: inline-block;
+}
+
+#rebuild_status_panel {
+    display: inline-block;
+    background-color: lightgrey;
+    width: auto;
+
+    padding: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
+    float: left;
+}
+
+#rebuild_status_label {
+    display: inline-block;
+}
+
+#rebuild_status {
+    display: inline-block;
+    margin: auto;
+}
+
+#rebuild_log_button {
+    display: flex;
+    margin: auto;
+}

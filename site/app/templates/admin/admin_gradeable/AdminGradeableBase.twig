@@ -11,8 +11,18 @@
         method="post" enctype="multipart/form-data" onsubmit="return checkForm();"> 
 
         <div class="modal-header" style="overflow: auto;">
-            <div>
+            <div id="modal-header-top-block">
                 <h1 id="myModalLabel">{{ action == 'edit' ? 'Edit Gradeable' : 'New Gradeable' }}<span id="modal_label_title"></span></h1>
+				
+				{% if action == 'edit' %}
+					<div id="rebuild_status_panel">
+						<span id="rebuild_status_label">Build Status: </span>
+						<div id="rebuild_status">
+							Finished Building
+						</div>
+						<input id="rebuild_log_button" type="button" value="Open Rebuild Log"/>
+					</div>
+				{% endif %}
             </div>
             <div>
                 <b>                    
