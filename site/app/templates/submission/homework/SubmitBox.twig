@@ -10,7 +10,7 @@
 {% endif %}
 
 <div class="content">
-    <header>
+    <header id="gradeable-info">
         <h1>New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
             <h2>Due: {{ formatted_due_date }}</h2>
@@ -18,68 +18,61 @@
     </header>
 
     {% if show_no_late_submission_warning %}
-        <div>
-            <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
-        </div>
+        <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
-
-    <br/>
 
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
-        <form id="submissionForm" method="post" style="width: 100%; ">
-	    <fieldset>
-            <legend> Select submission mode: </legend>
-            <div style="clear:both;">
-                <input type='radio' id="radio_normal" name="submission_type" checked="true">
-                <label for="radio_normal">Normal Submission</label>
-                &nbsp;&nbsp;&nbsp;&nbsp;
-                <input type='radio' id="radio_student" name="submission_type">
-                <label for="radio_student">Make Submission for a Student</label>
+        <form id="submission-form" method="post">
+            <fieldset id="submission-mode">
+                <legend> Select submission mode: </legend>
+                <label for="radio-normal">
+                    <input type='radio' id="radio-normal" name="submission_type" checked="true">
+                    Normal Submission
+                </label>
+                <label for="radio-student">
+                    <input type='radio' id="radio-student" name="submission_type">
+                    Make Submission for a Student
+                </label>
                 {% if part_names|length == 1 and not is_vcs %}
-                    &nbsp;&nbsp;&nbsp;&nbsp;
-                    <input type='radio' id="radio_bulk" name="submission_type">
-                    <label for="radio_bulk">Bulk PDF Upload
-                    <a style="text-decoration:none;" aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
-	                    <i aria-hidden="true" title="Bulk PDF Upload Help" class="far fa-question-circle helpicon"></i>
-                    </a>
+                    <label for="radio-bulk">
+                        <input type='radio' id="radio-bulk" name="submission_type">
+                        Bulk PDF Upload
+                        <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
+                            <i aria-hidden="true" title="Bulk PDF Upload Help" class="far fa-question-circle helpicon"></i>
+                        </a>
                     </label>
                 {% endif %}
-            </div>
-            <div id="user_id_input" style="display: none">
-                <br />
+            </fieldset>
+            <div id="user-id-input" class="hide">
                 <div class="sub">
                     Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
                 </div>
                 <div class="sub">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     <label for="user_id"> user_id: </label>
-		    <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
-            <br />
-            <div class = "sub" id="pdf_submit_button" style="display: none">
+            <div class="sub hide" id="pdf-submit-button">
                 <div class="sub">
-                    <label for="use_qr">Split by QR code?</label>
-                    <input type="checkbox" id="use_qr">
-                    <br />
-                    <label id="pages_prompt" for="num_pages"># of page(s) per PDF:</label>
-                    <span id="prefix_prompt">QR code prefix/suffix:
-                    <a style="text-decoration:none;" aria-label="Split by QR Code Help" href = "https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
+                    <label for="use-qr">Split by QR code?</label>
+                    <input type="checkbox" id="use-qr">
+                    <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
+                    <span id="prefix-prompt">QR code prefix/suffix:
+                    <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
 	                    <i aria-hidden="true" title="Split by QR Code Help" class="far fa-question-circle helpicon"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
-                    <div id="expected_num_box">
+                    <div id="expected-num-box">
                     <label for= "expected_pages_input"> Expected Number of pages per PDF: </label>
                     <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
                     </div>
                 </div>
-                <br />
             </div>
-            </fieldset>
         </form>
 
         <script type="text/javascript">
@@ -87,28 +80,28 @@
                 students_full = {{ students_full|json_encode|raw }};
                 $('#qr_prefix').prop('hidden', true);
                 $('#qr_suffix').prop('hidden', true);
-                $('#prefix_prompt').prop('hidden', true);
+                $('#prefix-prompt').prop('hidden', true);
                 $('#bulk_progress_box').prop('hidden', true);
-                $('#expected_num_box').prop('hidden', true);
+                $('#expected-num-box').prop('hidden', true);
 
                 //load what upload mode the user selected (if any)
-                if(sessionStorage.getItem('radio_bulk')){
-                    $('#radio_bulk').prop('checked', true);
+                if(sessionStorage.getItem('radio-bulk')){
+                    $('#radio-bulk').prop('checked', true);
                     $('#bulk_progress_box').prop('hidden', false);
-                }else if(sessionStorage.getItem('radio_student')){
-                    $('#radio_student').prop('checked',true);
+                }else if(sessionStorage.getItem('radio-student')){
+                    $('#radio-student').prop('checked',true);
                 }else{
-                    $('#radio_normal').prop('checked',true);
+                    $('#radio-normal').prop('checked',true);
                 }
                 //load if bulkupload with qr codes selected or not
-                if(sessionStorage.getItem('use_qr')){
+                if(sessionStorage.getItem('use-qr')){
                     $('#qr_prefix').prop('hidden',false)
                     $('#qr_suffix').prop('hidden',false)
-                    $('#prefix_prompt').prop('hidden', false);
-                    $('#pages_prompt').prop('hidden', true);
+                    $('#prefix-prompt').prop('hidden', false);
+                    $('#pages-prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
-                    $('#use_qr').prop('checked',true);
-                    $('#expected_num_box').prop('hidden', false);
+                    $('#use-qr').prop('checked',true);
+                    $('#expected-num-box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -117,16 +110,16 @@
                         $('#qr_suffix').val(sessionStorage.getItem('qr_suffix'));
                     }
                 }
-                if ($("#radio_student").is(":checked")) {
-                    $('#user_id_input').show();
+                if ($("#radio-student").is(":checked")) {
+                    $('#user-id-input').show();
                 }
-                if ($("#radio_bulk").is(":checked")) {
-                    $('#pdf_submit_button').show();
+                if ($("#radio-bulk").is(":checked")) {
+                    $('#pdf-submit-button').show();
                     $('#bulk_progress_box').prop('hidden', false);
                 }else{
                      $('#bulk_progress_box').prop('hidden', true);
                 }
-                if($('#use_qr').is(':checked')){
+                if($('#use-qr').is(':checked')){
                     //save qr_code prefix on textarea change
                     $('#qr_prefix').change(function(){
                         sessionStorage.setItem('qr_prefix', $('#qr_prefix').val());
@@ -135,41 +128,41 @@
                         sessionStorage.setItem('qr_suffix', $('#qr_suffix').val());
                     });
                 }
-                $('#radio_normal').click(function() {
-                    sessionStorage.setItem('radio_normal', true);
-                    sessionStorage.removeItem('radio_student');
-                    sessionStorage.removeItem('radio_bulk');
-                    $('#pdf_submit_button').hide();
-                    $('#user_id_input').hide();
-                    $('#pdf_submit_button').hide();
+                $('#radio-normal').click(function() {
+                    sessionStorage.setItem('radio-normal', true);
+                    sessionStorage.removeItem('radio-student');
+                    sessionStorage.removeItem('radio-bulk');
+                    $('#pdf-submit-button').hide();
+                    $('#user-id-input').hide();
+                    $('#pdf-submit-button').hide();
                     $('#user_id').val('');
                     $('#bulk_progress_box').prop('hidden', true);
                 });
-                $('#radio_student').click(function() {
-                    sessionStorage.setItem('radio_student', true);
-                    sessionStorage.removeItem('radio_bulk');
-                    sessionStorage.removeItem('radio_normal');
-                    $('#pdf_submit_button').hide();
-                    $('#user_id_input').show();
+                $('#radio-student').click(function() {
+                    sessionStorage.setItem('radio-student', true);
+                    sessionStorage.removeItem('radio-bulk');
+                    sessionStorage.removeItem('radio-normal');
+                    $('#pdf-submit-button').hide();
+                    $('#user-id-input').show();
                     $('#bulk_progress_box').prop('hidden', true);
                 });
-                $('#radio_bulk').click(function()  {
-                    sessionStorage.setItem('radio_bulk', true);
-                    sessionStorage.removeItem('radio_student');
-                    sessionStorage.removeItem('radio_normal');
-                    $('#user_id_input').hide();
-                    $('#pdf_submit_button').show();
+                $('#radio-bulk').click(function()  {
+                    sessionStorage.setItem('radio-bulk', true);
+                    sessionStorage.removeItem('radio-student');
+                    sessionStorage.removeItem('radio-normal');
+                    $('#user-id-input').hide();
+                    $('#pdf-submit-button').show();
                     $('#user_id').val('');
                     $('#bulk_progress_box').prop('hidden', false);
                 });
-                $('#use_qr').click(function(){
-                    (sessionStorage.getItem('use_qr')) ? sessionStorage.removeItem('use_qr') : sessionStorage.setItem('use_qr', true);
+                $('#use-qr').click(function(){
+                    (sessionStorage.getItem('use-qr')) ? sessionStorage.removeItem('use-qr') : sessionStorage.setItem('use-qr', true);
                     $('#num_pages').prop('hidden', !$('#num_pages').is(':hidden'));
                     $('#qr_prefix').prop('hidden', !$('#qr_prefix').is(':hidden'));
                     $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
-                    $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
-                    $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
-                    $('#expected_num_box').prop('hidden',!$('#expected_num_box').is(':hidden'));
+                    $('#prefix-prompt').prop('hidden', !$('#prefix-prompt').is(':hidden'));
+                    $('#pages-prompt').prop('hidden', !$('#pages-prompt').is(':hidden'));
+                    $('#expected-num-box').prop('hidden',!$('#expected-num-box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -183,24 +176,22 @@
         {% if vcs_host_type == 0 or vcs_host_type == 1 %}
             <h3>To access your Repository:</h3>
             <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
         {% endif %}
 
         {% if vcs_host_type == 2 or vcs_host_type == 3 %}
             <h3>Please enter your GitHub URL: </h3>
 
             GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
-            <input style='width: 16%' type="text" id="github_user_id" name="git_user_id" class="required" value="{{ github_user_id }}" placeholder="user_name"/>
+            <input type="text" id="github-user-id" name="git_user_id" class="required github-id" value="{{ github_user_id }}" placeholder="user_name"/>
             <kbd>/</kbd>
-            <input style='width: 16%' type="text" id="github_repo_id" name="git_repo_id" class="required" value="{{ github_repo_id }}" placeholder="repo_name"/>
-            <br />
+            <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
 
             {% if vcs_host_type == 2 %}
             Note: This should be a <em>public repository</em>, visible to everyone.
             {% else %}
             Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
             {% endif %}
-            <br /><br />
 
         {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
@@ -226,8 +217,6 @@
                     {# Handle if cell is image #}
                     {% elseif cell.type == "image" %}
 
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
-
                         <img src="{{ attribute(image_data, cell.image) }}"
 
                         {% if cell.width > 0 %}
@@ -244,29 +233,37 @@
 
                         >
 
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
+
                     {# Handle if cell is short_answer #}
                     {% elseif cell.type == "short_answer" %}
-
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
 
                         {# If programming language not defined render regular text boxes #}
                         {% if cell.programming_language is not defined %}
 
-                            {{ self.render_short_answer(cell, num_short_answer, highest_version) }}
+                            {{ self.render_short_answer(cell, num_short_answer, highest_version, testcase_messages) }}
                             {% set num_short_answer = num_short_answer + 1 %}
 
                         {# Else render a codebox #}
                         {% else %}
+                                <div>
+                                    {% if cell.label %}
+                                        {{ cell.label | markdown }}
+                                    {% else %}
+                                        Write your {{ cell.programming_language | title }} below:
+                                    {% endif %}
+                                </div>
+
                                 <div id="codebox_{{ num_codeboxes }}"
                                      name="codebox_{{ num_codeboxes }}"
                                      class="codebox"
                                      data-initial_value="{{ cell.initial_value }}"
                                      data-recent_submission="{{ cell.recent_submission }}"
-                                     style="border: 1px solid LightGrey;" onKeyPress="handle_input_keypress();">
+                                     onKeyPress="handle_input_keypress();">
                                 </div>
 
-                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox_clear_reset">Clear</button>
-                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox_clear_reset">Use Most Recent Submission</button>
+                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
+                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
 
                                 <script>
 
@@ -306,49 +303,65 @@
 
                                     {% endif %}
                                 </script>
-                            <br>
                             {% set num_codeboxes = num_codeboxes + 1 %}
                         {% endif %}
 
                     {# Handle if cell is multiple choice #}
                     {% elseif cell.type == "multiple_choice" %}
 
-                        {{ self.render_testcase_messages(cell, testcase_messages) }}
-
                         <fieldset id="mc_field_{{ num_multiple_choice }}"
                                   class="mc"
                                   {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
-                            {% for choice in cell.choices %}
-                                {% if cell.allow_multiple == true %}
-                                    <input type="checkbox"
-                                           name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                           value="{{ choice.value }}"
-                                           onclick="handle_input_keypress();" />
+                            {% if cell.allow_multiple == true %}
+                                <legend>
+                                    {% if cell.label %}
+                                        {{ cell.label | markdown }}
+                                    {% else %}
+                                        You may select many:
+                                    {% endif %}
+                                </legend>
 
+                                {{ self.render_testcase_messages(cell, testcase_messages) }}
+
+                                {% for choice in cell.choices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                                        <input type="checkbox"
+                                               name="multiple_choice_{{ num_multiple_choice }}"
+                                               id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
+                                               value="{{ choice.value }}"
+                                               onclick="handle_input_keypress();" 
+                                        />
                                         {{ choice.description | markdown }}
                                     </label>
+                                {% endfor %}
+                            {% else %}
+                                <legend>
+                                    {% if cell.label %}
+                                        {{ cell.label | markdown }}
+                                    {% else %}
+                                        Select one:
+                                    {% endif %}
+                                </legend>
 
-                                {% else %}
-                                    <input type="radio"
-                                           name="multiple_choice_{{ num_multiple_choice }}"
-                                           id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
-                                           value="{{ choice.value }}"
-                                           onclick="handle_input_keypress();" />
+                                {{ self.render_testcase_messages(cell, testcase_messages) }}
 
+                                {% for choice in cell.choices %}                                      
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                                        <input type="radio"
+                                               name="multiple_choice_{{ num_multiple_choice }}"
+                                               id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
+                                               value="{{ choice.value }}"
+                                               onclick="handle_input_keypress();" 
+                                        />
                                         {{ choice.description | markdown }}
                                     </label>
-
-                                {% endif %}
-                                <br/>
-                            {% endfor %}
+                                {% endfor %}
+                            {% endif %}
                         </fieldset>
 
                         {# Create reset to recent submission button #}
-                        <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc_clear">Clear</button>
-                        <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc_recent">Use Most Recent Submission</button>
+                        <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
+                        <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
 
                         <script>
                             {# Populate checkboxes initially #}
@@ -388,16 +401,17 @@
         </div>
 
         {# File upload boxes #}
-        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
+        <div id="upload-boxes">
             {# Submit boxes #}
             {% for part in part_names %}
                 {# uploadIndex and input_fileIndex required for drag-and-drop.js #}
                 <div tabindex="0"
                      id="upload{{ loop.index }}"
+                     class="upload-box"
                      onkeypress="clicked_on_box(event)"
                      role="text"
                      aria-label="Press enter to upload your {{ part }} file"
-                     style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
+                >
                     <h2 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
@@ -405,7 +419,7 @@
                             Drag your file(s) here or click to open file browser
                         {% endif %}
                     </h2>
-                    <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
+                    <input type="file" name="files" id="input_file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                 </div>
             {% endfor %}
         </div>
@@ -416,20 +430,18 @@
                 <div class="sub">
                     <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
                     {% for component_name in component_names %}
-                        <div>{{ component_name }}: <input type="number" id="page_{{ loop.index0 }}" min="1"></div><br />
+                        <div>{{ component_name }}: <input type="number" id="page_{{ loop.index0 }}" min="1"></div>
                     {% endfor %}
                 </div>
             </form>
         {% endif %}
         {# /Page selector #}
 
-        <div>
+        <p>
             {{ upload_message }}
-            <br>
-            &nbsp;
-        </div>
+        </p>
 
-        <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
+        <button type="button" id="submit" class="btn btn-success">Submit</button>
 
         {% if part_names is not empty %}
             <button type="button" id="startnew" class="btn btn-primary">Clear</button>
@@ -549,15 +561,15 @@
         $("#submit").click(function(e){ // Submit button
             var user_id = "";
             var num_pages = 0;
-            if ($('#radio_student').is(':checked')) {
+            if ($('#radio-student').is(':checked')) {
                 user_id = $("#user_id").val();
             };
-            if ($('#radio_bulk').is(':checked')) {
+            if ($('#radio-bulk').is(':checked')) {
                 num_pages = $("#num_pages").val();
-                use_qr = $("#use_qr").is(":checked");
+                use_qr = $("#use-qr").is(":checked");
                 qr_prefix = $('#qr_prefix').val();
                 qr_suffix = $('#qr_suffix').val();
-                if($('#use_qr').is(':checked')){
+                if($('#use-qr').is(':checked')){
                     if(!sessionStorage.getItem('qr_prefix'))
                         sessionStorage.setItem('qr_prefix', qr_prefix );
                     if(!sessionStorage.getItem('qr_suffix'))
@@ -568,11 +580,11 @@
             var git_user_id = "";
             var git_repo_id = "";
             if ({{ is_vcs ? "true" : "false" }}) {
-                git_user_id = $("#github_user_id").val();
-                git_repo_id = $("#github_repo_id").val();
+                git_user_id = $("#github-user-id").val();
+                git_repo_id = $("#github-repo-id").val();
             }
             // bulk upload
-            if ($("#radio_bulk").is(":checked")) {
+            if ($("#radio-bulk").is(":checked")) {
                 handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix, qr_suffix );
             }
             // no user id entered, upload for whoever is logged in
@@ -616,7 +628,7 @@
         {% if testcase_messages[cell.testcase_ref] is defined %}
 
             {% for msg in testcase_messages[cell.testcase_ref] %}
-                <p class="feedback_msg_{{ msg.type }}">{{ msg.message }}</p>
+                <p class="feedback-msg-{{ msg.type }}">{{ msg.message }}</p>
             {% endfor %}
 
         {% endif %}
@@ -625,15 +637,25 @@
 
 {% endmacro %}
 
-{% macro render_short_answer(short_answer, index, version) %}
-
-    <p style="max-width: 50em;">
+{% macro render_short_answer(short_answer, index, version, testcase_messages) %}
+    <p class="short-answer">
         {% if short_answer.rows == 0 %}
-            <input
+            <label>
+                <div>
+                    {% if short_answer.label %}
+                        {{ short_answer.label | markdown }}
+                    {% else %}
+                        Write your answer below:
+                    {% endif %}
+                </div>
+
+                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
+
+                <input
                     type="text"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
-                    class="sa_box"
+                    class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     {% if core.getConfig().keepPreviousFiles() %}
@@ -641,21 +663,35 @@
                     {% else %}
                         value="{{ short_answer.initial_value }}"
                     {% endif %}
-                    onKeyPress="handle_input_keypress();">
-            <br />
+                    onKeyPress="handle_input_keypress();"
+                />
+            </label>
         {% else %}
-            <label>Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea
+            <label>
+                <div>
+                    {% if short_answer.label %}
+                        {{ short_answer.label | markdown }}
+                    {% else %}
+                        Write your answer below:
+                    {% endif %}
+                    Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
+                </div>
+
+                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
+
+                {# Single line to prevent whitespace from being captured #}
+                <textarea
                     rows="{{ short_answer.rows }}"
                     cols="50"
-                    style="width:60em; height:100%; min-height:110px;"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
-                    class="sa_box"
+                    class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
-                    onKeyPress="handle_input_keypress()">{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
-            <br />
+                    onKeyPress="handle_input_keypress()"
+                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}
+                </textarea>
+            </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -666,8 +702,8 @@
                 enableTabsInTextArea('#short_answer_{{ index }}');
             </script>
         {% endif %}
-        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa_clear_reset">Clear</button>
-        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa_clear_reset">Use Most Recent Submission</button>
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa-clear-reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
         <script>
 
             {% if version == 0 %}
@@ -691,5 +727,4 @@
 
         </script>
     </p>
-    <br>
 {% endmacro %}

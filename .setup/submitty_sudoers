@@ -1,0 +1,2 @@
+submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/sbin/create_course.sh
+submitty_daemon ALL = (root) NOPASSWD: /usr/local/submitty/sbin/adduser.py

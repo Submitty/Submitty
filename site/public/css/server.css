@@ -1758,6 +1758,10 @@ header > * {
     text-align: left !important;
 }
 
+.hide {
+    display: none;
+}
+
 .bare-button {
     border: none;
     padding: 0;
