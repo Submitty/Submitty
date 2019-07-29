@@ -33,8 +33,8 @@ class GradedGradeable extends AbstractModel {
     protected $ta_graded_gradeable = null;
     /** @property @var AutoGradedGradeable The Autograding info */
     protected $auto_graded_gradeable = null;
-    /** @property @var array|null The grade inquiries for this submitter/gradeable  */
-    protected $regrade_requests = null;
+    /** @property @var array The grade inquiries for this submitter/gradeable  */
+    protected $regrade_requests = [];
 
     /** @property @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
@@ -146,6 +146,18 @@ class GradedGradeable extends AbstractModel {
                 $carry = $item->getStatus() || $carry;
                 return $carry;
             });
+    }
+
+    public function getGradeInquiryByGcId($gc_id) {
+        foreach ($this->regrade_requests as $grade_inquiry) {
+            if ($grade_inquiry->getGcId() == $gc_id)
+                return $grade_inquiry;
+        }
+        return null;
+    }
+
+    public function getGradeInquiryCount() {
+        return count($this->regrade_requests);
     }
 
     /**

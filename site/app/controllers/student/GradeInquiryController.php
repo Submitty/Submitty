@@ -3,6 +3,7 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\models\gradeable\GradedGradeable;
 use app\models\Notification;
 use app\models\Email;
 use app\libraries\response\Response;
@@ -52,7 +53,7 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content, $gc_id);
-            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new');
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'new', $gc_id);
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
@@ -102,14 +103,17 @@ class GradeInquiryController extends AbstractController {
             );
         }
 
-        $grade_inquiry = array_filter($graded_gradeable->getRegradeRequests(), function($grade_inquiry) use ($gc_id) {
-            return $grade_inquiry->getGcId() == $gc_id;
-        });
-        $grade_inquiry_id = array_values($grade_inquiry)[0]->getId();
+        $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
+        if (is_null($grade_inquiry)){
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Cannot find grade inquiry')
+            );
+        }
+        $grade_inquiry_id = $grade_inquiry->getId();
 
         try {
             $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
-            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply');
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply',$gc_id);
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
@@ -159,12 +163,14 @@ class GradeInquiryController extends AbstractController {
             );
         }
 
-        $grade_inquiry = array_filter($graded_gradeable->getRegradeRequests(), function($grade_inquiry) use ($gc_id) {
-            return $grade_inquiry->getGcId() == $gc_id;
-        });
-        $grade_inquiry = array_values($grade_inquiry)[0];
+        $grade_inquiry = $graded_gradeable->getGradeInquiryByGcId($gc_id);
+        if (is_null($grade_inquiry)){
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Cannot find grade inquiry')
+            );
+        }
         // toggle status
-        $status = $graded_gradeable->getRegradeRequest()->getStatus();
+        $status = $grade_inquiry->getStatus();
         if ($status == -1) {
           $status = 0;
           $type = 'resolve';
@@ -174,9 +180,9 @@ class GradeInquiryController extends AbstractController {
         }
 
         try {
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
-            $this->notifyGradeInquiryEvent($graded_gradeable,$gradeable_id,$content,$type);
+            $grade_inquiry->setStatus($status);
+            $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
+            $this->notifyGradeInquiryEvent($graded_gradeable,$gradeable_id,$content,$type,$gc_id);
             if ($content != "") {
                 $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
             }
@@ -194,7 +200,14 @@ class GradeInquiryController extends AbstractController {
         }
     }
 
-    private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type)
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @param int $gradeable_id
+     * @param string $content
+     * @param string $type
+     * @param int|null $gc_id
+     */
+    private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type, $gc_id)
     {
         //TODO: send notification to grader per component
         if ($graded_gradeable->hasTaGradingInfo()) {
@@ -204,42 +217,48 @@ class GradeInquiryController extends AbstractController {
             $user_id = $this->core->getUser()->getId();
             $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
 
+            if (!is_null($gc_id)) {
+                $component = $graded_gradeable->getGradeable()->getComponent($gc_id);
+                $component_title = $component->getTitle();
+                $component_string = " and for component, $component_title";
+            }
+
             if ($type == 'new') {
                 if ($this->core->getUser()->accessGrading()) {
                     $subject = "New Grade Inquiry: $gradeable_title - $user_id";
-                    $body = "An Instructor/TA/Mentor submitted a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
+                    $body = "An Instructor/TA/Mentor submitted a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 } else {
                     $subject = "New Grade Inquiry: $gradeable_title - $user_id";
-                    $body = "A student has submitted a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
+                    $body = "A student has submitted a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 }
             } else if ($type == 'reply') {
                 if ($this->core->getUser()->accessGrading()) {
                     $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
-                    $body = "An Instructor/TA/Mentor made a post in a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
+                    $body = "An Instructor/TA/Mentor made a post in a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 } else {
                     $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
-                    $body = "A student has made a post in a grade inquiry for gradeable, $gradeable_title.\n\n$user_id writes:\n$content";
+                    $body = "A student has made a post in a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 }
 
             } else if ($type == 'resolve') {
                 if ($this->core->getUser()->accessGrading()) {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
                     $subject = "Grade Inquiry Resolved: $gradeable_title - $user_id";
-                    $body = "An Instructor/TA/Mentor has resolved your grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
+                    $body = "An Instructor/TA/Mentor has resolved your grade inquiry for gradeable, $gradeable_title$component_string.\n\n$included_post_content";
                 } else {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
                     $subject = "Grade Inquiry Resolved: $gradeable_title - $user_id";
-                    $body = "A student has cancelled a grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
+                    $body = "A student has cancelled a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$included_post_content";
                 }
             } else if ($type == 'reopen') {
                 if ($this->core->getUser()->accessGrading()) {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
                     $subject = "Grade Inquiry Reopened: $gradeable_title - $user_id";
-                    $body = "An Instructor/TA/Mentor has reopened your grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
+                    $body = "An Instructor/TA/Mentor has reopened your grade inquiry for gradeable, $gradeable_title$component_string.\n\n$included_post_content";
                 } else {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
                     $subject = "Grade Inquiry Reopened: $gradeable_title - $user_id";
-                    $body = "A student has reopened a grade inquiry for gradeable, $gradeable_title.\n\n$included_post_content";
+                    $body = "A student has reopened a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$included_post_content";
                 }
             }
 

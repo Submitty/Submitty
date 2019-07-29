@@ -744,10 +744,9 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
-
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
-
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
+
         $request_regrade_url = $this->core->buildNewCourseUrl([
             'gradeable',
             $graded_gradeable->getGradeable()->getId(),
@@ -769,17 +768,22 @@ class HomeworkView extends AbstractView {
 
         $grade_inquiries = $graded_gradeable->getRegradeRequests();
         $gradeable_components = $graded_gradeable->getGradeable()->getComponents();
-        // initialize grade inquiries array with all posts grade inquiry
+
+        // initialize grade inquiries array with all posts grade inquiry to aggregate all posts
         $grade_inquiries_twig_array = [];
         if (!is_null($grade_inquiries)) {
-            $grade_inquiries_twig_array[0] = ['posts' => []];
+            if ($grade_inquiry_per_component_allowed) {
+                $grade_inquiries_twig_array[0] = ['posts' => []];
+            }
             $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
-                $gc_title = $gc_id != 0 ? array_reduce($gradeable_components, function($c,$component) use ($gc_id) {
-                    $c .= $component->getId() == $gc_id ? $component->getTitle() : '';
-                    return $c;
-                }) : '';
+                $gc_title = '';
+                if ($gc_id != 0) {
+                    $component = $graded_gradeable->getGradeable()->getComponent($gc_id);
+                    $gc_title = $component->getTitle();
+                }
+
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
@@ -791,6 +795,7 @@ class HomeworkView extends AbstractView {
                     $posts[] = [
                         'is_staff' => $is_staff,
                         'date' => date_format($date, 'm/d/Y g:i A'),
+                        'date_sort' => $date,
                         'name' => $name,
                         'content' => $content,
                         'gc_title' => $gc_title
@@ -813,9 +818,20 @@ class HomeworkView extends AbstractView {
                     $grade_inquiries_twig_array[0]['status'] = $grade_inquiry->getStatus();
                 }
                 // add posts to all component
-                $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
+                if ($grade_inquiry_per_component_allowed) {
+                    $grade_inquiries_twig_array[0]['posts'] = array_merge($grade_inquiries_twig_array[0]['posts'], $posts);
+                } else {
+                    $grade_inquiries_twig_array[0]['posts'] = $posts;
+                }
             }
         }
+        // sort by most recent posts for all tab
+        if ($grade_inquiry_per_component_allowed) {
+            usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
+                return strtotime($a['date']) - strtotime($b['date']);
+            });
+        }
+
 
         // construct components array for tabs
         $components_twig_array = [];
@@ -829,25 +845,6 @@ class HomeworkView extends AbstractView {
             }
         }
         $components_twig_array[] = ['id' => 0, 'title' => 'All'];
-
-//        $posts = [];
-//        if ($graded_gradeable->hasRegradeRequest()) {
-//            $threads = $this->core->getQueries()->getRegradeDiscussions($graded_gradeable->getRegradeRequest());
-//            foreach ($threads as $thread) {
-//                if (empty($threads)) break;
-//                $is_staff = $this->core->getQueries()->isStaffPost($thread['user_id']);
-//                $name = $this->core->getQueries()->getUserById($thread['user_id'])->getDisplayedFirstName();
-//                $date = DateUtils::parseDateTime($thread['timestamp'], $this->core->getConfig()->getTimezone());
-//                $content = $thread['content'];
-//                $posts[] = [
-//                    'is_staff' => $is_staff,
-//                    'date' => date_format($date, 'm/d/Y g:i A'),
-//                    'name' => $name,
-//                    'content' => $content
-//                ];
-//
-//            }
-//        }
 
         return $this->core->getOutput()->renderTwigTemplate('submission/regrade/Discussion.twig', [
             'grade_inquiries' => $grade_inquiries_twig_array,

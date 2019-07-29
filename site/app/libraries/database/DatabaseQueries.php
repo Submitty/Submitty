@@ -3135,12 +3135,15 @@ AND gc_id IN (
         return ($this->course_db->row()['cnt']);
     }
     public function getRegradeDiscussions(array $grade_inquiries) {
+        if (count($grade_inquiries) == 0) {
+            return [];
+        }
         $grade_inquiry_ids = $this->createParamaterList(count($grade_inquiries));
         $params = array_map(function ($grade_inquiry) {
             return $grade_inquiry->getId();
         },$grade_inquiries);
         $this->course_db->query("SELECT * FROM regrade_discussion WHERE regrade_id IN $grade_inquiry_ids AND deleted=false ORDER BY timestamp ASC ", $params);
-        $result = array();
+        $result = [];
         foreach ($params as $id) {
             $result[$id] = array_filter($this->course_db->rows(), function ($v) use ($id) {
                 return $v['regrade_id'] == $id;

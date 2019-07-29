@@ -1,8 +1,8 @@
 {% import _self as self %}
 {% if grade_inquiry_per_component_allowed %}
 <h3>Grade Inquiries</h3>
-    <p>{{ regrade_message }}</p>
 {% endif %}
+<p>{{ regrade_message }}</p>
 {% if not has_submission %}
     <span class="yellow-message">No Submission</span>
 {% endif %}
@@ -40,19 +40,19 @@
                     {% endif %}
                 </div>
                 {% for post in grade_inquiries[component.id].posts %}
-                        <div class='{{ post.is_staff ? "post_box important" : "post_box" }}'>
-                            <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
-                            <hr>
-                            <div style="float:left">
-                                {% if grade_inquiry_per_component_allowed and component.id == 0 %}
-                                    <p class="component-identifier-post"><b>{{ post.gc_title }}</b></p>
-                                {% endif %}
-                            </div>
-                            <div style="float:right">
-                                <b>{{ post.name }}</b> &nbsp;
-                                {{ post.date }}
-                            </div>
+                    <div class='{{ post.is_staff ? "post_box important" : "post_box" }}'>
+                        <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
+                        <hr>
+                        <div style="float:left">
+                            {% if grade_inquiry_per_component_allowed and component.id == 0 %}
+                                <p class="component-identifier-post"><b>{{ post.gc_title }}</b></p>
+                            {% endif %}
                         </div>
+                        <div style="float:right">
+                            <b>{{ post.name }}</b> &nbsp;
+                            {{ post.date }}
+                        </div>
+                    </div>
                 {% endfor %}
                 {% if (grade_inquiry_per_component_allowed and not component.id == 0) or not grade_inquiry_per_component_allowed %}
                     <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
