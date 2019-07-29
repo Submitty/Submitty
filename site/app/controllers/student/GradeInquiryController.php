@@ -164,13 +164,6 @@ class GradeInquiryController extends AbstractController {
         });
         $grade_inquiry = array_values($grade_inquiry)[0];
         // toggle status
-<<<<<<< HEAD
-        $status = $grade_inquiry->getStatus() === -1 ? 0 : -1;
-
-        try {
-            $grade_inquiry->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($grade_inquiry);
-=======
         $status = $graded_gradeable->getRegradeRequest()->getStatus();
         if ($status == -1) {
           $status = 0;
@@ -184,7 +177,6 @@ class GradeInquiryController extends AbstractController {
             $graded_gradeable->getRegradeRequest()->setStatus($status);
             $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
             $this->notifyGradeInquiryEvent($graded_gradeable,$gradeable_id,$content,$type);
->>>>>>> 7dc7c26f3a2108cac86b876aa710fcfa4f09b59f
             if ($content != "") {
                 $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
             }
@@ -252,11 +244,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-<<<<<<< HEAD
-            $metadata = json_encode(['url' => $this->core->buildUrl(['component' => 'grading', 'page' => 'electronic', 'action' => 'grade', 'gradeable_id' => $gradeable_id, 'who_id' => $submitter->getId()])]);
-=======
             $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
->>>>>>> 7dc7c26f3a2108cac86b876aa710fcfa4f09b59f
             foreach ($graders as $grader) {
                 if ($grader->accessFullGrading() && $grader->getId() != $user_id) {
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
