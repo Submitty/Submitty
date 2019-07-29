@@ -75,6 +75,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
+            "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message"
         ];
@@ -183,6 +184,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("RPI", $config->getInstitutionName());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
+        $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
         $config->loadCourseJson($this->course_json_path);
@@ -274,6 +276,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
+            'course_code_requirements' => "Please follow your school's convention for course code.",
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',

@@ -229,6 +229,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
 fi
 # ------------------------------------------------------------------------
 
@@ -246,7 +247,6 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
-
 # ------------------------------------------------------------------------
 # Set owner/group of the top level logs directory
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
@@ -257,6 +257,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
 fi
@@ -582,6 +583,15 @@ echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\
 #############################################################
 
 cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
+
+################################################################################################################
+################################################################################################################
+# Allow course creation by daemon
+#############################################################
+
+cat ${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers | envsubst | cat - > /etc/sudoers.d/submitty
+chmod 0440 /etc/sudoers.d/submitty
+chown root:root /etc/sudoers.d/submitty
 
 ################################################################################################################
 ################################################################################################################
