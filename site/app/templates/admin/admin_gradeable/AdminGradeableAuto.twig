@@ -64,33 +64,6 @@
     <div class="btn-container">
         <a class="btn btn-primary" href="{{ core.buildUrl({ 'component': 'admin', 'page': 'admin_gradeable', 'action': 'rebuild_assignment', 'id': gradeable.getId() }) }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     </div>
-    <div class="log-container">
-        <div class="option-title">Build log:</div>
-        {% if build_script_output is null or build_script_output is empty %}
-            <pre>There is currently no build output.</pre>
-        {% else %}
-            <pre>{{ build_script_output|raw }}</pre>
-        {% endif %}
-    </div>
-
-    <div class="log-container">
-        <div class="option-title">CMake output:</div>
-        {% if cmake_output is null or cmake_output is empty %}
-            <pre>There is currently no cmake output.</pre>
-        {% else %}
-            <pre>{{ cmake_output|raw }}</pre>
-        {% endif %}
-    </div>
-
-    <div class="log-container">
-        <div class="option-title">Make output:</div>
-        {% if make_output is null or make_output is empty %}
-            <pre>There is currently no make output.</pre>
-        {% else %}
-            <pre>{{ make_output|raw }}</pre>
-        {% endif %}
-    </div>
-
 </div>
 
 <script type="text/javascript">

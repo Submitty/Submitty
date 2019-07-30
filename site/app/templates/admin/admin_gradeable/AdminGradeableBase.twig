@@ -18,12 +18,43 @@
 					<div id="rebuild_status_panel">
 						<span id="rebuild_status_label">Build Status: </span>
 						<div id="rebuild_status">
-							Finished Building
+							None
 						</div>
-						<input id="rebuild_log_button" type="button" value="Open Rebuild Log"/>
+						
+						<div id="rebuild_log_button">
+						<input id="open_build_log" type="button" value="Open Build Log" onclick="showBuildLog()" />
+						<input id="close_build_log" type="button" value="Close Build Log" onclick="hideBuildLog()" hidden />
+						</div>
+						
+						<div class="log-container" hidden>
+							<div class="option-title">Build log:</div>
+							{% if build_script_output is null or build_script_output is empty %}
+								<pre>There is currently no build output.</pre>
+							{% else %}
+								<pre>{{ build_script_output|raw }}</pre>
+							{% endif %}
+						</div>
+
+						<div class="log-container" hidden>
+							<div class="option-title">CMake output:</div>
+							{% if cmake_output is null or cmake_output is empty %}
+								<pre>There is currently no cmake output.</pre>
+							{% else %}
+								<pre>{{ cmake_output|raw }}</pre>
+							{% endif %}
+						</div>
+
+						<div class="log-container" hidden>
+							<div class="option-title">Make output:</div>
+							{% if make_output is null or make_output is empty %}
+								<pre>There is currently no make output.</pre>
+							{% else %}
+								<pre>{{ make_output|raw }}</pre>
+							{% endif %}
+						</div>
 					</div>
 				{% endif %}
-            </div>
+			</div>
             <div>
                 <b>                    
                     <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable">Need help with creating/editing a gradeable? <i style="font-style:normal;" class="helpicon"></i></a>
@@ -118,6 +149,18 @@
         onChangeNavTab(adminGradeableNavTab);
     }
 
+	function showBuildLog() {
+        $('.log-container').show();
+        $('#open_build_log').hide();
+        $('#close_build_log').show();
+    }
+
+    function hideBuildLog() {
+        $('.log-container').hide();
+        $('#open_build_log').show();
+        $('#close_build_log').hide();
+    }
+	
     function onTitleChange() {
         let title = $('#g_title').val();
         let my_id = $('#g_id').val();

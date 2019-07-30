@@ -148,6 +148,49 @@ $(document).ready(function () {
     });
 });
 
+function ajaxCheckBuildStatus(gradeable_id,current_status) {
+    $.getJSON({
+        url: buildUrl({
+            'component': 'admin',
+            'page': 'admin_gradeable',
+            'action': 'update_build_status',
+            'id': gradeable_id,
+            'build_status': current_status
+        }),
+        success: function (response) {
+            $('#rebuild_log_button').css('display','block');
+            if (response['data'] == 'queued') {
+                $('#rebuild_status').html(gradeable_id.concat(' is in the rebuild queue...'));
+                $('#rebuild_log_button').css('display','none');
+                ajaxCheckBuildStatus(gradeable_id,'queued');
+            }
+            else if (response['data'] == 'processing') {
+                $('#rebuild_status').html(gradeable_id.concat(' is being rebuilt...'));
+                $('#rebuild_log_button').css('display','none');
+                ajaxCheckBuildStatus(gradeable_id,'processing');
+            }
+            else if (response['data'] == true) {
+                $('#rebuild_status').html('Gradeable build complete');
+            }
+            else if (response['data'] == false) {
+                $('#rebuild_status').html('Gradeable build failed');
+            }
+            else if (response['data'] == 'timeout') {
+                $('#rebuild_status').html('Error');
+                console.error('Server took too long to respond, please try again.');
+            }
+            else {
+                $('#rebuild_status').html('Error');
+                console.error('Internal server error, please try again.');
+            }
+        },
+        error: function (response) {
+            console.error('Failed to parse response from server: ' + response);
+        }
+    });
+}
+
+
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     let container = $('#container-rubric');
     if (container.length === 0) {
@@ -169,6 +212,11 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
         }),
         data: p_values,
         success: function (response) {
+            if (Array.isArray(response['data'])) {
+                if (response['data'].includes('rebuild_queued')) {
+                    ajaxCheckBuildStatus(gradeable_id,'');
+                }
+            }
             setGradeableUpdateComplete();
             if (response.status === 'success') {
                 successCallback(response.data);

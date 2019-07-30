@@ -58,10 +58,59 @@ class AdminGradeableController extends AbstractController {
             case 'import_components':
                 $this->importComponents();
                 break;
+            case 'update_build_status':
+                $this->ajaxUpdateBuildStatus();
+                break;
             default:
                 $this->newPage();
                 break;
         }
+    }
+
+    private function ajaxUpdateBuildStatus() {
+        $gradeable_id = $_REQUEST['id'];
+        $build_status = $_REQUEST['build_status'];
+        $max_wait_time = 60;
+
+        $new_build_status = $this->getBuildStatusOfGradeable($gradeable_id);
+
+        while($new_build_status == $build_status && $max_wait_time > 0) {
+            sleep(1);
+            $max_wait_time--;
+            $new_build_status = $this->getBuildStatusOfGradeable($gradeable_id);
+        }
+
+        if ($new_build_status != $build_status) {
+            if ($new_build_status == 'none' && ($build_status == 'processing' || $build_status == 'queued')) {
+                $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+                $this->core->getOutput()->renderJsonSuccess($gradeable->hasAutogradingConfig());
+            }
+            else {
+                $this->core->getOutput()->renderJsonSuccess($new_build_status);
+            }
+        }
+        else {
+            $this->core->getOutput()->renderJsonSuccess('time_out');
+        }
+    }
+
+    private function getBuildStatusOfGradeable($gradeable_id) {
+        $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $rebuilding_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
+        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
+
+        if (is_file($queued_path)) {
+            $file_found = 'queued';
+        }
+        else if (is_file($rebuilding_path)) {
+            $file_found = 'processing';
+        }
+        else {
+            $file_found = 'none';
+        }
+        clearstatcache();
+        return $file_found;
     }
 
     /* Page load methods */
@@ -1057,6 +1106,9 @@ class AdminGradeableController extends AbstractController {
             if ($result !== null) {
                 // TODO: what key should this get?
                 $errors['server'] = $result;
+            }
+            else {
+                $updated_properties[] = 'rebuild_queued';
             }
         }
 
