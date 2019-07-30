@@ -5,6 +5,7 @@ import argparse
 import json
 import os
 import re
+from ../sbin/shipper_utils import dateutils
 
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 
@@ -42,20 +43,24 @@ def main():
         "course": args.course,
         "gradeable": args.assignment,
         "required_capabilities": required_capabilities,
-        "queue_time": time.localtime(),
+        "queue_time": dateutils.write_submitty_date(microseconds=True),
         "generate_output": True,
     }
     should_generated_output = False
     for testcase in testcases:
         input_generation_commands = testcase.get('input_generation_commands',[])
-        if input_generation_commands:
-            should_generated_output = True
-            break
+        validations = testcase.get('validation',[])
+        for validation in validations:
+            output_generation_commands = validation.get('command',[])
+            if output_generation_commands:
+                if not input_generation_commands:
+                    should_generated_output = True
+                    break
 
     if should_generated_output:
         path_grading_file = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue", "__".join([args.semester, args.course, args.assignment]))
         with open(path_grading_file, 'a') as grading_file:
-            json.dump(graded_file, grading_file)
+            json.dump(graded_file, grading_file,sort_keys=True,indent=4)
         print("Starting to build generated output")
 
 if __name__ == "__main__":
