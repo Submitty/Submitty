@@ -27,7 +27,7 @@ class MiscController extends AbstractController {
      * Returns a json string which contains the current server time broken up into year, month, day, hour, minute,
      * second
      *
-     * @Route("/misc/server_time")
+     * @Route("/server_time")
      * @return Response
      */
     public function getServerTime() {
@@ -132,7 +132,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/misc/read_file")
+     * @Route("/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
         $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));

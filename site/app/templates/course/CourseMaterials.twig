@@ -70,7 +70,7 @@
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url) }}
     {% endfor %}
 {% endmacro %}
 
@@ -131,9 +131,10 @@
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url
+        ) }}
     {% else %}
     <div>
 
@@ -160,7 +161,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url) }}
 
         </div>
     </div>
@@ -287,12 +288,10 @@
         var newDateTime = $(me).val();
         changeNewDateTime(path, newDateTime);
 
-        var url = buildNewUrl(['misc', 'server_time']);
+        var url = buildNewUrl(['server_time']);
 
-        $.ajax({
-            type: "POST",
+        $.get({
             url: url,
-            data: {csrf_token: csrfToken},
             success: function(data) {
                 var now = JSON.parse(data)['data'];
                 now = new Date(parseInt(now.year),
@@ -352,12 +351,10 @@
 
     function handleTimeZones() {
 
-        var url = buildNewUrl(['misc', 'server_time']);
+        var url = buildNewUrl(['server_time']);
 
-        $.ajax({
-            type: "POST",
+        $.get({
             url: url,
-            data: {csrf_token: csrfToken},
             success: function(data) {
 
                 // Collect server time

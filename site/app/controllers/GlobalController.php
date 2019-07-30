@@ -19,7 +19,7 @@ class GlobalController extends AbstractController {
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildNewUrl(['misc', 'read_file']) . '?' . http_build_query([
+            return $this->core->buildNewUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
@@ -333,7 +333,7 @@ class GlobalController extends AbstractController {
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildNewUrl(['misc', 'read_file']) . '?' . http_build_query([
+            return $this->core->buildNewUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
