@@ -28,10 +28,15 @@
         <div id="gradeables">
         {% for list_section, info in sections %}
             <div id="{{ info.section_id }}" class="course-section-heading">
-                {{ info.title }}
-                {% if info.subtitle != "" %}
-                    &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
-                {% endif %}
+                <div class="course-section-title">
+                    {{ info.title }}
+                    {% if info.subtitle != "" %}
+                        &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                    {% endif %}
+                </div>
+                {% for button in 1 .. max_buttons %}
+                    <div class="button-placeholder"></div>
+                {% endfor %}
             </div>
 
             <div id="{{ info.section_id }}-section" class="course-section">
@@ -56,11 +61,7 @@
                         </div>
                     </div>
                     {% for button in g_info.buttons %}
-                        {% if button is null %}
-                            <div class="button-placeholder"></div>
-                        {% else %}
-                            <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
-                        {% endif %}
+                        <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
                     {% endfor %}
                 </div>
                 {% endfor %}
@@ -75,44 +76,48 @@
 </div>
 
 {% macro renderButton(button) %}
-    <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}"
-        {% if button.getTitle() != null %}
-            name="{{ button.getTitle()|lower }}_button"
-        {% endif %}
-        {% if button.isDisabled() %}
-            disabled
-        {% else %}
-            {# assigns the href unless button has onclick affect #}
-            {% if not button.hasOnclick() %}
-                href="{{ button.getHref() }}"
-            {% else %}
-                onclick="{{ button.getOnclick() }}"
-            {% endif %}
-        {% endif %}
-        {% if button.isTitleOnHover %}
-            title="{{ button.getTitle() }}"
-        {% endif %}
-        {% if button.getAriaLabel() != null  %}
-            aria-label="{{ button.getAriaLabel() }}"
-        {% endif %}
-    >
-        {% if button.getBadge() > 0 %}
-            <span class="notification-badge">{{  button.getBadge() }} </span>
-        {% endif %}
-
-        {% if not button.isTitleOnHover() and button.getTitle() != null %}
-            {{ button.getTitle() }}
-        {% endif %}
-        {% if button.getSubtitle() != null %}
+    {% if button is null %}
+        <div class="button-placeholder"></div>
+    {% else %}
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}"
             {% if button.getTitle() != null %}
-                <br>
+                name="{{ button.getTitle()|lower }}_button"
             {% endif %}
-            <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
+            {% if button.isDisabled() %}
+                disabled
+            {% else %}
+                {# assigns the href unless button has onclick affect #}
+                {% if not button.hasOnclick() %}
+                    href="{{ button.getHref() }}"
+                {% else %}
+                    onclick="{{ button.getOnclick() }}"
+                {% endif %}
+            {% endif %}
+            {% if button.isTitleOnHover %}
+                title="{{ button.getTitle() }}"
+            {% endif %}
+            {% if button.getAriaLabel() != null  %}
+                aria-label="{{ button.getAriaLabel() }}"
+            {% endif %}
+        >
+            {% if button.getBadge() > 0 %}
+                <span class="notification-badge">{{  button.getBadge() }} </span>
+            {% endif %}
+
+            {% if not button.isTitleOnHover() and button.getTitle() != null %}
+                {{ button.getTitle() }}
+            {% endif %}
+            {% if button.getSubtitle() != null %}
+                {% if button.getTitle() != null %}
+                    <br>
+                {% endif %}
+                <span class="subtitle">{{ button.getSubtitle()|nl2br }}</span>
+            {% endif %}
+        </a>
+        {% if button.getProgress() != null %}
+            <div class="meter">
+                <span style="width: {{ max(2, button.getProgress()) }}%"></span>
+            </div>
         {% endif %}
-    </a>
-    {% if button.getProgress() != null %}
-        <div class="meter">
-            <span style="width: {{ max(2, button.getProgress()) }}%"></span>
-        </div>
     {% endif %}
 {% endmacro %}

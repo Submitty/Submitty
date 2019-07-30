@@ -42,7 +42,7 @@
     justify-content: center;
     padding: 12px;
     margin: 3px 0;
-    min-height: 50px;
+    min-height: 100%;
     min-width: 100%;
 }
 
@@ -76,7 +76,7 @@
         border-bottom: 1px solid var(--standard-light-gray);
         margin: 0;
         padding: 0;
-        display: table-row;
+        display: table-row-group;
     }
 
     .course-section {
@@ -96,11 +96,14 @@
     .course-main {
         padding: 9px;
         min-width: 220px;
-        width: 0px;
+        /* webkit tables cannot shrink to fit content; it must take a percentage width value */
+        width: 40%;
+        /* this is the logical behavior, that firefox will render (max width overrides width) */
+        max-width: max-content;
     }
 
     .course-button {
-        padding: 20px 0 0 10px;
+        padding: 10px;
         text-align: center;
         width: 220px;
         min-width: min-content;
@@ -108,8 +111,6 @@
     }
 
     .btn-nav {
-        max-width: 250px;
-        min-width: min-content;
         margin: auto;
     }
 
