@@ -801,9 +801,12 @@ class HomeworkView extends AbstractView {
             }
         }
         // sort by most recent posts
-        usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
-            return strtotime($a['date']) - strtotime($b['date']);
-        });
+        if (!empty($grade_inquiries_twig_array)) {
+            usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
+                return strtotime($a['date']) - strtotime($b['date']);
+            });
+        }
+
 
 
         // construct components array for tabs

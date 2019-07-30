@@ -169,7 +169,10 @@ class GradedGradeable extends AbstractModel {
                 return $carry;
             });
         }
-        return count($this->regrade_requests);
+        return array_reduce($this->regrade_requests, function($carry, RegradeRequest $grade_inquiry) {
+            $carry += $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0;
+            return $carry;
+        });
     }
 
     /**
