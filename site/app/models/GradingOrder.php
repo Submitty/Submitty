@@ -97,18 +97,57 @@ class GradingOrder extends AbstractModel {
             /* @var GradedGradeable $graded_gradeable */
             $this->has_submission[$id] = $version > 0;
         }
-
-        $this->sort();
     }
 
     /**
      * Sort grading order.
      */
-    public function sort() {
-        //TODO: More sort criteria
+    public function sort($type, $direction) {
+        //Function to turn submitters into "keys" that are sorted (like python's list.sort)
+        $keyFn = function(Submitter $a) { return $a->getId(); };
+
+        switch ($type) {
+            case "id":
+                $keyFn = function(Submitter $a) { return $a->getId(); };
+                break;
+            case "first":
+                $keyFn = function(Submitter $a) {
+                    if ($a->isTeam()) {
+                        return $a->getId();
+                    } else {
+                        return $a->getUser()->getDisplayedFirstName();
+                    }
+                };
+                break;
+            case "last":
+                $keyFn = function(Submitter $a) {
+                    if ($a->isTeam()) {
+                        return $a->getId();
+                    } else {
+                        return $a->getUser()->getDisplayedLastName();
+                    }
+                };
+                break;
+            case "random":
+                $keyFn = function(Submitter $a) {
+                    //So it's (pseudo) randomly ordered, and will be different for each gradeable
+                    return md5($a->getId() . $this->gradeable->getId());
+                };
+                break;
+        }
+
+        //Sort based on the keys
         foreach ($this->section_submitters as $name => &$section) {
-            usort($section, function(Submitter $a, Submitter $b) {
-                return ($a->getId() < $b->getId()) ? -1 : 1;
+            //For efficiency, run all the submitters through the key function first and then just compare the keys
+            $keys = [];
+            foreach ($section as $submitter) {
+                $keys[$submitter->getId()] = $keyFn($submitter);
+            }
+
+            $directionMult = ($direction === "DESC" ? -1 : 1);
+
+            usort($section, function(Submitter $a, Submitter $b) use ($keys, $directionMult) {
+                return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
             });
         }
         unset($section);
@@ -326,7 +365,8 @@ class GradingOrder extends AbstractModel {
                 $gg_idx[$idx] = $gg;
             }
         }
-
+        //Since the array's elements were not added in the same order as the indices, sort to fix it
+        ksort($gg_idx);
         return array_merge($gg_idx, $unsorted);
     }
 }

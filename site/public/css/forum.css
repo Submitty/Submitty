@@ -441,6 +441,7 @@ body {min-width: 925px;}
     margin-bottom: 0.25em;
 }
 
+
 .well {
   min-height: 20px;
   padding: 19px;
@@ -464,3 +465,15 @@ body {min-width: 925px;}
   padding: 9px;
   border-radius: 3px;
 }
+
+.post_content pre{
+    white-space: pre-wrap;
+}
+
+.post_content p img{
+    max-width: 100%;
+}
+.markdown-active{
+    color: green;
+}
+

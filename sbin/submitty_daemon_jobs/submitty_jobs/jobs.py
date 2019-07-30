@@ -102,6 +102,22 @@ class CourseGradeableJob(CourseJob):
         return self.job_details['gradeable'] not in ['', '.', '..']
 
 
+class RunAutoRainbowGrades(CourseJob):
+    def run_job(self):
+
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+
+        path = '/usr/local/submitty/sbin/auto_rainbow_grades.py'
+        debug_output = '/var/local/submitty/courses/' + semester + '/' + course + '/rainbow_grades/auto_debug_output.txt'
+
+        try:
+            with open(debug_output, "w") as file:
+                subprocess.call(['python3', path, semester, course], stdout=file, stderr=file)
+        except PermissionError:
+            print("error, could not open "+file+" for writing")
+
+
 class BuildConfig(CourseGradeableJob):
     def run_job(self):
         semester = self.job_details['semester']
@@ -282,3 +298,33 @@ class BulkUpload(CourseJob):
             pass
 
         os.chdir(current_path)
+
+
+# pylint: disable=abstract-method
+class CreateCourse(AbstractJob):
+    def validate_job_details(self):
+        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
+            if key not in self.job_details or self.job_details[key] is None:
+                return False
+            if self.job_details[key] in ['', '.', '..']:
+                return False
+            if self.job_details[key] != os.path.basename(self.job_details[key]):
+                return False
+        return True
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        head_instructor = self.job_details['head_instructor']
+        base_course_semester = self.job_details['base_course_semester']
+        base_course_title = self.job_details['base_course_title']
+
+        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
+
+        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
+            semester, course, head_instructor, base_group
+        ))
+
+        with log_file_path.open("w") as output_file:
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser.py", "--course", semester, course, "null", head_instructor], input="\n\n\n\n", encoding='ascii', stdout=output_file, stderr=output_file)

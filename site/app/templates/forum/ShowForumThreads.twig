@@ -6,6 +6,7 @@
         enableTabsInTextArea('.post_content_reply');
         saveScrollLocationOnRefresh('posts_list');
         addCollapsable();
+        thread_post_handler();
         var b = $('#nav-buttons li a');
         $.each(b, function(e) {
             $(b[e]).tooltip('disable').attr('title', $(b[e]).attr('data-original-title'));
@@ -13,6 +14,7 @@
         $('#'+'{{ display_option }}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
         $(".post_reply_from").submit(publishPost);
         $("form").areYouSure();
+        loadThreadHandler();
     });
 
 </script>
@@ -81,7 +83,7 @@
             </div>
             <script type="text/javascript">
                 $(function(){
-                    dynamicScrollContentOnDemand($('#thread_list'), buildUrl({'component': 'forum', 'page': 'get_threads', 'page_number':'{{ '{{' }}#{{ '}}' }}'}), {{ currentThread }}, '', '{{ currentCourse }}');
+                    dynamicScrollContentOnDemand($('#thread_list'), buildNewCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ currentThread }}, '', '{{ currentCourse }}');
                     var active_thread = $('#thread_list .active');
                     if(active_thread.length > 0) {
                         active_thread[0].scrollIntoView(true);

@@ -5,6 +5,8 @@ namespace app;
 use app\libraries\Core;
 use app\models\Email;
 use app\models\Notification;
+use app\models\User;
+use LogicException;
 
 /**
  * A factory class that will handle all notification events and send notifications and emails accordingly
@@ -31,8 +33,10 @@ class NotificationFactory {
         $recipients = $this->core->getQueries()->getAllUsersIds();
         $notifications = $this->createNotificationsArray($event,$recipients);
         $this->sendNotifications($notifications);
-        $emails =$this->createEmailsArray($event,$recipients);
-        $this->sendEmails($emails);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $emails =$this->createEmailsArray($event,$recipients);
+            $this->sendEmails($emails);
+        }
     }
 
     /**
@@ -42,9 +46,11 @@ class NotificationFactory {
         $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads");
         $notifications = $this->createNotificationsArray($event,$recipients);
         $this->sendNotifications($notifications);
-        $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
-        $emails =$this->createEmailsArray($event,$recipients);
-        $this->sendEmails($emails);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
+            $emails =$this->createEmailsArray($event,$recipients);
+            $this->sendEmails($emails);
+        }
     }
 
     /**
@@ -63,12 +69,13 @@ class NotificationFactory {
         $notifications = $this->createNotificationsArray($event,$notification_recipients);
         $this->sendNotifications($notifications);
 
-        $users_with_email_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts_email");
-        $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread_email");
-        $email_recipients = array_unique(array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference));
-        $emails =$this->createEmailsArray($event,$email_recipients);
-        $this->sendEmails($emails);
-
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $users_with_email_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts_email");
+            $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread_email");
+            $email_recipients = array_unique(array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference));
+            $emails =$this->createEmailsArray($event,$email_recipients);
+            $this->sendEmails($emails);
+        }
     }
 
     /**
@@ -82,11 +89,47 @@ class NotificationFactory {
         $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
 
-        $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'].'_email');
-        $email_recipients[] = $event['recipient'];
-        $email_recipients = array_unique($email_recipients);
-        $emails = $this->createEmailsArray($event,$email_recipients);
-        $this->sendEmails($emails);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'].'_email');
+            $email_recipients[] = $event['recipient'];
+            $email_recipients = array_unique($email_recipients);
+            $emails = $this->createEmailsArray($event,$email_recipients);
+            $this->sendEmails($emails);
+        }
+    }
+    // ***********************************TEAM NOTIFICATIONS***********************************
+
+    /**
+     * checks whether $recipients have correct team settings and sends the notification and email.
+     * @param array $event
+     * @param array $recipients
+     */
+    public function onTeamEvent(array $event, array $recipients) {
+        $notification_recipients = array();
+        $email_recipients = array();
+        $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
+        foreach ($recipients as $recipient) {
+            $user_settings_row = array_filter($users_settings, function($v, $k) use ($recipient) {
+                return $v['user_id'] === $recipient;
+            }, ARRAY_FILTER_USE_BOTH);
+            if (!empty($user_settings_row)) {
+                $user_settings_row = $user_settings_row[0];
+            }
+            $user_settings = User::constructNotificationSettings($user_settings_row);
+            if ($user_settings[$event['type']]) {
+                $notification_recipients[] = $recipient;
+            }
+            if ($user_settings[$event['type'].'_email']) {
+                $email_recipients[] = $recipient;
+            }
+        }
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
+        $this->sendNotifications($notifications);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $emails = $this->createEmailsArray($event,$email_recipients);
+            $this->sendEmails($emails);
+        }
+
     }
 
     // ***********************************HELPERS***********************************
@@ -150,12 +193,14 @@ class NotificationFactory {
      * @param array $emails
      */
     public function sendEmails(array $emails) {
+        if (!$this->core->getConfig()->isEmailEnabled()) {
+            throw new LogicException("Email is not enabled");
+        }
         if (empty($emails)) {
             return;
         }
         // parameterize email array
         foreach ($emails as $email) {
-            $flattened_emails[] = $email->getRecipient();
             $flattened_emails[] = $email->getSubject();
             $flattened_emails[] = $email->getBody();
             $flattened_emails[] = $email->getUserId();

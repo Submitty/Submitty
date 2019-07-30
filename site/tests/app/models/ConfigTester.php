@@ -75,6 +75,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
+            "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message"
         ];
@@ -110,7 +111,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'regrade_enabled' => false,
                 'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
-                'room_seating_gradeable_id' => ""
+                'room_seating_gradeable_id' => "",
+                'auto_rainbow_grades' => false
             )
         );
 
@@ -125,6 +127,29 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             }
         }
         FileUtils::writeJsonFile($this->course_json_path, $config);
+
+        // Create psuedo email json
+        $config = array(
+            'email_enabled' => true,
+            'email_user' => '',
+            'email_password' => '',
+            'email_sender' => 'submitty@myuniversity.edu',
+            'email_reply_to'=> 'submitty_do_not_reply@myuniversity.edu',
+            'email_server_hostname' => 'localhost',
+            'email_server_port' => 25
+        );
+        $config = array_replace($config,$extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
+
+        // Create version json
+        $config = array(
+            "installed_commit" => "d150131c19e3e8084b25cddcc32e6c40a8e93a2b",
+            "short_installed_commit" => "d150131c",
+            "most_recent_git_tag" => "v19.07.00"
+        );
+        $config = array_replace($config,$extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
+
     }
 
     public function testConfig() {
@@ -159,6 +184,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("RPI", $config->getInstitutionName());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
+        $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
         $config->loadCourseJson($this->course_json_path);
@@ -237,7 +263,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'regrade_enabled' => false,
                     'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
-                    'room_seating_gradeable_id' => ""
+                    'room_seating_gradeable_id' => "",
+                    'auto_rainbow_grades' => false
                 ]
             ],
             'course_loaded' => true,
@@ -249,15 +276,21 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
+            'course_code_requirements' => "Please follow your school's convention for course code.",
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
-            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93'
+            'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
+            'email_enabled' => true,
+            'auto_rainbow_grades' => false,
+            'latest_commit' => 'd150131c',
+            'latest_tag' => 'v19.07.00'
         );
         $actual = $config->toArray();
 
         ksort($expected);
         ksort($actual);
+
         $this->assertEquals($expected, $actual);
     }
 
@@ -375,6 +408,15 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Error parsing the config file: Syntax error');
         $config->loadCourseJson(FileUtils::joinPaths($this->temp_dir, "test.txt"));
+    }
+
+    public function testMissingEmailJson() {
+        $this->createConfigFile();
+        unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
+        $config = new Config($this->core, "s17", "csci1000");
+        $this->expectException(\app\exceptions\ConfigException::class);
+        $this->expectExceptionMessageRegExp('/Could not find email config: .*\/config\/email.json/');
+        $config->loadMasterConfigs($this->config_path);
     }
 
     public function getRequiredSections() {
