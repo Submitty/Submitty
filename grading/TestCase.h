@@ -76,6 +76,14 @@ public:
 
   void debugJSON() const { std::cout << _json.dump(2) << std::endl; }
 
+  void header(int i) const {
+    std::cout << "========================================================" << std::endl;
+
+    std::cout << "TEST #" << i << std::endl;
+    std::cout << "TITLE " << getTitle() << std::endl;
+    
+  }
+
   // -------------------------------
   // COMMANDS
   std::vector<std::string> getCommands() const;

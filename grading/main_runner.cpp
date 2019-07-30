@@ -107,15 +107,13 @@ int main(int argc, char *argv[]) {
 
     if ( generation_type == "output" ) {
     
-    for (int i = 0; i < my_testcase.numFileGraders(); i++ ){
+    for (int k = 0; k < my_testcase.numFileGraders(); k++ ){
         
-        std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(i), "command");
+        std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(k), "command");
         
         if ( outputGeneratorCommandsForValidation.size() > 0 ) {
-          std::cout << "========================================================" << std::endl;
-
-          std::cout << "TEST #" << i << std::endl;
-          std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+          
+          my_testcase.header(i);
         
           for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
             int exit_no = execute(outputGeneratorCommandsForValidation[j],
@@ -136,13 +134,10 @@ int main(int argc, char *argv[]) {
       std::vector <std::string> inputGeneratorCommands = my_testcase.getInputGeneratorCommands();
       if ( inputGeneratorCommands.size() > 0 ) {
        
-        std::cout << "========================================================" << std::endl;
+        my_testcase.header(i);
 
-        std::cout << "TEST #" << i << std::endl;
-        std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
-        
-        for (int i = 0; i < inputGeneratorCommands.size(); i++ ) {
-          int exit_no = execute(inputGeneratorCommands[i],
+        for (int j = 0; j < inputGeneratorCommands.size(); j++ ) {
+          int exit_no = execute(inputGeneratorCommands[j],
                                   actions,
                                   dispatcher_actions,
                                   "execute_logfile.txt",
@@ -158,9 +153,6 @@ int main(int argc, char *argv[]) {
 
       }
     } else {
-      std::cout << "========================================================" << std::endl;
-      std::cout << "TEST #" << i << std::endl;
-
       std::vector<std::string> commands = my_testcase.getCommands();
 
       actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
@@ -168,7 +160,7 @@ int main(int argc, char *argv[]) {
 
       assert (commands.size() > 0);
 
-      std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
+      my_testcase.header(i);
       
       for (int x = 0; x < commands.size(); x++) {
         std::cout << "COMMAND " << commands[x] << std::endl;

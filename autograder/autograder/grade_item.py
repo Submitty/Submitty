@@ -477,7 +477,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             # copy any instructor provided solution code files to testcase folder
             copy_contents_into(job_id,instructor_solution_path,random_input_testcase_folder,tmp_logs)
             
-            # copy compile.out to the current directory
+            # copy run.out to the current directory
             shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(random_input_testcase_folder,"my_runner.out"))
             add_permissions(os.path.join(random_input_testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
             untrusted_grant_rwx_access(which_untrusted, random_input_testcase_folder)
