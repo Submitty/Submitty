@@ -148,6 +148,58 @@ $(document).ready(function () {
     });
 });
 
+function showBuildLog() {
+    ajaxGetBuildLogs($('#g_id').val());
+}
+
+function hideBuildLog() {
+    $('.log-container').hide();
+    $('#open_build_log').show();
+    $('#close_build_log').hide();
+}
+
+function ajaxGetBuildLogs(gradeable_id) {
+    $.getJSON({
+        url: buildUrl({
+            'component': 'admin',
+            'page': 'admin_gradeable',
+            'action': 'get_build_logs',
+            'id': gradeable_id,
+        }),
+        success: function (response) {
+            var build_info = response['data'][0];
+            var cmake_info = response['data'][1];
+            var make_info = response['data'][2];
+
+            if (build_info != null) {
+                $('#build_log_body').html(build_info);
+            }
+            else {
+                $('#build_log_body').html('There is currently no build output.');
+            }
+            if (cmake_info != null) {
+                $('#cmake_log_body').html(cmake_info);
+            }
+            else {
+                $('#cmake_log_body').html('There is currently no cmake output.');
+            }
+            if (make_info != null) {
+                $('#make_log_body').html(make_info);
+            }
+            else {
+                $('#make_log_body').html('There is currently no make output.');
+            }
+
+            $('.log-container').show();
+            $('#open_build_log').hide();
+            $('#close_build_log').show();
+        },
+        error: function (response) {
+            console.error('Failed to parse response from server: ' + response);
+        }
+    });
+}
+
 function ajaxCheckBuildStatus(gradeable_id,current_status) {
     $.getJSON({
         url: buildUrl({
@@ -159,6 +211,7 @@ function ajaxCheckBuildStatus(gradeable_id,current_status) {
         }),
         success: function (response) {
             $('#rebuild_log_button').css('display','block');
+            hideBuildLog();
             if (response['data'] == 'queued') {
                 $('#rebuild_status').html(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild_log_button').css('display','none');
