@@ -1801,3 +1801,12 @@ header > * {
         width: -moz-min-content;
     }
 }
+
+.pre-wrap{
+    white-space: pre-wrap;
+}
+
+.pre_forum {
+    font-family: inherit;
+    max-width: 70vw;
+}
