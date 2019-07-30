@@ -13,11 +13,18 @@ from submitty_utils import dateutils
 from .. import autograding_utils, CONFIG_PATH
 
 class SecureExecutionEnvironment():
-  def __init__(self, testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment):
+  def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+               testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment):
+    self.job_id = job_id
+    self.is_batch = is_batch_job
+    self.untrusted_user = untrusted_user
+    self.is_vcs = is_vcs
+    self.log_path = log_path
+    self.stack_trace_log_path = stack_trace_log_path
     self.name = testcase_directory
     self.patterns = complete_config_obj['autograding']
-    self.my_testcase = testcase_obj
-    self.pre_commands = pre_commands
+    self.pre_commands = testcase_info.get('pre_commands', list())
+    self.is_test_environment = is_test_environment
 
     self.tmp = autograding_directory
     self.tmp_work = os.path.join(autograding_directory, 'TMP_WORK')
@@ -27,7 +34,6 @@ class SecureExecutionEnvironment():
     self.tmp_results = os.path.join(autograding_directory,"TMP_RESULTS")
     self.checkout_path = os.path.join(self.tmp_submission, "checkout")
     self.checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
-    self.is_test_environment = is_test_environment
     self.directory = os.path.join(self.tmp_work, testcase_directory)
 
     if is_test_environment == False:
@@ -46,13 +52,13 @@ class SecureExecutionEnvironment():
       if command == 'cp':
         try:
           autograding_utils.pre_command_copy_file(source_testcase, source_directory, self.directory, 
-                                                  destination, self.my_testcase.job_id, self.tmp_logs,
-                                                  self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
+                                                  destination, self.job_id, self.tmp_logs,
+                                                  self.log_path, self.stack_trace_log_path)
         except Exception as e:
-          self.my_testcase.log_message("Encountered an error while processing pre-command. See traces entry for more details.")
-          self.my_testcase.log_stack_trace(traceback.format_exc())
+          self.log_message("Encountered an error while processing pre-command. See traces entry for more details.")
+          self.log_stack_trace(traceback.format_exc())
       else:
-        self.my_testcase.log_message("Encountered an error while processing pre-command. See traces entry for more details.")
+        self.log_message("Encountered an error while processing pre-command. See traces entry for more details.")
         print("Invalid pre-command '{0}'".format(command))
 
   def _setup_single_directory_for_compilation(self, directory):
@@ -63,12 +69,12 @@ class SecureExecutionEnvironment():
     os.makedirs(directory)
     autograding_utils.pattern_copy("submission_to_compilation", self.patterns['submission_to_compilation'], submission_path, directory, self.tmp_logs)
 
-    if self.my_testcase.is_vcs:
+    if self.is_vcs:
       checkout_subdir_path = os.path.join(self.tmp_submission, 'checkout', self.checkout_subdirectory)
       autograding_utils.pattern_copy("checkout_to_compilation",self.patterns['checkout_to_compilation'],checkout_subdir_path, directory,self.tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    autograding_utils.copy_contents_into(self.my_testcase.job_id, provided_code_path, directory, self.tmp_logs, self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
+    autograding_utils.copy_contents_into(self.job_id, provided_code_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(directory,"my_compile.out"))
     
@@ -77,11 +83,11 @@ class SecureExecutionEnvironment():
 
   def lockdown_directory_after_execution(self):
     if self.is_test_environment == False:
-        autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.my_testcase.untrusted_user, self.directory)
+        autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, self.directory)
     autograding_utils.add_all_permissions(self.directory)
     autograding_utils.lock_down_folder_permissions(self.directory)
 
-  def _setup_single_directory_for_execution(self, directory):
+  def _setup_single_directory_for_execution(self, directory, testcase_dependencies):
     # Make the testcase folder
     os.makedirs(directory)
 
@@ -92,18 +98,19 @@ class SecureExecutionEnvironment():
     autograding_utils.pattern_copy("submission_to_runner",self.patterns["submission_to_runner"], 
                             submission_path, directory, self.tmp_logs)
 
-    if self.my_testcase.is_vcs:
+    if self.is_vcs:
         autograding_utils.pattern_copy("checkout_to_runner",self.patterns["checkout_to_runner"], 
                             checkout_path, directory, self.tmp_logs)
 
-    for c in self.my_testcase.testcase_dependencies:
+    # TODO: This should be removed as soon as we move to all pre_commands.
+    for c in testcase_dependencies:
         if c.type == 'Compilation':
             autograding_utils.pattern_copy("compilation_to_runner", self.patterns['compilation_to_runner'], 
                          c.secure_environment.directory, directory, self.tmp_logs)
 
     # copy input files
     test_input_path = os.path.join(self.tmp_work, 'test_input')
-    autograding_utils.copy_contents_into(self.my_testcase.job_id, test_input_path, directory, self.tmp_logs, self.my_testcase.log_path, self.my_testcase.stack_trace_log_path)
+    autograding_utils.copy_contents_into(self.job_id, test_input_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
 
     # copy runner.out to the current directory
     bin_runner = os.path.join(self.tmp_autograding, "bin","run.out")
@@ -115,7 +122,7 @@ class SecureExecutionEnvironment():
 
     # Add the correct permissions to the target folder.
     if self.is_test_environment == False:
-      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.my_testcase.untrusted_user, self.directory)
+      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, self.directory)
 
     autograding_utils.add_all_permissions(directory)
 
@@ -125,9 +132,9 @@ class SecureExecutionEnvironment():
     # Run any necessary pre_commands
     self._run_pre_commands()
 
-  def setup_for_execution_testcase(self):
+  def setup_for_execution_testcase(self, testcase_dependencies):
     os.chdir(self.tmp_work)
-    self._setup_single_directory_for_execution(self.directory)
+    self._setup_single_directory_for_execution(self.directory, testcase_dependencies)
     self._run_pre_commands()
 
   def setup_for_testcase_archival(self):
@@ -141,7 +148,6 @@ class SecureExecutionEnvironment():
 
     os.mkdir(details_dir)
     os.mkdir(public_dir)
-
 
   def archive_results(self, overall_log):
     raise NotImplementedError
@@ -172,3 +178,17 @@ class SecureExecutionEnvironment():
       # If we are in production but we are not the daemon user, throw an error
       if int(os.getuid()) != int(DAEMON_UID):
         raise Exception("ERROR: grade_item should be run by submitty_daemon in a production environment")
+
+  def log_message(self, message):
+    autograding_utils.log_message(self.log_path,
+                                job_id = self.job_id,
+                                is_batch = self.is_batch,
+                                which_untrusted = self.untrusted_user,
+                                message = message)
+
+  def log_stack_trace(self, trace):
+    autograding_utils.log_stack_trace(self.stack_trace_log_path,
+                                      job_id = self.job_id,
+                                      is_batch = self.is_batch,
+                                      which_untrusted = self.untrusted_user,
+                                      trace = trace)

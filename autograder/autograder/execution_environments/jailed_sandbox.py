@@ -8,8 +8,10 @@ from . import secure_execution_environment
 from .. import autograding_utils
 
 class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
-  def __init__(self, testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment):
-     super().__init__(testcase_directory, complete_config_obj, pre_commands, testcase_obj, autograding_directory, is_test_environment)   
+  def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+               testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment):
+     super().__init__(job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+                      testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
 
   def setup_for_archival(self, overall_log):
     """
@@ -31,8 +33,8 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     try:
       self.verify_execution_status()
     except Exception as e:
-      self.my_testcase.log_stack_trace(traceback.format_exc())
-      self.my_testcase.log("ERROR: Could not verify execution mode status.")
+      self.log_stack_trace(traceback.format_exc())
+      self.log("ERROR: Could not verify execution mode status.")
       return
 
     script = os.path.join(self.directory, script)
@@ -49,13 +51,13 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
                                 stdout=logfile,
                                 cwd=cwd)
     except Exception as e:
-      self.my_testcase.log_message("ERROR. See traces entry for more details.")
-      self.my_testcase.log_stack_trace(traceback.format_exc())
+      self.log_message("ERROR. See traces entry for more details.")
+      self.log_stack_trace(traceback.format_exc())
 
     try:
       os.remove(script)
     except Exception as e:
-      self.my_testcase.log_message(f"ERROR. Could not remove {script}.")
-      self.my_testcase.log_stack_trace(traceback.format_exc())
+      self.log_message(f"ERROR. Could not remove {script}.")
+      self.log_stack_trace(traceback.format_exc())
     
     return success
