@@ -25,18 +25,6 @@
 
 {%  include "forum/HistoryForm.twig" %}
 
-{%  include "forum/FilterForm.twig" with {
-    "categories" : filterFormData.categories,
-    "current_thread" : filterFormData.current_thread,
-    "current_category_ids" : filterFormData.current_category_ids,
-    "current_course" : filterFormData.current_course,
-    "cookie_selected_categories" : filterFormData.cookie_selected_categories,
-    "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
-    "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
-    "display_option" : filterFormData.display_option,
-    "thread_exists" : filterFormData.thread_exists
-} %}
-
 <div class="full_height content forum_content forum_show_threads">
 
     {% if thread_exists == false %}
@@ -47,7 +35,16 @@
             "show_more" : button_params.show_more,
             "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
             "show_threads" : button_params.show_threads,
-            "thread_exists" : button_params.thread_exists
+            "thread_exists" : button_params.thread_exists,
+            "categories" : filterFormData.categories,
+            "current_thread" : filterFormData.current_thread,
+            "current_category_ids" : filterFormData.current_category_ids,
+            "current_course" : filterFormData.current_course,
+            "cookie_selected_categories" : filterFormData.cookie_selected_categories,
+            "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
+            "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
+            "display_option" : filterFormData.display_option,
+            "thread_exists" : filterFormData.thread_exists
         } %}
 
         <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
@@ -61,7 +58,16 @@
             "show_threads" : button_params.show_threads,
             "thread_exists" : button_params.thread_exists,
             "more_data" : button_params.more_data,
-            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left
+            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
+            "categories" : filterFormData.categories,
+            "current_thread" : filterFormData.current_thread,
+            "current_category_ids" : filterFormData.current_category_ids,
+            "current_course" : filterFormData.current_course,
+            "cookie_selected_categories" : filterFormData.cookie_selected_categories,
+            "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
+            "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
+            "display_option" : filterFormData.display_option,
+            "thread_exists" : filterFormData.thread_exists
         } %}
 
         <div id="thread-container" class="row">

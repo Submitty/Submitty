@@ -1713,7 +1713,7 @@ function onAddComponent() {
  * Called when the 'Import Components' button is pressed
  */
 function importComponentsFromFile() {
-    let submit_url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'import_components', 'gradeable_id': getGradeableId()});
+    let submit_url = buildNewCourseUrl(['gradeable', getGradeableId(), 'components', 'import']);
     let formData = new FormData();
 
     let files = $('#import-components-file')[0].files;

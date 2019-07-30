@@ -152,6 +152,9 @@ class WebRouter {
             if (!isset($arguments[$param_name])) {
                 $arguments[$param_name] = $this->request->query->get($param_name);
             }
+            if (!isset($arguments[$param_name])) {
+                $arguments[$param_name] = $param->getDefaultValue();
+            }
         }
 
         return call_user_func_array([$controller, $this->method_name], $arguments);
