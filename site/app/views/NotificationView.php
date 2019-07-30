@@ -5,6 +5,7 @@ namespace app\views;
 class NotificationView extends AbstractView {
     public function showNotifications($current_course, $show_all, $notifications, $notification_saves) {
         $this->core->getOutput()->addBreadcrumb("Notifications");
+        $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
             'course' => $current_course,
             'show_all' => $show_all,

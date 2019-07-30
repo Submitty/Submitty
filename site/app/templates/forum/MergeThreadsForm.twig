@@ -22,7 +22,7 @@
         </script>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'forum', 'page': 'merge_thread'}) }}">
+    <form method="post" action="{{ merge_url }}">
         {{ parent() }}
     </form>
 {% endblock %}

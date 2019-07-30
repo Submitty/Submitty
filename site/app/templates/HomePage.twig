@@ -10,11 +10,11 @@
                     <ul id="course-list" class="bare-list">
                         {% for course in rank.courses %}
                             <li>
-                                <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildNewUrl([course.getSemester(), course.getTitle()]) }}">
-                                    {{ course.getLongSemester() }} &nbsp; &nbsp;
-                                    {{ course.getCapitalizedTitle() }} &nbsp; &nbsp;
-                                    {% if course.getDisplayName() != "" %}
-                                        {{ course.getDisplayName() }}
+                                <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildNewUrl([course['semester'], course['title']]) }}">
+                                    {{ course['display_semester'] }} &nbsp; &nbsp;
+                                    {{ course['title'] | upper }} &nbsp; &nbsp;
+                                    {% if course['display_name'] != "" %}
+                                        {{ course['display_name'] }}
                                     {% endif %}
                                     {{ user.accessAdmin() }}
                                 </a>
@@ -31,14 +31,21 @@
             <li><b>Username:</b> {{ user.getId() }}</li>
             <li class="flex-row">
                 <span><b>First Name:</b>&nbsp;{{ user.getDisplayedFirstName() }}</span>
-                <a onclick="userNameChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+                <a class="icon" tabindex="0" href="javascript:userNameChange()" aria-label="Change preferred names" title="Change preferred names">
+                    <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                </a>
             </li>
             <li><b>Last Name:</b> {{ user.getDisplayedLastName() }}</li>
             <li><b>Email:</b> {{ user.getEmail() }}</li>
+            {% if display_access_level %}
+                <li><b>Access Level: </b> {{ access_level }}</li>
+            {% endif %}
             {% if show_change_password %}
                 <li class="flex-row">
                     <b>Change Password</b>
-                    <a onclick="passwordChange()"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+                    <a class="icon" tabindex="0" href="javascript:passwordChange()" aria-label="Change password" title="Change password">
+                        <i class="fas fa-pencil-alt" aria-hidden="true"></i>
+                    </a>
                 </li>
             {% endif %}
         </ul>

@@ -95,7 +95,7 @@ class HomeworkView extends AbstractView {
             && $gradeable->isTaGrading()
             && $submission_count !== 0
             && $active_version !== 0) {
-            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
+            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available,$version_instance);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable,$can_inquiry);
@@ -347,10 +347,11 @@ class HomeworkView extends AbstractView {
 
         // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
-
+        
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
-
+        
+        $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
@@ -396,7 +397,8 @@ class HomeworkView extends AbstractView {
             'image_data' => $image_data,
             'component_names' => $component_names,
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
         ]);
     }
 
@@ -554,6 +556,13 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden
      * @return string
      */
+
+    /**
+     * @param GradedGradeable $graded_gradeable
+     * @param AutoGradedVersion|null $version_instance
+     * @param bool $show_hidden
+     * @return string
+     */
     private function renderVersionBox(GradedGradeable $graded_gradeable, $version_instance, bool $show_hidden): string {
         $gradeable = $graded_gradeable->getGradeable();
         $autograding_config = $gradeable->getAutogradingConfig();
@@ -636,34 +645,15 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        $cancel_url = $this->core->buildUrl([
-            'component' => 'student',
-            'action' => 'update',
-            'gradeable_id' => $gradeable->getId(),
-            'new_version' => 0
-        ]);
+        $cancel_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'version' ,'0']);
 
-        $change_version_url = $this->core->buildUrl([
-            'component' => 'student',
-            'action' => 'update',
-            'gradeable_id' => $gradeable->getId(),
-            'new_version' => $display_version
-        ]);
+        $change_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'version', $display_version]);
 
-        $view_version_url = $this->core->buildUrl([
-            'component' => 'student',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => ''
-        ]);
+        $view_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]) . '/';
 
-        $check_refresh_submission_url = $this->core->buildUrl([
-            'component' => 'student',
-            'page' => 'submission',
-            'action' => 'check_refresh',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => $display_version
-        ]);
-        // $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
+        $check_refresh_submission_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
+
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [
             'gradeable_id' => $gradeable->getId(),
@@ -704,6 +694,7 @@ class HomeworkView extends AbstractView {
      * @return string
      */
     private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+
         $rendered_ta_results = '';
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
@@ -711,10 +702,10 @@ class HomeworkView extends AbstractView {
             $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults',
                 $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles());
         }
+
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
             'been_ta_graded' => $been_ta_graded,
-            'rendered_ta_results' => $rendered_ta_results
-        ]);
+            'rendered_ta_results' => $rendered_ta_results]);
     }
 
     /**
