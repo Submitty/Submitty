@@ -1010,15 +1010,6 @@ div.full_height {
     margin-left: 5px;
 }
 
-.btn-nav {
-    width:100%;
-}
-
-.btn.btn-nav-submit, .btn.btn-nav-grade {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 .td-open {
     width: 10%;
 }
