@@ -162,13 +162,16 @@
             <input type="checkbox" name="display_rainbow_grades_summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} />
         </div>
 
-        <div class="flex-row">
-            <label for="auto_rainbow_grades">
-                <div class="option-title">Automatic Rainbow Grades Generation</div>
-                <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>
-            </label>
-            <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
-        </div>
+        {# Only show this option if submitty-admin user is available and ready #}
+        {% if fields['show_auto_rainbow_grades'] %}
+            <div class="flex-row">
+                <label for="auto_rainbow_grades">
+                    <div class="option-title">Automatic Rainbow Grades Generation</div>
+                    <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>
+                </label>
+                <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
+            </div>
+        {% endif %}
 
         <label for="room_seating_gradeable_id">
             <div class="option-title">Display Room Seating Guide</div>

@@ -3,6 +3,7 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileNotFoundException;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\libraries\response\JsonResponse;
@@ -10,6 +11,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\models\RainbowCustomizationJSON;
+use http\Exception;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -57,7 +59,8 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
+            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
+            'show_auto_rainbow_grades'       => $this->showAutoRainbowGrades()
         );
 
         return Response::WebOnlyResponse(
@@ -176,6 +179,45 @@ class ConfigurationController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
         );
+    }
+
+    /**
+     * Determine if the option to enable nightly automatic rainbow grades build should be shown on the course
+     * settings page.  For this feature to be available to the instructors, the submitty-admin user must be configured
+     * at the system level and also must be a member of the course in question.
+     *
+     * @return bool True if option can be enabled, False otherwise
+     */
+    private function showAutoRainbowGrades() {
+
+        // Determine if submitty-admin is ready to go on the system level
+        $status_file = FileUtils::joinPaths(
+            '/', 'usr', 'local', 'submitty', 'site', 'config', 'submitty_admin_status.json'
+        );
+
+
+        if(!is_file($status_file)) {
+            throw new FileNotFoundException('Unable to locate the submity_admin_status.json file');
+        }
+
+        $status_file_contents = json_decode(file_get_contents($status_file));
+
+        // Determine if submitty-admin is ready to go on the course level
+        if($status_file_contents->submitty_admin_exists === true)
+        {
+            $course = $this->core->getConfig()->getCourse();
+            $semester = $this->core->getConfig()->getSemester();
+
+            $results = $this->core->getQueries()->checkIsInstructorInCourse(
+                $status_file_contents->submitty_admin_username,
+                $course,
+                $semester
+            );
+
+            return $results;
+        }
+
+        return false;
     }
 
     private function getGradeableSeatingOptions() {
