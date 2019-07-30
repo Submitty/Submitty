@@ -142,8 +142,14 @@ class GradedGradeable extends AbstractModel {
      */
     public function hasActiveRegradeRequest() {
         return $this->hasRegradeRequest() &&
-            array_reduce($this->regrade_requests, function ($carry, RegradeRequest $item) {
-                $carry = $item->getStatus() || $carry;
+            array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
+                if ($this->gradeable->isGradeInquiryPerComponentAllowed()) {
+                    $carry = $grade_inquiry->getStatus() || $carry;
+                }
+                else {
+                    $carry = $grade_inquiry->getStatus() && is_null($grade_inquiry->getGcId()) || $carry;;
+                }
+
                 return $carry;
             });
     }
@@ -157,6 +163,12 @@ class GradedGradeable extends AbstractModel {
     }
 
     public function getGradeInquiryCount() {
+        if (!$this->gradeable->isGradeInquiryPerComponentAllowed()) {
+            return array_reduce($this->regrade_requests, function($carry, RegradeRequest $grade_inquiry) {
+                $carry += is_null($grade_inquiry->getGcId()) ? 1 : 0;
+                return $carry;
+            });
+        }
         return count($this->regrade_requests);
     }
 

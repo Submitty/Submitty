@@ -352,7 +352,7 @@
     <td>
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
-            {% if badge_count > 0 %}
+            {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
                 <span class="notification-badge">{{ badge_count }}</span>
             {% endif %}
         </a>

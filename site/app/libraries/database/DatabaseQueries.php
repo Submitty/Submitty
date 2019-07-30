@@ -3130,8 +3130,9 @@ AND gc_id IN (
             throw $dbException;
         }
     }
-    public function getNumberRegradeRequests($gradeable_id) {
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1", array($gradeable_id));
+    public function getNumberGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
+        $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1".$grade_inquiry_all_only_query, array($gradeable_id));
         return ($this->course_db->row()['cnt']);
     }
     public function getRegradeDiscussions(array $grade_inquiries) {
