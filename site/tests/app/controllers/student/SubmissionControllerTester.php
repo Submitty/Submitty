@@ -758,7 +758,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testVcsUpload() {
         $_POST['git_repo_id'] = "some_repo_id";
-        $_REQUEST['vcs_checkout'] = "true";
+        $_POST['vcs_checkout'] = "true";
         $return = $this->runController();
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
@@ -780,48 +780,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController();
         $this->assertTrue($return['status'] == 'fail');
         $this->assertRegExp("/Empty POST request. This may mean that the sum size of your files are greater than [0-9]*M./", $return['message']);
-        $this->assertFalse($return['status'] == 'success');
-    }
-
-    public function testErrorNotSetCsrfToken() {
-        $_POST['csrf_token'] = null;
-        $return = $this->runController();
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid CSRF token.", $return['message']);
-        $this->assertFalse($return['status'] == 'success');
-    }
-
-    /**
-     * Test that one must have at least full grading access to change the active submission version a user
-     */
-    public function testUpdateSubmissionVersionPermission() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['ta'] = 'true';
-        $return = $this->runController($this->createMockCore($user_config = array('access_full_grading' => false)));
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("You do not have access to that page.", $return['message']);
-        unset($_REQUEST['ta']);
-    }
-
-    /**
-     * Test that one must be at least a full access grader to delete split items
-     */
-    public function testDeleteSplitItemPermission() {
-        $_REQUEST['action'] = 'delete_split';
-        $return = $this->runController($this->createMockCore(array('csrf_token' => true), array('access_full_grading' => false)));
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertFalse($return['status'] == 'success');
-        $this->assertEquals("You do not have access to that page.", $return['message']);
-    }
-
-
-    public function testErrorInvalidCsrfToken() {
-        $config = $this->config;
-        $config['csrf_token'] = false;
-        $core = $this->createMockCore($config);
-        $return = $this->runController($core);
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid CSRF token.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
@@ -1067,7 +1025,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorCreateVcsFile() {
         $_POST['git_repo_id'] = "some_repo_id";
-        $_REQUEST['vcs_checkout'] = "true";
+        $_POST['vcs_checkout'] = "true";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
         $return = $this->runController();
@@ -1222,22 +1180,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $this->runController($core);
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
-    }
-
-    public function testUpdateSubmissionNoId() {
-        $_REQUEST['gradeable_id'] = null;
-        $_REQUEST['action'] = 'update';
-        $return = $this->runController();
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid gradeable id.", $return['message']);
-    }
-
-    public function testUpdateSubmissionNoCsrfToken() {
-        $_POST['csrf_token'] = null;
-        $_REQUEST['action'] = 'update';
-        $return = $this->runController();
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Invalid CSRF token. Refresh the page and try again.", $return['message']);
     }
 
     public function testUpdateNegativeVersion() {

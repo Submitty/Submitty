@@ -1702,18 +1702,6 @@ function toggleRegradeRequests(){
     }
 
 }
-function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    });
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
