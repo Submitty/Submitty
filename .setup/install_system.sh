@@ -605,29 +605,29 @@ if [ ${WORKER} == 1 ]; then
     echo  Running configure submitty in worker mode
     python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
-        if [ ${VAGRANT} == 1 ]; then
+    if [ ${VAGRANT} == 1 ]; then
         # This should be set by setup_distro.sh for whatever distro we have, but
         # in case it is not, default to our primary URL
         if [ -z "${SUBMISSION_URL}" ]; then
             SUBMISSION_URL='http://192.168.56.101'
         fi
         echo -e "/var/run/postgresql
-        ${DB_USER}
-        ${DATABASE_PASSWORD}
-        America/New_York
-        ${SUBMISSION_URL}
+${DB_USER}
+${DATABASE_PASSWORD}
+America/New_York
+${SUBMISSION_URL}
 
 
-        1
+1
 
 
-        y
+y
 
 
-        submitty@vagrant
-        do-not-reply@vagrant
-        localhost
-        25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+submitty@vagrant
+do-not-reply@vagrant
+localhost
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
