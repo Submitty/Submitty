@@ -1,7 +1,4 @@
 $( document ).ready(function () {
-  // style component tabs
-  $('.component-tab').bind('eventChangeSelectedTab', changeColorClass);
-
   // open last opened grade inquiry or open first component with grade inquiry
   var g_id = $('.component-tabs').data('g_id');
   var component_cookie = document.cookie.match('(^|;) ?' + g_id + '_component_id' + '=([^;]*)(;|$)');
@@ -30,9 +27,6 @@ function onComponentTabClicked(tab) {
   var component_tabs = $('.component-tab');
   component_tabs.removeClass("btn-selected");
   $(tab).addClass("btn-selected");
-
-  // style components
-  component_tabs.trigger('eventChangeSelectedTab');
 
   // update header
   $(".grade-inquiry-header").text("Grade Inquiry: " + $(tab).text());
