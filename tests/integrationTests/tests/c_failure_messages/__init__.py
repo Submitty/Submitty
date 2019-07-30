@@ -5,13 +5,12 @@ import subprocess
 import os
 import glob
 import shutil
-from submitty_utils import submitty_schema_validator
 
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples/c_failure_messages/config")
-SAMPLE_SUBMISSIONS       = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples/c_failure_messages/submissions")
+SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples", "c_failure_messages", "config")
+SAMPLE_SUBMISSIONS       = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples", "c_failure_messages", "submissions")
 
 @prebuild
 def initialize(test):
@@ -38,12 +37,8 @@ def cleanup(test):
 def schema_validation(test):
     cleanup(test)
     config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
-    schema = os.path.join(SUBMITTY_INSTALL_DIR, 'bin', 'json_schemas', 'complete_config_schema.json')
-    try:
-        submitty_schema_validator.validate_complete_config_schema_using_filenames(config_path, schema, show_warnings=False)
-    except submitty_schema_validator.SubmittySchemaException as s:
-        s.print_human_readable_error()
-        raise
+    test.validate_complete_config(config_path)
+   
 
 @testcase
 def correct(test):
