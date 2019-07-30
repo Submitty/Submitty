@@ -331,27 +331,26 @@
                     Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
 
                 </script>
-                    <div id="mySmallDiv">
-                        <script>
-                            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
-                            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
-                        </script>
-                    </div>
+                <div id="mySmallDiv">
+                    <script>
+                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
+                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
+                    </script>
+                </div>
                 <br />
-                {{ mode }}
                 Version Conflicts: {{ VerConf }}
-                    <br />
+                <br />
                 No Submissions: {{ noSub }}
-                    <br />
+                <br />
                 No Active Versions: {{ noActive }}
-                    <br />
+                <br />
                 Grade Inquiries: {{ GradeInq }}
-                    <br />
+                <br />
                 Incomplete Grading: {{ IncompGrading }}
-                    <br />
-                    Cancelled Submissions: {{ cancelledSub }}
+                <br />
+                Cancelled Submissions: {{ cancelledSub }}
                 <br/>
                 <br/>
                 Double-click on the chart to zoom out
@@ -555,7 +554,6 @@
                     </div>
 
                     <br />
-                    {{ mode }}
                     Version Conflicts: {{ VerConf }}
                     <br />
                     No Submissions: {{ noSub }}
