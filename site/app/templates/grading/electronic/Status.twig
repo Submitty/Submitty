@@ -135,10 +135,6 @@
             </a>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 <a class="btn btn-primary"
-                   href="{{ grade_url }}">
-                    Grade Next Student
-                </a>
-                <a class="btn btn-primary"
                    href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id}) }}">
                     Download Zip of All Assigned Students
                 </a>
