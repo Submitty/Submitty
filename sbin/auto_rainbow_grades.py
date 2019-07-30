@@ -138,7 +138,8 @@ if 'token' not in creds or not creds['token']:
 
     print('No auth token found', flush=True)
     print('Running with limited functionality', flush=True)
-    print('Refer to www.submitty.org/instructor/rainbow_grades/automatic_setup for more information.')
+    print('Refer to www.submitty.org/instructor/rainbow_grades/automatic_setup' +
+          'for more information.')
     print('Attempting to continue with previously generated grade summaries',
           flush=True)
 
