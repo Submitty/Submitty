@@ -27,7 +27,7 @@
 
 .checkbox-row input[type="checkbox"] {
     flex: none;
-    margin-left: 10px;
+    margin-right: 1em;
 }
 
 #email-seating-assignment a {
@@ -58,15 +58,6 @@
 }
 
 @media (min-width: 541px) {
-    .checkbox-row {
-        flex-flow: row-reverse;
-        justify-content: flex-end;
-    }
-
-    .checkbox-row input[type="checkbox"] {
-        margin: 0 1em 0 0;
-    }
-
     #room-seating-gradeable-id {
         flex: none;
     }

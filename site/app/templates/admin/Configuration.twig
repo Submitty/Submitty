@@ -26,12 +26,12 @@
         <input class="config-row" type="text" name="course_home_url" value="{{ fields['course_home_url'] }}" />
 
         <div id="forum-enabled-wrapper" class="config-row checkbox-row">
-            <label for="forum_enabled" class="config-row">
+            <input type="checkbox" name="forum_enabled" id="forum-enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
+            <label for="forum_enabled">
                 <div class="option-title">Enable Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
                 <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a>
             </label>
-            <input type="checkbox" name="forum_enabled" id="forum-enabled" value="true" {{ fields['forum_enabled'] ? 'checked': '' }} />
         </div>
 
         <h2>Submissions</h2>
@@ -55,12 +55,12 @@
         </label>
         <input class="config-row" type="text" name="private_repository" value="{{ fields['private_repository'] }}" />
 
-        <div class="checkbox-row config-row">
+        <div class="config-row checkbox-row">
+            <input type="checkbox" name="keep_previous_files" value="true" {{ fields['keep_previous_files'] ? 'checked' : '' }} />
             <label for="keep_previous_files">
                 <div class="option-title">Keep previous files uploaded</div>
                 <div class="option-alt">Should the files from previous submission be in the upload box by default.</div>
             </label>
-            <input type="checkbox" name="keep_previous_files" value="true" {{ fields['keep_previous_files'] ? 'checked' : '' }} />
         </div>
 
         <fieldset class="config-row">
@@ -121,12 +121,12 @@
         </label>
         <textarea class="config-row" name="course_email" />{{ fields['course_email'] }}</textarea>
 
-        <div class="checkbox-row config-row">
+        <div class="config-row checkbox-row">
+            <input type="checkbox" name="regrade_enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} />
             <label for="regrade_enabled">
                 <div class="option-title">Grade Inquiries Allowed</div>
                 <div class="option-alt">Allow students to submit grade inquiries for assignments.</div>
             </label>
-            <input type="checkbox" name="regrade_enabled" value="true" {{ fields['regrade_enabled'] ? 'checked': '' }} />
         </div>
 
         <label for="regrade_message" class="config-row">
@@ -147,7 +147,8 @@
         <h2>Student Features</h2>
         <hr>
 
-        <div class="checkbox-row config-row">
+        <div class="config-row checkbox-row">
+            <input type="checkbox" name="display_rainbow_grades_summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} />
             <label for="display_rainbow_grades_summary">
                 <div class="option-title">Display Rainbow Grades Summary</div>
                 <div class="option-alt">
@@ -157,7 +158,6 @@
                     You must manually run rainbow grades. <i style="font-style:normal;" class="helpicon"></i></a>
                 </div>
             </label>
-            <input type="checkbox" name="display_rainbow_grades_summary" value="true" {{ fields['display_rainbow_grades_summary'] ? 'checked' : '' }} />
         </div>
 
         <label for="room_seating_gradeable_id" class="config-row">
@@ -191,12 +191,12 @@
             </button>
         {% endif %}
 
-        <div class="checkbox-row config-row">
+        <div class="config-row checkbox-row">
+            <input type="checkbox" name="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />
             <label for="display_custom_message">
                 <div class="option-title">Display Custom Message</div>
                 <div class="option-alt">Show a custom message to students at the top of the navigation page.</div>
             </label>
-            <input type="checkbox" name="display_custom_message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />
         </div>
 
 {#            <div class="option-desc col-md-8">#}
