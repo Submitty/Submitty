@@ -27,7 +27,6 @@
         }
         var loop = Math.ceil(range/increment);
         var tracking = min;
-        console.log(range," ",increment," ",loop);
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
             tracking+=increment;
@@ -62,8 +61,6 @@
             }
             yValue.push(value);
         }
-        console.log(xBuckets);
-        console.log(yValue);
         return mode;
     }
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
@@ -78,8 +75,6 @@
         {% if overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
                 mode=fillBuckets(rangeT,parseInt(bucketInputTotal.value),betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
-                console.log(xBuckets);
-                console.log(yValue);
                 var dataTotal=tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
