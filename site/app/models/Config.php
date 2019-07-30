@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
+use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -435,6 +436,45 @@ class Config extends AbstractModel {
             }
             $this->$key = $config[$section][$key];
         }
+    }
+
+    /**
+     * Determine if automatic rainbow grades is fully configured
+     * For some features to be available to the instructors, the submitty-admin user must be configured
+     * at the system level and also must be a member of the course in question.
+     *
+     * @return bool True if fully configured, False otherwise
+     */
+    public function isAutoRainbowGradesReady() {
+
+        // Determine if submitty-admin is ready to go on the system level
+        $status_file = FileUtils::joinPaths(
+            '/', 'usr', 'local', 'submitty', 'site', 'config', 'submitty_admin_status.json'
+        );
+
+
+        if(!is_file($status_file)) {
+            throw new FileNotFoundException('Unable to locate the submity_admin_status.json file');
+        }
+
+        $status_file_contents = json_decode(file_get_contents($status_file));
+
+        // Determine if submitty-admin is ready to go on the course level
+        if($status_file_contents->submitty_admin_exists === true)
+        {
+            $course = $this->getCourse();
+            $semester = $this->getSemester();
+
+            $results = $this->core->getQueries()->checkIsInstructorInCourse(
+                $status_file_contents->submitty_admin_username,
+                $course,
+                $semester
+            );
+
+            return $results;
+        }
+
+        return false;
     }
 
     /**
