@@ -324,7 +324,7 @@
         {% if graded_gradeable.hasActiveRegradeRequest() %}
             {% set contents = contents ~ " + Grade Inquiry" %}
             {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradebable.getGradeInquiryCount()  %}
+            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
         {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
@@ -343,7 +343,7 @@
         {% if graded_gradeable.hasActiveRegradeRequest() %}
             {% set contents = contents ~ " + Grade Inquiry" %}
             {% set btn_class = "btn-danger" %}
-            {% set badge_count = graded_gradeable.getGradeInquiryCount() %}
+            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
         {%  endif %}
     {% else %}
         {% set contents = "View" %}
