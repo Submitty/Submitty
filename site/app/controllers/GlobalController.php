@@ -62,6 +62,15 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-star"
                 ]);
             }
+            elseif ($this->core->getUser()->accessFaculty()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildNewUrl(['home', 'courses', 'new']),
+                    "title" => "New Course",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-new-course",
+                    "icon" => "fa-plus-square"
+                ]);
+            }
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -78,7 +87,7 @@ class GlobalController extends AbstractController {
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                    "href" => $this->core->buildNewCourseUrl(['gradeable']),
                     "title" => "New Gradeable",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-new-gradeable",
