@@ -187,7 +187,7 @@ class MiscController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/download_zip")
      */
-    public function downloadSubmissionZip($gradeable_id, $user_id, $version = null) {
+    public function downloadSubmissionZip($gradeable_id, $user_id, $version = null, $origin = null) {
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
@@ -222,8 +222,6 @@ class MiscController extends AbstractController {
         // Context of these next two checks is important
         // If the request is coming from the submissions page, then the results and results_public folder
         // should not be included, otherwise include them
-        $origin = $_REQUEST['origin'] ?? null;
-
         if($origin != 'submission') {
 
             if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
