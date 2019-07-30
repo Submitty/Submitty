@@ -185,6 +185,7 @@ class GradeInquiryController extends AbstractController {
     }
 
     /**
+     * Helper function to create notification/email content and aggregate recipients
      * @param GradedGradeable $graded_gradeable
      * @param $gradeable_id
      * @param $content
