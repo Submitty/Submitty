@@ -1,6 +1,16 @@
 <div class="content">
     <h2>Rainbow Grades Customization -- Work In Progress</h2>
 
+    {% if limited_functionality_mode %}
+        <div id="limited_func_messages">
+            <p>Notice: Rainbow Grades tools are running in limited functionality mode.  This means that grades summaries must be
+                manually generated prior to each use of this interface.  To generate grade summaries navigate to the Grade
+                Reports page, and click the 'Generate Grade Summaries' button.</p>
+            <p>For more information about limited functionality mode visit the
+                <a href="http://www.submitty.org/instructor/rainbow_grades/automatic_setup">rainbow grades documentation</a>.</p>
+        </div>
+    {% endif %}
+
     <div id="save_status_container" class="customization_item">
         <span id="status_label">Status: </span>
         <div id="save_status">

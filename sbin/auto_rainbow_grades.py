@@ -136,10 +136,6 @@ with open(creds_file, 'r') as file:
 # Take this path if we DID NOT get an auth token
 if 'token' not in creds or not creds['token']:
 
-    print('No auth token found', flush=True)
-    print('Running with limited functionality', flush=True)
-    print('Refer to www.submitty.org/instructor/rainbow_grades/automatic_setup' +
-          'for more information.')
     print('Attempting to continue with previously generated grade summaries',
           flush=True)
 
@@ -173,7 +169,7 @@ else:
         raise Exception('Failure generating grade summaries')
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
-print('Pulling in grade reports', flush=True)
+print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
 # Run make
