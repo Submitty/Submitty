@@ -89,7 +89,7 @@ class GlobalController extends AbstractController {
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                    "href" => $this->core->buildNewCourseUrl(['gradeable']),
                     "title" => "New Gradeable",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-new-gradeable",
