@@ -247,13 +247,6 @@ if (!$logged_in) {
         $_REQUEST['page'] = 'login';
     }
 }
-elseif ($core->getUser() === null) {
-    $core->loadSubmittyUser();
-    if ($_REQUEST['component'] !== 'authentication') {
-        $_REQUEST['component'] = 'navigation';
-        $_REQUEST['page'] = 'no_access';
-    }
-}
 else if ($core->getConfig()->isCourseLoaded()
          && !$core->getAccess()->canI("course.view", ["semester" => $core->getConfig()->getSemester(), "course" => $core->getConfig()->getCourse()])
          && $_REQUEST['component'] !== 'authentication') {

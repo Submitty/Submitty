@@ -110,15 +110,6 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals($core->buildNewUrl(['home']), $response->redirect_response->url);
     }
 
-    public function testNoUser() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample'], ['no_user' => true]);
-        $request = Request::create(
-            "/s19/sample"
-        );
-        $response = WebRouter::getWebResponse($request, $core, true);
-        $this->assertEquals($core->buildNewCourseUrl(['no_access']), $response->redirect_response->url);
-    }
-
     public function randomUrlProvider() {
         return [
             ["/everywhere"],
