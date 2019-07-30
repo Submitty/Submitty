@@ -313,6 +313,26 @@ function changeDisplayOptions(option){
     window.location.replace(buildNewCourseUrl(['forum', 'threads', thread_id]) + `?option=${option}`);
 }
 
+function readCategoryValues(){
+    var categories_value = [];
+    $('#thread_category button').each(function(){
+        if($(this).attr("btn-selected")==="true"){
+            categories_value.push($(this).attr("cat-id"));
+        }
+    });
+    return categories_value;
+}
+
+function readThreadStatusValues(){
+    var thread_status_value = [];
+    $('#thread_status_select button').each(function(){
+        if($(this).attr("btn-selected")==="true"){
+            thread_status_value.push($(this).attr("sel-id"));
+        }
+    });
+    return thread_status_value;
+}
+
 function dynamicScrollLoadPage(element, atEnd) {
     var load_page = $(element).attr(atEnd?"next_page":"prev_page");
     if(load_page == 0) {
@@ -377,8 +397,10 @@ function dynamicScrollLoadPage(element, atEnd) {
 
     var next_url = urlPattern.replace("{{#}}", load_page);
 
-    var categories_value = $("#thread_category").val();
-    var thread_status_value = $("#thread_status_select").val();
+    var categories_value = readCategoryValues();
+    var thread_status_value = readThreadStatusValues();
+
+    // var thread_status_value = $("#thread_status_select").val();
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
@@ -391,7 +413,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             unread_select: unread_select_value,
             currentThreadId: currentThreadId,
             currentCategoriesId: currentCategoriesId,
-            csrf_token: csrfToken
+            csrf_token: window.csrfToken
         },
         success: function(r){
             var x = JSON.parse(r);
@@ -484,8 +506,10 @@ function alterShowMergeThreadStatus(newStatus, course) {
 }
 
 function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirstPage, success_callback){
-    var categories_value = $("#thread_category").val();
-    var thread_status_value = $("#thread_status_select").val();
+
+    var categories_value = readCategoryValues();
+    var thread_status_value = readThreadStatusValues();
+
     var unread_select_value = $("#unread").is(':checked');
     categories_value = (categories_value == null)?"":categories_value.join("|");
     thread_status_value = (thread_status_value == null)?"":thread_status_value.join("|");
@@ -507,6 +531,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
         success: function(r){
             var x = JSON.parse(r);
             var page_number = parseInt(x.page_number);
+            var threadCount = parseInt(x.count);
             x = x.html;
             x = `${x}`;
             var jElement = $("#thread_list");
@@ -523,7 +548,11 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
                 $("#thread_list .fa-caret-up").show();
                 $("#thread_list .fa-caret-down").hide();
             }
+
+            $('#num_filtered').text(threadCount);
+            
             dynamicScrollLoadIfScrollVisible(jElement);
+            loadThreadHandler();
             if(success_callback != null) {
                 success_callback();
             }
@@ -1127,6 +1156,83 @@ function loadThreadHandler(){
     });
 }
 
+var filters_applied = [];
+
+// Taken from https://stackoverflow.com/a/1988361/2650341
+
+Array.prototype.inArray = function(comparer) {
+    for(var i=0; i < this.length; i++) {
+        if(comparer(this[i])) return i;
+    }
+    return false;
+};
+
+// adds an element to the array if it does not already exist using a comparer
+// function
+Array.prototype.toggleElement = function(element, comparer) {
+    var index = this.inArray(comparer);
+    if ((typeof(index) == "boolean" && !index) || (typeof(index) == "int" && index === 0)){
+        this.push(element);
+    }
+    else{
+        this.splice(index, 1);
+    }
+};
+
+function clearForumFilter(){
+    if(checkUnread()){
+        $('#filter_unread_btn').click();
+    }
+    window.filters_applied = [];
+    $('#thread_category button, #thread_status_select button').attr('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
+    $('#filter_unread_btn').removeClass('filter-active').addClass('filter-inactive');
+    $('#clear_filter_button').hide();
+
+    updateThreads(true, null);
+    return false;
+}
+
+function loadFilterHandlers(){
+
+    $('#filter_unread_btn').mousedown(function (e) {
+        $(this).toggleClass('filter-inactive filter-active');
+    });
+
+    $('#thread_category button, #thread_status_select button').mousedown(function(e) {
+        e.preventDefault();
+        var current_selection = $(this).attr('btn-selected');
+
+        if(current_selection==="true"){
+            $(this).attr('btn-selected', "false").removeClass('filter-active').addClass('filter-inactive');
+        }
+        else{
+            $(this).attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+        }
+
+        var filter_text = $(this).text();
+
+        window.filters_applied.toggleElement(filter_text, function(e) {
+            return e === filter_text;
+        });
+
+        if(window.filters_applied.length == 0){
+            clearForumFilter();
+        }
+        else {
+            $('#clear_filter_button').css('display', 'inline-block');
+        }
+        updateThreads(true, null);
+        return true;
+    });
+
+    $('#unread').change(function(e) {
+        e.preventDefault();
+        updateThreads(true,null);
+        checkUnread();
+        return true;
+    });
+}
+
 function thread_post_handler(){
     $('.submit_unresolve').click(function(event){
         var post_box_id = $(this).attr("post_box_id");
@@ -1141,4 +1247,20 @@ function thread_post_handler(){
         post_unresolve.attr("disabled", "true").val('Submitting post...');
         return true;
     });
+}
+
+function forumFilterBar(){
+    $('#forum_filter_bar').toggle();
+}
+
+function checkUnread(){
+    if($('#unread').prop("checked")){
+        unread_marked = true;
+        $('#filter_unread_btn').removeClass('filter-inactive').addClass('filter-active');
+        $('#clear_filter_button').css('display', 'inline-block');
+        return true;
+    }
+    else{
+        return false;
+    }
 }
