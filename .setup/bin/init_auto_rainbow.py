@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 
-"""Obtain an api auth token for submitty-admin user during installation."""
+"""
+Obtain an api auth token for submitty-admin user during installation.
+
+Also write a file into the file system which can be used by PHP to determine if
+submitty-admin is present at the system level and correctly configured.
+"""
 
 import os
 import json
@@ -67,6 +72,23 @@ else:
 # Add token string to submitty_admin json
 creds['token'] = token
 
-# Write back to file
+# Write back to submitty_admin json file
 with open(admin_file, 'w') as file:
     json.dump(creds, file, indent=4)
+
+# Configure path to where status file should be saved
+# This file is saved somewhere submitty_php can read from so the PHP side of
+# submitty is able to determine if it can use certain features
+status_file = os.path.join(install_dir, 'site', 'config', 'submitty_admin_status.txt')
+
+does_exist = True if token else False
+
+# Write to status file
+with open(status_file, 'w') as file:
+    json.dump({
+        'submitty_admin_exists': does_exist,
+        'submitty_admin_username': creds['submitty_admin_username']
+    }, file, indent=4)
+
+cmd_output = os.popen('chmod 0440 ' + status_file).read()
+cmd_output = os.popen('chown submitty_php:submitty_php ' + status_file).read()
