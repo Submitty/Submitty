@@ -12,7 +12,7 @@
             $(b[e]).tooltip('disable').attr('title', $(b[e]).attr('data-original-title'));
         });
         $('#'+'{{ display_option }}').attr('checked', 'checked'); //Saves the radiobutton state when refreshing the page
-        $(".post_reply_from").submit(publishPost);
+        $(".post_reply_from").submit(event, publishPost);
         $("form").areYouSure();
         loadThreadHandler();
     });

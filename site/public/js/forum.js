@@ -128,7 +128,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
         formData.append('file_input[]', files[i], files[i].name);
     }
     var submit_url = form.attr('action');
-    
+    sdf
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -160,12 +161,26 @@ function publishFormWithAttachments(form, test_category, error_message) {
     return false;
 }
 
-function createThread() {
-    return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+function createThread(e) {
+    e.preventDefault();
+    try {
+        return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+    }
+    catch{
+        alert("There was an irrecoverable fault. Kindly contact administrator.");
+        return false;
+    }
 }
 
-function publishPost() {
-    return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+function publishPost(e) {
+    e.preventDefault();
+    try {
+        return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+    }
+    catch{
+        alert("There was an irrecoverable fault. Kindly contact administrator.");
+        return false;
+    }
 }
 
 function changeThreadStatus(thread_id) {
