@@ -49,11 +49,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
-        if (isset($config_values['course_home_url'])) {
-            $core->method('buildCourseUrl')->willReturn($config_values['course_home_url']);
-            $config->method('getCourseHomeUrl')->willReturn($config_values['course_home_url']);
-        }
-
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
@@ -120,8 +115,8 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         /** @noinspection PhpParamsInspection */
-        $output = new Output($core);
-        $output->disableRender();
+        $output = $this->createMockModel(Output::class);
+        $output->method('addBreadcrumb')->willReturn(true);
 
         $core->method('getOutput')->willReturn($output);
 
