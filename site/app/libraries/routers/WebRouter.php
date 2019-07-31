@@ -99,7 +99,7 @@ class WebRouter {
      * @param Request $request
      * @param Core $core
      * @return Response|mixed should be of type Response only in the future
-     * @throws \ReflectionException
+     * @throws \ReflectionException|\Exception
      */
     static public function getWebResponse(Request $request, Core $core) {
         $logged_in = false;
@@ -166,6 +166,10 @@ class WebRouter {
         return call_user_func_array([$controller, $this->method_name], $arguments);
     }
 
+    /**
+     * Loads course config if they exist in the requested URL.
+     * @throws \Exception
+     */
     private function loadCourse() {
         if (array_key_exists('_semester', $this->parameters) &&
             array_key_exists('_course', $this->parameters)) {
@@ -195,9 +199,13 @@ class WebRouter {
         }
     }
 
+    /**
+     * Check if we have a saved cookie with a session id and then that there exists
+     * a session with that id. If there is no session, then we delete the cookie.
+     * @param Core $core
+     * @return bool
+     */
     static private function isWebLoggedIn(Core $core) {
-        // Check if we have a saved cookie with a session id and then that there exists
-        // a session with that id. If there is no session, then we delete the cookie.
         $logged_in = false;
         $cookie_key = 'submitty_session';
         if (isset($_COOKIE[$cookie_key])) {
@@ -239,8 +247,14 @@ class WebRouter {
         return $logged_in;
     }
 
+    /**
+     * Check if the user has a valid jwt in the header.
+     *
+     * @param Core $core
+     * @param Request $request
+     * @return bool
+     */
     static private function isApiLoggedIn(Core $core, Request $request) {
-        // check if the user has a valid jwt in the header
         $logged_in = false;
         $jwt = $request->headers->get("authorization");
         if (!empty($jwt)) {
@@ -262,6 +276,11 @@ class WebRouter {
         return $logged_in;
     }
 
+    /**
+     * Check if the user needs a redirection depending on their login status.
+     * @param $logged_in
+     * @return Response|bool
+     */
     private function loginRedirectCheck($logged_in) {
         if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
@@ -307,6 +326,10 @@ class WebRouter {
         return true;
     }
 
+    /**
+     * Check if the request carries a valid CSRF token for all POST requests.
+     * @return Response|bool
+     */
     private function csrfCheck() {
         if ($this->request->isMethod('POST') &&
             !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
