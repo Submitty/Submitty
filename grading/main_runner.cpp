@@ -15,6 +15,37 @@
 // =====================================================================
 
 
+void executeSetOfCommands(std::vector<std::string> setOfCommands,  
+                          std::vector<nlohmann::json> actions, 
+                          std::vector<nlohmann::json> dispatcher_actions, 
+                          TestCase testcase,
+                          std::string logfile,  
+                          nlohmann::json config_json,
+                          int i){
+
+  if ( setOfCommands.size() > 0 ) {
+            
+    std::cout << "========================================================" << std::endl;
+
+    std::cout << "TEST #" << i << std::endl;
+    std::cout << "TITLE " << testcase.getTitle() << std::endl;
+
+    for (int j = 0; j < setOfCommands.size();  j++){
+      int exit_no = execute(setOfCommands[j],
+                            actions,
+                            dispatcher_actions,
+                            logfile,
+                            testcase.get_test_case_limits(),
+                            config_json.value("resource_limits",nlohmann::json()),
+                            config_json,
+                            false,
+                            "");
+    }
+    std::cout << "========================================================" << std::endl;
+    std::cout << "FINISHED TEST #" << i << std::endl;
+  }
+}
+
 int main(int argc, char *argv[]) {
   std::cout << "Running User Code..." << std::endl;
   std::string hw_id = "";
@@ -111,47 +142,18 @@ int main(int argc, char *argv[]) {
         
         std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(k), "command");
         
-        if ( outputGeneratorCommandsForValidation.size() > 0 ) {
-          
-          my_testcase.header(i);
-        
-          for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
-            int exit_no = execute(outputGeneratorCommandsForValidation[j],
-                                  actions,
-                                  dispatcher_actions,
-                                  "execute_logfile.txt",
-                                  my_testcase.get_test_case_limits(),
-                                  config_json.value("resource_limits",nlohmann::json()),
-                                  config_json,
-                                  false,
-                                  "");
-          }
-          std::cout << "========================================================" << std::endl;
-          std::cout << "FINISHED TEST #" << i << std::endl;
-        }
+        std::string logfile = "execute_logfile.txt";
+
+        executeSetOfCommands(outputGeneratorCommandsForValidation,actions,dispatcher_actions,my_testcase,logfile,config_json,i);
       }
     } else if ( generation_type == "input" ) {
+      
       std::vector <std::string> inputGeneratorCommands = my_testcase.getInputGeneratorCommands();
-      if ( inputGeneratorCommands.size() > 0 ) {
-       
-        my_testcase.header(i);
+      
+      std::string logfile = "execute_logfile.txt";
+        
+      executeSetOfCommands(inputGeneratorCommands,actions,dispatcher_actions,my_testcase,logfile,config_json,i);
 
-        for (int j = 0; j < inputGeneratorCommands.size(); j++ ) {
-          int exit_no = execute(inputGeneratorCommands[j],
-                                  actions,
-                                  dispatcher_actions,
-                                  "execute_logfile.txt",
-                                  my_testcase.get_test_case_limits(),
-                                  config_json.value("resource_limits",nlohmann::json()),
-                                  config_json,
-                                  false,
-                                  "");
-        }
-
-        std::cout << "========================================================" << std::endl;
-        std::cout << "FINISHED TEST #" << i << std::endl;
-
-      }
     } else {
       std::vector<std::string> commands = my_testcase.getCommands();
 
@@ -160,7 +162,10 @@ int main(int argc, char *argv[]) {
 
       assert (commands.size() > 0);
 
-      my_testcase.header(i);
+      std::cout << "========================================================" << std::endl;
+
+      std::cout << "TEST #" << i << std::endl;
+      std::cout << "TITLE " << my_testcase.getTitle() << std::endl;
       
       for (int x = 0; x < commands.size(); x++) {
         std::cout << "COMMAND " << commands[x] << std::endl;
