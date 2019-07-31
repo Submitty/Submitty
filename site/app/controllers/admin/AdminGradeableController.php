@@ -27,8 +27,10 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    private function ajaxGetBuildLogs() {
-        $gradeable_id = $_REQUEST['id'];
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
+     */
+    public function ajaxGetBuildLogs($gradeable_id) {
 
         $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
         $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
@@ -40,20 +42,21 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
     }
 
-    private function ajaxUpdateBuildStatus() {
-        $gradeable_id = $_REQUEST['id'];
-        $build_status = $_REQUEST['build_status'];
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status/{current_status}", methods={"GET"})
+     */
+     public function ajaxUpdateBuildStatus($gradeable_id, $current_status) {
         $max_wait_time = 60;
 
         $new_build_status = $this->getBuildStatusOfGradeable($gradeable_id);
 
-        while($new_build_status == $build_status && $max_wait_time > 0) {
+        while($new_build_status == $current_status && $max_wait_time > 0) {
             sleep(1);
             $max_wait_time--;
             $new_build_status = $this->getBuildStatusOfGradeable($gradeable_id);
         }
 
-        if ($new_build_status != $build_status) {
+        if ($new_build_status != $current_status) {
             if ($new_build_status == 'none') {
                 $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
                 $this->core->getOutput()->renderJsonSuccess($gradeable->hasAutogradingConfig());

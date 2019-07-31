@@ -90,7 +90,7 @@ $(document).ready(function () {
         }
     };
 
-    ajaxCheckBuildStatus($('#g_id').val(),'');
+    ajaxCheckBuildStatus($('#g_id').val(),'unknown');
 
     $('input,select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
@@ -164,12 +164,8 @@ function hideBuildLog() {
 
 function ajaxGetBuildLogs(gradeable_id) {
     $.getJSON({
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'admin_gradeable',
-            'action': 'get_build_logs',
-            'id': gradeable_id,
-        }),
+        type: "GET",
+        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
             var build_info = response['data'][0];
             var cmake_info = response['data'][1];
@@ -206,13 +202,8 @@ function ajaxGetBuildLogs(gradeable_id) {
 
 function ajaxCheckBuildStatus(gradeable_id,current_status) {
     $.getJSON({
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'admin_gradeable',
-            'action': 'update_build_status',
-            'id': gradeable_id,
-            'build_status': current_status
-        }),
+        type: "GET",
+        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_status',current_status]),
         success: function (response) {
             $('#rebuild_log_button').css('display','block');
             hideBuildLog();
@@ -266,7 +257,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
         success: function (response) {
             if (Array.isArray(response['data'])) {
                 if (response['data'].includes('rebuild_queued')) {
-                    ajaxCheckBuildStatus(gradeable_id,'');
+                    ajaxCheckBuildStatus(gradeable_id,'unknown');
                 }
             }
             setGradeableUpdateComplete();
