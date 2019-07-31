@@ -425,9 +425,7 @@ class HomeworkView extends AbstractView {
                 //get the cover image if it exists
                 if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
                     $corrected_filename = rawurlencode(htmlspecialchars($filename));
-                    $url = $this->core->buildUrl([
-                        'component' => 'misc',
-                        'page' => 'display_file',
+                    $url = $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                         'dir' => 'split_pdf',
                         'file' => $corrected_filename,
                         'path' => $path,
@@ -445,9 +443,7 @@ class HomeworkView extends AbstractView {
                 // get the full filename for PDF popout
                 // add 'timestamp / full filename' to count_array so that path to each filename is to the full PDF, not the cover
                 $filename = rawurlencode(htmlspecialchars($filename));
-                $url = $this->core->buildUrl([
-                    'component' => 'misc',
-                    'page' => 'display_file',
+                $url = $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                     'dir' => 'split_pdf',
                     'file' => $filename,
                     'path' => $path,
@@ -455,9 +451,7 @@ class HomeworkView extends AbstractView {
                 ]);
                 $filename_full = str_replace('_cover.pdf', '.pdf', $filename);
                 $path_full = str_replace('_cover.pdf', '.pdf', $path);
-                $url_full = $this->core->buildUrl([
-                    'component' => 'misc',
-                    'page' => 'display_file',
+                $url_full = $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                     'dir' => 'uploads',
                     'file' => $filename_full,
                     'path' => $path_full,
