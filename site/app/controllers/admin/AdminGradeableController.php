@@ -68,7 +68,7 @@ class AdminGradeableController extends AbstractController {
         else {
             $this->core->getOutput()->renderJsonSuccess('time_out');
         }
-    }
+     }
 
     private function getBuildStatusOfGradeable($gradeable_id) {
         $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
@@ -232,10 +232,6 @@ class AdminGradeableController extends AbstractController {
         }
         usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
 
-        $is_in_rebuild_queue = $this->isInRebuildQueue($gradeable->getId());
-
-        $check_refresh_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'check_refresh']);
-
         $type_string = 'UNKNOWN';
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()) {
@@ -301,9 +297,6 @@ class AdminGradeableController extends AbstractController {
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
-            // rebuild queue information
-            'is_in_rebuild_queue' => $is_in_rebuild_queue,
-            'check_refresh_url' => $check_refresh_url,
             'build_status' => $gradeable->hasAutogradingConfig(),
 
             'upload_config_url' => $this->core->buildNewCourseUrl(['autograding_config']),
@@ -1154,8 +1147,6 @@ class AdminGradeableController extends AbstractController {
         if ($result !== null) {
             die($result);
         }
-        $this->core->addSuccessMessage("Successfully added {$gradeable_id} to the rebuild queue");
-        $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'update']) . '?' . http_build_query(['nav_tab' => '1']));
     }
 
     /**
@@ -1244,35 +1235,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->redirect($this->core->buildNewCourseUrl());
     }
 
-    /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/check_refresh")
-     */
-    public function checkRefresh($gradeable_id) {
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        if(!$this->isInRebuildQueue($gradeable_id)) {
-            $refresh_string = "REFRESH_ME";
-            $refresh_bool = true;
-            $this->core->addSuccessMessage("Finished rebuild of {$gradeable_id}");
-        }
-        else {
-            $refresh_string = "NO_REFRESH";
-            $refresh_bool = false;
-        }
-        $this->core->getOutput()->renderString($refresh_string);
-        return array('refresh' => $refresh_bool, 'string' => $refresh_string);
-    }
-
     private function redirectToEdit($gradeable_id) {
         $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']);
         header('Location: ' . $url);
-    }
-
-    private function isInRebuildQueue($gradeable_id) {
-        // Check the rebuild queue for the file indicating that a config rebuild is in process
-        $rebuild_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
-        $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuild_filename);
-        return is_file($daemon_queue_dir);
     }
 
     /**

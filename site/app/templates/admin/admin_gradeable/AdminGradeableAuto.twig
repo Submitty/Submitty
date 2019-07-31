@@ -62,7 +62,7 @@
         </div>
     </div>
     <div class="btn-container">
-        <a class="btn btn-primary" href="{{ rebuild_url }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
+        <a class="btn btn-primary" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     </div>
 </div>
 
@@ -199,9 +199,5 @@
             sub.prop('checked', true);
             sub.change();
         });
-
-        {% if is_in_rebuild_queue %}
-            checkRefreshPage("{{ check_refresh_url|raw }}");
-        {% endif %}
     });
 </script>

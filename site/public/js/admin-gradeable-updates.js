@@ -108,7 +108,7 @@ $(document).ready(function () {
             saveGraders();
             return;
         }
-        if ($('#all_access').is(':checked')) {
+        if ($(this).prop('id') == 'all_access' || $(this).prop('id') == 'minimum_grading_group') {
             saveGraders();
         }
         // Don't save if it we're ignoring it
@@ -161,6 +161,18 @@ function hideBuildLog() {
     $('#open_build_log').show();
     $('#close_build_log').hide();
 }
+function ajaxRebuildGradeableButton() {
+    var gradeable_id = $('#g_id').val();
+    $.ajax({
+        url: buildNewCourseUrl(['gradeable', gradeable_id, 'rebuild']),
+        success: function (response) {
+            ajaxCheckBuildStatus(gradeable_id,'unknown');
+        },
+        error: function (response) {
+            console.error(response);
+        }
+    });
+}
 
 function ajaxGetBuildLogs(gradeable_id) {
     $.getJSON({
@@ -211,17 +223,20 @@ function ajaxCheckBuildStatus(gradeable_id,current_status) {
                 $('#rebuild_status').html(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild_log_button').css('display','none');
                 ajaxCheckBuildStatus(gradeable_id,'queued');
+                $('[name="config_search_error"]').hide();
             }
             else if (response['data'] == 'processing') {
                 $('#rebuild_status').html(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild_log_button').css('display','none');
                 ajaxCheckBuildStatus(gradeable_id,'processing');
+                $('[name="config_search_error"]').hide();
             }
             else if (response['data'] == true) {
                 $('#rebuild_status').html('Gradeable build complete');
             }
             else if (response['data'] == false) {
                 $('#rebuild_status').html('Gradeable build failed');
+                $('[name="config_search_error"]').show();
             }
             else if (response['data'] == 'timeout') {
                 $('#rebuild_status').html('Error');
