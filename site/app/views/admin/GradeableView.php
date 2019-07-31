@@ -17,6 +17,7 @@ class GradeableView extends AbstractView {
             "upload_url" => $this->core->buildNewCourseUrl(['autograding_config', 'upload']),
             "rename_url" => $this->core->buildNewCourseUrl(['autograding_config', 'rename']),
             "delete_url" => $this->core->buildNewCourseUrl(['autograding_config', 'delete']),
+            "display_url" => $this->core->buildNewCourseUrl(['display_file']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

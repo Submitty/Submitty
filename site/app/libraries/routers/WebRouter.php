@@ -209,7 +209,7 @@ class WebRouter {
             );
         }
 
-        if(!$this->core->getConfig()->isCourseLoaded()) {
+        if(!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
             if ($this->logged_in){
                 if ($this->parameters['_method'] !== 'logout' &&
                     !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
