@@ -115,7 +115,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         /** @noinspection PhpParamsInspection */
-        $output = $this->createMockModel(Output::class);
+        $output = $this->getMockBuilder(Output::class)
+            ->setConstructorArgs([$core])
+            ->setMethods(['addBreadcrumb'])
+            ->getMock();
         $output->method('addBreadcrumb')->willReturn(true);
 
         $core->method('getOutput')->willReturn($output);
