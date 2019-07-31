@@ -165,6 +165,13 @@ input[type="checkbox"]:checked:before {
   display: inline-block;
 }
 
+.helpicon_nocolor::before {
+  font-family: 'Font Awesome 5 Free';
+  content: "\f059";
+  font-weight: 300;
+  display: inline-block;
+}
+
 select.disabled,
 textarea.disabled,
 input.disabled {
