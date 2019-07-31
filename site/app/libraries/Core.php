@@ -39,6 +39,9 @@ class Core {
     /** @var SessionManager */
     private $session_manager;
 
+    /** @var DatabaseFactory */
+    private $database_factory;
+
     /** @var DatabaseQueries */
     private $database_queries;
 
@@ -114,7 +117,7 @@ class Core {
      * @param $course
      * @throws \Exception
      */
-    public function loadConfig($semester, $course) {
+    public function loadCourseConfig($semester, $course) {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
         $this->config = new Config($this, $semester, $course);
@@ -135,6 +138,13 @@ class Core {
         }
     }
 
+    public function loadMasterConfig() {
+        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
+
+        $this->config = new Config($this, '', '');
+        $this->config->loadMasterConfigs($conf_path);
+    }
+
     public function loadAuthentication() {
         $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
@@ -152,21 +162,26 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadDatabases() {
+    public function loadMasterDatabase() {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
 
-        $database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
+        $this->database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
 
-        $this->submitty_db = $database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
+        $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
+        $this->database_queries = $this->database_factory->getQueries($this);
+    }
+
+    public function loadCourseDatabase() {
         if ($this->config->isCourseLoaded()) {
-            $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
+            $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
             $this->course_db->connect();
+
+            $this->database_queries = $this->database_factory->getQueries($this);
         }
-        $this->database_queries = $database_factory->getQueries($this);
     }
 
     public function loadForum() {

@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
+use app\libraries\TokenManager;
 
 
 class WebRouter {
@@ -25,9 +26,6 @@ class WebRouter {
 
     /** @var Request  */
     protected $request;
-
-    /** @var bool */
-    protected $logged_in;
 
     /** @var AnnotationReader */
     protected $reader;
@@ -41,10 +39,9 @@ class WebRouter {
     /** @var string the method to call */
     protected $method_name;
 
-    private function __construct(Request $request, Core $core, $logged_in) {
+    private function __construct(Request $request, Core $core) {
         $this->core = $core;
         $this->request = $request;
-        $this->logged_in = $logged_in;
 
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -61,17 +58,26 @@ class WebRouter {
     /**
      * @param Request $request
      * @param Core $core
-     * @param $logged_in
      * @return Response|mixed should be of type Response only in the future
      */
-    static public function getApiResponse(Request $request, Core $core, $logged_in) {
+    static public function getApiResponse(Request $request, Core $core) {
         try {
-            $router = new self($request, $core, $logged_in);
+            $router = new self($request, $core);
+            $router->loadCourse();
+
+            $logged_in = self::isApiLoggedIn($core, $request);
 
             // prevent user that is not logged in from going anywhere except AuthenticationController
             if (!$logged_in &&
                 !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')) {
                 return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
+            }
+
+            /** @noinspection PhpUnhandledExceptionInspection */
+            if (!$router->accessCheck()) {
+                return Response::JsonOnlyResponse(
+                    JsonResponse::getFailResponse("You don't have access to this endpoint.")
+                );
             }
         }
         catch (ResourceNotFoundException $e) {
@@ -92,14 +98,18 @@ class WebRouter {
     /**
      * @param Request $request
      * @param Core $core
-     * @param $logged_in
      * @return Response|mixed should be of type Response only in the future
+     * @throws \ReflectionException
      */
-    static public function getWebResponse(Request $request, Core $core, $logged_in) {
+    static public function getWebResponse(Request $request, Core $core) {
+        $logged_in = false;
         try {
-            $router = new self($request, $core, $logged_in);
+            $router = new self($request, $core);
+            $router->loadCourse();
 
-            $login_check_response = $router->loginCheck();
+            $logged_in = self::isWebLoggedIn($core);
+
+            $login_check_response = $router->loginRedirectCheck($logged_in);
             if ($login_check_response instanceof Response) {
                 return $login_check_response;
             }
@@ -108,7 +118,8 @@ class WebRouter {
             if ($csrf_check_response instanceof Response) {
                 return $csrf_check_response;
             }
-          
+
+            /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
                 return new Response(
                     JsonResponse::getFailResponse("You don't have access to this endpoint."),
@@ -155,8 +166,104 @@ class WebRouter {
         return call_user_func_array([$controller, $this->method_name], $arguments);
     }
 
-    private function loginCheck() {
-        if (!$this->logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
+    private function loadCourse() {
+        if (array_key_exists('_semester', $this->parameters) &&
+            array_key_exists('_course', $this->parameters)) {
+            $semester = $this->parameters['_semester'];
+            $course = $this->parameters['_course'];
+
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $this->core->loadCourseConfig($semester, $course);
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $this->core->loadGradingQueue();
+
+            if($this->core->getConfig()->isCourseLoaded()){
+                $this->core->getOutput()->addBreadcrumb(
+                    $this->core->getDisplayedCourseName(),
+                    $this->core->buildCourseUrl(),
+                    $this->core->getConfig()->getCourseHomeUrl()
+                );
+            }
+
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $this->core->loadCourseDatabase();
+
+            if($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
+                /** @noinspection PhpUnhandledExceptionInspection */
+                $this->core->loadForum();
+            }
+        }
+    }
+
+    static private function isWebLoggedIn(Core $core) {
+        // Check if we have a saved cookie with a session id and then that there exists
+        // a session with that id. If there is no session, then we delete the cookie.
+        $logged_in = false;
+        $cookie_key = 'submitty_session';
+        if (isset($_COOKIE[$cookie_key])) {
+            try {
+                $token = TokenManager::parseSessionToken(
+                    $_COOKIE[$cookie_key],
+                    $core->getConfig()->getBaseUrl(),
+                    $core->getConfig()->getSecretSession()
+                );
+                $session_id = $token->getClaim('session_id');
+                $expire_time = $token->getClaim('expire_time');
+                $logged_in = $core->getSession($session_id, $token->getClaim('sub'));
+                // make sure that the session exists and it's for the user they're claiming
+                // to be
+                if (!$logged_in) {
+                    // delete cookie that's stale
+                    Utils::setCookie($cookie_key, "", time() - 3600);
+                }
+                else {
+                    if ($expire_time > 0) {
+                        Utils::setCookie(
+                            $cookie_key,
+                            (string) TokenManager::generateSessionToken(
+                                $session_id,
+                                $token->getClaim('sub'),
+                                $core->getConfig()->getBaseUrl(),
+                                $core->getConfig()->getSecretSession()
+                            ),
+                            $expire_time
+                        );
+                    }
+                }
+            }
+            catch (\InvalidArgumentException $exc) {
+                // Invalid cookie data, delete it
+                Utils::setCookie($cookie_key, "", time() - 3600);
+            }
+        }
+        return $logged_in;
+    }
+
+    static private function isApiLoggedIn(Core $core, Request $request) {
+        // check if the user has a valid jwt in the header
+        $logged_in = false;
+        $jwt = $request->headers->get("authorization");
+        if (!empty($jwt)) {
+            try {
+                $token = TokenManager::parseApiToken(
+                    $request->headers->get("authorization"),
+                    $core->getConfig()->getBaseUrl(),
+                    $core->getConfig()->getSecretSession()
+                );
+                $api_key = $token->getClaim('api_key');
+                $logged_in = $core->loadApiUser($api_key);
+            }
+            catch (\InvalidArgumentException $exc) {
+                $core->getOutput()->renderJsonFail("Invalid token.");
+                $core->getOutput()->displayOutput();
+            }
+        }
+
+        return $logged_in;
+    }
+
+    private function loginRedirectCheck($logged_in) {
+        if (!$logged_in && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
             return Response::RedirectOnlyResponse(
                 new RedirectResponse(
@@ -182,7 +289,7 @@ class WebRouter {
         }
 
         if(!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
-            if ($this->logged_in){
+            if ($logged_in){
                 if ($this->parameters['_method'] !== 'logout' &&
                     !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
                     return Response::RedirectOnlyResponse(
