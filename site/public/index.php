@@ -68,52 +68,34 @@ function error_handler() {
 }
 register_shutdown_function("error_handler");
 
-$semester = '';
-$course = '';
-$is_api = False;
-
-if ($core->getRouter()->hasNext()) {
-    $first = $core->getRouter()->getNext();
-    if ($first === 'api') {
-        $is_api = True;
-        $semester = $core->getRouter()->getNext() ?? '';
-        $course = $core->getRouter()->getNext() ?? '';
-    }
-    elseif (in_array($first, ['authentication', 'home'])) {
-        $_REQUEST['component'] = $first;
-    }
-    else {
-        $semester = $first ?? '';
-        $course = $core->getRouter()->getNext() ?? '';
-    }
-}
-
-/*
- * Check that we have a semester and a course specified by the user and then that there's no
- * potential for path trickery by using basename which will return only the last part of a
- * given path (such that /../../test would become just test)
+/**
+ * Assume there are only 6 kinds of URLs:
+ * 1. /semester/course/*
+ * 2. /api/semester/course/*
+ * 3. /authentication/*
+ * 4. /home/*
+ * 5. /api/*
+ * 6. /*
  */
 
-if (empty($_REQUEST['semester'])) {
-    $_REQUEST['semester'] = $semester;
+$semester = '';
+$course = '';
+
+$url_parts = explode('/', $request->getPathInfo());
+
+$is_api = $url_parts[1] === 'api';
+
+if ($is_api) {
+    $semester = $url_parts[2] ?? '';
+    $course = $url_parts[3] ?? '';
+}
+else {
+    $semester = $url_parts[1] ?? '';
+    if (!in_array($semester, ['authentication', 'home'])) {
+        $course = $url_parts[2] ?? '';
+    }
 }
 
-if (empty($_REQUEST['course'])) {
-    $_REQUEST['course'] = $course;
-}
-
-
-// Sanitize the inputted semester & course to prevent directory attacks
-$semester = basename($_REQUEST['semester']);
-$course = basename($_REQUEST['course']);
-
-if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
-    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $url = str_replace("course={$_REQUEST['course']}", "course={$course}", $url);
-    $url = str_replace("semester={$_REQUEST['semester']}", "semester={$semester}", $url);
-    header("Location: {$url}");
-    exit();
-}
 /*
  * This sets up our Core (which in turn loads the config, database, etc.) for the application
  * and then we initialize our Output engine (as it requires Core to run) and then set the
@@ -147,6 +129,7 @@ ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 $core->loadDatabases();
 
 if($core->getConfig()->isCourseLoaded() && $core->getConfig()->isForumEnabled()) {
+    /** @noinspection PhpUnhandledExceptionInspection */
     $core->loadForum();
 }
 
@@ -222,6 +205,7 @@ if (!empty($jwt)) {
 }
 
 if (empty($_COOKIE['submitty_token'])) {
+    /** @noinspection PhpUnhandledExceptionInspection */
     Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 

@@ -99,11 +99,6 @@ class WebRouter {
         try {
             $router = new self($request, $core, $logged_in);
 
-            $course_check_response = $router->loadCourses();
-            if ($course_check_response instanceof Response) {
-                return $course_check_response;
-            }
-
             $login_check_response = $router->loginCheck();
             if ($login_check_response instanceof Response) {
                 return $login_check_response;
@@ -158,29 +153,6 @@ class WebRouter {
         }
 
         return call_user_func_array([$controller, $this->method_name], $arguments);
-    }
-
-    private function loadCourses() {
-        if (array_key_exists('_semester', $this->parameters) &&
-            array_key_exists('_course', $this->parameters)) {
-            $semester = $this->parameters['_semester'];
-            $course = $this->parameters['_course'];
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadConfig($semester, $course);
-            $course_loaded = true;
-        }
-
-        // This is a workaround for backward compatibility
-        // Should be removed after ClassicRouter is killed completely
-        if ($this->core->getConfig()->isCourseLoaded() && !isset($course_loaded)) {
-            if ($this->core->getConfig()->isDebug()) {
-                throw new \RuntimeException("Attempted to use router for invalid URL. 
-                Please report the sequence of pages/actions you took to get to this exception to API developers.");
-            }
-            return Response::RedirectOnlyResponse(new RedirectResponse($this->core->getConfig()->getBaseUrl()));
-        }
-
-        return $this->core->getConfig()->isCourseLoaded();
     }
 
     private function loginCheck() {
