@@ -152,6 +152,9 @@ class WebRouter {
             if (!isset($arguments[$param_name])) {
                 $arguments[$param_name] = $this->request->query->get($param_name);
             }
+            if (!isset($arguments[$param_name])) {
+                $arguments[$param_name] = $param->getDefaultValue();
+            }
         }
 
         return call_user_func_array([$controller, $this->method_name], $arguments);
@@ -206,7 +209,7 @@ class WebRouter {
             );
         }
 
-        if(!$this->core->getConfig()->isCourseLoaded()) {
+        if(!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
             if ($this->logged_in){
                 if ($this->parameters['_method'] !== 'logout' &&
                     !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {

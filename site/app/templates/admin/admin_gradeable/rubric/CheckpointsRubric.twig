@@ -1,6 +1,7 @@
 <div class="multi-field-wrapper-checkpoints">
     {# This is a layout table #}
     <table class="checkpoints-table table table-bordered" id="gradeable_rubric" style=" border: 1px solid #AAA; max-width:50% !important;">
+        <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
         <!-- Layout Headings -->
         <tr class="rubric_layout_header">
             <td class="layout_th_cell"> Label </th>
