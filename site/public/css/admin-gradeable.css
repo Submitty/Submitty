@@ -80,7 +80,7 @@ a.nav-bar.disabled-btn {
 }
 
 a.nav-bar.normal-btn {
-    background-color: var(--standard-white) ;
+    background-color: var(--default-white) ;
     color: var(--text-black);
 }
 
