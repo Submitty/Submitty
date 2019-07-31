@@ -527,7 +527,8 @@ CREATE TABLE notification_settings (
 	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL,
 	team_invite_email BOOLEAN DEFAULT TRUE NOT NULL,
 	team_joined_email BOOLEAN DEFAULT TRUE NOT NULL,
-	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL
+	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL,
+	self_notification BOOLEAN DEFAULT FALSE NOT NULL
 );
 
 --

@@ -237,6 +237,18 @@
                     <div class="option-input col-md-5"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
+
+            <hr>
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">Notify me on my actions/updates</div>
+                        <div class="option-alt">Receive a notification when your perform the actions selected above</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
+            </div>
+
         </div>
     </form>
     <script>

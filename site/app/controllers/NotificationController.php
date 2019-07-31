@@ -24,7 +24,8 @@ class NotificationController extends AbstractController {
         'reply_in_post_thread',
         'team_invite',
         'team_joined',
-        'team_member_submission'
+        'team_member_submission',
+        'self_notification'
     ];
 
 	const EMAIL_SELECTIONS = [
