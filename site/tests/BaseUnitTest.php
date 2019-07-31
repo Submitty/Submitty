@@ -49,11 +49,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
-        if (isset($config_values['logged_in'])) {
-            $config->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
-            $config->method('isApiLoggedIn')->willReturn($config_values['logged_in']);
-        }
-
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
@@ -64,8 +59,12 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             });
         }
 
-
         $core->method('getConfig')->willReturn($config);
+
+        if (isset($config_values['logged_in'])) {
+            $core->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
+            $core->method('isApiLoggedIn')->willReturn($config_values['logged_in']);
+        }
 
         if (isset($config_values['csrf_token'])) {
             $core->method('checkCsrfToken')->willReturn($config_values['csrf_token'] === true);
