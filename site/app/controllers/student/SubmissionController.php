@@ -1285,18 +1285,20 @@ class SubmissionController extends AbstractController {
 
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
-
-            // notify other team members that a submission has been made
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
-            $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
-            $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
             // remove submitting user from recipient list
             if (($key = array_search($original_user_id, $team_members)) !== false) {
                 array_splice($team_members, $key, 1);
             }
-            $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
-            $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
+            if (!empty($team_members)) {
+                // notify other team members that a submission has been made
+                $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
+                $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
+                $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
+                $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
+                $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
+            }
+
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
