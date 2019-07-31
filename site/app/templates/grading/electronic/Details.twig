@@ -306,7 +306,6 @@
 {% macro render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) %}
     <td class="td-graded-questions">
         {%- for index in 0..info.graded_groups|length-1 -%}
-            {%- if loop.index0 != 0 %}&nbsp;{% endif -%}
             {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
                 <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
             {% else %}
