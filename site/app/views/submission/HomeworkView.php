@@ -347,10 +347,11 @@ class HomeworkView extends AbstractView {
 
         // Import custom stylesheet to style notebook items
         $this->core->getOutput()->addInternalCss('gradeable-notebook.css');
-
+        
         // Import custom js for notebook items
         $this->core->getOutput()->addInternalJs('gradeable-notebook.js');
-
+        
+        $this->core->getOutput()->addInternalCss('submitbox.css');
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'eclipse.css'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'theme', 'monokai.css'));
@@ -424,9 +425,7 @@ class HomeworkView extends AbstractView {
                 //get the cover image if it exists
                 if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
                     $corrected_filename = rawurlencode(htmlspecialchars($filename));
-                    $url = $this->core->buildUrl([
-                        'component' => 'misc',
-                        'page' => 'display_file',
+                    $url = $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                         'dir' => 'split_pdf',
                         'file' => $corrected_filename,
                         'path' => $path,
@@ -444,9 +443,7 @@ class HomeworkView extends AbstractView {
                 // get the full filename for PDF popout
                 // add 'timestamp / full filename' to count_array so that path to each filename is to the full PDF, not the cover
                 $filename = rawurlencode(htmlspecialchars($filename));
-                $url = $this->core->buildUrl([
-                    'component' => 'misc',
-                    'page' => 'display_file',
+                $url = $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                     'dir' => 'split_pdf',
                     'file' => $filename,
                     'path' => $path,
@@ -454,9 +451,7 @@ class HomeworkView extends AbstractView {
                 ]);
                 $filename_full = str_replace('_cover.pdf', '.pdf', $filename);
                 $path_full = str_replace('_cover.pdf', '.pdf', $path);
-                $url_full = $this->core->buildUrl([
-                    'component' => 'misc',
-                    'page' => 'display_file',
+                $url_full = $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                     'dir' => 'uploads',
                     'file' => $filename_full,
                     'path' => $path_full,
@@ -644,33 +639,14 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        $cancel_url = $this->core->buildUrl([
-            'component' => 'student',
-            'action' => 'update',
-            'gradeable_id' => $gradeable->getId(),
-            'new_version' => 0
-        ]);
+        $cancel_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'version' ,'0']);
 
-        $change_version_url = $this->core->buildUrl([
-            'component' => 'student',
-            'action' => 'update',
-            'gradeable_id' => $gradeable->getId(),
-            'new_version' => $display_version
-        ]);
+        $change_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'version', $display_version]);
 
-        $view_version_url = $this->core->buildUrl([
-            'component' => 'student',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => ''
-        ]);
+        $view_version_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]) . '/';
 
-        $check_refresh_submission_url = $this->core->buildUrl([
-            'component' => 'student',
-            'page' => 'submission',
-            'action' => 'check_refresh',
-            'gradeable_id' => $gradeable->getId(),
-            'gradeable_version' => $display_version
-        ]);
+        $check_refresh_submission_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $display_version, 'check_refresh']);
+
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
 
         $param = array_merge($param, [

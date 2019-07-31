@@ -29,19 +29,17 @@
 
 	<div class="row">
 
-	<div class="col-7">
-
+	<div class="col-8">
 
 		{% if thread_exists %}
-
 
 			<form id="search_block" method="post" action="{{ search_url }}">
 				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
 			<div class="row">
-				<div class="col-7">
+				<div class="col-6">
 					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				</div>
-				<div class="col-4">
+				<div class="col-5">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 		  				Search
 					</button>
@@ -62,15 +60,20 @@
 
 						{% endif %}
 					{% endfor %}
+
+					<a id="clear_filter_button" class="inline-block text-decoration-none" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+
 				</div>
+
 			</div>
+
 			</form>
 
 		{% endif %}
-		
+
 		</div>
 		
-	<div class="col-5">
+	<div class="col-4">
 
 		{% for button in forum_bar_buttons_right %}
 			{% if user_group <= button.required_rank %}
@@ -87,7 +90,6 @@
 				{% endif %}
 			{% endif %}
 		{% endfor %}
-
 
 	{% if show_more %}
 	    <div class="dropdown more-dropdown">
@@ -113,6 +115,81 @@
 	    </div>
 	{% endif %}
 	</div>
+	{% if thread_exists %}
+		<style>
+			{% for category in categories %}
+				{{ "#categoryid_" ~ category.category_id }}.filter-inactive{
+					color: {{ category.color }};
+					border: 1px solid {{ category.color }}
+				}
+
+				{{ "#categoryid_" ~ category.category_id }}.filter-active{
+					color: white;
+					background-color: {{ category.color }}
+				}
+			{% endfor %}
+		</style>
+		<div id="forum_filter_bar">
+			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
+			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
+				{% for category in categories %}
+					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" cat-id="{{ category.category_id }}" btn-selected="false">{{ category.category_desc }}</button>
+				{% endfor %}
+			</div>
+			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
+			</div>
+		</div>
+	{% endif %}
 </div>
 </div>
 <hr/>
+{% if thread_exists %}
+<script type="text/javascript">
+	function updateThreads(loadFirstPage, success_callback) {
+		{% if thread_exists %}
+		modifyThreadList({{ current_thread }}, '{{ current_category_ids|join("|") }}', '{{ current_course }}', loadFirstPage, success_callback);
+		{% endif %}
+	}
+
+	$( document ).ready(function() {
+		loadFilterHandlers();
+
+		$('#num_filtered').text({{ display_thread_count }});
+
+		{% for category in cookie_selected_categories %}
+		$('#thread_category button[cat-id="{{ category }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+		filters_applied.toggleElement($('#thread_category button[cat-id="{{ category }}"]').text(), function(e) {
+			return e === $('#thread_category button[cat-id="{{ category }}"]').text();
+		});
+		{% endfor %}
+		{% for status in cookie_selected_thread_status %}
+		$('#thread_status_select button[sel-id="{{ status }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+		filters_applied.toggleElement($('#thread_status_select button[cat-id="{{ status }}"]').text(), function(e) {
+			return e === $('#thread_status_select button[sel-id="{{ status }}"]').text();
+		});
+		{% endfor %}
+
+		var unread_marked = false;
+
+		$('#unread').prop("checked", {{cookie_selected_unread_value}});
+
+		unread_marked = checkUnread();
+
+		if(filters_applied.length > 0 || unread_marked ){
+			$('#forum_filter_bar').css('display', 'inline-block');
+			$('#clear_filter_button').css('display', 'inline-block');
+		}
+
+		$("#tree").prop("checked", true);
+		{% if display_option in ['tree', 'time', 'alpha'] %}
+		$("#{{ display_option }}").attr("checked", true);
+		$("#{{display_option }}_label").addClass('active');
+		{% endif %}
+
+		window.csrfToken = "{{ csrf_token }}" ;
+	});
+</script>
+{% endif %}

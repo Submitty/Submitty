@@ -19,9 +19,7 @@ class GlobalController extends AbstractController {
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl([
-                'component' => 'misc',
-                'page' => 'read_file',
+            return $this->core->buildNewUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
@@ -89,7 +87,7 @@ class GlobalController extends AbstractController {
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                    "href" => $this->core->buildNewCourseUrl(['gradeable']),
                     "title" => "New Gradeable",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-new-gradeable",
@@ -335,9 +333,7 @@ class GlobalController extends AbstractController {
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl([
-                'component' => 'misc',
-                'page' => 'read_file',
+            return $this->core->buildNewUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
