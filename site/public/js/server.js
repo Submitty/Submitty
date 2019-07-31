@@ -1111,43 +1111,13 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path, dir) {
-    window.location = buildUrl({
-        'component': 'misc',
-        'page': 'download_file',
-        'dir': dir,
-        'file': file,
-        'path': path});
+function downloadFile(path, dir) {
+    window.location = buildNewCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadZip(grade_id, user_id, version = null, origin = null) {
-    var url_components = {
-        'component': 'misc',
-        'page': 'download_zip',
-        'dir': 'submissions',
-        'gradeable_id': grade_id,
-        'user_id': user_id
-    };
-
-    if(version !== null) {
-        url_components['version'] = version;
-    }
-
-    if(origin !== null) {
-        url_components['origin'] = origin;
-    }
-
-    window.location = buildUrl(url_components);
+function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
+    window.location = buildNewCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
     return false;
-}
-
-function downloadFileWithAnyRole(file_name, path) {
-    // Trim file without path
-    var file = file_name;
-    if (file.indexOf("/") != -1) {
-        file = file.substring(file.lastIndexOf('/')+1);
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
@@ -1756,14 +1726,12 @@ function changeFolderPermission(filenames, checked,handleData) {
 }
 
 function updateToServerTime(fp) {
-    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+    var url = buildNewUrl(['server_time']);
 
-    $.ajax({
-        type: "POST",
+    $.get({
         url: url,
-        data: {csrf_token: csrfToken},
         success: function(data) {
-            var time = JSON.parse(data);
+            var time = JSON.parse(data)['data'];
             time = new Date(parseInt(time.year),
                             parseInt(time.month) - 1,
                             parseInt(time.day),
@@ -1885,13 +1853,11 @@ $(document).ready(function() {
 });
 
 function checkBulkProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk', 'progress']);
     $.ajax({
         url: url,
-        data: {
-            gradeable_id : gradeable_id
-        },
-        type: "POST",
+        data: null,
+        type: "GET",
         success: function(data) {
             data = JSON.parse(data);
             var result = {};
