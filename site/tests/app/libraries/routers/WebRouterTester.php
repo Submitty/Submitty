@@ -21,11 +21,11 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testLogin() {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => false]);
         $request = Request::create(
             "/authentication/login"
         );
-        $response = WebRouter::getWebResponse($request, $core, false);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(null, $response->redirect_response);
         $this->assertEquals("Authentication", $response->web_response->view_class);
         $this->assertEquals("loginForm", $response->web_response->view_function);
@@ -33,21 +33,21 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testLogout() {
         $_COOKIE['submitty_token'] = "test";
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => true]);
         $request = Request::create(
             "/authentication/logout"
         );
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals('', $_COOKIE['submitty_session']);
         $this->assertEquals($core->buildUrl(['authentication', 'login']), $response->redirect_response->url);
     }
 
     public function testRedirectToLoginFromCourse() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample']);
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
         $request = Request::create(
             "/s19/sample"
         );
-        $response = WebRouter::getWebResponse($request, $core, false);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
             $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
             $response->redirect_response->url
@@ -55,33 +55,33 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testRedirectToHomeFromLogin() {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => true]);
         $request = Request::create(
             "/authentication/login"
         );
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
     public function testParamAttackLoggedIn() {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => true]);
         $request = Request::create(
             "/authentication/login",
             "GET",
             ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
         );
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
     public function testParamAttackNotLoggedIn() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample']);
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
         $request = Request::create(
             "/s19/sample",
             "GET",
             ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
         );
-        $response = WebRouter::getWebResponse($request, $core, false);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
             $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
             $response->redirect_response->url
@@ -93,9 +93,9 @@ class WebRouterTester extends BaseUnitTest {
      * @dataProvider randomUrlProvider
      */
     public function testRedirectToLoginFromRandomUrl($url) {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => false]);
         $request = Request::create($url);
-        $response = WebRouter::getWebResponse($request, $core, false);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildUrl(['authentication', 'login']), $response->redirect_response->url);
     }
 
@@ -104,18 +104,18 @@ class WebRouterTester extends BaseUnitTest {
      * @dataProvider randomUrlProvider
      */
     public function testRedirectToHomeFromRandomUrl($url) {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => true]);
         $request = Request::create($url);
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
     public function testNoUser() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample'], ['no_user' => true]);
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => true], ['no_user' => true]);
         $request = Request::create(
             "/s19/sample"
         );
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals($core->buildCourseUrl(['no_access']), $response->redirect_response->url);
     }
 
@@ -135,12 +135,12 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testNoCsrfToken() {
-        $core = $this->createMockCore(['csrf_token' => false]);
+        $core = $this->createMockCore(['csrf_token' => false, 'logged_in' => true]);
         $request = Request::create(
             "/home/change_username",
             "POST"
         );
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
             [
                 "status" => "fail",
@@ -155,12 +155,12 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testWithCsrfToken() {
-        $core = $this->createMockCore(['csrf_token' => true]);
+        $core = $this->createMockCore(['csrf_token' => true, 'logged_in' => true]);
         $request = Request::create(
             "/home/change_username",
             "POST"
         );
-        $response = WebRouter::getWebResponse($request, $core, true);
+        $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
             $core->buildUrl(['home']),
             $response->redirect_response->url
@@ -172,11 +172,11 @@ class WebRouterTester extends BaseUnitTest {
      * @dataProvider randomUrlProvider
      */
     public function testApiNotFound($url) {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => true]);
         $request = Request::create(
             "/api" . $url
         );
-        $response = WebRouter::getApiResponse($request, $core, true);
+        $response = WebRouter::getApiResponse($request, $core);
         $this->assertEquals([
             'status' => "fail",
             'message' => "Endpoint not found."
@@ -184,11 +184,11 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testApiWrongMethod() {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => true]);
         $request = Request::create(
             "/api/token"
         );
-        $response = WebRouter::getApiResponse($request, $core, true);
+        $response = WebRouter::getApiResponse($request, $core);
         $this->assertEquals([
             'status' => "fail",
             'message' => "Method not allowed."
@@ -196,11 +196,11 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testApiNoToken() {
-        $core = $this->createMockCore();
+        $core = $this->createMockCore(['logged_in' => false]);
         $request = Request::create(
             "/api/courses"
         );
-        $response = WebRouter::getApiResponse($request, $core, false);
+        $response = WebRouter::getApiResponse($request, $core);
         $this->assertEquals([
             'status' => "fail",
             'message' => "Unauthenticated access. Please log in."

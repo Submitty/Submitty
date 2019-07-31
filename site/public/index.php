@@ -119,7 +119,6 @@ if ($is_api) {
     $response = WebRouter::getApiResponse($request, $core);
 }
 else {
-    /** @noinspection PhpUnhandledExceptionInspection */
     $response = WebRouter::getWebResponse($request, $core);
 }
 

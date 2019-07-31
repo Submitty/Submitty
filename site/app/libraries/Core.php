@@ -12,6 +12,7 @@ use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
 use app\NotificationFactory;
+use Symfony\Component\HttpFoundation\Request;
 
 
 
@@ -639,5 +640,80 @@ class Core {
 
     public function getNotificationFactory() {
         return $this->notification_factory;
+    }
+
+    /**
+     * Check if we have a saved cookie with a session id and then that there exists
+     * a session with that id. If there is no session, then we delete the cookie.
+     * @return bool
+     */
+    public function isWebLoggedIn() {
+        $logged_in = false;
+        $cookie_key = 'submitty_session';
+        if (isset($_COOKIE[$cookie_key])) {
+            try {
+                $token = TokenManager::parseSessionToken(
+                    $_COOKIE[$cookie_key],
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                $session_id = $token->getClaim('session_id');
+                $expire_time = $token->getClaim('expire_time');
+                $logged_in = $this->getSession($session_id, $token->getClaim('sub'));
+                // make sure that the session exists and it's for the user they're claiming
+                // to be
+                if (!$logged_in) {
+                    // delete cookie that's stale
+                    Utils::setCookie($cookie_key, "", time() - 3600);
+                }
+                else {
+                    if ($expire_time > 0) {
+                        Utils::setCookie(
+                            $cookie_key,
+                            (string) TokenManager::generateSessionToken(
+                                $session_id,
+                                $token->getClaim('sub'),
+                                $this->getConfig()->getBaseUrl(),
+                                $this->getConfig()->getSecretSession()
+                            ),
+                            $expire_time
+                        );
+                    }
+                }
+            }
+            catch (\InvalidArgumentException $exc) {
+                // Invalid cookie data, delete it
+                Utils::setCookie($cookie_key, "", time() - 3600);
+            }
+        }
+        return $logged_in;
+    }
+
+    /**
+     * Check if the user has a valid jwt in the header.
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function isApiLoggedIn(Request $request) {
+        $logged_in = false;
+        $jwt = $request->headers->get("authorization");
+        if (!empty($jwt)) {
+            try {
+                $token = TokenManager::parseApiToken(
+                    $request->headers->get("authorization"),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                $api_key = $token->getClaim('api_key');
+                $logged_in = $this->loadApiUser($api_key);
+            }
+            catch (\InvalidArgumentException $exc) {
+                $this->getOutput()->renderJsonFail("Invalid token.");
+                $this->getOutput()->displayOutput();
+            }
+        }
+
+        return $logged_in;
     }
 }
