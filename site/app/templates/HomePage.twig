@@ -10,11 +10,11 @@
                     <ul id="course-list" class="bare-list">
                         {% for course in rank.courses %}
                             <li>
-                                <a id="{{ course.getSemester() }}_{{ course.getTitle() }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildNewUrl([course.getSemester(), course.getTitle()]) }}">
-                                    {{ course.getLongSemester() }} &nbsp; &nbsp;
-                                    {{ course.getCapitalizedTitle() }} &nbsp; &nbsp;
-                                    {% if course.getDisplayName() != "" %}
-                                        {{ course.getDisplayName() }}
+                                <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildNewUrl([course['semester'], course['title']]) }}">
+                                    {{ course['display_semester'] }} &nbsp; &nbsp;
+                                    {{ course['title'] | upper }} &nbsp; &nbsp;
+                                    {% if course['display_name'] != "" %}
+                                        {{ course['display_name'] }}
                                     {% endif %}
                                     {{ user.accessAdmin() }}
                                 </a>
@@ -37,6 +37,9 @@
             </li>
             <li><b>Last Name:</b> {{ user.getDisplayedLastName() }}</li>
             <li><b>Email:</b> {{ user.getEmail() }}</li>
+            {% if display_access_level %}
+                <li><b>Access Level: </b> {{ access_level }}</li>
+            {% endif %}
             {% if show_change_password %}
                 <li class="flex-row">
                     <b>Change Password</b>
