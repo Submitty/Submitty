@@ -1,0 +1,116 @@
+<div class="content">
+    <h2>New Course -- Work In Progress</h2>
+
+    <form id="course-creation-form" action="{{ course_creation_url }}"
+          method="post" enctype="multipart/form-data">
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_semester">
+                    <div class="option-title">Term</div>
+                    <div class="option-alt">
+                    <p>What is the term for the new course?</p>
+                    <p>Note: Contact the system administrator to if the desired term is not available from the drop down menu.</p>
+                    <p style="color:red">(Required)</p>
+                    </div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <select name="course_semester" id="course_semester" class="auto_save">
+                    {% for semester in semesters %}
+                        <option value="{{ semester }}">
+                            {{ semester }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="course_title">
+                    <div class="option-title">Course Code</div>
+                    <div class="option-alt">
+                    <p>What is the course code for the new course?<br>
+                    {{ course_code_requirements }} </p>
+                    <p>Note: This field must contain only lowercase letters (a-z), digits (0-9), and the underscore character.</p>
+                    <p style="color:red">(Required)</p>
+                    </div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <textarea name='course_title' id='course_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required></textarea>
+            </div>
+        </div>
+
+        {% if is_superuser %}
+            <div class="option row">
+                <div class="option-desc col-md-6">
+                    <label for="head_instructor">
+                        <div class="option-title">Head Instructor</div>
+                        <div class="option-alt">Who is the head instructor?
+                            <p style="color:red">(Required)</p></div>
+                    </label>
+                </div>
+
+                <div class="option-input col-md-6">
+                    <select name="head_instructor" id="head_instructor" class="auto_save">
+                        {% for instructor in faculty %}
+                            <option value="{{ instructor.getId() }}">
+                                {{ instructor.getId() }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        {% else %}
+            <input type="hidden" name="head_instructor" id="head_instructor" value="{{ head_instructor }}" />
+        {% endif %}
+
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="base_course">
+                    <div class="option-title">Prior Course Offering</div>
+                    <div class="option-alt">Select a prior offering of this course from the dropdown menu.</br>
+                        Note: Instructors and graders with access to the prior course files on GNU/Linux will be able to see the content of the new course as well.<br>
+                        Contact the system administrator if this course should not share a GNU/Linux group with any prior course.
+                        <p style="color:red">(Required)</p>
+                    </div>
+                </label>
+            </div>
+
+            <div class="option-input col-md-6">
+                <select name="base_course" id="base_courses" class="auto_save"></select>
+            </div>
+        </div>
+
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+
+        <div class="row">
+            <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Course</button>
+        </div>
+    </form>
+</div>
+
+<script type="text/javascript">
+    function onHeadInstructorChange() {
+        let headInstructor = $('#head_instructor').val();
+        $.ajax({
+            type: "GET",
+            url: buildNewUrl(['home', 'courses', headInstructor]) + '?as_instructor=true',
+            success: function(data) {
+                let json = JSON.parse(data);
+                let courses = json['data']['unarchived_courses'].concat(json['data']['archived_courses']);
+                $('#base_courses').find('option').remove();
+                $.each(courses, (i, val) => {
+                    $('#base_courses').append(`<option value="${val['semester']}|${val['title']}">${val['semester']}.${val['title']}`)
+                })
+            }
+        });
+    }
+
+    $(document).ready(function() {
+        onHeadInstructorChange();
+        $('[name="head_instructor"]').change(onHeadInstructorChange);
+    });
+</script>

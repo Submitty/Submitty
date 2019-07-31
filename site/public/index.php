@@ -308,20 +308,8 @@ elseif (!$supported_by_new_router) {
             $control = new app\controllers\MiscController($core);
             $control->run();
             break;
-        case 'student':
-            $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'submission':
-            $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
         case 'forum':
             $control = new app\controllers\forum\ForumController($core);
-            $control->run();
-            break;
-        case 'notification':
-            $control = new app\controllers\NotificationController($core);
             $control->run();
             break;
         case 'pdf':

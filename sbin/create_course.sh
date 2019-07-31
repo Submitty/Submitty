@@ -300,7 +300,7 @@ echo -e "\nSUCCESS!\n\n"
 ########################################################################################################################
 
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
-echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/index.php?semester=${semester}&course=${course}"
+echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/${semester}/${course}"
 
 ########################################################################################################################
 ########################################################################################################################
