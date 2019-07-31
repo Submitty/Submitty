@@ -112,7 +112,7 @@ class ForumThreadView extends AbstractView {
     public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $ajax=false) {
 
         if(!$this->forumAccess()){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            $this->core->redirect($this->core->buildNewCourseUrl([]));
             return;
         }
         $threadExists = $this->core->getQueries()->threadExists();
@@ -986,7 +986,7 @@ class ForumThreadView extends AbstractView {
     public function showCategories($category_colors){
 
         if(!$this->forumAccess()){
-            $this->core->redirect($this->core->buildUrl(array('component' => 'navigation')));
+            $this->core->redirect($this->core->buildNewCourseUrl([]));
             return;
         }
 

@@ -10,25 +10,6 @@ window.addEventListener("load", function() {
 window.addEventListener("resize", checkSidebarCollapse);
 
 /**
- * Acts in a similar fashion to Core->buildUrl() function within the PHP code
- * so that we do not have to pass in fully built URL to JS functions, but rather
- * construct them there as it makes sense (which helps on cutting down on potential
- * duplication of effort where we can replicate JS functions across multiple pages).
- *
- * @param {object} parts - Object representing URL parts to append to the URL
- * @returns {string} - Built up URL to use
- */
-function buildUrl(parts) {
-    var constructed = "";
-    for (var part in parts) {
-        if (parts.hasOwnProperty(part)) {
-            constructed += "&" + part + "=" + parts[part];
-        }
-    }
-    return document.body.dataset.siteUrl + constructed;
-}
-
-/**
  * Acts in a similar fashion to Core->buildNewUrl() function within the PHP code
  *
  * @param {object} parts - Object representing URL parts to append to the URL
