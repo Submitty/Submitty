@@ -3,6 +3,7 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\models\gradeable\GradedGradeable;
 use app\models\Notification;
 use app\models\Email;
 use app\libraries\response\Response;
@@ -183,12 +184,19 @@ class GradeInquiryController extends AbstractController {
         }
     }
 
-    private function notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type)
+    /**
+     * Helper function to create notification/email content and aggregate recipients
+     * @param GradedGradeable $graded_gradeable
+     * @param $gradeable_id
+     * @param $content
+     * @param $type
+     */
+    private function notifyGradeInquiryEvent(GradedGradeable $graded_gradeable, $gradeable_id, $content, $type)
     {
         //TODO: send notification to grader per component
         if ($graded_gradeable->hasTaGradingInfo()) {
             $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
-            $graders = $ta_graded_gradeable->getGraders();
+            $graders = $ta_graded_gradeable->getVisibleGraders();
             $submitter = $graded_gradeable->getSubmitter();
             $user_id = $this->core->getUser()->getId();
             $gradeable_title = $graded_gradeable->getGradeable()->getTitle();
@@ -234,6 +242,9 @@ class GradeInquiryController extends AbstractController {
 
             // make graders' notifications and emails
             $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
+            if (empty($graders)) {
+                $graders = $this->core->getQueries()->getAllGraders();
+            }
             foreach ($graders as $grader) {
                 if ($grader->accessFullGrading() && $grader->getId() != $user_id) {
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];

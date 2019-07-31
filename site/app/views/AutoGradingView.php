@@ -13,6 +13,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\DateUtils;
+use function GuzzleHttp\Psr7\build_query;
 
 class AutoGradingView extends AbstractView {
 
@@ -142,9 +143,7 @@ class AutoGradingView extends AbstractView {
                     "pdf" => true,
                     "name" => $file_name,
                     "path" => $file_path,
-                    "url" => $this->core->buildUrl([
-                        "component" => "misc",
-                        "page" => "display_file",
+                    "url" => $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
                         "dir" => $public ? "results_public": "results",
                         "file" => $file_name,
                         "path" => $file_path
