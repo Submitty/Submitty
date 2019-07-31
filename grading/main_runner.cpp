@@ -105,32 +105,7 @@ int main(int argc, char *argv[]) {
       continue;
     }
 
-    if ( generation_type == "output" ) {
-    
-    for (int k = 0; k < my_testcase.numFileGraders(); k++ ){
-        
-        std::vector<std::string> outputGeneratorCommandsForValidation = stringOrArrayOfStrings(my_testcase.getGrader(k), "command");
-        
-        if ( outputGeneratorCommandsForValidation.size() > 0 ) {
-          
-          my_testcase.header(i);
-        
-          for (int j = 0; j < outputGeneratorCommandsForValidation.size();  j++){
-            int exit_no = execute(outputGeneratorCommandsForValidation[j],
-                                  actions,
-                                  dispatcher_actions,
-                                  "execute_logfile.txt",
-                                  my_testcase.get_test_case_limits(),
-                                  config_json.value("resource_limits",nlohmann::json()),
-                                  config_json,
-                                  false,
-                                  "");
-          }
-          std::cout << "========================================================" << std::endl;
-          std::cout << "FINISHED TEST #" << i << std::endl;
-        }
-      }
-    } else if ( generation_type == "input" ) {
+    if ( generation_type == "input" ) {
       std::vector <std::string> inputGeneratorCommands = my_testcase.getInputGeneratorCommands();
       if ( inputGeneratorCommands.size() > 0 ) {
        
@@ -153,7 +128,7 @@ int main(int argc, char *argv[]) {
 
       }
     } else {
-      std::vector<std::string> commands = my_testcase.getCommands();
+      std::vector<std::string> commands = (generation_type == "output" ? my_testcase.getSolutionCommands() : my_testcase.getCommands());
 
       actions  = mapOrArrayOfMaps((*tc)[i-1],"actions");
       dispatcher_actions = mapOrArrayOfMaps((*tc)[i-1],"dispatcher_actions");
@@ -175,11 +150,35 @@ int main(int argc, char *argv[]) {
         
         
         std::string logfile = "execute_logfile.txt";
-        // run the command, capturing STDOUT & STDERR
-        int exit_no = execute(commands[x]
-                              +
-                              " 1>" + "STDOUT" + which + ".txt" +
-                              " 2>" + "STDERR" + which + ".txt",
+        // Check to see if the instructor is already capturing STDIN
+        if(this_command.find("1>") == std::string::npos){
+
+          bool found_redirect = false;
+          size_t position = this_command.find(">");
+
+          // Check to see if they are using > rather than 1>
+          // Note: escaped > characters don't count.
+          while(position != std::string::npos){
+            // Check to see if the character was escaped.
+            // If it wasn't, break the loop because it represents a redirect.
+            if(this_command[position-1] != '\\'){
+              found_redirect=true;
+              break;
+            }
+            position = this_command.find(">",position+1);
+          }
+
+          // Append a redirect if there isn't one already.
+          if(found_redirect == false){
+            this_command = this_command + " 1>STDOUT" + which + ".txt";
+          }
+        }
+
+        if(this_command.find("2>") == std::string::npos){
+          this_command += " 2>STDERR" + which + ".txt";
+        }
+
+        int exit_no = execute(this_command,
                               actions,
                               dispatcher_actions,
                               logfile,
@@ -187,7 +186,7 @@ int main(int argc, char *argv[]) {
                               config_json.value("resource_limits",nlohmann::json()),
                               config_json,
                               windowed,
-                              display_variable); 
+                              display_variable);
       }
       std::cout << "========================================================" << std::endl;
       std::cout << "FINISHED TEST #" << i << std::endl;

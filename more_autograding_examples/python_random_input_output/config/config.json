@@ -4,10 +4,10 @@
             "title" : "Simple Test Case -- No Additional Input",
             "details" : "python *.py",
             "command" : "python *.py",
+            "solution_commands" : ["python solution.py 1> output.txt"],
             "points" : 3,
             "validation" : [
                 {
-                    "command" : ["python solution.py 1> output.txt"],
                     "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
@@ -19,10 +19,10 @@
             "title" : "Additional Input From File -- 1 2 3 4",
             "details" : "python *.py input.txt",
             "command" : "python *.py input.txt",
+            "solution_commands" : ["python solution.py input.txt 1> output.txt"],
             "points" : 3,
             "validation" : [
                 {
-                    "command" : ["python solution.py input.txt 1> output.txt"],
                     "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
@@ -32,14 +32,14 @@
         },
         {
             "title" : "Random Input #1",
-            "command" : "python *.py randominput.txt",
             "input_generation_commands": [
                 "python generator.py 1> randominput.txt"
             ],
+            "command" : "python *.py randominput.txt",
+            "solution_commands" : ["python solution.py randominput.txt > output.txt"],
             "points" : 3,
             "validation" : [
                 {
-                    "command" : ["python solution.py randominput.txt 1> output.txt"],
                     "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",
@@ -49,14 +49,14 @@
         },
         {
             "title" : "Random Input #2",
-            "command" : "python *.py randominput.txt",
             "input_generation_commands": [
                 "python generator.py 1> randominput.txt"
             ],
+            "command" : "python *.py randominput.txt",
+            "solution_commands" : ["python solution.py randominput.txt > output.txt"],
             "points" : 3,
             "validation" : [
                 {
-                    "command" : ["python solution.py randominput.txt 1> output.txt"],
                     "method" : "diff",
                     "actual_file" : "STDOUT.txt",
                     "description" : "Program Output",

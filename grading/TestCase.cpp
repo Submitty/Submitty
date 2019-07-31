@@ -274,6 +274,42 @@ std::vector<std::string> TestCase::getCommands() const {
   return stringOrArrayOfStrings(command_map, "commands");
 }
 
+
+std::vector<std::string> TestCase::getSolutionCommands() const {
+
+  //TODO potential point of failure
+  std::vector<nlohmann::json> containers = mapOrArrayOfMaps(this->_json, "solution_containers");
+
+  assert(containers.size() > 0);
+
+  if (this->CONTAINER_NAME == ""){
+    //TODO add back in if possible.
+    //assert(containers.size() == 1);
+    return stringOrArrayOfStrings(containers[0], "commands");
+  }
+
+  bool found = false;
+  nlohmann::json command_map;
+  //If we ARE running in a docker container, we must find the commands that are bound for us.
+  for(std::vector<nlohmann::json>::const_iterator it = containers.begin(); it != containers.end(); ++it) {
+    nlohmann::json::const_iterator val = it->find("container_name");
+    std::string curr_target = *val;
+    if(curr_target == this->CONTAINER_NAME){
+      found = true;
+      command_map = *it;
+      break;
+    }
+  }
+
+  if(!found){
+    std::cout << "ERROR: Could not find " << this->CONTAINER_NAME << " in the command map." << std::endl;
+    std::vector<std::string> empty;
+    return empty;
+  }
+
+  return stringOrArrayOfStrings(command_map, "commands");
+}
+
 // =================================================================================
 // =================================================================================
 // ACCESSORS

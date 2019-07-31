@@ -623,6 +623,17 @@ void parse_command_line(const std::string &cmd,
       }
       validate_filename(my_stdout);
     }
+    else if (token.size() >= 1 && token.substr(0,1) == ">") {
+      assert (my_stdout == "");
+      if (token.size() == 1) {
+        which++;
+        assert (which < tokens.size());
+        my_stdout = tokens[which];
+      } else {
+        my_stdout = token.substr(1,token.size()-1);
+      }
+      validate_filename(my_stdout);
+    }
     else if (token.size() >= 2 && token.substr(0,2) == "2>") {
       assert (my_stderr == "");
       if (token.size() == 2) {
