@@ -128,7 +128,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
         formData.append('file_input[]', files[i], files[i].name);
     }
     var submit_url = form.attr('action');
-    sdf
 
     $.ajax({
         url: submit_url,
