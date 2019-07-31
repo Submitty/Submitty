@@ -69,7 +69,7 @@
                         {% if can_download and files|length > 1 %}
                             <hr>
                             <p style="text-align:center">
-                                Download all files: <button class = "btn btn-default" onclick='downloadZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'> Download Zip
+                                Download all files: <button class = "btn btn-default" onclick='downloadSubmissionZip("{{ gradeable_id }}", "{{ user_id }}", "{{ display_version }}")'> Download Zip
                                     <i class="fas fa-download" aria-hidden="true" title="Download zip of all files"></i></button>
                             </p>
                         {% endif %}
