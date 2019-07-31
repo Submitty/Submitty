@@ -173,18 +173,19 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 
     # prepare the zip files
     try:
+        with open(next_to_grade, 'r') as infile:
+            queue_obj = json.load(infile)
+            queue_obj["which_untrusted"] = which_untrusted
+            queue_obj["which_machine"] = which_machine
+            queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
+
+        is_generated_output = queue_obj['generated_output']
         autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
         submission_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_submission.zip")
         todo_queue_file = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_queue.json")
-
-        with open(next_to_grade, 'r') as infile:
-            queue_obj = json.load(infile)
-            queue_obj["which_untrusted"] = which_untrusted
-            queue_obj["which_machine"] = which_machine
-            queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
     except Exception as e:
         grade_items_logging.log_stack_trace(job_id=JOB_ID, trace=traceback.format_exc())
         grade_items_logging.log_message(JOB_ID, message="ERROR: failed preparing submission zip or accessing next to grade "+str(e))

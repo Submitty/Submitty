@@ -5,7 +5,7 @@ import argparse
 import json
 import os
 import re
-from ../sbin/shipper_utils import dateutils
+from submitty_utils import dateutils
 
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 
@@ -24,15 +24,11 @@ def parse_args():
 
 def main():
     args = parse_args()
-    config_json_path = os.path.join(args.config_file_path, 'config.json')
-    print(config_json_path)
-    if os.path.isfile(config_json_path):
-        with open(config_json_path,'r', encoding='utf-8') as infile:
-            # this hack should be removed
-            infile=re.sub("//.*?\n","",infile.read())
-            infile=re.sub("/\\*.*?\\*/","",infile)
-            infile=re.sub(",",",\n",infile)
-            config_file=json.loads(infile)
+    complete_config_json_path = os.path.join(SUBMITTY_DATA_DIR,'courses',args.semester,args.course,'config','complete_config','complete_config_' + args.assignment + '.json')
+    print(complete_config_json_path)
+    if os.path.isfile(complete_config_json_path):
+        with open(complete_config_json_path,'r', encoding='utf-8') as infile:
+            config_file=json.load(infile)
     else:
         sys.exit(1)
 
