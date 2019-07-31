@@ -88,6 +88,9 @@ $(document).ready(function () {
             event.returnValue = 1;
         }
     };
+
+    ajaxCheckBuildStatus($('#g_id').val(),'');
+
     $('input,select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
             return;
@@ -227,6 +230,9 @@ function ajaxCheckBuildStatus(gradeable_id,current_status) {
             }
             else if (response['data'] == false) {
                 $('#rebuild_status').html('Gradeable build failed');
+            }
+            else if (response['data'] == 'none') {
+                $('#rebuild_status').html('None');
             }
             else if (response['data'] == 'timeout') {
                 $('#rebuild_status').html('Error');
