@@ -43,7 +43,7 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testRedirectToLoginFromCourse() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false, 'course_home_url' => 'test.com']);
         $request = Request::create(
             "/s19/sample"
         );
@@ -75,7 +75,7 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testParamAttackNotLoggedIn() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false]);
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => false, 'course_home_url' => 'test.com']);
         $request = Request::create(
             "/s19/sample",
             "GET",
@@ -111,7 +111,7 @@ class WebRouterTester extends BaseUnitTest {
     }
 
     public function testNoUser() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => true], ['no_user' => true]);
+        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => true, 'course_home_url' => 'test.com'], ['no_user' => true]);
         $request = Request::create(
             "/s19/sample"
         );

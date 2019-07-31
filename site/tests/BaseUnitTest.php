@@ -49,6 +49,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getCoursePath')->willReturn($config_values['course_path']);
         }
 
+        if (isset($config_values['course_home_url'])) {
+            $config->method('getCourseHomeUrl')->willReturn($config_values['course_home_url']);
+        }
+
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
