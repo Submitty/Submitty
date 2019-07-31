@@ -27,7 +27,6 @@
         }
         var loop = Math.ceil(range/increment);
         var tracking = min;
-        console.log(range," ",increment," ",loop);
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
             tracking+=increment;
@@ -62,8 +61,6 @@
             }
             yValue.push(value);
         }
-        console.log(xBuckets);
-        console.log(yValue);
         return mode;
     }
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
@@ -78,8 +75,6 @@
         {% if overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
                 mode=fillBuckets(rangeT,parseInt(bucketInputTotal.value),betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
-                console.log(xBuckets);
-                console.log(yValue);
                 var dataTotal=tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
@@ -182,12 +177,19 @@
             {% set noActive = 0 %}
             {% set GradeInq = 0 %}
             {% set IncompGrading = 0 %}
+            {% set cancelledSub = 0 %}
             {# Iterate through all the Scores #}
             {% for ov in overall_scores %}
                 {# If Autograded, add the points to the array of autograded scores#}
                 {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
-                    {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
-                        {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
+                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                        {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
+                            {% if ov.getAutoGradedGradeable().getTotalPoints() >=0 or ov.getAutoGradedGradeable().getTotalPoints() <0 %}
+                                {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
+                            {% else %}
+                                {% set cancelledSub = cancelledSub+1 %}
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
                 {% else %}
 
@@ -329,25 +331,26 @@
                     Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
 
                 </script>
-                    <div id="mySmallDiv">
-                        <script>
-                            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
-                            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
-                        </script>
-                    </div>
-                {{ "\n"|nl2br }}
-                {{ mode }}
+                <div id="mySmallDiv">
+                    <script>
+                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
+                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
+                    </script>
+                </div>
+                <br />
                 Version Conflicts: {{ VerConf }}
-                {{ "\n"|nl2br }}
+                <br />
                 No Submissions: {{ noSub }}
-                {{ "\n"|nl2br }}
+                <br />
                 No Active Versions: {{ noActive }}
-                {{ "\n"|nl2br }}
+                <br />
                 Grade Inquiries: {{ GradeInq }}
-                {{ "\n"|nl2br }}
+                <br />
                 Incomplete Grading: {{ IncompGrading }}
+                <br />
+                Cancelled Submissions: {{ cancelledSub }}
                 <br/>
                 <br/>
                 Double-click on the chart to zoom out
@@ -550,17 +553,18 @@
                         </script>
                     </div>
 
-                    {{ "\n"|nl2br }}
-                    {{ mode }}
+                    <br />
                     Version Conflicts: {{ VerConf }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     No Submissions: {{ noSub }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     No Active Versions: {{ noActive }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     Grade Inquiries: {{ GradeInq }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     Incomplete Grading: {{ IncompGrading }}
+                    <br />
+                    Cancelled Submissions: {{ cancelledSub }}
                     <br/>
                     <br/>
                     Double-click on the chart to zoom out
