@@ -2,7 +2,7 @@ table.mobile-table {
     width: 100%;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 830px) {
     table.mobile-table, 
     .mobile-table thead, 
     .mobile-table tbody, 

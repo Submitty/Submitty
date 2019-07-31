@@ -75,7 +75,8 @@ class Course extends AbstractModel {
         return [
             "semester" => $this->semester,
             "title" => $this->title,
-            "display_name" => $this->display_name
+            "display_name" => $this->display_name,
+            "display_semester" => $this->getLongSemester()
         ];
     }
 

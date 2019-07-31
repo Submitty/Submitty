@@ -1071,7 +1071,7 @@ function checkRefreshPage(url) {
 }
 
 function check_server(url) {
-    $.post(url,
+    $.get(url,
         function(data) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
@@ -1111,43 +1111,13 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path, dir) {
-    window.location = buildUrl({
-        'component': 'misc',
-        'page': 'download_file',
-        'dir': dir,
-        'file': file,
-        'path': path});
+function downloadFile(path, dir) {
+    window.location = buildNewCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadZip(grade_id, user_id, version = null, origin = null) {
-    var url_components = {
-        'component': 'misc',
-        'page': 'download_zip',
-        'dir': 'submissions',
-        'gradeable_id': grade_id,
-        'user_id': user_id
-    };
-
-    if(version !== null) {
-        url_components['version'] = version;
-    }
-
-    if(origin !== null) {
-        url_components['origin'] = origin;
-    }
-
-    window.location = buildUrl(url_components);
+function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
+    window.location = buildNewCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
     return false;
-}
-
-function downloadFileWithAnyRole(file_name, path) {
-    // Trim file without path
-    var file = file_name;
-    if (file.indexOf("/") != -1) {
-        file = file.substring(file.lastIndexOf('/')+1);
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
@@ -1480,7 +1450,7 @@ function updateHomeworkExtensions(data) {
 
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
-    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'update'});
+    var url = buildNewCourseUrl(['grade_override', $('#g_id').val(), 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1501,11 +1471,11 @@ function updateGradeOverride(data) {
                 $('#messages').append(message);
                 return;
             }
-            refreshOnResponseOverridenGrades(json);
+            refreshOnResponseOverriddenGrades(json);
             $('#user_id').val(this.defaultValue);
             $('#marks').val(this.defaultValue);
             $('#comment').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overriden Grades for ' + json['data']['gradeable_id'] + '.</div>';
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overridden Grades for ' + json['data']['gradeable_id'] + '.</div>';
             $('#messages').append(message);
         },
         error: function() {
@@ -1540,8 +1510,8 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function loadOverridenGrades(g_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'get_overriden_grades', 'g_id': g_id});
+function loadOverriddenGrades(g_id) {
+    var url = buildNewCourseUrl(['grade_override', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1557,7 +1527,7 @@ function loadOverridenGrades(g_id) {
                 $('#messages').append(message);
                 return;
             }
-            refreshOnResponseOverridenGrades(json);
+            refreshOnResponseOverriddenGrades(json);
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1577,16 +1547,16 @@ function refreshOnResponseLateDays(json) {
     });
 }
 
-function refreshOnResponseOverridenGrades(json) {
-    var form = $("#load-overriden-grades");
+function refreshOnResponseOverriddenGrades(json) {
+    var form = $("#load-overridden-grades");
     $('#my_table tr:gt(0)').remove();
-    var title = '<div class="option-title" id="title">Overriden Grades for ' + json['data']['gradeable_id'] + '</div>';
+    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
     $('#title').replaceWith(title);
     if(json['data']['users'].length === 0){
         $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
     } else {
         json['data']['users'].forEach(function(elem){
-            var delete_button = "<a onclick=\"deleteOverridenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
             var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#my_table').append(bits.join('</td><td>'));
         });
@@ -1662,8 +1632,8 @@ function deleteLateDays(user_id, datestamp) {
     return false;
 }
 
-function deleteOverridenGrades(user_id, g_id) {
-    var url = buildUrl({'component': 'admin', 'page': 'grade_override', 'action': 'delete_grades'});
+function deleteOverriddenGrades(user_id, g_id) {
+    var url = buildNewCourseUrl(['grade_override', g_id, 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1671,8 +1641,7 @@ function deleteOverridenGrades(user_id, g_id) {
             type: "POST",
             data: {
                 csrf_token: csrfToken,
-                user_id: user_id,
-                g_id: g_id
+                user_id: user_id
             },
             success: function(data) {
                 var json = JSON.parse(data);
@@ -1681,9 +1650,9 @@ function deleteOverridenGrades(user_id, g_id) {
                     $('#messages').append(message);
                     return;
                 }
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overriden Grades deleted .</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overridden Grades deleted .</div>';
                 $('#messages').append(message);
-                refreshOnResponseOverridenGrades(json);
+                refreshOnResponseOverriddenGrades(json);
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
@@ -1702,18 +1671,6 @@ function toggleRegradeRequests(){
         element.style.display = 'block';
     }
 
-}
-function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    });
 }
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
@@ -1769,14 +1726,12 @@ function changeFolderPermission(filenames, checked,handleData) {
 }
 
 function updateToServerTime(fp) {
-    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+    var url = buildNewUrl(['server_time']);
 
-    $.ajax({
-        type: "POST",
+    $.get({
         url: url,
-        data: {csrf_token: csrfToken},
         success: function(data) {
-            var time = JSON.parse(data);
+            var time = JSON.parse(data)['data'];
             time = new Date(parseInt(time.year),
                             parseInt(time.month) - 1,
                             parseInt(time.day),
@@ -1898,13 +1853,11 @@ $(document).ready(function() {
 });
 
 function checkBulkProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk', 'progress']);
     $.ajax({
         url: url,
-        data: {
-            gradeable_id : gradeable_id
-        },
-        type: "POST",
+        data: null,
+        type: "GET",
         success: function(data) {
             data = JSON.parse(data);
             var result = {};

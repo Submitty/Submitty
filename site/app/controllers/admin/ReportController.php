@@ -617,16 +617,18 @@ class ReportController extends AbstractController {
             $failure_detected = true;
         }
 
+        $debug_contents = file_get_contents($debug_output_path);
+
         // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
         // implying that it finished
         if($max_wait_time AND $failure_detected == false)
         {
-            $this->core->getOutput()->renderJsonSuccess("Success");
+            $this->core->getOutput()->renderJsonSuccess($debug_contents);
         }
         // Else we timed out or something else went wrong
         else
         {
-            $this->core->getOutput()->renderJsonFail('A failure occurred waiting for the job to finish');
+            $this->core->getOutput()->renderJsonFail($debug_contents);
         }
     }
 }

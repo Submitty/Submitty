@@ -384,8 +384,7 @@ function isValidSubmission(){
  * user_id can be an array of ids to validate multiple at once for teams
  */
 function validateUserId(csrf_token, gradeable_id, user_id){
-    var url = buildUrl({'component': 'student', 'page': 'submission', 
-                        'action': 'verify', 'gradeable_id': gradeable_id});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'verify']);
     return new Promise(function (resolve, reject) {
         $.ajax({
             url : url,
@@ -548,9 +547,7 @@ function displayPreviousSubmissionOptions(callback){
  * Ajax call to submit a split item to a student. Optional params to merge and or clobber previous submissions
  */
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous=false, clobber=false) {
-    var url = buildUrl({'component': 'student', 'page': 'submission', 
-                        'action': 'upload_split', 'gradeable_id': gradeable_id, 
-                        'merge': merge_previous, 'clobber': clobber});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'upload']) + '?merge=' + merge_previous + '&clobber=' + clobber;
 
     return new Promise(function (resolve, reject) {
         $.ajax({
@@ -586,7 +583,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
 */
 function deleteSplitItem(csrf_token, gradeable_id, path) {
 
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete_split', 'gradeable_id': gradeable_id});
+    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'delete']);
 
     return new Promise(function (resolve, reject) {
         $.ajax({
@@ -640,6 +637,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
+    formData.append('csrf_token', csrfToken);
 
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
@@ -662,8 +660,8 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
         }
     }
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk', 'gradeable_id': gradeable_id});
-    var return_url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk']);
+    var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
 
     $.ajax({
         url: url,
@@ -759,8 +757,8 @@ function gatherInputAnswersByType(type){
 function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
 
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
-    var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
+    var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
 
     var message = "";
     // check versions used

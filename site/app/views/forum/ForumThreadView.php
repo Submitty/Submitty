@@ -5,7 +5,6 @@ use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
 
-
 class ForumThreadView extends AbstractView {
 
 	public function forumAccess(){
@@ -245,8 +244,7 @@ class ForumThreadView extends AbstractView {
             "cookie_selected_thread_status" => $cookieSelectedThreadStatus,
             "cookie_selected_unread_value" => $cookieSelectedUnread,
             "display_option" => $display_option,
-            "thread_exists" => $threadExists,
-            "display_option" => $display_option
+            "thread_exists" => $threadExists
         );
 
         $next_page = 0;
@@ -294,12 +292,12 @@ class ForumThreadView extends AbstractView {
             $other_buttons = array(
                 array(
                     "required_rank" => 4,
-                    "display_text" => 'Filter',
+                    "display_text" => 'Filter (<span id="num_filtered">0</span>)',
                     "style" => 'display:inline-block;',
                     "link" => array(false),
                     "optional_class" => '',
                     "title" => 'Filter Threads based on Categories',
-                    "onclick" => array(true, "$('#category_wrapper').css('display','block');")
+                    "onclick" => array(true, "forumFilterBar()")
                 )
             );
 
@@ -343,6 +341,7 @@ class ForumThreadView extends AbstractView {
                 "prev_page" => $prev_page,
                 "arrowup_visibility" => $arrowup_visibility,
                 "display_thread_content" => $displayThreadContent,
+                "display_thread_count" => count($displayThreadContent["thread_content"]),
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
                 "generate_post_content" => $generatePostContent,
@@ -551,6 +550,13 @@ class ForumThreadView extends AbstractView {
 		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
 	}
 
+	public function contentMarkdownToPlain($str){
+        $str = preg_replace("/\[[^)]+\]/","",$str);
+        $str = preg_replace('/\(([^)]+)\)/s', '$1', $str);
+        $str = str_replace("```","", $str);
+        return $str;
+    }
+
     public function displayThreadList($threads, $filtering, &$activeThreadAnnouncement, &$activeThreadTitle, &$activeThread, $thread_id_p, $current_categories_ids, $render)
     {
         $used_active = false; //used for the first one if there is not thread_id set
@@ -600,13 +606,16 @@ class ForumThreadView extends AbstractView {
             //fix legacy code
             $titleDisplay = $thread['title'];
 
-
             //replace tags from displaying in sidebar
             $first_post_content = str_replace("[/code]", "", str_replace("[code]", "", strip_tags($first_post["content"])));
             $temp_first_post_content = preg_replace('#\[url=(.*?)\](.*?)(\[/url\])#', '$2', $first_post_content);
 
             if (!empty($temp_first_post_content)) {
                 $first_post_content = $temp_first_post_content;
+            }
+
+            if($first_post['render_markdown']==1) {
+                $first_post_content = $this->contentMarkdownToPlain($first_post_content);
             }
 
             $sizeOfContent = strlen($first_post_content);

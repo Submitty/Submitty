@@ -57,7 +57,8 @@ function updatePdfPageSettings() {
 
 function onPrecisionChange() {
     ajaxUpdateGradeableProperty(getGradeableId(), {
-        'precision': $('#point_precision_id').val()
+        'precision': $('#point_precision_id').val(),
+        'csrf_token': csrfToken
     }, function () {
         // Clear errors by just removing red background
         clearError('precision');
@@ -115,7 +116,7 @@ $(document).ready(function () {
             return;
         }
 
-        let data = {};
+        let data = {'csrf_token': csrfToken};
         data[this.name] = $(this).val();
         let addDataToRequest = function (i, val) {
             if (val.type === 'radio' && !$(val).is(':checked')) {
@@ -260,12 +261,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     setGradeableUpdateInProgress();
     $.getJSON({
         type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'admin_gradeable',
-            'action': 'update_gradeable',
-            'id': gradeable_id
-        }),
+        url: buildNewCourseUrl(['gradeable', gradeable_id, 'update']),
         data: p_values,
         success: function (response) {
             if (Array.isArray(response['data'])) {
@@ -419,25 +415,14 @@ function saveRubric(redirect = true) {
     $('#save_status').html('Saving Rubric...');
     $.getJSON({
         type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'admin_gradeable',
-            'action': 'update_gradeable_rubric',
-            'id': $('#g_id').val()
-        }),
+        url: buildNewCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
         data: values,
         success: function (response) {
             if (response.status === 'success') {
                 delete errors['rubric'];
                 updateErrorMessage();
                 if (redirect) {
-                    window.location.replace(buildUrl({
-                        'component': 'admin',
-                        'page': 'admin_gradeable',
-                        'action': 'edit_gradeable_page',
-                        'id': $('#g_id').val(),
-                        'nav_tab': '2'
-                    }));
+                    window.location.replace(buildNewCourseUrl(['gradeable', $('#g_id').val(), 'update']) + '?nav_tab=2');
                 }
             } else {
                 errors['rubric'] = response.message;
@@ -492,14 +477,10 @@ function saveGraders() {
     $('#save_status').html('Saving Graders...');
     $.getJSON({
         type: "POST",
-        url: buildUrl({
-            'component': 'admin',
-            'page': 'admin_gradeable',
-            'action': 'update_gradeable_graders',
-            'id': $('#g_id').val()
-        }),
+        url: buildNewCourseUrl(['gradeable', $('#g_id').val(), 'graders']),
         data: {
-            graders: values
+            graders: values,
+            csrf_token: csrfToken
         },
         success: function (response) {
             if (response.status !== 'success') {

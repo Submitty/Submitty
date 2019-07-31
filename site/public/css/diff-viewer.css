@@ -18,25 +18,6 @@
     background-color: var(--alert-background-bronze);
 }
 
-.diff-code .highlight {
-
-}
-
-.upperinfo {
-    clear: both;
-    margin-bottom: 40px;
-}
-
-.upperinfo-left {
-    float: left;
-    margin-bottom: 0px !important;
-}
-
-.upperinfo-right {
-    float: right;
-    margin-bottom: 0px !important;
-}
-
 .highlight-hover {
     background-color: var(--standard-light-blue-gray) !important;
 }

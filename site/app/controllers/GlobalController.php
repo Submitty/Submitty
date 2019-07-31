@@ -19,9 +19,7 @@ class GlobalController extends AbstractController {
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl([
-                'component' => 'misc',
-                'page' => 'read_file',
+            return $this->core->buildNewUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
@@ -64,6 +62,15 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-star"
                 ]);
             }
+            elseif ($this->core->getUser()->accessFaculty()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildNewUrl(['home', 'courses', 'new']),
+                    "title" => "New Course",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-new-course",
+                    "icon" => "fa-plus-square"
+                ]);
+            }
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -80,7 +87,7 @@ class GlobalController extends AbstractController {
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                    "href" => $this->core->buildNewCourseUrl(['gradeable']),
                     "title" => "New Gradeable",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-new-gradeable",
@@ -231,7 +238,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-calendar-plus"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'grade_override', 'action' => 'view_overriden_grades')),
+                    "href" => $this->core->buildNewCourseUrl(['grade_override']),
                     "title" => "Grade Override",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grade-override",
@@ -326,9 +333,7 @@ class GlobalController extends AbstractController {
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl([
-                'component' => 'misc',
-                'page' => 'read_file',
+            return $this->core->buildNewUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),

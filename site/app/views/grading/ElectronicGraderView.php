@@ -235,6 +235,8 @@ class ElectronicGraderView extends AbstractView {
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests,
+            "download_zip_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
+            "bulk_stats_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
             "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
@@ -250,7 +252,7 @@ class ElectronicGraderView extends AbstractView {
 		<div class="content_upload_content">
 
 HTML;
-        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildUrl(array('component' => 'submission', 'action' => 'stat_page', 'gradeable_id' => $gradeable_id)));
+        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'bulk_stats']));
 
         $return .= <<<HTML
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
@@ -879,7 +881,8 @@ HTML;
             "results_public" => $results_public,
             "site_url" => $this->core->getConfig()->getSiteUrl(),
             "active_version" => $display_version,
-            'toolbar_css' => $toolbar_css
+            'toolbar_css' => $toolbar_css,
+            "display_file_url" => $this->core->buildNewCourseUrl(['display_file'])
         ]);
     }
 
@@ -923,21 +926,26 @@ HTML;
 
         //sort array by version number after values have been mapped
         ksort($version_data);
+
+        $submitter_id = $graded_gradeable->getSubmitter()->getId();
+        $active_version = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $new_version = $display_version === $active_version ? 0 : $display_version;
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/StudentInformationPanel.twig", [
             "gradeable_id" => $gradeable->getId(),
             "submission_time" => $submission_time,
-            "submitter_id" => $graded_gradeable->getSubmitter()->getId(),
+            "submitter_id" => $submitter_id,
             "submitter" => $graded_gradeable->getSubmitter(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "display_version" => $display_version,
             "highest_version" => $graded_gradeable->getAutoGradedGradeable()->getHighestVersion(),
-            "active_version" => $graded_gradeable->getAutoGradedGradeable()->getActiveVersion(),
+            "active_version" => $active_version,
             "on_change" => $onChange,
             "tables" => $tables,
-
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
-            "csrf_token" => $this->core->getCsrfToken()
+            "csrf_token" => $this->core->getCsrfToken(),
+            "update_version_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $new_version]) . http_build_query(['ta' => true, 'who' => $submitter_id])
         ]);
     }
 
@@ -957,7 +965,7 @@ HTML;
         $version_conflict = $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() !== $display_version;
         $has_active_version = $graded_gradeable->getAutoGradedGradeable()->hasActiveVersion();
         $has_submission = $graded_gradeable->getAutoGradedGradeable()->hasSubmission();
-        $has_overriden_grades = $graded_gradeable->hasOverriddenGrades();
+        $has_overridden_grades = $graded_gradeable->hasOverriddenGrades();
 
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
@@ -973,7 +981,7 @@ HTML;
             "can_verify" => $can_verify,
             "grading_disabled" => $grading_disabled,
             "has_submission" => $has_submission,
-            "has_overriden_grades" => $has_overriden_grades,
+            "has_overridden_grades" => $has_overridden_grades,
             "has_active_version" => $has_active_version,
             "version_conflict" => $version_conflict,
             "show_silent_edit" => $show_silent_edit,

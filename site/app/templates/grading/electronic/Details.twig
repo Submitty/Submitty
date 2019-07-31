@@ -286,7 +286,9 @@
 {% macro render_column_autograding(self, context, section, graded_gradeable, index, info, column) %}
     <td>
         {% if graded_gradeable.getAutoGradedGradeable().getHighestVersion() != 0 %}
-            {{ graded_gradeable.getAutoGradedGradeable().getTotalPoints() }} / {{ graded_gradeable.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() }}
+            {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() != 0  %}
+                {{ graded_gradeable.getAutoGradedGradeable().getTotalPoints() }} / {{ graded_gradeable.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() }}
+            {% endif %}
         {% endif %}
     </td>
 {% endmacro %}
@@ -304,8 +306,11 @@
 {% macro render_column_graded_questions(self, context, section, graded_gradeable, index, info, column) %}
     <td class="td-graded-questions">
         {%- for index in 0..info.graded_groups|length-1 -%}
-            {%- if loop.index0 != 0 %}&nbsp;{% endif -%}
-            <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+            {%  if graded_gradeable.getAutoGradedGradeable().getActiveVersion() == 0  %}
+                <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-NULL"></i>
+            {% else %}
+                <i title="{{graded_gradeable.getGradeable().getComponents()[index].getTitle()}}" class="fas fa-circle grader-{{- info.graded_groups[index] -}}"></i>
+            {% endif %}
         {%- endfor -%}
     </td>
 {% endmacro %}
@@ -454,7 +459,7 @@
     {% set total_possible = graded_gradeable.getGradeable().getAutoGradingConfig().getTotalNonExtraCredit() + graded_gradeable.getGradeable().getTaPoints() %}
     <td>
         {% if not graded_gradeable.getOrCreateTaGradedGradeable().hasVersionConflict() and graded_gradeable.isTaGradingComplete() %}
-            <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
+                <div class="{{ box_background }}" style="white-space: nowrap;">{{ graded }} / {{ total_possible }}</div>
         {% endif %}
     </td>
 {% endmacro %}
