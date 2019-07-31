@@ -10,12 +10,10 @@ use app\libraries\Utils;
  * @method void     setSubject($sub)
  * @method void     setBody($bod)
  * @method void     setUserId($uid)
- * @method void     setRecipient($recip)
 
  * @method string   getSubject()
  * @method string   getBody()
  * @method string   getUserId()
- * @method string   getRecipient()
  */
 class Email extends AbstractModel {
     /** @property @var string Subject line of email */
@@ -24,10 +22,6 @@ class Email extends AbstractModel {
     protected $body;
     /** @property @var string user name */
     protected $user_id;
-
-    /** @property @var string Intended receiver of email */
-    // NOTE: THIS IS ESSENTIALLY A DEPRECATED / LEGACY FIELD
-    protected $recipient;
 
 
   /**
@@ -43,7 +37,6 @@ class Email extends AbstractModel {
             return;
         }
         $this->setUserId($details["to_user_id"]);
-        $this->setRecipient('DEPRECATED');
         $this->setSubject($this->formatSubject($details["subject"]));
         $this->setBody($this->formatBody($details["body"]));
     }
@@ -56,7 +49,7 @@ class Email extends AbstractModel {
 
     //inject a "do not reply" note in the footer of the body
     private function formatBody($body){
-        return $body."\n--\nNOTE: This is an automated email.\nAny responses will not be looked at or responded to.";
+      return $body."\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     }
 
 }
