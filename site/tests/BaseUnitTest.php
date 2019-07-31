@@ -50,6 +50,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         if (isset($config_values['course_home_url'])) {
+            $config->method('buildCourseUrl')->willReturn($config_values['course_home_url']);
             $config->method('getCourseHomeUrl')->willReturn($config_values['course_home_url']);
         }
 
