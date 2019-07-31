@@ -5,9 +5,7 @@ use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
-use app\libraries\Access;
 use app\libraries\TokenManager;
-use app\libraries\routers\ClassicRouter;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
 
@@ -36,7 +34,6 @@ AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 $request = Request::createFromGlobals();
 
 $core = new Core();
-$core->setRouter(new ClassicRouter($_GET['url'] ?? ''));
 
 /**
  * Register custom expection and error handlers that will get run anytime our application
@@ -224,88 +221,12 @@ if (!empty($jwt)) {
     }
 }
 
-// Prevent anyone who isn't logged in from going to any other controller than authentication
-if (!$logged_in) {
-    if ($_REQUEST['component'] != 'authentication') {
-        foreach ($_REQUEST as $key => $value) {
-            if ($key == "semester" || $key == "course") {
-                continue;
-            }
-            if ($value === "") {
-                continue;
-            }
-            if(isset($_REQUEST[$key])) {
-                $_REQUEST['old'][$key] = $value;
-            }
-            else if(substr($key, 0, 4) === "old_") {
-                $_REQUEST['old'][substr($key, 4)] = $value;
-                
-            }
-            unset($_REQUEST[$key]);
-        }
-        $_REQUEST['component'] = 'authentication';
-        $_REQUEST['page'] = 'login';
-    }
-}
-elseif ($core->getUser() === null) {
-    $core->loadSubmittyUser();
-    if ($_REQUEST['component'] !== 'authentication') {
-        $_REQUEST['component'] = 'navigation';
-        $_REQUEST['page'] = 'no_access';
-    }
-}
-else if ($core->getConfig()->isCourseLoaded()
-         && !$core->getAccess()->canI("course.view", ["semester" => $core->getConfig()->getSemester(), "course" => $core->getConfig()->getCourse()])
-         && $_REQUEST['component'] !== 'authentication') {
-
-    $_REQUEST['component'] = 'navigation';
-    $_REQUEST['page'] = 'no_access';
-}
-
 if (empty($_COOKIE['submitty_token'])) {
     Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
-if(!$core->getConfig()->isCourseLoaded()) {
-    if ($logged_in){
-        if (isset($_REQUEST['page']) && $_REQUEST['page'] === 'logout'){
-            $_REQUEST['component'] = 'authentication';
-        }
-        else {
-            $_REQUEST['component'] = 'home';
-        }
-    }
-    else {
-        $_REQUEST['component'] = 'authentication';
-    }
-}
-
-if (empty($_REQUEST['component']) && $core->getUser() !== null) {
-    if ($core->getConfig()->isCourseLoaded()) {
-        $_REQUEST['component'] = 'navigation';
-    }
-    else {
-        $_REQUEST['component'] = 'home';
-    }
-}
-
-/********************************************
-* END LOGIN CODE
-*********************************************/
-
-$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
-
 if ($is_api) {
     $response = WebRouter::getApiResponse($request, $core, $api_logged_in);
-}
-elseif (!$supported_by_new_router) {
-    switch($_REQUEST['component']) {
-        default:
-            $control = new app\controllers\AuthenticationController($core, $logged_in);
-            $control->run();
-            break;
-    }
-    $response = null;
 }
 else {
     $response = WebRouter::getWebResponse($request, $core, $logged_in);

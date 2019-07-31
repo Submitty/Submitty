@@ -8,7 +8,6 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
@@ -60,9 +59,6 @@ class Core {
 
     /** @var Forum $forum */
     private $forum  = null;
-
-    /** @var ClassicRouter */
-    private $router;
 
     /** @var NotificationFactory */
     private $notification_factory;
@@ -630,13 +626,6 @@ class Core {
         }
     }
 
-    public function setRouter(ClassicRouter $router) {
-        $this->router = $router;
-    }
-
-    public function getRouter(): ClassicRouter {
-        return $this->router;
-    }
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
      * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
