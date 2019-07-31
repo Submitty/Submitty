@@ -288,7 +288,7 @@
         var newDateTime = $(me).val();
         changeNewDateTime(path, newDateTime);
 
-        var url = buildNewUrl(['server_time']);
+        var url = buildUrl(['server_time']);
 
         $.get({
             url: url,
@@ -351,7 +351,7 @@
 
     function handleTimeZones() {
 
-        var url = buildNewUrl(['server_time']);
+        var url = buildUrl(['server_time']);
 
         $.get({
             url: url,

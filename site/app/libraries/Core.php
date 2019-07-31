@@ -459,7 +459,7 @@ class Core {
      *
      * @return string
      */
-    public function buildNewUrl($parts=array()) {
+    public function buildUrl($parts=array()) {
         $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
         return $url;
     }
@@ -474,9 +474,9 @@ class Core {
      *
      * @return string
      */
-    public function buildNewCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts=array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
-        return $this->buildNewUrl($parts);
+        return $this->buildUrl($parts);
     }
 
     /**

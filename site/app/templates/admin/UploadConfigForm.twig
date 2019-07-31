@@ -36,7 +36,7 @@
     <br>&nbsp;<br>
     <script>
         function openRenamePopup(file_path){
-            let url = buildNewCourseUrl(['autograding_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
+            let url = buildCourseUrl(['autograding_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
             $('#alert_in_use').html('');
             $('#gradeables_using_config').empty();
             $.ajax({

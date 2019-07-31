@@ -120,12 +120,12 @@ class WebRouter {
             // redirect to login page or home page
             if (!$logged_in) {
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($core->buildNewUrl(['authentication', 'login']))
+                    new RedirectResponse($core->buildUrl(['authentication', 'login']))
                 );
             }
             else {
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($core->buildNewUrl(['home']))
+                    new RedirectResponse($core->buildUrl(['home']))
                 );
             }
         }
@@ -160,7 +160,7 @@ class WebRouter {
             $old_request_url = $this->request->getUriForPath($this->request->getPathInfo());
             return Response::RedirectOnlyResponse(
                 new RedirectResponse(
-                    $this->core->buildNewUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url)
+                    $this->core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url)
                 )
             );
         }
@@ -168,7 +168,7 @@ class WebRouter {
             $this->core->loadSubmittyUser();
             if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildNewCourseUrl(['no_access']))
+                    new RedirectResponse($this->core->buildCourseUrl(['no_access']))
                 );
             }
         }
@@ -177,7 +177,7 @@ class WebRouter {
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
             && $this->parameters['_method'] !== 'noAccess') {
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['no_access']))
+                new RedirectResponse($this->core->buildCourseUrl(['no_access']))
             );
         }
 
@@ -186,13 +186,13 @@ class WebRouter {
                 if ($this->parameters['_method'] !== 'logout' &&
                     !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
                     return Response::RedirectOnlyResponse(
-                        new RedirectResponse($this->core->buildNewUrl(['home']))
+                        new RedirectResponse($this->core->buildUrl(['home']))
                     );
                 }
             }
             elseif (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildNewUrl(['authentication', 'login']))
+                    new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
                 );
             }
         }
@@ -210,7 +210,7 @@ class WebRouter {
             return new Response(
                 JsonResponse::getFailResponse($msg),
                 null,
-                new RedirectResponse($this->core->buildNewUrl())
+                new RedirectResponse($this->core->buildUrl())
             );
         }
 

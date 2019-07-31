@@ -90,7 +90,7 @@ Please email your instructor with any questions or concerns.';
         $this->core->getNotificationFactory()->sendEmails($seating_assignment_emails);
         $this->core->addSuccessMessage("Seating assignments have been sucessfully emailed!");
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl())
+            new RedirectResponse($this->core->buildCourseUrl())
         );
     }
 

@@ -68,7 +68,7 @@ class ReportController extends AbstractController {
         // Check that the directory is writable, fail if not
         if(!is_writable($base_path)) {
             $this->core->addErrorMessage('Unable to write to the grade summaries directory');
-            $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
         $g_sort_keys = [
@@ -86,7 +86,7 @@ class ReportController extends AbstractController {
             return null;
         });
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+        $this->core->redirect($this->core->buildCourseUrl(['reports']));
         return $this->core->getOutput()->renderJsonSuccess();
     }
 

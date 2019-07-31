@@ -241,7 +241,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
             if (empty($graders)) {
                 $graders = $this->core->getQueries()->getAllGraders();
             }
@@ -254,7 +254,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make students' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable_id])]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
             if($submitter->isTeam()){
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {

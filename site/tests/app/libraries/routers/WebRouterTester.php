@@ -39,7 +39,7 @@ class WebRouterTester extends BaseUnitTest {
         );
         $response = WebRouter::getWebResponse($request, $core, true);
         $this->assertEquals('', $_COOKIE['submitty_session']);
-        $this->assertEquals($core->buildNewUrl(['authentication', 'login']), $response->redirect_response->url);
+        $this->assertEquals($core->buildUrl(['authentication', 'login']), $response->redirect_response->url);
     }
 
     public function testRedirectToLoginFromCourse() {
@@ -49,7 +49,7 @@ class WebRouterTester extends BaseUnitTest {
         );
         $response = WebRouter::getWebResponse($request, $core, false);
         $this->assertEquals(
-            $core->buildNewUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
+            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
             $response->redirect_response->url
         );
     }
@@ -60,7 +60,7 @@ class WebRouterTester extends BaseUnitTest {
             "/authentication/login"
         );
         $response = WebRouter::getWebResponse($request, $core, true);
-        $this->assertEquals($core->buildNewUrl(['home']), $response->redirect_response->url);
+        $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
     public function testParamAttackLoggedIn() {
@@ -71,7 +71,7 @@ class WebRouterTester extends BaseUnitTest {
             ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
         );
         $response = WebRouter::getWebResponse($request, $core, true);
-        $this->assertEquals($core->buildNewUrl(['home']), $response->redirect_response->url);
+        $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
     public function testParamAttackNotLoggedIn() {
@@ -83,7 +83,7 @@ class WebRouterTester extends BaseUnitTest {
         );
         $response = WebRouter::getWebResponse($request, $core, false);
         $this->assertEquals(
-            $core->buildNewUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
+            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
             $response->redirect_response->url
         );
     }
@@ -96,7 +96,7 @@ class WebRouterTester extends BaseUnitTest {
         $core = $this->createMockCore();
         $request = Request::create($url);
         $response = WebRouter::getWebResponse($request, $core, false);
-        $this->assertEquals($core->buildNewUrl(['authentication', 'login']), $response->redirect_response->url);
+        $this->assertEquals($core->buildUrl(['authentication', 'login']), $response->redirect_response->url);
     }
 
     /**
@@ -107,7 +107,7 @@ class WebRouterTester extends BaseUnitTest {
         $core = $this->createMockCore();
         $request = Request::create($url);
         $response = WebRouter::getWebResponse($request, $core, true);
-        $this->assertEquals($core->buildNewUrl(['home']), $response->redirect_response->url);
+        $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
     public function testNoUser() {
@@ -116,7 +116,7 @@ class WebRouterTester extends BaseUnitTest {
             "/s19/sample"
         );
         $response = WebRouter::getWebResponse($request, $core, true);
-        $this->assertEquals($core->buildNewCourseUrl(['no_access']), $response->redirect_response->url);
+        $this->assertEquals($core->buildCourseUrl(['no_access']), $response->redirect_response->url);
     }
 
     public function randomUrlProvider() {
@@ -149,7 +149,7 @@ class WebRouterTester extends BaseUnitTest {
             $response->json_response->json
         );
         $this->assertEquals(
-            $core->buildNewUrl(),
+            $core->buildUrl(),
             $response->redirect_response->url
         );
     }
@@ -162,7 +162,7 @@ class WebRouterTester extends BaseUnitTest {
         );
         $response = WebRouter::getWebResponse($request, $core, true);
         $this->assertEquals(
-            $core->buildNewUrl(['home']),
+            $core->buildUrl(['home']),
             $response->redirect_response->url
         );
     }

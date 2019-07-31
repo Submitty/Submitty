@@ -98,7 +98,7 @@ class NotificationController extends AbstractController {
     public function markNotificationAsSeen($nid) {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 
@@ -109,7 +109,7 @@ class NotificationController extends AbstractController {
     public function markAllNotificationsAsSeen() {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 

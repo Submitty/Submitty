@@ -39,7 +39,7 @@ class CourseMaterialsController extends AbstractController {
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+            $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
         }
 
         // remove entry from json file
@@ -71,7 +71,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //refresh course materials page
-        $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+        $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
     }
 
     /**
@@ -149,7 +149,7 @@ class CourseMaterialsController extends AbstractController {
             $filename = $filenames;
             if (!isset($filename) ||
                 !isset($checked)) {
-                $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
@@ -176,7 +176,7 @@ class CourseMaterialsController extends AbstractController {
             foreach ($data as $filename){
                 if (!isset($filename) ||
                     !isset($checked)) {
-                    $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                    $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
                 }
 
                 $file_name = htmlspecialchars($filename);
@@ -216,7 +216,7 @@ class CourseMaterialsController extends AbstractController {
 
             if (!isset($filename) ||
                 !isset($newdatatime)) {
-                $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
@@ -240,7 +240,7 @@ class CourseMaterialsController extends AbstractController {
             foreach ($data as $filename){
                 if (!isset($filename) ||
                     !isset($newdatatime)) {
-                    $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                    $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
                 }
 
                 $file_name = htmlspecialchars($filename);

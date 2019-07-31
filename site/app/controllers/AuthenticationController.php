@@ -73,7 +73,7 @@ class AuthenticationController extends AbstractController {
         }
         $this->core->removeCurrentSession();
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['authentication', 'login']))
+            new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
         );
     }
     

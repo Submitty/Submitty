@@ -162,7 +162,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     setGradeableUpdateInProgress();
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'update']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
         data: p_values,
         success: function (response) {
             setGradeableUpdateComplete();
@@ -311,14 +311,14 @@ function saveRubric(redirect = true) {
     $('#save_status').html('Saving Rubric...');
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
+        url: buildCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
         data: values,
         success: function (response) {
             if (response.status === 'success') {
                 delete errors['rubric'];
                 updateErrorMessage();
                 if (redirect) {
-                    window.location.replace(buildNewCourseUrl(['gradeable', $('#g_id').val(), 'update']) + '?nav_tab=2');
+                    window.location.replace(buildCourseUrl(['gradeable', $('#g_id').val(), 'update']) + '?nav_tab=2');
                 }
             } else {
                 errors['rubric'] = response.message;
@@ -373,7 +373,7 @@ function saveGraders() {
     $('#save_status').html('Saving Graders...');
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['gradeable', $('#g_id').val(), 'graders']),
+        url: buildCourseUrl(['gradeable', $('#g_id').val(), 'graders']),
         data: {
             graders: values,
             csrf_token: csrfToken
