@@ -908,11 +908,17 @@ class ElectronicGraderController extends AbstractController {
         $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
         $order->sort($sort, $direction);
 
+        // Get previous and next submitters
         $prev = $order->getPrevSubmitter($graded_gradeable->getSubmitter());
         $next = $order->getNextSubmitter($graded_gradeable->getSubmitter());
 
         $prev_id = $prev ? $prev->getId() : "";
         $next_id = $next ? $next->getId() : "";
+
+        // Get previous and next ungraded submitters
+        $prev_ungraded = $order->getPrevSubmitterMatching($graded_gradeable->getSubmitter(), function(Submitter $sub) {
+
+        });
 
         $not_in_my_section = !$order->containsSubmitter($graded_gradeable->getSubmitter());
 
