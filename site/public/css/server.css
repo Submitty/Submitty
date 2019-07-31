@@ -1271,6 +1271,7 @@ div.full_height {
     background: var(--standard-pale-gray);
     padding: 0px;
 }
+
 .meter > span {
     display: block;
     height: 100%;
