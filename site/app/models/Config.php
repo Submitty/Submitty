@@ -424,7 +424,6 @@ class Config extends AbstractModel {
         $this->course_loaded = true;
     }
 
-
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
             throw new ConfigException("Missing config section '{$section}' in json file");
@@ -449,7 +448,7 @@ class Config extends AbstractModel {
 
         // Determine if submitty-admin is ready to go on the system level
         $status_file = FileUtils::joinPaths(
-            '/', 'usr', 'local', 'submitty', 'site', 'config', 'submitty_admin_status.json'
+            '/', 'usr', 'local', 'submitty', 'config', 'submitty_admin_status.json'
         );
 
 

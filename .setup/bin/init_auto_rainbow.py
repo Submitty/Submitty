@@ -79,7 +79,7 @@ with open(admin_file, 'w') as file:
 # Configure path to where status file should be saved
 # This file is saved somewhere submitty_php can read from so the PHP side of
 # submitty is able to determine if it can use certain features
-status_file = os.path.join(install_dir, 'site', 'config', 'submitty_admin_status.json')
+status_file = os.path.join(install_dir, 'config', 'submitty_admin_status.json')
 
 does_exist = True if token else False
 

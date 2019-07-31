@@ -17,6 +17,7 @@ import subprocess
 import shutil
 import pwd
 import json
+import datetime
 
 # Constants
 PROVIDED_JSON_NAME = 'custom_customization.json'
@@ -68,6 +69,8 @@ for item in users:
 
 if user_found is False:
     raise Exception('Unable to locate the specified user {}'.format(user))
+
+print('Started build at {}'.format(datetime.datetime.now()), flush=True)
 
 # Generate path information
 rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
