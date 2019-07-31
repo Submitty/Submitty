@@ -14,12 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 class MiscController extends AbstractController {
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
 
     /**
      * Get the current server time

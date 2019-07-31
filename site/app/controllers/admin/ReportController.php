@@ -32,12 +32,6 @@ class ReportController extends AbstractController {
 
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
 
     /**
      * @Route("/{_semester}/{_course}/reports")

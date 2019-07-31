@@ -20,13 +20,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SimpleGraderController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @param $gradeable_id
      * @param $section
      * @param $section_type

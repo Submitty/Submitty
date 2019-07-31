@@ -21,16 +21,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AdminGradeableController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /* Page load methods */
-
-
-    /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
      */
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {

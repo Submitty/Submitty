@@ -36,24 +36,6 @@ class AuthenticationController extends AbstractController {
         $this->logged_in = $logged_in;
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'logout':
-                $this->logout();
-                break;
-            case 'checklogin':
-                $this->checkLogin();
-                break;
-            case 'vcs_login':
-                $this->vcsLogin();
-                break;
-            case 'login':
-            default:
-                $this->loginForm();
-                break;
-        }
-    }
-    
     /**
      * Logs out the current user from the system. This is done by both deleting the current going
      * session from the database as well as invalidating the session id saved in the cookie. The latter

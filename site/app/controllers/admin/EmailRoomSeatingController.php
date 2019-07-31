@@ -37,10 +37,6 @@ Please email your instructor with any questions or concerns.';
         parent::__construct($core);
     }
 
-    public function run() {
-        return null;
-    }
-
     /**
      * @Route("/{_semester}/{_course}/email_room_seating")
      * @return Response

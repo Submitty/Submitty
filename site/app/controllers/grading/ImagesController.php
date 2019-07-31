@@ -10,13 +10,6 @@ use app\libraries\Utils;
 
 class ImagesController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/student_photos")
      */
     public function viewImagesPage() {

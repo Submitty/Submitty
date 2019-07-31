@@ -15,17 +15,6 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'no_access':
-                $this->noAccess();
-                break;
-            default:
-                $this->navigationPage();
-                break;
-        }
-    }
-
     /**
      * @Route("/{_semester}/{_course}/no_access")
      */

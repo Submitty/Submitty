@@ -47,11 +47,6 @@ class NotificationController extends AbstractController {
             $this->selections = array_merge($this->selections,self::EMAIL_SELECTIONS);
         }
     }
-
-    public function run() {
-        return null;
-    }
-
     /**
      * @param $show_all
      * @Route("/{_semester}/{_course}/notifications")

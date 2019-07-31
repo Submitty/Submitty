@@ -27,13 +27,6 @@ class WrapperController extends AbstractController {
     ];
 
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/theme")
      * @return Response
      */

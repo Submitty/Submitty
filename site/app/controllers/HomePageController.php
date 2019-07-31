@@ -27,21 +27,6 @@ class HomePageController extends AbstractController {
         parent::__construct($core);
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'change_username':
-                $this->changeUserName();
-                break;
-            case 'change_password':
-                $this->changePassword();
-                break;
-            case 'home_page':
-            default:
-                $this->showHomepage();
-                break;
-        }
-    }
-
     /**
      * @Route("/home/change_password", methods={"POST"})
      * @return Response

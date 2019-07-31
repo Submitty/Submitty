@@ -23,13 +23,6 @@ use app\exceptions\DatabaseException;
  */
 class UsersController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/users", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
      * @return Response

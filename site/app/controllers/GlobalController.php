@@ -11,11 +11,6 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
 
-    public function run() {
-        //TODO: Whenever run() stops taking GET parameters require access to
-        // header() and footer() to use run()
-    }
-
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {

@@ -13,13 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PlagiarismController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/plagiarism")
      */
     public function plagiarismMainPage($refresh_page = "NO_REFRESH") {

@@ -19,13 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AutogradingConfigController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
      * @return Response
      */

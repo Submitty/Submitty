@@ -7,10 +7,6 @@ use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
-    public function run() {
-        return null;
-    }
-
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
      */

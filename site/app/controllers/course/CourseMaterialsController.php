@@ -11,13 +11,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CourseMaterialsController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage() {

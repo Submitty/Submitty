@@ -12,10 +12,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 class GradeInquiryController extends AbstractController {
-    public function run() {
-        return null;
-    }
-
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})

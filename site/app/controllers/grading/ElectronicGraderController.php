@@ -24,13 +24,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class ElectronicGraderController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption
      * @param string $option
      * @return bool
