@@ -231,9 +231,6 @@ function ajaxCheckBuildStatus(gradeable_id,current_status) {
             else if (response['data'] == false) {
                 $('#rebuild_status').html('Gradeable build failed');
             }
-            else if (response['data'] == 'none') {
-                $('#rebuild_status').html('None');
-            }
             else if (response['data'] == 'timeout') {
                 $('#rebuild_status').html('Error');
                 console.error('Server took too long to respond, please try again.');

@@ -97,7 +97,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         if ($new_build_status != $build_status) {
-            if ($new_build_status == 'none' && ($build_status == 'processing' || $build_status == 'queued')) {
+            if ($new_build_status == 'none') {
                 $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
                 $this->core->getOutput()->renderJsonSuccess($gradeable->hasAutogradingConfig());
             }
@@ -363,6 +363,7 @@ class AdminGradeableController extends AbstractController {
             // rebuild queue information
             'is_in_rebuild_queue' => $is_in_rebuild_queue,
             'check_refresh_url' => $check_refresh_url,
+            'build_status' => $gradeable->hasAutogradingConfig(),
 
             'upload_config_url' => $this->core->buildNewCourseUrl(['autograding_config'])
         ]);

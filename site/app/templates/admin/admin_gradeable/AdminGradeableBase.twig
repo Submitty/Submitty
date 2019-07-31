@@ -18,7 +18,11 @@
 					<div id="rebuild_status_panel">
 						<span id="rebuild_status_label">Build Status: </span>
 						<div id="rebuild_status">
-							None
+							{% if build_status %}
+								Gradeable build complete
+							{% else %}
+								Gradeable build failed
+							{% endif %}
 						</div>
 						
 						<div id="rebuild_log_button">
