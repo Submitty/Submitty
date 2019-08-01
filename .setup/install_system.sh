@@ -327,7 +327,6 @@ echo "Getting JUnit & Hamcrest..."
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
 if [ ${WORKER} == 0 ]; then
@@ -347,19 +346,6 @@ popd > /dev/null
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-
-# EMMA is a tool for computing code coverage of Java programs
-echo "Getting emma..."
-
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma > /dev/null
-wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
-unzip emma-${EMMA_VERSION}.zip > /dev/null
-mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VERSION}*
-chmod o+r . *.jar
-popd > /dev/null
 
 
 # JaCoCo is a replacement for EMMA
@@ -620,29 +606,28 @@ if [ ${WORKER} == 1 ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
-    # This should be set by setup_distro.sh for whatever distro we have, but
-    # in case it is not, default to our primary URL
-    if [ -z "${SUBMISSION_URL}" ]; then
-        SUBMISSION_URL='http://192.168.56.101'
-    fi
-    echo -e "/var/run/postgresql
-    ${DB_USER}
-    ${DATABASE_PASSWORD}
-    America/New_York
-    ${SUBMISSION_URL}
+        # This should be set by setup_distro.sh for whatever distro we have, but
+        # in case it is not, default to our primary URL
+        if [ -z "${SUBMISSION_URL}" ]; then
+            SUBMISSION_URL='http://192.168.56.101'
+        fi
+        echo -e "/var/run/postgresql
+${DB_USER}
+${DATABASE_PASSWORD}
+America/New_York
+${SUBMISSION_URL}
 
 
-    1
+1
 
 
-    y
+y
 
 
-    submitty@vagrant
-    do-not-reply@vagrant
-    localhost
-    25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
-
+submitty@vagrant
+do-not-reply@vagrant
+localhost
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi

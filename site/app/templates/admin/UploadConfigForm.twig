@@ -64,12 +64,12 @@
         }
     </script>
     <ul>
-        {{ self.display_files(self, all_files, 1, false, inuse_config) }}
+        {{ self.display_files(self, all_files, 1, false, inuse_config, display_url) }}
     </ul>
 </div>
 {% endif %}
 
-{% macro display_files(self, files, indent, seen_root, inuse_config) %}
+{% macro display_files(self, files, indent, seen_root, inuse_config, display_url) %}
     {% set margin_left = 15 %}
     {% set neg_margin_left = -15 * indent %}
     {% for name, file in files %}
@@ -84,14 +84,13 @@
                 {% endif %}
                 <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
-                    {{ self.display_files(self, file.files, indent + 1, true) }}
+                    {{ self.display_files(self, file.files, indent + 1, true, inuse_config, display_url) }}
                 </div>
             </div>
         {% else %}
-            {% set url = core.buildUrl({'component': 'misc', 'page': 'display_file', 'dir': 'config_upload', 'path': file.path}) %}
             <div>
-                <div class="file-viewer"><a onclick='openFrame("{{ url }}", "{{ id }}", "{{ file.name }}")'>
-                    <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ url }}")'>(Popout)</a>
+                <div class="file-viewer"><a onclick='openFrame("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}", "{{ id }}", "{{ file.name }}")'>
+                    <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}")'>(Popout)</a>
                 </div>
                 <div id="file_viewer_{{ id }}" style='margin-left: {{ neg_margin_left }}px'></div>
             </div>
