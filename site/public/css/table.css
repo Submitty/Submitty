@@ -1,3 +1,8 @@
+#empty-table {
+    padding: 1em;
+    text-align: center;
+}
+
 .mobile-table {
     width: 100%;
     text-align: center;  
