@@ -2884,6 +2884,7 @@ AND gc_id IN (
             'team_invite',
             'team_joined_email',
             'team_member_submission',
+            'self_notification',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -2891,7 +2892,8 @@ AND gc_id IN (
             'reply_in_post_thread_email',
             'team_invite_email',
             'team_joined_email',
-            'team_member_submission_email'
+            'team_member_submission_email',
+            'self_notification_email',
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
@@ -2921,7 +2923,7 @@ AND gc_id IN (
 
      */
     public function getAllParentAuthors(string $post_author_id, string $post_id) {
-        $params = [$post_id, $post_author_id];
+        $params = [$post_id];
         $query = "SELECT * FROM
                   (WITH RECURSIVE parents AS (
                   SELECT
@@ -2935,8 +2937,7 @@ AND gc_id IN (
                   ) SELECT DISTINCT 
                     author_user_id AS user_id
                   FROM
-                    parents
-                  WHERE author_user_id <> ?) AS parents;";
+                    parents) AS parents;";
         $this->course_db->query($query,$params);
         return $this->rowsToArray($this->course_db->rows());
     }
