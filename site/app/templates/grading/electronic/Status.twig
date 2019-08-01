@@ -119,20 +119,39 @@
     {# Top buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            <a class="btn btn-primary"
+            <a class="btn btn-primary" style="float: left"
                 {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
                     href="{{ details_view_all_url }}">
                 {% else %}
                     href="{{ details_url }}">
                 {% endif %}
 
-                Index of Grading Details for All Students
+                Grading Index
             </a>
+            <ul style="margin-left: 25px; margin-top: -5px; float: left">
+                <li>View Submissions</li>
+                {%  if team_assignment %}
+                    <li>Manage Teams</li>
+                {% endif %}
+                {% if component_averages|length != 0 %}
+                    <li>Manual Grading</li>
+                    <li>Grade Inquiries</li>
+                {% endif %}
+            </ul>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
-                <a class="btn btn-primary"
-                   href="{{ grade_url }}" style="float: right;">
-                    Grade Next Student
-                </a>
+                {% if overall_average == null or overall_average.getCount() == 0 %}
+                    {% if team_assignment %}
+                        <a class="btn btn-primary"
+                           href="{{ grade_url }}" style="float: right;">
+                            My Next Ungraded Team
+                        </a>
+                    {% else %}
+                        <a class="btn btn-primary"
+                           href="{{ grade_url }}" style="float: right;">
+                            My Next Ungraded Student
+                        </a>
+                    {% endif %}
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>
@@ -150,7 +169,7 @@
             <div class =tab-bar-wrapper">
                 <a class="nav-bar normal-btn"  onclick="openStat(event, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
                 <a class="nav-bar normal-btn"  id="btn-hist-auto" onclick="openStat(event, 'autograding-score-histogram'), this.blur()">Autograding Histogram</a>
-                <a class="nav-bar normal-btn"  id="btn-comp" onclick="openStat(event, 'component-averages'), this.blur()">Component Averages</a>
+                <a class="nav-bar normal-btn"  id="btn-comp" onclick="openStat(event, 'component-averages'), this.blur()">Manual Grading Component Averages</a>
                 <a class="nav-bar normal-btn"  id="btn-hist-tot" onclick="openStat(event, 'total-score-histogram'), this.blur()">Overall Histogram</a>
             </div>
             {% set bTA = [] %}
@@ -703,10 +722,18 @@
     <div style="margin-top: 20px;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
-                <a class="btn btn-primary"
-                   href="{{ download_zip_url }}">
-                    Download Zip of All Assigned Students
-                </a>
+                {%  if team_assignment %}
+                    <a class="btn btn-primary"
+                       href="{{ download_zip_url }}">
+                        Download Zip of Assigned Teams
+                    </a>
+                {% else %}
+                    <a class="btn btn-primary"
+                       href="{{ download_zip_url }}">
+                        Download Zip of Assigned Students
+                    </a>
+                {% endif %}
+
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
                 <a class="btn btn-default"
