@@ -47,7 +47,7 @@
     min-width: 100%;
 }
 
-.btn-nav-open, .button-placeholder {
+.btn-nav-open {
     display: none;
 }
 
@@ -124,8 +124,9 @@
         padding: 5px !important;
     }
 
-    .button-placeholder {
-        display: table-cell;
+    .course-main .button-placeholder {
+        display: inline-block;
+        width: 33px;
     }
 
     .course-button {
