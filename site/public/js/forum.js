@@ -166,7 +166,7 @@ function createThread(e) {
         return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
     }
     catch{
-        alert("There was an irrecoverable fault. Kindly contact administrator.");
+        alert("Something went wrong. Please try again.");
         return false;
     }
 }
@@ -177,7 +177,7 @@ function publishPost(e) {
         return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
     }
     catch{
-        alert("There was an irrecoverable fault. Kindly contact administrator.");
+        alert("Something went wrong. Please try again.");
         return false;
     }
 }
