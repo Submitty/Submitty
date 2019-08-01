@@ -43,50 +43,26 @@ class AdminGradeableController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status/{current_status}", methods={"GET"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
-     public function ajaxUpdateBuildStatus($gradeable_id, $current_status) {
-        $max_wait_time = 60;
-
-        $new_build_status = $this->getBuildStatusOfGradeable($gradeable_id);
-
-        while($new_build_status == $current_status && $max_wait_time > 0) {
-            sleep(1);
-            $max_wait_time--;
-            $new_build_status = $this->getBuildStatusOfGradeable($gradeable_id);
-        }
-
-        if ($new_build_status != $current_status) {
-            if ($new_build_status == 'none') {
-                $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-                $this->core->getOutput()->renderJsonSuccess($gradeable->hasAutogradingConfig());
-            }
-            else {
-                $this->core->getOutput()->renderJsonSuccess($new_build_status);
-            }
-        }
-        else {
-            $this->core->getOutput()->renderJsonSuccess('time_out');
-        }
-     }
-
-    private function getBuildStatusOfGradeable($gradeable_id) {
+    public function getBuildStatusOfGradeable($gradeable_id) {
         $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
         $rebuilding_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
         $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 
         if (is_file($queued_path)) {
-            $file_found = 'queued';
+            $status = 'queued';
         }
         else if (is_file($rebuilding_path)) {
-            $file_found = 'processing';
+            $status = 'processing';
         }
         else {
-            $file_found = 'none';
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $status = $gradeable->hasAutogradingConfig();
         }
         clearstatcache();
-        return $file_found;
+        $this->core->getOutput()->renderJsonSuccess($status);
     }
 
     /* Page load methods */

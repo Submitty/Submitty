@@ -61,9 +61,35 @@
             </div>
         </div>
     </div>
-    <div class="btn-container">
+    <div class="btn-container" id="rebuild_gradeable_button">
         <a class="btn btn-primary" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
     </div>
+	
+	<div id="rebuild_status_panel">
+		<span id="rebuild_status_label">Build Status: </span>
+		<div id="rebuild_status"></div>
+	</div>
+	
+	<div id="rebuild_log_button">	
+		<input type="button" class="btn btn-default" id="open_build_log" type="button" value="Open Build Log" onclick="showBuildLog()" />
+		<input type="button" class="btn btn-primary" id="close_build_log" type="button" value="Close Build Log" onclick="hideBuildLog()" />
+	</div>
+	
+	<div class="log-container" hidden>
+		<div class="option-title">Build log:</div>
+		<pre id="build_log_body"></pre>
+	</div>
+
+	<div class="log-container" hidden>
+		<div class="option-title">CMake output:</div>
+		<pre id="cmake_log_body"></pre>
+	</div>
+
+	<div class="log-container" hidden>
+		<div class="option-title">Make output:</div>
+		<pre id="make_log_body"></pre>
+	</div>
+	
 </div>
 
 <script type="text/javascript">

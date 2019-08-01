@@ -90,7 +90,7 @@ $(document).ready(function () {
         }
     };
 
-    ajaxCheckBuildStatus($('#g_id').val(),'unknown');
+    ajaxCheckBuildStatus();
 
     $('input,select,textarea').change(function () {
         if ($(this).hasClass('ignore')) {
@@ -166,7 +166,7 @@ function ajaxRebuildGradeableButton() {
     $.ajax({
         url: buildNewCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function (response) {
-            ajaxCheckBuildStatus(gradeable_id,'unknown');
+            ajaxCheckBuildStatus();
         },
         error: function (response) {
             console.error(response);
@@ -212,24 +212,26 @@ function ajaxGetBuildLogs(gradeable_id) {
     });
 }
 
-function ajaxCheckBuildStatus(gradeable_id,current_status) {
+function ajaxCheckBuildStatus() {
+    var gradeable_id = $('#g_id').val();
+    $('#rebuild_log_button').css('display','none');
+    hideBuildLog();
     $.getJSON({
         type: "GET",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_status',current_status]),
+        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
             $('#rebuild_log_button').css('display','block');
-            hideBuildLog();
             if (response['data'] == 'queued') {
                 $('#rebuild_status').html(gradeable_id.concat(' is in the rebuild queue...'));
                 $('#rebuild_log_button').css('display','none');
-                ajaxCheckBuildStatus(gradeable_id,'queued');
                 $('[name="config_search_error"]').hide();
+                setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'processing') {
                 $('#rebuild_status').html(gradeable_id.concat(' is being rebuilt...'));
                 $('#rebuild_log_button').css('display','none');
-                ajaxCheckBuildStatus(gradeable_id,'processing');
                 $('[name="config_search_error"]').hide();
+                setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == true) {
                 $('#rebuild_status').html('Gradeable build complete');
@@ -237,10 +239,6 @@ function ajaxCheckBuildStatus(gradeable_id,current_status) {
             else if (response['data'] == false) {
                 $('#rebuild_status').html('Gradeable build failed');
                 $('[name="config_search_error"]').show();
-            }
-            else if (response['data'] == 'timeout') {
-                $('#rebuild_status').html('Error');
-                console.error('Server took too long to respond, please try again.');
             }
             else {
                 $('#rebuild_status').html('Error');

@@ -175,13 +175,22 @@ div.btn-container {
 #rebuild_status_panel {
     display: inline-block;
     background-color: lightgrey;
+
+    position: relative;
+    top: 5px;
+    left: 50px;
+    height: 34px;
     width: auto;
 
     padding: 5px;
     padding-left: 5px;
     padding-right: 5px;
     border-radius: 5px;
+}
+
+#rebuild_gradeable_button {
     float: left;
+    display: inline-block;
 }
 
 #rebuild_status_label {
@@ -194,6 +203,8 @@ div.btn-container {
 }
 
 #rebuild_log_button {
-    display: flex;
-    margin: auto;
+    display: inline-block;
+    position: relative;
+    top: 5px;
+    float: right;
 }
