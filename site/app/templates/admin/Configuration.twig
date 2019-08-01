@@ -162,12 +162,14 @@
 
         {# Only show this option if submitty-admin user is available and ready #}
         {% if fields['show_auto_rainbow_grades'] %}
-            <div class="flex-row">
+            <div class="config-row checkbox-row">
+                <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                 <label for="auto_rainbow_grades">
                     <div class="option-title">Automatic Rainbow Grades Generation</div>
-                    <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>
+                    <div class="option-alt">
+                        After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.
+                    </div>
                 </label>
-                <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
             </div>
         {% endif %}
 
@@ -209,13 +211,5 @@
                 <div class="option-alt">Show a custom message to students at the top of the navigation page.</div>
             </label>
         </div>
-
-{#            <div class="option-desc col-md-8">#}
-{#                <div class="option-title">Automatic Rainbow Grades Generation</div>#}
-{#                <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>#}
-{#            </div>#}
-{#            <div class="option-input col-md-4"><input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ?#}
-{#                'checked': '' }} /></div>#}
-
     </div>
 </div>
