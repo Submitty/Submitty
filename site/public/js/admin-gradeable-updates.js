@@ -152,15 +152,6 @@ $(document).ready(function () {
     });
 });
 
-function showBuildLog() {
-    ajaxGetBuildLogs($('#g_id').val());
-}
-
-function hideBuildLog() {
-    $('.log-container').hide();
-    $('#open_build_log').show();
-    $('#close_build_log').hide();
-}
 function ajaxRebuildGradeableButton() {
     var gradeable_id = $('#g_id').val();
     $.ajax({
@@ -184,27 +175,27 @@ function ajaxGetBuildLogs(gradeable_id) {
             var make_info = response['data'][2];
 
             if (build_info != null) {
-                $('#build_log_body').html(build_info);
+                $('#build-log-body').html(build_info);
             }
             else {
-                $('#build_log_body').html('There is currently no build output.');
+                $('#build-log-body').html('There is currently no build output.');
             }
             if (cmake_info != null) {
-                $('#cmake_log_body').html(cmake_info);
+                $('#cmake-log-body').html(cmake_info);
             }
             else {
-                $('#cmake_log_body').html('There is currently no cmake output.');
+                $('#cmake-log-body').html('There is currently no cmake output.');
             }
             if (make_info != null) {
-                $('#make_log_body').html(make_info);
+                $('#make-log-body').html(make_info);
             }
             else {
-                $('#make_log_body').html('There is currently no make output.');
+                $('#make-log-body').html('There is currently no make output.');
             }
 
             $('.log-container').show();
-            $('#open_build_log').hide();
-            $('#close_build_log').show();
+            $('#open-build-log').hide();
+            $('#close-build-log').show();
         },
         error: function (response) {
             console.error('Failed to parse response from server: ' + response);
@@ -214,34 +205,34 @@ function ajaxGetBuildLogs(gradeable_id) {
 
 function ajaxCheckBuildStatus() {
     var gradeable_id = $('#g_id').val();
-    $('#rebuild_log_button').css('display','none');
+    $('#rebuild-log-button').css('display','none');
     hideBuildLog();
     $.getJSON({
         type: "GET",
         url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
-            $('#rebuild_log_button').css('display','block');
+            $('#rebuild-log-button').css('display','block');
             if (response['data'] == 'queued') {
-                $('#rebuild_status').html(gradeable_id.concat(' is in the rebuild queue...'));
-                $('#rebuild_log_button').css('display','none');
+                $('#rebuild-status').html(gradeable_id.concat(' is in the rebuild queue...'));
+                $('#rebuild-log-button').css('display','none');
                 $('[name="config_search_error"]').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == 'processing') {
-                $('#rebuild_status').html(gradeable_id.concat(' is being rebuilt...'));
-                $('#rebuild_log_button').css('display','none');
+                $('#rebuild-status').html(gradeable_id.concat(' is being rebuilt...'));
+                $('#rebuild-log-button').css('display','none');
                 $('[name="config_search_error"]').hide();
                 setTimeout(ajaxCheckBuildStatus,1000);
             }
             else if (response['data'] == true) {
-                $('#rebuild_status').html('Gradeable build complete');
+                $('#rebuild-status').html('Gradeable build complete');
             }
             else if (response['data'] == false) {
-                $('#rebuild_status').html('Gradeable build failed');
+                $('#rebuild-status').html('Gradeable build failed');
                 $('[name="config_search_error"]').show();
             }
             else {
-                $('#rebuild_status').html('Error');
+                $('#rebuild-status').html('Error');
                 console.error('Internal server error, please try again.');
             }
         },
@@ -250,7 +241,6 @@ function ajaxCheckBuildStatus() {
         }
     });
 }
-
 
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
     let container = $('#container-rubric');
@@ -501,4 +491,14 @@ function saveGraders() {
             console.error('Failed to parse response from server: ' + response);
         }
     });
+}
+
+function showBuildLog() {
+    ajaxGetBuildLogs($('#g_id').val());
+}
+
+function hideBuildLog() {
+    $('.log-container').hide();
+    $('#open-build-log').show();
+    $('#close-build-log').hide();
 }

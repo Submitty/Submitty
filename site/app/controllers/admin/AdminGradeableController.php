@@ -27,44 +27,6 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
-     */
-    public function ajaxGetBuildLogs($gradeable_id) {
-
-        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
-        $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
-        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
-        $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
-        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
-        $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
-
-        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
-    }
-
-    /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
-     */
-    public function getBuildStatusOfGradeable($gradeable_id) {
-        $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
-        $rebuilding_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
-        $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
-        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
-
-        if (is_file($queued_path)) {
-            $status = 'queued';
-        }
-        else if (is_file($rebuilding_path)) {
-            $status = 'processing';
-        }
-        else {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            $status = $gradeable->hasAutogradingConfig();
-        }
-        clearstatcache();
-        $this->core->getOutput()->renderJsonSuccess($status);
-    }
-
     /* Page load methods */
 
 
@@ -272,8 +234,6 @@ class AdminGradeableController extends AbstractController {
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
-
-            'build_status' => $gradeable->hasAutogradingConfig(),
 
             'upload_config_url' => $this->core->buildNewCourseUrl(['autograding_config']),
             'rebuild_url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
@@ -1123,6 +1083,43 @@ class AdminGradeableController extends AbstractController {
         if ($result !== null) {
             die($result);
         }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
+     */
+    public function ajaxGetBuildLogs($gradeable_id) {
+        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
+        $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
+        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
+        $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
+        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
+        $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
+
+        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
+     */
+    public function getBuildStatusOfGradeable($gradeable_id) {
+        $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $rebuilding_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
+        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
+
+        if (is_file($queued_path)) {
+            $status = 'queued';
+        }
+        else if (is_file($rebuilding_path)) {
+            $status = 'processing';
+        }
+        else {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $status = $gradeable->hasAutogradingConfig();
+        }
+        clearstatcache();
+        $this->core->getOutput()->renderJsonSuccess($status);
     }
 
     /**
