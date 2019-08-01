@@ -15,41 +15,40 @@
     min-height: 7em;
 }
 
-#config label, 
-#config legend, 
-#config input[type="text"], 
-#config input[type="number"], 
-#config textarea,
-#config button,
-#config .option-desc,
-#config .option-input,
-#room-seating-gradeable-id {
+.config-row {
     flex: 1 0 60%;
     margin: 0 0 1em;
 }
 
-#config input[type="checkbox"] {
-    flex: none;
+.checkbox-row {
+    display: flex;
+    align-items: center;
 }
 
-#config input[type="checkbox"] {
-    margin-left: 1em;
+.checkbox-row input[type="checkbox"] {
+    flex: none;
+    margin-right: 1em;
 }
 
 #email-seating-assignment a {
     width: 100%;
 }
 
-#forum-enabled-wrapper, #instructor-seating {
+#instructor-seating {
+    display: flex;
     flex-wrap: wrap;
 }
 
-#forum-enabled-input {
-    margin: 0 0 1em;
+#room-seating-gradeable-id {
+    flex: 1 0 60%;
 }
 
 #seating-only-label {
-    flex: none !important;
+    margin: 0;
+}
+
+#seating-only-label input[type="checkbox"] {
+    margin: 5px !important;
 }
 
 #vcs-options label {
@@ -59,13 +58,14 @@
 }
 
 @media (min-width: 541px) {
-    #forum-enabled-message,
     #room-seating-gradeable-id {
         flex: none;
     }
-}
 
-@media (min-width: 768px) {
+    #seating-only-label {
+        margin: 0 0 0 1em;
+    }
+
     #email-seating-assignment {
         display: flex;
     }
