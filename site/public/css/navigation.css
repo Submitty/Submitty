@@ -8,37 +8,6 @@
     background-color: lightgray;
 }
 
-.course-main {
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    margin-bottom: 9px;
-    padding-bottom: 5px;
-}
-
-.course-main .fas, .course-main .course-title {
-    margin: 0 5px;
-}
-
-.course-button {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.btn-nav {
-    margin: 3px 0;
-    min-width: 220px;
-    min-height: 60px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-}
-
-.btn-nav-open, .button-placeholder {
-    display: none;
-}
-
 .gradeable-row {
     margin: 0 -30px;
     padding: 18px 30px;
@@ -49,6 +18,39 @@
     border: none;
 }
 
+.course-main {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 9px;
+    padding-bottom: 5px;
+}
+
+.course-main .fas, .course-main .course-title {
+    margin: 0 5px;
+    display: inline-block;
+}
+
+.course-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.btn-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px;
+    margin: 3px 0;
+    min-height: 100%;
+    min-width: 100%;
+}
+
+.btn-nav-open, .button-placeholder {
+    display: none;
+}
+
 @media (min-width: 541px) {   
     .course-section-heading {
         border-bottom: 2px solid #000;
@@ -57,11 +59,73 @@
 
     .gradeable-row {
         border: none;
-        padding: 18px 30px;
     }
 
+    .btn-nav {
+        min-width: 95%;
+    }
+}
+
+@media (min-width: 950px) {
+    #gradeables {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .course-section-heading {
+        border-bottom: 1px solid var(--standard-light-gray);
+        margin: 0;
+        padding: 0;
+        display: table-row-group;
+    }
+
+    .course-section {
+        display: table-row-group;
+    }
+
+    .gradeable-row {
+        display: table-row;
+        justify-content: space-between;
+    }
+
+    .course-main, .course-button {
+        display: table-cell;
+        vertical-align: middle;
+    }
+    
     .course-main {
-        border: none;
+        padding: 9px;
+        min-width: 220px;
+        /* webkit tables cannot shrink to fit content; it must take a percentage width value */
+        width: 40%;
+        /* this is the logical behavior, that firefox will render (max width overrides width) */
+        max-width: max-content;
+    }
+
+    .course-button {
+        padding: 10px;
+        text-align: center;
+        width: 220px;
+        min-width: min-content;
+        max-width: max-content;
+    }
+
+    .btn-nav {
+        margin: auto;
+    }
+
+    .btn-nav-open {
+        display: flex;
+        max-width: 85px;
+        min-width: 0;
+        min-height: 50px;
+        justify-content: center;
+        padding: 5px !important;
+    }
+
+    .button-placeholder {
+        display: table-cell;
     }
 
     .course-button {

@@ -35,7 +35,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
                          .find_element_by_id('graded-section')
                          .find_elements_by_class_name("gradeable-row")))
         self.assertEqual(4, len(self.driver.find_element_by_class_name(
-            'course-button-wrapper').find_elements_by_class_name('course-button')))
+            'gradeable-row').find_elements_by_class_name('course-button')))
 
     def test_ta(self):
         self.log_in(user_id="ta", user_name="Jill")
@@ -64,7 +64,7 @@ class TestNavigationPageNonStudent(BaseTestCase):
                                 .find_elements_by_class_name("gradeable-row")))
 
         self.assertEqual(3, len(self.driver.find_element_by_class_name(
-            'course-button-wrapper').find_elements_by_class_name('course-button')))
+            'gradeable-row').find_elements_by_class_name('course-button')))
 
 
 if __name__ == "__main__":

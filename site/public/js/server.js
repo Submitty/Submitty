@@ -1805,7 +1805,7 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     var size = $(document.body).width();
-    if (size < 1000) {
+    if (size < 1150) {
         $("aside").toggleClass("collapsed", true);
     }
     else{
