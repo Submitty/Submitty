@@ -120,6 +120,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             ->setMethods(['addBreadcrumb'])
             ->getMock();
         $output->method('addBreadcrumb')->willReturn(true);
+        $output->disableRender();
 
         $core->method('getOutput')->willReturn($output);
 
