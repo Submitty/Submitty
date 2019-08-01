@@ -2884,6 +2884,7 @@ AND gc_id IN (
             'team_invite',
             'team_joined_email',
             'team_member_submission',
+            'self_notification',
             'merge_threads_email',
             'all_new_threads_email',
             'all_new_posts_email',
@@ -2892,7 +2893,7 @@ AND gc_id IN (
             'team_invite_email',
             'team_joined_email',
             'team_member_submission_email',
-            'self_notification'
+            'self_notification_email',
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);

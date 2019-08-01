@@ -247,6 +247,9 @@
                     </label>
                 </div>
                 <div class="option-input col-md-3"><input type="checkbox" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
             </div>
 
         </div>

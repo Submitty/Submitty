@@ -211,7 +211,7 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_emails = [];
         foreach ($emails as $email) {
-            if ($email->getUserId() == $current_user->getId() && $current_user->getNotificationSetting('self_notification')) {
+            if ($email->getUserId() == $current_user->getId() && $current_user->getNotificationSetting('self_notification_email')) {
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
