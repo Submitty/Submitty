@@ -22,6 +22,7 @@
 
 .course-button {
     display: flex;
+    flex-direction: column;
     justify-content: center;
 }
 
@@ -63,7 +64,9 @@
         border: none;
     }
 
-    .btn-nav {
+    .course-button {
         max-width: 95%;
+        display: block;
+        margin: auto;
     }
 }

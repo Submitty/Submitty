@@ -1266,16 +1266,18 @@ div.full_height {
 
 /* from https://css-tricks.com/css3-progress-bars/ */
 .meter {
+    width: 100%;
     height: 10px;
-    position: relative;
     background: var(--standard-pale-gray);
     padding: 0px;
+    border-radius: 4px;
 }
+
 .meter > span {
     display: block;
     height: 100%;
     background-color: var(--good-green);
-    position: relative;
+    border-radius: 4px;
 }
 
 /*
