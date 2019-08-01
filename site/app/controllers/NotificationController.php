@@ -24,7 +24,8 @@ class NotificationController extends AbstractController {
         'reply_in_post_thread',
         'team_invite',
         'team_joined',
-        'team_member_submission'
+        'team_member_submission',
+        'self_notification'
     ];
 
 	const EMAIL_SELECTIONS = [
@@ -36,6 +37,7 @@ class NotificationController extends AbstractController {
         'team_invite_email',
         'team_joined_email',
         'team_member_submission_email',
+        'self_notification_email'
     ];
 
 	protected $selections;
