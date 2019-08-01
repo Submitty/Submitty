@@ -81,8 +81,9 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-            if (!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp'])) {
-                $error = "Datestamp must be mm/dd/yy";
+
+            if (!isset($_POST['datestamp']) ||  (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
+                $error = "Datestamp must be Y-m-d";
                 $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
