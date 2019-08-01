@@ -33,6 +33,7 @@
 
 .course-button {
     display: flex;
+    flex-direction: column;
     justify-content: center;
 }
 
@@ -125,5 +126,11 @@
 
     .button-placeholder {
         display: table-cell;
+    }
+
+    .course-button {
+        max-width: 95%;
+        display: block;
+        margin: auto;
     }
 }

@@ -2,6 +2,8 @@
 
 namespace app\views;
 
+use app\models\User;
+
 class NotificationView extends AbstractView {
     public function showNotifications($current_course, $show_all, $notifications, $notification_saves) {
         $this->core->getOutput()->addBreadcrumb("Notifications");
@@ -19,11 +21,13 @@ class NotificationView extends AbstractView {
 
     public function showNotificationSettings($notification_saves) {
         $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildNewCourseUrl(['notifications']));
+        $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->addBreadcrumb("Notification Settings");
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
             'notification_saves' => $notification_saves,
             'email_enabled' => $this->core->getConfig()->isEmailEnabled(),
             'csrf_token' => $this->core->getCsrfToken(),
+            'defaults' => User::constructNotificationSettings([]),
             'update_settings_url' => $this->core->buildNewCourseUrl(['notifications', 'settings'])
         ]);
     }

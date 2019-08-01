@@ -12,7 +12,23 @@
             {% else %}
                 {% set header = "Notification Settings" %}
             {% endif %}
-            <div><h1>{{ header }}</h1></div>
+            <div class="header">
+                <h1>{{ header }}</h1>
+                <div class="button-group">
+                    <div class="button-row">
+                        <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="checkAll(this)">Subscribe to all notifications</button>
+                        <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional notifications</button>
+                        <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="resetNotification(this)">Reset notification settings</button>
+                    </div>
+                    {% if email_enabled %}
+                        <div class="button-row">
+                            <button type="button" class="notification-setting-button btn" data-selector=".email-setting-input" onclick="checkAll(this)">Subscribe to all emails</button>
+                            <button type="button" class="notification-setting-button btn" data-selector=".email-setting-input" onclick="unCheckAll(this)">Unsubscribe from all optional emails</button>
+                            <button type="button" class="notification-setting-button btn" data-selector=".email-setting-input" onclick="resetNotification(this)">Reset email settings</button>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
             <div class="row">
                 <div class="heading col-md-4"></div>
                 <div class="heading col-md-3">
@@ -36,9 +52,9 @@
                         <div class="option-alt">Receive a notification whenever an instructor posts a new announcement</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="announcement_email" id="announcement_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -49,9 +65,9 @@
                         <div class="option-alt">Receive a notification whenever a reply is posted in a thread that you created</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="reply_thread_email" id="reply_thread_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -62,9 +78,9 @@
                         <div class="option-alt">Receive a notification whenever one of your posts was edited, deleted, or merged</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" disabled="true" checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="my_post_altered" id="my_post_altered" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="my_post_altered_email" id="my_post_altered_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -75,10 +91,10 @@
                         <div class="option-alt">Receive a notification whenever a reply is posted in a thread in which you also posted</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
 
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="reply_in_post_thread_email" id="reply_in_post_thread_email" {% if notification_saves['reply_in_post_thread_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -89,9 +105,9 @@
                         <div class="option-alt">Receive a notification whenever a thread is merged</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="merge_threads_email" id="merge_threads_email" {% if notification_saves['merge_threads_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -102,9 +118,9 @@
                         <div class="option-alt">Receive a notification whenever a thread is created</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="all_new_threads_email" id="all_new_threads_email" {% if notification_saves['all_new_threads_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -115,9 +131,9 @@
                         <div class="option-alt">Receive a notification whenever a post is created</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="all_new_posts_email" id="all_new_posts_email" {% if notification_saves['all_new_posts_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -129,10 +145,11 @@
                             <div class="option-alt">Receive a notification whenever a thread/post has been edited, deleted, or undeleted</div>
                         </label>
                     </div>
-                    <div class="option-input col-md-3"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
                     {% if email_enabled %}
-                        <div class="option-input col-md-5"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
-                    {% endif %}                </div>
+                        <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="all_modifications_forum_email" id="all_modifications_forum_email" {% if notification_saves['all_modifications_forum_email'] %}checked="true"{% endif %}></div>
+                    {% endif %}
+                </div>
             {% endif %}
 
             <div class="heading">
@@ -148,9 +165,9 @@
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="new_grade_inquiry" id="new_grade_inquiry" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="new_grade_inquiry_email" id="new_grade_inquiry_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -162,8 +179,10 @@
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked></div>
-                <div class="option-input col-md-5"><input type="checkbox" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="new_grade_inquiry_post" id="new_grade_inquiry_post" disabled checked></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="new_grade_inquiry_post_email" id="new_grade_inquiry_post_email" disabled checked></div>
+                {% endif %}
             </div>
 
             <div class="option row">
@@ -174,9 +193,9 @@
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="grade_inquiry_resolved" id="grade_inquiry_resolved" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="grade_inquiry_resolved_email" id="grade_inquiry_resolved_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -188,9 +207,9 @@
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="grade_inquiry_reopened" id="grade_inquiry_reopened" disabled checked></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="grade_inquiry_reopened_email" id="grade_inquiry_reopened_email" disabled checked></div>
                 {% endif %}
             </div>
 
@@ -206,9 +225,9 @@
                         <div class="option-alt">Receive a notification when you get an invitation to join a team</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_invite_email" id="team_invite_email" {% if notification_saves['team_invite_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -219,9 +238,9 @@
                         <div class="option-alt">Receive a notification when a new now member joins your team</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_joined_email" id="team_joined_email" {% if notification_saves['team_joined_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
@@ -232,14 +251,48 @@
                         <div class="option-alt">Receive a notification when a team member makes a submission to your gradeable</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
         </div>
     </form>
     <script>
+        function checkAll(button) {
+            var selector = $(button).data('selector');
+            $(selector).children().prop('checked',true);
+            $('#form_notification_settings').trigger("change");
+        }
+
+        function unCheckAll(button) {
+            var selector = $(button).data('selector');
+            $(selector).children().filter(':not(:disabled)').prop('checked',false);
+            $('#form_notification_settings').trigger("change");
+        }
+
+        function resetNotification(button) {
+            var defaults = {{ defaults|json_encode|raw }};
+            var selector = $(button).data('selector');
+            if (selector === '.notification-setting-input') {
+                for (d in defaults) {
+                    if (defaults.hasOwnProperty(d) && !d.includes("_email")) {
+                        $("input[name='" + d + "']").prop('checked',defaults[d]);
+                    }
+                }
+            }
+            else if (selector === '.email-setting-input') {
+                for (d in defaults) {
+                    if (defaults.hasOwnProperty(d) && d.includes("_email")) {
+                        $("input[name='" + d + "']").prop('checked',defaults[d]);
+                    }
+                }
+            }
+            $('#form_notification_settings').trigger("change");
+        }
+
+
+
         $('#form_notification_settings').on("change",function(e) {
             var f = $(this);
             var url = f.attr('action');
