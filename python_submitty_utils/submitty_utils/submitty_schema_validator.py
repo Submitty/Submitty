@@ -20,7 +20,6 @@ class SubmittySchemaException(Exception):
         self.title = title
         self.schema_message = schema_error.message
 
-
     def print_human_readable_error(self):
         """Use to print a human readable version of this exception."""
         print(file=sys.stderr)
@@ -43,7 +42,7 @@ def complete_config_validator(j_, s_, warn=True):
     """
     s_prop = s_['properties']
 
-    for key in ['autograding', 'autograding_method', 'container_options', 
+    for key in ['autograding', 'autograding_method', 'container_options',
                 'resource_limits']:
         validate_schema(j_, s_prop, key, 'global', warn=warn)
 
@@ -76,12 +75,12 @@ def complete_config_validator(j_, s_, warn=True):
 
         # validate all of the different chunks of the testcase
         t_name = f'testcase_{testcase_num}'
-        
-        for key in ['dispatcher_actions', 'actions', 'points', 'type', 
+
+        for key in ['dispatcher_actions', 'actions', 'points', 'type',
                     'pre_commands', 'single_port_per_container',
-                    'use_router', 'title', 'hidden', 'extra_credit', 
-                    'input_generation_commands', 'executable_name', 
-                    'testcase_label']: 
+                    'use_router', 'title', 'hidden', 'extra_credit',
+                    'input_generation_commands', 'executable_name',
+                    'testcase_label']:
             validate_schema(t, p_s, key, t_name, warn=warn)
 
         containers = t['containers']
