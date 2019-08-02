@@ -191,25 +191,26 @@ std::set<std::string> get_compiled_executables(const nlohmann::json &whole_confi
 
 
 bool local_executable (const std::string &program, const nlohmann::json &whole_config) {
-  assert (program.size() > 3);
-  assert (program.substr(0,2) == "./");
+  return true;
+  // assert (program.size() > 3);
+  // assert (program.substr(0,2) == "./");
 
-  std::set<std::string> executables = get_compiled_executables(whole_config);
+  // std::set<std::string> executables = get_compiled_executables(whole_config);
 
-  if (executables.find(program.substr(2,program.size())) != executables.end()) {
-    return true;
-  }
+  // if (executables.find(program.substr(2,program.size())) != executables.end() || isInstructor) {
+  //   return true;
+  // }
 
-  std::cout << "WARNING: The local program '" << program
-            << "' is not compiled by the assignment configuration." << std::endl;;
-  std::cout << "CONFIGURATION COMPILED EXECUTABLES: ";
-  for (std::set<std::string>::iterator itr = executables.begin(); itr != executables.end(); itr++) {
-    std::cout << " './" << *itr << "'";
-  }
-  if (executables.size() == 0) { std::cout << " (none)" << std::endl; }
-  std::cout << std::endl;
+  // std::cout << "WARNING: The local program '" << program
+  //           << "' is not compiled by the assignment configuration." << std::endl;;
+  // std::cout << "CONFIGURATION COMPILED EXECUTABLES: ";
+  // for (std::set<std::string>::iterator itr = executables.begin(); itr != executables.end(); itr++) {
+  //   std::cout << " './" << *itr << "'";
+  // }
+  // if (executables.size() == 0) { std::cout << " (none)" << std::endl; }
+  // std::cout << std::endl;
 
-  return false;
+  // return false;
 }
 
 
@@ -619,6 +620,17 @@ void parse_command_line(const std::string &cmd,
         my_stdout = tokens[which];
       } else {
         my_stdout = token.substr(2,token.size()-2);
+      }
+      validate_filename(my_stdout);
+    }
+    else if (token.size() >= 1 && token.substr(0,1) == ">") {
+      assert (my_stdout == "");
+      if (token.size() == 1) {
+        which++;
+        assert (which < tokens.size());
+        my_stdout = tokens[which];
+      } else {
+        my_stdout = token.substr(1,token.size()-1);
       }
       validate_filename(my_stdout);
     }
@@ -1059,7 +1071,7 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
 
 
 // Executes command (from shell) and returns error code (0 = success)
-int execute(const std::string &cmd, 
+int execute(const std::string &cmd,
       const std::vector<nlohmann::json> actions,
       const std::vector<nlohmann::json> dispatcher_actions,
       const std::string &execute_logfile,
