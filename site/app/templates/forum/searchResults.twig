@@ -19,7 +19,7 @@
             </thead>
             <tbody>
                 {% for thread in threads %}
-                    <tr class="info persist-header hoverable cursor-pointer" title="Go to thread" onclick="window.location = '{{ thread.thread_link }}';">
+                    <tr class="info hoverable cursor-pointer" title="Go to thread" onclick="window.location = '{{ thread.thread_link }}';">
                         <td colspan="10" class="text-center"><h4>{{ thread.thread_title }}</h4></td>
                     </tr>
                     {% for post in thread.posts %}

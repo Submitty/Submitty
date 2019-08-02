@@ -140,7 +140,7 @@
             {% for section_id, section in sections %}
                 {# Section header #}
                 <tbody>
-                    <tr class="info persist-header">
+                    <tr class="info">
                         <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
