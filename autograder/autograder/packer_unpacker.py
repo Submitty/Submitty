@@ -113,7 +113,7 @@ def unzip_queue_file(zipfilename):
 
 # ==================================================================================
 # ==================================================================================
-def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade):
+def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade,is_generate_output):
     os.chdir(SUBMITTY_DATA_DIR)
 
     # generate a random id to be used to track this job in the autograding logs
@@ -122,15 +122,15 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     # --------------------------------------------------------
     # figure out what we're supposed to grade & error checking
     obj = load_queue_file_obj(job_id,next_directory,next_to_grade)
-
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
-    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
-    if not os.path.isdir(submission_path):
-        grade_items_logging.log_message(job_id, message="ERROR: the submission directory does not exist " + submission_path)
-        raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
-    print(which_machine,which_untrusted,"prepare zip",submission_path)
-    is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
+    if not is_generate_output:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+        submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
+        if not os.path.isdir(submission_path):
+            grade_items_logging.log_message(job_id, message="ERROR: the submission directory does not exist " + submission_path)
+            raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
+        print(which_machine,which_untrusted,"prepare zip",submission_path)
+        is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
 
     is_batch_job = "regrade" in obj and obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
@@ -175,15 +175,16 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     copytree_if_exists(bin_path,os.path.join(tmp_autograding,"bin"))
     shutil.copy(form_json_config,os.path.join(tmp_autograding,"form.json"))
     shutil.copy(complete_config,os.path.join(tmp_autograding,"complete_config.json"))
+    if not is_generate_output:
+        checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",partial_path)
+        results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",partial_path)
 
-    checkout_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"checkout",partial_path)
-    results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",obj["semester"],obj["course"],"results",partial_path)
-
-    # grab a copy of the current history.json file (if it exists)
-    history_file = os.path.join(results_path,"history.json")
-    history_file_tmp = ""
-    if os.path.isfile(history_file):
-        shutil.copy(history_file,os.path.join(tmp_submission,"history.json"))
+        # grab a copy of the current history.json file (if it exists)
+        history_file = os.path.join(results_path,"history.json")
+        history_file_tmp = ""
+        if os.path.isfile(history_file):
+            shutil.copy(history_file,os.path.join(tmp_submission,"history.json"))
+    
     # get info from the gradeable config file
     with open(complete_config, 'r') as infile:
         complete_config_obj = json.load(infile)
@@ -231,7 +232,8 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     filehandle1, my_autograding_zip_file =tempfile.mkstemp()
     filehandle2, my_submission_zip_file =tempfile.mkstemp()
     grade_item.zip_my_directory(tmp_autograding,my_autograding_zip_file)
-    grade_item.zip_my_directory(tmp_submission,my_submission_zip_file)
+    if not is_generate_output:
+        grade_item.zip_my_directory(tmp_submission,my_submission_zip_file)
     os.close(filehandle1)
     os.close(filehandle2)
     # cleanup
@@ -255,6 +257,7 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
         return False
 
     job_id = queue_obj["job_id"]
+    is_generate_output = queue_obj.get('generate_output',False)
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
     results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results",partial_path)

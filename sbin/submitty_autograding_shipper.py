@@ -179,8 +179,8 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             queue_obj["which_machine"] = which_machine
             queue_obj["ship_time"] = dateutils.write_submitty_date(microseconds=True)
 
-        is_generated_output = queue_obj['generated_output']
-        autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade)
+        is_generate_output = queue_obj.get('generate_output',False)
+        autograding_zip_tmp,submission_zip_tmp = packer_unpacker.prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_directory,next_to_grade,is_generate_output)
         fully_qualified_domain_name = socket.getfqdn()
         servername_workername = "{0}_{1}".format(fully_qualified_domain_name, address)
         autograding_zip = os.path.join(SUBMITTY_DATA_DIR,"autograding_TODO",servername_workername+"_"+which_untrusted+"_autograding.zip")
@@ -235,8 +235,11 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    if not next_to_grade:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    else:
+        item_name = ""
     is_batch = "regrade" in obj and obj["regrade"]
     grade_items_logging.log_message(JOB_ID, jobname=item_name, which_untrusted=which_untrusted,
                                     is_batch=is_batch, message="Prepared job for " + which_machine)
@@ -249,8 +252,13 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     # variables needed for logging
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    is_generate_output = obj.get('generate_output',False)
+    if not is_generate_output:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    else: 
+        item_name = ""
+        
     is_batch = "regrade" in obj and obj["regrade"]
 
     # verify the DAEMON_USER is running this script
