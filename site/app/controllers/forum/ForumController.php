@@ -487,7 +487,7 @@ class ForumController extends AbstractController{
         if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildNewCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->getOutput()->renderJson(['error' => 'Thread is locked']);
             return;
         }
