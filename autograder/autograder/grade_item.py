@@ -591,6 +591,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     with open(os.path.join(tmp_logs,"output_generator_log.txt"), 'w') as logfile:
         for testcase_num in range(1, len(my_testcases)+1):
+            solution_commands = complete_config_obj["testcases"][testcase_num-1].['solution_containers'][0]["commands"]
+            if not solution_commands:
+                continue
             testcase_folder = os.path.join(tmp_work_random_output, "test{:02}".format(testcase_num))
             random_input_testcase_folder = os.path.join(tmp_work, "random_input", "test{:02}".format(testcase_num))
             os.makedirs(testcase_folder)
@@ -601,6 +604,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             
             # copy test input into testcase folder
             copy_contents_into(job_id,test_input_path,testcase_folder,tmp_logs)
+            # TODO: Make use of other files except txt files 
             pattern_copy("random_input_to_runner",["*.txt"],random_input_testcase_folder,testcase_folder,tmp_logs)
             
             # copy run.out to the current directory
