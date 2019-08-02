@@ -766,8 +766,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
 
-    patterns_work_to_random_output = complete_config_obj["autograding"]["work_to_random_output"]
-    pattern_copy("work_to_random_output", patterns_work_to_random_output,tmp_work, tmp_results, tmp_logs)
+    #patterns_work_to_random_output = complete_config_obj["autograding"]["work_to_random_output"]
+    pattern_copy("work_to_random_output", ['random_output/test*/*.txt',], tmp_work, tmp_results, tmp_logs)
 
     if ("work_to_public" in complete_config_obj["autograding"] and
         len(complete_config_obj["autograding"]["work_to_public"]) > 0):
