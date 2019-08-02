@@ -49,6 +49,8 @@ jobs:
         - pip3 install tzlocal
         - pip3 install paramiko
         - pip3 install psutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
       script: skip
     - <<: *00-cache
       php: 7.3
@@ -109,6 +111,8 @@ jobs:
         - pip3 install -U pip
         - pip3 install tzlocal
         - pip3 install sqlalchemy
+        - pip3 install jsonschema
+        - pip3 install jsonref
       script:
         - pushd python_submitty_utils
         - python3 setup.py test
@@ -172,6 +176,8 @@ jobs:
         - pip3 install sqlalchemy
         - pip3 install pylint_runner
         - pip3 install python-dateutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
         - pip3 install selenium
         - pip3 install pause
         - pip3 install paramiko
@@ -275,6 +281,8 @@ jobs:
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
         - pip3 install paramiko
         - pip3 install psycopg2-binary
         - pip3 install sqlalchemy
