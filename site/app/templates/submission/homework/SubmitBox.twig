@@ -518,10 +518,10 @@
         if (is_pdf) {
             submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
-
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
+                {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 {{ highest_version }},
                 {{ max_submissions }},
@@ -540,6 +540,7 @@
         }
         else {
             handleSubmission({{ late_days_use }},
+                {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 highest_version,
                 {{ max_submissions }},
