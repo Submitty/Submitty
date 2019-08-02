@@ -464,11 +464,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     os.chdir(tmp_work)
 
-    #random_input_tmp_work = os.path.join(tmp_work,"random_input")
-    #os.mkdir(random_input_tmp_work)
-
     with open(os.path.join(tmp_logs,"input_generator_log.txt"), 'w') as logfile:
         for testcase_num in range(1, len(my_testcases)+1):
+            input_generation_commands = complete_config_obj["testcases"][testcase_num-1].get('input_generation_commands',None)
+            if not input_generation_commands:
+                continue
             random_input_testcase_folder = os.path.join(tmp_work,"random_input", "test{:02}".format(testcase_num))
 
             os.makedirs(random_input_testcase_folder)
@@ -762,12 +762,8 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
 
-    try:
-        patterns_work_to_random_output = complete_config_obj["autograding"]["work_to_random_output"]
-        pattern_copy("work_to_random_output", patterns_work_to_random_output, tmp_results, tmp_logs)
-    except:
-        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-            print ("Sorry this is not working")
+    patterns_work_to_random_output = complete_config_obj["autograding"]["work_to_random_output"]
+    pattern_copy("work_to_random_output", patterns_work_to_random_output,tmp_work, tmp_results, tmp_logs)
 
     if ("work_to_public" in complete_config_obj["autograding"] and
         len(complete_config_obj["autograding"]["work_to_public"]) > 0):
