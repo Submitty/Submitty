@@ -1311,7 +1311,7 @@ class SubmissionController extends AbstractController {
             $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}";
         }
 
-        $return $this->uploadResult($message);
+        return $this->uploadResult($message);
     }
 
     private function uploadResult($message, $success = true) {
