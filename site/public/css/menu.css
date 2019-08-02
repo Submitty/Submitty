@@ -97,6 +97,8 @@
     font-weight: bold;
     border-radius: 4px;
     height: 40px;
+    display: flex;
+    align-items: center;
 }
 
 @media (min-width: 541px) {
