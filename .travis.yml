@@ -222,18 +222,22 @@ jobs:
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
         - SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
-        - python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        - sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        - pushd /tmp
         - git clone http://instructor:instructor@localhost/git/${SEMESTER}/sample/open_homework/instructor open_homework
         - cd open_homework
         - touch test.txt
         - git add .
         - git commit -m "Add test.txt"
         - git push
+        - git pull
+        - cd ..
         - set +e
         - git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor
         - EXIT_CODE=$?
         - set -e
         - test ${EXIT_CODE} -ne 0
+        - popd
     - <<: *03-e2e
       php: 7.3
       if: branch = master OR type = pull_request
