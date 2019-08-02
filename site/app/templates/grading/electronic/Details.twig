@@ -107,7 +107,7 @@
             {% for section in sections %}
                 {# Section heading #}
                 <tbody>
-                    <tr class="info persist-header">
+                    <tr class="info">
                         <td colspan="{{ columns|length }}" style="text-align: center">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section.title }}
@@ -136,7 +136,7 @@
         {# /Sections #}
         {# Empty teams #}
         {% if gradeable.isTeamAssignment() and empty_teams|length > 0 %}
-            <tr class="info persist-header">
+            <tr class="info">
                 <td colspan="{{ columns|length }}" style="text-align: center">Empty Teams</td>
             </tr>
             <tbody>
