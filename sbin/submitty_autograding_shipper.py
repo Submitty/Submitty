@@ -387,7 +387,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
     except Exception as e:
         autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
         print (my_name, " ERROR attempting to remove grading file: ", grading_file, " exception=",str(e))
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, OB_ID, message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR attempting to remove grading file: " + grading_file + " exception=" + str(e))
 
 
 # ==================================================================================

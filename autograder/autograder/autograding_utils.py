@@ -187,11 +187,15 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
 #
 # ==================================================================================
 
-def add_all_permissions(folder):
-    add_permissions_recursive(folder,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+def add_all_permissions(path):
+    if os.path.isdir(path):
+        add_permissions_recursive(path,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    elif os.path.isfile(path):
+        add_permissions(path, stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
 
 def lock_down_folder_permissions(top_dir):
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
@@ -287,16 +291,18 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
-    if os.path.isfile(history_file_tmp) and is_test_environment:
+    if os.path.isfile(history_file_tmp) and not is_test_environment:
+
+        from . import CONFIG_PATH
         with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
             OPEN_JSON = json.load(open_file)
         DAEMON_UID = OPEN_JSON['daemon_uid']
 
-        shutil.move(history_file_tmp,history_file)
+        shutil.move(history_file_tmp, history_file)
         # fix permissions
         ta_group_id = os.stat(tmp_results).st_gid
-        os.chown(history_file,int(owner_uid),ta_group_id)
-        add_permissions(history_file,stat.S_IRGRP)
+        os.chown(history_file, int(DAEMON_UID),ta_group_id)
+        add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
 

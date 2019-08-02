@@ -34,7 +34,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
       self.verify_execution_status()
     except Exception as e:
       self.log_stack_trace(traceback.format_exc())
-      self.log("ERROR: Could not verify execution mode status.")
+      self.log_message("ERROR: Could not verify execution mode status.")
       return
 
     script = os.path.join(self.directory, script)

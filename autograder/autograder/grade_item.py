@@ -108,7 +108,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
 
-        validation_environment = jailed_sandbox.JailedSandbox(tmp_work, complete_config_obj, list(), None, working_directory, False)
+        validation_environment = jailed_sandbox.JailedSandbox(job_id, which_untrusted, tmp_work, is_vcs, is_batch_job, complete_config_obj, 
+                                                              dict(), working_directory, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
         # VALIDATION
         print ("====================================\nVALIDATION STARTS", file=overall_log)
         overall_log.flush()
@@ -132,21 +133,18 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         os.chdir(working_directory)
         autograding_utils.untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, tmp_work)
         autograding_utils.add_all_permissions(tmp_work)
-        subprocess.call(['ls', '-lR', '.'])
 
         # ARCHIVE
         print ("====================================\nARCHIVING STARTS", file=overall_log)
         overall_log.flush()
         for tc in testcases:
-            print('archival')
             tc.setup_for_archival(overall_log)
-        print('begin big archive')
+
         try:
             autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
                                                   gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
         except Exception as e:
             traceback.print_exc()
-        print('big archive')
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
     

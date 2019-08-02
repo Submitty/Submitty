@@ -168,12 +168,17 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
     tmp_submission = os.path.join(tmp,"TMP_SUBMISSION")
     os.mkdir(tmp_submission)
 
-    copytree_if_exists(provided_code_path,os.path.join(tmp_autograding,"provided_code"))
-    copytree_if_exists(instructor_solution_path,os.path.join(tmp_autograding,"instructor_solution"))
-    copytree_if_exists(test_input_path,os.path.join(tmp_autograding,"test_input"))
-    copytree_if_exists(test_output_path,os.path.join(tmp_autograding,"test_output"))
-    copytree_if_exists(custom_validation_code_path,os.path.join(tmp_autograding,"custom_validation_code"))
-    copytree_if_exists(bin_path,os.path.join(tmp_autograding,"bin"))
+    copytree_if_exists(provided_code_path, os.path.join(tmp_autograding,"provided_code"))
+    copytree_if_exists(instructor_solution_path, os.path.join(tmp_autograding,"instructor_solution"))
+    copytree_if_exists(test_input_path, os.path.join(tmp_autograding,"test_input"))
+    copytree_if_exists(test_output_path, os.path.join(tmp_autograding,"test_output"))
+    copytree_if_exists(custom_validation_code_path, os.path.join(tmp_autograding,"custom_validation_code"))
+    copytree_if_exists(bin_path, os.path.join(tmp_autograding,"bin"))
+    # Copy the default submitty_router into bin.
+    router_path = os.path.join(SUBMITTY_INSTALL_DIR, "src", 'grading','python','submitty_router.py')
+    shutil.copy(router_path, os.path.join(tmp_autograding,"bin"))
+
+
     shutil.copy(form_json_config,os.path.join(tmp_autograding,"form.json"))
     shutil.copy(complete_config,os.path.join(tmp_autograding,"complete_config.json"))
 

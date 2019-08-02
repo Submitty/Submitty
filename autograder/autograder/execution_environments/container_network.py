@@ -4,6 +4,7 @@ import subprocess
 import traceback
 import time
 from pwd import getpwnam
+import shutil
 
 from submitty_utils import dateutils
 from . import secure_execution_environment
@@ -24,15 +25,17 @@ class Container():
 
     # This will be populated later
     self.container_id = None
-    self.network = None
     self.process = None
     self.return_code = None
     self.log_function = log_function
 
-    if self.name == 'router' and container_info.get('import_default_router', False):
-      self.import_router = True
+    
+    need_router = container_info.get('import_default_router', False)
+    if self.name == 'router' and need_router:
+        self.import_router = True
     else:
-      self.import_router = False
+        self.import_router = False
+
 
   def create(self, execution_script, arguments, more_than_one):
 
@@ -53,36 +56,26 @@ class Container():
                                                 '-w', self.directory,
                                                 '--hostname', self.name,
                                                 '--name', self.full_name,
-                                                self.image,
+                                                self.image, 
                                                 execution_script]
                                                 + arguments
                                                 + conatiner_name_argument
                                               ).decode('utf8').strip()
-    self.network = 'none'
     dockerlaunch_done = dateutils.get_current_time()
     self.log_function(f'docker container {this_container} created')
     self.container_id = this_container
 
 
   def start(self, logfile):
-    asdf = ' '.join(['docker', 'start', '-i', '--attach', self.container_id])
     self.process = subprocess.Popen(['docker', 'start', '-i', '--attach', self.container_id], stdout=logfile,stdin=subprocess.PIPE)
 
 
-  def cleanup(self):
-    print('cleaning up')
+  def cleanup_container(self):
     self.process.wait()
     self.return_code = self.process.returncode
 
     subprocess.call(['docker', 'rm', '-f', self.container_id])
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container_id} destroyed')
-
-    if self.network != 'none':
-      try:
-        subprocess.call(['docker', 'network', 'rm', self.network])
-        self.log_function(f'{dateutils.get_current_time()} docker network {self.network} destroyed')
-      except Exception as e:
-        pass
 
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
@@ -110,6 +103,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     self.dispatcher_actions = testcase_info.get('dispatcher_actions', list())
 
     self.single_port_per_container = testcase_info.get('single_port_per_container', False)
+    self.networks = list()
 
 
   ###########################################################
@@ -179,8 +173,9 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
 
     for container in self.containers:
-        container.network = network_name
-        subprocess.check_output(['docker', 'network', 'connect', '--alias', container.name, network_name, container.full_name]).decode('utf8').strip()
+      subprocess.check_output(['docker', 'network', 'connect', '--alias', container.name, network_name, container.full_name]).decode('utf8').strip()
+
+    self.networks.append(network_name)
 
 
   def network_containers_with_router(self):
@@ -188,17 +183,17 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     router_name = f"{self.untrusted_user}_router"
     router_connections = dict()
 
-    #TODO SORT
     for container in self.containers:
       network_name = f"{container.full_name}_network"
 
-      if container.full_name == 'router':
+      if container.name == 'router':
         continue
 
-      container.network = network_name
-      actual_name  = '{0}_Actual'.format(container.full_name)
-      subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', container.network]).decode('utf8').strip()
-      subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, container.network, container.full_name]).decode('utf8').strip()
+      self.networks.append(network_name)
+
+      actual_name  = '{0}_Actual'.format(container.name)
+      subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
+      subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, network_name, container.full_name]).decode('utf8').strip()
 
       #The router pretends to be all dockers on this network.
       aliases = []
@@ -216,8 +211,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     
     # Connect the router to all networks.
     for startpoint, endpoints in router_connections.items():
-      network_name = f"{self.untrusted_user}_{startpoint}_network"
-      print(network_name)
+      full_startpoint_name = f'{self.untrusted_user}_{startpoint}'
+      network_name = f"{full_startpoint_name}_network"
 
       aliases = []
       for endpoint in endpoints:
@@ -226,10 +221,15 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         aliases.append('--alias')
         aliases.append(endpoint)
 
-      lis = ['docker', 'network', 'connect'] + aliases + [network_name, router_name]
-      print(' '.join(lis))
       subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
 
+  def cleanup_networks(self):
+    for network in self.networks:
+      try:
+        subprocess.call(['docker', 'network', 'rm', network])
+        self.log_message(f'{dateutils.get_current_time()} docker network {network} destroyed')
+      except Exception as e:
+        self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
 
   def create_knownhosts_txt(self):
     tcp_connection_list = list()
@@ -239,43 +239,43 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     sorted_containers = sorted(self.containers, key=lambda x: x.name)
     for container in sorted_containers:
-        if self.single_port_per_container:
-            tcp_connection_list.append([container.name, current_tcp_port])
-            udp_connection_list.append([container.name, current_udp_port])
-            current_tcp_port += 1
-            current_udp_port += 1  
-        else:
-            for connected_machine in container.outgoing_connections:
-                if connected_machine == container.name:
-                    continue
+      if self.single_port_per_container:
+        tcp_connection_list.append([container.name, current_tcp_port])
+        udp_connection_list.append([container.name, current_udp_port])
+        current_tcp_port += 1
+        current_udp_port += 1  
+      else:
+        for connected_machine in container.outgoing_connections:
+          if connected_machine == container.name:
+              continue
 
-                tcp_connection_list.append([container.name, connected_machine,  current_tcp_port])
-                udp_connection_list.append([container.name, connected_machine,  current_udp_port])
-                current_tcp_port += 1
-                current_udp_port += 1
+          tcp_connection_list.append([container.name, connected_machine,  current_tcp_port])
+          udp_connection_list.append([container.name, connected_machine,  current_udp_port])
+          current_tcp_port += 1
+          current_udp_port += 1
 
     #writing complete knownhosts csvs to input directory'
     networked_containers = self.get_standard_containers()
     router = self.get_router()
 
     if router is not None:
-        networked_containers.append(router)
+      networked_containers.append(router)
 
     sorted_networked_containers = sorted(networked_containers, key=lambda x: x.name)
     for container in sorted_networked_containers:
-        knownhosts_location = os.path.join(container.directory, 'knownhosts_tcp.txt')
-        with open(knownhosts_location, 'w') as outfile:
-            print(f'WRITING KNOWNHOSTS {knownhosts_location}')
-            print(tcp_connection_list)
-            for tup in tcp_connection_list:
-                outfile.write(" ".join(map(str, tup)) + '\n')
-                outfile.flush()
+      knownhosts_location = os.path.join(container.directory, 'knownhosts_tcp.txt')
+      with open(knownhosts_location, 'w') as outfile:
+        for tup in tcp_connection_list:
+          outfile.write(" ".join(map(str, tup)) + '\n')
+          outfile.flush()
+      autograding_utils.add_all_permissions(knownhosts_location)
 
-        knownhosts_location = os.path.join(container.directory, 'knownhosts_udp.txt')
-        with open(knownhosts_location, 'w') as outfile:
-            for tup in udp_connection_list:
-                outfile.write(" ".join(map(str, tup)) + '\n')
-                outfile.flush()
+      knownhosts_location = os.path.join(container.directory, 'knownhosts_udp.txt')
+      with open(knownhosts_location, 'w') as outfile:
+        for tup in udp_connection_list:
+          outfile.write(" ".join(map(str, tup)) + '\n')
+          outfile.flush()
+      autograding_utils.add_all_permissions(knownhosts_location)
 
 
   ###########################################################
@@ -358,13 +358,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     for container in self.containers:
       self._setup_single_directory_for_execution(container.directory, testcase_dependencies)
 
-      if container.import_default_router:
-          if self.is_test_environment:
-              self.log_message("ERROR: The default router should not be used in a test environment, please include a custom router.")
-          else:
-              router_path = os.path.join(self.SUBMITTY_INSTALL_DIR, "src", 'grading','python','submitty_router.py')
-              self.log_message(f"COPYING:\n\t{router_path}\n\t{container.directory}")
-              shutil.copy(router_path, container.directory)
+      if container.import_router:
+        router_path = os.path.join(self.tmp_autograding, "bin", "submitty_router.py")
+        self.log_message(f"COPYING:\n\t{router_path}\n\t{container.directory}")
+        shutil.copy(router_path, container.directory)
+        autograding_utils.add_all_permissions(container.directory)
+
     
     self._run_pre_commands()
 
@@ -389,42 +388,62 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
     if cwd is None:
       cwd = self.directory
-    self.create_containers(script, arguments)
-    self.network_containers()
 
-    router = self.get_router()
-    # First start the router a second before any other container.
-    if router is not None:
-      router.start(logfile)
-      time.sleep(1)
+    try:
+      self.verify_execution_status()
+    except Exception as e:
+      self.log_stack_trace(traceback.format_exc())
+      self.log_message("ERROR: Could not verify execution mode status.")
+      return
 
-    # Next start any server containers
-    for container in self.get_server_containers():
-      container.start(logfile)
+    try:
+      self.create_containers(script, arguments)
+      self.network_containers()
+    except Exception as e:
+      self.log_message('ERROR: Could not create or network containers. See stack trace output for more details.')
+      self.log_stack_trace(traceback.format_exc())
 
-    # Finally, start the standard (assignment) containers
-    for container in self.get_standard_containers():
-      container.start(logfile)
+    try:
+      router = self.get_router()
+      # First start the router a second before any other container.
+      if router is not None:
+        router.start(logfile)
+        time.sleep(1)
 
-    # Deliver dispatcher actions
-    self.process_dispatcher_actions()
+      # Next start any server containers
+      for container in self.get_server_containers():
+        container.start(logfile)
 
-    # When we are done with the dispatcher actions, keep running until all
-    # student process' finish.
-    self.wait_until_standard_containers_finish()
+      # Finally, start the standard (assignment) containers
+      for container in self.get_standard_containers():
+        container.start(logfile)
 
-    # Now stop any unfinished router/server containers, 
-    # and cleanup after all containers.
-    for container in self.containers:
-      container.cleanup()
+      # Deliver dispatcher actions
+      self.process_dispatcher_actions()
 
-    # A zero return code means execution went smoothly
-    return_code = 0
-    # Check the return codes of the standard (non server/router) containers
-    # to see if they finished properly. Note that this return code is yielded by
-    # main runner/validator/compiler.
-    for container in self.get_standard_containers():
-      if container.return_code != 0:
-        return_code = container.return_code
-        break
+      # When we are done with the dispatcher actions, keep running until all
+      # student process' finish.
+      self.wait_until_standard_containers_finish()
+
+       # A zero return code means execution went smoothly
+      return_code = 0
+      # Check the return codes of the standard (non server/router) containers
+      # to see if they finished properly. Note that this return code is yielded by
+      # main runner/validator/compiler.
+      for container in self.get_standard_containers():
+        if container.return_code != 0:
+          return_code = container.return_code
+          break
+    except Exception as e:
+      self.log_message('ERROR grading using docker. See stack trace output for more details.')
+      self.log_stack_trace(traceback.format_exc())
+      return_code = -1
+    finally:
+      # Now stop any unfinished router/server containers, 
+      # and cleanup after all containers.
+      for container in self.containers:
+        container.cleanup_container()
+
+      self.cleanup_networks()
+
     return return_code

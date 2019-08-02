@@ -27,13 +27,12 @@ class Testcase():
     self.testcase_dependencies = previous_testcases.copy()
     self.submission_string = submission_string
     self.dependencies = previous_testcases
-    # if complete_config_obj.get("autograding_method", "") == "docker":
-    #   self.secure_environment = ContainerNetwork(self.parent_directory, self.testcase_directory, self.log, testcase_info)
-    # else:
-    self.secure_environment = container_network.ContainerNetwork(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+    if complete_config_obj.get("autograding_method", "") == "docker":
+      self.secure_environment = container_network.ContainerNetwork(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
                                                            testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
-    # self.secure_environment = jailed_sandbox.JailedSandbox(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
-    #                                                        testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
+    else:
+      self.secure_environment = jailed_sandbox.JailedSandbox(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+                                                             testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
 
   def _run_execution(self):
     self.secure_environment.setup_for_execution_testcase(self.dependencies)
@@ -70,29 +69,29 @@ class Testcase():
   def _run_compilation(self):
     self.secure_environment.setup_for_compilation_testcase()
     with open(os.path.join(self.secure_environment.tmp_logs,"compilation_log.txt"), 'a') as logfile:
-        arguments = [
-          self.queue_obj['gradeable'],
-          self.queue_obj['who'],
-          str(self.queue_obj['version']),
-          self.submission_string,
-          '--testcase', str(self.number)
-        ]
-        
-        try:
-            success = self.secure_environment.execute(self.untrusted_user, 'my_compile.out', arguments, logfile)
-        except Exception as e:
-            success = -1
-            self.secure_environment.log_message("ERROR thrown by main compile. See traces entry for more details.")
-            self.secure_environment.log_stack_trace(traceback.format_exc())
-        finally:
-            self.secure_environment.lockdown_directory_after_execution()
-        return success
+      arguments = [
+        self.queue_obj['gradeable'],
+        self.queue_obj['who'],
+        str(self.queue_obj['version']),
+        self.submission_string,
+        '--testcase', str(self.number)
+      ]
+      
+      try:
+        success = self.secure_environment.execute(self.untrusted_user, 'my_compile.out', arguments, logfile)
+      except Exception as e:
+        success = -1
+        self.secure_environment.log_message("ERROR thrown by main compile. See traces entry for more details.")
+        self.secure_environment.log_stack_trace(traceback.format_exc())
+      finally:
+        self.secure_environment.lockdown_directory_after_execution()
+      return success
 
   def execute(self):
     if self.type in ['Compilation', 'FileCheck']:
-        success = self._run_compilation()
+      success = self._run_compilation()
     else:
-        success = self._run_execution()
+      success = self._run_execution()
     
     if success == 0:
       print(self.machine, self.untrusted_user, "{0} OK".format(self.type.upper()))
