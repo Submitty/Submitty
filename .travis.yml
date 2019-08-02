@@ -228,8 +228,13 @@ jobs:
         - cd open_homework
         - touch test.txt
         - git add .
-        - git commit -m "Add test.txt"
+        - git commit -m "First commit"
         - git push
+        - touch test2.txt
+        - git add .
+        - git commit -m "Second commit"
+        - git push
+        - git reset --hard HEAD~1
         - git pull
         - cd ..
         - set +e
