@@ -143,7 +143,6 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
   }
 }
 
-
 void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   //check if docker is globally enabled.
@@ -191,107 +190,114 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
     assert(!(this_testcase["single_port_per_container"] && this_testcase["use_router"]));
 
-    nlohmann::json commands = nlohmann::json::array();
-    // if "command" exists in whole_config, we must wrap it in a container.
-    bool found_commands = false;
-    if(this_testcase.find("command") != this_testcase.end()){
-      found_commands = true;
-      if (this_testcase["command"].is_array()){
-        commands = this_testcase["command"];
-      }
-      else{
-        commands.push_back(this_testcase["command"]);
-      }
+    
+    // if "command" or "solution_commands" exists in whole_config, we must wrap it in a container.
+    for(std::pair<std::string, std::string> option : std::vector<std::pair<std::string, std::string>>{ 
+                                                       std::pair<std::string, std::string>{"command", "containers"}, 
+                                                       std::pair<std::string, std::string>{"solution_commands", "solution_containers"}
+                                                     }){
+      nlohmann::json commands = nlohmann::json::array();
+      std::string command_type = option.first;
+      std::string container_type = option.second;
+      bool found_commands = false;
+      if(this_testcase.find(command_type) != this_testcase.end()){
+        found_commands = true;
+        if (this_testcase[command_type].is_array()){
+          commands = this_testcase[command_type];
+        }
+        else{
+          commands.push_back(this_testcase[command_type]);
+        }
 
-      this_testcase.erase("command");
-    }
-
-    assert (this_testcase["containers"].is_null() || !found_commands);
-
-    if(!this_testcase["containers"].is_null()){
-      assert(this_testcase["containers"].is_array());
-    }else{
-      this_testcase["containers"] = nlohmann::json::array();
-      //commands may have to be a json::array();
-      this_testcase["containers"][0] = nlohmann::json::object();
-      this_testcase["containers"][0]["commands"] = commands;
-    }
-
-    //get the testcase type
-    std::string testcase_type = this_testcase.value("type","Execution");
-    if (testcase_type == "Compilation"){
-      assert(this_testcase["containers"].size() == 1);
-    }
-
-    if(this_testcase["containers"].size() > 1){
-      assert(whole_config["autograding_method"] == "docker");
-    }
-
-    int router_container = -1;
-    bool found_non_server = false;
-
-    for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
-      if(this_testcase["containers"][container_num]["commands"].is_string()){
-        std::string this_command = this_testcase["containers"][container_num].value("commands", "");
-        this_testcase["containers"][container_num].erase("commands");
-        this_testcase["containers"][container_num]["commands"] = nlohmann::json::array();
-        this_testcase["containers"][container_num]["commands"].push_back(this_command);
+        this_testcase.erase(command_type);
       }
 
-      if(!this_testcase["containers"][container_num]["commands"].is_array()){
-        this_testcase["containers"][container_num]["commands"] = nlohmann::json::array();
-      }
+      assert (this_testcase[container_type].is_null() || !found_commands);
 
-      if(this_testcase["containers"][container_num]["container_name"].is_null()){
-        this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num);
-      }
-
-      if (this_testcase["containers"][container_num]["container_name"] == "router"){
-        assert(router_container == -1);
-        router_container = container_num;
-      }
-
-      if(!this_testcase["containers"][container_num]["server"].is_boolean()){
-        this_testcase["containers"][container_num]["server"] = false;
-      }
-
-      if(this_testcase["containers"][container_num]["server"] == true){
-        assert(this_testcase["containers"][container_num]["commands"].size() == 0);
+      if(!this_testcase[container_type].is_null()){
+        assert(this_testcase[container_type].is_array());
       }else{
-        found_non_server = true;
+        this_testcase[container_type] = nlohmann::json::array();
+        //commands may have to be a json::array();
+        this_testcase[container_type][0] = nlohmann::json::object();
+        this_testcase[container_type][0]["commands"] = commands;
       }
 
-      std::string container_name = this_testcase["containers"][container_num]["container_name"];
-
-      assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
-
-      if(this_testcase["containers"][container_num]["outgoing_connections"].is_null()){
-        this_testcase["containers"][container_num]["outgoing_connections"] = nlohmann::json::array();
+      //get the testcase type
+      std::string testcase_type = this_testcase.value("type","Execution");
+      if (testcase_type == "Compilation"){
+        assert(this_testcase[container_type].size() == 1);
       }
 
-      if(this_testcase["containers"][container_num]["container_image"].is_null()){
-        //TODO: store the default system image somewhere and fill it in here.
-        this_testcase["containers"][container_num]["container_image"] = whole_config["container_options"]["container_image"];
+      if(this_testcase[container_type].size() > 1){
+        assert(whole_config["autograding_method"] == "docker");
       }
-    }
 
-    if(this_testcase["use_router"] && router_container == -1){
-      nlohmann::json insert_router = nlohmann::json::object();
-      insert_router["outgoing_connections"] = nlohmann::json::array();
-      insert_router["commands"] = nlohmann::json::array();
-      insert_router["commands"].push_back("python3 submitty_router.py");
-      insert_router["container_name"] = "router";
-      insert_router["import_default_router"] = true;
-      insert_router["container_image"] = "ubuntu:custom";
-      insert_router["server"] = false;
-      this_testcase["containers"].push_back(insert_router);
-    }
-    //We now always add the default router in case of instructor overriding
-    else if(this_testcase["use_router"] && router_container != -1){
-      this_testcase["containers"][router_container]["import_default_router"] = true;
-    }
+      int router_container = -1;
+      bool found_non_server = false;
 
-    assert(found_non_server == true);
+      for (int container_num = 0; container_num < this_testcase[container_type].size(); container_num++){
+        if(this_testcase[container_type][container_num]["commands"].is_string()){
+          std::string this_command = this_testcase[container_type][container_num].value("commands", "");
+          this_testcase[container_type][container_num].erase("commands");
+          this_testcase[container_type][container_num]["commands"] = nlohmann::json::array();
+          this_testcase[container_type][container_num]["commands"].push_back(this_command);
+        }
+
+        if(!this_testcase[container_type][container_num]["commands"].is_array()){
+          this_testcase[container_type][container_num]["commands"] = nlohmann::json::array();
+        }
+
+        if(this_testcase[container_type][container_num]["container_name"].is_null()){
+          this_testcase[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
+        }
+
+        if (this_testcase[container_type][container_num]["container_name"] == "router"){
+          assert(router_container == -1);
+          router_container = container_num;
+        }
+
+        if(!this_testcase[container_type][container_num]["server"].is_boolean()){
+          this_testcase[container_type][container_num]["server"] = false;
+        }
+
+        if(this_testcase[container_type][container_num]["server"] == true){
+          assert(this_testcase[container_type][container_num]["commands"].size() == 0);
+        }else{
+          found_non_server = true;
+        }
+
+        std::string container_name = this_testcase[container_type][container_num]["container_name"];
+
+        assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
+
+        if(this_testcase[container_type][container_num]["outgoing_connections"].is_null()){
+          this_testcase[container_type][container_num]["outgoing_connections"] = nlohmann::json::array();
+        }
+
+        if(this_testcase[container_type][container_num]["container_image"].is_null()){
+          //TODO: store the default system image somewhere and fill it in here.
+          this_testcase[container_type][container_num]["container_image"] = whole_config["container_options"]["container_image"];
+        }
+      }
+
+      if(this_testcase["use_router"] && router_container == -1){
+        nlohmann::json insert_router = nlohmann::json::object();
+        insert_router["outgoing_connections"] = nlohmann::json::array();
+        insert_router["commands"] = nlohmann::json::array();
+        insert_router["commands"].push_back("python3 submitty_router.py");
+        insert_router["container_name"] = "router";
+        insert_router["import_default_router"] = true;
+        insert_router["container_image"] = "ubuntu:custom";
+        insert_router["server"] = false;
+        this_testcase[container_type].push_back(insert_router);
+      }
+      //We now always add the default router in case of instructor overriding
+      else if(this_testcase["use_router"] && router_container != -1){
+        this_testcase[container_type][router_container]["import_default_router"] = true;
+      }
+      assert(found_non_server == true);
+    }
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
