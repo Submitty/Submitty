@@ -55,10 +55,6 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
   }
 
-  if (whole_config["autograding"].find("work_to_random_output") == whole_config["autograding"].end()){
-    whole_config["autograding"]["work_to_random_output"].push_back("random_output/test*/*.txt");
-  }
-
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
     whole_config["autograding"]["use_checkout_subdirectory"] = "";
   }
