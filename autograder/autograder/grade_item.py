@@ -122,14 +122,12 @@ def zip_my_directory(path,zipfilename):
             zipf.write(os.path.join(root,my_file),os.path.join(relpath,my_file))
     zipf.close()
 
-
 def unzip_this_file(zipfilename,path):
     if not os.path.exists(zipfilename):
         raise RuntimeError("ERROR: zip file does not exist '", zipfilename, "'")
     zip_ref = zipfile.ZipFile(zipfilename,'r')
     zip_ref.extractall(path)
     zip_ref.close()
-
 
 def allow_only_one_part(path, log_path=os.devnull):
     """
@@ -190,6 +188,14 @@ def remove_test_input_files(overall_log,test_input_path,testcase_folder):
                     print ("removing (likely) stale test_input file: ", my_file, file=f)
                     os.remove(my_file)
 
+def add_all_permissions(folder):
+    add_permissions_recursive(folder,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
+                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+def remove_read_permissions(top_dir):
+    os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
 
 def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untrusted):
 
@@ -370,10 +376,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             add_permissions(os.path.join(testcase_folder,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
             #untrusted_grant_rwx_access(which_untrusted, tmp_compilation)          
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
-            add_permissions_recursive(testcase_folder,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+            add_all_permissions(testcase_folder)
 
             if USE_DOCKER:
                 try:
@@ -431,22 +434,17 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     else:
         print (which_machine,which_untrusted,"COMPILATION FAILURE")
         grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="COMPILATION FAILURE")
-    add_permissions_recursive(tmp_compilation,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                      stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
-
+    
+    add_all_permissions(tmp_compilation)
 
     # return to the main tmp directory
     os.chdir(tmp)
 
-
-    # --------------------------------------------------------------------
-    # make the runner directory
-
+    # --------------------------------------------------------------------    
+    # RUN INPUT GENERATION
     with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        print ("====================================\nRUNNER STARTS", file=f)
-        
+        print ("====================================\nINPUT GENERATION STARTS", file=f)
+    
     tmp_work = os.path.join(tmp,"TMP_WORK")
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
@@ -464,6 +462,60 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     os.mkdir(tmp_work_compiled)
     os.mkdir(tmp_work_checkout)
 
+    os.chdir(tmp_work)
+
+    with open(os.path.join(tmp_logs,"input_generator_log.txt"), 'w') as logfile:
+        for testcase_num in range(1, len(my_testcases)+1):
+            input_generation_commands = complete_config_obj["testcases"][testcase_num-1].get('input_generation_commands',None)
+            if not input_generation_commands:
+                continue
+            random_input_testcase_folder = os.path.join(tmp_work,"random_input", "test{:02}".format(testcase_num))
+
+            os.makedirs(random_input_testcase_folder)
+            os.chdir(random_input_testcase_folder)
+            
+            # copy any instructor provided solution code files to testcase folder
+            copy_contents_into(job_id,instructor_solution_path,random_input_testcase_folder,tmp_logs)
+            
+            # copy run.out to the current directory
+            shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(random_input_testcase_folder,"my_runner.out"))
+            add_permissions(os.path.join(random_input_testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
+            untrusted_grant_rwx_access(which_untrusted, random_input_testcase_folder)
+            add_all_permissions(random_input_testcase_folder)
+            
+            input_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                which_untrusted,
+                                                os.path.join(random_input_testcase_folder,"my_runner.out"),
+                                                queue_obj["gradeable"],
+                                                queue_obj["who"],
+                                                str(queue_obj["version"]),
+                                                submission_string,
+                                                '--testcase', str(testcase_num),
+                                                '--generation_type',str('input')],
+                                                stdout=logfile, 
+                                                cwd=random_input_testcase_folder)
+            # remove the compilation program
+            untrusted_grant_rwx_access(which_untrusted, random_input_testcase_folder)
+            os.remove(os.path.join(random_input_testcase_folder,"my_runner.out"))
+
+            if input_generator_success == 0:
+                print (which_machine,which_untrusted, f"INPUT GENERATOR OK TESTCASE {testcase_num}")
+            else:
+                print (which_machine,which_untrusted, f"INPUT GENERATOR FAILURE TESTCASE {testcase_num}")
+                grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="INPUT GENERATOR FAILURE")
+
+    # return to the main tmp directory
+    os.chdir(tmp_work)
+    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
+
+    # --------------------------------------------------------------------
+
+    # --------------------------------------------------------------------
+    # make the runner directory
+
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nRUNNER STARTS", file=f)
+        
     os.chdir(tmp_work)
 
     # move all executable files from the compilation directory to the main tmp directory
@@ -499,7 +551,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
-    # copy runner.out to the current directory
+    # copy run.out to the current directory
     shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(tmp_work,"my_runner.out"))
 
     #set the appropriate permissions for the newly created directories 
@@ -531,14 +583,64 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
         print (which_machine,which_untrusted, "RUNNER FAILURE")
         grade_items_logging.log_message(job_id, is_batch_job, which_untrusted, item_name, message="RUNNER FAILURE")
 
-    add_permissions_recursive(tmp_work,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
-    add_permissions_recursive(tmp_compilation,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                          stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
+    # RUN SOLUTION RUNNER
+    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+        print ("====================================\nRUNNER SOLUTION STARTS", file=f)
+    tmp_work_random_output = os.path.join(tmp_work,"random_output")
+    os.mkdir(tmp_work_random_output)
+
+    with open(os.path.join(tmp_logs,"output_generator_log.txt"), 'w') as logfile:
+        for testcase_num in range(1, len(my_testcases)+1):
+            if not 'solution_containers' in complete_config_obj["testcases"][testcase_num-1]:
+                continue
+
+            solution_commands = complete_config_obj["testcases"][testcase_num-1]['solution_containers'][0]["commands"]
+
+            if len(solution_commands) == 0:
+                continue
+
+            testcase_folder = os.path.join(tmp_work_random_output, "test{:02}".format(testcase_num))
+            random_input_testcase_folder = os.path.join(tmp_work, "random_input", "test{:02}".format(testcase_num))
+            os.makedirs(testcase_folder)
+            os.chdir(testcase_folder)
+            
+            # copy any instructor provided solution code files to testcase folder
+            copy_contents_into(job_id,instructor_solution_path,testcase_folder,tmp_logs)
+            
+            # copy test input into testcase folder
+            copy_contents_into(job_id,test_input_path,testcase_folder,tmp_logs)
+            # TODO: Make use of other files except txt files 
+            pattern_copy("random_input_to_runner",["*.txt"],random_input_testcase_folder,testcase_folder,tmp_logs)
+            
+            # copy run.out to the current directory
+            shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(testcase_folder,"my_runner.out"))
+            # TODO: These permissions are clobbered
+            add_permissions(os.path.join(testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)          
+            add_all_permissions(testcase_folder)
+            output_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                which_untrusted,
+                                                os.path.join(testcase_folder,"my_runner.out"),
+                                                queue_obj["gradeable"],
+                                                queue_obj["who"],
+                                                str(queue_obj["version"]),
+                                                submission_string,
+                                                '--testcase', str(testcase_num),
+                                                '--generation_type',str('output')],
+                                                stdout=logfile, 
+                                                cwd=testcase_folder)
+            # remove the compilation program
+            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            os.remove(os.path.join(testcase_folder,"my_runner.out"))
+
+            if output_generator_success == 0:
+                print (which_machine,which_untrusted, f"OUTPUT GENERATION OK TESTCASE {testcase_num}")
+            else:
+                print (which_machine,which_untrusted, f"OUTPUT GENERATION FAILURE TESTCASE {testcase_num}")
+                grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="OUTPUT GENERATION FAILURE")
+
+    # return to the main tmp directory
+    os.chdir(tmp_work)
+    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     # --------------------------------------------------------------------
     # RUN VALIDATOR
@@ -646,13 +748,37 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # remove the test_input directory, so we don't archive it!
     shutil.rmtree(os.path.join(tmp_work,"test_input"))
 
+    # remove the test_output directory, so we don't archive it!
+    shutil.rmtree(os.path.join(tmp_work,"test_output"))
+
     # loop over the test case directories, and remove any files that are also in the test_input folder
     for testcase_num in range(1, len(my_testcases)+1):
         testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
         remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
+        
+        random_input_testcase_folder = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
+        if os.path.exists(random_input_testcase_folder):
+            remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_testcase_folder,testcase_folder)
+
+    # loop over the random output test case directories, and remove any files that are also in the test_input folder
+    for testcase_num in range(1, len(my_testcases)+1):
+        testcase_folder = os.path.join(tmp_work,"random_output", "test{:02}".format(testcase_num))
+
+        if not os.path.exists(testcase_folder):
+            continue
+
+        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
+        
+        random_input_testcase_folder = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
+        if os.path.exists(random_input_testcase_folder):
+            remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_testcase_folder,testcase_folder)
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
+
+    #patterns_work_to_random_output = complete_config_obj["autograding"]["work_to_random_output"]
+    if os.path.exists(os.path.join(tmp_work, 'random_output')):
+        pattern_copy("work_to_random_output", [os.path.join(tmp_work, 'random_output', 'test*', '*.txt'),], tmp_work, tmp_results, tmp_logs)
 
     if ("work_to_public" in complete_config_obj["autograding"] and
         len(complete_config_obj["autograding"]["work_to_public"]) > 0):
