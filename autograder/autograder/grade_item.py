@@ -498,11 +498,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             untrusted_grant_rwx_access(which_untrusted, random_input_testcase_folder)
             os.remove(os.path.join(random_input_testcase_folder,"my_runner.out"))
 
-        if input_generator_success == 0:
-            print (which_machine,which_untrusted,"INPUT GENERATOR OK")
-        else:
-            print (which_machine,which_untrusted,"INPUT GENERATOR FAILURE")
-            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="INPUT GENERATOR FAILURE")
+            if input_generator_success == 0:
+                print (which_machine,which_untrusted, f"INPUT GENERATOR OK TESTCASE {testcase_num}")
+            else:
+                print (which_machine,which_untrusted, f"INPUT GENERATOR FAILURE TESTCASE {testcase_num}")
+                grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="INPUT GENERATOR FAILURE")
 
     # return to the main tmp directory
     os.chdir(tmp_work)
@@ -591,9 +591,14 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
 
     with open(os.path.join(tmp_logs,"output_generator_log.txt"), 'w') as logfile:
         for testcase_num in range(1, len(my_testcases)+1):
-            solution_commands = complete_config_obj["testcases"][testcase_num-1].['solution_containers'][0]["commands"]
-            if not solution_commands:
+            if not 'solution_containers' in complete_config_obj["testcases"][testcase_num-1]:
                 continue
+
+            solution_commands = complete_config_obj["testcases"][testcase_num-1]['solution_containers'][0]["commands"]
+
+            if len(solution_commands) == 0:
+                continue
+
             testcase_folder = os.path.join(tmp_work_random_output, "test{:02}".format(testcase_num))
             random_input_testcase_folder = os.path.join(tmp_work, "random_input", "test{:02}".format(testcase_num))
             os.makedirs(testcase_folder)
@@ -609,10 +614,9 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             
             # copy run.out to the current directory
             shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(testcase_folder,"my_runner.out"))
-            add_permissions(os.path.join(testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
-            untrusted_grant_rwx_access(which_untrusted, testcase_folder)
+            # TODO: These permissions are clobbered
+            add_permissions(os.path.join(testcase_folder,"my_runner.out"), stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IXOTH)          
             add_all_permissions(testcase_folder)
-
             output_generator_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                 which_untrusted,
                                                 os.path.join(testcase_folder,"my_runner.out"),
@@ -628,13 +632,11 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
             untrusted_grant_rwx_access(which_untrusted, testcase_folder)
             os.remove(os.path.join(testcase_folder,"my_runner.out"))
 
-        if output_generator_success == 0:
-            print (which_machine,which_untrusted,"OUTPUT GENERATION OK")
-        else:
-            print (which_machine,which_untrusted,"OUTPUT GENERATION FAILURE")
-            grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="OUTPUT GENERATION FAILURE")
-        add_all_permissions(tmp_work)
-        add_all_permissions(tmp_compilation)
+            if output_generator_success == 0:
+                print (which_machine,which_untrusted, f"OUTPUT GENERATION OK TESTCASE {testcase_num}")
+            else:
+                print (which_machine,which_untrusted, f"OUTPUT GENERATION FAILURE TESTCASE {testcase_num}")
+                grade_items_logging.log_message(job_id,is_batch_job,which_untrusted,item_name,message="OUTPUT GENERATION FAILURE")
 
     # return to the main tmp directory
     os.chdir(tmp_work)
@@ -752,22 +754,31 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # loop over the test case directories, and remove any files that are also in the test_input folder
     for testcase_num in range(1, len(my_testcases)+1):
         testcase_folder = os.path.join(tmp_work, "test{:02}".format(testcase_num))
-        random_input_testcase_folder = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
         remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
-        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_testcase_folder,testcase_folder)
+        
+        random_input_testcase_folder = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
+        if os.path.exists(random_input_testcase_folder):
+            remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_testcase_folder,testcase_folder)
 
     # loop over the random output test case directories, and remove any files that are also in the test_input folder
     for testcase_num in range(1, len(my_testcases)+1):
         testcase_folder = os.path.join(tmp_work,"random_output", "test{:02}".format(testcase_num))
-        random_input_testcase_folder = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
+
+        if not os.path.exists(testcase_folder):
+            continue
+
         remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),test_input_path,testcase_folder)
-        remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_testcase_folder,testcase_folder)
+        
+        random_input_testcase_folder = os.path.join(tmp_work,"random_input","test{:02}".format(testcase_num))
+        if os.path.exists(random_input_testcase_folder):
+            remove_test_input_files(os.path.join(tmp_logs,"overall.txt"),random_input_testcase_folder,testcase_folder)
 
     patterns_work_to_details = complete_config_obj["autograding"]["work_to_details"]
     pattern_copy("work_to_details",patterns_work_to_details,tmp_work,os.path.join(tmp_results,"details"),tmp_logs)
 
     #patterns_work_to_random_output = complete_config_obj["autograding"]["work_to_random_output"]
-    pattern_copy("work_to_random_output", ['random_output/test*/*.txt',], tmp_work, tmp_results, tmp_logs)
+    if os.path.exists(os.path.join(tmp_work, 'random_output')):
+        pattern_copy("work_to_random_output", [os.path.join(tmp_work, 'random_output', 'test*', '*.txt'),], tmp_work, tmp_results, tmp_logs)
 
     if ("work_to_public" in complete_config_obj["autograding"] and
         len(complete_config_obj["autograding"]["work_to_public"]) > 0):
