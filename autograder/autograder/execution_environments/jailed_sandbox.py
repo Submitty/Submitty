@@ -18,7 +18,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     Archive the results of an execution and validation.
     """
     self.setup_for_testcase_archival()
-    test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
+    test_input_path = os.path.join(self.tmp_autograding, 'test_input')
     public_dir = os.path.join(self.tmp_results,"results_public", self.name)
     details_dir = os.path.join(self.tmp_results, "details", self.name)
 

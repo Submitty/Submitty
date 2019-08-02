@@ -67,6 +67,7 @@ class SecureExecutionEnvironment():
     submission_path = os.path.join(self.tmp_submission, 'submission')
 
     os.makedirs(directory)
+
     autograding_utils.pattern_copy("submission_to_compilation", self.patterns['submission_to_compilation'], submission_path, directory, self.tmp_logs)
 
     if self.is_vcs:
@@ -142,9 +143,8 @@ class SecureExecutionEnvironment():
     os.makedirs(os.path.join(self.tmp_results,"results_public"), exist_ok=True)
     os.chdir(self.tmp_work)
     
-    test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
-    public_dir = os.path.join(self.tmp_results,"results_public", self.name)
     details_dir = os.path.join(self.tmp_results, "details", self.name)
+    public_dir = os.path.join(self.tmp_results,"results_public", self.name)
 
     os.mkdir(details_dir)
     os.mkdir(public_dir)

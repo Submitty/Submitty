@@ -21,7 +21,7 @@ class Testcase():
     self.number = number
     self.queue_obj = queue_obj
     self.untrusted_user = untrusted_user
-    self.testcase_directory = os.path.join(autograding_directory, 'TMP_WORK', "test{:02}".format(number))
+    self.testcase_directory = "test{:02}".format(number)
     self.type = testcase_info.get('type', 'Execution')
     self.machine = socket.gethostname()
     self.testcase_dependencies = previous_testcases.copy()
@@ -32,7 +32,8 @@ class Testcase():
     # else:
     self.secure_environment = container_network.ContainerNetwork(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
                                                            testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
-
+    # self.secure_environment = jailed_sandbox.JailedSandbox(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
+    #                                                        testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
 
   def _run_execution(self):
     self.secure_environment.setup_for_execution_testcase(self.dependencies)

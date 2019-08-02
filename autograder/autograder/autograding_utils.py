@@ -221,8 +221,17 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     # Remove any and all containers left over from past runs.
     old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', 'name={0}'.format(user_id_of_runner)]).split()
 
+    if len(old_containers) > 0:
+        print('REMOVING STALE CONTAINERS')
     for old_container in old_containers:
         subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
+
+    old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', 'name={0}'.format(user_id_of_runner)]).split()
+
+    if len(old_containers) > 0:
+        print('REMOVING STALE NETWORKS')
+    for old_network in old_networks:
+        subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
 
     # unzip autograding and submission folders
     try:
@@ -321,8 +330,8 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
     submission_longstring = dateutils.write_submitty_date(submission_datetime)
     seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
-    # note: negative = not late
 
+    # note: negative = not late
     grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
 
     with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
@@ -444,13 +453,11 @@ def add_permissions_recursive(top_dir,root_perms,dir_perms,file_perms):
 # it's ok if the target directory or subdirectories already exist
 # it will overwrite files with the same name if they exist
 def copy_contents_into(job_id,source,target,tmp_logs, log_path, stack_trace_log_path):
-    print(f'COPY {source} {target}')
     if not os.path.isdir(target):
         log_message(log_path, job_id, message="ERROR: Could not copy contents. The target directory does not exist " + target)
         raise RuntimeError("ERROR: the target directory does not exist '", target, "'")
     if os.path.isdir(source):
         for item in os.listdir(source):
-            print(item)
             if os.path.isdir(os.path.join(source,item)):
                 if os.path.isdir(os.path.join(target,item)):
                     # recurse
@@ -538,8 +545,6 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
 
   source_testcase = os.path.join(str(os.getcwd()), source_testcase)
 
-  print(f'cp {source_testcase} {destination_testcase}')
-
   if not os.path.isdir(source_testcase):
     raise RuntimeError("ERROR: The directory {0} does not exist.".format(source_testcase))
 
@@ -548,7 +553,6 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
 
   source = os.path.join(source_testcase, source_directory)
   target = os.path.join(destination_testcase, destination)
-  print(f'cp {source} {target}')
 
   # The target without the potential executable.
   target_base = '/'.join(target.split('/')[:-1])
@@ -556,13 +560,11 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
   # If the source is a directory, we copy the entire thing into the
   # target.
   if os.path.isdir(source):
-    print('1')
     # We must copy from directory to directory 
     copy_contents_into(job_id, source, target, tmp_logs, log_path, stack_trace_log_path)
 
   # Separate ** and * for simplicity.
   elif not '**' in source:
-    print('2')
     # Grab all of the files that match the pattern
     files = glob.glob(source, recursive=True)
 
@@ -577,7 +579,6 @@ def pre_command_copy_file(source_testcase, source_directory, destination_testcas
         traceback.print_exc()
         log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
   else:
-    print('3')
     # Everything after the first **. 
     source_base = source[:source.find('**')]
     # The full target must exist (we must be moving to a directory.)
