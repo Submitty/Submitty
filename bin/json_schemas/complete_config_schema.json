@@ -1,0 +1,1349 @@
+{
+  "description" : "The config.json schema for Submitty",
+  "additionalProperties" : false,
+  "type": "object",
+  "required" : ["autograding", "autograding_method", "container_options", "testcases"],
+  "properties" : {
+      "early_submission_incentive" : {
+        "properties" : {
+          "message" : {
+            "type" : "string"
+          },
+          "minimum_days_early" : {
+            "type" : "integer"
+          },
+          "minimum_points" : {
+            "type" : "number"
+          },
+          "test_cases" : {
+            "type" : "array",
+            "items" : {
+              "type" : "integer"
+            }
+          }
+        }
+      },
+      "one_part_only" : {
+        "type" : "boolean"
+      },
+      "assignment_message" : {
+        "type" : "string"
+      },
+      "grading_parameters" : {
+        "type" : "object",
+        "properties" : {
+          "AUTO_POINTS" : {
+            "type" : "number"
+          },
+          "EXTRA_CREDIT_POINTS" : {
+            "type" : "number"
+          }
+        }
+      },
+      "allow_system_calls" : {
+        "type" : "array",
+        "items" : {
+          "type" : "string"
+        }
+      },
+      "resource_limits" : {
+          "type" : "object",
+          "description" : "Limits on the system resources that may be consumed by a student process",
+          "additionalProperties" : false,
+          "properties" : {
+              "RLIMIT_CPU" : {
+                  "type" : "integer",
+                  "description" : "CPU time (not wall clock) allowed to the student process in seconds."
+              },
+              "RLIMIT_FSIZE" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The maximum size of a student output file."
+              },
+              "RLIMIT_DATA" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The amount of space on the heap allocated to a student assignment."
+              },
+              "RLIMIT_STACK" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The amount of space on the stack allocated to a student assignment."
+              },
+              "RLIMIT_CORE" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "Maximum core file size in bytes."
+              },
+              "RLIMIT_RSS" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "Limit in pages of the resident set."
+              },
+              "RLIMIT_NPROC" : {
+                  "type" : "integer",
+                  "description" : "The number of processes (threads) that a student process can create."
+              },
+              "RLIMIT_NOFILE" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The number of file descriptors that can be opened by a student process."
+              },
+              "RLIMIT_MEMLOCK" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The maximum number of bytes that can be locked into RAM."
+              },
+              "RLIMIT_AS" : {
+                  "oneOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The maximum size of the student process' virtual memory."
+              },
+              "RLIMIT_LOCKS" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The combined number of locks that the student process can establish."
+              },
+              "RLIMIT_SIGPENDING" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The number of signals that may be queued for the uid of the student process."
+              },
+              "RLIMIT_MSGQUEUE" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The number of bytes that can be allocated for POSIX message queues by the student process."
+              },
+              "RLIMIT_NICE" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The ceiling to which the process's nice value can be raised."
+              },
+              "RLIMIT_RTPRIO" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The ceiling on the real-time priority that may be set for the student process."
+              },
+              "RLIMIT_RTTIME" : {
+                  "anyOf" : [
+                    {
+                      "type" : "integer",
+                      "minimum" : 0
+                    },
+                    {
+                      "type" : "string",
+                      "enum" : ["RLIM_INFINITY"]
+                    }
+                  ],
+                  "description" : "The limit (in microseconds) on the amount of CPU time that the process may consume without making a blocking system call."
+              }
+          }
+      },
+      "max_submission_size" : {
+        "type" : "integer",
+        "minimum" : 1
+      },
+      "autograding" : {
+        "type" : "object",
+        "description" : "Specify files to be copied during the various phases of autograding",
+        "additionalProperties" : false,
+        "properties" : {
+          "compilation_to_runner" : {
+            "type" : "array",
+            "description" : "Files to be transferred from the compilation step to the execution step.",
+            "items" : {
+              "description" : "File paths or patterns.",
+              "type" : "string"
+            }
+          },
+          "compilation_to_validation" : {
+            "type" : "array",
+            "description" : "Files to be transferred from the compilation step to the validation step.",
+            "items" : {
+              "description" : "File paths or patterns.",
+              "type" : "string"
+            }
+          },
+          "submission_to_compilation" : {
+            "type" : "array",
+            "description" : "Files to be transferred from the student submission step to the execution step.",
+            "items" : {
+              "description" : "File paths or patterns.",
+              "type" : "string"
+            }
+          },
+          "submission_to_runner" : {
+            "type" : "array",
+            "description" : "Files to be transferred from the student submission step to the execution step.",
+            "items" : {
+              "description" : "File paths or patterns.",
+              "type" : "string"
+            }
+          },
+          "submission_to_validation" : {
+            "type" : "array",
+            "description" : "Files to be transferred from the student submission step to the validation step.",
+            "items" : {
+              "description" : "File paths or patterns.",
+              "type" : "string"
+            }
+          },
+          "work_to_details" : {
+            "type" : "array",
+            "description" : "Files from the validation step to be archived for students or graders to review.",
+            "items" : {
+              "description" : "File paths or patterns.",
+              "type" : "string"
+            }
+          },
+          "work_to_public" : {
+              "type" : "array",
+              "items" : {
+                "description" : "File paths or patterns.",
+                "type" : "string"
+              }
+          },
+          "use_checkout_subdirectory" : {
+            "type" : "string"
+          }
+        }
+      },
+      "autograding_method" : {
+        "type" : "string",
+        "description" : "Specifies the environment in which autograding will be run. Acceptable values are 'jailed_sandbox', and 'docker'",
+        "enum" : ["jailed_sandbox", "docker"]
+      },
+      "container_options" : {
+        "type" : "object",
+        "description" : "If grading within containers, specify global default container options.",
+        "additionalProperties" : false,
+        "required" : ["container_image", "single_port_per_container", "use_router"],
+        "properties" : {
+          "container_image" : {
+            "type" : "string",
+            "description" : "The default docker image from which containers should be built."
+          },
+          "single_port_per_container" : {
+            "type" : "boolean",
+            "description" : "Specifies whether container communications should happen over a single port per container."
+          },
+          "use_router" : {
+            "type" : "boolean",
+            "description" : "When grading networked containers, determines whether a centralized logging node should be injected to capture all messages."
+          }
+        }
+      },
+      "part_names" : {
+        "type" : "array",
+        "minLength" : 1,
+        "items" : {
+          "type" : "string"
+        }
+      },
+      "testcases" : {
+        "description" : "The array of testcases which will be run against the student code",
+        "type" : "array",
+        "items" : {
+          "anyOf" : [
+            {
+              "$ref" : "#/definitions/testcase"
+            },
+            {
+              "$ref" : "#/definitions/submission_limit"
+            },
+            {
+              "$ref" : "#/definitions/filecheck"
+            }
+          ]
+        },
+        "minItems" : 1
+      },
+      "notebook" : {
+        "description" : "The definition of a notebook consisting of messages and inputs.",
+        "type" : "array",
+        "items" : {
+          "$ref" : "#/definitions/notebook_object"
+        },
+        "minItems" : 0
+      }
+  },
+  "definitions" : {
+    "submission_limit" : {
+      "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
+      "required" : ["max_submissions", "penalty", "points", "title", "type"],
+      "properties" : {
+        "max_submissions" : {
+          "description" : "The maximum number of submissions a student can make without penalty.",
+          "type" : "integer",
+          "minimum" : 1
+        },
+        "penalty" : {
+          "description" : "The penalty that a student receives for submitting too many times.",
+          "type" : "number"
+        },
+        "points" : {
+          "type" : "number"
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : ["FileCheck"]
+        }
+      }
+    },
+    "filecheck": {
+      "description" : "A file existence check",
+      "additionalProperties" : false,
+      "required" : ["type", "title", "actual_file", "points"],
+      "properties" : {
+        "actual_file" : {
+          "description" : "The file whose existence is being checked.",
+          "type" : "string"
+        },
+        "points" : {
+          "type" : "number", 
+          "description" : "The number of points the student receives if actual_file exists"
+        },
+        "title" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "type" : {
+          "type" : "string",
+          "enum" : ["FileCheck"]
+        }
+      }
+    },
+    "testcase" : {
+      "description" : "A testcase represents a single test run against student code.",
+      "type": "object",
+      "additionalProperties" : false,
+      "required" : ["containers", "dispatcher_actions", "points",
+                    "pre_commands", "single_port_per_container", 
+                    "use_router", "title", "validation"],
+      "properties" : {
+        "hidden" : {
+          "type" : "boolean"
+        },
+        "view_testcase_message" : {
+          "type" : "boolean"
+        },
+        "extra_credit" : {
+          "type" : "boolean"
+        },
+        "partial_credit" : {
+          "type" : "boolean"
+        },
+        "details" : {
+          "type" : "string"
+        },
+        "containers" : {
+          "description" : "Specifies the environment that will be invoked to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
+          "items" : {
+            "description" : "The environments used to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
+            "$ref" : "#/definitions/container"
+          }
+        },
+        "dispatcher_actions" : {
+          "type" : "array",
+          "description" : "Standard input to be delivered to a process running in a docker container.",
+          "items" : {
+            "anyOf" : [
+              {
+                "description" : "Delay between dispatcher actions, defined in seconds.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "seconds"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["delay"]
+                  },
+                  "seconds" : {
+                    "type" : "number",
+                    "minimum" : 0.1
+                  }
+                }
+              },
+              {
+                "description" : "A string to be delivered to one or more containers as standard input.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "string", "containers"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["stdin"]
+                  },
+                  "string" : {
+                    "description" : "The string to be delivered to the specified containers",
+                    "type" : "string"
+                  },
+                  "containers" : {
+                    "type" : "array",
+                    "description" : "The list of named containers to which this message should be delivered.",
+                    "items" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "input_generation_commands" : {
+          "description" : "A list of commands to be run at the input generation step",
+          "type" : "array",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "executable_name" : {
+          "oneOf" : [
+            {
+              "type" : "string",
+              "minLength" : 1
+            },
+            {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              },
+              "minLength" : 1
+            }
+          ]
+        },
+        "actions" : {
+          "type" : "array",
+          "description" : "Actions to be taken against a running graphics application.",
+          "items" : {
+            "anyOf" : [
+              {
+                "description" : "Delays a number of seconds before the next action is taken. Useful if the results of the previous action may take some time to render.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "seconds"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["delay"]
+                  },
+                  "seconds" : {
+                    "description" : "An integer or floating point number greater than 0.",
+                    "type" : "number",
+                    "minimum" : 0.01
+                  }
+                }
+              },
+              {
+                "description" : "Takes a screenshot of the display. Screenshots are stored as .png files. By default, screenshots are labeled sequentially per test case (e.g. screenshot_0.png), but they may be given custom names using the name field.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "name"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["screenshot"]
+                  },
+                  "name" : {
+                    "description" : "(Optional) An optional unique name for the image. NOTE: Do not include file extensions.",
+                    "type" : "string"
+                  }
+                }
+              },
+              {
+                "description" : "Creates an animated gif of the display. By default, gifs are labeled sequentially per test case (e.g. gif_0.gif), but they may be given custom names using the name field.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "name", "seconds", "frames_per_second", "preserver_individual_frames"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["gif"]
+                  },
+                  "name" : {
+                    "description" : "(Optional) An optional unique name for the gif. NOTE: Do not include file extensions.",
+                    "type" : "string"
+                  },
+                  "seconds" : {
+                    "description" : "The duration of the gif in seconds. An integer or floating point number greater than 0.",
+                    "type" : "number",
+                    "minimum" : 1
+                  },
+                  "frames_per_second" : {
+                    "description" : "(Optional) The integer number of frames to be captured per second. Defaults to 10. Max value is 30.",
+                    "type" : "integer",
+                    "minimum" : 10,
+                    "maximum" : 30
+                  },
+                  "preserve_individual_frames" : {
+                    "description" : "(Optional) Boolean. If true, all individual frames are archived as png files. Defaults to false.",
+                    "type" : "boolean"
+                  }
+                }
+              },
+              {
+                "description" : "Types a sequence of keys one or more times with a delay between each repetition. By default, the sequence is typed once with a .1 second delay. Keys within the sequence are pressed sequentially without delay.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "string", "delay_in_seconds", "presses"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["type"]
+                  },
+                  "string" : {
+                    "description" : "The string to be typed. Note that each character is entered one after the other. To press all keys together, see the key command.",
+                    "type" : "string"
+                  },
+                  "delay_in_seconds" : {
+                    "description" : "(Optional) An integer or floating point number greater than 0. Specifies the delay between repetitions.",
+                    "type" : "number",
+                    "minimum" : 0.01
+                  },
+                  "presses" : {
+                    "description" : "(Optional) An integer greater than zero. Specifies the number of repetitions.",
+                    "type" : "integer",
+                    "minimum" : 1
+                  }
+                }
+              },
+              {
+                "description" : "Presses one or more keys. This action may be done over delayed repetitions.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "key_combination", "delay_in_seconds", "presses"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["key"]
+                  },
+                  "key_combination" : {
+                    "description" : "The key combination to be pressed. Keys can be chained together using the character + (e.g. a+b presses a and b at the same time). For a list of keys, see the xdotool key list. To press keys one after the other, see the type command.",
+                    "type" : "string"
+                  },
+                  "delay_in_seconds" : {
+                    "description" : "(Optional) An integer or floating point number greater than 0. Specifies the delay between repetitions.",
+                    "type" : "number",
+                    "minimum" : 0.01
+                  },
+                  "presses" : {
+                    "description" : "(Optional) An integer greater than zero. Specifies the number of repetitions.",
+                    "type" : "integer",
+                    "minimum" : 1
+                  }
+                }
+              },
+              {
+                "description" : "The standard version of click and drag starts either at the mouse’s current position or at a position specified by the user. If a mouse button has been specified, that button is pressed down at that position, otherwise, the left mouse button is pressed. The mouse is then moved to coordinates specified by the end position, and the held button is released.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "start_x", "start_y", "end_x", "end_y", "mouse_button"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["click and drag"]
+                  },
+                  "start_x" : {
+                    "description" : "(Optional) An integer starting x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer",
+                    "minimum" : 1
+                  },
+                  "start_y" : {
+                    "description" : "(Optional) An integer starting y position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer",
+                    "minimum" : 1
+                  },
+                  "end_x" : {
+                    "description" : "(Optional) An integer ending x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer",
+                    "minimum" : 1
+                  },
+                  "end_y" : {
+                    "description" : "(Optional) An integer ending y position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer",
+                    "minimum" : 1
+                  },
+                  "mouse_button" : {
+                    "description" : "(Optional) left, middle, or right. The mouse button to be clicked. Defaults to left.",
+                    "type" : "string",
+                    "enum" : ["left","right","middle"]
+                  }
+                }
+              },
+              {
+                "description" : "The delta version of click and drag starts at the current mouse position, clicks the desired mouse button (or left if one isn’t provided) and then moves a specified number of pixels before releasing. The mouse may not leave the window bounds. However, the function is wrapping, so it will repeatedly click and drag until the desired distance has been moved.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "end_x", "end_y", "mouse_button"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["click and drag delta"]
+                  },
+                  "end_x" : {
+                    "description" : "(Optional) The amount of x distance over which the click and drag will move. Defaults to zero.",
+                    "type" : "integer"
+                  },
+                  "end_y" : {
+                    "description" : "(Optional) The amount of y distance over which the click and drag will move. Defaults to zero.",
+                    "type" : "integer"
+                  },
+                  "mouse_button" : {
+                    "description" : "(Optional) left, middle, or right. The mouse button to be clicked. Defaults to left.",
+                    "type" : "string",
+                    "enum" : ["left","right","middle"]
+                  }
+                }
+              },
+              {
+                "description" : "Processes a mousedown and a mouseup of the specified mouse button. Defaults to left click.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "mouse_button"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["click"]
+                  },
+                  "mouse_button" : {
+                    "description" : "(Optional) left, middle, or right. The mouse button to be clicked. Defaults to left.",
+                    "type" : "string",
+                    "enum" : ["left","right","middle"]
+                  }
+                }
+              },
+              {
+                "description" : "Processes a mousedown and a mouseup of the specified mouse button. Defaults to left click.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action", "end_x", "end_y"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["move"]
+                  },
+                  "end_x" : {
+                    "description" : "(Optional) An integer ending x position for the mouse in window coordinates. Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer"
+                  },
+                  "end_y" : {
+                    "description" : "(Optional) An integer ending y position for the mouse in window coordinates.Values will be clamped to within the window’s size. Defaults to zero.",
+                    "type" : "integer"
+                  }
+                }
+              },
+              {
+                "description" : "Moves the mouse to the center of the student’s window.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["center"]
+                  }
+                }
+              },
+              {
+                "description" : "Moves the mouse to the origin (upper left) of the student’s window.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["origin"]
+                  }
+                }
+              }
+            ]
+          }
+        }, 
+        "points" : {
+          "description" : "The point value of this testcase",
+          "type": "number"
+        },
+        "type" : {
+          "description" : "The type of this testcase.",
+          "type": "string"
+        },
+        "pre_commands" : {
+          "type" : "array",
+          "description" : "Standard input to be delivered to a process running in a docker container.",
+          "items" : {
+            "anyOf" : [
+              {
+                "description" : "Copy files from one testcase to another.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["command", "source", "destination", "testcase"],
+                "properties" : {
+                  "command" : {
+                    "type" : "string",
+                    "enum" : ["cp"]
+                  },
+                  "destination" : {
+                    "type" : "string"
+                  }, 
+                  "option" : {
+                    "type" : "string"
+                  },
+                  "pattern" : {
+                  },
+                  "source" : {
+                    "type" : "string"
+                  },
+                  "testcase" : {
+                    "type" : "string"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "single_port_per_container" : {
+          "type" : "boolean",
+          "description" : "Specifies whether container communications should happen over a single port per container."
+        },
+        "use_router" : {
+          "type" : "boolean",
+          "description" : "When grading networked containers, determines whether a centralized logging node should be injected to capture all messages."
+        },
+        "testcase_label" : {
+          "type" : "string",
+          "description" : "Used to link a testcase to a notebook element."
+        },
+        "title" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "validation" : {
+          "type" : "array",
+          "description" : "The validation objects used to grade this testcase.",
+          "items" : {
+            "allOf" : [
+              {
+                "$ref" : "#/definitions/validator_definitions"
+              },
+              {
+                "$ref" : "#/definitions/abstract_validation_object"
+              }
+            ]
+          } 
+        }
+      }
+    },
+    "container" : {
+      "description" : "A container defines an environment in which student code is to be executed.",
+      "type": "object",
+      "additionalProperties" : false,
+      "required" : ["commands", "container_image", "container_name", "outgoing_connections", "server"],
+      "properties" : {
+        "commands" : {
+          "type" : "array",
+          "description" : "A list of unix commands to be run against the student code. (e.g. ./a.out or python3 *.py)",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "container_image" : {
+          "type" : "string",
+          "description" : "When grading using 'autograding_method' : 'docker', the docker image from which containers should be built."
+        },
+        "container_name" : {
+          "type" : "string",
+          "description" : "When grading using 'autograding_method' : 'docker', container_name defines 1) The name by which this container may be contacted on a network, 2. If there are more than one containers being used, the name of the folder in which the container output will be stored."
+        },
+        "outgoing_connections" : {
+          "type" : "array",
+          "description" : "A list of container_names defining which endpoints (other containers) this container may contact on the network.",
+          "items" : {
+            "type" : "string"
+          }
+        },
+        "server" : {
+          "type" : "boolean",
+          "description" : "If true, this container does not execute student code, but is instead agreed to act as a server on the student network. In such a case, it is understood that the container image is properly set up to be invoked via the run command. Primarily used for hosting databases for student programs to access."
+        },
+        "import_default_router" : {
+          "type" : "boolean",
+          "description" : "A flag that tells the system to copy the default submitty router to the router's directory. Necessary if using or extending the default router."
+        }
+      }
+    },
+    "abstract_validation_object" : {
+      "type": "object",
+      "required" : [ "actual_file", "deduction", "show_message", "show_actual"],
+      "properties" : {
+        "description" : {
+          "description" : "A description of this validation step for use by the students.",
+          "type" : "string"
+        },
+        "actual_file" : {
+          "description" : "The output file(s) produced by the student code.",
+          "oneOf" : [
+            {
+              "type" : "string"
+            },
+            {
+              "type" : "array",
+              "items" : {
+                "type": "string",
+                "minItems" : 1
+              }
+            }
+          ]
+        },
+        "expected_file" : {
+          "description" : "The professor specified expected output file(s).",
+          "oneOf" : [
+            {
+              "type" : "string"
+            },
+            {
+              "type" : "array",
+              "items" : {
+                "type": "string",
+                "minItems" : 1
+              }
+            }
+          ]
+        },
+        "deduction" : {
+          "description" : "The amount of points that this validation step is worth, scaled between 0 and 1.",
+          "type" : "number",
+          "minimum" : 0,
+          "maximum" : 1
+        },
+        "show_message" : {
+          "description" : "Specifies when to show the message to the student.",
+          "type" : "string",
+          "enum" : ["always", "never", "on_success", "on_failure"]
+        },
+        "show_actual" : {
+          "description" : "Specifies when to show the actual file to the student.",
+          "type" : "string",
+          "enum" : ["always", "never", "on_success", "on_failure"]
+        },
+        "show_expected" : {
+          "description" : "Specifies when to show the expected file to the student.",
+          "type" : "string",
+          "enum" : ["always", "never", "on_success", "on_failure"]
+        },
+        "show_difference_image" : {
+          "description" : "Specifies when to show a difference image to the student.",
+          "type" : "string",
+          "enum" : ["always", "never", "on_success", "on_failure"]
+        }
+      }
+    },
+    "validator_definitions" : {
+      "type": "object",
+      "description" : "The definition for each type of validation object.",
+      "anyOf" : [
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["MultipleJUnitTestGrader"]
+            }
+          }  
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "instruction_coverage_threshold", "package"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["JaCoCoCoverageReportGrader"]
+            },
+            "exclude_class" : {
+              "type" : "string"
+            },
+            "instruction_coverage_threshold" : {
+              "type" : "number"
+            },
+            "package" : {
+              "type" : "string"
+            },
+            "branch_coverage_threshold" : {
+              "type" : "number"
+            },
+            "line_coverage_threshold" : {
+              "type" : "number"
+            },
+            "complexity_coverage_threshold" : {
+              "type" : "number"
+            },
+            "method_coverage_threshold" : {
+              "type" : "number"
+            },
+            "class" : {
+              "type" : "string"
+            },
+            "exclude_package" : {
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "num_tests"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["JUnitTestGrader"]
+            },
+            "num_tests" : {
+              "type" : "integer",
+              "minimum" : 1
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["EmmaInstrumentationGrader"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "coverage_threshold"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["EmmaCoverageReportGrader_doit"]
+            },
+            "coverage_threshold" : {
+              "type" : "number",
+              "minimum" : 0
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["DrMemoryGrader"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "num_tests"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["PacmanGrader"]
+            }, 
+            "num_tests" : {
+              "type" : "integer",
+              "minimum" : 1
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "data"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["searchToken"]
+            }, 
+            "data" : {
+              "type" : "array",
+              "items" : {
+                "type" : "string"
+              }
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "term", "comparison"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["intComparison"]
+            }, 
+            "term" : {
+              "type" : "number"
+            }, 
+            "comparison" : {
+              "type" : "string"
+            },
+            "description" : {
+              "type" : "string"
+            },
+            "failure_message" : {
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["diff"]
+            }, 
+            "comparison" : {
+              "type" : "string"
+            },
+            "ignoreWhitespace" : {
+              "type" : "boolean"
+            },
+            "lineSwapOk" : {
+              "type" : "boolean"
+            },
+            "extra_student_output" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["fileExists"]
+            }, 
+            "one_of" : {
+              "type" : "boolean"
+            },
+            "sequence_diagram" : {
+              "description" : "(Internal) Determines whether actual_file should be displayed as a sequence diagram.",
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["warnIfNotEmpty"]
+            }, 
+            "jvm_memory" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["warnIfEmpty"]
+            },
+            "sequence_diagram" : {
+              "description" : "(Internal) Determines whether actual_file should be displayed as a sequence diagram.",
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["errorIfNotEmpty"]
+            },
+            "jvm_memory" : {
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["errorIfEmpty"]
+            },
+            "sequence_diagram" : {
+              "description" : "(Internal) Determines whether actual_file should be displayed as a sequence diagram.",
+              "type" : "boolean"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method", "acceptable_threshold"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["ImageDiff"]
+            }
+          },
+          "acceptable_threshold" : {
+            "type" : "string"
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "enum" : ["custom_validator"]
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["method"],
+          "properties" : {
+            "method" : {
+              "type" : "string",
+              "not" : {"enum":["JUnitTestGrader", "EmmaInstrumentationGrader", "MultipleJUnitTestGrader",
+                       "EmmaCoverageReportGrader", "JaCoCoCoverageReportGrader", "DrMemoryGrader",
+                       "PacmanGrader", "searchToken", "intComparison", "diff", "fileExists",
+                       "warnIfNotEmpty", "warnIfEmpty", "errorIfNotEmpty", "errorIfEmpty", "ImageDiff",
+                       "custom_validator"]}
+            }
+          }
+        }
+      ]       
+    },
+    "notebook_object" : {
+      "type": "object",
+      "description" : "A notebook input or output.",
+      "anyOf" : [
+        {
+          "type" : "object",
+          "required" : ["type", "markdown_string"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["markdown"]
+            },
+            "markdown_string" : {
+              "type" : "string"
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "filename"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["short_answer"]
+            },
+            "filename" : {
+              "description" : "Filename where results of submission will be saved.",
+              "type" : "string"
+            },
+            "initial_value" : {
+              "type" : "string",
+              "description" : "A value to pre-populate into short answer box."
+            },
+            "programming_language" : {
+              "type" : "string",
+              "description" : "Programming language that will be entered into the short answer box and will be used for syntax highlighting."
+            },
+            "rows" :{
+              "description" : "Height of the short answer box in rows.",
+              "type" : "integer",
+              "minimum" : 1
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "filename", "choices"],
+          "properties" : {
+            "type" : {
+              "type" : "string",
+              "enum" : ["multiple_choice"]
+            },
+            "filename" : {
+              "description" : "Filename where results of submission will be saved.",
+              "type" : "string"
+            },
+            "choices" : {
+              "description" : "An array of JSON objects which describe a value and description for each choice.",
+              "type" : "array",
+              "items" : {
+                "type" : "object",
+                "properties" : {
+                  "value" : {
+                    "type" : "string"
+                  },
+                  "description" : {
+                    "type" : "string"
+                  }
+                }
+              },
+              "minItems" : 1
+            },
+            "allow_multiple" : {
+              "type" : "boolean",
+              "description" : "If true allows multiple values to be selected, if false only one value may be selected."
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        },
+        {
+          "type" : "object",
+          "required" : ["type", "image"],
+          "properties" : {
+            "image" : {
+              "type" : "string",
+              "description" : "The filename of the image to display."
+            },
+            "height" : {
+              "description" : "The height in pixels the image should be displayed at.",
+              "type" : "integer"
+            },
+            "width" : {
+              "description" : "The width in pixels the image should be displayed at.",
+              "type" : "integer"
+            },
+            "alt_text" : {
+              "type" : "string",
+              "description" : "When displaying an image you should use this field to describe the contents of the image. Such a description is useful to visually impaired users who may be using screen reading software."
+            },
+            "testcase_ref" : {
+              "description" : "Used to reference a testcase_label",
+              "type" : "string"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
