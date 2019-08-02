@@ -1,55 +1,54 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div class="content">
-    <div style="float: right; margin-bottom: 20px;">
-        <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Graders</a>
-        <a href="javascript:newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
-        <a href="javascript:newGraderForm()" class="btn btn-primary">New Grader</a>
-		<a href="javascript:editRegistrationSectionsForm()" class="btn btn-primary">Assign Registration Sections for Grading</a>
-    </div>
-    <h1>Manage Graders</h1>
+    <header>
+        <h1>Manage Graders</h1>
+        <div class="btn-wrapper">
+            <a href="javascript:newDownloadForm()" class="btn btn-primary">Download Graders</a>
+            <a href="javascript:newGraderListForm()" class="btn btn-primary">Upload Grader List</a>
+            <a href="javascript:newGraderForm()" class="btn btn-primary">New Grader</a>
+            <a href="javascript:editRegistrationSectionsForm()" class="btn btn-primary">Assign Registration Sections for Grading</a>
+        </div>
+    </header>
     {# This is a data table #}
-    <table class="table table-striped table-bordered persist-area">
-        <caption />
-        <thead class="persist-thead">
-            <tr>
-                <th width="4%"></th>
-                <th width="20%" style="text-align: left">User ID</th>
-                <th width="30%" colspan="2">Name</th>
-                <th width="23%">User Group</th>
-                <th width="20%">Registration Sections</th>
-                <th width="3%"></th>
-            </tr>
-        </thead>
-        <tbody>
-        {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
+    {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
+        <table id="grader-table" class="table table-striped mobile-table directory-table">
+            <caption>Course Graders</caption>
+            <thead>
+                <th>User ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>User Group</th>
+                <th>Registration Sections</th>
+                <th>Edit Student</th>
+            </thead>
 			{% for grading_group in 1..3 %}
-				{% if graders[grading_group]|length > 0 %}
-					<tr class="info persist-header">
-						<td colspan="8" style="text-align: center">{{groups[grading_group].name}}</td>
-					</tr>
-					{% for grader in graders[grading_group] %}
-						<tr id="user-{{ grader.getId() }}">
-							<td>{{ loop.index }}</td>
-							<td style="text-align: left">{{ grader.getId() }}</td>
-							<td style="text-align: left">{{ grader.getDisplayedFirstName() }}</td>
-							<td style="text-align: left">{{ grader.getDisplayedLastName() }}</td>
-							<td>{{ groups[grader.getGroup()].name }}</td>
-							<td>{{ grader.getGradingRegistrationSections()|join(", ") }}</td>
-							<td><a onclick="editUserForm('{{ grader.getId() }}');" aria-label="edit user {{ grader.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
-						</tr>
-					{% endfor %}
-				{% else %}
-					<tr class="info persist-header">
-						<td colspan="8" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
-					</tr>
-				{% endif %}
+                <tbody id="section-{{ registration }}">
+                    {% if graders[grading_group]|length > 0 %}
+                        <tr class="info">
+                            <th class="section-break" colspan="8">{{groups[grading_group].name}}</td>
+                        </tr>
+                        {% for grader in graders[grading_group] %}
+                            <tr id="user-{{ grader.getId() }}">
+                                <td class="align-left">{{ grader.getId() }}</td>
+                                <td class="align-left">{{ grader.getDisplayedFirstName() }}</td>
+                                <td class="align-left">{{ grader.getDisplayedLastName() }}</td>
+                                <td>{{ groups[grader.getGroup()].name }}</td>
+                                <td>{{ grader.getGradingRegistrationSections()|join(", ") ?: "None" }}</td>
+                                <td><a href="javascript:editUserForm('{{ grader.getId() }}');" aria-label="edit user {{ grader.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr class="info">
+                            <td colspan="8" style="text-align: center">No {{groups[grading_group].name|replace({'Grader':'Graders'})}}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
 			{% endfor %}
-        {% else %}
-            <tr>
-                <td colspan="3">No graders found</td>
-            </tr>
-        {% endif %}
-        </tbody>
-    </table>
+        </table>
+    {% else %}
+        <p id="empty-table" class="warning">No graders found</p>
+    {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') %}
 {% include('admin/users/GraderListForm.twig') %}
