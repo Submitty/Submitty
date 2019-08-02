@@ -58,6 +58,10 @@
                 <div class="sub">
                     <label for="use-qr">Split by QR code?</label>
                     <input type="checkbox" id="use-qr">
+
+                    <label id ="use-ocr-id"for ="use-ocr">Detect Student ID's?</label>
+                    <input type="checkbox" id="use-ocr">
+
                     <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
                     <span id="prefix-prompt">QR code prefix/suffix:
                     <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
@@ -83,6 +87,8 @@
                 $('#prefix-prompt').prop('hidden', true);
                 $('#bulk_progress_box').prop('hidden', true);
                 $('#expected-num-box').prop('hidden', true);
+                $('#use-ocr-id').prop('hidden', true);
+                $('#use-ocr').prop('hidden', true);
 
                 //load what upload mode the user selected (if any)
                 if(sessionStorage.getItem('radio-bulk')){
@@ -102,12 +108,17 @@
                     $('#num_pages').prop('hidden', true);
                     $('#use-qr').prop('checked',true);
                     $('#expected-num-box').prop('hidden', false);
+                    $('#use-ocr').prop('hidden', false);
+                    $('#use-ocr-id').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
                     }
                     if(sessionStorage.getItem('qr_suffix')){
                         $('#qr_suffix').val(sessionStorage.getItem('qr_suffix'));
+                    }
+                    if(sessionStorage.getItem('use-ocr')){
+                        $('#use-ocr').prop('checked', true);
                     }
                 }
                 if ($("#radio-student").is(":checked")) {
@@ -127,6 +138,14 @@
                     $('#qr_suffix').change(function(){
                         sessionStorage.setItem('qr_suffix', $('#qr_suffix').val());
                     });
+
+                    $('#use-ocr').prop('hidden', false);
+                    $('#use-ocr-id').prop('hidden', false);
+
+                    if(sessionStorage.getItem('use-ocr'))
+                        $('#use-ocr').prop('checked', true);
+                    else
+                        $('#use-ocr').prop('checked', false);
                 }
                 $('#radio-normal').click(function() {
                     sessionStorage.setItem('radio-normal', true);
@@ -163,6 +182,12 @@
                     $('#prefix-prompt').prop('hidden', !$('#prefix-prompt').is(':hidden'));
                     $('#pages-prompt').prop('hidden', !$('#pages-prompt').is(':hidden'));
                     $('#expected-num-box').prop('hidden',!$('#expected-num-box').is(':hidden'));
+                    $('#use-ocr').prop('hidden', !$('#use-ocr').is(':hidden'));
+                    $('#use-ocr-id').prop('hidden', !$('#use-ocr-id').is(':hidden'))
+                });
+                $('#use-ocr').click(function(){
+                    sessionStorage.getItem('use-ocr') ? sessionStorage.removeItem('use-ocr') :
+                        sessionStorage.setItem('use-ocr', true);
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -567,6 +592,7 @@
             if ($('#radio-bulk').is(':checked')) {
                 num_pages = $("#num_pages").val();
                 use_qr = $("#use-qr").is(":checked");
+                use_ocr = $('#use-ocr').is(":checked");
                 qr_prefix = $('#qr_prefix').val();
                 qr_suffix = $('#qr_suffix').val();
                 if($('#use-qr').is(':checked')){
@@ -585,7 +611,7 @@
             }
             // bulk upload
             if ($("#radio-bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix, qr_suffix );
+                handleBulk("{{ gradeable_id }}", num_pages, use_qr, use_ocr, qr_prefix, qr_suffix );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){

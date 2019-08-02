@@ -283,6 +283,7 @@ class SubmissionController extends AbstractController {
     */
     public function ajaxBulkUpload($gradeable_id) {
         $is_qr = $_POST['use_qr_codes'] === "true";
+        $use_ocr = $_POST['use_ocr'] === "true" && $is_qr;
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
@@ -403,7 +404,8 @@ class SubmissionController extends AbstractController {
                     "qr_prefix" => $qr_prefix,
                     "qr_suffix" => $qr_suffix,
                     "filename"  => $uploaded_file["name"][$i],
-                    "is_qr"     => true
+                    "is_qr"     => true,
+                    "use_ocr"   => $use_ocr
                 ];
 
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";

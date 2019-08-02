@@ -6,6 +6,7 @@ import os
 import traceback
 import numpy
 from . import write_to_log as logger
+from . import submitty_ocr as scanner
 
 # try importing required modules
 try:
@@ -26,6 +27,7 @@ def main(args):
     qr_prefix = args[2]
     qr_suffix = args[3]
     log_file_path = args[4]
+    use_ocr = args[5]
 
     buff = "Process " + str(os.getpid()) + ": "
 
@@ -47,14 +49,18 @@ def main(args):
             cv_img = numpy.array(page)
             mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
             inverted = 255 - cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+
             # decode img - only look for QR codes
             val = pyzbar.decode(inverted, symbols=[ZBarSymbol.QRCODE])
             if val != []:
                 # found a new qr code, split here
                 # convert byte literal to string
                 data = val[0][0].decode("utf-8")
-                buff += "Found a QR code with value \'" + data + "\' on"
-                buff += " page " + str(page_number) + ", "
+
+                if not use_ocr:
+                    buff += "Found a QR code with value \'" + data + "\' on"
+                    buff += " page " + str(page_number) + ", "
+
                 if data == "none":  # blank exam with 'none' qr code
                     data = "BLANK EXAM"
                 else:
@@ -65,6 +71,12 @@ def main(args):
                         data = data[len(qr_prefix):]
                     if qr_suffix != '' and suf == qr_suffix:
                         data = data[:-len(qr_suffix)]
+
+                # if we're looking for a student's ID, use that as the value instead
+                if use_ocr:
+                    data = scanner.getDigits(inverted, val[0][2])
+                    buff += "Found student ID number of \'" + data + "\' on"
+                    buff += " page " + str(page_number) + ", "
 
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
