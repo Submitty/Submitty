@@ -1,3 +1,5 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div class="content">
     <header>
         <h1>Manage Graders</h1>
@@ -11,7 +13,7 @@
     {# This is a data table #}
     {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
         <table id="grader-table" class="table table-striped mobile-table directory-table">
-            <caption>Graders For Class</caption>
+            <caption>Course Graders</caption>
             <thead>
                 <th>User ID</th>
                 <th>First Name</th>
@@ -45,7 +47,7 @@
 			{% endfor %}
         </table>
     {% else %}
-        <p id="no-one-found" class="warning">No graders found</p>
+        <p id="empty-table" class="warning">No graders found</p>
     {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') %}

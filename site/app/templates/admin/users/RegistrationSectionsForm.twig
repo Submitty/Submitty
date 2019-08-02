@@ -77,6 +77,10 @@ Macros
 		padding: 0.5em;
 	}
 
+	#registration-section-assignment td {
+		vertical-align: middle;
+	}
+
 	#registration-section-assignment td label {
 		display: flex;
 		flex: 1 0 auto;
@@ -84,8 +88,8 @@ Macros
 	}
 
 	#registration-section-assignment td:nth-of-type(1):before { content: "All Sections" }
-	{% for i in 2 .. (reg_sections | length) + 1 %}
-		#registration-section-assignment td:nth-of-type({{ i }}):before { content: "Section {{ i }}" }
+	{% for section in reg_sections %}
+		#registration-section-assignment td:nth-of-type({{ loop.index + 1 }}):before { content: "{{ section['sections_registration_id'] }}"}
 	{% endfor %}
 
 	@media (min-width: 831px) {
