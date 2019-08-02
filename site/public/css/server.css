@@ -1021,15 +1021,6 @@ div.full_height {
     margin-left: 5px;
 }
 
-.btn-nav {
-    width:100%;
-}
-
-.btn.btn-nav-submit, .btn.btn-nav-grade {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 .td-open {
     width: 10%;
 }
@@ -1277,16 +1268,18 @@ div.full_height {
 
 /* from https://css-tricks.com/css3-progress-bars/ */
 .meter {
+    width: 100%;
     height: 10px;
-    position: relative;
     background: var(--standard-pale-gray);
     padding: 0px;
+    border-radius: 4px;
 }
+
 .meter > span {
     display: block;
     height: 100%;
     background-color: var(--good-green);
-    position: relative;
+    border-radius: 4px;
 }
 
 /*

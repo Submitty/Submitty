@@ -9,8 +9,8 @@ import shutil
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
-SAMPLE_ASSIGNMENT_CONFIG = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/c_failure_messages/config"
-SAMPLE_SUBMISSIONS       = SUBMITTY_INSTALL_DIR + "/more_autograding_examples/c_failure_messages/submissions"
+SAMPLE_ASSIGNMENT_CONFIG = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples", "c_failure_messages", "config")
+SAMPLE_SUBMISSIONS       = os.path.join(SUBMITTY_INSTALL_DIR, "more_autograding_examples", "c_failure_messages", "submissions")
 
 @prebuild
 def initialize(test):
@@ -32,6 +32,13 @@ def cleanup(test):
                      glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*.txt")) +
                      [os.path.join(test.testcase_path, "data", "test_output")])
 
+
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
+   
 
 @testcase
 def correct(test):

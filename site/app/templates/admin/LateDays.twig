@@ -1,20 +1,22 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div type="hidden" id="message"></div>
 <div class="content">
     <h1>Late Days Allowed</h1>
-    <form id="lateDayForm" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
+    <form id="late-day-form" method="post" enctype="multipart/form-data" onsubmit="return updateLateDays($(this));">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <p>
             Use this form to grant students additional late days (beyond the initial number specified in the course configuration).<br>
             Students may use these additional late days for any future homeworks (after the specificed date).
         </p>
-        <fieldset>
+        <fieldset id="single-student-late-day">
             <legend class="option-title">Single Student Entry</legend>
             <label for="user_id">
                 Student ID:
                 <input class="option-input" type="text" name="user_id" id="user_id">
             </label>
             <label for="datestamp">
-                Datestamp (MM/DD/YYYY):
+                Datestamp (YYYY-MM-DD):
                 <input class="option-input" type="text" name="datestamp" id="datestamp">
             </label>
             <label for="late_days">
@@ -28,50 +30,56 @@
         <fieldset>
             <legend>
                 <span class="option-title" id="csv_upload_title">Multiple Student Entry Via CSV Upload</span>
-                <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, MM/DD/YY, late_days</div>
+                <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, YYYY-MM-DD, late_days</div>
             </legend>
-            <input type="file" name="csv_upload" id="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="return updateLateDays($(this));">
             <label for="csv_option_overwrite_all">
-                Upload overwrites <em>all</em> values
                 <input type="radio" name="csv_option" id="csv_option_overwrite_all" value="csv_option_overwrite_all" checked>
+                Upload overwrites&nbsp;<em>all</em>&nbsp;values
             </label>
             <label for="csv_option_preserve_higher">
-                Do not overwrite higher values
                 <input type="radio" name="csv_option" id="csv_option_preserve_higher" value="csv_option_preserve_higher">
+                Do not overwrite higher values
             </label>
+            <input type="file" name="csv_upload" id="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="return updateLateDays($(this));">
         </fieldset>
     </form>
-    <div id="load-late-days" align="center">
-        <div class="option-title" id="late_day_title">Late Days Allowed</div>
-        {# This is a data table #}
-        <table id="late_day_table" class="table table-striped table-bordered persist-area" style="width:80%">
-			<caption />
+    {# This is a data table #}
+    {% if not users or (users|length < 1) %}
+        <p id="empty-table" class="warning">No late days are currently entered</p>
+    {% else %}
+        <table id="late-day-table" class="table table-striped mobile-table">
+            <caption>Late Days Allowed</caption>
             <thead class="persist-thead">
-                <th>Student ID</th>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Total Allowed Late Days</th>
-                <th>Effective Date</th>
-                <th>Delete</th>
+                <tr>
+                    <th>Student ID</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                    <th>Total Allowed Late Days</th>
+                    <th>Effective Date</th>
+                    <th>Delete</th>
+                </tr>
             </thead>
             <tbody>
-            {% if not users or (users|length < 1) %}
-            <tr><td colspan="6">No late days are currently entered.</td></tr>
-            {% else %}
                 {% for user in users %}
-                <tr>
-                    <td>{{ user.getId() }}</td>
-                    <td>{{ user.getDisplayedFirstName() }}</td>
-                    <td>{{ user.getDisplayedLastName() }}</td>
-                    <td>{{ user.getAllowedLateDays() }}</td>
-                    <td>{{ user.getSinceTimestamp() }}</td>
-                    <td><a aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}' onclick="deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"><i class="fas fa-trash"></i></a></td>
-                </tr>
+                    <tr>
+                        <td class="align-left">{{ user.getId() }}</td>
+                        <td class="align-left">{{ user.getDisplayedFirstName() }}</td>
+                        <td class="align-left">{{ user.getDisplayedLastName() }}</td>
+                        <td>{{ user.getAllowedLateDays() }}</td>
+                        <td>{{ user.getSinceTimestamp() }}</td>
+                        <td>
+                            <a 
+                                aria-label='Delete latedays for {{ user.getId() }} on {{ user.getSinceTimestamp() }}' 
+                                href="javascript:deleteLateDays('{{ user.getId() }}', '{{ user.getSinceTimestamp() }}');"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
                 {% endfor %}
-            {% endif %}
             </tbody>
         </table>
-    </div>
+    {% endif %}
 </div>
 <script>
     $("#user_id").autocomplete({
