@@ -243,12 +243,7 @@ jobs:
         - git reset --hard HEAD~1
         - git pull
         - cd ..
-        - set +e
-        - git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor
-        - EXIT_CODE=$?
-        - set -e
-        - test ${EXIT_CODE} -ne 0
-        - popd
+        - EXIT_CODE=0; git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor || EXIT_CODE=$?; test ${EXIT_CODE} -ne 0
     - <<: *03-e2e
       php: 7.3
       if: branch = master OR type = pull_request
