@@ -56,14 +56,16 @@
                             {% if loop.index0 > 0 %}
                                 <span>&gt;</span> {# span required to give conditional rendering #}
                             {% endif %}
-                            {% if b.getUrl() is not empty and not loop.last %}
-                                <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
-                            {% else %}
-                                <span>{{ b.getTitle() }}</span>
-                            {% endif %}
-                            {% if b.getExternalUrl() is not empty %}
-                                <a class="external" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
-                            {% endif %}
+                            <div class="breadcrumb">
+                                {% if b.getUrl() is not empty and not loop.last %}
+                                    <a href='{{ b.getUrl() }}'>{{ b.getTitle() }}</a>
+                                {% else %}
+                                    <span>{{ b.getTitle() }}</span>
+                                {% endif %}
+                                {% if b.getExternalUrl() is not empty %}
+                                    <a class="external-breadcrumb" href="{{ b.getExternalUrl() }}" target="_blank" aria-label="Go to {{ b.getTitle() }}"><i class="fas fa-external-link-alt"></i></a>
+                                {% endif %}
+                            </div>
                         {% endfor %}
                     </div>
                 </div>

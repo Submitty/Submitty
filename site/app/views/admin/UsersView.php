@@ -16,7 +16,7 @@ class UsersView extends AbstractView {
      */
     public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $use_database=false) {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
-        $this->core->getOutput()->addInternalCss('studentlist.css');
+        $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('userform.js');
@@ -44,6 +44,8 @@ class UsersView extends AbstractView {
      */
     public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database=false) {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
+        $this->core->getOutput()->addInternalCss('directory.css');
+        $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');

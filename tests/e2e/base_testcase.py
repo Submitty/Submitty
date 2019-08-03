@@ -149,7 +149,7 @@ class BaseTestCase(unittest.TestCase):
     # clicks the navigation header text to 'go back' pages
     # for homepage, selector can be gradeable list
     def click_header_link_text(self, text, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='breadcrumbs']/a[text()='{}']".format(text)).click()
+        self.driver.find_element_by_xpath("//div[@id='breadcrumbs']/div[@class='breadcrumb']/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     def wait_after_ajax(self):

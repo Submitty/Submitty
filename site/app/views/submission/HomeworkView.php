@@ -205,7 +205,8 @@ class HomeworkView extends AbstractView {
                     $messages[] = ['type' => 'would_get_zero'];
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
-                    $new_late_days_remaining = $late_days_remaining - $new_late_charged;
+                    $new_late_charged = $would_be_days_late-$active_days_late;
+                    $new_late_days_remaining = $late_days_remaining-$new_late_charged;
                     $messages[] = ['type' => 'would_allowed', 'info' => [
                         'charged' => $new_late_charged,
                         'remaining' => $new_late_days_remaining
@@ -244,6 +245,13 @@ class HomeworkView extends AbstractView {
         $students_full = [];
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
         $notebook = $gradeable->getAutogradingConfig()->getNotebook();
+        $would_be_days_late = $gradeable->getWouldBeDaysLate();
+        $active_version_instance = null;
+        if ($graded_gradeable !== null) {
+            $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
+        }
+        $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
+        $days_to_be_charged = $would_be_days_late-$active_days_late;
         $old_files = [];
         $display_version = 0;
 
@@ -399,6 +407,7 @@ class HomeworkView extends AbstractView {
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
+            'days_to_be_charged' => $days_to_be_charged
         ]);
     }
 
