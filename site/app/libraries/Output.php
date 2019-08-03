@@ -290,10 +290,10 @@ HTML;
             }
         }
 
-        if ($success == true) {
-            return $this->core->getOutput()->renderJsonSuccess($message);
+        if ($success === true) {
+            return $this->renderJsonSuccess($message);
         } else {
-            return $this->core->getOutput()->renderJsonFail($message);
+            return $this->renderJsonFail($message);
         }
     }
     
