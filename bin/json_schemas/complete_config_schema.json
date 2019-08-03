@@ -424,7 +424,7 @@
       "description" : "A testcase represents a single test run against student code.",
       "type": "object",
       "additionalProperties" : false,
-      "required" : ["containers", "dispatcher_actions", "points",
+      "required" : ["containers", "solution_containers", "dispatcher_actions", "points",
                     "pre_commands", "single_port_per_container", 
                     "use_router", "title", "validation"],
       "properties" : {
@@ -445,6 +445,13 @@
         },
         "containers" : {
           "description" : "Specifies the environment that will be invoked to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
+          "items" : {
+            "description" : "The environments used to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
+            "$ref" : "#/definitions/container"
+          }
+        },
+        "solution_containers" : {
+          "description" : "Specifies the environment that will be invoked to process this testcase for generation of output automatically. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
           "items" : {
             "description" : "The environments used to process this testcase. When grading using 'autograding_method' : 'docker', multiple containers may be specified to run networked gradeables.",
             "$ref" : "#/definitions/container"

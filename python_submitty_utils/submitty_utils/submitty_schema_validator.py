@@ -88,6 +88,10 @@ def complete_config_validator(j_, s_, warn=True):
         for c in containers:
             validate_schema(c, c_schema, prefix=t_name, warn=warn)
 
+        solution_containers = t['solution_containers']
+        for c in solution_containers:
+            validate_schema(c, c_schema, prefix=t_name, warn=warn)
+
         validators = t['validation']
         validator_num = 0
         # Validate each validation object in the testcase
