@@ -765,22 +765,10 @@ fi
 # DOCKER SETUP
 #################
 
-# WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security
-# These commands should be run manually if testing Docker integration
+# WIP: gets "full" ubuntu basic container for grading CS1 & DS assignments
 
-rm -rf /tmp/docker
-mkdir -p /tmp/docker
-cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
-cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
-
-chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
-
-pushd /tmp/docker
-su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
-popd > /dev/null
-
+su -c 'docker pull submitty/ubuntu:20190803' ${DAEMON_USER}
+su -c 'docker tag submitty/ubuntu:20190803 ubuntu:custom' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES
