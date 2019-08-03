@@ -1,4 +1,32 @@
 <div class="electronic_file">
+
+        <div class="option-title">
+            What are students allowed to do?
+        </div>
+        <div>
+            View the gradeable on the course home page and download submitted files?<br>
+            <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
+                    {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
+            <input type="radio" id="no_student_view" name="student_view" value="false"
+                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
+            <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
+                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> When grades are released
+
+            <input type="radio" id="yes_student_view" name="student_view" value="true"
+                    {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
+        </div>
+
+        <div id="student_submit_view">
+            <div>
+                Make new submissions and access all prior versions?<br>
+                <input type="radio" id="yes_student_submit" name="student_submit" value="true"
+                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+                <input type="radio" id="no_student_submit" name="student_submit" value="false"
+                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
+            </div>
+        </div>
+<br><br>
+
 		<div class="option-title">Choose an autograding configuration:</div>
                 <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
                     "Course Autograding Config Directory"<i style="font-style:normal;" class="helpicon"></i></a>
@@ -29,67 +57,36 @@
 		<input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path' 
 			value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
+    <br><br>
 
-    <div class="btn-container">
-        <input type="button" class="btn btn-default" id="show-advanced-student-permissions" value="Show Student Permission Settings" onclick="showAdvancedStudentPermissions()">
-        <span id="hide-advanced-student-permissions-container" hidden><input type="button" class="btn btn-primary student-permissions" value="Hide Student Permission Settings" onclick="hideAdvancedStudentPermissions()"></span>
+    <div class="btn-container" id="rebuild-gradeable-button">
+        <a class="btn btn-primary" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
     </div>
-    <div class="student-permissions settings" hidden>
-        <div>
-            What are students allowed to do?
-        </div>
-        <div>
-            View the gradeable on the course home page and download submitted files?
-            <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
-                    {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_view" name="student_view" value="false"
-                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
-            <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> When grades are released
+	
+	<div id="rebuild-status-panel">
+		<span id="rebuild-status-label">Build Status: </span>
+		<div id="rebuild-status"></div>
+	</div>
+	
+	<div id="rebuild-log-button">	
+		<input type="button" class="btn btn-default" id="open-build-log" type="button" value="Open Build Log" onclick="showBuildLog()" />
+		<input type="button" class="btn btn-primary" id="close-build-log" type="button" value="Close Build Log" onclick="hideBuildLog()" />
+	</div>
+	
+	<div class="log-container" hidden>
+		<div class="option-title">Build log:</div>
+		<pre id="build-log-body"></pre>
+	</div>
 
-            <input type="radio" id="yes_student_view" name="student_view" value="true"
-                    {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
-        </div>
+	<div class="log-container" hidden>
+		<div class="option-title">CMake output:</div>
+		<pre id="cmake-log-body"></pre>
+	</div>
 
-        <div id="student_submit_view">
-            <div>
-                Make new submissions and access all prior versions?
-                <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
-                <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
-            </div>
-        </div>
-    </div>
-    <div class="btn-container">
-        <a class="btn btn-primary" href="{{ rebuild_url }}">Rebuild Gradeable (only necessary if you have modified your custom configuration files)</a>
-    </div>
-    <div class="log-container">
-        <div class="option-title">Build log:</div>
-        {% if build_script_output is null or build_script_output is empty %}
-            <pre>There is currently no build output.</pre>
-        {% else %}
-            <pre>{{ build_script_output|raw }}</pre>
-        {% endif %}
-    </div>
-
-    <div class="log-container">
-        <div class="option-title">CMake output:</div>
-        {% if cmake_output is null or cmake_output is empty %}
-            <pre>There is currently no cmake output.</pre>
-        {% else %}
-            <pre>{{ cmake_output|raw }}</pre>
-        {% endif %}
-    </div>
-
-    <div class="log-container">
-        <div class="option-title">Make output:</div>
-        {% if make_output is null or make_output is empty %}
-            <pre>There is currently no make output.</pre>
-        {% else %}
-            <pre>{{ make_output|raw }}</pre>
-        {% endif %}
-    </div>
+	<div class="log-container" hidden>
+		<div class="option-title">Make output:</div>
+		<pre id="make-log-body"></pre>
+	</div>
 
 </div>
 
@@ -185,18 +182,6 @@
         no_due_date.change();
     }
 
-    function showAdvancedStudentPermissions() {
-        $('.student-permissions').show();
-        $('#hide-advanced-student-permissions-container').show();
-        $('#show-advanced-student-permissions').hide();
-    }
-
-    function hideAdvancedStudentPermissions() {
-        $('.student-permissions').hide();
-        $('#hide-advanced-student-permissions-container').hide();
-        $('#show-advanced-student-permissions').show();
-    }
-
     $(document).ready(function() {
 
         // Hide PDF settings if not in use
@@ -226,9 +211,5 @@
             sub.prop('checked', true);
             sub.change();
         });
-
-        {% if is_in_rebuild_queue %}
-            checkRefreshPage("{{ check_refresh_url|raw }}");
-        {% endif %}
     });
 </script>
