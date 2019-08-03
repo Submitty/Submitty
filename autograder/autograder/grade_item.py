@@ -669,18 +669,18 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # copy any instructor instructor_solution code into the tmp work directory
     copy_contents_into(job_id,instructor_solution_path,tmp_work_instructor_solution,tmp_logs)
 
-    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     # copy validator.out to the current directory
     shutil.copy (os.path.join(bin_path,"validate.out"),os.path.join(tmp_work,"my_validator.out"))
 
     # give the untrusted user read/write/execute permissions on the tmp directory & files
-    add_permissions_recursive(tmp_work,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
-                              stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+    untrusted_grant_rwx_access(which_untrusted, tmp_work)
+    add_all_permissions(tmp_work)
+
 
     add_permissions(os.path.join(tmp_work,"my_validator.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
+
+    subprocess.call(['ls', '-lR', '.'], stdout=open(tmp_logs + "/overall.txt", 'a'))
 
     #todo remove prints.
     print("VALIDATING")
@@ -722,7 +722,7 @@ def grade_from_zip(my_autograding_zip_file,my_submission_zip_file,which_untruste
     # grab the result of autograding
     grade_result = ""
     try:
-        with open(os.path.join(tmp_work,"grade.txt")) as f:
+        with open(os.path.join(tmp_work,"grade.txt"), 'r') as f:
             lines = f.readlines()
             for line in lines:
                 line = line.rstrip('\n')
