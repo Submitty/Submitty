@@ -157,10 +157,21 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
-.helpicon::before {
+.fa-question-circle{
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
   color: var(--actionable-blue);
+  font-weight: 300;
+  display: inline-block;
+}
+
+.fa-question-circle.disabled,
+.fa-question-circle[disabled],
+.disabled>.fa-question-circle,
+[disabled]>.fa-question-circle{
+  font-family: 'Font Awesome 5 Free';
+  color: var(--standard-light-gray);
+  content: "\f059";
   font-weight: 300;
   display: inline-block;
 }
