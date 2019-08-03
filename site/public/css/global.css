@@ -51,14 +51,17 @@ nav a > i.f {
 #breadcrumbs {
     display: flex;
     width: 1px;
-    overflow-x: auto;
     flex: 1 1 auto;
-    white-space: nowrap;
+    flex-wrap: wrap;
 }
 
 #breadcrumbs > *:not(:last-child) {
     padding-right: 7px;
     display: none;
+}
+
+.external-breadcrumb {
+    padding-left: 7px;
 }
 
 #logout-button {

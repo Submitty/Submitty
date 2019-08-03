@@ -156,7 +156,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         }
         expected = tcg.value("expected_file", "");
         if (expected != "") {
-          std::string expectedWithFolder = "test_output/" + expected;
+          std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
           fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
           if (!expectedFileExists) {
             BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
@@ -170,7 +170,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             result.printJSON(diff_stream);
             std::stringstream expected_path;
             std::string id = hw_id;
-            std::string expected_out_dir = "test_output/" + id + "/";
+            std::string expected_out_dir = getPathForOutputFile(my_testcase, expected, id);
             expected_path << expected_out_dir << expected;
             if (show_expected) {
              autocheck_j["expected_file"] = expected_path.str();

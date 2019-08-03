@@ -1023,7 +1023,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   input_file.close();
 
   command = command + " 1>" + output_file_name;
-  int ret = execute(command, 
+  int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
   std::remove(input_file_name.c_str());
