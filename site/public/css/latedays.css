@@ -1,44 +1,34 @@
 fieldset {
-    display: flex;
     margin: 1em 0;
 }
 
-fieldset > * {
-    padding-right: 2em;
+#late-day-form label {
+    display: flex;
+    flex: 1 0 auto;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0.5em 0;
 }
 
-#late-day-history li {
-    margin-left: 30px;
+#single-student-late-day input {
+    width: 100%;
 }
 
-#late-day-table th,
-#late-day-table td {
-    text-align: center;
-    padding: 5px 10px;
-}
+#late-day-table td:nth-of-type(1):before { content: "Student ID"; }
+#late-day-table td:nth-of-type(2):before { content: "First Name"; }
+#late-day-table td:nth-of-type(3):before { content: "Last Name"; }
+#late-day-table td:nth-of-type(4):before { content: "Total Allowed Late Days"; }
+#late-day-table td:nth-of-type(5):before { content: "Effective Date"; }
+#late-day-table td:nth-of-type(6):before { content: "Delete"; }
 
-#late-day-table td:nth-of-type(1):before { content: "Assignment"; }
-#late-day-table td:nth-of-type(2):before { content: "Due date"; }
-#late-day-table td:nth-of-type(3):before { content: "Max late days"; }
-#late-day-table td:nth-of-type(4):before { content: "Days submitted late"; }
-#late-day-table td:nth-of-type(5):before { content: "Days from extensions"; }
-#late-day-table td:nth-of-type(6):before { content: "Status"; }
-#late-day-table td:nth-of-type(7):before { content: "Late days used here"; }
+@media (min-width: 768px) {
+    #single-student-late-day label {
+        flex: 0 0 0;
+        width: 420px;
+        justify-content: space-between;
+    }
 
-@media (min-width: 831px) {   
-    #late-day-table {
-        margin: 1em 0 0;
-    }
-        
-    #late-day-table thead tr {
-        background: var(--standard-light-gray);
-    }
-    
-    #late-day-table tbody tr:nth-child(even) {
-        background: var(--standard-hover-light-gray);
-    }
-    
-    #late-day-table td:before {
-        content: none !important;
+    #single-student-late-day input {
+        width: auto;
     }
 }
