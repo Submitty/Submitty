@@ -2,34 +2,39 @@
 {% block popup_id %}upload-course-materials-form{% endblock %}
 {% block title %}Upload Course Materials{% endblock %}
 {% block body %}
-    <p>
-        Total files cannot exceed {{ max_size_string }}.<br>
-    </p>
-    <br/>
-
-    <b>Full path to the directory containing the course material file(s):</b><br>
-    <fieldset>
-        <p><br>Add folder(s) to the course_materials folder if necessary: <br>
-        (ex: homework1 or homework1/classes/pokemon) <br><br>
-        Current folder setting:</p>
-         <label id="cm_path">{{ folderPath~'/'~courseMaterial }}</label>
-        <input style='width: auto' type='text' id='input_provide_full_path' name='eg_config_path' value="" placeholder="(Optional)"/>
-        <br><input id="expand_zip_checkbox" type="checkbox" value="off"/><label>Unzip zip files (Note: If checked, will replace all folders/files)</label>
-    </fieldset>
-    <br /> <br />
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
-        <div id="upload1" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 20px;">
-            <h3 class="label" id="label">"Drag your file(s) here or click to open file browser"</h3>
-            <input type="file" name="files" id="input_file1" style="display: none" onchange="addFilesFromInput(1,false)" multiple />
+    <div id="material-upload-form" class="flex-col flex-col-space">
+        <p>
+            <strong>Path to directory containing course materials file(s):</strong><br />
+            {{ folderPath~'/'~courseMaterial }}
+        </p>
+        <label id="cm_path">
+            <p>
+                <strong>Optional: ammend the above path to use a sub directory</strong><br />
+                e.g. "optional/subdirectory" makes the full path:<br />
+                {{ folderPath~'/'~courseMaterial }}optional/subdirectory
+            </p>
+            <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
+        </label>
+        <label>
+            <input id="expand-zip-checkbox" type="checkbox" value="off"/>
+            Unzip zip files (Note: If checked, will replace all folders/files)
+        </label>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <div id="upload-boxes">
+            {# upload1 and input_file1 required for drag-and-drop.js #}
+            <div id="upload1" class="file-input">
+                <label class="label" for="input-file">"Drag your file(s) here or click to open file browser"</label>
+                <input type="file" name="files" id="input_file1" onchange="addFilesFromInput(1,false)" multiple />
+            </div>
         </div>
+        <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
     <script type="text/javascript">
         function makeSubmission(expandZip,cmPath, requestedPath) {
             handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath);
         }
         $(function() {
-            $("#submit_materials").click(function(e){ // Submit button
+            $("#submit-materials").click(function(e){ // Submit button
                 var cb = $("input#expand_zip_checkbox");
                 var expandZip = 'off';
                 if (cb.is(":checked")) {
@@ -38,7 +43,7 @@
 
                 var cmPath = document.getElementById('cm_path').innerHTML;
 
-                var requestedPath = document.getElementById("input_provide_full_path").value;
+                var requestedPath = document.getElementById("input-provide-full-path").value;
                 makeSubmission(expandZip, cmPath, requestedPath);
                 e.stopPropagation();
             });
@@ -56,5 +61,5 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" id="submit_materials" type="submit" value="Submit" />
+    <input class="btn btn-primary" id="submit-materials" type="submit" value="Submit" />
 {% endblock %}

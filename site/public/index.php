@@ -300,38 +300,6 @@ if ($is_api) {
 }
 elseif (!$supported_by_new_router) {
     switch($_REQUEST['component']) {
-        case 'admin':
-            $control = new app\controllers\AdminController($core);
-            $control->run();
-            break;
-        case 'grading':
-            $control = new app\controllers\GradingController($core);
-            $control->run();
-            break;
-        case 'misc':
-            $control = new app\controllers\MiscController($core);
-            $control->run();
-            break;
-        case 'student':
-            $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'submission':
-            $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'forum':
-            $control = new app\controllers\forum\ForumController($core);
-            $control->run();
-            break;
-        case 'notification':
-            $control = new app\controllers\NotificationController($core);
-            $control->run();
-            break;
-        case 'pdf':
-            $control = new app\controllers\pdf\PDFController($core);
-            $control->run();
-            break;
         default:
             $control = new app\controllers\AuthenticationController($core, $logged_in);
             $control->run();

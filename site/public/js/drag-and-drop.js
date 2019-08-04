@@ -104,15 +104,15 @@ function addFilesFromInput(part, check_duplicate_zip=true){
 // 0 - a file with the same name already selected for this version
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
-function fileExists(file, part){
+function fileExists(filename, part){
     for(var i = 0; i < previous_files[part-1].length; i++){
-        if(previous_files[part-1][i] == file.name){
+        if(previous_files[part-1][i] == filename){
             return [1, i];
         }
     }
 
     for(var j = 0; j < file_array[part-1].length; j++){
-        if(file_array[part-1][j].name == file.name){
+        if(file_array[part-1][j].name == filename){
             return [0, j];
         }
     }
@@ -144,7 +144,7 @@ function isFolder(file){
 }
 
 function addFile(file, part, check_duplicate_zip=true){
-    var i = fileExists(file, part);
+    var i = fileExists(file.name, part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
@@ -276,7 +276,7 @@ function addLabel(filename, filesize, part, previous){
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
     tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash'></i><br />";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i><br />";
 
     // styling
     tmp.children[0].onmouseover = function(e){
@@ -384,8 +384,7 @@ function isValidSubmission(){
  * user_id can be an array of ids to validate multiple at once for teams
  */
 function validateUserId(csrf_token, gradeable_id, user_id){
-    var url = buildUrl({'component': 'student', 'page': 'submission', 
-                        'action': 'verify', 'gradeable_id': gradeable_id});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'verify']);
     return new Promise(function (resolve, reject) {
         $.ajax({
             url : url,
@@ -548,9 +547,7 @@ function displayPreviousSubmissionOptions(callback){
  * Ajax call to submit a split item to a student. Optional params to merge and or clobber previous submissions
  */
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous=false, clobber=false) {
-    var url = buildUrl({'component': 'student', 'page': 'submission', 
-                        'action': 'upload_split', 'gradeable_id': gradeable_id, 
-                        'merge': merge_previous, 'clobber': clobber});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'upload']) + '?merge=' + merge_previous + '&clobber=' + clobber;
 
     return new Promise(function (resolve, reject) {
         $.ajax({
@@ -586,7 +583,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
 */
 function deleteSplitItem(csrf_token, gradeable_id, path) {
 
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete_split', 'gradeable_id': gradeable_id});
+    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'delete']);
 
     return new Promise(function (resolve, reject) {
         $.ajax({
@@ -640,6 +637,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
+    formData.append('csrf_token', csrfToken);
 
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
@@ -662,8 +660,8 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
         }
     }
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk', 'gradeable_id': gradeable_id});
-    var return_url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk']);
+    var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
 
     $.ajax({
         url: url,
@@ -756,11 +754,10 @@ function gatherInputAnswersByType(type){
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
-
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
-    var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
+    var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
 
     var message = "";
     // check versions used
@@ -772,7 +769,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     }
     // check due date
     if (days_late > 0 && days_late <= late_days_allowed) {
-        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_late + " late day(s)?";
+        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
@@ -990,8 +987,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
                 return;
             }
 
-            var file = new File([""], target_path + "/" + file_array[i][j].name);
-            var k = fileExists(file, 1);
+            var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
             // Check conflict here
             if ( k[0] == 1 )
             {

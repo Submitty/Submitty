@@ -1,0 +1,72 @@
+{
+    "testcases" : [
+
+        // *************** COMPILATION *****************
+        {
+            "type" : "Compilation",
+            "title" : "Compilation",
+            "command" : "clang++ -Wall -o a.out -- *.cpp",
+            "executable_name" : "a.out",
+            "points" : 3
+        },
+        // *************** TEST CASES *****************
+        {
+            "title" : "Cinco de Mayo 5 5 2019",
+            "command" : "./a.out < cinco_de_mayo.txt",
+            "solution_commands": [ "python3 solution.py cinco_de_mayo.txt 1>generated_output.txt" ],
+            "points" : 3,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "generated_output.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Halloween 10 31 2019",
+            "command" : "./a.out < halloween.txt",
+            "solution_commands":[ "python3 solution.py halloween.txt 1>generated_output.txt" ],
+            "points" : 3,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "generated_output.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Random Input #1",
+            "input_generation_commands" : [ 
+                    "python3 generator.py 1> randominput.txt"
+                ],
+            "command" : "./a.out < randominput.txt",
+            "solution_commands":[ "python3 solution.py randominput.txt 1>randomoutput.txt" ],
+            "points" : 3,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "randomoutput.txt"
+                }
+            ]
+        },
+        {
+            "title" : "Random Input #2",
+            "input_generation_commands" : [ 
+                    "python3 generator.py 1> randominput.txt"
+                ],
+            "command" : "./a.out < randominput.txt",
+            "solution_commands":[ "python3 solution.py randominput.txt 1>randomoutput.txt" ],
+            "points" : 3,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "expected_file" : "randomoutput.txt"
+                }
+            ]
+        }
+    ]
+}

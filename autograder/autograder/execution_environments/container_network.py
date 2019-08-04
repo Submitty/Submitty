@@ -304,6 +304,10 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       # A .1 second delay after each action to keep things flowing smoothly.
       time.sleep(.1)
 
+    if len(self.dispatcher_actions) > 0:
+      send_message_to_processes("SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
+
+
   def get_container_with_name(self, name):
     for container in self.containers:
       if container.name == name:
@@ -350,7 +354,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     for container in self.containers:
       self._setup_single_directory_for_compilation(container.directory)
       # Run any necessary pre_commands
-    self._run_pre_commands()
+    self._run_pre_commands(self.directory)
 
 
   def setup_for_execution_testcase(self, testcase_dependencies):
@@ -365,14 +369,29 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         autograding_utils.add_all_permissions(container.directory)
 
     
-    self._run_pre_commands()
+    self._run_pre_commands(self.directory)
+
+  def setup_for_random_output(self, testcase_dependencies):
+    os.chdir(self.tmp_work)
+    for container in self.containers:
+      random_output_container_directory = os.path.join(self.random_output_directory, container.name)
+
+      self._setup_single_directory_for_random_output(random_output_container_directory, testcase_dependencies)
+
+      if container.import_router:
+        router_path = os.path.join(self.tmp_autograding, "bin", "submitty_router.py")
+        self.log_message(f"COPYING:\n\t{router_path}\n\t{random_output_container_directory}")
+        shutil.copy(router_path, random_output_container_directory)
+        autograding_utils.add_all_permissions(random_output_container_directory)
+    
+    self._run_pre_commands(self.random_output_directory)
 
 
   def setup_for_archival(self, overall_log):
     """
     Archive the results of an execution and validation.
     """
-    self.setup_for_testcase_archival()
+    self.setup_for_testcase_archival(overall_log)
     test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
     
     for container in self.containers:
@@ -380,9 +399,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         public_dir = os.path.join(self.tmp_results,"results_public", self.name, container.name)
         details_dir = os.path.join(self.tmp_results, "details", self.name, container.name)
         os.mkdir(public_dir)
-        os.mkdir(details_dir)
-      # Remove any files that are also in the test output folder
-      autograding_utils.remove_test_input_files(overall_log, test_input_path, container.directory)    
+        os.mkdir(details_dir)    
 
 
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
@@ -397,7 +414,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       return
 
     try:
-      self.create_containers(script, arguments)
+      self.create_containers( os.path.join(cwd, script), arguments)
       self.network_containers()
     except Exception as e:
       self.log_message('ERROR: Could not create or network containers. See stack trace output for more details.')

@@ -187,6 +187,8 @@ pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
 pip3 install distro
+pip3 install jsonschema
+pip3 install jsonref
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
@@ -327,7 +329,6 @@ echo "Getting JUnit & Hamcrest..."
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
 if [ ${WORKER} == 0 ]; then
@@ -347,19 +348,6 @@ popd > /dev/null
 
 # TODO:  Want to Install JUnit 5.0
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
-
-
-# EMMA is a tool for computing code coverage of Java programs
-echo "Getting emma..."
-
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma > /dev/null
-wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
-unzip emma-${EMMA_VERSION}.zip > /dev/null
-mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VERSION}*
-chmod o+r . *.jar
-popd > /dev/null
 
 
 # JaCoCo is a replacement for EMMA
@@ -447,10 +435,9 @@ if [ ${WORKER} == 0 ]; then
         rm /etc/apache2/sites*/000-default.conf
         rm /etc/apache2/sites*/default-ssl.conf
 
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-        # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+        cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require ip ${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
@@ -621,29 +608,28 @@ if [ ${WORKER} == 1 ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
-    # This should be set by setup_distro.sh for whatever distro we have, but
-    # in case it is not, default to our primary URL
-    if [ -z "${SUBMISSION_URL}" ]; then
-        SUBMISSION_URL='http://192.168.56.101'
-    fi
-    echo -e "/var/run/postgresql
-    ${DB_USER}
-    ${DATABASE_PASSWORD}
-    America/New_York
-    ${SUBMISSION_URL}
+        # This should be set by setup_distro.sh for whatever distro we have, but
+        # in case it is not, default to our primary URL
+        if [ -z "${SUBMISSION_URL}" ]; then
+            SUBMISSION_URL='http://192.168.56.101'
+        fi
+        echo -e "/var/run/postgresql
+${DB_USER}
+${DATABASE_PASSWORD}
+America/New_York
+${SUBMISSION_URL}
 
 
-    1
+1
 
 
-    y
+y
 
 
-    submitty@vagrant
-    do-not-reply@vagrant
-    localhost
-    25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
-
+submitty@vagrant
+do-not-reply@vagrant
+localhost
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -724,15 +710,26 @@ if [ ${WORKER} == 0 ]; then
         rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
 
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
         chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -743,12 +740,6 @@ if [ ${WORKER} == 0 ]; then
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
-
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then

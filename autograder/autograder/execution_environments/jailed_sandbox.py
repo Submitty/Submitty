@@ -17,13 +17,19 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     """
     Archive the results of an execution and validation.
     """
-    self.setup_for_testcase_archival()
+    self.setup_for_testcase_archival(overall_log)
     test_input_path = os.path.join(self.tmp_autograding, 'test_input')
     public_dir = os.path.join(self.tmp_results,"results_public", self.name)
     details_dir = os.path.join(self.tmp_results, "details", self.name)
 
-    # Remove any files that are also in the test output folder
-    autograding_utils.remove_test_input_files(overall_log, test_input_path, self.directory)    
+
+  def execute_random_input(self, untrusted_user, script, arguments, logfile, cwd=None):
+    self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_input_directory)
+
+
+  def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
+    self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_output_directory)
+
 
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
 
@@ -37,7 +43,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
       self.log_message("ERROR: Could not verify execution mode status.")
       return
 
-    script = os.path.join(self.directory, script)
+    script = os.path.join(cwd, script)
     if self.is_test_environment:
       full_script = [script, ]
     else:

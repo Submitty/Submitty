@@ -15,7 +15,7 @@ class PDFView extends AbstractView {
     public function showPDFEmbedded($params){
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $pdf_url = $this->core->buildUrl(array('component' => 'misc', 'page' => 'base64_encode_pdf'));
+        $pdf_url = $this->core->buildNewCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
         $is_student = $params["is_student"];
 
         $localcss = array();
@@ -26,6 +26,7 @@ class PDFView extends AbstractView {
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
+        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf-annotate.js', 'pdf-annotate.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'PDFAnnotateEmbedded.js'), 'js');
 

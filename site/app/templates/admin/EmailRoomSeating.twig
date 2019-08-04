@@ -4,7 +4,8 @@
 	<h1>Email Room Seating Assignments</h1>
 
  <p>Customize an email to be sent to each student detailing their seating assignment for the selected seating configuration. Placeholder variables will be replaced with actual respective seating data upon successful submission of this form.</p>
- <form method="post" id="form_seating_assignment_email" action="{{ core.buildUrl({'component': 'admin', 'page': 'email_room_seating', 'action': 'send_email' }) }}">
+ <form method="post" id="form_seating_assignment_email" action="{{ send_email_url }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 	<p style="margin-top:15px;"><b>Email Subject</b></p>
 	<div class="option-input">
 	<textarea name="room_seating_email_subject" id="room_seating_email_subject" rows="10">{{ defaultSubject }}</textarea>

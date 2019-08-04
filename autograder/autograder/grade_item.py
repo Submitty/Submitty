@@ -83,7 +83,28 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         overall_log.flush()
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
-        
+
+        # RANDOM INPUT GENERATION
+        print ("====================================\nRANDOM INPUT GENERATION STARTS", file=overall_log)
+        for tc in testcases:
+            if tc.has_input_generator_commands:
+                tc.generate_random_inputs()
+                overall_log.flush()
+
+                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                       which_untrusted,
+                                                       os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                       stdout=overall_log)
+          
+                if killall_success != 0:
+                    print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                else:
+                    print ("KILLALL COMPLETE RANDOM INPUT GENERATION",file=overall_log)
+                overall_log.flush()
+
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+        overall_log.flush()
+
         # EXECUTE
         print ("====================================\nRUNNER STARTS", file=overall_log)
         overall_log.flush()
@@ -99,11 +120,32 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
       
                 print ("LOGGING END my_runner.out",file=overall_log)
                 if killall_success != 0:
-                    print('RUNNER ERROR: had to kill {} process(es)'.format(killall_success))
+                    print('RUNNER ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
                 else:
                     print ("KILLALL COMPLETE my_runner.out",file=overall_log)
                 overall_log.flush()
+
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+        overall_log.flush()
         
+        # RANDOM OUTPUT GENERATION
+        print ("====================================\RANDOM OUTPUT GENERATION STARTS", file=overall_log)
+        for tc in testcases:
+            if tc.has_solution_commands:
+                tc.generate_random_outputs()
+                overall_log.flush()
+
+                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                   which_untrusted,
+                                                   os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                   stdout=overall_log)
+          
+                if killall_success != 0:
+                    print('INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                else:
+                    print ("KILLALL COMPLETE INPUT GENERATION",file=overall_log)
+                overall_log.flush()
+
         
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
@@ -157,4 +199,3 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
 if __name__ == "__main__":
     raise SystemExit('ERROR: Do not call this script directly')
-

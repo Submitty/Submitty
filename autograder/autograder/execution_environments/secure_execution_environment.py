@@ -35,6 +35,9 @@ class SecureExecutionEnvironment():
     self.checkout_path = os.path.join(self.tmp_submission, "checkout")
     self.checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     self.directory = os.path.join(self.tmp_work, testcase_directory)
+    self.random_input_directory = os.path.join(self.tmp_work, 'random_input', testcase_directory)
+    self.instructor_solution_path = os.path.join(self.tmp_work, "instructor_solution")
+    self.random_output_directory = os.path.join(self.tmp_work,"random_output", testcase_directory)
 
     if is_test_environment == False:
       from .. import CONFIG_PATH
@@ -42,7 +45,7 @@ class SecureExecutionEnvironment():
         OPEN_JSON = json.load(open_file)
       self.SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 
-  def _run_pre_commands(self):
+  def _run_pre_commands(self, target_directory):
     for pre_command in self.pre_commands:
       command = pre_command['command']
       source_testcase   = pre_command["testcase"]
@@ -51,7 +54,7 @@ class SecureExecutionEnvironment():
 
       if command == 'cp':
         try:
-          autograding_utils.pre_command_copy_file(source_testcase, source_directory, self.directory, 
+          autograding_utils.pre_command_copy_file(source_testcase, source_directory, target_directory, 
                                                   destination, self.job_id, self.tmp_logs,
                                                   self.log_path, self.stack_trace_log_path)
         except Exception as e:
@@ -82,11 +85,12 @@ class SecureExecutionEnvironment():
     autograding_utils.add_permissions(os.path.join(directory,"my_compile.out"), stat.S_IXUSR | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)
     autograding_utils.add_all_permissions(directory)
 
-  def lockdown_directory_after_execution(self):
+  def lockdown_directory_after_execution(self, directory=None):
+    directory = self.directory if directory is None else directory
     if self.is_test_environment == False:
-        autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, self.directory)
-    autograding_utils.add_all_permissions(self.directory)
-    autograding_utils.lock_down_folder_permissions(self.directory)
+        autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory)
+    autograding_utils.add_all_permissions(directory)
+    autograding_utils.lock_down_folder_permissions(directory)
 
   def _setup_single_directory_for_execution(self, directory, testcase_dependencies):
     # Make the testcase folder
@@ -113,6 +117,9 @@ class SecureExecutionEnvironment():
     test_input_path = os.path.join(self.tmp_work, 'test_input')
     autograding_utils.copy_contents_into(self.job_id, test_input_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
 
+    if os.path.exists(self.random_input_directory):
+      autograding_utils.pattern_copy("random_input_to_runner", ["*.txt",], self.random_input_directory, directory, self.tmp_logs)
+
     # copy runner.out to the current directory
     bin_runner = os.path.join(self.tmp_autograding, "bin","run.out")
     my_runner  = os.path.join(directory, "my_runner.out")
@@ -123,22 +130,58 @@ class SecureExecutionEnvironment():
 
     # Add the correct permissions to the target folder.
     if self.is_test_environment == False:
-      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, self.directory)
+      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory)
 
     autograding_utils.add_all_permissions(directory)
+
+  def _setup_single_directory_for_random_output(self, directory, testcase_dependencies):
+    self._setup_single_directory_for_execution(directory, testcase_dependencies)
+    
+    # copy any instructor provided solution code files to testcase folder
+    autograding_utils.copy_contents_into(self.job_id, self.instructor_solution_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
+    
+    # TODO: Make use of other files except txt files 
+    autograding_utils.pattern_copy("random_input_to_runner",["*.txt"], self.random_input_directory, directory, self.tmp_logs)
+
+    # This untrusted_grant_rwx call may be redundant.
+    if self.is_test_environment == False:
+      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory)
+    autograding_utils.add_all_permissions(directory)
+
+  def setup_for_input_generation(self):
+    # Make the testcase folder
+    os.makedirs(self.random_input_directory)
+
+    # copy any instructor provided solution code files to testcase folder
+    autograding_utils.copy_contents_into(self.job_id, self.instructor_solution_path, self.random_input_directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
+    
+    # copy run.out to the current directory
+    bin_path = os.path.join(self.tmp_autograding, 'bin')
+    shutil.copy (os.path.join(bin_path,"run.out"),os.path.join(self.random_input_directory,"my_runner.out"))
+    
+    if self.is_test_environment == False:
+      autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, self.random_input_directory)
+    autograding_utils.add_permissions(os.path.join(self.random_input_directory, "my_runner.out"), stat.S_IXUSR | stat.S_IXGRP |stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH)          
+    autograding_utils.add_all_permissions(self.random_input_directory)
+
+  def setup_for_random_output(self, testcase_dependencies):
+    os.chdir(self.tmp_work)
+    self._setup_single_directory_for_random_output(self.random_output_directory, testcase_dependencies)
+    self._run_pre_commands(self.random_output_directory)
+
 
   def setup_for_compilation_testcase(self):
     os.chdir(self.tmp_work)
     self._setup_single_directory_for_compilation(self.directory)
     # Run any necessary pre_commands
-    self._run_pre_commands()
+    self._run_pre_commands(self.directory)
 
   def setup_for_execution_testcase(self, testcase_dependencies):
     os.chdir(self.tmp_work)
     self._setup_single_directory_for_execution(self.directory, testcase_dependencies)
-    self._run_pre_commands()
+    self._run_pre_commands(self.directory)
 
-  def setup_for_testcase_archival(self):
+  def setup_for_testcase_archival(self, overall_log):
     os.makedirs(os.path.join(self.tmp_results,"details"), exist_ok=True)
     os.makedirs(os.path.join(self.tmp_results,"results_public"), exist_ok=True)
     os.chdir(self.tmp_work)
@@ -149,12 +192,27 @@ class SecureExecutionEnvironment():
     os.mkdir(details_dir)
     os.mkdir(public_dir)
 
+    test_input_path = os.path.join(self.tmp_work, 'test_input')
+    autograding_utils.remove_test_input_files(overall_log, test_input_path, self.directory) 
+
+    if os.path.exists(self.random_output_directory):
+        autograding_utils.remove_test_input_files(overall_log, test_input_path, self.random_output_directory)
+
   def archive_results(self, overall_log):
+    raise NotImplementedError
+
+  # Should start with a chdir and end with a chdir
+  def execute_random_input(self, untrusted_user, executable, arguments, logfile, cwd):
+    raise NotImplementedError
+
+  # Should start with a chdir and end with a chdir
+  def execute_random_output(self, untrusted_user, executable, arguments, logfile, cwd):
     raise NotImplementedError
 
   # Should start with a chdir and end with a chdir
   def execute(self, untrusted_user, executable, arguments, logfile, cwd):
     raise NotImplementedError
+
 
   def verify_execution_status(self):
 

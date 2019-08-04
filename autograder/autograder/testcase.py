@@ -33,6 +33,19 @@ class Testcase():
     else:
       self.secure_environment = jailed_sandbox.JailedSandbox(job_id, untrusted_user, self.testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
                                                              testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment)
+    
+    input_generation_commands = complete_config_obj["testcases"][number-1].get('input_generation_commands',None)
+    if input_generation_commands is not None:
+      self.has_input_generator_commands = True if len(input_generation_commands) > 0 else False
+    else:
+      self.has_input_generator_commands = False
+
+    solution_containers = complete_config_obj["testcases"][number-1].get('solution_containers', None)
+    if solution_containers is not None and len(solution_containers) > 0:
+      self.has_solution_commands = True if len(solution_containers[0]['commands']) > 0 else False
+    else:
+      self.has_solution_commands = False
+
 
   def _run_execution(self):
     self.secure_environment.setup_for_execution_testcase(self.dependencies)
@@ -94,10 +107,80 @@ class Testcase():
       success = self._run_execution()
     
     if success == 0:
-      print(self.machine, self.untrusted_user, "{0} OK".format(self.type.upper()))
+      print(self.machine, self.untrusted_user, f"{self.type.upper()} TESTCASE {self.number} OK")
     else:
-      print(self.machine, self.untrusted_user, "{0} FAILURE".format(self.type.upper()))
-      self.secure_environment.log_message("{0} FAILURE".format(self.type.upper()))   
+      print(self.machine, self.untrusted_user, f"{self.type.upper()} TESTCASE {self.number} FAILURE")
+      self.secure_environment.log_message(f"{self.type.upper()} TESTCASE {self.number} FAILURE")
+
+  def generate_random_inputs(self):
+    
+    if not self.has_input_generator_commands:
+      return
+    
+    self.secure_environment.setup_for_input_generation()
+    with open(os.path.join(self.secure_environment.tmp_logs,"input_generator_log.txt"), 'a') as logfile:
+
+      arguments = [
+        self.queue_obj['gradeable'],
+        self.queue_obj['who'],
+        str(self.queue_obj['version']),
+        self.submission_string,
+        '--testcase', str(self.number),
+        '--generation_type',str('input')
+      ]
+      
+      try:
+        success = self.secure_environment.execute_random_input(self.untrusted_user, 'my_runner.out', arguments, logfile, cwd=self.secure_environment.random_input_directory )
+      except Exception as e:
+        success = -1
+        self.secure_environment.log_message("ERROR thrown by input generator. See traces entry for more details.")
+        self.secure_environment.log_stack_trace(traceback.format_exc())
+      finally:
+        self.secure_environment.lockdown_directory_after_execution(self.secure_environment.random_input_directory)
+
+      if success == 0:
+        print(self.machine, self.untrusted_user, f"INPUT GENERATION TESTCASE {self.number} OK")
+      else:
+        print(self.machine, self.untrusted_user, f"INPUT GENERATION TESTCASE {self.number} FAILURE")
+        self.secure_environment.log_message(f"INPUT GENERATION TESTCASE {self.number} FAILURE")
+      return success
+
+  def generate_random_outputs(self):
+    
+    if not self.has_solution_commands:
+      return
+    
+    self.secure_environment.setup_for_random_output(self.dependencies)
+    with open(os.path.join(self.secure_environment.tmp_logs,"output_generator_log.txt"), 'a') as logfile:
+      logfile.write("\n\nMADE IT INTO OUTPUT GENERATION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!1\n")
+      arguments = [
+        self.queue_obj["gradeable"],
+        self.queue_obj["who"],
+        str(self.queue_obj["version"]),
+        self.submission_string,
+        '--testcase', str(self.number),
+        '--generation_type',str('output')
+      ]
+      
+      try:
+        success = self.secure_environment.execute_random_output(self.untrusted_user, 'my_runner.out', arguments, logfile, cwd=self.secure_environment.random_output_directory )
+      except Exception as e:
+        success = -1
+        self.secure_environment.log_message("ERROR thrown by output generator. See traces entry for more details.")
+        self.secure_environment.log_stack_trace(traceback.format_exc())
+      finally:
+        self.secure_environment.lockdown_directory_after_execution( self.secure_environment.random_output_directory )
+
+      if success == 0:
+        print(self.machine, self.untrusted_user, f"OUTPUT GENERATION TESTCASE {self.number} OK")
+      else:
+        print(self.machine, self.untrusted_user, f"OUTPUT GENERATION TESTCASE {self.number} FAILURE")
+        self.secure_environment.log_message(f"OUTPUT GENERATION TESTCASE {self.number} FAILURE")
+      return success
+
+
+
+
 
   def setup_for_archival(self, overall_log):
     self.secure_environment.setup_for_archival(overall_log)

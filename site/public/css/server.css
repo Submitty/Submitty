@@ -1,7 +1,5 @@
 @import url("reset.css");
 @import url("google/inconsolata.css");
-@import "colors.css";
-
 
 :root {
     --viewed_content: #e8f0f7;
@@ -79,7 +77,7 @@ a > i.far {
     color: var(--text-black);
 }
 
-a.btn {
+a.btn, a.icon {
     text-decoration: none;
 }
 
@@ -159,10 +157,21 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
-.helpicon::before {
+.fa-question-circle{
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
   color: var(--actionable-blue);
+  font-weight: 300;
+  display: inline-block;
+}
+
+.fa-question-circle.disabled,
+.fa-question-circle[disabled],
+.disabled>.fa-question-circle,
+[disabled]>.fa-question-circle{
+  font-family: 'Font Awesome 5 Free';
+  color: var(--standard-light-gray);
+  content: "\f059";
   font-weight: 300;
   display: inline-block;
 }
@@ -195,6 +204,10 @@ table tr.table-header {
     border-top: 1px solid var(--standard-light-gray);
 }
 
+.table tr {
+    border-top: 1px solid #ddd;
+}
+
 .table-bordered {
     border: 1px solid var(--standard-medium-gray);
     border-collapse: separate;
@@ -215,8 +228,13 @@ table tr.table-header {
     background: var(--standard-hover-light-gray);
 }
 
-.table>tbody>tr.info {
+tr.info, tr.info td, tr.info th {
     background-color: var(--table-info);
+}
+
+td>a.active-sort {
+    text-decoration: underline;
+    font-weight: bold;
 }
 
 .floating-thead,
@@ -277,9 +295,11 @@ table tr.table-header {
     box-shadow: 0 2px 15px -5px var(--standard-light-gray);
     background-color: var(--default-white);
     border-radius: 3px;
-    padding: 30px;
-    margin: 15px;
     overflow: auto;
+    margin: 10px;;
+    padding: 30px;
+    background-color: #fff;
+    flex-grow: 1;
 }
 
 .content:last-child {
@@ -295,6 +315,10 @@ table tr.table-header {
     padding-bottom: 20px;
 }
 
+.content.overridden_message {
+    background-color: var(--important-post);
+    color: black;
+}
 
 .content h1 {
     margin-bottom: 20px;
@@ -444,31 +468,31 @@ table tr.table-header {
 .green-message {
     font-style: italic;
     font-weight: bold;
-    color: #008800;
+    color: var(--standard-dark-green);
 }
 
 .blue-message {
     font-style: italic;
     font-weight: bold;
-    color: #0a6496;
+    color: var(--standard-vibrant-dark-blue);
 }
 
 .red-message {
     font-style: italic;
     font-weight: bold;
-    color: #af0000;
+    color: var(--error-alert-dark-red);
 }
 
 .yellow-message {
     font-style: italic;
     font-weight: bold;
-    color: #ff9900;
+    color: var(--standard-vibrant-orange);
 }
 
 .black-message {
     font-style: italic;
     font-weight: bold;
-    color: #000000;
+    color: var(--text-black);
 }
 
 .sub-text {
@@ -997,15 +1021,6 @@ div.full_height {
     margin-left: 5px;
 }
 
-.btn-nav {
-    width:100%;
-}
-
-.btn.btn-nav-submit, .btn.btn-nav-grade {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 .td-open {
     width: 10%;
 }
@@ -1116,6 +1131,7 @@ div.full_height {
     margin: 10px;
     height: calc(100% - 20px);
     width: calc(100vw - 20px);
+    word-break: break-word;
 }
 
 .popup-form form {
@@ -1252,16 +1268,18 @@ div.full_height {
 
 /* from https://css-tricks.com/css3-progress-bars/ */
 .meter {
+    width: 100%;
     height: 10px;
-    position: relative;
     background: var(--standard-pale-gray);
     padding: 0px;
+    border-radius: 4px;
 }
+
 .meter > span {
     display: block;
     height: 100%;
     background-color: var(--good-green);
-    position: relative;
+    border-radius: 4px;
 }
 
 /*
@@ -1325,12 +1343,12 @@ end of styles used in the admin gradeable page
 /* styles for the colors for the electronic grader details page */
 /* color for no grader */
 .grader-NULL {
-    color: var(--default-white)
+    color: var(--default-white);
     text-shadow:
-    -1px -1px 0 #000,
-    1px -1px 0 #000,
-    -1px 1px 0 #000,
-    1px 1px 0 #000;
+    -1px -1px 0 var(--text-black),
+    1px -1px 0 var(--text-black),
+    -1px 1px 0 var(--text-black),
+    1px 1px 0 var(--text-black);
 }
 
 /* color for limited access graders who were verifed */
@@ -1366,16 +1384,48 @@ end of styles used in the admin gradeable page
 }
 
 .grader-invalid{
-   color: #d9534f;
+   color: var(--standard-light-red);
 }
 
 .grader-invalid{
-   color: #d9534f;
+   color: var(--standard-light-red);
 }
 
 /* prevents line break in the graded questions column */
 .td-graded-questions {
     white-space: nowrap;
+}
+
+#team-check-marks {
+    white-space: nowrap;
+    padding-right: 10px;
+}
+.viewed-green-check {
+    color: var(--standard-vibrant-green);
+    font-size: 1.5em;
+}
+
+.viewed-white-check {
+    color: var(--default-white);
+    font-size: 1.5em;
+    text-shadow:
+            -1px -1px 0 #000,
+            1px -1px 0 #000,
+            -1px 1px 0 #000,
+            1px 1px 0 #000;
+}
+
+.viewed-red-x {
+    color: var(--badge-backgroud-red);
+    font-size: 1.5em;
+}
+
+[name^="user_id_"]:valid {
+    background-color: transparent;
+}
+
+[name^="user_id_"] {
+    background-color: var(--alert-invalid-entry-pink);
 }
 
 /* color for nav page edit button for rebuild error on gradeable */
@@ -1532,13 +1582,8 @@ end of styles used in the admin gradeable page
     border: 0;
 }
 
-/* Give file submission boxes a blue outline when they have focus (for VPAT compliance) */
-#upload-boxes > div:focus {
-    outline: var(--standard-focus-cornflowe-blue);
-}
-
 /* Give trash cans inside submission boxes a blue outline when they have focus (for VPAT compliance) */
-.fa-trash:focus {
+.custom-focus:focus {
     outline: var(--standard-focus-cornflowe-blue);
 }
 
@@ -1566,6 +1611,7 @@ end of styles used in the admin gradeable page
     width: 108px;
     border: 2px solid #2627ee;
     height: min-content;
+    height: -moz-min-content;
     position: absolute;
     z-index: 999;
 }
@@ -1575,28 +1621,29 @@ end of styles used in the admin gradeable page
 }
 
 .warning {
-    background: #fff3cd;
-    color: #856404;
+    background: var(--alert-border-bronze);
+    color: var(--standard-bronze);
 }
 
 .danger {
     background: #f2dede;
-    color: #b94a48;
+    color: var(--alert-danger-red);
 }
 
-.black-btn, .black-btn > i.fas {
+.black-btn, .black-btn > i {
     color: #000 !important;
     border-color: #000 !important;
+    text-decoration: none;
 }
 
-.black-btn:hover, .black-btn > i.fas:hover {
+.black-btn:hover, .black-btn:hover > i, .black-btn > i:hover {
     color: #405E90 !important;
     border-color: #405E90 !important;
 }
 
-.black-btn:active, .black-btn > i.fas:active {
-    color: #991313 !important;
-    border-color: #991313 !important;
+.black-btn:active, .black-btn:active > i, .black-btn > i:active {
+    color: var(--external-link-active) !important;
+    border-color: var(--external-link-active) !important;
 }
 
 .flex-row {
@@ -1605,26 +1652,30 @@ end of styles used in the admin gradeable page
     align-items: center;
 }
 
-.flex-row > * {
-    display: inherit;
-    align-items: inherit;
-}
-
 .flex-col {
     display: flex;
     justify-content: space-between;
     flex-direction: column;
 }
 
+.flex-col-space > * {
+    margin: 10px 0;
+}
+
+.flex-line {
+    display: flex;
+    align-items: center;
+}
+
 .shadow {
-    box-shadow: 0 2px 15px -5px #888888;
+    box-shadow: 0 2px 15px -5px var(--standard-medium-gray);
     border-radius: 3px;
 }
 
 .content {
     margin: 10px;;
     padding: 30px;
-    background-color: #fff;
+    background-color: var(--default-white);
     flex-grow: 1;
 }
 
@@ -1660,13 +1711,67 @@ end of styles used in the admin gradeable page
     margin-bottom: 0;
 }
 
-ul.bare-list {
+.btn-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
+    max-width: 100%;
+    width: 100%;
+}
+
+.btn-wrapper .btn {
+    flex: 1 0 90%;
+    margin: 5px 0 0 5px;
+}
+
+.wrap-reverse {
+    flex-wrap: wrap-reverse;
+}
+
+ul.full-list, ol.full-list {
+    display: block;
+    margin: 1em 0;
+    padding-left: 40px;
+}
+
+ul.bare-list, ol.bare-list {
     list-style: none;
     padding: 0;
 }
 
+.std-margin {
+    margin: 1em 0;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+header > * {
+    margin-bottom: 20px
+}
+
+.full-width {
+    width: 100% !important;
+    display: block;
+}
+
 .align-left {
     text-align: left !important;
+}
+
+.hide {
+    display: none;
+}
+
+.bare-button {
+    border: none;
+    padding: 0;
+    font-size: 1em;
+    background: unset;
+    color: unset;
 }
 
 @media (min-width: 541px) {
@@ -1681,11 +1786,31 @@ ul.bare-list {
 }
 
 @media (min-width: 768px) {
+    .btn-wrapper {
+        width: max-content;
+    }
+
+    .btn-wrapper .btn {
+        flex: 1 0 auto;
+    }
+
     .popup-window {
         min-height: 300px;
-        width: 60%;
-        max-height: min-content;
-        height: auto;
-        max-width: 680px;
+        max-height: 80%;
+        min-width: 680px;
+        max-width: 80%;
+        height: min-content;
+        height: -moz-min-content;
+        width: min-content;
+        width: -moz-min-content;
     }
+}
+
+.pre-wrap{
+    white-space: pre-wrap;
+}
+
+.pre_forum {
+    font-family: inherit;
+    max-width: 70vw;
 }

@@ -27,7 +27,6 @@
         }
         var loop = Math.ceil(range/increment);
         var tracking = min;
-        console.log(range," ",increment," ",loop);
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
             tracking+=increment;
@@ -62,8 +61,6 @@
             }
             yValue.push(value);
         }
-        console.log(xBuckets);
-        console.log(yValue);
         return mode;
     }
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
@@ -78,8 +75,6 @@
         {% if overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
                 mode=fillBuckets(rangeT,parseInt(bucketInputTotal.value),betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
-                console.log(xBuckets);
-                console.log(yValue);
                 var dataTotal=tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
@@ -125,33 +120,33 @@
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
             <a class="btn btn-primary"
-                    {% if core.getUser().accessAdmin() %}
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : 'all' }) }}">
+                {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
+                    href="{{ details_view_all_url }}">
                 {% else %}
-                    href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action' :  'details', 'gradeable_id' :  gradeable_id, 'view' : (core.getUser().getGradingRegistrationSections()|length == 0) ? 'all' : null}) }}">
+                    href="{{ details_url }}">
                 {% endif %}
 
                 Index of Grading Details for All Students
             </a>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'grade', 'gradeable_id': gradeable_id}) }}">
+                   href="{{ grade_url }}">
                     Grade Next Student
                 </a>
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id}) }}">
+                   href="{{ download_zip_url }}">
                     Download Zip of All Assigned Students
                 </a>
             {% endif %}
             {% if core.getUser().accessFullGrading() and submitted_total %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id, 'type': 'All'}) }}">
+                   href="{{ download_zip_url }}?type=all">
                     Download Zip of All Students
                 </a>
             {% endif %}
             {% if core.getUser().accessFullGrading() %}
                 <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
+                   href="{{ bulk_stats_url }}">
                     Bulk Upload Forensics
                 </a>
             {% endif %}
@@ -182,12 +177,19 @@
             {% set noActive = 0 %}
             {% set GradeInq = 0 %}
             {% set IncompGrading = 0 %}
+            {% set cancelledSub = 0 %}
             {# Iterate through all the Scores #}
             {% for ov in overall_scores %}
                 {# If Autograded, add the points to the array of autograded scores#}
                 {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
-                    {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
-                        {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
+                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                        {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
+                            {% if ov.getAutoGradedGradeable().getTotalPoints() >=0 or ov.getAutoGradedGradeable().getTotalPoints() <0 %}
+                                {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
+                            {% else %}
+                                {% set cancelledSub = cancelledSub+1 %}
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
                 {% else %}
 
@@ -329,25 +331,26 @@
                     Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
 
                 </script>
-                    <div id="mySmallDiv">
-                        <script>
-                            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
-                            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
-                        </script>
-                    </div>
-                {{ "\n"|nl2br }}
-                {{ mode }}
+                <div id="mySmallDiv">
+                    <script>
+                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
+                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
+                    </script>
+                </div>
+                <br />
                 Version Conflicts: {{ VerConf }}
-                {{ "\n"|nl2br }}
+                <br />
                 No Submissions: {{ noSub }}
-                {{ "\n"|nl2br }}
+                <br />
                 No Active Versions: {{ noActive }}
-                {{ "\n"|nl2br }}
+                <br />
                 Grade Inquiries: {{ GradeInq }}
-                {{ "\n"|nl2br }}
+                <br />
                 Incomplete Grading: {{ IncompGrading }}
+                <br />
+                Cancelled Submissions: {{ cancelledSub }}
                 <br/>
                 <br/>
                 Double-click on the chart to zoom out
@@ -550,17 +553,18 @@
                         </script>
                     </div>
 
-                    {{ "\n"|nl2br }}
-                    {{ mode }}
+                    <br />
                     Version Conflicts: {{ VerConf }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     No Submissions: {{ noSub }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     No Active Versions: {{ noActive }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     Grade Inquiries: {{ GradeInq }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     Incomplete Grading: {{ IncompGrading }}
+                    <br />
+                    Cancelled Submissions: {{ cancelledSub }}
                     <br/>
                     <br/>
                     Double-click on the chart to zoom out
@@ -627,7 +631,9 @@
                         {% if ta_grades_released %}
                             {% if team_assignment %}
                                 <br/>
-                                <b>Number of teams who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+                                <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
+								<b>Number of students who have viewed their grade:</b> 
+									{{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
                             {% else %}
                                 <br/>
                                 <b>Number of students who have viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
