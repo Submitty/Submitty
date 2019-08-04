@@ -75,6 +75,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
+            "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message"
         ];
@@ -139,6 +140,16 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         );
         $config = array_replace($config,$extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
+
+        // Create version json
+        $config = array(
+            "installed_commit" => "d150131c19e3e8084b25cddcc32e6c40a8e93a2b",
+            "short_installed_commit" => "d150131c",
+            "most_recent_git_tag" => "v19.07.00"
+        );
+        $config = array_replace($config,$extra);
+        FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
+
     }
 
     public function testConfig() {
@@ -173,6 +184,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("RPI", $config->getInstitutionName());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
+        $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
         $config->loadCourseJson($this->course_json_path);
@@ -264,17 +276,21 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
+            'course_code_requirements' => "Please follow your school's convention for course code.",
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
             'secret_session' => 'LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93',
             'email_enabled' => true,
-            'auto_rainbow_grades' => false
+            'auto_rainbow_grades' => false,
+            'latest_commit' => 'd150131c',
+            'latest_tag' => 'v19.07.00'
         );
         $actual = $config->toArray();
 
         ksort($expected);
         ksort($actual);
+
         $this->assertEquals($expected, $actual);
     }
 

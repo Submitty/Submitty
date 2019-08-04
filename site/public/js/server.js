@@ -54,8 +54,6 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
     var expected_div_name = "#" + div_name + "_1";
     var actual_div = $(actual_div_name).children()[0];
     var expected_div = $(expected_div_name).children()[0];
-    var args = {'component': 'grading', 'page': 'electronic', 'action': 'remove_empty'
-        ,'gradeable_id': gradeable_id, 'who_id' : who_id, 'version': version, 'index' : index, 'autocheck_cnt': autocheck_cnt};
     var list_white_spaces = {};
     $('#'+helper_id).empty();
     if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Visualize whitespace characters"){
@@ -63,20 +61,20 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
-        args['option'] = 'unicode'
+        var option = 'unicode'
     } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
-        args['option'] = 'escape'
+        var option = 'escape'
     } else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
-        args['option'] = 'original'
+        var option = 'original'
     }
     //Insert actual and expected one at a time
-    args['which'] = 'expected';
-    var url = buildUrl(args);
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
+        `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
     let assertSuccess = function(data) {
         if (data.status === 'fail') {
@@ -100,8 +98,8 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             }
             $(expected_div).empty();
             $(expected_div).html(response.data.html);
-            args['which'] = 'actual';
-            url = buildUrl(args);
+            url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
+                `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
             $.getJSON({
                 url: url,
                 success: function (response) {
@@ -144,8 +142,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
-        var url = buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'load_student_file',
-            'gradeable_id': gradeable_id, 'who_id' : who_id, 'index' : index, 'version' : version});
+        var url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-in-progress").show();
@@ -173,44 +170,11 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 /**
  * Displays edit registration sections form on button press
  */
-function editRegistrationSectionsForm() {
-    var form = $("#registration-sections-form");
-    form.css("display","block");
-}
-
 function extensionPopup(json){
     $('.popup-form').css('display', 'none');
     var form = $('#more_extension_popup');
     form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
-}
-
-function newDownloadForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $('#download-form');
-    form.css('display', 'block');
-    $("#download-form input:checkbox").each(function() {
-        if ($(this).val() === 'NULL') {
-            $(this).prop('checked', false);
-        } else {
-            $(this).prop('checked', true);
-        }
-    });
-}
-
-function newGraderListForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#grader-list-form");
-    form.css("display", "block");
-    $('[name="upload"]', form).val(null);
-}
-
-function newClassListForm() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#class-list-form");
-    form.css("display", "block");
-    $('[name="move_missing"]', form).prop('checked', false);
-    $('[name="upload"]', form).val(null);
 }
 
 function newDeleteGradeableForm(form_action, gradeable_name) {
@@ -269,29 +233,6 @@ function confirmExtension(option){
     $('input[name="option"]').val(option);
     $('#excusedAbsenceForm').submit();
     $('input[name="option"]').val(-1);
-}
-
-function userNameChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#edit-username-form");
-    form.css("display", "block");
-    $('[name="user_name_change"]', form).val("");
-}
-
-function passwordChange() {
-    $('.popup-form').css('display', 'none');
-    var form = $("#change-password-form");
-    form.css("display", "block");
-    $('[name="new_password"]', form).val("");
-    $('[name="confirm_new_password"]', form).val("");
-}
-
-function closePopup(popup) {
-    //See if we have a close button that lets us click to close
-    var closer = $(popup).find(".close-button");
-    if (closer.length) {
-        closer.click();
-    }
 }
 
 function newUploadCourseMaterialsForm() {
@@ -383,8 +324,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -430,8 +370,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     }
                 })
 
-                var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matching_users',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1});
+                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -461,8 +400,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':'', 'version_user_2': ''});
+                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=&version_user_2=`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -491,8 +429,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_submission_concatenated',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'user_id_2':user_id_2, 'version_user_2': version_user_2});
+                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=${user_id_2}&version_user_2=${version_user_2}`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -541,8 +478,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
 
-    var url = buildUrl({'component': 'admin', 'page': 'plagiarism', 'action': 'get_matches_for_clicked_match',
-                        'gradeable_id': gradeable_id , 'user_id_1':user_id_1, 'version_user_1': version_user_1, 'start':user_1_match_start.line, 'end': user_1_match_end.line});
+    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'clicked_match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&start=${user_1_match_start.line}&end=${user_1_match_end.line}`;
 
     //console.log(user_1_match_start.line);
 
@@ -866,6 +802,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
     var form = $("#admin-team-form");
     form.css("display", "block");
 
+    $("#admin-team-form-submit").prop('disabled',false);
     $('[name="new_team"]', form).val(new_team);
     $('[name="reg_section"] option[value="' + reg_section + '"]', form).prop('selected', true);
     $('[name="rot_section"] option[value="' + rot_section + '"]', form).prop('selected', true);
@@ -899,6 +836,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             $('[name="user_id_'+i+'"]', form).autocomplete({
                 source: student_full
             });
+            $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
         members_div.find('[name="reg_section"]').val(reg_section);
         members_div.find('[name="rot_section"]').val(rot_section);
@@ -910,7 +848,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         title_div.append('Edit Team: ' + who_id);
         for (var i = 0; i < members.length; i++) {
             members_div.append('<input class="readonly" type="text" name="user_id_' + i + '" readonly="readonly" value="' + members[i] + '" /> \
-                <input id="remove_member_'+i+'" class = "btn btn-danger" type="submit" value="Remove" onclick="removeTeamMemberInput('+i+');" \
+                <input id="remove_member_'+i+'" class = "btn btn-danger" value="Remove" onclick="removeTeamMemberInput('+i+');" \
                 style="cursor:pointer; width:80px; padding-top:3px; padding-bottom:3px;" aria-hidden="true"></input><br />');
         }
         for (var i = members.length; i < members.length+pending_members.length; i++) {
@@ -925,36 +863,67 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             });
             $('[name="user_id_'+i+'"]').autocomplete( "option", "appendTo", form );
         }
-        var team_history_len=user_assignment_setting_json.team_history.length;
-        team_history_title_div.append('Team History: ');
-        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_left" readonly="readonly" value="Team formed on: " /><br />');
-        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
-        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
-        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
-        for (var j = 0; j <=team_history_len-1; j++) {
-            if(user_assignment_setting_json.team_history[j].action == "admin_create"){
-                for (var i = 0; i < members.length; i++) {
-                    if(user_assignment_setting_json.team_history[j].first_user == members[i] || user_assignment_setting_json.team_history[j].added_user == members[i]){
-                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+
+        if (user_assignment_setting_json != false) {
+            var team_history_len=user_assignment_setting_json.team_history.length;
+            team_history_title_div.append('Team History: ');
+            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_left" readonly="readonly" value="Team formed on: " /><br />');
+            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="team_formation_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[0].time+ '" /><br />');
+            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_left" readonly="readonly" value="Last edited on: " /><br />');
+            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="last_edit_date_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[team_history_len-1].time+ '" /><br />');
+            for (var j = 0; j <=team_history_len-1; j++) {
+                if(user_assignment_setting_json.team_history[j].action == "admin_create"){
+                    for (var i = 0; i < members.length; i++) {
+                        if(user_assignment_setting_json.team_history[j].first_user == members[i] || user_assignment_setting_json.team_history[j].added_user == members[i]){
+                            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
+                            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                        }
                     }
                 }
-            }
-            if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
-                for (var i = 0; i < members.length; i++) {
-                    if(user_assignment_setting_json.team_history[j].added_user == members[i]){
-                        team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
-                        team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                if(user_assignment_setting_json.team_history[j].action == "admin_add_user"){
+                    for (var i = 0; i < members.length; i++) {
+                        if(user_assignment_setting_json.team_history[j].added_user == members[i]){
+                            team_history_div_left.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_left" readonly="readonly" value="'+members[i]+ ' added on: " /><br />');
+                            team_history_div_right.append('<input class="readonly" type="text" style="width:100%;" name="user_id_' +i+ '_right" readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                        }
                     }
                 }
-            }
-            if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
-                team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
-                team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                if(user_assignment_setting_json.team_history[j].action == "admin_remove_user"){
+                    team_history_div_left.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="'+user_assignment_setting_json.team_history[j].removed_user+ ' removed on: " /><br />');
+                    team_history_div_right.append('<input class="readonly" type="text" style="width:100%;"  readonly="readonly" value="' +user_assignment_setting_json.team_history[j].time+ '" /><br />');
+                }
             }
         }
-
     }
+    
+    $(":text",form).change(function() {
+        var found = false;
+        for (var i = 0; i < student_full.length; i++) {
+            if (student_full[i]['value'] == $(this).val()) {
+                found = true;
+                break;
+            }
+        }
+        if (found || $(this).val() == '') {
+            $(this)[0].setCustomValidity('');
+        }
+        else {
+            $(this)[0].setCustomValidity("Invalid user_id");
+        }
+
+        var invalid_entry = false;
+        $(":text",form).each( function() {
+            if (!this.checkValidity())  {
+                invalid_entry = true;
+            }
+        });
+        if (invalid_entry) {
+            $("#admin-team-form-submit").prop('disabled',true);
+        }
+        else {
+            $("#admin-team-form-submit").prop('disabled',false);
+        }
+    });
     var param = (new_team ? 3 : members.length+2);
     members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
         Add More Users</span>');
@@ -1102,7 +1071,7 @@ function checkRefreshPage(url) {
 }
 
 function check_server(url) {
-    $.post(url,
+    $.get(url,
         function(data) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
@@ -1122,18 +1091,18 @@ function checkRefreshLichenMainPage(url, semester, course) {
 }
 
 function check_lichen_jobs(url, semester, course) {
-    $.post(url,
+    $.get(url,
         function(data) {
             var last_data = localStorage.getItem("last_data");
             if (data == "REFRESH_ME") {
                 last_data= "REFRESH_ME";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+                window.location.href = buildNewCourseUrl(['plagiarism']);
             }
             else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildUrl({'component':'admin', 'page' :'plagiarism', 'course':course, 'semester': semester});
+                window.location.href = buildNewCourseUrl(['plagiarism']);
             }
             else {
                 checkRefreshLichenMainPage(url, semester, course);
@@ -1142,38 +1111,13 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path, dir) {
-    window.location = buildUrl({
-        'component': 'misc',
-        'page': 'download_file',
-        'dir': dir,
-        'file': file,
-        'path': path});
+function downloadFile(path, dir) {
+    window.location = buildNewCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadZip(grade_id, user_id, version = null) {
-    var url_components = {
-        'component': 'misc',
-        'page': 'download_zip',
-        'dir': 'submissions',
-        'gradeable_id': grade_id,
-        'user_id': user_id
-    };
-
-    if(version !== null) {
-        url_components['version'] = version;
-    }
-    window.location = buildUrl(url_components);
+function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
+    window.location = buildNewCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
     return false;
-}
-
-function downloadFileWithAnyRole(file_name, path) {
-    // Trim file without path
-    var file = file_name;
-    if (file.indexOf("/") != -1) {
-        file = file.substring(file.lastIndexOf('/')+1);
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
@@ -1504,6 +1448,43 @@ function updateHomeworkExtensions(data) {
     return false;
 }
 
+function updateGradeOverride(data) {
+    var fd = new FormData($('#gradeOverrideForm').get(0));
+    var url = buildNewCourseUrl(['grade_override', $('#g_id').val(), 'update']);
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: fd,
+        processData: false,
+        cache: false,
+        contentType: false,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverriddenGrades(json);
+            $('#user_id').val(this.defaultValue);
+            $('#marks').val(this.defaultValue);
+            $('#comment').val(this.defaultValue);
+            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated overridden Grades for ' + json['data']['gradeable_id'] + '.</div>';
+            $('#messages').append(message);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
+    })
+    return false;
+}
+
 function loadHomeworkExtensions(g_id, due_date) {
     var url = buildNewCourseUrl(['extensions', g_id]);
     $.ajax({
@@ -1529,20 +1510,49 @@ function loadHomeworkExtensions(g_id, due_date) {
     });
 }
 
-function refreshOnResponseLateDays(json) {
-    $('#late_day_table tr:gt(0)').remove();
-    if(json['data']['users'].length === 0){
-        $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
-    }
-    json['data']['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
-        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
-        $('#late_day_table').append(bits.join('</td><td>'));
+function loadOverriddenGrades(g_id) {
+    var url = buildNewCourseUrl(['grade_override', g_id]);
+    $.ajax({
+        url: url,
+        success: function(data) {
+            try {
+                var json = JSON.parse(data);
+            } catch(err){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
+                $('#messages').append(message);
+                return;
+            }
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
+                $('#messages').append(message);
+                return;
+            }
+            refreshOnResponseOverriddenGrades(json);
+        },
+        error: function() {
+            window.alert("Something went wrong. Please try again.");
+        }
     });
 }
 
+function refreshOnResponseOverriddenGrades(json) {
+    var form = $("#load-overridden-grades");
+    $('#my_table tr:gt(0)').remove();
+    var title = '<div class="option-title" id="title">Overridden Grades for ' + json['data']['gradeable_id'] + '</div>';
+    $('#title').replaceWith(title);
+    if(json['data']['users'].length === 0){
+        $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
+    } else {
+        json['data']['users'].forEach(function(elem){
+            var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
+            var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
+            $('#my_table').append(bits.join('</td><td>'));
+        });
+    }
+}
+
 function updateLateDays(data) {
-    var fd = new FormData($('#lateDayForm').get(0));
+    var fd = new FormData($('#late-day-form').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
     var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
@@ -1551,24 +1561,8 @@ function updateLateDays(data) {
         data: fd,
         processData: false,
         contentType: false,
-        success: function(data) {
-            var json = JSON.parse(data);
-            if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
-                return;
-            }
-            var form = $("#load-late-days");
-            refreshOnResponseLateDays(json);
-            //Reset all form elements
-            $('#user_id').val(this.defaultValue);
-            $('#datestamp').val(this.defaultValue);
-            $('#late_days').val(this.defaultValue);
-            $('#csv_upload').val(this.defaultValue);
-            $('#csv_option_overwrite_all').prop('checked',true);
-            //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
-            $('#messages').append(message);
+        success: function() {
+            window.location.reload();
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1591,6 +1585,27 @@ function deleteLateDays(user_id, datestamp) {
                 user_id: user_id,
                 datestamp: datestamp_mmddyy
             },
+            success: function() {
+                window.location.reload();
+            },
+            error: function() {
+                window.alert("Something went wrong. Please try again.");
+            }
+        })
+    }
+}
+
+function deleteOverriddenGrades(user_id, g_id) {
+    var url = buildNewCourseUrl(['grade_override', g_id, 'delete']);
+    var confirm = window.confirm("Are you sure you would like to delete this entry?");
+    if (confirm) {
+        $.ajax({
+            url: url,
+            type: "POST",
+            data: {
+                csrf_token: csrfToken,
+                user_id: user_id
+            },
             success: function(data) {
                 var json = JSON.parse(data);
                 if(json['status'] === 'fail'){
@@ -1598,9 +1613,9 @@ function deleteLateDays(user_id, datestamp) {
                     $('#messages').append(message);
                     return;
                 }
-                refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
+                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Overridden Grades deleted .</div>';
                 $('#messages').append(message);
+                refreshOnResponseOverriddenGrades(json);
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
@@ -1609,6 +1624,7 @@ function deleteLateDays(user_id, datestamp) {
     }
     return false;
 }
+
 function toggleRegradeRequests(){
     var element = document.getElementById("regradeBoxSection");
     if (element.style.display === 'block') {
@@ -1618,18 +1634,6 @@ function toggleRegradeRequests(){
         element.style.display = 'block';
     }
 
-}
-function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    });
 }
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
@@ -1685,14 +1689,12 @@ function changeFolderPermission(filenames, checked,handleData) {
 }
 
 function updateToServerTime(fp) {
-    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+    var url = buildNewUrl(['server_time']);
 
-    $.ajax({
-        type: "POST",
+    $.get({
         url: url,
-        data: {csrf_token: csrfToken},
         success: function(data) {
-            var time = JSON.parse(data);
+            var time = JSON.parse(data)['data'];
             time = new Date(parseInt(time.year),
                             parseInt(time.month) - 1,
                             parseInt(time.day),
@@ -1766,7 +1768,7 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     var size = $(document.body).width();
-    if (size < 1000) {
+    if (size < 1150) {
         $("aside").toggleClass("collapsed", true);
     }
     else{
@@ -1814,13 +1816,11 @@ $(document).ready(function() {
 });
 
 function checkBulkProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk', 'progress']);
     $.ajax({
         url: url,
-        data: {
-            gradeable_id : gradeable_id
-        },
-        type: "POST",
+        data: null,
+        type: "GET",
         success: function(data) {
             data = JSON.parse(data);
             var result = {};

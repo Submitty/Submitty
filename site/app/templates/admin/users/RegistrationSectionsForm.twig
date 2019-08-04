@@ -6,15 +6,27 @@ Macros
 {% macro display_graders(graders, reg_sections) %}
     {% for grader in graders %}
         <tr>
-            <th>{{ grader.getDisplayedFirstName() ~ " " ~ grader.getDisplayedLastName() ~ "(" ~ grader.getId() ~ ")" }}</th>
-            <td><input type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all" 
-				{{ grader.getGradingRegistrationSections()|length == reg_sections|length ? 'checked' : ''}} 
-				onclick="fixCheckBoxes('{{ grader.getId() }}',true);" /></td>
+            <th scope="row" class="grader-name">{{ grader.getDisplayedFirstName() ~ " " ~ grader.getDisplayedLastName() ~ "(" ~ grader.getId() ~ ")" }}</th>
+            <td>
+				<label>
+					<span class="screen-reader">Can {{ grader.getId() }} grade all sections</span>
+					<input type="checkbox" name="{{ grader.getId() }}_all" id="{{ grader.getId() }}_all" 
+						{{ grader.getGradingRegistrationSections()|length == reg_sections|length ? 'checked' : ''}} 
+						onclick="fixCheckBoxes('{{ grader.getId() }}',true);" 
+					/>
+				</label>
+			</td>
             {% for section in reg_sections %}
-                <td><input type="checkbox" name="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
-				id="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
-				{{ section['sections_registration_id'] in grader.getGradingRegistrationSections() ? 'checked' : ''}} 
-				onclick="fixCheckBoxes('{{ grader.getId() }}',false);"/></td>
+			<td>
+				<label>
+					<span class="screen-reader">Can {{ grader.getId() }} grade section {{ section['sections_registration_id'] }}</span>
+					<input type="checkbox" name="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
+						id="{{ grader.getId() }}_{{section['sections_registration_id']}}" 
+						{{ section['sections_registration_id'] in grader.getGradingRegistrationSections() ? 'checked' : ''}} 
+						onclick="fixCheckBoxes('{{ grader.getId() }}',false);"
+					/>
+				</label>
+			</td>
             {% endfor %}
         </tr>
     {% endfor %}
@@ -28,35 +40,70 @@ Macros
 {% block body %}
 <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 {% if graders[1]|length + graders[2]|length + graders[3]|length > 0 %}
-	<table id="registration_section_assignment">
+	<table id="registration-section-assignment" class="mobile-table">
 		{% if reg_sections|length > 0 %}
-			<tr>
-				<th />
-				<th>All</th>
+			<thead>
+				<th scope="col">Grader</th>
+				<th scope="col">All</th>
 				{% for section in reg_sections %}
-					<th>{{ section['sections_registration_id'] }}</th>
+					<th scope="col">{{ section['sections_registration_id'] }}</th>
 				{% endfor %}
-			</tr>
-			<tr>
-				<th>Instructor Graders</th>
+			</thead>
+			<tr class="info">
+				<th class="section-break" scope="col" colspan="{{ 2 + (reg_sections | length) }}">Instructor Graders</td>
 			</tr>
 			{{ self.display_graders(graders[1], reg_sections) }}
-			<tr>
-				<th>Full Access Graders</th>
+			<tr class="info">
+				<th class="section-break" scope="col" colspan="{{ 2 + (reg_sections | length) }}">Full Access Graders</td>
 			</tr>
 			{{ self.display_graders(graders[2], reg_sections) }}
-			<tr>
-				<th>Limited Access Graders</th>
+			<tr class="info">
+				<th class="section-break" scope="col" colspan="{{ 2 + (reg_sections | length) }}">Limited Access Graders</td>
 			</tr>
 			{{ self.display_graders(graders[3], reg_sections) }}
 		{% elseif num_rotating_sections == 0 %}
-			<br/>
-			<p><b>Rotating Sections have not been set up yet. <br/> You can set up Rotating Sections using the "Manage Sections" option on the sidebar.</b></p>
+			<p><b>
+				Rotating Sections have not been set up yet. <br/> 
+				You can set up Rotating Sections using the "Manage Sections" option on the sidebar.
+			</b></p>
 		{% endif %}
 	</table>
 {% else %}
 	No graders found
 {% endif %}
+
+<style>
+	.grader-name {
+		padding: 0.5em;
+	}
+
+	#registration-section-assignment td {
+		vertical-align: middle;
+	}
+
+	#registration-section-assignment td label {
+		display: flex;
+		flex: 1 0 auto;
+		flex-flow: row-reverse;
+	}
+
+	#registration-section-assignment td:nth-of-type(1):before { content: "All Sections" }
+	{% for section in reg_sections %}
+		#registration-section-assignment td:nth-of-type({{ loop.index + 1 }}):before { content: "{{ section['sections_registration_id'] }}"}
+	{% endfor %}
+
+	@media (min-width: 831px) {
+		.grader-name {
+			text-align: left;
+			padding: 0;
+		}
+
+		#registration-section-assignment td:before {
+			content: none !important;
+		}
+	}
+</style>
+
 {% endblock %}
 
 {% block form %}

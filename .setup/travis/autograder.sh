@@ -72,7 +72,6 @@ popd > /dev/null
 echo "Getting JUnit..."
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools/
 
@@ -88,17 +87,6 @@ pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
 travis_retry wget https://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar
 chmod o+r . *.jar
 popd
-
-# EMMA is a tool for computing code coverage of Java programs
-echo "Getting emma..."
-EMMA_VER=2.0.5312
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma
-travis_retry wget https://github.com/Submitty/emma/archive/${EMMA_VER}.zip -O emma-${EMMA_VER}.zip
-unzip emma-${EMMA_VER}.zip > /dev/null
-mv emma-${EMMA_VER}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VER}*
-chmod o+r . *.jar
-popd 
 
 # JaCoCo is a potential replacement for EMMA
 echo "Getting JaCoCo..."

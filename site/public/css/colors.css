@@ -49,6 +49,7 @@
     --alert-info-blue: #3a87ad;
     --alert-background-blue: #d9edf7;
     --alert-border-blue: #bce8f1;
+    --alert-invalid-entry-pink: #FFDDDD;
 
     --standard-pale-blue-gray: #e8f0f7;
     --standard-light-blue-gray: #ddddff;
@@ -75,10 +76,12 @@
 
     --standard-light-red:  #d9534f;
     --standard-medium-red: #c9302c;
+    --standard-red-orange: #f62817;
 
     --standard-light-orange: #f0ad4e;
     --standard-medium-orange: #ec971f;
     --standard-vibrant-orange: #ffa500;
+    --standard-creamsicle-orange: #ff8040;
 
     --standard-vibrant-yellow: #ffff00;
 
