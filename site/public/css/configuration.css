@@ -16,7 +16,7 @@
 }
 
 .config-row {
-    flex: 1 0 60%;
+    flex: 1 0 auto;
     margin: 0 0 1em;
 }
 

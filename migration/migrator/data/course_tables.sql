@@ -520,6 +520,7 @@ CREATE TABLE notification_settings (
 	team_invite BOOLEAN DEFAULT TRUE NOT NULL,
 	team_joined BOOLEAN DEFAULT TRUE NOT NULL,
 	team_member_submission BOOLEAN DEFAULT TRUE NOT NULL,
+    self_notification BOOLEAN DEFAULT FALSE NOT NULL,
 	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
@@ -527,7 +528,9 @@ CREATE TABLE notification_settings (
 	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL,
 	team_invite_email BOOLEAN DEFAULT TRUE NOT NULL,
 	team_joined_email BOOLEAN DEFAULT TRUE NOT NULL,
-	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL
+	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL,
+	self_notification_email BOOLEAN DEFAULT FALSE NOT NULL
+
 );
 
 --

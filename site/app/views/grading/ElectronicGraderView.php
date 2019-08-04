@@ -631,7 +631,7 @@ HTML;
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $columns,
             "export_teams_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
-            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_team_rotating_sections']),
+            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
             "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "peer" => $peer,
             "details_base_url" => $details_base_url,
@@ -671,7 +671,7 @@ HTML;
     public function randomizeButtonWarning(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
             "gradeable_id" => $gradeable->getId(),
-            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_team_rotating_sections'])
+            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
         ]);
     }
 

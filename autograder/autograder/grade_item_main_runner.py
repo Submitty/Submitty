@@ -83,7 +83,7 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                     for name, info in container_info.items():
                         mounted_directory = info['mounted_directory']
                         #Copies the code needed to run into mounted_directory
-                        setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
+                        setup_folder_for_grading(mounted_directory, tmp_work, job_id, tmp_logs,testcases[testcase_num-1],testcase_num)
 
 
                     # Start the docker containers.
@@ -168,8 +168,11 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
             else:
                 try:
                     # Move the files necessary for grading (runner, inputs, etc.) into the testcase folder.
-                    setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1])
+                    setup_folder_for_grading(testcase_folder, tmp_work, job_id, tmp_logs,testcases[testcase_num-1],testcase_num)
                     my_testcase_runner = os.path.join(testcase_folder, 'my_runner.out')
+
+                    if os.path.exists(os.path.join(tmp_work,"random_input")):
+                      grade_item.remove_read_permissions(os.path.join(tmp_work,"random_input")) 
 
                     display_sys_variable = os.environ.get('DISPLAY', None)
                     display_line = [] if display_sys_variable is None else ['--display', str(display_sys_variable)]
@@ -184,6 +187,8 @@ def executeTestcases(complete_config_obj, tmp_logs, tmp_work, queue_obj, submiss
                                                       '--testcase', str(testcase_num)]
                                                       + display_line,
                                                       stdout=logfile)
+                    if os.path.exists(os.path.join(tmp_work,"random_input")):
+                      grade_item.add_all_permissions(os.path.join(tmp_work,"random_input"))
                 except Exception as e:
                     grade_items_logging.log_message(job_id, message="ERROR thrown by main runner. See traces entry for more details.")
                     print ("ERROR caught runner.out exception={0}".format(str(e.args[0])).encode("utf-8"),file=logfile)
@@ -294,12 +299,13 @@ def pre_command_copy_file(tmp_work, source_testcase, source_directory, destinati
 
 
 
-def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase):
+def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase, testcase_num):
     #The paths to the important folders.
     tmp_work_test_input = os.path.join(tmp_work, "test_input")
     tmp_work_submission = os.path.join(tmp_work, "submitted_files")
     tmp_work_compiled = os.path.join(tmp_work, "compiled_files")
     tmp_work_checkout = os.path.join(tmp_work, "checkout")
+    tmp_work_random_input = os.path.join(tmp_work, "random_input", "test{:02}".format(testcase_num))
     my_runner = os.path.join(tmp_work,"my_runner.out")
 
     #######################################################################################
@@ -332,6 +338,9 @@ def setup_folder_for_grading(target_folder, tmp_work, job_id, tmp_logs, testcase
     grade_item.copy_contents_into(job_id,tmp_work_compiled  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_checkout  ,target_folder,tmp_logs)
     grade_item.copy_contents_into(job_id,tmp_work_test_input,target_folder,tmp_logs)
+
+    if os.path.exists(tmp_work_random_input):
+      grade_item.pattern_copy("random_input_to_runner", ["*.txt",], tmp_work_random_input, target_folder, tmp_logs)
     #copy the compiled runner to the test directory
     shutil.copy(my_runner,target_folder)
 

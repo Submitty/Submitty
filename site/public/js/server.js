@@ -1535,18 +1535,6 @@ function loadOverriddenGrades(g_id) {
     });
 }
 
-function refreshOnResponseLateDays(json) {
-    $('#late_day_table tr:gt(0)').remove();
-    if(json['data']['users'].length === 0){
-        $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
-    }
-    json['data']['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
-        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
-        $('#late_day_table').append(bits.join('</td><td>'));
-    });
-}
-
 function refreshOnResponseOverriddenGrades(json) {
     var form = $("#load-overridden-grades");
     $('#my_table tr:gt(0)').remove();
@@ -1564,7 +1552,7 @@ function refreshOnResponseOverriddenGrades(json) {
 }
 
 function updateLateDays(data) {
-    var fd = new FormData($('#lateDayForm').get(0));
+    var fd = new FormData($('#late-day-form').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
     var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
@@ -1573,24 +1561,8 @@ function updateLateDays(data) {
         data: fd,
         processData: false,
         contentType: false,
-        success: function(data) {
-            var json = JSON.parse(data);
-            if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
-                return;
-            }
-            var form = $("#load-late-days");
-            refreshOnResponseLateDays(json);
-            //Reset all form elements
-            $('#user_id').val(this.defaultValue);
-            $('#datestamp').val(this.defaultValue);
-            $('#late_days').val(this.defaultValue);
-            $('#csv_upload').val(this.defaultValue);
-            $('#csv_option_overwrite_all').prop('checked',true);
-            //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
-            $('#messages').append(message);
+        success: function() {
+            window.location.reload();
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1613,23 +1585,14 @@ function deleteLateDays(user_id, datestamp) {
                 user_id: user_id,
                 datestamp: datestamp_mmddyy
             },
-            success: function(data) {
-                var json = JSON.parse(data);
-                if(json['status'] === 'fail'){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
-                $('#messages').append(message);
+            success: function() {
+                window.location.reload();
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
             }
         })
     }
-    return false;
 }
 
 function deleteOverriddenGrades(user_id, g_id) {
