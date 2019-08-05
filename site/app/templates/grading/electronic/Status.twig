@@ -239,6 +239,7 @@
             {% if (overall_average == null or overall_average.getCount() == 0) and component_averages|length == 0%}
                 <script>
                     document.getElementById("btn-hist-tot").className+= " disabled-btn";
+                    document.getElementById("btn-hist-tot").style.visibility = "hidden";
                 </script>
 
             {% else %}
@@ -369,6 +370,7 @@
                 {% if component_averages|length == 0 %}
                     <script>
                         document.getElementById("btn-comp").className+= " disabled-btn";
+                        document.getElementById("btn-comp").style.visibility = "hidden";
                     </script>
                 {% else %}
 
@@ -453,6 +455,7 @@
                 {% if autograded_average == null or autograded_average.getCount() == 0 or bAuto|length == 0 %}
                     <script>
                         document.getElementById("btn-hist-auto").className+= " disabled-btn";
+                        document.getElementById("btn-hist-auto").style.visibility = "hidden";
                     </script>
 
                 {% else %}
