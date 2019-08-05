@@ -1060,6 +1060,26 @@ class AdminGradeableController extends AbstractController {
             "gradeable" => $g_id
         ];
 
+        $this->enqueueGenerateRepos($semester,$course,$g_id);
+
+        if ((!is_writable($config_build_file) && file_exists($config_build_file))
+            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+            return "Failed to write to file {$config_build_file}";
+        }
+        return null;
+    }
+
+    private function enqueueGenerateRepos($semester,$course,$g_id) {
+        // FIXME:  should use a variable intead of hardcoded top level path
+        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+
+        $config_build_data = [
+            "job" => "RunGenerateRepos",
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $g_id
+        ];
+
         if ((!is_writable($config_build_file) && file_exists($config_build_file))
             || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
             return "Failed to write to file {$config_build_file}";

@@ -134,6 +134,22 @@ class BuildConfig(CourseGradeableJob):
             print("error, could not open "+output_file+" for writing")
 
 
+class RunGenerateRepos(CourseGradeableJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+
+        build_script = os.path.join(INSTALL_DIR,'bin','generate_repos.py')
+        build_output = os.path.join(DATA_DIR,'logs','vcs_generation','repo_generation_{}'.format(gradeable))
+
+        try:
+            with open(build_output, "a") as output_file:
+                subprocess.run(["sudo", build_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        except PermissionError:
+            print("error, could not open " + output_file + " for writing")
+
+
 class RunLichen(CourseGradeableJob):
     def run_job(self):
         semester = self.job_details['semester']
