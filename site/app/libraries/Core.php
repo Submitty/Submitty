@@ -123,7 +123,8 @@ class Core {
             throw new \Exception("Master config has not been loaded");
         }
         if (!empty($semester) && !empty($course)) {
-            $course_json_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.json");
+            $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
+            $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
             if (file_exists($course_json_path) && is_readable ($course_json_path)) {
                 $this->config->loadCourseJson($semester, $course, $course_json_path);
             }

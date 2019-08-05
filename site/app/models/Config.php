@@ -316,10 +316,6 @@ class Config extends AbstractModel {
         }
         $this->site_url = $this->base_url."index.php?";
 
-        if (!empty($this->semester) && !empty($this->course)) {
-            $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
-        }
-
         $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
         if (!$secrets_json) {
             throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
@@ -360,6 +356,8 @@ class Config extends AbstractModel {
     public function loadCourseJson($semester, $course, $course_json_path) {
         $this->semester = $semester;
         $this->course = $course;
+        $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
+
         if (!file_exists($course_json_path)) {
             throw new ConfigException("Could not find course config file: ".$course_json_path, true);
         }
