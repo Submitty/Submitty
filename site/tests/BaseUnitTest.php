@@ -22,6 +22,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @param array $config_values
      * @param array $user_config
      * @param array $queries
+     * @param array $access
      *
      * @return Core
      */
@@ -76,9 +77,14 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         $mock_access = $this->createMock(Access::class);
-        foreach ($access as $method => $value) {
-            $mock_access->method($method)->willReturn($value);
-        }
+        $mock_access->expects($this->any())->method('canI')->willReturnCallback(
+            function ($permission) use ($access) {
+                if (in_array($permission, $access)) {
+                    return true;
+                }
+                return false;
+            }
+        );
         $core->method('getAccess')->willReturn($mock_access);
 
         $mock_queries = $this->createMock(DatabaseQueries::class);
