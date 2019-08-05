@@ -213,14 +213,9 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
-     * @param $semester
-     * @param $course
      */
-    public function __construct(Core $core, $semester, $course) {
+    public function __construct(Core $core) {
         parent::__construct($core);
-
-        $this->semester = $semester;
-        $this->course = $course;
     }
 
     public function loadMasterConfigs($config_path) {
@@ -362,7 +357,9 @@ class Config extends AbstractModel {
         $this->latest_commit = $version_json['short_installed_commit'];
     }
 
-    public function loadCourseJson($course_json_path) {
+    public function loadCourseJson($semester, $course, $course_json_path) {
+        $this->semester = $semester;
+        $this->course = $course;
         if (!file_exists($course_json_path)) {
             throw new ConfigException("Could not find course config file: ".$course_json_path, true);
         }

@@ -119,15 +119,13 @@ class Core {
      * @throws \Exception
      */
     public function loadCourseConfig($semester, $course) {
-        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
-
-        $this->config = new Config($this, $semester, $course);
-        $this->config->loadMasterConfigs($conf_path);
-
+        if ($this->config === null) {
+            throw new \Exception("Master config has not been loaded");
+        }
         if (!empty($semester) && !empty($course)) {
             $course_json_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.json");
             if (file_exists($course_json_path) && is_readable ($course_json_path)) {
-                $this->config->loadCourseJson($course_json_path);
+                $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
             else{
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
@@ -142,7 +140,7 @@ class Core {
     public function loadMasterConfig() {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
-        $this->config = new Config($this, '', '');
+        $this->config = new Config($this);
         $this->config->loadMasterConfigs($conf_path);
     }
 
@@ -709,8 +707,7 @@ class Core {
                 $logged_in = $this->loadApiUser($api_key);
             }
             catch (\InvalidArgumentException $exc) {
-                $this->getOutput()->renderJsonFail("Invalid token.");
-                $this->getOutput()->displayOutput();
+                return false;
             }
         }
 
