@@ -24,11 +24,11 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def execute_random_input(self, untrusted_user, script, arguments, logfile, cwd=None):
-    self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_input_directory)
+    return self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_input_directory)
 
 
   def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
-    self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_output_directory)
+    return self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_output_directory)
 
 
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):

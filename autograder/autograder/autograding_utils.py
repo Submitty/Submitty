@@ -285,6 +285,9 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     if 'work_to_public' in patterns:
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
+    if os.path.exists(os.path.join(tmp_work, 'random_output')):
+        pattern_copy("work_to_random_output", [os.path.join(tmp_work, 'random_output', 'test*', '*.txt'),], tmp_work, tmp_results, tmp_logs)
+
     # grab the submission time
     with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()

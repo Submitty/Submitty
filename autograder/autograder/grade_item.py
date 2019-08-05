@@ -129,7 +129,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         overall_log.flush()
         
         # RANDOM OUTPUT GENERATION
-        print ("====================================\RANDOM OUTPUT GENERATION STARTS", file=overall_log)
+        print ("====================================\nRANDOM OUTPUT GENERATION STARTS", file=overall_log)
         for tc in testcases:
             if tc.has_solution_commands:
                 tc.generate_random_outputs()

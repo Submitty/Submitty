@@ -36,7 +36,7 @@ class SecureExecutionEnvironment():
     self.checkout_subdirectory = complete_config_obj["autograding"].get("use_checkout_subdirectory","")
     self.directory = os.path.join(self.tmp_work, testcase_directory)
     self.random_input_directory = os.path.join(self.tmp_work, 'random_input', testcase_directory)
-    self.instructor_solution_path = os.path.join(self.tmp_work, "instructor_solution")
+    self.instructor_solution_path = os.path.join(self.tmp_autograding, "instructor_solution")
     self.random_output_directory = os.path.join(self.tmp_work,"random_output", testcase_directory)
 
     if is_test_environment == False:
@@ -78,7 +78,8 @@ class SecureExecutionEnvironment():
       autograding_utils.pattern_copy("checkout_to_compilation",self.patterns['checkout_to_compilation'],checkout_subdir_path, directory,self.tmp_logs)
     
     # copy any instructor provided code files to tmp compilation directory
-    autograding_utils.copy_contents_into(self.job_id, provided_code_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
+    if os.path.exists(provided_code_path):
+      autograding_utils.copy_contents_into(self.job_id, provided_code_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
     # copy compile.out to the current directory
     shutil.copy (os.path.join(bin_path,"compile.out"),os.path.join(directory,"my_compile.out"))
     
@@ -140,9 +141,6 @@ class SecureExecutionEnvironment():
     # copy any instructor provided solution code files to testcase folder
     autograding_utils.copy_contents_into(self.job_id, self.instructor_solution_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
     
-    # TODO: Make use of other files except txt files 
-    autograding_utils.pattern_copy("random_input_to_runner",["*.txt"], self.random_input_directory, directory, self.tmp_logs)
-
     # This untrusted_grant_rwx call may be redundant.
     if self.is_test_environment == False:
       autograding_utils.untrusted_grant_rwx_access(self.SUBMITTY_INSTALL_DIR, self.untrusted_user, directory)

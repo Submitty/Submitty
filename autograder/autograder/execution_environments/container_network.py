@@ -12,9 +12,9 @@ from .. import autograding_utils
 
 class Container():
   # Container info should have name, image, server (true, false), and outgoing_connections
-  def __init__(self, container_info, untrusted_user, testcase_directory, greater_than_one, is_test_environment, log_function):
+  def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one, is_test_environment, log_function):
     self.name = container_info['container_name']
-    self.directory = os.path.join(testcase_directory, self.name) if greater_than_one else testcase_directory
+    self.directory = os.path.join(testcase_directory, self.name) if more_than_one else testcase_directory
     self.is_router = True if self.name == 'router' else False
 
     self.image = container_info['container_image']
@@ -85,6 +85,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     containers = list()
     container_specs = testcase_info.get('containers', list())
+    solution_container_specs = testcase_info.get('solution_containers', list())
     
     if len(container_specs) > 0:
       greater_than_one = True if len(container_specs) > 1 else False
@@ -98,8 +99,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         'outgoing_connections' : []
       }
       containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), False, self.is_test_environment, self.log_message))
-
     self.containers = containers
+
+    solution_containers = list()
+    greater_than_one_solution_container = True if len(solution_container_specs) > 1 else False
+    for solution_container_spec in solution_container_specs:
+      solution_containers.append(Container(solution_container_spec, untrusted_user, self.random_output_directory, greater_than_one_solution_container, self.is_test_environment, self.log_message))
+    self.solution_containers = solution_containers
+
     self.dispatcher_actions = testcase_info.get('dispatcher_actions', list())
 
     self.single_port_per_container = testcase_info.get('single_port_per_container', False)
@@ -112,30 +119,30 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   #
   ###########################################################
 
-  def get_router(self):
-    for container in self.containers:
+  def get_router(self, containers):
+    for container in containers:
       if container.name == 'router':
         return container 
     return None
 
 
-  def get_server_containers(self):
+  def get_server_containers(self, all_containers):
     containers = list()
-    for container in self.containers:
+    for container in all_containers:
       if container.name != 'router' and container.is_server == True:
         containers.append(container)
     return containers
 
 
-  def get_standard_containers(self):
+  def get_standard_containers(self, all_containers):
     containers = list()
-    for container in self.containers:
+    for container in all_containers:
       if container.name != 'router' and container.is_server == False:
         containers.append(container)
     return containers
 
 
-  def create_containers(self, script, arguments):
+  def create_containers(self, containers, script, arguments):
 
     try:
         self.verify_execution_status()
@@ -144,46 +151,46 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       self.log("ERROR: Could not verify execution mode status.")
       return
 
-    more_than_one = True if len(self.containers) > 1 else False
-    for container in self.containers:
+    more_than_one = True if len(containers) > 1 else False
+    for container in containers:
       my_script = os.path.join(container.directory, script)
       container.create(my_script, arguments, more_than_one)
 
   
-  def network_containers(self):
-    if len(self.containers) <= 1:
+  def network_containers(self, containers):
+    if len(containers) <= 1:
       return
 
     #remove all containers from the none network
-    for container in self.containers:
+    for container in containers:
       subprocess.check_output(['docker', 'network','disconnect', 'none', container.container_id]).decode('utf8').strip()
 
-    if self.get_router() is not None:
-      self.network_containers_with_router()
+    if self.get_router(containers) is not None:
+      self.network_containers_with_router(containers)
     else:
-      self.network_containers_routerless()
+      self.network_containers_routerless(containers)
 
-    self.create_knownhosts_txt()
+    self.create_knownhosts_txt(containers)
 
 
-  def network_containers_routerless(self):
+  def network_containers_routerless(self, containers):
     network_name = f'{self.untrusted_user}_routerless_network'
 
     #create the global network
     subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
 
-    for container in self.containers:
+    for container in containers:
       subprocess.check_output(['docker', 'network', 'connect', '--alias', container.name, network_name, container.full_name]).decode('utf8').strip()
 
     self.networks.append(network_name)
 
 
-  def network_containers_with_router(self):
+  def network_containers_with_router(self, containers):
     #if there are multiple containers, create a router and a network. Otherwise, return.
     router_name = f"{self.untrusted_user}_router"
     router_connections = dict()
 
-    for container in self.containers:
+    for container in containers:
       network_name = f"{container.full_name}_network"
 
       if container.name == 'router':
@@ -231,13 +238,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       except Exception as e:
         self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
 
-  def create_knownhosts_txt(self):
+  def create_knownhosts_txt(self, containers):
     tcp_connection_list = list()
     udp_connection_list = list()
     current_tcp_port = 9000
     current_udp_port = 15000
 
-    sorted_containers = sorted(self.containers, key=lambda x: x.name)
+    sorted_containers = sorted(containers, key=lambda x: x.name)
     for container in sorted_containers:
       if self.single_port_per_container:
         tcp_connection_list.append([container.name, current_tcp_port])
@@ -255,8 +262,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
           current_udp_port += 1
 
     #writing complete knownhosts csvs to input directory'
-    networked_containers = self.get_standard_containers()
-    router = self.get_router()
+    networked_containers = self.get_standard_containers(containers)
+    router = self.get_router(containers)
 
     if router is not None:
       networked_containers.append(router)
@@ -284,13 +291,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   #
   ###########################################################
 
-  def process_dispatcher_actions(self):
+  def process_dispatcher_actions(self, containers):
     for action_obj in self.dispatcher_actions:
       action_type  = action_obj["action"]
 
       if action_type == "delay":
         time_to_delay = float(action_obj["seconds"])
-        while time_to_delay > 0 and self.at_least_one_alive():
+        while time_to_delay > 0 and self.at_least_one_alive(containers):
           if time_to_delay >= .1:
             time.sleep(.1)
           else:
@@ -298,27 +305,27 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
           # This can go negative (subtracts .1 even in the else case) but that's fine.
           time_to_delay -= .1
       elif action_type == "stdin":
-        send_message_to_processes(action_obj["string"], action_obj["containers"])
+        send_message_to_processes(containers, action_obj["string"], action_obj["containers"])
       elif action_type in ['stop', 'start', 'kill']:
-        send_message_to_processes(f"SUBMITTY_SIGNAL:{action_type.upper()}\n", action_obj['containers'])
+        send_message_to_processes(containers, f"SUBMITTY_SIGNAL:{action_type.upper()}\n", action_obj['containers'])
       # A .1 second delay after each action to keep things flowing smoothly.
       time.sleep(.1)
 
     if len(self.dispatcher_actions) > 0:
-      send_message_to_processes("SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
+      send_message_to_processes(containers, "SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
 
 
-  def get_container_with_name(self, name):
-    for container in self.containers:
+  def get_container_with_name(self, name, containers):
+    for container in containers:
       if container.name == name:
         return container
     return None
 
 
   #targets must hold names/keys for the processes dictionary
-  def send_message_to_processes(self, message, targets):
+  def send_message_to_processes(self, containers, message, targets):
       for target in targets:
-        container = get_container_with_name(target)
+        container = get_container_with_name(target, containers)
         # poll returns None if the process is still running.
         if container.process.poll() == None:
             container.process.stdin.write(message.encode('utf-8'))
@@ -327,17 +334,17 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
             pass
 
 
-  def at_least_one_alive(self):
-    for container in self.get_standard_containers():
-      if container.process.poll() == None:
+  def at_least_one_alive(self, containers):
+    for container in self.get_standard_containers(containers):
+      if container.process.poll() is None:
         return True
     return False
 
 
-  def wait_until_standard_containers_finish(self):
+  def wait_until_standard_containers_finish(self, containers):
     still_going = True
     while still_going:
-      still_going = self.at_least_one_alive()
+      still_going = self.at_least_one_alive(containers)
       time.sleep(.1)
 
 
@@ -373,16 +380,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
   def setup_for_random_output(self, testcase_dependencies):
     os.chdir(self.tmp_work)
-    for container in self.containers:
-      random_output_container_directory = os.path.join(self.random_output_directory, container.name)
-
-      self._setup_single_directory_for_random_output(random_output_container_directory, testcase_dependencies)
+    for container in self.solution_containers:
+      self._setup_single_directory_for_random_output(container.directory, testcase_dependencies)
 
       if container.import_router:
         router_path = os.path.join(self.tmp_autograding, "bin", "submitty_router.py")
-        self.log_message(f"COPYING:\n\t{router_path}\n\t{random_output_container_directory}")
-        shutil.copy(router_path, random_output_container_directory)
-        autograding_utils.add_all_permissions(random_output_container_directory)
+        self.log_message(f"COPYING:\n\t{router_path}\n\t{container.directory}")
+        shutil.copy(router_path, container.directory)
+        autograding_utils.add_all_permissions(container.directory)
     
     self._run_pre_commands(self.random_output_directory)
 
@@ -399,13 +404,37 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         public_dir = os.path.join(self.tmp_results,"results_public", self.name, container.name)
         details_dir = os.path.join(self.tmp_results, "details", self.name, container.name)
         os.mkdir(public_dir)
-        os.mkdir(details_dir)    
+        os.mkdir(details_dir)
 
+  def execute_random_input(self, untrusted_user, executable, arguments, logfile, cwd):
+    container_spec = {
+        'container_name'  : f'{untrusted_user}_temporary_container',
+        'container_image' : 'ubuntu:custom', 
+        'server' : False,
+        'outgoing_connections' : []
+    }
+    container = Container( container_spec, untrusted_user, self.random_input_directory, False, self.is_test_environment, self.log_message)
+    execution_script = os.path.join(container.directory, executable)
+    
+    try:
+      container.create(execution_script, arguments, False)
+      container.start(logfile)
+      container.process.wait()
+    except Exception as e:
+      self.log_message('ERROR generating random input using docker. See stack trace output for more details.')
+      self.log_stack_trace(traceback.format_exc())
+    finally:
+      container.cleanup_container()
+
+    return container.return_code
+
+  def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
+    return self.execute_helper(self.solution_containers, script, arguments, logfile)
 
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
-    if cwd is None:
-      cwd = self.directory
+    return self.execute_helper(self.containers, script, arguments, logfile)
 
+  def execute_helper(self, containers, script, arguments, logfile):
     try:
       self.verify_execution_status()
     except Exception as e:
@@ -414,53 +443,60 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       return
 
     try:
-      self.create_containers( os.path.join(cwd, script), arguments)
-      self.network_containers()
+      self.create_containers( containers, script, arguments)
+      self.network_containers(containers)
     except Exception as e:
       self.log_message('ERROR: Could not create or network containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
 
     try:
-      router = self.get_router()
+      router = self.get_router(containers)
       # First start the router a second before any other container.
       if router is not None:
         router.start(logfile)
         time.sleep(1)
 
       # Next start any server containers
-      for container in self.get_server_containers():
+      for container in self.get_server_containers(containers):
         container.start(logfile)
 
       # Finally, start the standard (assignment) containers
-      for container in self.get_standard_containers():
+      for container in self.get_standard_containers(containers):
         container.start(logfile)
 
       # Deliver dispatcher actions
-      self.process_dispatcher_actions()
+      self.process_dispatcher_actions(containers)
 
       # When we are done with the dispatcher actions, keep running until all
       # student process' finish.
-      self.wait_until_standard_containers_finish()
+      self.wait_until_standard_containers_finish(containers)
 
-       # A zero return code means execution went smoothly
-      return_code = 0
-      # Check the return codes of the standard (non server/router) containers
-      # to see if they finished properly. Note that this return code is yielded by
-      # main runner/validator/compiler.
-      for container in self.get_standard_containers():
-        if container.return_code != 0:
-          return_code = container.return_code
-          break
     except Exception as e:
       self.log_message('ERROR grading using docker. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
       return_code = -1
-    finally:
-      # Now stop any unfinished router/server containers, 
-      # and cleanup after all containers.
-      for container in self.containers:
+
+    try:
+      for container in containers:
         container.cleanup_container()
-
+    except Exception as e:
+      self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
+      self.log_stack_trace(traceback.format_exc())
+    
+    try:
       self.cleanup_networks()
+    except Exception as e:
+      self.log_message('ERROR cleaning up docker networks. See stack trace output for more details.')
+      self.log_stack_trace(traceback.format_exc())
+    
 
+    # A zero return code means execution went smoothly
+    return_code = 0
+    # Check the return codes of the standard (non server/router) containers
+    # to see if they finished properly. Note that this return code is yielded by
+    # main runner/validator/compiler.
+    for container in self.get_standard_containers(containers):
+      if container.return_code != 0:
+        return_code = container.return_code
+        break
     return return_code
