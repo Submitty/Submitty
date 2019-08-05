@@ -5,21 +5,11 @@ namespace tests\app\libraries\routers;
 use app\libraries\routers\WebRouter;
 use tests\BaseUnitTest;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 
 /**
  * @runTestsInSeparateProcesses
  */
 class WebRouterTester extends BaseUnitTest {
-
-    /**
-     * Loads annotations for routers.
-     */
-    public static function setUpBeforeClass(): void {
-        $loader = require(__DIR__.'/../../../../vendor/autoload.php');
-        AnnotationRegistry::registerLoader([$loader, 'loadClass']);
-    }
-
     public function testLogin() {
         $core = $this->createMockCore();
         $request = Request::create(
@@ -33,6 +23,8 @@ class WebRouterTester extends BaseUnitTest {
 
     public function testLogout() {
         $_COOKIE['submitty_token'] = "test";
+        $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
+        $_SERVER['HTTP_USER_AGENT'] = 'test';
         $core = $this->createMockCore();
         $request = Request::create(
             "/authentication/logout"

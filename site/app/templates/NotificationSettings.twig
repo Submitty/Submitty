@@ -48,8 +48,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">New announcements</div>
-                        <div class="option-alt">Receive a notification whenever an instructor posts a new announcement</div>
+                        <div class="option-title">New Announcement</div>
+                        <div class="option-alt">Alert me when an instructor posts a new announcement</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="announcement" id="announcement" disabled checked></div>
@@ -61,8 +61,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">Replies to my thread</div>
-                        <div class="option-alt">Receive a notification whenever a reply is posted in a thread that you created</div>
+                        <div class="option-title">Reply to My Thread</div>
+                        <div class="option-alt">Alert me when a reply is posted in a thread that I created</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="reply_thread" id="reply_thread" disabled checked></div>
@@ -74,8 +74,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">My post was modified</div>
-                        <div class="option-alt">Receive a notification whenever one of your posts was edited, deleted, or merged</div>
+                        <div class="option-title">My Post was Modified</div>
+                        <div class="option-alt">Alert me when one of my posts is edited, deleted, or merged</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="my_post_altered" id="my_post_altered" disabled checked></div>
@@ -87,8 +87,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">Replies to thread in which you have posted</div>
-                        <div class="option-alt">Receive a notification whenever a reply is posted in a thread in which you also posted</div>
+                        <div class="option-title">Reply in Participating Thread</div>
+                        <div class="option-alt">Alert me when a reply is posted in a thread in which I also posted</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="reply_in_post_thread" id="reply_in_post_thread" {% if notification_saves['reply_in_post_thread'] %}checked="true"{% endif %}></div>
@@ -101,8 +101,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">Merge threads</div>
-                        <div class="option-alt">Receive a notification whenever a thread is merged</div>
+                        <div class="option-title">Merged Thread</div>
+                        <div class="option-alt">Alert me when a thread is merged</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="merge_threads" id="merge_threads" {% if notification_saves['merge_threads'] %}checked="true"{% endif %}></div>
@@ -114,8 +114,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">All new threads</div>
-                        <div class="option-alt">Receive a notification whenever a thread is created</div>
+                        <div class="option-title">All New Threads</div>
+                        <div class="option-alt">Alert me when a thread is created</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_new_threads" id="all_new_threads" {% if notification_saves['all_new_threads'] %}checked="true"{% endif %}></div>
@@ -127,8 +127,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">All new posts</div>
-                        <div class="option-alt">Receive a notification whenever a post is created</div>
+                        <div class="option-title">All New Posts</div>
+                        <div class="option-alt">Alert me when a post is created</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_new_posts" id="all_new_posts" {% if notification_saves['all_new_posts'] %}checked="true"{% endif %}></div>
@@ -141,8 +141,8 @@
                 <div class="option row">
                     <div class="option-desc col-md-4">
                         <label for="forum_enabled">
-                            <div class="option-title">A thread/post has been altered</div>
-                            <div class="option-alt">Receive a notification whenever a thread/post has been edited, deleted, or undeleted</div>
+                            <div class="option-title">All Modified Threads & Posts</div>
+                            <div class="option-alt">Alert me when a thread/post has been edited, deleted, or undeleted</div>
                         </label>
                     </div>
                     <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="all_modifications_forum" id="all_modifications_forum" {% if notification_saves['all_modifications_forum'] %}checked="true"{% endif %}></div>
@@ -160,8 +160,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">A Grade Inquiry has been submitted</div>
-                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has submitted a grade inquiry on work you graded" : "Receive a notification when a grader or a team member makes a grade inquiry on your work" %}
+                        <div class="option-title">Grade Inquiry Submitted</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student that I graded submits a grade inquiry" : "Alert me when my team member or grader makes a grade inquiry on my work" %}
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
@@ -174,8 +174,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">A Grade Inquiry post has been made</div>
-                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has submitted a post on their grade inquiry" : "Receive a notification when a grader or a team member makes a post on your grade inquiry" %}
+                        <div class="option-title">Grade Inquiry Post</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student posts a followup message on their grade inquiry" : "Alert me when my team member or grader posts a followup message on my grade inquiry" %}
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
@@ -188,8 +188,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">A Grade Inquiry has been resolved</div>
-                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has closed their grade inquiry" : "Receive a notification when a grader or a team member resolves your grade inquiry" %}
+                        <div class="option-title">Grade Inquiry Resolved</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student closes their grade inquiry" : "Alert me when a team member or grader resolves my grade inquiry" %}
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
@@ -202,8 +202,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">A Grade Inquiry has been reopened</div>
-                        {% set notification_setting_text = core.getUser().accessGrading() ? "Receive a notification when a student has reopened their grade inquiry" : "Receive a notification when a grader or a team member reopened your grade inquiry" %}
+                        <div class="option-title">Grade Inquiry Re-Opened</div>
+                        {% set notification_setting_text = core.getUser().accessGrading() ? "Alert me when a student reopens their grade inquiry" : "Alert me when a team member or grader reopens my grade inquiry" %}
                         <div class="option-alt">{{ notification_setting_text }}</div>
                     </label>
                 </div>
@@ -221,8 +221,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">New team invites</div>
-                        <div class="option-alt">Receive a notification when you get an invitation to join a team</div>
+                        <div class="option-title">Team Invitation</div>
+                        <div class="option-alt">Alert me when I get an invitation to join a team</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_invite" id="team_invite" {% if notification_saves['team_invite'] %}checked="true"{% endif %}></div>
@@ -234,8 +234,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">New team member</div>
-                        <div class="option-alt">Receive a notification when a new now member joins your team</div>
+                        <div class="option-title">New Team Member</div>
+                        <div class="option-alt">Alert me when a new team member joins my team</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_joined" id="team_joined" {% if notification_saves['team_joined'] %}checked="true"{% endif %}></div>
@@ -247,8 +247,8 @@
             <div class="option row">
                 <div class="option-desc col-md-4">
                     <label for="forum_enabled">
-                        <div class="option-title">New team member submission</div>
-                        <div class="option-alt">Receive a notification when a team member makes a submission to your gradeable</div>
+                        <div class="option-title">Team Member Submission</div>
+                        <div class="option-alt">Alert me when a team member makes a submission to the gradeable</div>
                     </label>
                 </div>
                 <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="team_member_submission" id="team_member_submission" {% if notification_saves['team_member_submission'] %}checked="true"{% endif %}></div>
@@ -256,6 +256,21 @@
                     <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="team_member_submission_email" id="team_member_submission_email" {% if notification_saves['team_member_submission_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
+
+            <hr>
+            <div class="option row">
+                <div class="option-desc col-md-4">
+                    <label for="forum_enabled">
+                        <div class="option-title">My Actions/Updates</div>
+                        <div class="option-alt">Alert me when I perform the actions selected above</div>
+                    </label>
+                </div>
+                <div class="option-input col-md-3"><input type="checkbox" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
+                {% if email_enabled %}
+                    <div class="option-input col-md-5"><input type="checkbox" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="true"{% endif %}></div>
+                {% endif %}
+            </div>
+
         </div>
     </form>
     <script>

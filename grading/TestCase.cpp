@@ -102,6 +102,29 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
   }
 }
 
+std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filename){
+  struct stat st;
+  std::string expectedFolder;
+  std::string test_output_path = "test_output/";
+  std::string random_output_path = "random_output/" + tc.getPrefix();
+  if (stat((test_output_path + filename).c_str(), &st) >= 0) {
+    expectedFolder = test_output_path;
+  } else if (stat((random_output_path + filename).c_str(), &st) >= 0){
+    expectedFolder = random_output_path;
+  }
+  return expectedFolder;
+}
+
+std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std::string &id){
+  std::string expectedPath = getOutputContainingFolderPath(tc, filename);
+  std::string requiredPath ;
+  if (expectedPath.substr(0,11) == "test_output"){
+    requiredPath = expectedPath + id + "/"; 
+  } else if (expectedPath.substr(0,13) == "random_output") {
+    requiredPath = expectedPath;
+  }
+  return requiredPath;
+}
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
   std::ifstream file(filename);
@@ -161,7 +184,8 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
-  std::string filename = "test_output/" + j.value("expected_file","");
+  std::string filename = j.value("expected_file","");
+  filename = getOutputContainingFolderPath(tc, filename) + filename;
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;
@@ -250,10 +274,50 @@ std::vector<std::string> TestCase::getCommands() const {
   return stringOrArrayOfStrings(command_map, "commands");
 }
 
+
+std::vector<std::string> TestCase::getSolutionCommands() const {
+
+  //TODO potential point of failure
+  std::vector<nlohmann::json> containers = mapOrArrayOfMaps(this->_json, "solution_containers");
+
+  assert(containers.size() > 0);
+
+  if (this->CONTAINER_NAME == ""){
+    //TODO add back in if possible.
+    //assert(containers.size() == 1);
+    return stringOrArrayOfStrings(containers[0], "commands");
+  }
+
+  bool found = false;
+  nlohmann::json command_map;
+  //If we ARE running in a docker container, we must find the commands that are bound for us.
+  for(std::vector<nlohmann::json>::const_iterator it = containers.begin(); it != containers.end(); ++it) {
+    nlohmann::json::const_iterator val = it->find("container_name");
+    std::string curr_target = *val;
+    if(curr_target == this->CONTAINER_NAME){
+      found = true;
+      command_map = *it;
+      break;
+    }
+  }
+
+  if(!found){
+    std::cout << "ERROR: Could not find " << this->CONTAINER_NAME << " in the command map." << std::endl;
+    std::vector<std::string> empty;
+    return empty;
+  }
+
+  return stringOrArrayOfStrings(command_map, "commands");
+}
+
 // =================================================================================
 // =================================================================================
 // ACCESSORS
 
+std::vector <std::string> TestCase::getInputGeneratorCommands() const {
+    std::vector <std::string> commands = stringOrArrayOfStrings(_json, "input_generation_commands");
+    return commands;
+}
 
 std::string TestCase::getTitle() const {
   const nlohmann::json::const_iterator& itr = _json.find("title");

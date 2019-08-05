@@ -113,6 +113,15 @@
                     "description": "STDERR.txt",
                     "difference_file": "test10/1_diff.json",
                     "expected_file": "test_output/testassignment/output_7B.txt"
+                },
+                {
+                    "description" : "execute_logfile.txt",
+                    "messages" : [
+                        {
+                            "message" : "WARNING: This file should be empty",
+                            "type" : "warning"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 1,

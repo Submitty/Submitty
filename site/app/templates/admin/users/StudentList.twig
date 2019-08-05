@@ -11,7 +11,7 @@
     </header>
     {# This is a data table #}
     {% if sections|length > 0 %}
-        <table id="student-table" class="table table-striped mobile-table">
+        <table id="student-table" class="table table-striped mobile-table directory-table">
             <caption>Students Enrolled</caption>
             <thead>
                 <tr>
@@ -26,7 +26,7 @@
             </thead>
             {% for registration, students in sections %}
                 <tbody id="section-{{ registration }}">
-                    <tr class="info persist-header">
+                    <tr class="info">
                         <th class="section-break" colspan="8">Students Enrolled in Registration Section {{ registration }}</td>
                     </tr>
                     {% for student in students %}
@@ -41,14 +41,14 @@
                             <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
-                            <td><a onclick="editUserForm('{{ student.getId() }}');" aria-label="edit user {{ student.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
+                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{ student.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
                         </tr>
                     {% endfor %}
                 </tbody>
             {% endfor %}
         </table>
     {% else %}
-        <p class="warning">No students found</p>
+        <p id="no-one-found" class="warning">No students found</p>
     {% endif %}
 </div>
 {% include('admin/users/UserForm.twig') %}

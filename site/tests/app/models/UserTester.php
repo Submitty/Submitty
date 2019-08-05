@@ -155,6 +155,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_invite' => true,
                 'team_joined' => true,
                 'team_member_submission' => true,
+                'self_notification' => false,
                 'reply_in_post_thread_email' => false,
                 'merge_threads_email' => false,
                 'all_new_threads_email' => false,
@@ -162,7 +163,9 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'all_modifications_forum_email' => false,
                 'team_invite_email' => true,
                 'team_joined_email' => true,
-                'team_member_submission_email' => true)
+                'team_member_submission_email' => true,
+                'self_notification_email' => false
+            )
         );
         $this->assertEquals($expected, $actual);
     }

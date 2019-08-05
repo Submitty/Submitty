@@ -360,22 +360,24 @@ class User extends AbstractModel {
 
     static public function constructNotificationSettings($details) {
         $notification_settings = [];
-        $notification_settings['reply_in_post_thread'] = !empty($details['reply_in_post_thread']) ? $details['reply_in_post_thread'] : false;
-        $notification_settings['merge_threads'] = !empty($details['merge_threads']) ? $details['merge_threads'] : false;
-        $notification_settings['all_new_threads'] = !empty($details['all_new_threads']) ? $details['all_new_threads'] : false;
-        $notification_settings['all_new_posts'] = !empty($details['all_new_posts']) ? $details['all_new_posts'] : false;
-        $notification_settings['all_modifications_forum'] = !empty($details['all_modifications_forum']) ? $details['all_modifications_forum'] : false;
-        $notification_settings['team_invite'] = isset($details['team_invite']) ? $details['team_invite'] : true;
-        $notification_settings['team_member_submission'] = isset($details['team_member_submission']) ? $details['team_member_submission'] : true;
-        $notification_settings['team_joined'] = isset($details['team_joined']) ? $details['team_joined'] : true;
-        $notification_settings['reply_in_post_thread_email'] = !empty($details['reply_in_post_thread_email']) ? $details['reply_in_post_thread_email'] : false;
-        $notification_settings['merge_threads_email'] = !empty($details['merge_threads_email']) ? $details['merge_threads_email'] : false;
-        $notification_settings['all_new_threads_email'] = !empty($details['all_new_threads_email']) ? $details['all_new_threads_email'] : false;
-        $notification_settings['all_new_posts_email'] = !empty($details['all_new_posts_email']) ? $details['all_new_posts_email'] : false;
-        $notification_settings['all_modifications_forum_email'] = !empty($details['all_modifications_forum_email']) ? $details['all_modifications_forum_email'] : false;
-        $notification_settings['team_invite_email'] = isset($details['team_invite_email']) ? $details['team_invite_email'] : true;
-        $notification_settings['team_member_submission_email'] = isset($details['team_member_submission_email']) ? $details['team_member_submission_email'] : true;
-        $notification_settings['team_joined_email'] = isset($details['team_joined_email']) ? $details['team_joined_email'] : true;
+        $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
+        $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
+        $notification_settings['all_new_threads'] = $details['all_new_threads'] ?? false;
+        $notification_settings['all_new_posts'] = $details['all_new_posts'] ?? false;
+        $notification_settings['all_modifications_forum'] = $details['all_modifications_forum'] ?? false;
+        $notification_settings['team_invite'] = $details['team_invite'] ?? true;
+        $notification_settings['team_joined'] = $details['team_joined'] ?? true;
+        $notification_settings['team_member_submission'] = $details['team_member_submission'] ?? true;
+        $notification_settings['self_notification'] = $details['self_notification'] ?? false;
+        $notification_settings['reply_in_post_thread_email'] = $details['reply_in_post_thread_email'] ?? false;
+        $notification_settings['merge_threads_email'] = $details['merge_threads_email'] ?? false;
+        $notification_settings['all_new_threads_email'] = $details['all_new_threads_email'] ?? false;
+        $notification_settings['all_new_posts_email'] = $details['all_new_posts_email'] ?? false;
+        $notification_settings['all_modifications_forum_email'] = $details['all_modifications_forum_email'] ?? false;
+        $notification_settings['team_invite_email'] = $details['team_invite_email'] ?? true;
+        $notification_settings['team_joined_email'] = $details['team_joined_email'] ?? true;
+        $notification_settings['team_member_submission_email'] = $details['team_member_submission_email'] ?? true;
+        $notification_settings['self_notification_email'] = $details['self_notification_email'] ?? false;
         return $notification_settings;
     }
 

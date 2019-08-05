@@ -59,6 +59,7 @@ class LateController extends AbstractController {
             $data = array();
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "late"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
@@ -67,6 +68,7 @@ class LateController extends AbstractController {
                 for ($i = 0; $i < count($data); $i++){
                     $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
                 }
+                $this->core->addSuccessMessage("Late days have been updated");
                 return $this->getLateDays();
             }
         }
@@ -74,23 +76,28 @@ class LateController extends AbstractController {
             $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
             if (!$user) {
                 $error = "Invalid Student ID";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
+
             if (!isset($_POST['datestamp']) ||  (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
             if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])))) {
                 $error = "Late Days must be a nonnegative integer";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
             $this->core->getQueries()->updateLateDays($_POST['user_id'], $_POST['datestamp'], $_POST['late_days']);
+            $this->core->addSuccessMessage("Late days have been updated");
             return $this->getLateDays();
         }
     }
@@ -103,17 +110,22 @@ class LateController extends AbstractController {
         $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
         if (!$user) {
             $error = "Invalid Student ID";
+            $this->core->addErrorMessage($error);
+
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse($error)
             );
         }
         if ((!isset($_POST['datestamp']) || !DateUtils::validateTimestamp($_POST['datestamp']))) {
             $error = "Datestamp must be mm/dd/yy";
+            $this->core->addErrorMessage($error);
+
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse($error)
             );
         }
         $this->core->getQueries()->deleteLateDays($_POST['user_id'], $_POST['datestamp']);
+        $this->core->addSuccessMessage("Late days entry removed");
 
         return $this->getLateDays();
     }
