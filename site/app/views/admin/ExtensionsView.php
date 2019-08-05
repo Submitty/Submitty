@@ -20,6 +20,9 @@ class ExtensionsView extends AbstractView {
         $students = $this->core->getQueries()->getAllUsers();
         $student_full = Utils::getAutoFillData($students);
         $current_gid = isset($_COOKIE['exception_gid']) ? $_COOKIE['exception_gid'] : null;
+        // get gradeable with matching gid
+        $g_key = array_search($current_gid, array_column($gradeables, 'g_id'));
+        $current_gradeable = $g_key === false ? null : $gradeables[$g_key]; 
 
         $users = $this->core->getQueries()->getUsersWithExtensions($current_gid);
         $current_exceptions = array();
@@ -34,7 +37,7 @@ class ExtensionsView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
             "gradeables" => $gradeables,
             "student_full" => $student_full,
-            "current_gid" => $current_gid,
+            "current_gradeable" => $current_gradeable,
             "current_exceptions" => $current_exceptions,
             "csrf_token" => $this->core->getCsrfToken()
         ]);

@@ -167,25 +167,56 @@ class LateController extends AbstractController {
                     JsonResponse::getFailResponse($error)
                 );
             }
-            if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days']))) {
-                $error = "Late Days must be a nonnegative integer";
+            $late_days = null;
+            if (isset($_POST['late_days']) && $_POST['late_days'] != "") {
+                $late_days = $_POST['late_days'];  
+                if (intval($late_days) < 0 || !ctype_digit($late_days)) {
+                    $error = "Extensions must be a nonnegative integer [" . $late_days . "]";
+                    $this->core->addErrorMessage($error);
+                    return Response::JsonOnlyResponse(
+                        JsonResponse::getFailResponse($error)
+                    );
+                }
+            } else if (isset($_POST['due_date']) && isset($_POST['late_calendar']) && $_POST['late_calendar'] != "") {
+                $new_date = strtotime($_POST['late_calendar']);
+                if (!$new_date) {
+                    $error = "New due date must be of the format YYYY-MM-DD";
+                    $this->core->addErrorMessage($error);
+                    return Response::JsonOnlyResponse(
+                        JsonResponse::getFailResponse($error)
+                    );
+                }
+                $orig_date = strtotime($_POST['due_date']);
+                $late_days = floor(($new_date - $orig_date)/60/60/24); // get days between dates
+                if ($late_days < 0) {
+                    $error = "Extended due date must be after the original";
+                    $this->core->addErrorMessage($error);
+                    return Response::JsonOnlyResponse(
+                        JsonResponse::getFailResponse($error)
+                    );
+                }
+                $late_days = strval($late_days);
+            } else {
+                $error = "You must specify a number of late days or a new due date for the student";
                 $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
-            }
+            } 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
             if($team != NULL && $team->getSize() > 1){
                 if($option == 0){
-                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
+                    $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                    $this->core->addSuccessMessage("Extensions have been updated");
                     return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 } else if($option == 1){
                     $team_member_ids = explode(", ", $team->getMemberList());
-                    for($i = 0; $i < count($team_member_ids); $i++){
-                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $_POST['late_days']);
+                    for($i = 0; $i < count($team_member_ids); $i++) {
+                        $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
                     }
+                    $this->core->addSuccessMessage("Extensions have been updated");
                     return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 } else {
                     $team_member_ids = explode(", ", $team->getMemberList());
@@ -201,7 +232,8 @@ class LateController extends AbstractController {
                     );
                 }
             } else {
-                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
+                $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
+                $this->core->addSuccessMessage("Extensions have been updated");
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }

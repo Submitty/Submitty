@@ -1,6 +1,8 @@
 function updateGradeableForExtensions() {
     var g_id = $('#gradeable-select').val();
-    document.cookie = "exception_gid=" + g_id;
+    var expiration_date = new Date(Date.now());
+    expiration_date.setDate(expiration_date.getDate() + 1);
+    document.cookie = "exception_gid=" + g_id + "; expires=" + expiration_date.toUTCString();
     window.location=window.location; // pseudo post/redirect/get pattern
 }
 
@@ -49,7 +51,7 @@ function clearLateDays() {
 function confirmExtension(option){
     $('.popup-form').css('display', 'none');
     $('input[name="option"]').val(option);
-    $('#excusedAbsenceForm').submit();
+    updateHomeworkExtension();
     $('input[name="option"]').val(-1);
 }
 
@@ -58,4 +60,5 @@ function extensionPopup(json){
     var form = $('#more_extension_popup');
     form[0].outerHTML = json['data']['popup'];
     $('#more_extension_popup').css('display', 'block');
+    $("#team-extension-cancel").focus();
 }

@@ -11,25 +11,22 @@
             <div class="option">
                 <label for="g_id">Select Gradeable:</label>
                 <select name="g_id" id="gradeable-select" onchange="updateGradeableForExtensions()">
-                    <option disabled {% if current_gid is null %} selected {% endif %} value> -- select an option -- </option>
+                    <option disabled {% if current_gradeable is null %} selected {% endif %} value> -- select an option -- </option>
                     {% for index, value in gradeables %}
                         <option 
                             value="{{value['g_id']}}" 
-                            {% if current_gid == value['g_id'] %} 
-                                selected 
-                                {% set due_date = value['eg_submission_due_date'] %}
-                                {% set current_gradeable = value['g_title'] %}
-                            {% endif %} 
+                            {% if current_gradeable['g_id'] == value['g_id'] %} selected {% endif %} 
                         >
-                            {{ value['g_title'] }} : {{ value['eg_submission_due_date'] }}
+                            {{ value['g_title'] }}
                         </option>
                     {% endfor %}
                 </select>
-                {% if current_gid is not null %}
-                    <p id ="due-date">Set Due Date: {{ due_date|date("m/d/Y H:i:s") }}</p>
+                {% if current_gradeable is not null %}
+                    <p id ="due-date">Set Due Date: {{ current_gradeable['eg_submission_due_date'] | date("m/d/Y H:i:s") }}</p>
                 {% endif %}
             </div>
         </div>
+         <input type="hidden" name="due_date" value="{{ due_date }}" />
         <fieldset class="single-student">
             <legend class="option-title">Single Student Entry</legend>
             <label for="user_id">
@@ -56,7 +53,7 @@
     </form>
     {% if current_exceptions is null %}
         <p id="empty-table" class="warning">
-            {% if current_gid is null %}
+            {% if current_gradeable is null %}
                 No gradeable has been selected
             {% else %}
                 No extensions are currently entered for this gradeable
@@ -82,7 +79,7 @@
                         <td>{{ user.late_day_exceptions }}</td>
                         <td>
                             <a 
-                                aria-label="Delete {{ user.getId() }}'s extension for {{ current_gradeable }}" 
+                                aria-label="Delete {{ user.getId() }}'s extension for {{ current_gradeable['g_id'] }}" 
                                 href="javascript:deleteHomeworkExtension('{{ user.user_id }}');"
                             >
                                 <i class="fas fa-trash"></i>
@@ -97,6 +94,35 @@
 <script>
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
+    });
+    flatpickr("#late-calendar", {
+        plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
+                        {
+                            label: "Now"
+                        }, 
+                        {
+                            label: "End of time"
+                        }
+                    ],
+                    label: "or",
+                    onClick: (index, fp) => {
+                        let date;
+                        switch (index) {
+                            case 0: 
+                                date = new Date();
+                                break;
+                            case 1: 
+                                date = new Date("01/01/9998");
+                                break;
+                        }
+                        fp.setDate(date, true);
+                    }
+                }
+            )],
+        allowInput: true,
+        dateFormat: "Y-m-d"
     });
 </script>
 {% include('admin/users/MoreExtensions.twig') %}
