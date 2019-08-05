@@ -35,6 +35,11 @@ def cleanup(test):
     subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "*")))
 
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def solution(test):

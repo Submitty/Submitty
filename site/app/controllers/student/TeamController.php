@@ -256,12 +256,12 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $team_members = $accept_team->getMembers();
+
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
-
+        $team_members = $accept_team->getMembers();
         // send notification to team members that user joined
         $metadata =  json_encode(['url' => $this->core->buildNewCourseUrl([$gradeable_id,'team'])]);
         $subject = "New Team Member: ".$gradeable->getTitle();

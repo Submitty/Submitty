@@ -25,12 +25,18 @@
 <div class="content">
     <h1>Gradeables</h1>
     {% if sections|length > 0 %}
+        <div id="gradeables">
         {% for list_section, info in sections %}
             <div id="{{ info.section_id }}" class="course-section-heading">
-                {{ info.title }}
-                {% if info.subtitle != "" %}
-                    &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
-                {% endif %}
+                <div class="course-section-title">
+                    {{ info.title }}
+                    {% if info.subtitle != "" %}
+                        &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                    {% endif %}
+                </div>
+                {% for button in 1 .. max_buttons %}
+                    <div class="button-placeholder"></div>
+                {% endfor %}
             </div>
 
             <div id="{{ info.section_id }}-section" class="course-section">
@@ -54,15 +60,14 @@
                             {% endif %}
                         </div>
                     </div>
-                    <div class="course-button-wrapper">
-                        {% for button in g_info.buttons %}
-                            <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
-                        {% endfor %}
-                    </div>
+                    {% for button in g_info.buttons %}
+                        <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
+                    {% endfor %}
                 </div>
                 {% endfor %}
             </div>
         {% endfor %}
+        </div>
     {% else %}
         <div class="container">
             <p>There are currently no assignments posted.  Please check back later.</p>
@@ -116,60 +121,3 @@
         {% endif %}
     {% endif %}
 {% endmacro %}
-
-{# Requires twig variables, so we need this here #}
-<style>
-    /* sidebar 60 + content padding 60 + content margin right 30 + button 220 = 350 */
-    /* button 220 + margin 40 = 260 */
-    @media (min-width: {{ 350 + max_buttons * 260 }}px) {
-        .course-section-heading {
-            border-bottom: 1px solid var(--standard-light-gray);
-            margin: 0;
-            padding: 0;
-        }
-
-        .gradeable-row {
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .course-main, .course-button-wrapper {
-            flex: 1 auto;
-        }
-        
-        .course-main {
-            padding: 0;
-        }
-
-        .course-button-wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-
-        .course-button {
-            margin: 0 20px;
-        }
-
-        .btn-nav {
-            min-height: auto;
-        }
-
-        .btn-nav-open {
-            display: inline-block;
-            width: 100px;
-            min-width: 0 !important;
-        }
-        
-        .course-main .button-placeholder {
-            display: block;
-            min-width: 22.5px;
-            margin: 0 5px;
-        }
-        
-        .course-button-wrapper .button-placeholder {
-            display: block;
-            min-width: 100px;
-        }
-    }
-</style>
