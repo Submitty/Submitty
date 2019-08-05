@@ -41,6 +41,7 @@ use app\libraries\Utils;
  * @method bool isCourseLoaded()
  * @method string getInstitutionName()
  * @method string getInstitutionHomepage()
+ * @method string getCourseCodeRequirements()
  * @method string getUsernameChangeText()
  * @method bool isForumEnabled()
  * @method bool isRegradeEnabled()
@@ -136,6 +137,13 @@ class Config extends AbstractModel {
      * @property
      */
     protected $username_change_text = "";
+
+    /**
+     * The text to be shown when an instructor enters a course code for a new course.
+     * @var string
+     * @property
+     */
+    protected $course_code_requirements = "";
 
     /** @property @var string Text shown to all users for system announcement */
     protected $system_message = '';
@@ -269,6 +277,10 @@ class Config extends AbstractModel {
 
         if (isset($submitty_json['username_change_text'])) {
             $this->username_change_text = $submitty_json['username_change_text'];
+        }
+
+        if (isset($submitty_json['course_code_requirements'])) {
+            $this->course_code_requirements = $submitty_json['course_code_requirements'];
         }
 
         if (isset($submitty_json['system_message'])) {

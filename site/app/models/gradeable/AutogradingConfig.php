@@ -145,7 +145,9 @@ class AutogradingConfig extends AbstractModel {
 
             // For each item in the notebook array inside the $details collect data and assign to variables in
             // $this->notebook
-            foreach ($details['notebook'] as $notebook_cell) {
+            for ($i = 0; $i < count($details['notebook']); $i++) {
+                $notebook_cell = $details['notebook'][$i];
+                $do_add = true;
 
                 // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
                 // markdown forward as 'data' as opposed to 'string' or 'file'
@@ -160,10 +162,25 @@ class AutogradingConfig extends AbstractModel {
 
                     // Readd as data
                     $notebook_cell['markdown_data'] = $markdown;
+
+                    // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
+                    if ($i < count($details['notebook']) - 1) 
+                    {
+                        $next_cell = &$details['notebook'][$i + 1];
+                        if (isset($next_cell['type']) &&
+                            ($next_cell['type'] == 'short_answer' OR $next_cell['type'] == 'multiple_choice')) 
+                        {
+                            $next_cell['label'] = $markdown;
+                            // Do not add current cell to notebook, since it is embedded in the label
+                            $do_add = false;
+                        }
+                    }
                 }
 
                 // Add this cell $this->notebook
-                array_push($this->notebook, $notebook_cell);
+                if ($do_add) {
+                    array_push($this->notebook, $notebook_cell);
+                }
 
                 // If cell is a type of input add it to the $actual_inputs array
                 if(isset($notebook_cell['type']) &&

@@ -10,14 +10,7 @@
                     {# If viewing the active version, show cancel button, otherwise show button to switch active #}
                     {% if display_version > 0 %}
                         <form style="display: inline;" method="post" onsubmit='return checkTaVersionChange();'
-                              action="{{ core.buildUrl({
-                                  'component': 'student',
-                                  'action': 'update',
-                                  'gradeable_id': gradeable_id,
-                                  'new_version': display_version == active_version ? 0 : display_version,
-                                  'ta': true,
-                                  'who': submitter_id
-                              }) }}">
+                              action="{{ update_version_url }}">
                             <input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
                             {% if display_version == active_version %}
                                 <input type="submit" class="btn btn-default btn-xs" style="float:right; margin: 0 10px;" value="Cancel Student Submission">

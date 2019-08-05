@@ -2,10 +2,10 @@
 
 namespace app;
 
-use app\exceptions\ConfigException;
 use app\libraries\Core;
 use app\models\Email;
 use app\models\Notification;
+use app\models\User;
 use LogicException;
 
 /**
@@ -97,6 +97,40 @@ class NotificationFactory {
             $this->sendEmails($emails);
         }
     }
+    // ***********************************TEAM NOTIFICATIONS***********************************
+
+    /**
+     * checks whether $recipients have correct team settings and sends the notification and email.
+     * @param array $event
+     * @param array $recipients
+     */
+    public function onTeamEvent(array $event, array $recipients) {
+        $notification_recipients = array();
+        $email_recipients = array();
+        $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
+        foreach ($recipients as $recipient) {
+            $user_settings_row = array_values(array_filter($users_settings, function($v) use ($recipient) {
+                return $v['user_id'] === $recipient;
+            }));
+            if (!empty($user_settings_row)) {
+                $user_settings_row = $user_settings_row[0];
+            }
+            $user_settings = User::constructNotificationSettings($user_settings_row);
+            if ($user_settings[$event['type']]) {
+                $notification_recipients[] = $recipient;
+            }
+            if ($user_settings[$event['type'].'_email']) {
+                $email_recipients[] = $recipient;
+            }
+        }
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
+        $this->sendNotifications($notifications);
+        if ($this->core->getConfig()->isEmailEnabled()) {
+            $emails = $this->createEmailsArray($event,$email_recipients);
+            $this->sendEmails($emails);
+        }
+
+    }
 
     // ***********************************HELPERS***********************************
 
@@ -143,15 +177,23 @@ class NotificationFactory {
             return;
         }
 
-        // parameterize notification array
+        // parametrize notification array
+        $current_user = $this->core->getUser();
+        $flattened_notifications = [];
         foreach ($notifications as $notification) {
-            $flattened_notifications[] = $notification->getComponent();
-            $flattened_notifications[] = $notification->getNotifyMetadata();
-            $flattened_notifications[] = $notification->getNotifyContent();
-            $flattened_notifications[] = $notification->getNotifySource();
-            $flattened_notifications[] = $notification->getNotifyTarget();
+            if ($notification->getNotifyTarget() == $current_user->getId() && $current_user->getNotificationSetting('self_notification')) {
+                $flattened_notifications[] = $notification->getComponent();
+                $flattened_notifications[] = $notification->getNotifyMetadata();
+                $flattened_notifications[] = $notification->getNotifyContent();
+                $flattened_notifications[] = $notification->getNotifySource();
+                $flattened_notifications[] = $notification->getNotifyTarget();
+            }
+
         }
-        $this->core->getQueries()->insertNotifications($flattened_notifications,count($notifications));
+        if (!empty($flattened_notifications)) {
+            $this->core->getQueries()->insertNotifications($flattened_notifications,count($notifications));
+        }
+
     }
 
     /**
@@ -165,12 +207,19 @@ class NotificationFactory {
         if (empty($emails)) {
             return;
         }
-        // parameterize email array
+        // parametrize email array
+        $current_user = $this->core->getUser();
+        $flattened_emails = [];
         foreach ($emails as $email) {
-            $flattened_emails[] = $email->getSubject();
-            $flattened_emails[] = $email->getBody();
-            $flattened_emails[] = $email->getUserId();
+            if ($email->getUserId() == $current_user->getId() && $current_user->getNotificationSetting('self_notification_email')) {
+                $flattened_emails[] = $email->getSubject();
+                $flattened_emails[] = $email->getBody();
+                $flattened_emails[] = $email->getUserId();
+            }
         }
-        $this->core->getQueries()->insertEmails($flattened_emails,count($emails));
+        if (!empty($flattened_emails)) {
+            $this->core->getQueries()->insertEmails($flattened_emails,count($emails));
+        }
+
     }
 }

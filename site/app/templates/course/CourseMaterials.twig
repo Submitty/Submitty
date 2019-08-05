@@ -54,28 +54,28 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath,inDir) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,inDir) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url) %}
     {# Files on top #}
 
     {% for dir, path in files|filter((path,dir) => path is not iterable) %}
         {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup,inDir) }}
+            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url) }}
         {% endif %}
     {% endfor %}
 
     {# Directories underneath #}
     {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir) }}
+        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url) }}
     {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup,inDir) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url) %}
     <div>
         <div class="file-viewer">
 
@@ -83,9 +83,9 @@
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                 <a target="_blank" href="{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=course_materials&file={{ dir }}&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
@@ -131,9 +131,10 @@
     </div>
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url
+        ) }}
     {% else %}
     <div>
 
@@ -160,7 +161,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url) }}
 
         </div>
     </div>
@@ -287,14 +288,12 @@
         var newDateTime = $(me).val();
         changeNewDateTime(path, newDateTime);
 
-        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+        var url = buildNewUrl(['server_time']);
 
-        $.ajax({
-            type: "POST",
+        $.get({
             url: url,
-            data: {csrf_token: csrfToken},
             success: function(data) {
-                var now = JSON.parse(data);
+                var now = JSON.parse(data)['data'];
                 now = new Date(parseInt(now.year),
                     parseInt(now.month) - 1,
                     parseInt(now.day),
@@ -352,16 +351,14 @@
 
     function handleTimeZones() {
 
-        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+        var url = buildNewUrl(['server_time']);
 
-        $.ajax({
-            type: "POST",
+        $.get({
             url: url,
-            data: {csrf_token: csrfToken},
             success: function(data) {
 
                 // Collect server time
-                var server_time = JSON.parse(data);
+                var server_time = JSON.parse(data)['data'];
                 server_time = new Date(parseInt(server_time.year),
                     parseInt(server_time.month) - 1,
                     parseInt(server_time.day),

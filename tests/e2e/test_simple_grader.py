@@ -38,7 +38,7 @@ class TestSimpleGrader(BaseTestCase):
             def wrapped_func(gradeable_id, gradeable_name):
                 self.click_nav_grade_button("items_being_graded", gradeable_id, "grade", (By.XPATH, "//div[@class='content']/h1[1][normalize-space(text())='{}']".format(gradeable_name)))
                 func()
-                self.click_header_link_text("sample", (By.XPATH, "//table[@class='gradeable_list']"))
+                self.click_header_link_text("sample", (By.XPATH, "//h1[text()='Gradeables']"))
             return wrapped_func if func is not None else lambda *args: None
         
         for user in users:
@@ -79,7 +79,7 @@ class TestSimpleGrader(BaseTestCase):
         def template_func():
             prev_section_num = None
             for tbody_elem in self.driver.find_elements_by_xpath("//div[@class='content']/table/tbody[not(starts-with(@id, 'section-'))]"):
-                td_elem = tbody_elem.find_element_by_xpath("tr[@class='info persist-header']/td[1]")
+                td_elem = tbody_elem.find_element_by_xpath("tr[@class='info']/td[1]")
                 # check that the header text is correct
                 self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
                 preceding_removed = td_elem.text.strip()[len(expected_text)+1:]

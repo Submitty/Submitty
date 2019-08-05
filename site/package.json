@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/Submitty/Submitty#readme",
   "dependencies": {
-    "@fortawesome/fontawesome-free": "~5.9.0",
+    "@fortawesome/fontawesome-free": "~5.10.1",
     "@submitty/pdf-annotate.js": "^2.0.2",
     "bootstrap": "^4.3.1",
     "chosen-js": "^1.8.7",
@@ -23,7 +23,8 @@
     "jquery.are-you-sure": "~1.9.0",
     "pdfjs-dist": "^2.1.266",
     "shortcut-buttons-flatpickr": "^0.3.0",
-    "twig": "^1.13.3"
+    "twig": "^1.13.3",
+    "mermaid": "~8.2.3"
   },
   "devDependencies": {}
 }
