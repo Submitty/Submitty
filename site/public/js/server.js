@@ -1111,43 +1111,13 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path, dir) {
-    window.location = buildUrl({
-        'component': 'misc',
-        'page': 'download_file',
-        'dir': dir,
-        'file': file,
-        'path': path});
+function downloadFile(path, dir) {
+    window.location = buildNewCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadZip(grade_id, user_id, version = null, origin = null) {
-    var url_components = {
-        'component': 'misc',
-        'page': 'download_zip',
-        'dir': 'submissions',
-        'gradeable_id': grade_id,
-        'user_id': user_id
-    };
-
-    if(version !== null) {
-        url_components['version'] = version;
-    }
-
-    if(origin !== null) {
-        url_components['origin'] = origin;
-    }
-
-    window.location = buildUrl(url_components);
+function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
+    window.location = buildNewCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
     return false;
-}
-
-function downloadFileWithAnyRole(file_name, path) {
-    // Trim file without path
-    var file = file_name;
-    if (file.indexOf("/") != -1) {
-        file = file.substring(file.lastIndexOf('/')+1);
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
 }
 
 function downloadCourseMaterialZip(dir_name, path) {
@@ -1565,18 +1535,6 @@ function loadOverriddenGrades(g_id) {
     });
 }
 
-function refreshOnResponseLateDays(json) {
-    $('#late_day_table tr:gt(0)').remove();
-    if(json['data']['users'].length === 0){
-        $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
-    }
-    json['data']['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
-        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
-        $('#late_day_table').append(bits.join('</td><td>'));
-    });
-}
-
 function refreshOnResponseOverriddenGrades(json) {
     var form = $("#load-overridden-grades");
     $('#my_table tr:gt(0)').remove();
@@ -1594,7 +1552,7 @@ function refreshOnResponseOverriddenGrades(json) {
 }
 
 function updateLateDays(data) {
-    var fd = new FormData($('#lateDayForm').get(0));
+    var fd = new FormData($('#late-day-form').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
     var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
@@ -1603,24 +1561,8 @@ function updateLateDays(data) {
         data: fd,
         processData: false,
         contentType: false,
-        success: function(data) {
-            var json = JSON.parse(data);
-            if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
-                return;
-            }
-            var form = $("#load-late-days");
-            refreshOnResponseLateDays(json);
-            //Reset all form elements
-            $('#user_id').val(this.defaultValue);
-            $('#datestamp').val(this.defaultValue);
-            $('#late_days').val(this.defaultValue);
-            $('#csv_upload').val(this.defaultValue);
-            $('#csv_option_overwrite_all').prop('checked',true);
-            //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
-            $('#messages').append(message);
+        success: function() {
+            window.location.reload();
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1643,23 +1585,14 @@ function deleteLateDays(user_id, datestamp) {
                 user_id: user_id,
                 datestamp: datestamp_mmddyy
             },
-            success: function(data) {
-                var json = JSON.parse(data);
-                if(json['status'] === 'fail'){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
-                $('#messages').append(message);
+            success: function() {
+                window.location.reload();
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
             }
         })
     }
-    return false;
 }
 
 function deleteOverriddenGrades(user_id, g_id) {
@@ -1701,18 +1634,6 @@ function toggleRegradeRequests(){
         element.style.display = 'block';
     }
 
-}
-function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    });
 }
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
@@ -1768,14 +1689,12 @@ function changeFolderPermission(filenames, checked,handleData) {
 }
 
 function updateToServerTime(fp) {
-    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+    var url = buildNewUrl(['server_time']);
 
-    $.ajax({
-        type: "POST",
+    $.get({
         url: url,
-        data: {csrf_token: csrfToken},
         success: function(data) {
-            var time = JSON.parse(data);
+            var time = JSON.parse(data)['data'];
             time = new Date(parseInt(time.year),
                             parseInt(time.month) - 1,
                             parseInt(time.day),
@@ -1849,7 +1768,7 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     var size = $(document.body).width();
-    if (size < 1000) {
+    if (size < 1150) {
         $("aside").toggleClass("collapsed", true);
     }
     else{
@@ -1897,13 +1816,11 @@ $(document).ready(function() {
 });
 
 function checkBulkProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
+    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk', 'progress']);
     $.ajax({
         url: url,
-        data: {
-            gradeable_id : gradeable_id
-        },
-        type: "POST",
+        data: null,
+        type: "GET",
         success: function(data) {
             data = JSON.parse(data);
             var result = {};

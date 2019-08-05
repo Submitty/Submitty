@@ -57,6 +57,21 @@
     padding: 10px 16px;
 }
 
+.button-group {
+    width: 100%;
+}
+
+.button-row {
+    width:100%;
+    display: flex;
+}
+
+.notification-setting-button {
+    flex-grow: 1;
+    margin: 5px;
+    background-color: white;
+}
+
 @media (min-width: 768px) {
     #notification-header {
         display: table-row;
