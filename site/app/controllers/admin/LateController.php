@@ -139,6 +139,7 @@ class LateController extends AbstractController {
             $data = array();
             if (!($this->parseAndValidateCsv($_FILES['csv_upload']['tmp_name'], $data, "extension"))) {
                 $error = "Something is wrong with the CSV you have chosen. Try again.";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
@@ -147,13 +148,13 @@ class LateController extends AbstractController {
                 for ($i = 0; $i < count($data); $i++){
                     $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
-
-                return $this->getExtensions($data[0][1]);
+                return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
         else {
             if ((!isset($_POST['g_id']) || $_POST['g_id'] == "" )) {
                 $error = "Please choose a gradeable_id";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
@@ -161,12 +162,14 @@ class LateController extends AbstractController {
             $user = current($this->core->getQueries()->getUsersById([$_POST['user_id']]));
             if (!$user) {
                 $error = "Invalid Student ID";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
             }
             if ((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days']))) {
                 $error = "Late Days must be a nonnegative integer";
+                $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
                 );
@@ -177,13 +180,13 @@ class LateController extends AbstractController {
             if($team != NULL && $team->getSize() > 1){
                 if($option == 0){
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
-                    return $this->getExtensions($_POST['g_id']);
+                    return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 } else if($option == 1){
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for($i = 0; $i < count($team_member_ids); $i++){
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $_POST['late_days']);
                     }
-                    return $this->getExtensions($_POST['g_id']);
+                    return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
                 } else {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     $team_members = array();
@@ -199,7 +202,7 @@ class LateController extends AbstractController {
                 }
             } else {
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $_POST['late_days']);
-                return $this->getExtensions($_POST['g_id']);
+                return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
     }
@@ -215,26 +218,6 @@ class LateController extends AbstractController {
         }
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(['users' => $user_table])
-        );
-    }
-
-    /**
-     * @param $g_id
-     *
-     * @Route("/{_semester}/{_course}/extensions/{g_id}")
-     * @return Response
-     */
-    public function getExtensions($g_id) {
-        $users = $this->core->getQueries()->getUsersWithExtensions($g_id);
-        $user_table = array();
-        foreach($users as $user) {
-            $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_day_exceptions' => $user->getLateDayExceptions());
-        }
-        return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse([
-                'gradeable_id' => $g_id,
-                'users' => $user_table
-            ])
         );
     }
 

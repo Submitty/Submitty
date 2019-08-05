@@ -20,8 +20,18 @@
     padding: 5px;
 }
 
-.mobile-table th, .mobile-table td {
-    white-space: nowrap;
+.mobile-table tr {
+    padding: 0 10px;
+}
+
+.mobile-table td:first-child,
+.mobile-table tr:first-child {
+    padding-left: 10px;
+}
+
+.mobile-table td:last-child,
+.mobile-table tr:last-child {
+    padding-right: 10px;
 }
 
 .section-break {
