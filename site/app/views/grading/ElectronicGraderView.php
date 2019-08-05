@@ -757,12 +757,18 @@ HTML;
         $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $prev_id ]);
         $next_student_url = $next_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $next_id ]);
 
+        // Setup urls for prev and next ungraded students
+        $prev_ungraded_student_url = $prev_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $prev_id, 'to_ungraded' => 'prev']);
+        $next_ungraded_student_url = $next_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $next_id, 'to_ungraded' => 'next']);
+
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
             "progress" => $progress,
             "peer" => $peer,
             "prev_student_url" => $prev_student_url,
+            "prev_ungraded_student_url" => $prev_ungraded_student_url,
             "next_student_url" => $next_student_url,
+            "next_ungraded_student_url" => $next_ungraded_student_url,
             "home_url" => $home_url,
             'regrade_panel_available' => $this->core->getConfig()->isRegradeEnabled(),
             'grade_inquiry_pending' => $graded_gradeable->hasActiveRegradeRequest(),

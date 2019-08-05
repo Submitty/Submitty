@@ -50,6 +50,11 @@ class GradingOrder extends AbstractModel {
     protected $all_team_ids;
 
     /**
+     * @var string[] $not_fully_graded
+     */
+    protected $not_fully_graded;
+
+    /**
      * GradingOrder constructor.
      * @param Core $core
      * @param Gradeable $gradeable
@@ -176,6 +181,28 @@ class GradingOrder extends AbstractModel {
             return $this->getHasSubmission($sub);
         });
 
+    }
+
+    public function getNextUngradedSubmitter(Submitter $submitter) {
+
+        // Query database to find out which users have not been completely graded
+        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable);
+
+        // Call getNextSubmitterMatching()
+        return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
+            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+        });
+    }
+
+    public function getPrevUngradedSubmitter(Submitter $submitter) {
+
+        // Query database to find out which users have not been completely graded
+        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable);
+
+        // Call getPrevubmitterMatching()
+        return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
+            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+        });
     }
 
 

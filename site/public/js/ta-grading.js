@@ -338,33 +338,51 @@ function changeEditorStyle(newStyle){
 
 //-----------------------------------------------------------------------------
 // Student navigation
-function gotoPrevStudent() {
+function gotoPrevStudent(to_ungraded = false) {
+
+    var selector;
+
+    if(to_ungraded === true) {
+        selector = "#prev-ungraded-student";
+    } else {
+        selector = "#prev-student";
+    }
+
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(function () {
-            window.location = $("#prev-student")[0].dataset.href;
+            window.location = $(selector)[0].dataset.href;
         }).catch(function () {
             if (confirm("Could not save open component, change student anyway?")) {
-                window.location = $("#prev-student")[0].dataset.href;
+                window.location = $(selector)[0].dataset.href;
             }
         });
     }
     else {
-        window.location = $("#prev-student")[0].dataset.href;
+        window.location = $(selector)[0].dataset.href;
     }
 }
 
-function gotoNextStudent() {
+function gotoNextStudent(to_ungraded = false) {
+
+    var selector;
+
+    if(to_ungraded === true) {
+        selector = "#next-ungraded-student";
+    } else {
+        selector = "#next-student";
+    }
+
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(function () {
-            window.location = $("#next-student")[0].dataset.href;
+            window.location = $(selector)[0].dataset.href;
         }).catch(function () {
             if (confirm("Could not save open component, change student anyway?")) {
-                window.location = $("#next-student")[0].dataset.href;
+                window.location = $(selector)[0].dataset.href;
             }
         });
     }
     else {
-        window.location = $("#next-student")[0].dataset.href;
+        window.location = $(selector)[0].dataset.href;
     }
 }
 //Navigate to the prev / next student buttons

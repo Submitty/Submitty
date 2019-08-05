@@ -823,7 +823,7 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null, $sort="id", $direction="ASC") {
+    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=false) {
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -831,9 +831,47 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
+        // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         if($graded_gradeable === false) {
             $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+        }
+
+        // Instantiate GradingOrder before other items
+        // This makes it possible to reassign $who_id if this request is to get the next ungraded submitter,
+        // needed since we cannot know until request time who the next ungraded submitter is
+        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
+        $order->sort($sort, $direction);
+
+        $is_graded = false;
+
+        if(!is_null($graded_gradeable->getTaGradedGradeable())) {
+            $is_graded = $graded_gradeable->getTaGradedGradeable()->isComplete();
+        }
+
+        // If request is for prev/next ungraded submitter then collect that information
+        // Lazy loaded to prevent extra database calls unless specifically needed
+        // We only need to do additional work if the Submitter being requested already has been graded
+        if($to_ungraded != false AND $is_graded) {
+
+            if($to_ungraded == 'next') {
+                $ungraded = $order->getNextUngradedSubmitter($graded_gradeable->getSubmitter());
+            } else {
+                $ungraded = $order->getPrevUngradedSubmitter($graded_gradeable->getSubmitter());
+            }
+
+            // Redirect to details page if no more ungraded submitters in the direction we are trying to go
+            if(is_null($ungraded)) {
+                $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            }
+
+            // Reassign $who_id and $graded_gradeable
+            $who_id = $ungraded->getId();
+
+            $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
+            if($graded_gradeable === false) {
+                $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            }
         }
 
         $peer = false;
@@ -905,20 +943,12 @@ class ElectronicGraderController extends AbstractController {
             $progress = round(($graded / $total_submitted) * 100, 1);
         }
 
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
-        $order->sort($sort, $direction);
-
         // Get previous and next submitters
         $prev = $order->getPrevSubmitter($graded_gradeable->getSubmitter());
         $next = $order->getNextSubmitter($graded_gradeable->getSubmitter());
 
         $prev_id = $prev ? $prev->getId() : "";
         $next_id = $next ? $next->getId() : "";
-
-        // Get previous and next ungraded submitters
-        $prev_ungraded = $order->getPrevSubmitterMatching($graded_gradeable->getSubmitter(), function(Submitter $sub) {
-
-        });
 
         $not_in_my_section = !$order->containsSubmitter($graded_gradeable->getSubmitter());
 

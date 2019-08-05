@@ -4064,4 +4064,36 @@ AND gc_id IN (
         }
         return $this->course_db->rows()[0]['lock_thread_date'] < date("Y-m-d H:i:S");
     }
+
+    /**
+     * Returns an array of users in the current course which have not been completely graded for the given gradeable.
+     * Excludes users in the null section
+     *
+     * @param Gradeable\Gradeable $gradeable
+     * @return array
+     */
+    public function getUsersNotFullyGraded(Gradeable\Gradeable $gradeable) {
+
+        // Get variables needed for query
+        $component_count = count($gradeable->getComponents());
+        $gradeable_id = $gradeable->getId();
+
+        // Construct query
+        $query = "select user_id from users where registration_section is not null and user_id not in
+            (select
+            gradeable_data.gd_user_id
+             from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
+             where g_id = '$gradeable_id' group by gradeable_data.gd_id having count(gradeable_data.gd_id) = $component_count);";
+
+        // Run query
+        $this->course_db->query($query);
+
+        // Capture results
+        $not_fully_graded = $this->course_db->rows();
+
+        // Clean up results
+        $not_fully_graded = array_column($not_fully_graded, 'user_id');
+
+        return $not_fully_graded;
+    }
 }

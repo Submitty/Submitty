@@ -8,7 +8,7 @@
             <i title="Previous ungraded student" class="fas fa-backward icon-header" style="color:grey"></i>
             <i title="Previous student" class="fas fa-caret-left icon-header" style="color:grey"></i>
         {% else %}
-            <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{{ prev_ungraded_student_url }}" id="prev-ungraded-student"><i title="Previous ungraded student" class="fas fa-backward icon-header"></i></a>
+            <a href="javascript:void(0);" onclick="gotoPrevStudent(true);" data-href="{{ prev_ungraded_student_url }}" id="prev-ungraded-student"><i title="Previous ungraded student" class="fas fa-backward icon-header"></i></a>
             <a href="javascript:void(0);" onclick="gotoPrevStudent();" data-href="{{ prev_student_url }}" id="prev-student"><i title="Previous student" class="fas fa-caret-left icon-header"></i></a>
         {% endif %}
 
@@ -21,7 +21,7 @@
             <i title="Next ungraded student" class="fas fa-forward icon-header" style="color:grey"></i>
         {% else %}
             <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{{ next_student_url }}" id="next-student"><i title="Next student" class="fas fa-caret-right icon-header"></i></a>
-            <a href="javascript:void(0);" onclick="gotoNextStudent();" data-href="{{ next_ungraded_student_url }}" id="next-ungraded-student"><i title="Next ungraded student" class="fas fa-forward icon-header"></i></a>
+            <a href="javascript:void(0);" onclick="gotoNextStudent(true);" data-href="{{ next_ungraded_student_url }}" id="next-ungraded-student"><i title="Next ungraded student" class="fas fa-forward icon-header"></i></a>
         {% endif %}
 
         {# /Nav buttons #}
