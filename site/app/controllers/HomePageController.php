@@ -224,7 +224,7 @@ class HomePageController extends AbstractController {
             $base_course_semester = $exploded_course[0];
             $base_course_title = $exploded_course[1];
         }
-        elseif(isset($_POST['base_course_semester']) && isset($_POST['base_course_title'])) {
+        elseif (isset($_POST['base_course_semester']) && isset($_POST['base_course_title'])) {
             $base_course_semester = $_POST['base_course_semester'];
             $base_course_title = $_POST['base_course_title'];
         }
