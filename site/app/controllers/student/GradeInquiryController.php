@@ -12,10 +12,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 class GradeInquiryController extends AbstractController {
-    public function run() {
-        return null;
-    }
-
     /**
      * @param $gradeable_id
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grade_inquiry/new", methods={"POST"})
@@ -273,12 +269,12 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
             if (empty($graders)) {
                 $graders = $this->core->getQueries()->getAllGraders();
             }
             foreach ($graders as $grader) {
-                if ($grader->accessFullGrading() && $grader->getId() != $user_id) {
+                if ($grader->accessFullGrading()) {
                     $details = ['component' => 'grading', 'metadata' => $metadata, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $grader->getId()];
                     $notifications[] = Notification::createNotification($this->core, $details);
                     $emails[] = new Email($this->core, $details);
@@ -286,22 +282,18 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make students' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable_id])]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
             if($submitter->isTeam()){
                 $submitting_team = $submitter->getTeam()->getMemberUsers();
                 foreach ($submitting_team as $submitting_user) {
-                    if ($submitting_user->getId() != $user_id) {
-                        $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
-                        $notifications[] = Notification::createNotification($this->core, $details);
-                        $emails[] = new Email($this->core, $details);
-                    }
-                }
-            } else {
-                if ($submitter->getUser()->getId() != $user_id) {
-                    $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
+                    $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitting_user->getId()];
                     $notifications[] = Notification::createNotification($this->core, $details);
                     $emails[] = new Email($this->core, $details);
                 }
+            } else {
+                $details = ['component' => 'student', 'metadata' => $metadata, 'content' => $body, 'body' => $body, 'subject' => $subject, 'sender_id' => $user_id, 'to_user_id' => $submitter->getId()];
+                $notifications[] = Notification::createNotification($this->core, $details);
+                $emails[] = new Email($this->core, $details);
             }
             $this->core->getNotificationFactory()->sendNotifications($notifications);
             if ($this->core->getConfig()->isEmailEnabled()) {

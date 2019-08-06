@@ -19,8 +19,6 @@ abstract class AbstractController {
         $this->core = $core;
     }
 
-    abstract public function run();
-
     /*
      *  Below are methods that try to fetch model objects from request parameters and render JSEND responses
      *      in the failure/error cases if requested in addition to returning false.  HTML-returning routes

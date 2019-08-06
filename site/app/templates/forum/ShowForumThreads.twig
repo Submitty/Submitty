@@ -85,7 +85,7 @@
             </div>
             <script type="text/javascript">
                 $(function(){
-                    dynamicScrollContentOnDemand($('#thread_list'), buildNewCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ currentThread }}, '', '{{ currentCourse }}');
+                    dynamicScrollContentOnDemand($('#thread_list'), buildCourseUrl(['forum', 'threads']) + '?page_number={{ '{{' }}#{{ '}}' }}', {{ currentThread }}, '', '{{ currentCourse }}');
                     var active_thread = $('#thread_list .active');
                     if(active_thread.length > 0) {
                         active_thread[0].scrollIntoView(true);

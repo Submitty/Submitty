@@ -42,7 +42,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
     window.RENDER_OPTIONS.userId = grader_id;
     if(url === ""){
-        url = buildNewCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
+        url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
     }
     $.ajax({
         type: 'POST',

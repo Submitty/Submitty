@@ -79,7 +79,7 @@ class TestSimpleGrader(BaseTestCase):
         def template_func():
             prev_section_num = None
             for tbody_elem in self.driver.find_elements_by_xpath("//div[@class='content']/table/tbody[not(starts-with(@id, 'section-'))]"):
-                td_elem = tbody_elem.find_element_by_xpath("tr[@class='info persist-header']/td[1]")
+                td_elem = tbody_elem.find_element_by_xpath("tr[@class='info']/td[1]")
                 # check that the header text is correct
                 self.assertEqual(expected_text, td_elem.text.strip()[:len(expected_text)])
                 preceding_removed = td_elem.text.strip()[len(expected_text)+1:]

@@ -196,7 +196,13 @@ HTML;
         }
         return $func;
     }
-    
+
+    /**
+     * Please avoid using this function unless absolutely necessary.
+     * Please use renderJsonSuccess, renderJsonFail and renderJsonError
+     * instead to ensure JSON responses have consistent format.
+     * @param $json
+     */
     public function renderJson($json) {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
         $this->useFooter(false);
@@ -290,10 +296,10 @@ HTML;
             }
         }
 
-        if ($success == true) {
-            return $this->core->getOutput()->renderJsonSuccess($message);
+        if ($success === true) {
+            return $this->renderJsonSuccess($message);
         } else {
-            return $this->core->getOutput()->renderJsonFail($message);
+            return $this->renderJsonFail($message);
         }
     }
     
