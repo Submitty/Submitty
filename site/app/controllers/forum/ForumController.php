@@ -28,13 +28,6 @@ class ForumController extends AbstractController{
         parent::__construct($core);
     }
 
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
     private function showDeleted() {
         return ($this->core->getUser()->accessGrading() && isset($_COOKIE['show_deleted']) && $_COOKIE['show_deleted'] == "1");
     }
@@ -47,9 +40,9 @@ class ForumController extends AbstractController{
             //Notify User
             $this->core->addErrorMessage($error);
             if($isThread){
-                $url = $this->core->buildNewCourseUrl(['forum', 'threads', 'new']);
+                $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
             } else {
-                $url = $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]);
+                $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
             return array(-1, $url);
     }
@@ -305,10 +298,10 @@ class ForumController extends AbstractController{
         }
         if(empty($thread_title) || empty($thread_post_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', 'new']);
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         } else if(!$this->isValidCategories($categories_ids)){
             $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', 'new']);
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
             if($hasGoodAttachment[0] == -1){
@@ -334,7 +327,7 @@ class ForumController extends AbstractController{
 
                 }
                 $full_course_name = $this->core->getFullCourseName();
-                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
                 // notify on a new announcement
                 if ($announcement) {
                     $subject = "New Announcement: ".Notification::textShortner($thread_title);
@@ -350,7 +343,7 @@ class ForumController extends AbstractController{
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
-                $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]);
+                $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
         }
         $this->core->getOutput()->renderJson($result);
@@ -390,16 +383,16 @@ class ForumController extends AbstractController{
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads']);
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         } else if(!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads']);
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads']);
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         } else if($this->core->getQueries()->isThreadLocked($thread_id) and !$this->core->getUser()->accessAdmin() ) {
             $this->core->addErrorMessage("Thread is locked.");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]);
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment[0] == -1){
@@ -426,14 +419,14 @@ class ForumController extends AbstractController{
                 $parent_post = $this->core->getQueries()->getPost($parent_id);
                 $parent_post_content = $parent_post['content'];
 
-                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
 
                 $subject = "New Reply: ".Notification::textShortner($thread_title);
                 $content = "A new message was posted in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nNew Reply:\n\n".$post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
-                $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
+                $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
             }
         }
         $this->core->getOutput()->renderJson($result);
@@ -486,7 +479,7 @@ class ForumController extends AbstractController{
         }
         if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
-            $this->core->redirect($this->core->buildNewCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
         } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->getOutput()->renderJson(['error' => 'Thread is locked']);
             return;
@@ -520,7 +513,7 @@ class ForumController extends AbstractController{
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
                 $subject = "Undeleted: ".Notification::textShortner($post["content"]);
                 $content = "In ".$full_course_name."\n\nThe following post was undeleted.\n\nThread: ".$thread_title."\n\n".$post["content"];
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -572,7 +565,7 @@ class ForumController extends AbstractController{
             if($any_changes) {
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
-                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
                 if ($type == "Post") {
                     $post_content = $_POST["thread_post_content"];
                     $subject = "Post Edited: ".Notification::textShortner($post_content);
@@ -591,7 +584,7 @@ class ForumController extends AbstractController{
                 $this->core->getOutput()->renderJson(['error' => $messageString]);
                 return;
             }
-            $this->core->redirect($this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]));
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
         }
     }
 
@@ -629,7 +622,7 @@ class ForumController extends AbstractController{
                 $child_thread_author = $child_thread['created_by'];
                 $child_thread_title = $child_thread['title'];
                 $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                $metadata = json_encode(array('url' => $this->core->buildNewCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string)$child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post));
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string)$child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post));
                 $subject = "Thread Merge: ".Notification::textShortner($child_thread_title);
                 $content = "Two threads were merged in:\n".$full_course_name."\n\nAll messages posted in Merged Thread:\n".$child_thread_title."\n\nAre now contained within Parent Thread:\n".$parent_thread_title;
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
@@ -640,7 +633,7 @@ class ForumController extends AbstractController{
                 $this->core->addErrorMessage("Merging Failed! ".$message);
             }
         }
-        $this->core->redirect($this->core->buildNewCourseUrl(['forum', 'threads', $thread_id]));
+        $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
     }
 
     private function editThread(){
@@ -807,7 +800,7 @@ class ForumController extends AbstractController{
                 if($thread['merged_thread_id'] != -1){
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
-                    $this->core->redirect($this->core->buildNewCourseUrl(['forum', 'threads', $thread['merged_thread_id']]));
+                    $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']]));
                     return;
                 }
                 if($option == "alpha"){

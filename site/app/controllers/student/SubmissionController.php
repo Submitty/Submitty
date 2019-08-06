@@ -137,11 +137,11 @@ class SubmissionController extends AbstractController {
         }
         else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage('Must be on a team to access submission');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
+            $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
                 $this->core->getOutput()->renderOutput('Error',
@@ -1286,13 +1286,13 @@ class SubmissionController extends AbstractController {
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+
             // notify other team members that a submission has been made
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id])]);
             $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
             $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
             $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
-
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
@@ -1347,7 +1347,7 @@ class SubmissionController extends AbstractController {
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                $this->core->redirect($this->core->buildNewCourseUrl());
+                $this->core->redirect($this->core->buildCourseUrl());
                 return $this->core->getOutput()->renderJsonFail($msg);
             }
             $ta = true;
@@ -1357,19 +1357,19 @@ class SubmissionController extends AbstractController {
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $who = $who ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
 
         // If $graded_gradeable is null, that means its a team assignment and the user is on no team
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
@@ -1417,7 +1417,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
@@ -1441,11 +1441,11 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage($msg);
         }
         if($ta) {
-            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
                 . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
         }
         else {
-            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $new_version]));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]));
         }
 
         return $this->core->getOutput()->renderJsonSuccess(['version' => $new_version, 'message' => $msg]);

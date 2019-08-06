@@ -384,7 +384,7 @@ function isValidSubmission(){
  * user_id can be an array of ids to validate multiple at once for teams
  */
 function validateUserId(csrf_token, gradeable_id, user_id){
-    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'verify']);
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'verify']);
     return new Promise(function (resolve, reject) {
         $.ajax({
             url : url,
@@ -547,7 +547,7 @@ function displayPreviousSubmissionOptions(callback){
  * Ajax call to submit a split item to a student. Optional params to merge and or clobber previous submissions
  */
 function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous=false, clobber=false) {
-    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'upload']) + '?merge=' + merge_previous + '&clobber=' + clobber;
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'upload']) + '?merge=' + merge_previous + '&clobber=' + clobber;
 
     return new Promise(function (resolve, reject) {
         $.ajax({
@@ -583,7 +583,7 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
 */
 function deleteSplitItem(csrf_token, gradeable_id, path) {
 
-    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'delete']);
+    var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'delete']);
 
     return new Promise(function (resolve, reject) {
         $.ajax({
@@ -660,8 +660,8 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
         }
     }
 
-    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'bulk']);
-    var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'bulk']);
+    var return_url = buildCourseUrl(['gradeable', gradeable_id]);
 
     $.ajax({
         url: url,
@@ -756,8 +756,8 @@ function gatherInputAnswersByType(type){
  */
 function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
-    var submit_url = buildNewCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
-    var return_url = buildNewCourseUrl(['gradeable', gradeable_id]);
+    var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
+    var return_url = buildCourseUrl(['gradeable', gradeable_id]);
 
     var message = "";
     // check versions used
@@ -889,8 +889,8 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
  * @param csrf_token
  */
 function handleDownloadImages(csrf_token) {
-    var image_submit_url = buildNewCourseUrl(['student_photos', 'upload']);
-    var return_url = buildNewCourseUrl(['student_photos']);
+    var image_submit_url = buildCourseUrl(['student_photos', 'upload']);
+    var return_url = buildCourseUrl(['student_photos']);
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('file_count', file_array.length);
@@ -941,7 +941,7 @@ function handleDownloadImages(csrf_token) {
             }
         },
         error: function(data) {
-            window.location.href = buildNewCourseUrl(['student_photos']);
+            window.location.href = buildCourseUrl(['student_photos']);
         }
     });
 }
@@ -951,8 +951,8 @@ function handleDownloadImages(csrf_token) {
  */
 
 function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
-    var submit_url = buildNewCourseUrl(['course_materials', 'upload']);
-    var return_url = buildNewCourseUrl(['course_materials']);
+    var submit_url = buildCourseUrl(['course_materials', 'upload']);
+    var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
@@ -1036,7 +1036,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             }
         },
         error: function(data) {
-            window.location.href = buildNewCourseUrl(['course_materials']);
+            window.location.href = buildCourseUrl(['course_materials']);
         }
     });
 }

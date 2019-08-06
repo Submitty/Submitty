@@ -20,13 +20,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class SimpleGraderController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @param $gradeable_id
      * @param $section
      * @param $section_type
@@ -50,7 +43,7 @@ class SimpleGraderController extends AbstractController {
         if (is_null($section)) {
             $this->core->addErrorMessage("ERROR: Section not set; You did not select a section to print.");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl())
+                new RedirectResponse($this->core->buildCourseUrl())
             );
         };
 
@@ -59,7 +52,7 @@ class SimpleGraderController extends AbstractController {
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable, "section" => $section])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade this section.");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl())
+                new RedirectResponse($this->core->buildCourseUrl())
             );
         }
 
@@ -80,7 +73,7 @@ class SimpleGraderController extends AbstractController {
         else {
             $this->core->addErrorMessage("ERROR: You did not select a valid section type to print.");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl())
+                new RedirectResponse($this->core->buildCourseUrl())
             );
         }
 
@@ -119,7 +112,7 @@ class SimpleGraderController extends AbstractController {
         if (!$this->core->getAccess()->canI("grading.simple.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("You do not have permission to grade {$gradeable->getTitle()}");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl())
+                new RedirectResponse($this->core->buildCourseUrl())
             );
         }
 
