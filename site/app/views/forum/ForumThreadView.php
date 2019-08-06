@@ -399,7 +399,7 @@ class ForumThreadView extends AbstractView {
 
         $csrf_token = $this->core->getCsrfToken();
 
-        $attachmentButton = array();
+        $totalAttachments = 0;
 
         if($display_option == "tree"){
             $order_array = array();
@@ -428,6 +428,7 @@ class ForumThreadView extends AbstractView {
             }
             $i = 0;
             $first = true;
+
             foreach($order_array as $ordered_post){
                 foreach($posts as $post){
                     if($post["id"] == $ordered_post){
@@ -437,7 +438,7 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, $attachmentButton);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, $totalAttachments);
 
                         break;
                     }
@@ -455,7 +456,7 @@ class ForumThreadView extends AbstractView {
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, 1, $display_option, $includeReply, $attachmentButton);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, 1, $display_option, $includeReply, $totalAttachments);
 
                 if($first){
                     $first= false;
@@ -500,11 +501,6 @@ class ForumThreadView extends AbstractView {
 
         $return = "";
 
-        $totalAttachments = 0;
-        foreach ($attachmentButton as $aButton) {
-            $totalAttachments += count($aButton)-1;
-        }
-
         if($render){
             $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
                 "userGroup" => $this->core->getUser()->getGroup(),
@@ -523,7 +519,6 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "attachment_all_button" => json_encode($attachmentButton),
                 "total_attachments" => $totalAttachments,
                 "merge_url" => $this->core->buildNewCourseUrl(['forum', 'threads', 'merge'])
             ]);
@@ -546,7 +541,6 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "attachment_all_button" => json_encode($attachmentButton),
                 "total_attachments" => $totalAttachments
             ];
         }
@@ -762,7 +756,7 @@ class ForumThreadView extends AbstractView {
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, &$attachmentButton = [])
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, &$totalAttachments)
     {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
@@ -903,6 +897,7 @@ class ForumThreadView extends AbstractView {
                 $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
 
                 $attachment_file_count++;
+                $totalAttachments++;
             }
 
             $attachment_encoded_data[] = $attachment_id;
@@ -913,8 +908,6 @@ class ForumThreadView extends AbstractView {
                 "num_files" => $attachment_num_files,
                 "encoded_data" => json_encode($attachment_encoded_data)
             ];
-
-            $attachmentButton[] = $attachment_encoded_data;
 
         }
 

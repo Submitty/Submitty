@@ -1158,7 +1158,10 @@ function loadThreadHandler(){
 function loadAllInlineImages() {
   $(".attachment-btn").each(function () {
     $(this).click();
-  })
+  });
+  $(".attachment-well").each(function () {
+    $(this).show();
+  });
 }
 
 function loadInlineImages(encoded_data) {
