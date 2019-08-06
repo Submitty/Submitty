@@ -82,7 +82,7 @@ class HomePageView extends AbstractView {
             "faculty" => $faculty,
             "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
             "semesters" => $semesters,
-            "course_creation_url" => $this->core->buildNewUrl(['home', 'courses', 'new']),
+            "course_creation_url" => $this->core->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements()
         ]);
     }

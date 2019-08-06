@@ -8,7 +8,7 @@ function updateGradeableForExtensions() {
 
 function updateHomeworkExtension() {
     var fd = new FormData($('#extensions-form').get(0));
-    var url = buildNewCourseUrl(['extensions', 'update']);
+    var url = buildCourseUrl(['extensions', 'update']);
     $.ajax({
         url: url,
         type: "POST",

@@ -32,12 +32,6 @@ class ReportController extends AbstractController {
 
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
 
     /**
      * @Route("/{_semester}/{_course}/reports")
@@ -68,7 +62,7 @@ class ReportController extends AbstractController {
         // Check that the directory is writable, fail if not
         if(!is_writable($base_path)) {
             $this->core->addErrorMessage('Unable to write to the grade summaries directory');
-            $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
         }
 
         $g_sort_keys = [
@@ -86,7 +80,7 @@ class ReportController extends AbstractController {
             return null;
         });
         $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->redirect($this->core->buildNewCourseUrl(['reports']));
+        $this->core->redirect($this->core->buildCourseUrl(['reports']));
         return $this->core->getOutput()->renderJsonSuccess();
     }
 

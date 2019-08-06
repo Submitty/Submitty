@@ -60,8 +60,6 @@
 			<Button style="float: left;" class="btn btn-default" onclick="randomizeRotatingGroupsButton()"> Randomly Re-Assign Teams to Rotating Sections</Button>
 		{% else %}
 			<a style="float: left;" class="btn btn-default" href="{{ randomize_team_rotating_sections_url }}"> Randomly Re-Assign Teams to Rotating Sections</a>
-			<a style="float: left;" class="btn btn-default" href="{{ core.buildUrl({'component': 'grading', 'page':
-				'electronic', 'action': 'randomize_team_rotating_sections', 'gradeable_id': gradeable.getId()}) }}"> Randomly Re-Assign Teams to Rotating Sections</a>
 		{% endif %}
 	{% endif %}
 

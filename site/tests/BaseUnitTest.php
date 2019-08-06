@@ -22,6 +22,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @param array $config_values
      * @param array $user_config
      * @param array $queries
+     * @param array $access
      *
      * @return Core
      */
@@ -59,8 +60,12 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             });
         }
 
-
         $core->method('getConfig')->willReturn($config);
+
+        if (isset($config_values['logged_in'])) {
+            $core->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
+            $core->method('isApiLoggedIn')->willReturn($config_values['logged_in']);
+        }
 
         if (isset($config_values['csrf_token'])) {
             $core->method('checkCsrfToken')->willReturn($config_values['csrf_token'] === true);
@@ -76,9 +81,14 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         $mock_access = $this->createMock(Access::class);
-        foreach ($access as $method => $value) {
-            $mock_access->method($method)->willReturn($value);
-        }
+        $mock_access->expects($this->any())->method('canI')->willReturnCallback(
+            function ($permission) use ($access) {
+                if (in_array($permission, $access)) {
+                    return true;
+                }
+                return false;
+            }
+        );
         $core->method('getAccess')->willReturn($mock_access);
 
         $mock_queries = $this->createMock(DatabaseQueries::class);
@@ -111,7 +121,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
 
         /** @noinspection PhpParamsInspection */
-        $output = new Output($core);
+        $output = $this->getMockBuilder(Output::class)
+            ->setConstructorArgs([$core])
+            ->setMethods(['addBreadcrumb'])
+            ->getMock();
+        $output->method('addBreadcrumb')->willReturn(true);
         $output->disableRender();
 
         $core->method('getOutput')->willReturn($output);
