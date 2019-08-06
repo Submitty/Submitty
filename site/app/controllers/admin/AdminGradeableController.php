@@ -1018,7 +1018,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         // this will cleanup the build files
-        $this->enqueueBuildFile($gradeable_id);
+        $this->enqueueBuildFile($gradeable);
 
         $this->core->redirect($this->core->buildNewCourseUrl());
     }
@@ -1046,7 +1046,8 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    private function enqueueBuildFile($g_id) {
+    private function enqueueBuildFile($gradeable) {
+        $g_id = $gradeable->getId();
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
@@ -1060,7 +1061,9 @@ class AdminGradeableController extends AbstractController {
             "gradeable" => $g_id
         ];
 
-        $this->enqueueGenerateRepos($semester,$course,$g_id);
+        if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+            $this->enqueueGenerateRepos($semester,$course,$g_id);
+        }
 
         if ((!is_writable($config_build_file) && file_exists($config_build_file))
             || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
@@ -1069,7 +1072,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    private function enqueueGenerateRepos($semester,$course,$g_id) {
+    public function enqueueGenerateRepos($semester,$course,$g_id) {
         // FIXME:  should use a variable intead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 
@@ -1091,7 +1094,7 @@ class AdminGradeableController extends AbstractController {
         // If write form config fails, it will return non-null and end execution, but
         //  if it does return null, we want to run 'enqueueBuildFile'.  This coalescing can
         //  be chained so long as 'null' is the success condition.
-        return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable->getId());
+        return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable);
     }
 
     /**
