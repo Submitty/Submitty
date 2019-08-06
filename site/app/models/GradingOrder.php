@@ -183,23 +183,43 @@ class GradingOrder extends AbstractModel {
 
     }
 
+    /**
+     * Get the next ungraded submitter
+     *
+     * If a component_id is passed in this function will return the next submitter with that specific
+     * component ungraded.  If component_id is not passed in this function returns the next submitter with
+     * any components ungraded.  Skips students with no submissions.
+     *
+     * @param Submitter $submitter Current grading submitter
+     * @param string $component_id The id of a gradeable component
+     * @return Submitter
+     */
     public function getNextUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
 
         // Query database to find out which users have not been completely graded
         $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
 
-        // Call getNextSubmitterMatching()
         return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
             return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
         });
     }
 
+    /**
+     * Get the prev ungraded submitter
+     *
+     * If a component_id is passed in this function will return the prev submitter with that specific
+     * component ungraded.  If component_id is not passed in this function returns the prev submitter with
+     * any components ungraded.  Skips students with no submissions.
+     *
+     * @param Submitter $submitter Current grading submitter
+     * @param string $component_id The id of a gradeable component
+     * @return Submitter
+     */
     public function getPrevUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
 
         // Query database to find out which users have not been completely graded
         $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
 
-        // Call getPrevubmitterMatching()
         return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
             return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
         });
