@@ -181,7 +181,7 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_notifications = [];
         foreach ($notifications as $notification) {
-            if ($notification->getNotifyTarget() == $current_user->getId() && $current_user->getNotificationSetting('self_notification')) {
+            if ($notification->getNotifyTarget() != $current_user->getId() || $current_user->getNotificationSetting('self_notification')) {
                 $flattened_notifications[] = $notification->getComponent();
                 $flattened_notifications[] = $notification->getNotifyMetadata();
                 $flattened_notifications[] = $notification->getNotifyContent();
@@ -191,7 +191,9 @@ class NotificationFactory {
 
         }
         if (!empty($flattened_notifications)) {
-            $this->core->getQueries()->insertNotifications($flattened_notifications,count($notifications));
+            // some notifications may not have been added to the flattened notifications
+            // so to calculate the number of notifications we must use flattened notifications
+            $this->core->getQueries()->insertNotifications($flattened_notifications,count($flattened_notifications)/5);
         }
 
     }
@@ -211,14 +213,14 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_emails = [];
         foreach ($emails as $email) {
-            if ($email->getUserId() == $current_user->getId() && $current_user->getNotificationSetting('self_notification_email')) {
+            if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
                 $flattened_emails[] = $email->getUserId();
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails,count($emails));
+            $this->core->getQueries()->insertEmails($flattened_emails,count($flattened_emails)/3);
         }
 
     }
