@@ -1,6 +1,6 @@
 $("#edit-user-form").ready(function() {
     var form = $("#edit-user-form");
-    var url = buildNewCourseUrl(['user_information']);
+    var url = buildCourseUrl(['user_information']);
     $.ajax({
         url: url,
         success: function(data) {
@@ -68,7 +68,7 @@ function newUserForm() {
 
 //opens modal with initial settings for edit user
 function editUserForm(user_id) {
-    var url = buildNewCourseUrl(['users', user_id]);
+    var url = buildCourseUrl(['users', user_id]);
     $.ajax({
         url: url,
         success: function(data) {
