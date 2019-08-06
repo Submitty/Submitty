@@ -95,16 +95,7 @@
                     Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
 
 
-        <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg">
-
-            {% for attachment in post_attachment.files %}
-
-                <div id="{{ attachment.file_viewer_id }}" class="attachment-div">
-                </div>
-        
-            {% endfor %}
-
-        </div>
+        <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
 
     {% endif %}
 

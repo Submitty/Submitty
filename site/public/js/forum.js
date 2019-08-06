@@ -1155,67 +1155,37 @@ function loadThreadHandler(){
     });
 }
 
-function formatIFrameInlineImages(divId, name, url){
-    //Not best practice but good enough for V1
-    return function(){
-      var iframe = $('#file_viewer_' + divId + '_iframe');
-      var contents = iframe.contents();
-      var body = contents.find('body');
-      var img = body.find('img');
-      body.append(`<style>
-          img { border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 400px; }
-          img:hover { box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5); cursor: pointer; } </style>`);
-      body.css("text-align", "center");
-      body.append('<h4 style="text-align:center">' + decodeURI(name) + '</h3> <br/>');
-      iframe.height(contents.find('img').height() + 100);
-      $(img).attr("title", "Click to view attachment in a popup");
-      $(img).click(function() {
+function loadAllInlineImages() {
+  $(".attachment-btn").each(function () {
+    $(this).click();
+  })
+}
+
+function loadInlineImages(encoded_data) {
+  var data = JSON.parse(encoded_data);
+  var attachment_well = $("#"+data[data.length-1]);
+
+  if (attachment_well.is(':visible'))
+    attachment_well.hide();
+  else {
+    attachment_well.show();
+  }
+
+  // if they're no images loaded for this well
+  if (attachment_well.children().length === 0 ) {
+    // add image tags
+    for (var i = 0; i < data.length - 1; i++) {
+      var attachment = data[i];
+      var url = attachment[0];
+      var img = $('<img src="' + url + '" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">');
+      img.click(function() {
+        var url = $(this).attr('src');
         window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
       });
+      attachment_well.append(img);
     }
-}
+  }
 
-function loadAllInlineImages(data) {
-    var json = JSON.parse(data);
-    for(var i = 0; i < json.length; i++) {
-        loadInlineImages(json[i], true);
-    }
-}
-
-function loadInlineImages(data, all = false) {
-    try {
-        var json;
-        if(!all) {
-            json = JSON.parse(data);
-        } else {
-            json = data;
-        }
-        var length = json.length-1;
-        var element = document.getElementById('button_'+json[length]);
-        var well = $('#'+json[length]);
-        if(well.is(':visible')) {
-            well.hide();
-            element.classList.remove('active');
-        } else {
-            well.show();
-            element.classList.add('active');
-        }
-        for(var attachment = 0; attachment < length; attachment++) {
-            //json[attachment][0] => url
-            //json[attachment][1] => div id
-            //json[attachment][2] => name
-            openFrame(json[attachment][0], json[attachment][1], json[attachment][2]);
-            var e = $('#file_viewer_' + json[attachment][1] + '_iframe');
-            if(!e[0].hasAttribute('frame_styled')) {
-                e.on('load', formatIFrameInlineImages(json[attachment][1], json[attachment][2], json[attachment][0]));
-                e[0].classList.add('frame_styled');
-            }
-        }
-    } catch (err){
-        var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Could not load image attachments. Please try again.' + data + '</div>';
-        $('#messages').append(message);
-        return;
-    }
 }
 
 var filters_applied = [];

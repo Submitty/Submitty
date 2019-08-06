@@ -912,7 +912,7 @@ class ForumThreadView extends AbstractView {
                 "button_id" => $attachment_button_id,
                 "num_files" => $attachment_num_files,
                 "encoded_data" => json_encode($attachment_encoded_data)
-                ];
+            ];
 
             $attachmentButton[] = $attachment_encoded_data;
 
