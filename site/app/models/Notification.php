@@ -119,7 +119,7 @@ class Notification extends AbstractModel {
         }
 
         if (!isset($metadata['url'])) {
-            return $core->buildNewCourseUrl();
+            return $core->buildCourseUrl();
         }
         return $metadata['url'];
     }
