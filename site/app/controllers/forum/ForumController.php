@@ -288,6 +288,14 @@ class ForumController extends AbstractController{
         $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+
+        if(strlen($thread_post_content) > 5000 ){
+            $this->core->addErrorMessage("Posts cannot be over than 5000 characters long");
+            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', 'new']);
+            $this->core->getOutput()->renderJson($result);
+            return $this->core->getOutput()->getOutput();
+        }
+
         if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
             $lock_thread_date = $_POST['lock_thread_date'];
         } else {
@@ -377,6 +385,13 @@ class ForumController extends AbstractController{
         $file_post = 'file_input';
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        if(strlen($post_content) > 5000 ){
+            $this->core->addErrorMessage("Posts cannot be over than 5000 characters long");
+            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads']);
+            $this->core->getOutput()->renderJson($result);
+            return $this->core->getOutput()->getOutput();
+        }
 
         if(isset($_POST['thread_status'])){
             $this->changeThreadStatus($_POST['thread_status'], $thread_id);
@@ -673,6 +688,12 @@ class ForumController extends AbstractController{
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
+
+            if(strlen($new_post_content) > 5000 ){
+                $this->core->addErrorMessage("Posts cannot be over than 5000 characters long");
+                return null;
+            }
+
             $post_id = $_POST["edit_post_id"];
             $original_post = $this->core->getQueries()->getPost($post_id);
             if(!empty($original_post)) {
