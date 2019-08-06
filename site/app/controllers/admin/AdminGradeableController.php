@@ -855,7 +855,14 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
 
         // start the build
-        return $this->enqueueBuild($gradeable);
+        $build_status = $this->enqueueBuild($gradeable);
+
+        $config = $this->core->getConfig();
+        if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+            $this->enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+        }
+
+        return $build_status;
     }
 
     /**
@@ -1008,6 +1015,16 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
      */
     public function deleteGradeable($gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable == false) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
+        if (!$gradeable->canDelete()) {
+            $this->core->addErrorMessage("Gradeable ".$gradeable_id." cannot be deleted.");
+            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
+
         $this->core->getQueries()->deleteGradeable($gradeable_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -1018,7 +1035,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         // this will cleanup the build files
-        $this->enqueueBuildFile($gradeable);
+        $this->enqueueBuildFile($gradeable_id);
 
         $this->core->redirect($this->core->buildNewCourseUrl());
     }
@@ -1046,8 +1063,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    private function enqueueBuildFile($gradeable) {
-        $g_id = $gradeable->getId();
+    private function enqueueBuildFile($g_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
@@ -1060,10 +1076,6 @@ class AdminGradeableController extends AbstractController {
             "course" => $course,
             "gradeable" => $g_id
         ];
-
-        if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($semester,$course,$g_id);
-        }
 
         if ((!is_writable($config_build_file) && file_exists($config_build_file))
             || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
@@ -1094,7 +1106,7 @@ class AdminGradeableController extends AbstractController {
         // If write form config fails, it will return non-null and end execution, but
         //  if it does return null, we want to run 'enqueueBuildFile'.  This coalescing can
         //  be chained so long as 'null' is the success condition.
-        return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable);
+        return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable->getId());
     }
 
     /**

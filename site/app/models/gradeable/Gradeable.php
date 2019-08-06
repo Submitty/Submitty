@@ -1210,11 +1210,11 @@ class Gradeable extends AbstractModel {
 
     /**
      * Used to decide whether a gradeable can be deleted or not.
-     * This means: No submissions, No manual grades entered, and No teams formed
+     * This means: No submissions, No manual grades entered, No teams formed, and No VCS repos created
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
     }
 
     /**
