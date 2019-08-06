@@ -183,10 +183,10 @@ class GradingOrder extends AbstractModel {
 
     }
 
-    public function getNextUngradedSubmitter(Submitter $submitter) {
+    public function getNextUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
 
         // Query database to find out which users have not been completely graded
-        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable);
+        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
 
         // Call getNextSubmitterMatching()
         return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
@@ -194,10 +194,10 @@ class GradingOrder extends AbstractModel {
         });
     }
 
-    public function getPrevUngradedSubmitter(Submitter $submitter) {
+    public function getPrevUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
 
         // Query database to find out which users have not been completely graded
-        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable);
+        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
 
         // Call getPrevubmitterMatching()
         return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {

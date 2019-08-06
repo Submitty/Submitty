@@ -823,7 +823,7 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=false) {
+    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=false, $component_id="-1") {
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -845,8 +845,18 @@ class ElectronicGraderController extends AbstractController {
 
         $is_graded = false;
 
-        if(!is_null($graded_gradeable->getTaGradedGradeable())) {
-            $is_graded = $graded_gradeable->getTaGradedGradeable()->isComplete();
+        // If looking for the next ungraded submitter figure out if the submitter being requested is already graded
+        if($to_ungraded AND !is_null($graded_gradeable->getTaGradedGradeable())) {
+
+            // If searching for users with any component ungraded check if grading is complete
+            if($component_id == "-1") {
+                $is_graded = $graded_gradeable->getTaGradedGradeable()->isComplete();
+
+            // Else we are searching for an ungraded specific component
+            } else {
+                $completed_components = $graded_gradeable->getTaGradedGradeable()->getGradedComponentContainers();
+                $is_graded = $completed_components[$component_id]->isComplete();
+            }
         }
 
         // If request is for prev/next ungraded submitter then collect that information
@@ -855,9 +865,9 @@ class ElectronicGraderController extends AbstractController {
         if($to_ungraded != false AND $is_graded) {
 
             if($to_ungraded == 'next') {
-                $ungraded = $order->getNextUngradedSubmitter($graded_gradeable->getSubmitter());
+                $ungraded = $order->getNextUngradedSubmitter($graded_gradeable->getSubmitter(), $component_id);
             } else {
-                $ungraded = $order->getPrevUngradedSubmitter($graded_gradeable->getSubmitter());
+                $ungraded = $order->getPrevUngradedSubmitter($graded_gradeable->getSubmitter(), $component_id);
             }
 
             // Redirect to details page if no more ungraded submitters in the direction we are trying to go
