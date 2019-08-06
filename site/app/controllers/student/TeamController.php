@@ -68,8 +68,10 @@ class TeamController extends AbstractController {
             return $this->core->getOutput()->renderJsonFail("Failed to write to team history to settings file");
         }
 
-        $config = $this->core->getConfig();
-        AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+        if ($gradeable->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+        }
 
         $this->core->redirect($return_url);
         return $this->core->getOutput()->renderJsonSuccess();
