@@ -879,7 +879,6 @@ HTML;
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
-            "site_url" => $this->core->getConfig()->getSiteUrl(),
             "active_version" => $display_version,
             'toolbar_css' => $toolbar_css,
             "display_file_url" => $this->core->buildCourseUrl(['display_file'])

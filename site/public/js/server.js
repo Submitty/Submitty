@@ -1,4 +1,3 @@
-var siteUrl = undefined;
 var csrfToken = undefined;
 
 window.addEventListener("load", function() {

@@ -35,7 +35,6 @@ class GlobalView extends AbstractView {
             "breadcrumbs" => $breadcrumbs,
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
-            "site_url" => $this->core->getConfig()->getSiteUrl(),
             "course_url" => $this->core->buildCourseUrl(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),

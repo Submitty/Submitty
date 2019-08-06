@@ -21,7 +21,6 @@ use app\libraries\Utils;
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
- * @method string getSiteUrl()
  * @method string getSubmittyPath()
  * @method string getCgiTmpPath()
  * @method string getCoursePath()
@@ -97,8 +96,6 @@ class Config extends AbstractModel {
     protected $vcs_url;
     /** @property @var string */
     protected $cgi_url;
-    /** @property @var string */
-    protected $site_url;
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
@@ -314,7 +311,6 @@ class Config extends AbstractModel {
                 throw new ConfigException("Missing log folder: {$path}");
             }
         }
-        $this->site_url = $this->base_url."index.php?";
 
         $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
         if (!$secrets_json) {
@@ -404,8 +400,6 @@ class Config extends AbstractModel {
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
-
-        $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
 
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
         foreach (WrapperController::WRAPPER_FILES as $file) {
