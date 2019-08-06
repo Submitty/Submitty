@@ -26,13 +26,15 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
 
     os.chdir(SUBMITTY_DATA_DIR)
 
+    # Removes the working directory if it exists, creates needed subdirectories and unzips zip files.
     autograding_utils.prepare_directory_for_autograding(working_directory, which_untrusted, autograding_zip_file,
                                                         submission_zip_file, False, AUTOGRADING_LOG_PATH,
                                                         AUTOGRADING_STACKTRACE_PATH, SUBMITTY_INSTALL_DIR)
-
+    # Now that the files are unzipped, we no longer need them.
     os.remove(autograding_zip_file)
     os.remove(submission_zip_file)
 
+    # Initialize variables needed for autograding.
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
     tmp_work = os.path.join(working_directory,"TMP_WORK")
@@ -40,6 +42,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
 
+    # Open the JSON and timestamp files needed to grade. Initialize needed variables.
     with open(os.path.join(tmp_submission,"queue_file.json"), 'r') as infile:
         queue_obj = json.load(infile)
     waittime = queue_obj["waittime"]
@@ -53,7 +56,6 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
-    # grab the submission time
     with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
 
@@ -61,13 +63,13 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         gradeable_config_obj = json.load(infile)
     is_vcs = gradeable_config_obj["upload_type"] == "repository"
 
-    # LOAD THE TESTCASES
+    # Load all testcases. 
     testcases = list()
     testcase_num = 1
     for t in complete_config_obj['testcases']:
         tmp_test = testcase.Testcase(testcase_num, queue_obj, complete_config_obj, t,
                                      which_untrusted, is_vcs, is_batch_job, job_id, working_directory, testcases,
-                                     submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+                                     submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, is_test_environment=False)
         testcases.append( tmp_test )
         testcase_num += 1
 
@@ -80,22 +82,32 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         for tc in testcases:
             if tc.type != 'Execution':
                 tc.execute()
-        overall_log.flush()
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-        overall_log.flush()
 
-        # RANDOM INPUT GENERATION
-        print ("====================================\nRANDOM INPUT GENERATION STARTS", file=overall_log)
-        for tc in testcases:
-            if tc.has_input_generator_commands:
-                tc.generate_random_inputs()
-                overall_log.flush()
-
+                # Killalll removes any stray processes left over from compilation.
                 killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                        which_untrusted,
                                                        os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
                                                        stdout=overall_log)
-          
+                if killall_success != 0:
+                    print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                else:
+                    print ("KILLALL COMPLETE RANDOM INPUT GENERATION",file=overall_log)
+                overall_log.flush()
+        overall_log.flush()
+        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+        overall_log.flush()
+
+        # GENERATE RANDOM INPUT
+        print ("====================================\nRANDOM INPUT GENERATION STARTS", file=overall_log)
+        for tc in testcases:
+            if tc.has_input_generator_commands:
+                tc.generate_random_inputs()
+
+                # Killalll removes any stray processes left over from input generation.
+                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                       which_untrusted,
+                                                       os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                       stdout=overall_log)
                 if killall_success != 0:
                     print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
                 else:
@@ -105,13 +117,14 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
 
-        # EXECUTE
+        # RUN EXECUTION TESTCASES
         print ("====================================\nRUNNER STARTS", file=overall_log)
         overall_log.flush()
         for tc in testcases:
             if tc.type == 'Execution':
                 tc.execute()
-
+                
+                # Killalll removes any stray processes left over from execution.
                 killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
                                                    os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
@@ -133,8 +146,8 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         for tc in testcases:
             if tc.has_solution_commands:
                 tc.generate_random_outputs()
-                overall_log.flush()
-
+                
+                # Killalll removes any stray processes left over from output generation.
                 killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
                                                    which_untrusted,
                                                    os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
@@ -150,11 +163,15 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
         overall_log.flush()
 
-        validation_environment = jailed_sandbox.JailedSandbox(job_id, which_untrusted, tmp_work, is_vcs, is_batch_job, complete_config_obj, 
-                                                              dict(), working_directory, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
-        # VALIDATION
+        # VALIDATE STUDENT OUTPUT
         print ("====================================\nVALIDATION STARTS", file=overall_log)
         overall_log.flush()
+
+        # Create a jailed sandbox to run validation inside of.
+        validation_environment = jailed_sandbox.JailedSandbox(job_id, which_untrusted, tmp_work, is_vcs, is_batch_job, complete_config_obj, 
+                                                              dict(), working_directory, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+
+        # Copy sensitive expected output files into tmp_work.
         autograding_utils.setup_for_validation(working_directory, complete_config_obj, is_vcs,
                                                testcases, job_id, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH)
 
@@ -176,13 +193,15 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         autograding_utils.untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, tmp_work)
         autograding_utils.add_all_permissions(tmp_work)
 
-        # ARCHIVE
+        # ARCHIVE STUDENT RESULTS
         print ("====================================\nARCHIVING STARTS", file=overall_log)
         overall_log.flush()
         for tc in testcases:
+            # Removes test input files, makes details directory for the testcase.
             tc.setup_for_archival(overall_log)
 
         try:
+            # Perform archival.
             autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
                                                   gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
         except Exception as e:
@@ -190,10 +209,12 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
         subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
     
-    # zip up results folder
+    # Zip the results
     filehandle, my_results_zip_file = tempfile.mkstemp()
     autograding_utils.zip_my_directory(tmp_results, my_results_zip_file)
     os.close(filehandle)
+
+    # Remove the tmp directory.
     shutil.rmtree(working_directory)
     return my_results_zip_file
 
