@@ -274,6 +274,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         self.log_message(f'{dateutils.get_current_time()} docker network {network} destroyed')
       except Exception as e:
         self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
+    self.networks.clear()
 
   def create_knownhosts_txt(self, containers):
     """ 
