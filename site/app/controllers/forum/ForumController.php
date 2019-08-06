@@ -54,18 +54,15 @@ class ForumController extends AbstractController{
         if (is_null($thread_id)) {
             $thread_id = $_POST['thread_id'];
         }
-		$result = array();
 		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
 			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
-				$result['success'] = 'Thread resolve state has been changed.';
+			    return $this->core->getOutput()->renderJsonSuccess();
 			} else {
-				$result['error'] = 'The thread resolve state could not be updated. Please try again.';
+			    return $this->core->getOutput()->renderJsonFail('The thread resolve state could not be updated. Please try again.');
 			}
 		} else {
-            $result["error"] = "You do not have permissions to do that.";
+		    return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
 		}
-        $this->core->getOutput()->renderJson($result);
-		return $this->core->getOutput()->getOutput();
 	}
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
@@ -141,10 +138,10 @@ class ForumController extends AbstractController{
         if(!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
             if($this->isValidCategories(-1, array($category))) {
-                $result["error"] = "That category already exists.";
+                return $this->core->getOutput()->renderJsonFail("That category already exists.");
             } else {
                 if(strlen($category)>50){
-                    $result["error"] = "Category name is more than 50 characters.";
+                    return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
                     $newCategoryId = $this->core->getQueries()->addNewCategory($category);
@@ -161,10 +158,9 @@ class ForumController extends AbstractController{
             }
         }
         else {
-            $result["error"] = "No category data submitted. Please try again.";
+            return $this->core->getOutput()->renderJsonFail("No category data submitted. Please try again.");
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     /**
@@ -172,25 +168,22 @@ class ForumController extends AbstractController{
      * @AccessControl(permission="forum.modify_category")
      */
     public function deleteCategory(){
-        $result = array();
         if(!empty($_POST["deleteCategory"])) {
             $category = (int)$_POST["deleteCategory"];
             if(!$this->isValidCategories(array($category))) {
-                $result["error"] = "That category doesn't exists.";
+                return $this->core->getOutput()->renderJsonFail("That category doesn't exists.");
             } else if(!$this->isCategoryDeletionGood($category)) {
-                $result["error"] = "Last category can't be deleted.";
+                return $this->core->getOutput()->renderJsonFail("Last category can't be deleted.");
             } else {
                 if($this->core->getQueries()->deleteCategory($category)) {
-                    $result["success"] = "OK";
+                    return $this->core->getOutput()->renderJsonSuccess();
                 } else {
-                    $result["error"] = "Category is in use.";
+                    return $this->core->getOutput()->renderJsonFail("Category is in use.");
                 }
             }
         } else {
-            $result["error"] = "No category data submitted. Please try again.";
+            return $this->core->getOutput()->renderJsonFail("No category data submitted. Please try again.");
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
     }
 
     /**
@@ -198,41 +191,28 @@ class ForumController extends AbstractController{
      * @AccessControl(permission="forum.modify_category")
      */
     public function editCategory(){
-        $result = array();
-
         $category_id = $_POST["category_id"];
         $category_desc = null;
         $category_color = null;
-        $should_update = true;
 
         if(!empty($_POST["category_desc"])) {
             $category_desc = trim($_POST["category_desc"]);
             if($this->isValidCategories(-1, array($category_desc))) {
-                $result["error"] = "That category already exists.";
-                $should_update = false;
+                return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
             else if(strlen($category_desc) > 50){
-                $result["error"] = "Category name is more than 50 characters.";
-                $should_update = false;
+                return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
             }
         }
         if(!empty($_POST["category_color"])) {
             $category_color = $_POST["category_color"];
             if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
-                $result["error"] = "Given category color is not allowed.";
-                $should_update = false;
+                return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
             }
         }
 
-        if($should_update) {
-            $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
-            $result["success"] = "OK";
-        } else if(!isset($result["error"])) {
-            $result["error"] = "No category data updated. Please try again.";
-        }
-
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**
@@ -240,7 +220,6 @@ class ForumController extends AbstractController{
      * @AccessControl(permission="forum.modify_category")
      */
     public function reorderCategories(){
-        $result = array();
         $rows = $this->core->getQueries()->getCategories();
 
         $current_order = array();
@@ -254,13 +233,10 @@ class ForumController extends AbstractController{
 
         if(count(array_diff(array_merge($current_order, $new_order), array_intersect($current_order, $new_order))) === 0) {
             $this->core->getQueries()->reorderCategories($new_order);
-            $results["success"] = "ok";
+            return $this->core->getOutput()->renderJsonSuccess();
         } else {
-            $result["error"] = "Different Categories IDs given";
+            return $this->core->getOutput()->renderJsonFail("Different Categories IDs given");
         }
-
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
     }
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
@@ -270,11 +246,6 @@ class ForumController extends AbstractController{
      * @AccessControl(permission="forum.publish")
      */
     public function publishThread(){
-        if(!$this->core->getAccess()->canI("forum.publish")) {
-            $this->core->getOutput()->renderJson(['error' => "Invalid CSRF token"]);
-            return $this->core->getOutput()->getOutput();
-        }
-
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = array();
@@ -346,8 +317,7 @@ class ForumController extends AbstractController{
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     /**
@@ -429,8 +399,7 @@ class ForumController extends AbstractController{
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
             }
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
     /**
@@ -452,8 +421,7 @@ class ForumController extends AbstractController{
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
         $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
-        $this->core->getOutput()->renderJson($response);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
     /**
@@ -474,15 +442,13 @@ class ForumController extends AbstractController{
         $markdown = !empty($_POST['markdown_status']);
 
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
-                $this->core->getOutput()->renderJson(['error' => 'You do not have permissions to do that.']);
-                return;
+                return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
         if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
         } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
-            $this->core->getOutput()->renderJson(['error' => 'Thread is locked']);
-            return;
+            return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         else if($modify_type == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
@@ -501,14 +467,13 @@ class ForumController extends AbstractController{
             $this->core->getNotificationFactory()->onPostModified($event);
 
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            $this->core->getOutput()->renderJson($response = array('type' => $type));
-            return $this->core->getOutput()->getOutput();
+            return $this->core->getOutput()->renderJsonSuccess(array('type' => $type));
         } else if($modify_type == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
                 $error = "Parent post must be undeleted first.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                return $this->core->getOutput()->renderJsonFail($error);
             } else {
                 // We want to reload same thread again, in both case (thread/post undelete)
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
@@ -519,9 +484,8 @@ class ForumController extends AbstractController{
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
-                $this->core->getOutput()->renderJson($response = array('type' => $type));
+                return $this->core->getOutput()->renderJsonSuccess(array('type' => $type));
             }
-            return $this->core->getOutput()->getOutput();
         } else if($modify_type == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
@@ -581,8 +545,7 @@ class ForumController extends AbstractController{
                 $this->core->getNotificationFactory()->onPostModified($event);
             }
             if($isError) {
-                $this->core->getOutput()->renderJson(['error' => $messageString]);
-                return;
+                return $this->core->getOutput()->renderJsonFail($messageString);
             }
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
         }
@@ -738,7 +701,7 @@ class ForumController extends AbstractController{
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return $this->core->getOutput()->renderJson(array(
+        return $this->core->getOutput()->renderJsonSuccess(array(
                 "html" => $this->core->getOutput()->getOutput(),
                 "count" => count($threads),
                 "page_number" => $pageNumber,
@@ -896,8 +859,7 @@ class ForumController extends AbstractController{
             $_post['user_info'] = $emptyUser ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
             $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
         }
-        $this->core->getOutput()->renderJson($output);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($output);
     }
 
     public function modifyAnonymous($author) {
@@ -922,12 +884,12 @@ class ForumController extends AbstractController{
                 if(isset($_POST["thread_id"])) {
                     $this->getThreadContent($_POST["thread_id"], $output);
                 }
-                $this->core->getOutput()->renderJson($output);
+                return $this->core->getOutput()->renderJsonSuccess($output);
             } else {
-                $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
+                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
             }
         }
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
     private function getThreadContent($thread_id, &$output){

@@ -139,8 +139,8 @@ function publishFormWithAttachments(form, test_category, error_message) {
             try {
                 var json = JSON.parse(data);
 
-                if(json["error"]) {
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["error"] + '</div>';
+                if(json["status"] === 'fail') {
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json["message"] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
@@ -149,7 +149,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
                 $('#messages').append(message);
                 return;
             }
-            window.location.href = json['next_page'];
+            window.location.href = json['data']['next_page'];
         },
         error: function(){
             var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + error_message + '</div>';
@@ -185,8 +185,8 @@ function changeThreadStatus(thread_id) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']) {
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail') {
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -221,11 +221,12 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
+            json = json['data'];
             var post_content = json.post;
             var lines = post_content.split(/\r|\r\n|\n/).length;
             var anon = json.anon;
@@ -416,7 +417,7 @@ function dynamicScrollLoadPage(element, atEnd) {
             csrf_token: window.csrfToken
         },
         success: function(r){
-            var x = JSON.parse(r);
+            var x = JSON.parse(r)['data'];
             var content = x.html;
             var count = x.count;
             content = `${content}`;
@@ -529,7 +530,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             csrf_token: csrfToken
         },
         success: function(r){
-            var x = JSON.parse(r);
+            var x = JSON.parse(r)['data'];
             var page_number = parseInt(x.page_number);
             var threadCount = parseInt(x.count);
             x = x.html;
@@ -616,8 +617,8 @@ function showHistory(post_id) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -625,6 +626,7 @@ function showHistory(post_id) {
             $("#popup-post-history .post_box.history_box").remove();
             $("#popup-post-history .form-body").css("padding", "5px");
             var dummy_box = $($("#popup-post-history .post_box")[0]);
+            json = json['data'];
             for(var i = json.length - 1 ; i >= 0 ; i -= 1) {
                 var post = json[i];
                 box = dummy_box.clone();
@@ -673,8 +675,8 @@ function addNewCategory(csrf_token){
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -682,7 +684,7 @@ function addNewCategory(csrf_token){
             $('#messages').append(message);
             $('#new_category_text').val("");
             // Create new item in #ui-category-list using dummy category
-            var category_id = json['new_id'];
+            var category_id = json['data']['new_id'];
             var category_color_code = "#000080";
             var category_desc = escapeSpecialChars(newCategory);
             newelement = $($('#ui-category-list li')[0]).clone(true);
@@ -721,8 +723,8 @@ function deleteCategory(category_id, category_desc, csrf_token){
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -761,8 +763,8 @@ function editCategory(category_id, category_desc, category_color, csrf_token) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -879,8 +881,8 @@ function reorderCategories(csrf_token) {
                 $('#messages').append(message);
                 return;
             }
-            if(json['error']){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+            if(json['status'] === 'fail'){
+                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                 $('#messages').append(message);
                 return;
             }
@@ -974,13 +976,13 @@ function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_tok
                     $('#messages').append(message);
                     return;
                 }
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }
                 var new_url = "";
-                switch(json['type']){
+                switch(json['data']['type']){
                     case "thread":
                     default:
                         new_url = buildCourseUrl(['forum', 'threads']);
@@ -1127,8 +1129,8 @@ function loadThreadHandler(){
                     $('#messages').append(message);
                     return;
                 }
-                if(json['error']){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['error'] + '</div>';
+                if(json['status'] === 'fail'){
+                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
                     $('#messages').append(message);
                     return;
                 }

@@ -1823,7 +1823,7 @@ function checkBulkProgress(gradeable_id){
         data: null,
         type: "GET",
         success: function(data) {
-            data = JSON.parse(data);
+            data = JSON.parse(data)['data'];
             var result = {};
             updateBulkProgress(data['job_data'], data['count']);
         },
