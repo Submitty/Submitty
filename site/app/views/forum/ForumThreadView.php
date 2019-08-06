@@ -894,7 +894,7 @@ class ForumThreadView extends AbstractView {
             foreach ($files as $file) {
                 $path = rawurlencode($file['path']);
                 $name = rawurlencode($file['name']);
-                $url = $this->core->buildUrl(array('component' => 'misc', 'page' => 'display_file', 'dir' => 'forum_attachments', 'file' => $name, 'path' => $path));
+                $url = $this->core->buildCourseUrl(['display_file']).'?dir=forum_attachments&path='.$path;
 
                 $post_attachment["files"][] = [
                     "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
