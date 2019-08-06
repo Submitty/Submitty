@@ -11,7 +11,7 @@
     <table class="table table-bordered persist-area">
         {% if sections|length > 0 %}
             {% for registration, students in sections %}
-                <tr class="info persist-header">
+                <tr class="info">
                     <td colspan="8" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</td>
                 </tr>
                 <tbody id="section-{{ registration }}">

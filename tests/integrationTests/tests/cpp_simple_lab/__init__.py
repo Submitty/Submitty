@@ -65,6 +65,12 @@ def cleanup(test):
         [os.path.join(test.testcase_path, "data", "test_output")])
 
 @testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
+
+@testcase
 def full_credit(test):
     cleanup(test)
     subprocess.call(["cp",os.path.join(SAMPLE_SUBMISSIONS, "README.txt"),

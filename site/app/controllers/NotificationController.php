@@ -24,7 +24,8 @@ class NotificationController extends AbstractController {
         'reply_in_post_thread',
         'team_invite',
         'team_joined',
-        'team_member_submission'
+        'team_member_submission',
+        'self_notification'
     ];
 
 	const EMAIL_SELECTIONS = [
@@ -36,6 +37,7 @@ class NotificationController extends AbstractController {
         'team_invite_email',
         'team_joined_email',
         'team_member_submission_email',
+        'self_notification_email'
     ];
 
 	protected $selections;
@@ -47,11 +49,6 @@ class NotificationController extends AbstractController {
             $this->selections = array_merge($this->selections,self::EMAIL_SELECTIONS);
         }
     }
-
-    public function run() {
-        return null;
-    }
-
     /**
      * @param $show_all
      * @Route("/{_semester}/{_course}/notifications")
@@ -98,7 +95,7 @@ class NotificationController extends AbstractController {
     public function markNotificationAsSeen($nid) {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 
@@ -109,7 +106,7 @@ class NotificationController extends AbstractController {
     public function markAllNotificationsAsSeen() {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 

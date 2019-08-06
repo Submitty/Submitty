@@ -211,7 +211,7 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 
     // Update the buttons to reflect that they were clicked
     submitAJAX(
-        buildNewCourseUrl(['gradeable', g_id, 'grading']),
+        buildCourseUrl(['gradeable', g_id, 'grading']),
         {
           'csrf_token': csrfToken,
           'user_id': user_id,
@@ -421,7 +421,7 @@ function setupNumericTextCells() {
         });
 
         submitAJAX(
-            buildNewCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
+            buildCourseUrl(['gradeable', row_el.data('gradeable'), 'grading']),
             {
                 'csrf_token': csrfToken,
                 'user_id': row_el.data("user"),
@@ -506,7 +506,7 @@ function setupNumericTextCells() {
                     }
                     if (!breakOut){
                         submitAJAX(
-                            buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
+                            buildCourseUrl(['gradeable', gradeable_id, 'grading', 'csv']),
                             {'csrf_token': csrfToken, 'users': user_ids,
                             'num_numeric' : num_numeric, 'big_file': reader.result},
                             function(returned_data) {

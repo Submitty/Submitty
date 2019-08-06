@@ -1,4 +1,3 @@
-var siteUrl = undefined;
 var csrfToken = undefined;
 
 window.addEventListener("load", function() {
@@ -11,41 +10,22 @@ window.addEventListener("resize", checkSidebarCollapse);
 
 /**
  * Acts in a similar fashion to Core->buildUrl() function within the PHP code
- * so that we do not have to pass in fully built URL to JS functions, but rather
- * construct them there as it makes sense (which helps on cutting down on potential
- * duplication of effort where we can replicate JS functions across multiple pages).
  *
  * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
-function buildUrl(parts) {
-    var constructed = "";
-    for (var part in parts) {
-        if (parts.hasOwnProperty(part)) {
-            constructed += "&" + part + "=" + parts[part];
-        }
-    }
-    return document.body.dataset.siteUrl + constructed;
-}
-
-/**
- * Acts in a similar fashion to Core->buildNewUrl() function within the PHP code
- *
- * @param {object} parts - Object representing URL parts to append to the URL
- * @returns {string} - Built up URL to use
- */
-function buildNewUrl(parts = []) {
+function buildUrl(parts = []) {
     return document.body.dataset.baseUrl + parts.join('/');
 }
 
 /**
- * Acts in a similar fashion to Core->buildNewCourseUrl() function within the PHP code
+ * Acts in a similar fashion to Core->buildCourseUrl() function within the PHP code
  * Course information is prepended to the URL constructed.
  *
  * @param {object} parts - Object representing URL parts to append to the URL
  * @returns {string} - Built up URL to use
  */
-function buildNewCourseUrl(parts = []) {
+function buildCourseUrl(parts = []) {
     return document.body.dataset.courseUrl + '/' + parts.join('/');
 }
 
@@ -73,7 +53,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         var option = 'original'
     }
     //Insert actual and expected one at a time
-    var url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
         `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=expected`;
 
     let assertSuccess = function(data) {
@@ -98,7 +78,7 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
             }
             $(expected_div).empty();
             $(expected_div).html(response.data.html);
-            url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
+            url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output', 'remove']) +
                 `?who_id=${who_id}&version=${version}&index=${index}&autocheck_cnt=${autocheck_cnt}&option=${option}&which=actual`;
             $.getJSON({
                 url: url,
@@ -142,7 +122,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         loadingTools.find(".loading-tools-show").show();
     }else{
         $("#show_char_"+index).toggle();
-        var url = buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
+        var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-in-progress").show();
@@ -196,7 +176,7 @@ function displayCloseSubmissionsWarning(form_action,gradeable_name) {
 }
 
 function newDeleteCourseMaterialForm(path, file_name) {
-    let url = buildNewCourseUrl(["course_materials", "delete"]) + "?path=" + path;
+    let url = buildCourseUrl(["course_materials", "delete"]) + "?path=" + path;
     var current_y_offset = window.pageYOffset;
     document.cookie = 'jumpToScrollPostion='+current_y_offset;
 
@@ -324,7 +304,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     version_user_1 = "max_matching";
                 }
 
-                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
+                var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -370,7 +350,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                     }
                 })
 
-                var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
+                var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}`;
                 $.ajax({
                     url: url,
                     success: function(data) {
@@ -400,7 +380,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
             if (changed == 'user_id_2') {
                 if (($('[name="user_id_2"]', form).val()) == '') {
                     $('[name="code_box_2"]').empty();
-                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=&version_user_2=`;
+                    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=&version_user_2=`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -429,7 +409,7 @@ function setUserSubmittedCode(gradeable_id, changed) {
                 else {
                     var user_id_2 = JSON.parse($('[name="user_id_2"]', form).val())["user_id"];
                     var version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
-                    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=${user_id_2}&version_user_2=${version_user_2}`;
+                    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'concat']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&user_id_2=${user_id_2}&version_user_2=${version_user_2}`;
                     $.ajax({
                         url: url,
                         success: function(data) {
@@ -478,7 +458,7 @@ function getMatchesForClickedMatch(gradeable_id, event, user_1_match_start, user
         version_user_2 = JSON.parse($('[name="user_id_2"]', form).val())["version"];
     }
 
-    var url = buildNewCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'clicked_match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&start=${user_1_match_start.line}&end=${user_1_match_end.line}`;
+    var url = buildCourseUrl(['plagiarism', 'gradeable', gradeable_id, 'clicked_match']) + `?user_id_1=${user_id_1}&version_user_1=${version_user_1}&start=${user_1_match_start.line}&end=${user_1_match_end.line}`;
 
     //console.log(user_1_match_start.line);
 
@@ -1097,12 +1077,12 @@ function check_lichen_jobs(url, semester, course) {
             if (data == "REFRESH_ME") {
                 last_data= "REFRESH_ME";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildNewCourseUrl(['plagiarism']);
+                window.location.href = buildCourseUrl(['plagiarism']);
             }
             else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
-                window.location.href = buildNewCourseUrl(['plagiarism']);
+                window.location.href = buildCourseUrl(['plagiarism']);
             }
             else {
                 checkRefreshLichenMainPage(url, semester, course);
@@ -1111,47 +1091,17 @@ function check_lichen_jobs(url, semester, course) {
     );
 }
 
-function downloadFile(file, path, dir) {
-    window.location = buildUrl({
-        'component': 'misc',
-        'page': 'download_file',
-        'dir': dir,
-        'file': file,
-        'path': path});
+function downloadFile(path, dir) {
+    window.location = buildCourseUrl(['download']) + `?dir=${dir}&path=${path}`;
 }
 
-function downloadZip(grade_id, user_id, version = null, origin = null) {
-    var url_components = {
-        'component': 'misc',
-        'page': 'download_zip',
-        'dir': 'submissions',
-        'gradeable_id': grade_id,
-        'user_id': user_id
-    };
-
-    if(version !== null) {
-        url_components['version'] = version;
-    }
-
-    if(origin !== null) {
-        url_components['origin'] = origin;
-    }
-
-    window.location = buildUrl(url_components);
+function downloadSubmissionZip(grade_id, user_id, version = null, origin = null) {
+    window.location = buildCourseUrl(['gradeable', grade_id, 'download_zip']) + `?dir=submissions&user_id=${user_id}&version=${version}&origin=${origin}`;
     return false;
 }
 
-function downloadFileWithAnyRole(file_name, path) {
-    // Trim file without path
-    var file = file_name;
-    if (file.indexOf("/") != -1) {
-        file = file.substring(file.lastIndexOf('/')+1);
-    }
-    window.location = buildUrl({'component': 'misc', 'page': 'download_file_with_any_role', 'dir': 'course_materials', 'file': file, 'path': path});
-}
-
 function downloadCourseMaterialZip(dir_name, path) {
-    window.location = buildNewCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
+    window.location = buildCourseUrl(['course_materials', 'download_zip']) + '?dir_name=' + dir_name + '&path=' + path;
 }
 
 function checkColorActivated() {
@@ -1429,7 +1379,7 @@ function enableTabsInTextArea(jQuerySelector) {
 
 function updateHomeworkExtensions(data) {
     var fd = new FormData($('#excusedAbsenceForm').get(0));
-    var url = buildNewCourseUrl(['extensions', 'update']);
+    var url = buildCourseUrl(['extensions', 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1480,7 +1430,7 @@ function updateHomeworkExtensions(data) {
 
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
-    var url = buildNewCourseUrl(['grade_override', $('#g_id').val(), 'update']);
+    var url = buildCourseUrl(['grade_override', $('#g_id').val(), 'update']);
     $.ajax({
         url: url,
         type: "POST",
@@ -1516,7 +1466,7 @@ function updateGradeOverride(data) {
 }
 
 function loadHomeworkExtensions(g_id, due_date) {
-    var url = buildNewCourseUrl(['extensions', g_id]);
+    var url = buildCourseUrl(['extensions', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1541,7 +1491,7 @@ function loadHomeworkExtensions(g_id, due_date) {
 }
 
 function loadOverriddenGrades(g_id) {
-    var url = buildNewCourseUrl(['grade_override', g_id]);
+    var url = buildCourseUrl(['grade_override', g_id]);
     $.ajax({
         url: url,
         success: function(data) {
@@ -1565,18 +1515,6 @@ function loadOverriddenGrades(g_id) {
     });
 }
 
-function refreshOnResponseLateDays(json) {
-    $('#late_day_table tr:gt(0)').remove();
-    if(json['data']['users'].length === 0){
-        $('#late_day_table').append('<tr><td colspan="6">No late days are currently entered.</td></tr>');
-    }
-    json['data']['users'].forEach(function(elem){
-        elem_delete = "<a onclick=\"deleteLateDays('"+elem['user_id']+"', '"+elem['datestamp']+"');\"><i class='fas fa-trash'></i></a>";
-        var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_days'], elem['datestamp'], elem_delete + '</td></tr>'];
-        $('#late_day_table').append(bits.join('</td><td>'));
-    });
-}
-
 function refreshOnResponseOverriddenGrades(json) {
     var form = $("#load-overridden-grades");
     $('#my_table tr:gt(0)').remove();
@@ -1594,33 +1532,17 @@ function refreshOnResponseOverriddenGrades(json) {
 }
 
 function updateLateDays(data) {
-    var fd = new FormData($('#lateDayForm').get(0));
+    var fd = new FormData($('#late-day-form').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
+    var url = buildCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
         url: url,
         type: "POST",
         data: fd,
         processData: false,
         contentType: false,
-        success: function(data) {
-            var json = JSON.parse(data);
-            if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
-                return;
-            }
-            var form = $("#load-late-days");
-            refreshOnResponseLateDays(json);
-            //Reset all form elements
-            $('#user_id').val(this.defaultValue);
-            $('#datestamp').val(this.defaultValue);
-            $('#late_days').val(this.defaultValue);
-            $('#csv_upload').val(this.defaultValue);
-            $('#csv_option_overwrite_all').prop('checked',true);
-            //Display confirmation message
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days have been updated.</div>';
-            $('#messages').append(message);
+        success: function() {
+            window.location.reload();
         },
         error: function() {
             window.alert("Something went wrong. Please try again.");
@@ -1632,7 +1554,7 @@ function updateLateDays(data) {
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildNewCourseUrl(['late_days', 'delete']);
+    var url = buildCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1643,27 +1565,18 @@ function deleteLateDays(user_id, datestamp) {
                 user_id: user_id,
                 datestamp: datestamp_mmddyy
             },
-            success: function(data) {
-                var json = JSON.parse(data);
-                if(json['status'] === 'fail'){
-                    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                    $('#messages').append(message);
-                    return;
-                }
-                refreshOnResponseLateDays(json);
-                var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Late days entry removed.</div>';
-                $('#messages').append(message);
+            success: function() {
+                window.location.reload();
             },
             error: function() {
                 window.alert("Something went wrong. Please try again.");
             }
         })
     }
-    return false;
 }
 
 function deleteOverriddenGrades(user_id, g_id) {
-    var url = buildNewCourseUrl(['grade_override', g_id, 'delete']);
+    var url = buildCourseUrl(['grade_override', g_id, 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
@@ -1702,18 +1615,6 @@ function toggleRegradeRequests(){
     }
 
 }
-function changeRegradeStatus(regradeId, gradeable_id, submitter_id, status) {
-    var url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id ,'submitter_id': submitter_id ,'regrade_id': regradeId, 'status': status, 'action': 'change_request_status'});
-    $.ajax({
-        url: url,
-        success: function(data) {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    });
-}
 /**
   * Taken from: https://stackoverflow.com/questions/1787322/htmlspecialchars-equivalent-in-javascript
   */
@@ -1735,7 +1636,7 @@ function escapeHTML(str) {
 
 function changePermission(filename, checked) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
+    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filename) + '&checked=' + checked;
 
     $.ajax({
         type: "POST",
@@ -1750,7 +1651,7 @@ function changePermission(filename, checked) {
 
 function changeFolderPermission(filenames, checked,handleData) {
     // send to server to handle file permission change
-    let url = buildNewCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
+    let url = buildCourseUrl(['course_materials', 'modify_permission']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&checked=' + checked;
 
     $.ajax({
         type: "POST",
@@ -1768,14 +1669,12 @@ function changeFolderPermission(filenames, checked,handleData) {
 }
 
 function updateToServerTime(fp) {
-    var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
+    var url = buildUrl(['server_time']);
 
-    $.ajax({
-        type: "POST",
+    $.get({
         url: url,
-        data: {csrf_token: csrfToken},
         success: function(data) {
-            var time = JSON.parse(data);
+            var time = JSON.parse(data)['data'];
             time = new Date(parseInt(time.year),
                             parseInt(time.month) - 1,
                             parseInt(time.day),
@@ -1792,7 +1691,7 @@ function updateToServerTime(fp) {
 
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
-    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
     var tbr;
     tbr=false;
     $.ajax({
@@ -1814,7 +1713,7 @@ function changeNewDateTime(filename, newdatatime,handleData) {
 
 function changeFolderNewDateTime(filenames, newdatatime,handleData) {
     // send to server to handle folder date/time change
-    let url = buildNewCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
+    let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filenames[0]) + '&newdatatime=' + newdatatime;
     var tbr;
     tbr=false;
     $.ajax({
@@ -1849,7 +1748,7 @@ $.fn.isInViewport = function() {                                        // jQuer
 
 function checkSidebarCollapse() {
     var size = $(document.body).width();
-    if (size < 1000) {
+    if (size < 1150) {
         $("aside").toggleClass("collapsed", true);
     }
     else{
@@ -1897,13 +1796,11 @@ $(document).ready(function() {
 });
 
 function checkBulkProgress(gradeable_id){
-    var url = buildUrl({'component': 'misc', 'page': 'check_bulk_progress'});
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'bulk', 'progress']);
     $.ajax({
         url: url,
-        data: {
-            gradeable_id : gradeable_id
-        },
-        type: "POST",
+        data: null,
+        type: "GET",
         success: function(data) {
             data = JSON.parse(data);
             var result = {};
