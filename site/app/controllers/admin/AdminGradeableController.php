@@ -858,7 +858,7 @@ class AdminGradeableController extends AbstractController {
         $build_status = $this->enqueueBuild($gradeable);
 
         $config = $this->core->getConfig();
-        if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
             $this->enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
         }
 
