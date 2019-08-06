@@ -1200,14 +1200,14 @@ function loadInlineImages(data, all = false) {
             well.show();
             element.classList.add('active');
         }
-        for(var attachmentIndex = 0; attachmentIndex < length; attachmentIndex++) {
-            //json[attachmentIndex][0] => url
-            //json[attachmentIndex][1] => div id
-            //json[attachmentIndex][2] => name
-            openFrame(json[attachmentIndex][0], json[attachmentIndex][1], json[attachmentIndex][2]);
-            var e = $('#file_viewer_' + json[i][1] + '_iframe');
+        for(var attachment = 0; attachment < length; attachment++) {
+            //json[attachment][0] => url
+            //json[attachment][1] => div id
+            //json[attachment][2] => name
+            openFrame(json[attachment][0], json[attachment][1], json[attachment][2]);
+            var e = $('#file_viewer_' + json[attachment][1] + '_iframe');
             if(!e[0].hasAttribute('frame_styled')) {
-                e.on('load', formatIFrameInlineImages(json[i][1], json[i][2], json[i][0]));
+                e.on('load', formatIFrameInlineImages(json[attachment][1], json[attachment][2], json[attachment][0]));
                 e[0].classList.add('frame_styled');
             }
         }
