@@ -1162,24 +1162,34 @@ var filters_applied = [];
 
 // Taken from https://stackoverflow.com/a/1988361/2650341
 
-Array.prototype.inArray = function(comparer) {
-    for(var i=0; i < this.length; i++) {
-        if(comparer(this[i])) return i;
-    }
-    return false;
-};
+if (!Array.prototype.inArray) {
+    Object.defineProperty(Array.prototype, 'inArray', {
+        value: function(comparer) {
+            for (let i=0; i < this.length; i++) {
+                if (comparer(this[i])) {
+                    return i;
+                }
+            }
+            return false;
+        }
+    });
+}
 
 // adds an element to the array if it does not already exist using a comparer
 // function
-Array.prototype.toggleElement = function(element, comparer) {
-    var index = this.inArray(comparer);
-    if ((typeof(index) == "boolean" && !index) || (typeof(index) == "int" && index === 0)){
-        this.push(element);
-    }
-    else{
-        this.splice(index, 1);
-    }
-};
+if (!Array.prototype.toggleElement) {
+    Object.defineProperty(Array.prototype, 'toggleElement', {
+        value: function(element, comparer) {
+            var index = this.inArray(comparer);
+            if ((typeof(index) == "boolean" && !index) || (typeof(index) == "int" && index === 0)) {
+                this.push(element);
+            }
+            else {
+                this.splice(index, 1);
+            }
+        }
+    });
+}
 
 function clearForumFilter(){
     if(checkUnread()){
