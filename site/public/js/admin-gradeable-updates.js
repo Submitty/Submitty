@@ -155,7 +155,7 @@ $(document).ready(function () {
 function ajaxRebuildGradeableButton() {
     var gradeable_id = $('#g_id').val();
     $.ajax({
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'rebuild']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function (response) {
             ajaxCheckBuildStatus();
         },
@@ -168,7 +168,7 @@ function ajaxRebuildGradeableButton() {
 function ajaxGetBuildLogs(gradeable_id) {
     $.getJSON({
         type: "GET",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_log']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
             var build_info = response['data'][0];
             var cmake_info = response['data'][1];
@@ -209,7 +209,7 @@ function ajaxCheckBuildStatus() {
     hideBuildLog();
     $.getJSON({
         type: "GET",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_status']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
             $('#rebuild-log-button').css('display','block');
             if (response['data'] == 'queued') {
