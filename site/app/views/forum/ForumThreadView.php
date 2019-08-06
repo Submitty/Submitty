@@ -341,7 +341,7 @@ class ForumThreadView extends AbstractView {
                 "prev_page" => $prev_page,
                 "arrowup_visibility" => $arrowup_visibility,
                 "display_thread_content" => $displayThreadContent,
-                "display_thread_count" => count($displayThreadContent["thread_content"]),
+                "display_thread_count" => empty($displayThreadContent) ? 0 : count($displayThreadContent["thread_content"]),
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
                 "generate_post_content" => $generatePostContent,
