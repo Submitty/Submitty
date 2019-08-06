@@ -1688,7 +1688,28 @@ function updateToServerTime(fp) {
         }
     });
 }
+function updateToTomorrowServerTime(fp) {
+    var url = buildNewUrl(['server_time']);
 
+    $.get({
+        url: url,
+        success: function(data) {
+            var time = JSON.parse(data)['data'];
+            time = new Date(parseInt(time.year),
+                parseInt(time.month) - 1,
+                parseInt(time.day),
+                parseInt(time.hour),
+                parseInt(time.minute),
+                parseInt(time.second));
+            nextDay = new Date(time);
+            nextDay.setDate(time.getDate()+1);
+            fp.setDate(nextDay,true);
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
 function changeNewDateTime(filename, newdatatime,handleData) {
     // send to server to handle file date/time change
     let url = buildCourseUrl(['course_materials', 'modify_timestamp']) + '?filenames=' + encodeURIComponent(filename) + '&newdatatime=' + newdatatime;
