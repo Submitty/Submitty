@@ -8,11 +8,11 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
 use app\NotificationFactory;
+use Symfony\Component\HttpFoundation\Request;
 
 
 
@@ -40,6 +40,9 @@ class Core {
     /** @var SessionManager */
     private $session_manager;
 
+    /** @var DatabaseFactory */
+    private $database_factory;
+
     /** @var DatabaseQueries */
     private $database_queries;
 
@@ -60,9 +63,6 @@ class Core {
 
     /** @var Forum $forum */
     private $forum  = null;
-
-    /** @var ClassicRouter */
-    private $router;
 
     /** @var NotificationFactory */
     private $notification_factory;
@@ -118,16 +118,15 @@ class Core {
      * @param $course
      * @throws \Exception
      */
-    public function loadConfig($semester, $course) {
-        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
-
-        $this->config = new Config($this, $semester, $course);
-        $this->config->loadMasterConfigs($conf_path);
-
+    public function loadCourseConfig($semester, $course) {
+        if ($this->config === null) {
+            throw new \Exception("Master config has not been loaded");
+        }
         if (!empty($semester) && !empty($course)) {
-            $course_json_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.json");
+            $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
+            $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
             if (file_exists($course_json_path) && is_readable ($course_json_path)) {
-                $this->config->loadCourseJson($course_json_path);
+                $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
             else{
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
@@ -137,6 +136,13 @@ class Core {
                 $this->addErrorMessage($message);
             }
         }
+    }
+
+    public function loadMasterConfig() {
+        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
+
+        $this->config = new Config($this);
+        $this->config->loadMasterConfigs($conf_path);
     }
 
     public function loadAuthentication() {
@@ -156,21 +162,26 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadDatabases() {
+    public function loadMasterDatabase() {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
 
-        $database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
+        $this->database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
 
-        $this->submitty_db = $database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
+        $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
+        $this->database_queries = $this->database_factory->getQueries($this);
+    }
+
+    public function loadCourseDatabase() {
         if ($this->config->isCourseLoaded()) {
-            $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
+            $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
             $this->course_db->connect();
+
+            $this->database_queries = $this->database_factory->getQueries($this);
         }
-        $this->database_queries = $database_factory->getQueries($this);
     }
 
     public function loadForum() {
@@ -457,29 +468,13 @@ class Core {
     }
 
     /**
-     * Given some number of URL parameters (parts), build a URL for the site using those parts
-     *
-     * @param array  $parts
-     * @param string $hash
-     *
-     * @return string
-     */
-    public function buildUrl($parts=array(), $hash = null) {
-        $url = $this->getConfig()->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
-        if ($hash !== null) {
-            $url .= "#".$hash;
-        }
-        return $url;
-    }
-
-    /**
      * Given some URL parameters (parts), build a URL for the site using those parts.
      *
      * @param array  $parts
      *
      * @return string
      */
-    public function buildNewUrl($parts=array()) {
+    public function buildUrl($parts=array()) {
         $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
         return $url;
     }
@@ -494,9 +489,9 @@ class Core {
      *
      * @return string
      */
-    public function buildNewCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts=array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
-        return $this->buildNewUrl($parts);
+        return $this->buildUrl($parts);
     }
 
     /**
@@ -630,13 +625,6 @@ class Core {
         }
     }
 
-    public function setRouter(ClassicRouter $router) {
-        $this->router = $router;
-    }
-
-    public function getRouter(): ClassicRouter {
-        return $this->router;
-    }
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
      * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
@@ -651,5 +639,79 @@ class Core {
 
     public function getNotificationFactory() {
         return $this->notification_factory;
+    }
+
+    /**
+     * Check if we have a saved cookie with a session id and then that there exists
+     * a session with that id. If there is no session, then we delete the cookie.
+     * @return bool
+     */
+    public function isWebLoggedIn() {
+        $logged_in = false;
+        $cookie_key = 'submitty_session';
+        if (isset($_COOKIE[$cookie_key])) {
+            try {
+                $token = TokenManager::parseSessionToken(
+                    $_COOKIE[$cookie_key],
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                $session_id = $token->getClaim('session_id');
+                $expire_time = $token->getClaim('expire_time');
+                $logged_in = $this->getSession($session_id, $token->getClaim('sub'));
+                // make sure that the session exists and it's for the user they're claiming
+                // to be
+                if (!$logged_in) {
+                    // delete cookie that's stale
+                    Utils::setCookie($cookie_key, "", time() - 3600);
+                }
+                else {
+                    if ($expire_time > 0) {
+                        Utils::setCookie(
+                            $cookie_key,
+                            (string) TokenManager::generateSessionToken(
+                                $session_id,
+                                $token->getClaim('sub'),
+                                $this->getConfig()->getBaseUrl(),
+                                $this->getConfig()->getSecretSession()
+                            ),
+                            $expire_time
+                        );
+                    }
+                }
+            }
+            catch (\InvalidArgumentException $exc) {
+                // Invalid cookie data, delete it
+                Utils::setCookie($cookie_key, "", time() - 3600);
+            }
+        }
+        return $logged_in;
+    }
+
+    /**
+     * Check if the user has a valid jwt in the header.
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function isApiLoggedIn(Request $request) {
+        $logged_in = false;
+        $jwt = $request->headers->get("authorization");
+        if (!empty($jwt)) {
+            try {
+                $token = TokenManager::parseApiToken(
+                    $request->headers->get("authorization"),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                $api_key = $token->getClaim('api_key');
+                $logged_in = $this->loadApiUser($api_key);
+            }
+            catch (\InvalidArgumentException $exc) {
+                return false;
+            }
+        }
+
+        return $logged_in;
     }
 }

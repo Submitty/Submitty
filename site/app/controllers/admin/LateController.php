@@ -16,10 +16,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class LateController extends AbstractController {
-    public function run() {
-        return null;
-    }
-
     /**
      * @Route("/{_semester}/{_course}/late_days")
      * @return Response
