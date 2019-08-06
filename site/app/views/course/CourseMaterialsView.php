@@ -22,10 +22,11 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir) {
+        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
+            $no_json = array();
 
             foreach($course_materials_array as $file) {
 
@@ -51,6 +52,19 @@ class CourseMaterialsView extends AbstractView {
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
                     }
+
+                }
+                else{
+
+                    $ex_file_path = $expected_file_path;
+                    $ex_file_path = array();
+                    $ex_file_path['checked'] = '1';
+                    $isShareToOther = $ex_file_path['checked'];
+                    $date = $now_date_time->format("Y-m-d H:i:sO");
+                    $date=substr_replace($date,"9999",0,4);
+                    $ex_file_path['release_datetime'] = $date;
+                    $releaseData = $ex_file_path['release_datetime'];
+                    $no_json[$expected_file_path] = $ex_file_path;
 
                 }
 
@@ -86,6 +100,13 @@ class CourseMaterialsView extends AbstractView {
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
+            if($json == false){
+                FileUtils::writeJsonFile($fp,$no_json);
+            }
+            $can_write =is_writable($fp);
+            if(!$can_write){
+               trigger_error("JSON is not writeable");
+            }
         }
 
         $submissions = array();
@@ -105,7 +126,7 @@ class CourseMaterialsView extends AbstractView {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
 
-        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir);
+        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
