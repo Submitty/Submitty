@@ -21,7 +21,6 @@ use app\libraries\Utils;
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
- * @method string getSiteUrl()
  * @method string getSubmittyPath()
  * @method string getCgiTmpPath()
  * @method string getCoursePath()
@@ -97,8 +96,6 @@ class Config extends AbstractModel {
     protected $vcs_url;
     /** @property @var string */
     protected $cgi_url;
-    /** @property @var string */
-    protected $site_url;
     /** @property @var string */
     protected $authentication;
     /** @property @var string */
@@ -213,14 +210,9 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
-     * @param $semester
-     * @param $course
      */
-    public function __construct(Core $core, $semester, $course) {
+    public function __construct(Core $core) {
         parent::__construct($core);
-
-        $this->semester = $semester;
-        $this->course = $course;
     }
 
     public function loadMasterConfigs($config_path) {
@@ -319,11 +311,6 @@ class Config extends AbstractModel {
                 throw new ConfigException("Missing log folder: {$path}");
             }
         }
-        $this->site_url = $this->base_url."index.php?";
-
-        if (!empty($this->semester) && !empty($this->course)) {
-            $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
-        }
 
         $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
         if (!$secrets_json) {
@@ -362,7 +349,11 @@ class Config extends AbstractModel {
         $this->latest_commit = $version_json['short_installed_commit'];
     }
 
-    public function loadCourseJson($course_json_path) {
+    public function loadCourseJson($semester, $course, $course_json_path) {
+        $this->semester = $semester;
+        $this->course = $course;
+        $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
+
         if (!file_exists($course_json_path)) {
             throw new ConfigException("Could not find course config file: ".$course_json_path, true);
         }
@@ -409,8 +400,6 @@ class Config extends AbstractModel {
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
-
-        $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
 
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
         foreach (WrapperController::WRAPPER_FILES as $file) {

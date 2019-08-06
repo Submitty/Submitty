@@ -18,7 +18,7 @@
     {% endfor %}
 </head>
 <script>var onAjaxInit;</script>
-<body data-site-url="{{ site_url }}" data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
+<body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
 <a id="skip-nav" href="#main">Skip to main content</a>
     {% if wrapper_urls['top_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
@@ -81,7 +81,7 @@
                         {% endif %}
                     </button>
                 {% elseif sidebar_buttons|length %}
-                    <a id="logout-button" class="black-btn" href="{{ core.buildNewUrl(['authentication', 'logout']) }}" aria-label="Logout"><i class="fas fa-power-off"></i></a>
+                    <a id="logout-button" class="black-btn" href="{{ core.buildUrl(['authentication', 'logout']) }}" aria-label="Logout"><i class="fas fa-power-off"></i></a>
                 {% endif %}
             </nav>
             <noscript class="system-message danger">

@@ -27,21 +27,6 @@ class HomePageController extends AbstractController {
         parent::__construct($core);
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'change_username':
-                $this->changeUserName();
-                break;
-            case 'change_password':
-                $this->changePassword();
-                break;
-            case 'home_page':
-            default:
-                $this->showHomepage();
-                break;
-        }
-    }
-
     /**
      * @Route("/home/change_password", methods={"POST"})
      * @return Response
@@ -58,7 +43,7 @@ class HomePageController extends AbstractController {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['home']))
+            new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
@@ -84,7 +69,7 @@ class HomePageController extends AbstractController {
             }
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['home']))
+            new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
@@ -190,7 +175,7 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
 
@@ -200,7 +185,7 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
 
@@ -229,7 +214,7 @@ class HomePageController extends AbstractController {
                 return new Response(
                     JsonResponse::getFailResponse($error),
                     null,
-                    new RedirectResponse($this->core->buildNewUrl(['home']))
+                    new RedirectResponse($this->core->buildUrl(['home']))
                 );
             }
         }
@@ -239,7 +224,7 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getErrorResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
 
@@ -259,7 +244,7 @@ class HomePageController extends AbstractController {
         return new Response(
             JsonResponse::getSuccessResponse(null),
             null,
-            new RedirectResponse($this->core->buildNewUrl(['home']))
+            new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
