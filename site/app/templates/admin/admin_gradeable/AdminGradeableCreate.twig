@@ -77,15 +77,14 @@
     <div class="option-desc col-md-12">
         {% if action == 'new' or action == 'template' %}
             <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-            <div class="option-title">Gradable Type</div>
+            {# (VPAT) fieldset/legend required for gradeable type container radio group #}
+            <fieldset><legend><div class="option-title">Gradeable Type</div></legend>
             <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a></div>
             <span id="required_type" >(Required)</span>
         {% else %}
             <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
         {% endif %}
-    </div>
-    <div class="option-desc col-md-12">
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
             <div>
                 <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
@@ -97,14 +96,16 @@
                     {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> <label for="radio_numeric"> {{ gradeable_type_strings['numeric'] }} </label>
             </div>
 
-            <div hidden>
+            <div aria-hidden="true" hidden>
                 <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
                         {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
             </div>
 
             {# Real input fields to back the exposed configurations options #}
-            <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
-            <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
+            <div aria-hidden="true" hidden>
+                <input id="scanned_exam" name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}">
+                <input id="vcs" name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}">
+            </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
@@ -121,6 +122,10 @@
                         {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> <label for="radio_ef_scanned_exam"> {{ gradeable_type_strings['electronic_exam'] }} </label>
             </div>
         </div>
+        {% if action == 'new' or action == 'template' %}
+            {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}
+            </fieldset>
+        {% endif %}
 
       <!-- This is only relevant to Electronic Files -->
         <div class="gradeable_type_options electronic_file" id="electronic_file">
@@ -160,23 +165,24 @@
             {% endif %}
 
             <div id="team-settings-container">
-                <fieldset>
-                    {% if action == 'new' or action == 'template' %}
-                        <legend>Is this a team assignment?</legend>
-                    {% else %}
-                        <legend>
-                            Team Settings:
-                            {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
-                        </legend>
-                    {% endif %}
-                    <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                        <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-                                {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) fieldset/legend needed for team assignment radio group #}
+                    <fieldset><legend>Is this a team assignment?</legend>
+                {% else %}
+                    Team Settings:
+                    {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
+                {% endif %}
+                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                    <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                            {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
 
-                        <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-                                {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
-                    </div>
-                </fieldset>
+                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                            {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                </div>
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) Closes fieldset for team assignment radio group #}
+                    </fieldset>
+                {% endif %}
             </div>
 
             <!-- Team settings (read only in edit mode) -->
