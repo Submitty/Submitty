@@ -1155,22 +1155,23 @@ function loadThreadHandler(){
     });
 }
 
-function formatIFrameInlineImages(a, name, url){
+function formatIFrameInlineImages(divId, name, url){
     //Not best practice but good enough for V1
     return function(){
-        var contents = $('#file_viewer_' + a + '_iframe').contents();
-        var body = contents.find('body');
-        var img = body.find('img');
-        body.append(`<style>
-            img { border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 400px; }
-            img:hover { box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5); cursor: pointer; } </style>`);
-        body.css("text-align", "center");
-        body.append('<h4 style="text-align:center">' + decodeURI(name) + '</h3> <br/>');
-        $('#file_viewer_' + a + '_iframe').height(contents.find('img').height() + 100);
-        $(img).attr("title", "Click to view attachment in a popup");
-        $(img).click(function() {
-            window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
-        });
+      var iframe = $('#file_viewer_' + divId + '_iframe');
+      var contents = iframe.contents();
+      var body = contents.find('body');
+      var img = body.find('img');
+      body.append(`<style>
+          img { border: 1px solid #ddd; border-radius: 4px; padding: 5px; width: 400px; }
+          img:hover { box-shadow: 0 0 2px 1px rgba(0, 140, 186, 0.5); cursor: pointer; } </style>`);
+      body.css("text-align", "center");
+      body.append('<h4 style="text-align:center">' + decodeURI(name) + '</h3> <br/>');
+      iframe.height(contents.find('img').height() + 100);
+      $(img).attr("title", "Click to view attachment in a popup");
+      $(img).click(function() {
+        window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+      });
     }
 }
 
@@ -1191,18 +1192,19 @@ function loadInlineImages(data, all = false) {
         }
         var length = json.length-1;
         var element = document.getElementById('button_'+json[length]);
-        if($('#'+json[length]).is(':visible')) {
-            $('#'+json[length]).hide();
+        var well = $('#'+json[length]);
+        if(well.is(':visible')) {
+            well.hide();
             element.classList.remove('active');
         } else {
-            $('#'+json[length]).show();
+            well.show();
             element.classList.add('active');
         }
-        for(var i = 0; i < length; i++) {
-            //json[i][0] => url
-            //json[i][1] => div id
-            //json[i][2] => name
-            openFrame(json[i][0], json[i][1], json[i][2]);
+        for(var attachmentIndex = 0; attachmentIndex < length; attachmentIndex++) {
+            //json[attachmentIndex][0] => url
+            //json[attachmentIndex][1] => div id
+            //json[attachmentIndex][2] => name
+            openFrame(json[attachmentIndex][0], json[attachmentIndex][1], json[attachmentIndex][2]);
             var e = $('#file_viewer_' + json[i][1] + '_iframe');
             if(!e[0].hasAttribute('frame_styled')) {
                 e.on('load', formatIFrameInlineImages(json[i][1], json[i][2], json[i][0]));

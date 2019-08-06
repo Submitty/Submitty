@@ -91,15 +91,16 @@
 
     {% if post_attachment.exist == true %}
 
-        <a href="#" id="{{ post_attachment.params.button_id }}" style="text-decoration:none;display:inline-block;white-space: nowrap;" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="btn btn-default btn-sm" type="button">
-                    Attachments <span style="float:right;margin-right:0px;min-width: 5px;" class="badge">{{ post_attachment.params.num_files }}</span> </a>
+        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm" type="button">
+                    Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
 
 
-        <div style="display:none;margin-top:10px;" id="{{ post_attachment.params.well_id }}" class="well well-lg">
+        <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg">
 
             {% for attachment in post_attachment.files %}
 
-                <div style="text-align: center;" id="{{ attachment.file_viewer_id }}"></div>
+                <div id="{{ attachment.file_viewer_id }}" class="attachment-div">
+                </div>
         
             {% endfor %}
 

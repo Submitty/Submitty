@@ -432,6 +432,26 @@ body {min-width: 925px;}
     margin-bottom: 0.25em;
 }
 
+.attachment-btn {
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.attachment-badge {
+    float: right;
+    margin-right: 0;
+    min-width: 5px;
+}
+
+.attachment-well {
+    display: none;
+    margin-top: 10px;
+}
+
+.attachment-div {
+    text-align: center;
+}
 
 .well {
   min-height: 20px;
