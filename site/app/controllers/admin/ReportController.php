@@ -304,7 +304,7 @@ class ReportController extends AbstractController {
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
             
-            if ($late_days->getLateDayInfoByGradeable(!$gg->hasOverriddenGrades()) ){
+            if (!$gg->hasOverriddenGrades()){
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
                     if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
