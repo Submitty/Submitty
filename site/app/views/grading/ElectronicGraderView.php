@@ -195,7 +195,7 @@ class ElectronicGraderView extends AbstractView {
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
         }
-        $details_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $details_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Status.twig", [
             "gradeable_id" => $gradeable->getId(),
             "gradeable_title" => $gradeable->getTitle(),
@@ -235,11 +235,11 @@ class ElectronicGraderView extends AbstractView {
             "total_students_submitted" => $total_students_submitted,
             "individual_viewed_percent" => $individual_viewed_percent ?? 0,
             "regrade_requests" => $regrade_requests,
-            "download_zip_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
-            "bulk_stats_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
+            "download_zip_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'download_zip']),
+            "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
-            "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
         ]);
     }
 
@@ -252,7 +252,7 @@ class ElectronicGraderView extends AbstractView {
 		<div class="content_upload_content">
 
 HTML;
-        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'bulk_stats']));
+        $this->core->getOutput()->addBreadcrumb("Bulk Upload Forensics", $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'bulk_stats']));
 
         $return .= <<<HTML
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
@@ -616,7 +616,7 @@ HTML;
                 }
         }
 
-        $details_base_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+        $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/Details.twig", [
             "gradeable" => $gradeable,
             "sections" => $sections,
@@ -630,9 +630,9 @@ HTML;
             "show_export_teams_button" => $show_export_teams_button,
             "past_grade_start_date" => $past_grade_start_date,
             "columns" => $columns,
-            "export_teams_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
-            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
-            "grade_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "export_teams_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'export']),
+            "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating']),
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
             "peer" => $peer,
             "details_base_url" => $details_base_url,
             "view_all_toggle_url" => $details_base_url . '?' .
@@ -655,7 +655,7 @@ HTML;
             "all_reg_sections" => $all_reg_sections,
             "all_rot_sections" => $all_rot_sections,
             "csrf_token" => $this->core->getCsrfToken(),
-            "team_submit_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'new'])
+            "team_submit_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'new'])
         ]);
     }
 
@@ -663,7 +663,7 @@ HTML;
         return $this->core->getOutput()->renderTwigTemplate("grading/ImportTeamForm.twig", [
             "gradeable_id" => $gradeable->getId(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "team_import_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'import'])
+            "team_import_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'import'])
         ]);
     }
 
@@ -671,7 +671,7 @@ HTML;
     public function randomizeButtonWarning(Gradeable $gradeable) {
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RandomizeButtonWarning.twig", [
             "gradeable_id" => $gradeable->getId(),
-            "randomize_team_rotating_sections_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
+            "randomize_team_rotating_sections_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'teams', 'randomize_rotating'])
         ]);
     }
 
@@ -751,11 +751,11 @@ HTML;
      * @return string
      */
     public function renderNavigationBar(GradedGradeable $graded_gradeable, float $progress, string $prev_id, string $next_id, bool $not_in_my_section, bool $peer, $sort, $direction) {
-        $home_url = $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
+        $home_url = $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'details']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => (count($this->core->getUser()->getGradingRegistrationSections()) == 0) ? 'all' : null ]);
 
         //Go home if there's nobody left
-        $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $prev_id ]);
-        $next_student_url = $next_id === "" ? $home_url : $this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $next_id ]);
+        $prev_student_url = $prev_id === "" ? $home_url : $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $prev_id ]);
+        $next_student_url = $next_id === "" ? $home_url : $this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']) . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'who_id' => $next_id ]);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/electronic/NavigationBar.twig", [
             "studentNotInSection" => $not_in_my_section,
@@ -806,7 +806,7 @@ HTML;
             }
 
             $posts_view .= <<<HTML
-                    <a href="{$this->core->buildNewCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
+                    <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
 
@@ -879,10 +879,9 @@ HTML;
             "checkout" => $checkout,
             "results" => $results,
             "results_public" => $results_public,
-            "site_url" => $this->core->getConfig()->getSiteUrl(),
             "active_version" => $display_version,
             'toolbar_css' => $toolbar_css,
-            "display_file_url" => $this->core->buildNewCourseUrl(['display_file'])
+            "display_file_url" => $this->core->buildCourseUrl(['display_file'])
         ]);
     }
 
@@ -893,7 +892,7 @@ HTML;
      */
     public function renderInformationPanel(GradedGradeable $graded_gradeable, $display_version_instance) {
         $gradeable = $graded_gradeable->getGradeable();
-        $version_change_url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
+        $version_change_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']) . '?'
             . http_build_query(['who_id' => $graded_gradeable->getSubmitter()->getId()]) . '&gradeable_version=';
         $onChange = "versionChange('{$version_change_url}', this)";
 
@@ -945,7 +944,7 @@ HTML;
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "update_version_url" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $new_version]) . http_build_query(['ta' => true, 'who' => $submitter_id])
+            "update_version_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]) . http_build_query(['ta' => true, 'who' => $submitter_id])
         ]);
     }
 

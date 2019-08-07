@@ -63,7 +63,7 @@
 
         {% if action == 'edit' %}
             // change the url so if the user refreshes the page, they stay on the same tab
-            window.history.replaceState("", "", buildNewCourseUrl(['gradeable', $('#g_id').val(), 'update']) + `?nav_tab=${tab}`);
+            window.history.replaceState("", "", buildCourseUrl(['gradeable', $('#g_id').val(), 'update']) + `?nav_tab=${tab}`);
         {% endif %}
 
         adminGradeableNavTab = tab;

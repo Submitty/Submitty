@@ -17,14 +17,6 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
-
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
     /**
      * @Route("/{_semester}/{_course}/config")
      * @return Response

@@ -10,14 +10,6 @@ use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 class LateDaysTableController extends AbstractController {
-    public function run() {
-        switch ($_REQUEST['action']) {
-            default:
-                $this->showLateTablePage();
-                break;
-        }
-    }
-
     /**
      * Renders the output for the late days table for a user
      * @param Core $core

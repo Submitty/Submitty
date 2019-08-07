@@ -27,8 +27,8 @@ class UsersView extends AbstractView {
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
-            'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
-            "return_url_upload_class_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
+            'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
+            "return_url_upload_class_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
         ]);
@@ -69,9 +69,9 @@ class UsersView extends AbstractView {
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
-            "return_url_upload_grader_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
-            "return_url_assign_reg_sections" => $this->core->buildNewCourseUrl(['graders', 'assign_registration_sections']),
-            'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
+            "return_url_upload_grader_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
+            "return_url_assign_reg_sections" => $this->core->buildCourseUrl(['graders', 'assign_registration_sections']),
+            'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
         ]);
@@ -116,8 +116,8 @@ class UsersView extends AbstractView {
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
             "max_section" => $max_section,
-            "update_registration_sections_url" => $this->core->buildNewCourseUrl(['sections', 'registration']),
-            "update_rotating_sections_url" => $this->core->buildNewCourseUrl(['sections', 'rotating']),
+            "update_registration_sections_url" => $this->core->buildCourseUrl(['sections', 'registration']),
+            "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
