@@ -254,7 +254,7 @@ class ForumController extends AbstractController{
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
 
         if(strlen($thread_post_content) > 5000 ){
-            $result['next_page'] = $this->core->bulldNewCourseURL(['forum', 'threads', 'new']);
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads', 'new']);
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over 5000 characters long", $result);
         }
 
@@ -348,7 +348,7 @@ class ForumController extends AbstractController{
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         if(strlen($thread_post_content) > 5000 ){
-            $result['next_page'] = $this->core->bulldNewCourseURL(['forum', 'threads']);
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over 5000 characters long", $result);
         }
 
