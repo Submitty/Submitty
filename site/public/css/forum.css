@@ -447,8 +447,11 @@ body {min-width: 925px;}
     max-width: 100%;
 }
 
+.markdown-inactive{
+    color: var(--standard-light-gray);
+}
 .markdown-active{
-    color: green;
+    color: var(--submitty-logo-blue);
 }
 
 #clear_filter_button, #unread{

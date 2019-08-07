@@ -24,7 +24,7 @@ class TestNavigationPageStudent(BaseTestCase):
                                 .find_elements_by_class_name("gradeable-row")))
 
         self.assertEqual(2, len(self.driver.find_element_by_class_name(
-            'course-button-wrapper').find_elements_by_class_name('course-button')))
+            'gradeable-row').find_elements_by_class_name('course-button')))
 
 
 if __name__ == "__main__":

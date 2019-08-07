@@ -13,13 +13,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class PlagiarismController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/plagiarism")
      */
     public function plagiarismMainPage($refresh_page = "NO_REFRESH") {
@@ -83,7 +76,7 @@ class PlagiarismController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_title= ($this->core->getQueries()->getGradeableConfig($gradeable_id))->getTitle();
-        $return_url= $this->core->buildNewCourseUrl(['plagiarism']);
+        $return_url= $this->core->buildCourseUrl(['plagiarism']);
 
         $file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
@@ -134,13 +127,13 @@ class PlagiarismController extends AbstractController {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
 
-        $return_url = $this->core->buildNewCourseUrl(['plagiarism', 'configuration', 'new']);
+        $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'new']);
         if($new_or_edit == "new") {
             $gradeable_id= $_POST['gradeable_id'];
         }
 
         if ($new_or_edit == "edit") {
-            $return_url = $this->core->buildNewCourseUrl(['plagiarism', 'configuration', 'edit']) . '?' . http_build_query(['gradeable_id'=> $gradeable_id]);
+            $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . '?' . http_build_query(['gradeable_id'=> $gradeable_id]);
 
         }
 
@@ -312,7 +305,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Lichen Plagiarism Detection configuration created for ".$gradeable_id);
-        $this->core->redirect($this->core->buildNewCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page'=> 'REFRESH_ME']));
+        $this->core->redirect($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page'=> 'REFRESH_ME']));
     }
 
     private function enqueueLichenJob($job, $gradeable_id) {
@@ -343,7 +336,7 @@ class PlagiarismController extends AbstractController {
     public function reRunPlagiarism($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $return_url = $this->core->buildNewCourseUrl(['plagiarism']);
+        $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         # Re run only if following checks are passed.
         if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
@@ -371,7 +364,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Re-Run of Lichen Plagiarism for ".$gradeable_id);
-        $this->core->redirect($this->core->buildNewCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page'=> 'REFRESH_ME']));
+        $this->core->redirect($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page'=> 'REFRESH_ME']));
     }
 
     /**
@@ -380,7 +373,7 @@ class PlagiarismController extends AbstractController {
     public function editPlagiarismSavedConfig($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $return_url = $this->core->buildNewCourseUrl(['plagiarism']);
+        $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
@@ -401,7 +394,7 @@ class PlagiarismController extends AbstractController {
     public function deletePlagiarismResultAndConfig($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $return_url = $this->core->buildNewCourseUrl(['plagiarism']);
+        $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
                 $this->core->addErrorMessage("A job is already running for the gradeable. Try again after a while.");
@@ -420,7 +413,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $this->core->addSuccessMessage("Lichen results and saved configuration for the gradeable will be deleted.");
-        $this->core->redirect($this->core->buildNewCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page'=> 'REFRESH_ME']));
+        $this->core->redirect($this->core->buildCourseUrl(['plagiarism']) . '?' . http_build_query(['refresh_page'=> 'REFRESH_ME']));
     }
 
     /**
@@ -429,7 +422,7 @@ class PlagiarismController extends AbstractController {
     public function toggleNightlyRerun($gradeable_id) {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        $return_url = $this->core->buildNewCourseUrl(['plagiarism']);
+        $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
         $nightly_rerun_info_file ="/var/local/submitty/courses/".$semester."/".$course."/lichen/nightly_rerun.json";
 
