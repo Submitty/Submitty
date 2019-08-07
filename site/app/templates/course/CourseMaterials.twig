@@ -392,22 +392,29 @@
                         button: [
                             {
                                 label: "Now"
-                            }, 
+                            },
+                            {
+                                label: "Tomorrow"
+                            },
                             {
                                 label: "End of time"
                             }
+
                         ],
-                        label: "or",
                         onClick: (index, fp) => {
                             let date;
                             switch (index) {
                                 case 0: 
                                     updateToServerTime(fp);
                                     break;
-                                case 1: 
+                                case 1:
+                                    updateToTomorrowServerTime(fp);
+                                    break;
+                                case 2:
                                     date = new Date("9998-01-01 00:00:00");
                                     fp.setDate(date,true);
                                     break;
+
                             }
                         }
                     }
