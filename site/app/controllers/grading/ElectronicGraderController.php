@@ -865,7 +865,7 @@ class ElectronicGraderController extends AbstractController {
 
             // Redirect to details page if no more ungraded submitters in the direction we are trying to go
             if(is_null($ungraded)) {
-                $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
             }
 
             // Reassign $who_id and $graded_gradeable
@@ -873,7 +873,7 @@ class ElectronicGraderController extends AbstractController {
 
             $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
             if($graded_gradeable === false) {
-                $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
             }
         }
 
