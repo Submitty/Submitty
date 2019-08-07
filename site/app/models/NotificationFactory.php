@@ -192,6 +192,10 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_notifications = [];
         foreach ($notifications as $notification) {
+            // check if user is in the null section
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($notification->getNotifyTarget(),$this->core->getConfig()->getCourse(),$this->core->getConfig()->getSemester())) {
+                continue;
+            }
             if ($notification->getNotifyTarget() != $current_user->getId() || $current_user->getNotificationSetting('self_notification')) {
                 $flattened_notifications[] = $notification->getComponent();
                 $flattened_notifications[] = $notification->getNotifyMetadata();
@@ -224,6 +228,10 @@ class NotificationFactory {
         $current_user = $this->core->getUser();
         $flattened_emails = [];
         foreach ($emails as $email) {
+            // check if user is in the null section
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(),$this->core->getConfig()->getCourse(),$this->core->getConfig()->getSemester())) {
+                continue;
+            }
             if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
                 $flattened_emails[] = $email->getSubject();
                 $flattened_emails[] = $email->getBody();
