@@ -892,7 +892,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
-        $this->core->getOutput()->addBreadcrumb('Student Index', $indexUrl);
+        $this->core->getOutput()->addBreadcrumb('Grading Interface ' . GradingOrder::getGradingOrderMessage($sort, $direction));
 
         $graded = 0;
         $total = 0;

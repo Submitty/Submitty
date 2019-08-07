@@ -416,5 +416,36 @@ class GradingOrder extends AbstractModel {
         ksort($gg_idx);
         return array_merge($gg_idx, $unsorted);
     }
+
+    /**
+     * Returns an string describing the ordering based on its sort type and direction, or an empty string
+     * if an unknown sort / direction combination is passed in.
+     *
+     * @param $sort Sort type
+     * @param $direction Direction of sort (ASC or DESC)
+     * @return string
+     */
+    public static function getGradingOrderMessage($sort, $direction) {
+
+        if($sort == 'first' AND $direction == 'ASC') {
+            $msg = 'First Name Ascending';
+        } else if ($sort == 'first' AND $direction == 'DESC') {
+            $msg = 'First Name Descending';
+        } else if ($sort == 'last' AND $direction == 'ASC') {
+            $msg = 'Last Name Ascending';
+        } else if ($sort == 'last' AND $direction == 'DESC') {
+            $msg = 'Last Name Descending';
+        } else if ($sort == 'id' AND $direction == 'ASC') {
+            $msg = 'ID Ascending';
+        } else if ($sort == 'id' AND $direction == 'DESC') {
+            $msg = 'ID Descending';
+        } else if ($sort == 'random') {
+            $msg = 'Randomized';
+        } else {
+            $msg = false;
+        }
+
+        return $msg === false ? '' : "$msg Order";
+    }
 }
 
