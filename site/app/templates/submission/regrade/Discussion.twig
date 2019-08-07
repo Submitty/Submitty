@@ -39,21 +39,25 @@
                         </span>
                     {% endif %}
                 </div>
-                {% for post in grade_inquiries[component.id].posts %}
-                    <div class='{{ post.is_staff ? "post_box important" : "post_box" }}'>
-                        <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
-                        <hr>
-                        <div style="float:left">
-                            {% if grade_inquiry_per_component_allowed and component.id == 0 %}
-                                <p class="component-identifier-post"><b>{{ post.gc_title }}</b></p>
-                            {% endif %}
+                {% if not grade_inquiries[component.id].posts is empty %}
+                    {% for post in grade_inquiries[component.id].posts %}
+                        <div class='{{ post.is_staff ? "post_box important" : "post_box" }}'>
+                            <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
+                            <hr>
+                            <div style="float:left">
+                                {% if grade_inquiry_per_component_allowed and component.id == 0 %}
+                                    <p class="component-identifier-post"><b>{{ post.gc_title }}</b></p>
+                                {% endif %}
+                            </div>
+                            <div style="float:right">
+                                <b>{{ post.name }}</b> &nbsp;
+                                {{ post.date }}
+                            </div>
                         </div>
-                        <div style="float:right">
-                            <b>{{ post.name }}</b> &nbsp;
-                            {{ post.date }}
-                        </div>
-                    </div>
-                {% endfor %}
+                    {% endfor %}
+                {% elseif component.id == 0 %}
+                    <p class="yellow-message no-post-warning" >No posts!</p>
+                {% endif %}
                 {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
                     <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
                         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
