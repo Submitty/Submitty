@@ -66,7 +66,7 @@ class ForumThreadView extends AbstractView {
 
 				if($post["anonymous"]){
 					$visible_username = 'Anonymous';
-				} 
+				}
 
 				//convert legacy htmlentities being saved in db
                 $post_content = html_entity_decode($post["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -102,7 +102,7 @@ class ForumThreadView extends AbstractView {
 
     	return $return;
     }
-	
+
 	/** Shows Forums thread splash page, including all posts
 		for a specific thread, in addition to head of the threads
 		that have been created after applying filter and to be
@@ -399,6 +399,8 @@ class ForumThreadView extends AbstractView {
 
         $csrf_token = $this->core->getCsrfToken();
 
+        $totalAttachments = 0;
+
         if($display_option == "tree"){
             $order_array = array();
             $reply_level_array = array();
@@ -426,6 +428,7 @@ class ForumThreadView extends AbstractView {
             }
             $i = 0;
             $first = true;
+
             foreach($order_array as $ordered_post){
                 foreach($posts as $post){
                     if($post["id"] == $ordered_post){
@@ -435,7 +438,7 @@ class ForumThreadView extends AbstractView {
                             $reply_level = $reply_level_array[$i];
                         }
 
-                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply);
+                        $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, $totalAttachments);
 
                         break;
                     }
@@ -453,7 +456,7 @@ class ForumThreadView extends AbstractView {
 
                 $first_post_id = $this->core->getQueries()->getFirstPostForThread($thread_id)['id'];
 
-                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, 1, $display_option, $includeReply);
+                $post_data[] = $this->createPost($thread_id, $post, $unviewed_posts, $function_date, $first, 1, $display_option, $includeReply, $totalAttachments);
 
                 if($first){
                     $first= false;
@@ -516,7 +519,8 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
-                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
+                "total_attachments" => $totalAttachments,
+                "merge_url" => $this->core->buildNewCourseUrl(['forum', 'threads', 'merge'])
             ]);
         }
         else {
@@ -536,7 +540,8 @@ class ForumThreadView extends AbstractView {
                 "merge_thread_content" => $merge_thread_content,
                 "csrf_token" => $csrf_token,
                 "activeThreadTitle" => $activeThreadTitle,
-                "post_box_id" => $post_box_id
+                "post_box_id" => $post_box_id,
+                "total_attachments" => $totalAttachments
             ];
         }
 
@@ -707,7 +712,7 @@ class ForumThreadView extends AbstractView {
             ];
 
         }
-        
+
         return $return;
     }
 
@@ -751,7 +756,7 @@ class ForumThreadView extends AbstractView {
 		return $post_content;
 	}
 
-	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply)
+	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, &$totalAttachments)
     {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
@@ -874,17 +879,36 @@ class ForumThreadView extends AbstractView {
 
             $post_attachment["files"] = [];
 
+            $attachment_num_files = count($files);
+            $attachment_id = "attachments_{$post['author_user_id']}_{$post['id']}";
+            $attachment_button_id = "button_attachments_{$post['author_user_id']}_{$post['id']}";
+            $attachment_file_count = 0;
+            $attachment_encoded_data = [];
+
             foreach ($files as $file) {
                 $path = rawurlencode($file['path']);
                 $name = rawurlencode($file['name']);
-                $name_display = rawurldecode($file['name']);
+                $url = $this->core->buildCourseUrl(['display_file']).'?dir=forum_attachments&path='.$path;
 
                 $post_attachment["files"][] = [
-                    "path" => $path,
-                    "name" => $name,
-                    "name_display" => $name_display
+                    "file_viewer_id" => "file_viewer_" . $post_id . "_" . $attachment_file_count
                 ];
+
+                $attachment_encoded_data[] = [$url, $post_id . '_' . $attachment_file_count, $name];
+
+                $attachment_file_count++;
+                $totalAttachments++;
             }
+
+            $attachment_encoded_data[] = $attachment_id;
+
+            $post_attachment["params"] = [
+                "well_id"   => $attachment_id,
+                "button_id" => $attachment_button_id,
+                "num_files" => $attachment_num_files,
+                "encoded_data" => json_encode($attachment_encoded_data)
+            ];
+
         }
 
         $post_box_id = 1;
@@ -1105,7 +1129,7 @@ class ForumThreadView extends AbstractView {
                 "thread_titles" => $thread_titles
             ];
 		}
-    
+
     $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
         "forumBarData" => $forumBarData,
         "userData" => $userData,
@@ -1117,4 +1141,3 @@ class ForumThreadView extends AbstractView {
 	}
 
 }
-
