@@ -468,7 +468,7 @@
         function() {
             // Redirect user to the same page, but in the process,
             //  fetch the data from the template gradeable
-            window.location.href = buildNewCourseUrl(['gradeable']) + `?template_id=${this.value}`;
+            window.location.href = buildCourseUrl(['gradeable']) + `?template_id=${this.value}`;
         });
 
         //
