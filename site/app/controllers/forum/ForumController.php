@@ -253,9 +253,9 @@ class ForumController extends AbstractController{
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
 
-        if(strlen($thread_post_content) > 5000 ){
+        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads', 'new']);
-            return $this->core->getOutput()->renderJsonFail("Posts cannot be over 5000 characters long", $result);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
 
         if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
@@ -347,9 +347,9 @@ class ForumController extends AbstractController{
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        if(strlen($thread_post_content) > 5000 ){
+        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
-            return $this->core->getOutput()->renderJsonFail("Posts cannot be over 5000 characters long", $result);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over ". ForumUtils::FORUM_CHAR_POST_LIMIT ." characters long", $result);
         }
 
         if(isset($_POST['thread_status'])){
@@ -641,8 +641,8 @@ class ForumController extends AbstractController{
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
 
-            if(strlen($new_post_content) > 5000 ){
-                $this->core->addErrorMessage("Posts cannot be over 5000 characters long");
+            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+                $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
                 return null;
             }
 

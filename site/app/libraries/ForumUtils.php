@@ -13,6 +13,7 @@ use app\models\forum\Post;
  */
 class ForumUtils {
 
+    const FORUM_CHAR_POST_LIMIT = 5000;
 
     public static function checkGoodAttachment($isThread, $thread_id, $file_post){
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){

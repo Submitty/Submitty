@@ -424,8 +424,8 @@ class ForumController2 extends AbstractController {
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
-            if(strlen($new_post_content) > 5000 ){
-                $this->core->addErrorMessage("Posts cannot be over 5000 characters long");
+            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+                $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
                 return null;
             }
 
