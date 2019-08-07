@@ -51,7 +51,7 @@ function resetForumFileUploadAfterError(displayPostId){
 }
 
 function checkNumFilesForumUpload(input, post_id){
-    var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
+    var displayPostId = (typeof post_id !== "undefined") ? "_" + escapeSpecialChars(post_id) : "";
     if(input.files.length > 5){
         displayError('Max file upload size is 5. Please try again.');
         resetForumFileUploadAfterError(displayPostId);
@@ -128,7 +128,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
         formData.append('file_input[]', files[i], files[i].name);
     }
     var submit_url = form.attr('action');
-    
+
     $.ajax({
         url: submit_url,
         data: formData,
@@ -551,7 +551,7 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             }
 
             $('#num_filtered').text(threadCount);
-            
+
             dynamicScrollLoadIfScrollVisible(jElement);
             loadThreadHandler();
             if(success_callback != null) {
@@ -1109,7 +1109,6 @@ function loadThreadHandler(){
     $("a.thread_box_link").click(function(event){
         event.preventDefault();
         var obj = this;
-
         var thread_id = $(obj).attr("data");
 
         var url = buildCourseUrl(['forum', 'threads', thread_id]);
@@ -1156,6 +1155,44 @@ function loadThreadHandler(){
             }
         });
     });
+}
+
+function loadAllInlineImages() {
+  $(".attachment-btn").each(function () {
+    $(this).click();
+  });
+  $(".attachment-well").each(function () {
+    $(this).show();
+  });
+}
+
+function loadInlineImages(encoded_data) {
+  var data = JSON.parse(encoded_data);
+  var attachment_well = $("#"+data[data.length-1]);
+
+  if (attachment_well.is(':visible'))
+    attachment_well.hide();
+  else {
+    attachment_well.show();
+  }
+
+  // if they're no images loaded for this well
+  if (attachment_well.children().length === 0 ) {
+    // add image tags
+    for (var i = 0; i < data.length - 1; i++) {
+      var attachment = data[i];
+      var url = attachment[0];
+      var img = $('<img src="' + url + '" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">');
+      var title = $('<p>' + escapeSpecialChars(decodeURI(attachment[2])) + '</p>')
+      img.click(function() {
+        var url = $(this).attr('src');
+        window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+      });
+      attachment_well.append(img);
+      attachment_well.append(title);
+    }
+  }
+
 }
 
 var filters_applied = [];

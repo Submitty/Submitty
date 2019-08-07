@@ -6,7 +6,6 @@ import sys
 import json
 import paramiko
 import subprocess
-# from autograder import grade_items_logging
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
 SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
@@ -64,7 +63,7 @@ if __name__ == "__main__":
 
   # verify the DAEMON_USER is running this script
   if not int(os.getuid()) == int(DAEMON_UID):
-      raise SystemExit("ERROR: the grade_item.py script must be run by the DAEMON_USER")
+      raise SystemExit("ERROR: the update_and_install_workers.py script must be run by the DAEMON_USER")
 
   with open(SUBMITTY_CONFIG_PATH) as infile:
       submitty_config = json.load(infile)
