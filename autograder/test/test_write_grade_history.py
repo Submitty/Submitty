@@ -6,7 +6,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 import unittest
 
-from autograder import write_grade_history
+from autograder import autograding_utils
 
 
 class TestWriteGradeHistory(unittest.TestCase):
@@ -23,7 +23,7 @@ class TestWriteGradeHistory(unittest.TestCase):
         """
         with TemporaryDirectory() as tmpdirname:
             history_file = Path(tmpdirname, 'history.json')
-            write_grade_history.just_write_grade_history(
+            autograding_utils.just_write_grade_history(
                 str(history_file),
                 "2019-05-23 23:59:59-0400",
                 "2019-05-23 20:39:12-0400",
@@ -62,7 +62,7 @@ class TestWriteGradeHistory(unittest.TestCase):
             for i in range(len(expected)):
                 self.assertEqual(expected[i], actual[i])
 
-            write_grade_history.just_write_grade_history(
+            autograding_utils.just_write_grade_history(
                 str(history_file),
                 "2019-05-23 23:59:59-0400",
                 "2019-05-23 20:47:12-0400",
@@ -108,7 +108,7 @@ class TestWriteGradeHistory(unittest.TestCase):
         """
         with TemporaryDirectory() as tmpdirname:
             history_file = Path(tmpdirname, 'history.json')
-            write_grade_history.just_write_grade_history(
+            autograding_utils.just_write_grade_history(
                 str(history_file),
                 "2019-05-23 23:59:59-0400",
                 "2019-05-28 20:39:12-0400",
