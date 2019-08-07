@@ -119,7 +119,10 @@ class TestForum(BaseTestCase):
         if must_exists:
             assert len(posts) > 0
         if check_attachment is not None:
-            assert len(posts[0].find_elements(By.XPATH, ".//a[contains(normalize-space(.), '{}')]".format(check_attachment))) > 0
+            posts[0].find_element(By.XPATH, ".//a[starts-with(@id, 'button_attachments_')]").click()
+            self.wait_after_ajax()
+            attachmentSrc = posts[0].find_elements(By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment))
+            assert len(attachmentSrc) > 0
         return posts
 
     def reply_and_test(self, post_content, newcontent, first_post, upload_attachment = False):
