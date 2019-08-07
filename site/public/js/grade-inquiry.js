@@ -1,19 +1,26 @@
 $( document ).ready(function () {
   // open last opened grade inquiry or open first component with grade inquiry
-  var g_id = $('.component-tabs').data('g_id');
-  var component_cookie = document.cookie.match('(^|;) ?' + g_id + '_component_id' + '=([^;]*)(;|$)');
-  var component_id = component_cookie ? component_cookie[2] : null;
-  if (component_id === null) {
-    $('.component-tab:first').click();
-  } else {
-    $('.component-'+component_id).click();
+  var component_selector = localStorage.getItem('selected_tab');
+  var first_unresolved_component = $('.component-unresolved:first');
+  if (component_selector !== null) {
+    $(component_selector).click();
+    localStorage.removeItem('selected_tab');
   }
+  else if (first_unresolved_component.length) {
+    first_unresolved_component.click();
+  }
+  else {
+    $('.component-tab:first').click();
+  }
+
 
 });
 
 function onComponentTabClicked(tab) {
   var component_id = $(tab).data("component_id");
-  var g_id = $('.component-tabs').data("g_id");
+  var component_tabs = $('.component-tabs');
+  var g_id = component_tabs.data("g_id");
+  var submitter_id = component_tabs.data("submitter_id");
 
   // show posts that pertain to this component_id
   $(".grade-inquiry").each(function(){
@@ -24,18 +31,15 @@ function onComponentTabClicked(tab) {
     }
   });
 
-  var component_tabs = $('.component-tab');
-  component_tabs.removeClass("btn-selected");
+  var component_tab = $('.component-tab');
+  component_tab.removeClass("btn-selected");
   $(tab).addClass("btn-selected");
 
   // update header
   $(".grade-inquiry-header").text("Grade Inquiry: " + $(tab).text());
 
   // set cookie for selected component
-  var date = new Date();
-  date.setTime(date.getTime()+(60*1000));
-  var expires = "; expires="+date.toGMTString();
-  document.cookie = g_id+"_component_id"+"="+component_id+expires+"; path=/";
+  document.cookie = g_id + "_"+ submitter_id + "_component_id"+"="+component_id+"; path=/";
 }
 
 function onReplyTextAreaKeyUp(textarea) {
@@ -54,6 +58,7 @@ function onGradeInquirySubmitClicked(button) {
   var button_clicked = $(button);
   var component_selected = $('.btn-selected');
   var component_id = component_selected.length ? component_selected.data('component_id') : 0;
+  localStorage.setItem('selected_tab','.component-'+component_id);
   var form = $("#reply-text-form-"+component_id);
   if (form.data("submitted") === true) {
     return;
@@ -63,7 +68,7 @@ function onGradeInquirySubmitClicked(button) {
   // and ignore their response
   var text_area = $("#reply-text-area-"+component_id);
   var submit_button_id = button_clicked.id;
-  if (submit_button_id != null && submit_button_id.includes('grading-close-inquiry')){
+  if (submit_button_id != null && submit_button_id.includes('grading-close')){
     if ($.trim(text_area.val())) {
       if (!confirm("The text you entered will not be posted. Are you sure you want to close the grade inquiry?")) {
         return;

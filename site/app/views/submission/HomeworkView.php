@@ -830,7 +830,6 @@ class HomeworkView extends AbstractView {
             'change_request_status_url' => $change_request_status_url,
             'make_request_post_url' => $make_regrade_post_url,
             'has_submission' => $graded_gradeable->hasSubmission(),
-            'gradeable_id' => $graded_gradeable->getGradeableId(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
             'g_id' =>$graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
