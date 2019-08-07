@@ -5,7 +5,7 @@
         </div>
         <div>
             <fieldset>
-                <legend>View the gradeable on the course home page and download submitted files?</legend><br>
+                <legend>View the gradeable on the course home page and download submitted files?</legend>
                 <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
                         {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
                 <input type="radio" id="no_student_view" name="student_view" value="false"
@@ -21,7 +21,7 @@
 
         <div id="student_submit_view">
             <div>
-                <fieldset><legend>Make new submissions and access all prior versions?</legend><br>
+                <fieldset><legend>Make new submissions and access all prior versions?</legend>
                 <input type="radio" id="yes_student_submit" name="student_submit" value="true"
                         {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
                 <input type="radio" id="no_student_submit" name="student_submit" value="false"
