@@ -254,10 +254,8 @@ class ForumController extends AbstractController{
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
 
         if(strlen($thread_post_content) > 5000 ){
-            $this->core->addErrorMessage("Posts cannot be over than 5000 characters long");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads', 'new']);
-            $this->core->getOutput()->renderJson($result);
-            return $this->core->getOutput()->getOutput();
+            $result['next_page'] = $this->core->bulldNewCourseURL(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over 5000 characters long", $result);
         }
 
         if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
@@ -349,11 +347,9 @@ class ForumController extends AbstractController{
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        if(strlen($post_content) > 5000 ){
-            $this->core->addErrorMessage("Posts cannot be over than 5000 characters long");
-            $result['next_page'] = $this->core->buildNewCourseUrl(['forum', 'threads']);
-            $this->core->getOutput()->renderJson($result);
-            return $this->core->getOutput()->getOutput();
+        if(strlen($thread_post_content) > 5000 ){
+            $result['next_page'] = $this->core->bulldNewCourseURL(['forum', 'threads']);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over 5000 characters long", $result);
         }
 
         if(isset($_POST['thread_status'])){
@@ -646,7 +642,7 @@ class ForumController extends AbstractController{
         if(!empty($new_post_content)) {
 
             if(strlen($new_post_content) > 5000 ){
-                $this->core->addErrorMessage("Posts cannot be over than 5000 characters long");
+                $this->core->addErrorMessage("Posts cannot be over 5000 characters long");
                 return null;
             }
 
