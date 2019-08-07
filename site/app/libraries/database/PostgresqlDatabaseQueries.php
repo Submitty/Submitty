@@ -30,11 +30,12 @@ SELECT u.*, ns.merge_threads, ns.all_new_threads,
        ns.all_new_posts, ns.all_modifications_forum,
        ns.reply_in_post_thread,ns.team_invite,
        ns.team_member_submission, ns.team_joined,
+       ns.self_notification,
        ns.merge_threads_email, ns.all_new_threads_email,
        ns.all_new_posts_email, ns.all_modifications_forum_email,
        ns.reply_in_post_thread_email, ns.team_invite_email, 
        ns.team_member_submission_email, ns.team_joined_email,
-       ns.self_notification,sr.grading_registration_sections
+       ns.self_notification_email,sr.grading_registration_sections
        
 FROM users u
 LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
