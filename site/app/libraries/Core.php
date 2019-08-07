@@ -451,6 +451,32 @@ class Core {
     }
 
     /**
+     * Invalidates user's token by refreshing user's api key.
+     *
+     * @return bool
+     *
+     * @throws AuthenticationException
+     */
+    public function invalidateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                $this->database_queries->refreshUserApiKey($user_id);
+                return true;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return false;
+    }
+
+    /**
      * Checks the inputted $csrf_token against the one that is loaded from the session table for the particular
      * signed in user.
      *

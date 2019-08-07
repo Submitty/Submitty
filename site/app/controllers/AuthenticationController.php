@@ -153,6 +153,28 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     * @Route("/api/token/invalidate", methods={"POST"})
+     *
+     * @return Response
+     */
+    public function invalidateToken() {
+        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+            $msg = 'Cannot leave user id or password blank';
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        $success = $this->core->invalidateJwt();
+        if ($success) {
+            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+        }
+        else {
+            $msg = "Could not login using that user id or password";
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+    }
+
+    /**
      * Handle stateless authentication for the VCS endpoints.
      *
      * This endpoint is unique from the other authentication methods in
