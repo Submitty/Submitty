@@ -146,6 +146,7 @@ def main():
             global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/generated_output",True,c_instructor,c_group,0o770)
 
             global_success &= CheckItemBits(course_path+"/submissions",True,PHP_USER,c_group,0o750)
             global_success &= CheckItemBits(course_path+"/config_upload",True,PHP_USER,c_group,0o750)
