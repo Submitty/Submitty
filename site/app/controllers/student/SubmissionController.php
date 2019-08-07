@@ -862,7 +862,7 @@ class SubmissionController extends AbstractController {
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
-                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+            return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -943,18 +943,19 @@ class SubmissionController extends AbstractController {
             $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
 
             foreach($this_config_inputs as $this_input) {
-                if($this_input instanceof SubmissionTextBox){
+                if ($this_input instanceof SubmissionTextBox) {
                     $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
                     $num_short_answers += 1;
                 }
-                else if($this_input instanceof SubmissionCodeBox){
+                else if ($this_input instanceof SubmissionCodeBox) {
                     $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? array();
                     $num_codeboxes += 1;
                 }
-                else if($this_input instanceof SubmissionMultipleChoice){
+                else if ($this_input instanceof SubmissionMultipleChoice) {
                     $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
                     $num_multiple_choice += 1;
-                }else{
+                }
+                else {
                     //TODO: How should we handle this case?
                     continue;
                 }
@@ -967,7 +968,7 @@ class SubmissionController extends AbstractController {
                 // FIXME: add error checking
                 $file = fopen($dst, "w");
 
-                foreach($answers as $answer_val){
+                foreach ($answers as $answer_val) {
                     fwrite($file, $answer_val . "\n");
                 }
                 fclose($file);
@@ -1244,12 +1245,16 @@ class SubmissionController extends AbstractController {
         // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
         $vcs_queue_file = "";
         if ($vcs_checkout === true) {
-          $vcs_queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-                                                 "VCS__".$queue_file_helper);
+            $vcs_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "to_be_graded_queue",
+                "VCS__".$queue_file_helper
+            );
         }
 
         // create json file...
-        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = array(
+            "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -1260,7 +1265,8 @@ class SubmissionController extends AbstractController {
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
             "version" => $new_version,
-            "vcs_checkout" => $vcs_checkout);
+            "vcs_checkout" => $vcs_checkout
+        );
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
@@ -1300,15 +1306,14 @@ class SubmissionController extends AbstractController {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        if ($user_id == $original_user_id) {
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()}");
+        if ($user_id === $original_user_id) {
+            $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()}";
         }
         else {
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
+            $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}";
         }
 
-
-        return $this->uploadResult("Successfully uploaded files");
+        return $this->uploadResult($message);
     }
 
     private function uploadResult($message, $success = true) {
