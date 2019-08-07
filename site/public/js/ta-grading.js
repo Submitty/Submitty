@@ -406,6 +406,14 @@ registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
     gotoNextStudent();
 });
 
+//Navigate to the prev / next student buttons
+registerKeyHandler({name: "Previous Ungraded Student", code: "Shift ArrowLeft"}, function() {
+    gotoPrevStudent(true);
+});
+registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, function() {
+    gotoNextStudent(true);
+});
+
 //-----------------------------------------------------------------------------
 // Panel show/hide
 
