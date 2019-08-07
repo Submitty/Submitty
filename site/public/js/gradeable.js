@@ -211,7 +211,7 @@ function renderInstructorEditGradeable(gradeable) {
         'gradeable': gradeable,
         'edit_marks_enabled': true,
         'decimal_precision': DECIMAL_PRECISION,
-        'export_components_url': buildNewCourseUrl(['gradeable', gradeable.id, 'components', 'export'])
+        'export_components_url': buildCourseUrl(['gradeable', gradeable.id, 'components', 'export'])
     });
 }
 
