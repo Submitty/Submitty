@@ -775,10 +775,6 @@ class ForumController extends AbstractController{
                 }
                 if(empty($posts)){
                     $this->core->addErrorMessage("No posts found for selected thread.");
-                } else {
-                    $posts = array_map(function(&$post) {
-                        $post['content'] = preg_replace('/\(([^)]+)\)/s', '$1', $post['content']);
-                    }, $posts);
                 }
             }
         }
@@ -789,6 +785,9 @@ class ForumController extends AbstractController{
         $thread_id = -1;
         if(!empty($posts)){
             $thread_id = $posts[0]["thread_id"];
+        }
+        foreach($posts as &$post) {
+            $post['content'] = preg_replace('/(?:!\[(.*?)\]\((.*?)\))/', '$2', $post['content']);
         }
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
