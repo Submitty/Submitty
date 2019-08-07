@@ -4069,7 +4069,7 @@ AND gc_id IN (
      * Returns an array of users in the current course which have not been completely graded for the given gradeable.
      * Excludes users in the null section
      *
-     * If a component_id is passed in, then the list of returned users will be limited to users with to users with
+     * If a component_id is passed in, then the list of returned users will be limited to users with
      * that specific component ungraded
      *
      * @param Gradeable\Gradeable $gradeable
@@ -4097,7 +4097,7 @@ AND gc_id IN (
 
         $main_query = "select $id_string from $table where $section_type is not null and $id_string not in";
 
-        // Construct query
+        // Select which subquery to use
         if($component_id != "-1") {
 
             // Use this sub query to select users who do not have a specific component within this gradable graded
