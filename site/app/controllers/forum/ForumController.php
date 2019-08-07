@@ -775,6 +775,10 @@ class ForumController extends AbstractController{
                 }
                 if(empty($posts)){
                     $this->core->addErrorMessage("No posts found for selected thread.");
+                } else {
+                    $posts = array_map(function(&$post) {
+                        $post['content'] = preg_replace('/\(([^)]+)\)/s', '$1', $post['content']);
+                    }, $posts);
                 }
             }
         }
