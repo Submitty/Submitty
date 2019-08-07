@@ -11,15 +11,24 @@ from . import secure_execution_environment
 from .. import autograding_utils
 
 class Container():
-  # Container info should have name, image, server (true, false), and outgoing_connections
+  """
+  Containers are the building blocks of a container network. Containers know how to
+  create, start, and cleanup after themselves. Note that a network of containers
+  can be made up of 1 or more containers.
+  """
   def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one, is_test_environment, log_function):
     self.name = container_info['container_name']
+
+    # If there are multiple containers, each gets its own directory under testcase_directory, otherwise,
+    # we can just use testcase_directory
     self.directory = os.path.join(testcase_directory, self.name) if more_than_one else testcase_directory
+    # Check if we are the router in a container network
     self.is_router = True if self.name == 'router' else False
 
     self.image = container_info['container_image']
     self.is_server = container_info['server']
     self.outgoing_connections = container_info['outgoing_connections']
+    # If we are in production, we need to run as an untrusted user inside of our docker container.
     self.container_user_argument = list()  if is_test_environment else ['-u', str(getpwnam(untrusted_user).pw_uid)]
     self.full_name = f'{untrusted_user}_{self.name}'
 
@@ -29,7 +38,7 @@ class Container():
     self.return_code = None
     self.log_function = log_function
 
-    
+    # Determine whether or not we need to pull the default submitty router into this container's directory.
     need_router = container_info.get('import_default_router', False)
     if self.name == 'router' and need_router:
         self.import_router = True
@@ -38,9 +47,11 @@ class Container():
 
 
   def create(self, execution_script, arguments, more_than_one):
+    """ Create (but don't start) this container. """
 
     # Only pass container name to testcases with greater than one container. (Doing otherwise breaks compilation)
     conatiner_name_argument = ['--container_name', self.name] if more_than_one else list()
+    # A server container does not run student code, but instead hosts a service (e.g. a database.)
     if self.is_server:
       container_id = subprocess.check_output(['docker', 'create', '-i', '--network', 'none',
                                               '-v', f'{self.directory}:{self.directory}',
@@ -49,7 +60,6 @@ class Container():
                                               self.image
                                              ]).decode('utf8').strip()
     else:
-      """'-u', self.untrusted_uid,"""
       this_container = subprocess.check_output(['docker', 'create', '-i', '--network', 'none']
                                                 + self.container_user_argument + 
                                                 ['-v', self.directory + ':' + self.directory,
@@ -67,17 +77,27 @@ class Container():
 
 
   def start(self, logfile):
+    """ Start the created container. (Must call create first). """
     self.process = subprocess.Popen(['docker', 'start', '-i', '--attach', self.container_id], stdout=logfile,stdin=subprocess.PIPE)
 
 
   def cleanup_container(self):
+    """ Remove this container. """
     self.process.wait()
     self.return_code = self.process.returncode
 
     subprocess.call(['docker', 'rm', '-f', self.container_id])
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container_id} destroyed')
 
+
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
+  """ 
+  A Container Network ensures a secure execution environment by executing instances of student code
+  within a secure Docker Container. To add an extra layer of security, files and directories are carefully
+  permissioned, and code is executed as a limited-access, untrusted user. Therefore, code is effectively
+  run in a Jailed Sandbox within the container. Containers may be networked together to test networked
+  gradeables. 
+  """
   def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
                testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment):
     super().__init__(job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
@@ -87,6 +107,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     container_specs = testcase_info.get('containers', list())
     solution_container_specs = testcase_info.get('solution_containers', list())
     
+    # If there are container specifications in the complete_config, create objects for them,
+    # else, create a single default container.
     if len(container_specs) > 0:
       greater_than_one = True if len(container_specs) > 1 else False
       for container_spec in container_specs:
@@ -101,15 +123,20 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), False, self.is_test_environment, self.log_message))
     self.containers = containers
 
+    # Solution containers are a network of containers which run instructor code.
+    # We instantiate objects for them in a similar manner to the way that we instantiate
+    # execution containers (above), but do not add a default container if they are not present.
     solution_containers = list()
     greater_than_one_solution_container = True if len(solution_container_specs) > 1 else False
     for solution_container_spec in solution_container_specs:
       solution_containers.append(Container(solution_container_spec, untrusted_user, self.random_output_directory, greater_than_one_solution_container, self.is_test_environment, self.log_message))
     self.solution_containers = solution_containers
 
+    # Check for dispatcher actions (standard input)
     self.dispatcher_actions = testcase_info.get('dispatcher_actions', list())
 
     self.single_port_per_container = testcase_info.get('single_port_per_container', False)
+    # As new container networks are generated, they will be appended to this list.
     self.networks = list()
 
 
@@ -120,6 +147,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   ###########################################################
 
   def get_router(self, containers):
+    """ Given a set of containers, return the router. """
     for container in containers:
       if container.name == 'router':
         return container 
@@ -127,6 +155,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def get_server_containers(self, all_containers):
+    """ Given a set of containers, return any server containers. """
     containers = list()
     for container in all_containers:
       if container.name != 'router' and container.is_server == True:
@@ -135,6 +164,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def get_standard_containers(self, all_containers):
+    """ Given a set of containers, return all non-router, non-server containers. """
     containers = list()
     for container in all_containers:
       if container.name != 'router' and container.is_server == False:
@@ -143,7 +173,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def create_containers(self, containers, script, arguments):
-
+    """ Given a set of containers, create each of them. """
     try:
         self.verify_execution_status()
     except Exception as e:
@@ -158,6 +188,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
   
   def network_containers(self, containers):
+    """ Given a set of containers, network them per their specifications. """
     if len(containers) <= 1:
       return
 
@@ -170,10 +201,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     else:
       self.network_containers_routerless(containers)
 
+    # Provide an initialization file to each container.
     self.create_knownhosts_txt(containers)
 
 
   def network_containers_routerless(self, containers):
+    """ If there is no router, all containers are added to the same network. """
     network_name = f'{self.untrusted_user}_routerless_network'
 
     #create the global network
@@ -186,7 +219,10 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def network_containers_with_router(self, containers):
-    #if there are multiple containers, create a router and a network. Otherwise, return.
+    """ 
+    If there is a router, all containers are added to their own network, on which the only other
+    endpoint is the router, which has been aliased to impersonate all other reachable endpoints.
+    """
     router_name = f"{self.untrusted_user}_router"
     router_connections = dict()
 
@@ -231,14 +267,21 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
 
   def cleanup_networks(self):
+    """ Destroy all created networks. """
     for network in self.networks:
       try:
         subprocess.call(['docker', 'network', 'rm', network])
         self.log_message(f'{dateutils.get_current_time()} docker network {network} destroyed')
       except Exception as e:
         self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
+    self.networks.clear()
 
   def create_knownhosts_txt(self, containers):
+    """ 
+    Given a set of containers, add initialization files to each 
+    container's directory which specify how to connect to other endpoints
+    on the container's network (hostname, port).
+    """
     tcp_connection_list = list()
     udp_connection_list = list()
     current_tcp_port = 9000
@@ -292,6 +335,10 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   ###########################################################
 
   def process_dispatcher_actions(self, containers):
+    """ 
+    Deliver actions (stdin, delay, stop, start, kill)
+    to a set of containers per their testcase specification.
+    """
     for action_obj in self.dispatcher_actions:
       action_type  = action_obj["action"]
 
@@ -305,17 +352,18 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
           # This can go negative (subtracts .1 even in the else case) but that's fine.
           time_to_delay -= .1
       elif action_type == "stdin":
-        send_message_to_processes(containers, action_obj["string"], action_obj["containers"])
+        self.send_message_to_processes(containers, action_obj["string"], action_obj["containers"])
       elif action_type in ['stop', 'start', 'kill']:
-        send_message_to_processes(containers, f"SUBMITTY_SIGNAL:{action_type.upper()}\n", action_obj['containers'])
+        self.send_message_to_processes(containers, f"SUBMITTY_SIGNAL:{action_type.upper()}\n", action_obj['containers'])
       # A .1 second delay after each action to keep things flowing smoothly.
       time.sleep(.1)
 
     if len(self.dispatcher_actions) > 0:
-      send_message_to_processes(containers, "SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
+      self.send_message_to_processes(containers, "SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
 
 
   def get_container_with_name(self, name, containers):
+    """ Given a name, grab the corresponding container. """
     for container in containers:
       if container.name == name:
         return container
@@ -324,17 +372,19 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
   #targets must hold names/keys for the processes dictionary
   def send_message_to_processes(self, containers, message, targets):
-      for target in targets:
-        container = get_container_with_name(target, containers)
-        # poll returns None if the process is still running.
-        if container.process.poll() == None:
-            container.process.stdin.write(message.encode('utf-8'))
-            container.process.stdin.flush()
-        else:
-            pass
+    """ Given containers, targets, and a message, deliver the message to the target containers. """
+    for target in targets:
+      container = self.get_container_with_name(target, containers)
+      # poll returns None if the process is still running.
+      if container.process.poll() == None:
+        container.process.stdin.write(message.encode('utf-8'))
+        container.process.stdin.flush()
+      else:
+        pass
 
 
   def at_least_one_alive(self, containers):
+    """ Check that at least one of a set of containers is running. """
     for container in self.get_standard_containers(containers):
       if container.process.poll() is None:
         return True
@@ -342,6 +392,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def wait_until_standard_containers_finish(self, containers):
+    """ Wait until all non-server, non-router containers have finished. """
     still_going = True
     while still_going:
       still_going = self.at_least_one_alive(containers)
@@ -350,12 +401,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
   ###########################################################
   #
-  # Overridden Functions
+  # Overridden Secure Execution Environment Functions
   #
   ###########################################################
 
 
   def setup_for_compilation_testcase(self):
+    """ For every container, set up its directory for compilation. """
     os.chdir(self.tmp_work)
 
     for container in self.containers:
@@ -365,20 +417,21 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def setup_for_execution_testcase(self, testcase_dependencies):
+    """ For every container, set up its directory for execution. """
     os.chdir(self.tmp_work)
     for container in self.containers:
       self._setup_single_directory_for_execution(container.directory, testcase_dependencies)
 
+      # Copy in the submitty_router if necessary.
       if container.import_router:
         router_path = os.path.join(self.tmp_autograding, "bin", "submitty_router.py")
         self.log_message(f"COPYING:\n\t{router_path}\n\t{container.directory}")
         shutil.copy(router_path, container.directory)
         autograding_utils.add_all_permissions(container.directory)
-
-    
     self._run_pre_commands(self.directory)
 
   def setup_for_random_output(self, testcase_dependencies):
+    """ For every container, set up its directory for random output generation. """
     os.chdir(self.tmp_work)
     for container in self.solution_containers:
       self._setup_single_directory_for_random_output(container.directory, testcase_dependencies)
@@ -393,9 +446,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def setup_for_archival(self, overall_log):
-    """
-    Archive the results of an execution and validation.
-    """
+    """ For every container, set up its directory for archival. """
+
     self.setup_for_testcase_archival(overall_log)
     test_input_path = os.path.join(self.tmp_autograding, 'test_input_path')
     
@@ -407,15 +459,15 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         os.mkdir(details_dir)
 
   def execute_random_input(self, untrusted_user, executable, arguments, logfile, cwd):
+    """ Generate random input for this container using its testcase specification. """
+
     container_spec = {
         'container_name'  : f'{untrusted_user}_temporary_container',
         'container_image' : 'ubuntu:custom', 
         'server' : False,
         'outgoing_connections' : []
     }
-    container = Container( container_spec, untrusted_user, self.random_input_directory, False, self.is_test_environment, self.log_message)
     execution_script = os.path.join(container.directory, executable)
-    
     try:
       container.create(execution_script, arguments, False)
       container.start(logfile)
@@ -429,13 +481,21 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     return container.return_code
 
   def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
+    """ 
+    Random output execution is analogous to execution, but with slightly different arguments
+    and a different network of containers. 
+    """
     return self.execute_helper(self.solution_containers, script, arguments, logfile)
 
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
+    """ Run an execution step using our container network specification. """
     return self.execute_helper(self.containers, script, arguments, logfile)
 
   def execute_helper(self, containers, script, arguments, logfile):
+    """ Create, Start, Monitor/Deliver input to a network of containers. """
     try:
+      # Make certain we are executing in the environment in which we say we are
+      # (e.g. test vs production environment).
       self.verify_execution_status()
     except Exception as e:
       self.log_stack_trace(traceback.format_exc())
@@ -451,20 +511,20 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     try:
       router = self.get_router(containers)
-      # First start the router a second before any other container.
+      # First start the router a second before any other container, giving it time to initialize.
       if router is not None:
         router.start(logfile)
         time.sleep(1)
 
-      # Next start any server containers
+      # Next start any server containers, giving them time to initialize.
       for container in self.get_server_containers(containers):
         container.start(logfile)
 
-      # Finally, start the standard (assignment) containers
+      # Finally, start the standard (assignment) containers.
       for container in self.get_standard_containers(containers):
         container.start(logfile)
 
-      # Deliver dispatcher actions
+      # Deliver dispatcher actions.
       self.process_dispatcher_actions(containers)
 
       # When we are done with the dispatcher actions, keep running until all
@@ -477,12 +537,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       return_code = -1
 
     try:
+      # Clean up all containers.
       for container in containers:
         container.cleanup_container()
     except Exception as e:
       self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
     
+    # Cleanup the all networks.
     try:
       self.cleanup_networks()
     except Exception as e:
@@ -494,7 +556,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     return_code = 0
     # Check the return codes of the standard (non server/router) containers
     # to see if they finished properly. Note that this return code is yielded by
-    # main runner/validator/compiler.
+    # main runner/validator/compiler. We return the first non-zero return code we encounter.
     for container in self.get_standard_containers(containers):
       if container.return_code != 0:
         return_code = container.return_code

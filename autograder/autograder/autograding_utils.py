@@ -73,6 +73,8 @@ def just_write_grade_history(json_file,assignment_deadline,submission_time,
 
 def log_message(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname="", timelabel="", elapsed_time=-1,
                 message=""):
+    """ Given a log directory, create or append a message to a dated log file in that directory. """
+
     now = dateutils.get_current_time()
     datefile = datetime.strftime(now, "%Y%m%d")+".txt"
     autograding_log_file = os.path.join(log_path, datefile)
@@ -95,6 +97,8 @@ def log_message(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", 
 
 
 def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname="", timelabel="", elapsed_time=-1, trace=""):
+    """ Given a log directory, create or append a stack trace to a dated log file in that directory. """
+
     now = dateutils.get_current_time()
     datefile = "stack_traces_{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
     autograding_log_file = os.path.join(log_path, datefile)
@@ -124,11 +128,8 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
 # ==================================================================================
 
 def setup_for_validation(working_directory, complete_config, is_vcs, testcases, job_id, log_path, stack_trace_log_path):
-    
-    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
     tmp_work = os.path.join(working_directory,"TMP_WORK")
-    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
 
@@ -140,12 +141,13 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
 
     patterns = complete_config['autograding']
 
+    # Add all permissions to tmp_work
     add_permissions_recursive(tmp_work,
                               stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
                               stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH) 
 
-    # copy results files from compilation...
+    # Copy required submission/checkout files
     pattern_copy("submission_to_validation", patterns['submission_to_validation'], submission_path, tmp_work, tmp_logs)
     if is_vcs:
         checkout_subdir_path = os.path.join(self.tmp_submission, 'checkout', self.checkout_subdirectory)
@@ -155,21 +157,22 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
         if c.type == 'Compilation':
             pattern_copy("compilation_to_validation", patterns['compilation_to_validation'], c.secure_environment.directory, tmp_work, tmp_logs)
 
-    # copy output files
+    # Copy expected files into the tmp_work_test_output path
     test_output_path = os.path.join(tmp_autograding, 'test_output')
     copy_contents_into(job_id, test_output_path, tmp_work_test_output, tmp_logs, log_path, stack_trace_log_path)
 
-    # copy any instructor instructor_solution code into the tmp work directory
+    # Copy in instructor solution code.
+    # TODO: Is this necessary?
     instructor_solution = os.path.join(tmp_autograding, 'instructor_solution')
     copy_contents_into(job_id, instructor_solution, tmp_work_instructor_solution, tmp_logs, log_path, stack_trace_log_path)
 
-    # copy any instructor custom validation code into the tmp work directory
+    # Copy any instructor custom validation code into the tmp work directory
     custom_validation_code_path = os.path.join(tmp_autograding, 'custom_validation_code')
     copy_contents_into(job_id, custom_validation_code_path, tmp_work, tmp_logs, log_path, stack_trace_log_path)
 
     
 
-    # copy the runner
+    # Copy the validation script into this directory.
     bin_runner = os.path.join(tmp_autograding, "bin","validate.out")
     my_runner  = os.path.join(tmp_work, "my_validator.out")
     
@@ -188,6 +191,7 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
 # ==================================================================================
 
 def add_all_permissions(path):
+    """ Recursively chmod a directory or file 777. """
     if os.path.isdir(path):
         add_permissions_recursive(path,
                           stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR | stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP | stat.S_IROTH | stat.S_IWOTH | stat.S_IXOTH,
@@ -198,20 +202,28 @@ def add_all_permissions(path):
 
 
 def lock_down_folder_permissions(top_dir):
+    # Chmod a directory to take away group and other rwx. 
     os.chmod(top_dir,os.stat(top_dir).st_mode & ~stat.S_IRGRP & ~stat.S_IWGRP & ~stat.S_IXGRP & ~stat.S_IROTH & ~stat.S_IWOTH & ~stat.S_IXOTH)
    
 
 def prepare_directory_for_autograding(working_directory, user_id_of_runner, autograding_zip_file, submission_zip_file, is_test_environment, log_path, stack_trace_log_path, SUBMITTY_INSTALL_DIR):
-    # clean up old usage of this directory
-
-    if os.path.exists(working_directory) and not is_test_environment:
-        untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, user_id_of_runner, working_directory)
+    """ 
+    Given a working directory, set up that directory for autograding by creating the required subdirectories
+    and configuring permissions. 
+    """
     
-    add_all_permissions(working_directory)
-
-    shutil.rmtree(working_directory,ignore_errors=True)
+    # If an old (stale) version of the working directory exists, we need to remove it.
+    if os.path.exists(working_directory):
+        # Make certain we can remove old instances of the working directory.
+        if not is_test_environment:
+            untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, user_id_of_runner, working_directory)
+        add_all_permissions(working_directory)
+        shutil.rmtree(working_directory,ignore_errors=True)
+    
+    # Create the working directory
     os.mkdir(working_directory)
 
+    # Important directory variables.
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
     tmp_work = os.path.join(working_directory,"TMP_WORK")
@@ -222,31 +234,29 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
     os.mkdir(tmp_work)
     os.mkdir(tmp_work_test_input)
 
-    # Remove any and all containers left over from past runs.
+    # Remove any docker containers left over from past runs.
     old_containers = subprocess.check_output(['docker', 'ps', '-aq', '-f', 'name={0}'.format(user_id_of_runner)]).split()
-
     if len(old_containers) > 0:
         print('REMOVING STALE CONTAINERS')
     for old_container in old_containers:
         subprocess.call(['docker', 'rm', '-f', old_container.decode('utf8')])
 
+    # Remove any docker networks left over from past runs.
     old_networks = subprocess.check_output(['docker', 'network', 'ls', '-qf', 'name={0}'.format(user_id_of_runner)]).split()
-
     if len(old_containers) > 0:
         print('REMOVING STALE NETWORKS')
     for old_network in old_networks:
         subprocess.call(['docker', 'network', 'rm', old_network.decode('utf8')])
 
-    # unzip autograding and submission folders
-    try:
-        unzip_this_file(autograding_zip_file,tmp_autograding)
-        unzip_this_file(submission_zip_file,tmp_submission)
-    except:
-        raise
+    # Unzip the autograding and submission folders
+    unzip_this_file(autograding_zip_file,tmp_autograding)
+    unzip_this_file(submission_zip_file,tmp_submission)
+
 
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
+    # Handle the case where a student errantly submits to multiple parts of a one part only gradeable.
     if complete_config_obj.get('one_part_only', False) == True:
         allow_only_one_part(submission_path, log_path=os.path.join(tmp_logs, "overall.txt"))
 
@@ -256,14 +266,18 @@ def prepare_directory_for_autograding(working_directory, user_id_of_runner, auto
 
     # copy output files
     test_input_path = os.path.join(tmp_autograding, 'test_input')
+    # Copy test input files into tmp_work_test_input.
     copy_contents_into(job_id, test_input_path, tmp_work_test_input, tmp_logs, log_path, stack_trace_log_path)
 
+    # Lock down permissions on the unzipped folders/test input folder to stop untrusted users from gaining access.
     lock_down_folder_permissions(tmp_work_test_input)
     lock_down_folder_permissions(tmp_autograding)
     lock_down_folder_permissions(tmp_submission)
 
 
-def archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj, gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
+def archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj, 
+                                gradeable_config_obj, queue_obj, log_path, stack_trace_log_path, is_test_environment):
+    """ After grading is finished, archive the results. """
 
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
@@ -411,7 +425,6 @@ def allow_only_one_part(path, log_path=os.devnull):
         log.flush()
         for entry in sorted(os.listdir(path)):
             full_path = os.path.join(path, entry)
-            print(full_path)
             if not os.path.isdir(full_path) or not entry.startswith('part'):
                 continue
             count = len(os.listdir(full_path))
@@ -420,7 +433,7 @@ def allow_only_one_part(path, log_path=os.devnull):
                 clean_directories.append(full_path)
 
         if len(clean_directories) > 1:
-            print("ERROR!  Student submitted to multiple parts in violation of instructions.\n"
+            print("Student submitted to multiple parts in violation of instructions.\n"
                   "Removing files from all but first non empty part.")
 
             for i in range(1, len(clean_directories)):
@@ -551,63 +564,64 @@ def unzip_this_file(zipfilename,path):
 
 
 def pre_command_copy_file(source_testcase, source_directory, destination_testcase, destination, job_id, tmp_logs, log_path, stack_trace_log_path):
+    """ Handles the cp pre_command. """
 
-  source_testcase = os.path.join(str(os.getcwd()), source_testcase)
+    source_testcase = os.path.join(str(os.getcwd()), source_testcase)
 
-  if not os.path.isdir(source_testcase):
-    raise RuntimeError("ERROR: The directory {0} does not exist.".format(source_testcase))
+    if not os.path.isdir(source_testcase):
+        raise RuntimeError("ERROR: The directory {0} does not exist.".format(source_testcase))
 
-  if not os.path.isdir(destination_testcase):
-    raise RuntimeError("ERROR: The directory {0} does not exist.".format(destination_testcase))
+    if not os.path.isdir(destination_testcase):
+        raise RuntimeError("ERROR: The directory {0} does not exist.".format(destination_testcase))
 
-  source = os.path.join(source_testcase, source_directory)
-  target = os.path.join(destination_testcase, destination)
+    source = os.path.join(source_testcase, source_directory)
+    target = os.path.join(destination_testcase, destination)
 
-  # The target without the potential executable.
-  target_base = '/'.join(target.split('/')[:-1])
+    # The target without the potential executable.
+    target_base = '/'.join(target.split('/')[:-1])
 
-  # If the source is a directory, we copy the entire thing into the
-  # target.
-  if os.path.isdir(source):
-    # We must copy from directory to directory 
-    copy_contents_into(job_id, source, target, tmp_logs, log_path, stack_trace_log_path)
+    # If the source is a directory, we copy the entire thing into the
+    # target.
+    if os.path.isdir(source):
+        # We must copy from directory to directory 
+        copy_contents_into(job_id, source, target, tmp_logs, log_path, stack_trace_log_path)
 
-  # Separate ** and * for simplicity.
-  elif not '**' in source:
-    # Grab all of the files that match the pattern
-    files = glob.glob(source, recursive=True)
+    # Separate ** and * for simplicity.
+    elif not '**' in source:
+        # Grab all of the files that match the pattern
+        files = glob.glob(source, recursive=True)
 
-    # The target base must exist in order for a copy to occur
-    if target_base != '' and not os.path.isdir(target_base):
-      raise RuntimeError("ERROR: The directory {0} does not exist.".format(target_base))
-    # Copy every file. This works whether target exists (is a directory) or does not (is a target file)
-    for file in files:
-      try:
-        shutil.copy(file, target)
-      except Exception as e:
-        traceback.print_exc()
-        log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
-  else:
-    # Everything after the first **. 
-    source_base = source[:source.find('**')]
-    # The full target must exist (we must be moving to a directory.)
-    if not os.path.isdir(target):
-      raise RuntimeError("ERROR: The directory {0} does not exist.".format(target))
+        # The target base must exist in order for a copy to occur
+        if target_base != '' and not os.path.isdir(target_base):
+            raise RuntimeError("ERROR: The directory {0} does not exist.".format(target_base))
+        # Copy every file. This works whether target exists (is a directory) or does not (is a target file)
+        for file in files:
+            try:
+                shutil.copy(file, target)
+            except Exception as e:
+                traceback.print_exc()
+                log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file, target))
+    else:
+        # Everything after the first **. 
+        source_base = source[:source.find('**')]
+        # The full target must exist (we must be moving to a directory.)
+        if not os.path.isdir(target):
+            raise RuntimeError("ERROR: The directory {0} does not exist.".format(target))
 
-    # Grab all of the files that match the pattern.
-    files = glob.glob(source, recursive=True)
+        # Grab all of the files that match the pattern.
+        files = glob.glob(source, recursive=True)
 
-    # For every file matched
-    for file_source in files:
-      file_target = os.path.join(target, file_source.replace(source_base,''))
-      # Remove the file path.
-      file_target_dir = '/'.join(file_target.split('/')[:-1])
-      # If the target directory doesn't exist, create it.
-      if not os.path.isdir(file_target_dir):
-        os.makedirs(file_target_dir)
-      # Copy.
-      try:
-        shutil.copy(file_source, file_target)
-      except Exception as e:
-        traceback.print_exc()
-        log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file_source, file_target))
+        # For every file matched
+        for file_source in files:
+            file_target = os.path.join(target, file_source.replace(source_base,''))
+            # Remove the file path.
+            file_target_dir = '/'.join(file_target.split('/')[:-1])
+            # If the target directory doesn't exist, create it.
+            if not os.path.isdir(file_target_dir):
+                os.makedirs(file_target_dir)
+            # Copy.
+            try:
+                shutil.copy(file_source, file_target)
+            except Exception as e:
+                traceback.print_exc()
+                log_message(log_path, job_id, message="Pre Command could not perform copy: {0} -> {1}".format(file_source, file_target))

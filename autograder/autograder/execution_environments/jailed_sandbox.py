@@ -8,6 +8,13 @@ from . import secure_execution_environment
 from .. import autograding_utils
 
 class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
+  """ 
+  A Jailed Sandbox ensures a secure execution environment by carefully permissioning
+  files during each phase of execution, and by running all execution steps as a limited-access,
+  untrusted user. 
+  """
+
+
   def __init__(self, job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
                testcase_info, autograding_directory, log_path, stack_trace_log_path, is_test_environment):
      super().__init__(job_id, untrusted_user, testcase_directory, is_vcs, is_batch_job, complete_config_obj, 
@@ -18,25 +25,37 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
     Archive the results of an execution and validation.
     """
     self.setup_for_testcase_archival(overall_log)
-    test_input_path = os.path.join(self.tmp_autograding, 'test_input')
-    public_dir = os.path.join(self.tmp_results,"results_public", self.name)
-    details_dir = os.path.join(self.tmp_results, "details", self.name)
 
 
   def execute_random_input(self, untrusted_user, script, arguments, logfile, cwd=None):
+    """
+    Given the correct script arguments, Jailed Sandbox is able to simple run the standard 
+    execute command from the random input directory to generate random input.
+    """
     return self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_input_directory)
 
 
   def execute_random_output(self, untrusted_user, script, arguments, logfile, cwd=None):
+    """
+    Given the correct script arguments, Jailed Sandbox is able to simple run the standard 
+    execute command from the random output directory to generate random output.
+    """
     return self.execute(untrusted_user, script, arguments, logfile, cwd=self.random_output_directory)
 
 
   def execute(self, untrusted_user, script, arguments, logfile, cwd=None):
+    """
+    Given an untrusted user, a script, arguments, and a permissioned
+    working directory, execute the script with the arguments as the user
+    in the directory.
+    """
 
     if cwd is None:
       cwd = self.directory
 
     try:
+      # Make certain we are in the execution mode that we say we are (e.g. we aren't accidentally running
+      # in production mode in a test environment or vice versa.)
       self.verify_execution_status()
     except Exception as e:
       self.log_stack_trace(traceback.format_exc())
@@ -44,6 +63,7 @@ class JailedSandbox(secure_execution_environment.SecureExecutionEnvironment):
       return
 
     script = os.path.join(cwd, script)
+    # If we are in a test environment, don't bother with untrusted execute.
     if self.is_test_environment:
       full_script = [script, ]
     else:
