@@ -51,7 +51,7 @@ function resetForumFileUploadAfterError(displayPostId){
 }
 
 function checkNumFilesForumUpload(input, post_id){
-    var displayPostId = (typeof post_id !== "undefined") ? "_" + escape(post_id) : "";
+    var displayPostId = (typeof post_id !== "undefined") ? "_" + escapeSpecialChars(post_id) : "";
     if(input.files.length > 5){
         displayError('Max file upload size is 5. Please try again.');
         resetForumFileUploadAfterError(displayPostId);
@@ -1183,11 +1183,13 @@ function loadInlineImages(encoded_data) {
       var attachment = data[i];
       var url = attachment[0];
       var img = $('<img src="' + url + '" alt="Click to view attachment in popup" title="Click to view attachment in popup" class="attachment-img">');
+      var title = $('<p>' + escapeSpecialChars(decodeURI(attachment[2])) + '</p>')
       img.click(function() {
         var url = $(this).attr('src');
         window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
       });
       attachment_well.append(img);
+      attachment_well.append(title);
     }
   }
 

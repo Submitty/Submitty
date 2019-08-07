@@ -446,6 +446,8 @@ body {min-width: 925px;}
 
 .attachment-well {
     display: none;
+    text-align: -moz-center;
+    text-align: -webkit-center;
     margin-top: 10px;
 }
 
@@ -481,7 +483,8 @@ body {min-width: 925px;}
     border: 1px solid #ddd;
     border-radius: 4px;
     padding: 5px;
-    max-width: 100%;
+    max-width: 400px;
+    display: block;
     height: auto;
 }
 
