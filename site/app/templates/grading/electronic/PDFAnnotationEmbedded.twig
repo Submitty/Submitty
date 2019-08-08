@@ -10,6 +10,7 @@
 </div>
 
 <script>
+    let csrfToken = "{{ csrfToken }}";
     try {
         for(let i = 0 ; i < localStorage.length; i++){
             if(localStorage.key(i).includes('annotations')){
