@@ -334,6 +334,7 @@ class AdminGradeableController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
+        
         try {
             $this->updateRubric($gradeable, $_POST['values']);
             $this->core->getOutput()->renderJsonSuccess();
