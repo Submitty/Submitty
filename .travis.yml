@@ -303,6 +303,7 @@ jobs:
         - pip3 install paramiko
         - pip3 install psycopg2-binary
         - pip3 install sqlalchemy
+        - pip3 install docker
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - pip3 install .
         - popd
