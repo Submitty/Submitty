@@ -367,9 +367,9 @@ class Config extends AbstractModel {
         }
 
         $this->authentication_settings = array_replace_recursive($auth_json);
-        if (empty($authentication_settings['methods'])) {
+        if (empty($this->authentication_settings['methods'])) {
             throw new ConfigException("Must specify an authentication method to use");
-        }    
+        }
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {

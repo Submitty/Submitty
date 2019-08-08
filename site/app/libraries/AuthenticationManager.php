@@ -1,8 +1,6 @@
 <?php
 
-namespace app\authentication;
-
-use app\libraries\Core;
+namespace app\libraries;
 
 class AuthenticationManager {
     private $settings;
@@ -19,7 +17,7 @@ class AuthenticationManager {
             if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
                 throw new \Exception("Invalid method specified for Authentication. All method should implement the AbstractAuthentication interface.");
             }
-            $this->methods[] = new $auth_class($this);
+            $this->methods[] = new $auth_class($core, $this);
         }
     }
 
