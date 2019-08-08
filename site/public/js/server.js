@@ -1689,7 +1689,7 @@ function updateToServerTime(fp) {
     });
 }
 function updateToTomorrowServerTime(fp) {
-    var url = buildNewUrl(['server_time']);
+    var url = buildUrl(['server_time']);
 
     $.get({
         url: url,
