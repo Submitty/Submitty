@@ -182,14 +182,20 @@ class LateController extends AbstractController {
             }
 
             $users_with_exceptions = $this->core->getQueries()->getUsersWithExtensions($_POST['g_id']);
-            foreach($users_with_exceptions as $user) {
-                if ($user->getId() == $_POST['user_id']) {
-                    if ($user->getLateDayExceptions() == $late_days) {
-                        $this->core->addNoticeMessage("User already has " . $late_days ." extensions; no changes made");
-                        return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+            $simple_late_user = null;
+            $no_change = false;
+            if (!$no_change) {
+                foreach($users_with_exceptions as $user) {
+                    if ($user->getId() == $_POST['user_id']) {
+                        $simple_late_user = $user;
+                        $no_change = $simple_late_user->getLateDayExceptions() == $late_days;
+                        break;
                     }
-                    break;
                 }
+            }
+            if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
+                $this->core->addNoticeMessage("User already has " . $late_days ." extensions; no changes made");
+                return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);

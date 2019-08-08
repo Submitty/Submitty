@@ -56,7 +56,7 @@ $(document).ready(function() {
 function updateLateDays(data) {
     var fd = new FormData($('#late-day-form').get(0));
     var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildNewCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
+    var url = buildCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
     $.ajax({
         url: url,
         type: "POST",
@@ -76,7 +76,7 @@ function updateLateDays(data) {
 function deleteLateDays(user_id, datestamp) {
     // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
     datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildNewCourseUrl(['late_days', 'delete']);
+    var url = buildCourseUrl(['late_days', 'delete']);
     var confirm = window.confirm("Are you sure you would like to delete this entry?");
     if (confirm) {
         $.ajax({
