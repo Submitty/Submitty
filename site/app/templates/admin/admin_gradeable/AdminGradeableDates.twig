@@ -19,9 +19,12 @@
         <br />
 
         <div id="due_date_options_container">
-            <div>Will this assignment have a due date?
-                <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
-                <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
+            <div>
+                <fieldset>
+                    <legend>Will this assignment have a due date?</legend>
+                    <input id="has_due_date_yes" name="has_due_date" value="true" type="radio" {{ gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_yes">Yes</label>
+                    <input id="has_due_date_no" name="has_due_date" value="false" type="radio" {{ not gradeable.hasDueDate() ? 'checked' : '' }}/><label for="has_due_date_no">No</label>
+                </fieldset>
             </div>
 
             <div id="due_date_container" {{ gradeable.hasDueDate() ? '' : 'hidden' }}>
@@ -55,14 +58,14 @@
         </div>
 
         <div id="late_days_options_container" {{ gradeable.hasDueDate() and gradeable.isStudentSubmit() ? '' : 'hidden' }}>
-            Should submissions be accepted after the due date?
-            <br />
-            <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
-                    {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> <label for="yes_late_submission">Yes</label>
+            <fieldset>
+                <legend>Should submissions be accepted after the due date?</legend>
+                <input type="radio" id = "yes_late_submission" name="late_submission_allowed" value="true"
+                        {{ action != 'new' and gradeable.isLateSubmissionAllowed() ? 'checked' : '' }}> <label for="yes_late_submission">Yes</label>
 
-            <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
-                    {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> <label for="no_late_submission">No</label>
-            <br />
+                <input type="radio" id = "no_late_submission" name="late_submission_allowed" value ="false"
+                        {{ not (action != 'new' and gradeable.isLateSubmissionAllowed()) ? 'checked' :  '' }}> <label for="no_late_submission">No</label>
+            </fieldset>
             <div class="yes-late-submission">
                 <label for="late_days">How many late days may students use on this assignment?</label>
                 <input style="width: 50px" id="late_days" name="late_days" class="int_val" type="text" value="{{ gradeable.getLateDays() }}"/>
@@ -72,7 +75,7 @@
                 <p style="max-width:600px;" id="late-days-message">
                 Note: Submissions received after the deadline will be automatically recorded as a zero if late days are not allowed
                     for this assignment (or the student does not have sufficient late days to cover the submission) and no excused
-                    absence extension is entered for this student for this gradeable. See 
+                    absence extension is entered for this student for this gradeable. See
                     <a target=_blank href="http://submitty.org/student/late_days">Late Days & Extensions. <i style="font-style:normal;" class="helpicon"></i></a>
                 </p>
             </div>
@@ -128,7 +131,7 @@
                         button: [
                             {
                                 label: "Now"
-                            }, 
+                            },
                             {
                                 label: "End of time"
                             }
@@ -137,10 +140,10 @@
                         onClick: (index, fp) => {
                             let date;
                             switch (index) {
-                                case 0: 
+                                case 0:
                                     date = new Date();
                                     break;
-                                case 1: 
+                                case 1:
                                     date = new Date("9998-01-01 00:00:00");
                                     break;
                             }
