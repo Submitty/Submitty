@@ -289,7 +289,8 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
-    
+    random_output_path = os.path.join(tmp_work, 'random_output')
+
     partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
     item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
     results_public_dir = os.path.join(tmp_results,"results_public")
@@ -303,9 +304,8 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     if 'work_to_public' in patterns:
         pattern_copy("work_to_public", patterns['work_to_public'], tmp_work, results_public_dir, tmp_logs)
 
-    if os.path.exists(os.path.join(tmp_work, 'random_output')):
-        pattern_copy("work_to_random_output", [os.path.join(tmp_work, 'random_output', 'test*', '*.txt'),], tmp_work, tmp_results, tmp_logs)
-
+    if os.path.exists(random_output_path):
+        pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
     # grab the submission time
     with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
         submission_string = submission_time_file.read().rstrip()
