@@ -147,16 +147,6 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
     }
 }
 
-/**
- * Displays edit registration sections form on button press
- */
-function extensionPopup(json){
-    $('.popup-form').css('display', 'none');
-    var form = $('#more_extension_popup');
-    form[0].outerHTML = json['data']['popup'];
-    $('#more_extension_popup').css('display', 'block');
-}
-
 function newDeleteGradeableForm(form_action, gradeable_name) {
     $('.popup-form').css('display', 'none');
     var form = $("#delete-gradeable-form");
@@ -192,7 +182,6 @@ function newDeleteCourseMaterialForm(path, file_name) {
         }
     });
 
-
     $('.popup-form').css('display', 'none');
     var form = $("#delete-course-material-form");
     $('[name="delete-course-material-message"]', form).html('');
@@ -206,13 +195,6 @@ function newUploadImagesForm() {
     var form = $("#upload-images-form");
     form.css("display", "block");
     $('[name="upload"]', form).val(null);
-}
-
-function confirmExtension(option){
-    $('.popup-form').css('display', 'none');
-    $('input[name="option"]').val(option);
-    $('#excusedAbsenceForm').submit();
-    $('input[name="option"]').val(-1);
 }
 
 function newUploadCourseMaterialsForm() {
@@ -1377,57 +1359,6 @@ function enableTabsInTextArea(jQuerySelector) {
     });
 }
 
-function updateHomeworkExtensions(data) {
-    var fd = new FormData($('#excusedAbsenceForm').get(0));
-    var url = buildCourseUrl(['extensions', 'update']);
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: fd,
-        processData: false,
-        cache: false,
-        contentType: false,
-        success: function(data) {
-            try {
-                var json = JSON.parse(data);
-            } catch(err){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>Error parsing data. Please try again.</div>';
-                $('#messages').append(message);
-                return;
-            }
-            if(json['status'] === 'fail'){
-                var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                $('#messages').append(message);
-                return;
-            }
-            if(json['data']['is_team']){
-                extensionPopup(json);
-                return;
-            }
-            var form = $("#load-homework-extensions");
-            $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
-            $('#title').replaceWith(title);
-            if(json['data']['users'].length === 0){
-                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
-            }
-            json['data']['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
-                $('#my_table').append(bits.join('</td><td>'));
-            });
-            $('#user_id').val(this.defaultValue);
-            $('#late_days').val(this.defaultValue);
-            $('#csv_upload').val(this.defaultValue);
-            var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-check-circle"></i>Updated exceptions for ' + json['data']['gradeable_id'] + '.</div>';
-            $('#messages').append(message);
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    })
-    return false;
-}
-
 function updateGradeOverride(data) {
     var fd = new FormData($('#gradeOverrideForm').get(0));
     var url = buildCourseUrl(['grade_override', $('#g_id').val(), 'update']);
@@ -1463,31 +1394,6 @@ function updateGradeOverride(data) {
         }
     })
     return false;
-}
-
-function loadHomeworkExtensions(g_id, due_date) {
-    var url = buildCourseUrl(['extensions', g_id]);
-    $.ajax({
-        url: url,
-        success: function(data) {
-            var json = JSON.parse(data);
-            var form = $("#load-homework-extensions");
-            $('#my_table tr:gt(0)').remove();
-            var title = '<div class="option-title" id="title">Current Extensions for ' + json['data']['gradeable_id'] + '</div>';
-            $('#title').replaceWith(title);
-            $('#due_date').text(due_date);
-            if(json['data']['users'].length === 0){
-                $('#my_table').append('<tr><td colspan="4">There are no extensions for this homework</td></tr>');
-            }
-            json['data']['users'].forEach(function(elem){
-                var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['late_day_exceptions'] + '</td></tr>'];
-                $('#my_table').append(bits.join('</td><td>'));
-            });
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    });
 }
 
 function loadOverriddenGrades(g_id) {
@@ -1528,50 +1434,6 @@ function refreshOnResponseOverriddenGrades(json) {
             var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
             $('#my_table').append(bits.join('</td><td>'));
         });
-    }
-}
-
-function updateLateDays(data) {
-    var fd = new FormData($('#late-day-form').get(0));
-    var selected_csv_option = $("input:radio[name=csv_option]:checked").val();
-    var url = buildCourseUrl(['late_days', 'update']) + '?csv_option=' + selected_csv_option;
-    $.ajax({
-        url: url,
-        type: "POST",
-        data: fd,
-        processData: false,
-        contentType: false,
-        success: function() {
-            window.location.reload();
-        },
-        error: function() {
-            window.alert("Something went wrong. Please try again.");
-        }
-    })
-    return false;
-}
-
-function deleteLateDays(user_id, datestamp) {
-    // Convert 'MM/DD/YYYY HH:MM:SS A' to 'MM/DD/YYYY'
-    datestamp_mmddyy = datestamp.split(" ")[0];
-    var url = buildCourseUrl(['late_days', 'delete']);
-    var confirm = window.confirm("Are you sure you would like to delete this entry?");
-    if (confirm) {
-        $.ajax({
-            url: url,
-            type: "POST",
-            data: {
-                csrf_token: csrfToken,
-                user_id: user_id,
-                datestamp: datestamp_mmddyy
-            },
-            success: function() {
-                window.location.reload();
-            },
-            error: function() {
-                window.alert("Something went wrong. Please try again.");
-            }
-        })
     }
 }
 
