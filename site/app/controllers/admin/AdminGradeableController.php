@@ -336,7 +336,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         try {
-            $this->updateRubric($gradeable, $_POST);
+            $this->updateRubric($gradeable, $_POST['values']);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
