@@ -165,6 +165,18 @@ class HomePageController extends AbstractController {
             );
         }
 
+        if (!isset($_POST['course_semester']) ||
+            !isset($_POST['course_title']) ||
+            !isset($_POST['head_instructor'])) {
+            $error = "Semester, course title or head instructor not set.";
+            $this->core->addErrorMessage($error);
+            return new Response(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildNewUrl(['home']))
+            );
+        }
+
         $semester = $_POST['course_semester'];
         $course_title = strtolower($_POST['course_title']);
         $head_instructor = $_POST['head_instructor'];
@@ -189,12 +201,15 @@ class HomePageController extends AbstractController {
             );
         }
 
+        $base_course_semester = '';
+        $base_course_title = '';
+
         if (isset($_POST['base_course'])) {
             $exploded_course = explode('|', $_POST['base_course']);
             $base_course_semester = $exploded_course[0];
             $base_course_title = $exploded_course[1];
         }
-        else {
+        elseif (isset($_POST['base_course_semester']) && isset($_POST['base_course_title'])) {
             $base_course_semester = $_POST['base_course_semester'];
             $base_course_title = $_POST['base_course_title'];
         }
@@ -208,6 +223,17 @@ class HomePageController extends AbstractController {
                     ]
                 )
             );
+
+            if (empty($group_check) || empty($base_course_semester) || empty($base_course_title)) {
+                $error = "Invalid base course.";
+                $this->core->addErrorMessage($error);
+                return new Response(
+                    JsonResponse::getFailResponse($error),
+                    null,
+                    new RedirectResponse($this->core->buildNewUrl(['home']))
+                );
+            }
+
             if (json_decode($group_check, true)['status'] === 'fail') {
                 $error = "The instructor is not in the correct Linux group.\n Please contact sysadmin for more information.";
                 $this->core->addErrorMessage($error);

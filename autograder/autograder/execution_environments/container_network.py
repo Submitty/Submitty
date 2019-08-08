@@ -389,6 +389,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     """ Given containers, targets, and a message, deliver the message to the target containers. """
     for target in targets:
       container = self.get_container_with_name(target, containers)
+      container.container.reload()
       if container.container.status != 'exited':
         os.write(container.socket.fileno(), message.encode('utf-8'))
       else:
