@@ -520,7 +520,7 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $totalAttachments,
-                "merge_url" => $this->core->buildNewCourseUrl(['forum', 'threads', 'merge'])
+                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
             ]);
         }
         else {
