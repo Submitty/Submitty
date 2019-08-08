@@ -17,6 +17,7 @@ function updateHomeworkExtension() {
         cache: false,
         contentType: false,
         success: function(data) {
+            console.log(data)
             try {
                 var json = JSON.parse(data);
             } catch(err) {
@@ -44,8 +45,11 @@ function clearDate() {
     document.getElementById("late-calendar").value = "";
 }
 
-function clearLateDays() {
-    document.getElementById("late-days").value = "";
+function setLateDays() {
+    let new_date = new Date($("#late-calendar").val());
+    let old_date = new Date($("#due-date").data("date"));
+    var diff = (new_date.getTime() - old_date.getTime()) / (1000 * 3600 * 24);
+    document.getElementById("late-days").value = diff;
 }
 
 function confirmExtension(option){
