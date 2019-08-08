@@ -175,6 +175,16 @@ class AdminGradeableController extends AbstractController {
             $type_string = self::gradeable_type_strings['checkpoint'];
         }
 
+        //true if there are no students in any rotating sections.
+        //Can sometimes be true even if $num_rotating_sections > 0 (if no students are in any section)
+        $no_rotating_sections = true;
+        foreach ($this->core->getQueries()->getCountUsersRotatingSections() as $section) {
+            if ($section['rotating_section'] != null && $section['count'] > 0) {
+                $no_rotating_sections = false;
+                break;
+            }
+        }
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -205,6 +215,7 @@ class AdminGradeableController extends AbstractController {
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
+            'no_rotating_sections' => $no_rotating_sections,
             'rotating_gradeables' => $rotating_gradeables,
             'graders_from_usertypes' => $graders_from_usertypes,
             //'inherit_teams_list' => $inherit_teams_list
