@@ -105,7 +105,7 @@ class CourseMaterialsView extends AbstractView {
             }
             $can_write =is_writable($fp);
             if(!$can_write){
-               trigger_error("JSON is not writeable");
+               $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
             }
         }
 
