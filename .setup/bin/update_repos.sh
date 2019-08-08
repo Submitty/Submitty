@@ -84,7 +84,7 @@ function clone_or_update_repo {
         # THE REPO DID NOT EXIST
         echo "    the repository did not previously exist... "
         pushd ${parent_repo_dir} > /dev/null
-        git clone --branch ${min_repo_version} --depth 1 "https://github.com/Submitty/${repo_name}" 2> /dev/null
+        git clone --branch ${min_repo_version} --depth 1 "https://github.com/Submitty/${repo_name}"
         popd > /dev/null
         echo -e "    automatically cloned version ${min_repo_version}\n"
 
@@ -98,3 +98,4 @@ clone_or_update_repo  Lichen  ${Lichen_Version}
 clone_or_update_repo  RainbowGrades  ${RainbowGrades_Version}
 clone_or_update_repo  Tutorial  ${Tutorial_Version}
 clone_or_update_repo  pdf-annotate.js  ${Pdf_Annotate_Js_Version}
+clone_or_update_repo  SysadminTools  ${SysadminTools_Version}
