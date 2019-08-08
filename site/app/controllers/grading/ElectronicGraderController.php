@@ -953,7 +953,13 @@ class ElectronicGraderController extends AbstractController {
         $prev_id = $prev ? $prev->getId() : "";
         $next_id = $next ? $next->getId() : "";
 
-        $not_in_my_section = !$order->containsSubmitter($graded_gradeable->getSubmitter());
+        // Full access graders should be able to grade any student, assigned or not
+        if($this->core->getUser()->accessFullGrading()) {
+            $not_in_my_section = false;
+        // Other graders can only grade students in their section
+        } else {
+            $not_in_my_section = !$order->containsSubmitter($graded_gradeable->getSubmitter());
+        }
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
