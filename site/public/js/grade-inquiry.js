@@ -18,9 +18,6 @@ $( document ).ready(function () {
 
 function onComponentTabClicked(tab) {
   var component_id = $(tab).data("component_id");
-  var component_tabs = $('.component-tabs');
-  var g_id = component_tabs.data("g_id");
-  var submitter_id = component_tabs.data("submitter_id");
 
   // show posts that pertain to this component_id
   $(".grade-inquiry").each(function(){
@@ -37,9 +34,6 @@ function onComponentTabClicked(tab) {
 
   // update header
   $(".grade-inquiry-header").text("Grade Inquiry: " + $(tab).text());
-
-  // set cookie for selected component
-  document.cookie = g_id + "_"+ submitter_id + "_component_id"+"="+component_id+"; path=/";
 }
 
 function onReplyTextAreaKeyUp(textarea) {
@@ -67,7 +61,7 @@ function onGradeInquirySubmitClicked(button) {
   // if grader clicks Close Grade Inquiry button with text in text area we want to confirm that they want to close the grade inquiry
   // and ignore their response
   var text_area = $("#reply-text-area-"+component_id);
-  var submit_button_id = button_clicked.id;
+  var submit_button_id = button_clicked.attr('id');
   if (submit_button_id != null && submit_button_id.includes('grading-close')){
     if ($.trim(text_area.val())) {
       if (!confirm("The text you entered will not be posted. Are you sure you want to close the grade inquiry?")) {
