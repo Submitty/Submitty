@@ -37,7 +37,7 @@
 <script>
     $( document ).ready(function() {
         enableTabsInTextArea("[name=thread_post_content]");
-        $("#thread_form").submit(createThread);
+        $("#thread_form").submit(event, createThread);
         $("form").areYouSure();
     });
 </script>

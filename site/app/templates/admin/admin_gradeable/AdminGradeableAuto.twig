@@ -4,89 +4,92 @@
             What are students allowed to do?
         </div>
         <div>
-            View the gradeable on the course home page and download submitted files?<br>
-            <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
-                    {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> Yes
-            <input type="radio" id="no_student_view" name="student_view" value="false"
-                    {{ not gradeable.isStudentView() ? 'checked' : '' }}/> No
-            <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
-                    {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> When grades are released
-
-            <input type="radio" id="yes_student_view" name="student_view" value="true"
-                    {{ gradeable.isStudentView() ? 'checked' : '' }} hidden/>
+            <fieldset>
+                <legend>View the gradeable on the course home page and download submitted files?</legend>
+                <input type="radio" id="no_student_view_after_grades" name="student_view_after_grades" value="false"
+                        {{ gradeable.isStudentView() and not gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="no_student_view_after_grades">Yes</label>
+                <input type="radio" id="no_student_view" name="student_view" value="false"
+                        {{ not gradeable.isStudentView() ? 'checked' : '' }}/> <label for="no_student_view">No</label>
+                <input type="radio" id="yes_student_view_after_grades" name="student_view_after_grades" value="true"
+                        {{ gradeable.isStudentView() and gradeable.isStudentViewAfterGrades() ? 'checked' : '' }}/> <label for="yes_student_view_after_grades">When grades are released</label>
+                <div aria-hidden="true" hidden>
+                    <input type="radio" id="yes_student_view" name="student_view" value="true"
+                        {{ gradeable.isStudentView() ? 'checked' : '' }} />
+                </div>
+            </fieldset>
         </div>
 
         <div id="student_submit_view">
             <div>
-                Make new submissions and access all prior versions?<br>
+                <fieldset><legend>Make new submissions and access all prior versions?</legend>
                 <input type="radio" id="yes_student_submit" name="student_submit" value="true"
-                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> Yes
+                        {{ gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="yes_student_submit">Yes</label>
                 <input type="radio" id="no_student_submit" name="student_submit" value="false"
-                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> No
+                        {{ not gradeable.isStudentSubmit() ? 'checked' : '' }}/> <label for="no_student_submit">No</label></fieldset>
             </div>
         </div>
 <br><br>
 
-		<div class="option-title">Choose an autograding configuration:</div>
+        <div class="option-title">Choose an autograding configuration:</div>
                 <p> You may specify your <a target=_blank href="https://submitty.org/instructor/assignment_configuration/configuration_path#course-autograding-configuration-directory">
                     "Course Autograding Config Directory"<i style="font-style:normal;" class="helpicon"></i></a>
                     from the Course Settings Page. </p>
                 <p> Manually type the full path to a configuration file, or select from the list below. </p>
-		<p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
-		{% for error_message in repository_error_messages %}
-			<div name="config_search_error">({{error_message}})</div>
-		{% endfor %}
-		{% if not currently_valid_repository %}
-			<div name="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
-		{% endif %}
+        <p> The dropdown list has all existing configurations that contain the current text. Hit the red X to clear current text.</p>
+        {% for error_message in repository_error_messages %}
+            <div name="config_search_error">({{error_message}})</div>
+        {% endfor %}
+        {% if not currently_valid_repository %}
+            <div name="config_search_error"> The current path is not valid, selecting Rebuild Gradeable without changing it will fail.</div>
+        {% endif %}
 
     <div class="settings">
-		<input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
-			autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" />
-		<a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
-		<datalist id="path_data" style="display:none" >
-		{% for path in all_config_paths %}
-			<option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
-		{% endfor %}
-		</datalist>
-		
-		<a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
-		<br />
-			
-		{# text box with the path to the current config file, hidden but still used in js #}
-		<input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path' 
-			value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
+        <input class="config_search ignore" type="text" id="config_search" list="path_data" placeholder="Search for existing configuration" value="{{ gradeable.getAutogradingConfigPath() }}"
+            autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" style="width: 700px;" aria-label="autograding configuration" />
+        <a class="fas fa-times" id= "clear_search_button" onclick="clearButtonPress();">
+        <datalist id="path_data" style="display:none" >
+        {% for path in all_config_paths %}
+            <option name="path_autofill_option" id="{{path.0}}" data-value="{{path.1}}"  style="display:none" >{{path.0}}</option>
+        {% endfor %}
+        </datalist>
+
+        <a class="btn btn-primary" style="margin-top: 6px" href="{{ upload_config_url }}">Upload a custom autograding configuration</a>
+        <br />
+
+        {# text box with the path to the current config file, hidden but still used in js #}
+        <input style='width: 83%' type='hidden' id='input-provide-full-path' name='autograding_config_path'
+            value="{{ gradeable.getAutogradingConfigPath() }}" class="required" placeholder="(Required)" {{'disabled'}}/>
     </div>
     <br><br>
 
     <div class="btn-container" id="rebuild-gradeable-button">
         <a class="btn btn-primary" onclick="ajaxRebuildGradeableButton()">Rebuild Gradeable</a>
     </div>
-	
-	<div id="rebuild-status-panel">
-		<span id="rebuild-status-label">Build Status: </span>
-		<div id="rebuild-status"></div>
-	</div>
-	
-	<div id="rebuild-log-button">	
-		<input type="button" class="btn btn-default" id="open-build-log" type="button" value="Open Build Log" onclick="showBuildLog()" />
-		<input type="button" class="btn btn-primary" id="close-build-log" type="button" value="Close Build Log" onclick="hideBuildLog()" />
-	</div>
-	
-	<div class="log-container" hidden>
-		<div class="option-title">Build log:</div>
-		<pre id="build-log-body"></pre>
-	</div>
 
-	<div class="log-container" hidden>
-		<div class="option-title">CMake output:</div>
-		<pre id="cmake-log-body"></pre>
-	</div>
+    <div id="rebuild-status-panel">
+        <span id="rebuild-status-label">Build Status: </span>
+        <div id="rebuild-status"></div>
+    </div>
 
-	<div class="log-container" hidden>
-		<div class="option-title">Make output:</div>
-		<pre id="make-log-body"></pre>
-	</div>
+    <div id="rebuild-log-button">
+        <input type="button" class="btn btn-default" id="open-build-log" type="button" value="Open Build Log" onclick="showBuildLog()" />
+        <input type="button" class="btn btn-primary" id="close-build-log" type="button" value="Close Build Log" onclick="hideBuildLog()" />
+    </div>
+
+    <div class="log-container" hidden>
+        <div class="option-title">Build log:</div>
+        <pre id="build-log-body"></pre>
+    </div>
+
+    <div class="log-container" hidden>
+        <div class="option-title">CMake output:</div>
+        <pre id="cmake-log-body"></pre>
+    </div>
+
+    <div class="log-container" hidden>
+        <div class="option-title">Make output:</div>
+        <pre id="make-log-body"></pre>
+    </div>
 
 </div>
 
@@ -105,52 +108,52 @@
             disableElementChildren('.pdf_page_input', true);
         }
     }
-	
-	function getConfigData() {
-		var names = [];
-		var paths = [];
-		
-		$("[name='path_autofill_option']").each(function() {
-			names.push($(this).attr("id"));
-			paths.push($(this).attr("data-value"));
-		});
-		
-		return [names,paths];
-	}
+
+    function getConfigData() {
+        var names = [];
+        var paths = [];
+
+        $("[name='path_autofill_option']").each(function() {
+            names.push($(this).attr("id"));
+            paths.push($(this).attr("data-value"));
+        });
+
+        return [names,paths];
+    }
 
     function onConfigPathChange() {
-		data=getConfigData();
-	    let full_path_obj = $('#input-provide-full-path');
-		let current_val = $('#config_search').val();
-		
-		//if a name is entered change to the path
+        data=getConfigData();
+        let full_path_obj = $('#input-provide-full-path');
+        let current_val = $('#config_search').val();
 
-		let index=-1;
-		for (i=0; i<data[0].length; i++) {
-			if (current_val == data[0][i]) {
-				index = i;
-			}
-		}
-		if (index != -1) {
-			current_val = data[1][index];
-		}
- 		full_path_obj.val(current_val);
-		full_path_obj.change();
+        //if a name is entered change to the path
 
-		
-		//if path matches display the name
-		for (i=0; i<data[1].length; i++) {
-			if (full_path_obj.val() == data[1][i]) {
-				$('#config_search').val(data[0][i]);
-				return;
-			}
-		}
-		$('#config_search').val(full_path_obj.val());
+        let index=-1;
+        for (i=0; i<data[0].length; i++) {
+            if (current_val == data[0][i]) {
+                index = i;
+            }
+        }
+        if (index != -1) {
+            current_val = data[1][index];
+        }
+        full_path_obj.val(current_val);
+        full_path_obj.change();
+
+
+        //if path matches display the name
+        for (i=0; i<data[1].length; i++) {
+            if (full_path_obj.val() == data[1][i]) {
+                $('#config_search').val(data[0][i]);
+                return;
+            }
+        }
+        $('#config_search').val(full_path_obj.val());
     }
-	
-	function clearButtonPress() {
-		$('#config_search').val('');
-	}
+
+    function clearButtonPress() {
+        $('#config_search').val('');
+    }
 
     function onStudentViewChange() {
         if($('#yes_student_view').is(':checked')) {
@@ -200,7 +203,7 @@
         $('[name=student_submit]').change(onStudentSubmitChange);
 
         // Update the text box when the path config changes
-		onConfigPathChange();
+        onConfigPathChange();
         $('#config_search').change(onConfigPathChange);
 
         $('input[name=student_view_after_grades]').change(function() {
