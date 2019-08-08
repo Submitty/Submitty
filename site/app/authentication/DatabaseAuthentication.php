@@ -13,8 +13,7 @@ namespace app\authentication;
  * @link http://php.net/manual/en/function.password-verify.php
  */
 class DatabaseAuthentication extends AbstractAuthentication {
-
-    public function authenticate() {
+    public function authenticate(): bool {
         if ($this->user_id === null || $this->password === null) {
             return false;
         }

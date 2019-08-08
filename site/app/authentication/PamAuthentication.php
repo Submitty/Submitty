@@ -4,8 +4,6 @@ namespace app\authentication;
 
 use app\exceptions\AuthenticationException;
 use app\exceptions\CurlException;
-use app\libraries\Core;
-use app\libraries\FileUtils;
 
 /**
  * Class PamAuthentication
@@ -18,7 +16,7 @@ use app\libraries\FileUtils;
  * the filename via GET to this page, all using the cURL library.
  */
 class PamAuthentication extends AbstractAuthentication {
-    public function authenticate() {
+    public function authenticate(): bool {
         // Check for $this->user_id and $this->>password to be non empty
         if (empty($this->user_id) || empty($this->password) ||
             $this->core->getQueries()->getSubmittyUser($this->user_id) === null) {

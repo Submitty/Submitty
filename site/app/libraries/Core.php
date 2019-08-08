@@ -34,8 +34,8 @@ class Core {
     /** @var AbstractDatabase */
     private $course_db = null;
 
-    /** @var AbstractAuthentication */
-    private $authentication;
+    /** @var AuthenticationManager */
+    private $authentication_manager;
 
     /** @var SessionManager */
     private $session_manager;
@@ -146,11 +146,7 @@ class Core {
     }
 
     public function loadAuthentication() {
-        $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
-        if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
-            throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
-        }
-        $this->authentication = new $auth_class($this);
+        $this->authentication_manager = new AuthenticationManager($this);
         $this->session_manager = new SessionManager($this);
     }
 
@@ -332,10 +328,10 @@ class Core {
     }
 
     /**
-     * @return AbstractAuthentication
+     * @return AbstractAuthentication[]
      */
     public function getAuthentication() {
-        return $this->authentication;
+        return $this->authentication_manager;
     }
 
     /**
@@ -394,9 +390,9 @@ class Core {
      * @throws AuthenticationException
      */
     public function authenticate(bool $persistent_cookie = true): bool {
-        $user_id = $this->authentication->getUserId();
+        $user_id = $this->authentication_manager->getUserId();
         try {
-            if ($this->authentication->authenticate()) {
+            if ($this->authentication_manager->authenticate()) {
                 // Set the cookie to last for 7 days
                 $token = TokenManager::generateSessionToken(
                     $this->session_manager->newSession($user_id),

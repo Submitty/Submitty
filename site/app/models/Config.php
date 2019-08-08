@@ -32,7 +32,6 @@ use app\libraries\Utils;
  * @method integer getDefaultHwLateDays()
  * @method integer getDefaultStudentLateDays()
  * @method string getConfigPath()
- * @method string getAuthentication()
  * @method \DateTimeZone getTimezone()
  * @method string getUploadMessage()
  * @method array getHiddenDetails()
@@ -56,6 +55,7 @@ use app\libraries\Utils;
  * @method array getCourseJson()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
+ * @method array getAuthenticationSettings()
  */
 
 class Config extends AbstractModel {
@@ -96,8 +96,6 @@ class Config extends AbstractModel {
     protected $vcs_url;
     /** @property @var string */
     protected $cgi_url;
-    /** @property @var string */
-    protected $authentication;
     /** @property @var string */
     protected $timezone = 'America/New_York';
     /** @property @var string */
@@ -206,6 +204,22 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $secret_session;
 
+    protected $authentication_settings = [
+        'methods' => [
+            'PamAuthentication'
+        ],
+        'ldap' => [
+            'url' => '',
+            'uid' => 'uid',
+            'bind_dn' => ''
+        ],
+        'database' => [
+            'enable_password_change' => false
+        ],
+        'pam' => [
+        ]
+    ];
+
     /**
      * Config constructor.
      *
@@ -238,7 +252,6 @@ class Config extends AbstractModel {
             $this->database_driver = $database_json['driver'];
         }
 
-        $this->authentication = $database_json['authentication_method'];
         $this->debug = $database_json['debugging_enabled'] === true;
 
         $submitty_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty.json'));
@@ -347,6 +360,16 @@ class Config extends AbstractModel {
         }
         $this->latest_tag = $version_json['most_recent_git_tag'];
         $this->latest_commit = $version_json['short_installed_commit'];
+
+        $auth_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'authentication.json'));
+        if (!$auth_json) {
+            throw new ConfigException("Could not find authentication file: {$this->config_path}/authentication.json");
+        }
+
+        $this->authentication_settings = array_replace_recursive($auth_json);
+        if (empty($authentication_settings['methods'])) {
+            throw new ConfigException("Must specify an authentication method to use");
+        }    
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {

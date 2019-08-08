@@ -2,6 +2,7 @@
 
 namespace app\authentication;
 
+use app\libraries\AuthenticationManager;
 use app\libraries\Core;
 
 /**
@@ -16,8 +17,16 @@ abstract class AbstractAuthentication {
     protected $user_id = null;
     protected $password = null;
 
-    public function __construct(Core $core) {
+    public function __construct(Core $core, AuthenticationManager $manager) {
         $this->core = $core;
+    }
+
+    public function setUserId(string $user_id): void {
+        $this->user_id = $user_id;
+    }
+
+    public function setPassword(string $password): void {
+        $this->password = $password;
     }
 
     /**
@@ -27,17 +36,5 @@ abstract class AbstractAuthentication {
      *
      * @return bool
      */
-    abstract public function authenticate();
-
-    public function setUserId($user_id) {
-        $this->user_id = trim(strtolower($user_id));
-    }
-
-    public function setPassword($password) {
-        $this->password = $password;
-    }
-
-    public function getUserId() {
-        return $this->user_id;
-    }
+    abstract public function authenticate(): bool;
 }
