@@ -159,9 +159,9 @@ What is the lowest privileged user group that can grade this?
         }
     }
 
-    function onSectionTypeChange() {
-        if ($('#rotating_section').is(':checked')) {
-            disableElementChildren('#rotating_data', false);
+	function onSectionTypeChange() {
+	if ($('#rotating_section').is(':checked')) {
+			disableElementChildren('#rotating_data', false);
 			disableElementChildren('#grader-warning',false);
         }
 		else if ($('#all_access').is(':checked')) {
