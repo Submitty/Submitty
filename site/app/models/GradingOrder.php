@@ -245,9 +245,23 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Previous submitter to grade
      */
     public function getPrevSubmitterMatching(Submitter $submitter, callable $fn) {
-        $index = $this->getSubmitterIndex($submitter);
-        if ($index === false) {
-            return null;
+
+        // If $submitter is in one of our sections, then get the $submitters index in the GradingOrder
+        if($this->containsSubmitter($submitter)) {
+            $index = $this->getSubmitterIndex($submitter);
+            if ($index === false) {
+                return null;
+            }
+
+        // Else $submitter is not in one of our sections so set $index to number of submitters in our sections
+        } else {
+            $count = 0;
+
+            foreach ($this->section_submitters as $section) {
+                $count += count($section);
+            }
+
+            $index = $count;
         }
 
         do {
@@ -270,9 +284,17 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Next submitter to grade
      */
     public function getNextSubmitterMatching(Submitter $submitter, callable $fn) {
-        $index = $this->getSubmitterIndex($submitter);
-        if ($index === false) {
-            return null;
+
+        // If $submitter is in one of our sections, then get the $submitters index in the GradingOrder
+        if($this->containsSubmitter($submitter)) {
+            $index = $this->getSubmitterIndex($submitter);
+            if ($index === false) {
+                return null;
+            }
+
+        // Else $submitter is not in one of our sections so set $index to -1
+        } else {
+            $index = -1;
         }
 
         do {
