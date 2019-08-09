@@ -20,10 +20,6 @@
     padding: 5px;
 }
 
-.mobile-table th, .mobile-table td {
-    white-space: nowrap;
-}
-
 .section-break {
     border-top: 1px solid var(--standard-hover-light-gray);
     font-weight: normal;
@@ -96,5 +92,15 @@
 
     .mobile-table td:before {
         content: none !important;
+    }
+
+    .mobile-table td:first-child,
+    .mobile-table th:first-child {
+        padding-left: 15px;
+    }
+
+    .mobile-table td:last-child,
+    .mobile-table th:last-child {
+        padding-right: 15px;
     }
 }
