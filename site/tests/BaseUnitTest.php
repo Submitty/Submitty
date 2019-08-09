@@ -117,6 +117,12 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                 $user->method('accessAdmin')->willReturn(false);
             }
 
+            if (isset($user_config['access_faculty'])) {
+                $user->method('accessFaculty')->willReturn($user_config['access_faculty'] == true);
+            } else {
+                $user->method('accessFaculty')->willReturn(false);
+            }
+
             $core->method('getUser')->willReturn($user);
         }
 
