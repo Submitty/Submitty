@@ -69,7 +69,6 @@ class GradingOrder extends AbstractModel {
         $this->all = $all;
 
         //Get that user's grading sections
-        // Full access graders may access all grading sections even if they are not assigned
         if ($all) {
             $this->sections = $gradeable->getAllGradingSections();
         } else {
