@@ -410,7 +410,10 @@ function saveRubric(redirect = true) {
     $.getJSON({
         type: "POST",
         url: buildCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
-        data: values,
+        data: {
+            values: values,
+            csrf_token: csrfToken
+        },
         success: function (response) {
             if (response.status === 'success') {
                 delete errors['rubric'];
