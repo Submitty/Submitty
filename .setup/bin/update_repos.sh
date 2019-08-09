@@ -84,7 +84,7 @@ function clone_or_update_repo {
         # THE REPO DID NOT EXIST
         echo "    the repository did not previously exist... "
         pushd ${parent_repo_dir} > /dev/null
-        git clone --branch ${min_repo_version} --depth 1 "https://github.com/Submitty/${repo_name}"
+        git clone --branch ${min_repo_version} --depth 1 "https://github.com/Submitty/${repo_name}" 2> /dev/null
         popd > /dev/null
         echo -e "    automatically cloned version ${min_repo_version}\n"
 
