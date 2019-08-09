@@ -25,13 +25,13 @@ use app\models\SimpleStat;
 class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getUserById($user_id) {
-        $details = array();
-
         $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
 
-        if (count($this->submitty_db->rows()) > 0) {
-            $details = array_merge($details, $this->submitty_db->row());
+        if ($this->submitty_db->getRowCount() === 0) {
+            return null;
         }
+
+        $details = $this->submitty_db->row();
 
         if ($this->course_db) {
             $this->course_db->query("
@@ -55,17 +55,13 @@ LEFT JOIN (
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
 
-            if (count($this->course_db->rows()) > 0) {
+            if ($this->course_db->getRowCount() > 0) {
                 $user = $this->course_db->row();
                 if (isset($user['grading_registration_sections'])) {
                     $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
                 }
                 $details = array_merge($details, $user);
             }
-        }
-
-        if (empty($details)) {
-            return null;
         }
 
         return new User($this->core, $details);
