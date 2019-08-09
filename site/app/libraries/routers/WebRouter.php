@@ -212,14 +212,6 @@ class WebRouter {
                 )
             );
         }
-        elseif ($this->core->getUser() === null && $this->parameters['_method'] !== 'noAccess') {
-            $this->core->loadSubmittyUser();
-            if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['no_access']))
-                );
-            }
-        }
         elseif ($this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
