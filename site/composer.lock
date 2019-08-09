@@ -1009,8 +1009,9 @@
             ],
             "authors": [
                 {
-                    "name": "Christian Lück",
-                    "email": "christian@lueck.tv"
+                    "name": "Luís Otávio Cobucci Oblonczyk",
+                    "role": "Developer",
+                    "email": "lcobucci@gmail.com"
                 }
             ],
             "description": "A trivial implementation of timeouts for Promises, built on top of ReactPHP.",

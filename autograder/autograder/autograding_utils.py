@@ -136,7 +136,7 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
-
+    checkout_subdirectory = complete_config["autograding"].get("use_checkout_subdirectory","")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
     tmp_work_instructor_solution = os.path.join(tmp_work, "instructor_solution")
 
@@ -154,7 +154,7 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     # Copy required submission/checkout files
     pattern_copy("submission_to_validation", patterns['submission_to_validation'], submission_path, tmp_work, tmp_logs)
     if is_vcs:
-        checkout_subdir_path = os.path.join(self.tmp_submission, 'checkout', self.checkout_subdirectory)
+        checkout_subdir_path = os.path.join(tmp_submission, 'checkout', checkout_subdirectory)
         pattern_copy("checkout_to_validation", patterns['submission_to_validation'],checkout_subdir_path,tmp_work,tmp_logs)
     
     for c in testcases:
