@@ -1197,6 +1197,16 @@ div.full_height {
     display: inline-block;
 }
 
+[name^="grader-warning-popup"] {
+    background:var(--danger-red);
+    box-shadow: 0 2px 15px -5px var(--standard-light-gray);
+    border-radius: 3px;
+    overflow: auto;
+    margin: 10px;;
+    padding: 30px;
+    flex-grow: 1;
+}
+
 .fill-available {
     width: 100%;
     width: -webkit-fill-available;

@@ -77,15 +77,14 @@
     <div class="option-desc col-md-12">
         {% if action == 'new' or action == 'template' %}
             <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-            <div class="option-title">Gradable Type</div>
-            <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a></div>    
+            {# (VPAT) fieldset/legend required for gradeable type container radio group #}
+            <fieldset><legend><div class="option-title">Gradeable Type</div></legend>
+            <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a></div>
             <span id="required_type" >(Required)</span>
         {% else %}
             <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
         {% endif %}
-    </div>
-    <div class="option-desc col-md-12">
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
             <div>
                 <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
@@ -97,14 +96,16 @@
                     {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> <label for="radio_numeric"> {{ gradeable_type_strings['numeric'] }} </label>
             </div>
 
-            <div hidden>
+            <div aria-hidden="true" hidden>
                 <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
                         {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
             </div>
 
             {# Real input fields to back the exposed configurations options #}
-            <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
-            <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
+            <div aria-hidden="true" hidden>
+                <input id="scanned_exam" name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}">
+                <input id="vcs" name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}">
+            </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
@@ -121,6 +122,10 @@
                         {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> <label for="radio_ef_scanned_exam"> {{ gradeable_type_strings['electronic_exam'] }} </label>
             </div>
         </div>
+        {% if action == 'new' or action == 'template' %}
+            {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}
+            </fieldset>
+        {% endif %}
 
       <!-- This is only relevant to Electronic Files -->
         <div class="gradeable_type_options electronic_file" id="electronic_file">
@@ -131,7 +136,7 @@
                 <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
                         {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
             </fieldset>
-            
+
             {% if regrade_enabled %}
                 <fieldset id="regrade_request_enable_container">
                     <legend>Will grade inquiries be enabled for this assignment?</legend>
@@ -161,7 +166,8 @@
 
             <div id="team-settings-container">
                 {% if action == 'new' or action == 'template' %}
-                    Is this a team assignment?
+                    {# (VPAT) fieldset/legend needed for team assignment radio group #}
+                    <fieldset><legend>Is this a team assignment?</legend>
                 {% else %}
                     Team Settings:
                     {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
@@ -173,6 +179,10 @@
                     <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
                             {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
                 </div>
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) Closes fieldset for team assignment radio group #}
+                    </fieldset>
+                {% endif %}
             </div>
 
             <!-- Team settings (read only in edit mode) -->
@@ -203,42 +213,44 @@
             </div>
 
             <div id="repository">
-                <label for="repository">VCS Repository Details (select one)</label>
-                <div>
-                    <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
-                        {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty hosted – single gradeable repository
-    
-                    <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
-                        <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
-                        <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
-                        <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
+                <fieldset>
+                    <legend>VCS Repository Details (select one)</legend>
+                    <div>
+                        <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
+                            {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
+
+                        <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
+                            <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
+                            <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
+                            <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
+                        </div>
                     </div>
-                </div>
-                <div class="team_no">
-                    <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
-                        {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
-                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Submitty hosted – choose repository name (can be used for multiple gradeables)
-    
-                    <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
-                        {% if action == 'new' or action == 'template' %}
-                            <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
-                            <input style='width: 30%' type='text' name="vcs_url" id="vcs_submitty_url" class="required auto_save" placeholder="(Required)"
-                                    value="" required />
-                            <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
-                        {% else %}
-                            <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
-                        {% endif %}
+                    <div class="team_no">
+                        <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
+                            {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted_set_url">Submitty hosted – choose repository name (can be used for multiple gradeables)</label>
+
+                        <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
+                            {% if action == 'new' or action == 'template' %}
+                                <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
+                                <input style='width: 30%' type='text' name="vcs_url" id="vcs_submitty_url" class="required auto_save" placeholder="(Required)"
+                                    aria-label="repository name" value="" required />
+                                <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
+                            {% else %}
+                                <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-    
-                <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
-                    {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - public repository, students will provide URL </br>
-    
-                <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
-                    {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
-                    {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)
+
+                    <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
+                        {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Github hosted - public repository, students will provide URL</label> </br>
+
+                    <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
+                        {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+                </fieldset>
             </div>
         </div>
     </div>
