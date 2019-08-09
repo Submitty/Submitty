@@ -70,7 +70,6 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
-.helpicon,
 .helpicon::before {
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
