@@ -81,7 +81,7 @@
                 {{ element.src |escape}}
               </div>
               <script>
-                mermaid.init( { "useMaxWidth" : false, "startOnLoad" : false, theme:"forest"  }, "#div_{{ index }}_{{ check_index }}");
+                mermaid.init( { "useMaxWidth" : false, "startOnLoad" : false, "theme":null, "themeCSS":"sequence.css"  }, "#div_{{ index }}_{{ check_index }}");
               </script>
             {% endif %}
         </div>
