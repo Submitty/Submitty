@@ -1,12 +1,11 @@
 <?php
 
-require __DIR__ . '/../../vendor/autoload.php';
+namespace app\libraries;
 
 use Ratchet\MessageComponentInterface;
 use Ratchet\ConnectionInterface;
-use Ratchet\Server\IoServer;
 
-class Chat implements MessageComponentInterface {
+class Socket implements MessageComponentInterface {
     protected $clients;
 
     public function __construct() {
@@ -46,10 +45,3 @@ class Chat implements MessageComponentInterface {
         $conn->close();
     }
 }
-
-$server = IoServer::factory(
-    new Chat(),
-    8080
-);
-
-$server->run();

@@ -3,6 +3,7 @@
 <script>
 
     $( document ).ready(function(){
+
         enableTabsInTextArea('.post_content_reply');
         saveScrollLocationOnRefresh('posts_list');
         addCollapsable();
@@ -15,6 +16,9 @@
         $(".post_reply_from").submit(event, publishPost);
         $("form").areYouSure();
         loadThreadHandler();
+
+        enableSocket();
+
     });
 
 </script>
