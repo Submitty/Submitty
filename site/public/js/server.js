@@ -29,6 +29,17 @@ function buildCourseUrl(parts = []) {
     return document.body.dataset.courseUrl + '/' + parts.join('/');
 }
 
+function enableSocket(){
+
+    var host = window.location.host;
+    var conn = new WebSocket('ws://' + host + ':8080');
+
+    conn.onopen = function(e) {
+        console.log("Connection established!");
+    };
+
+}
+
 function changeDiffView(div_name, gradeable_id, who_id, version, index, autocheck_cnt, helper_id){
     var actual_div_name = "#" + div_name + "_0";
     var expected_div_name = "#" + div_name + "_1";

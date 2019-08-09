@@ -1,14 +1,3 @@
-function enableSocket(){
-
-    var host = window.location.host;
-    var conn = new WebSocket('ws://' + host + ':8080');
-
-    conn.onopen = function(e) {
-        console.log("Connection established!");
-    };
-
-}
-
 function categoriesFormEvents(){
     $("#ui-category-list").sortable({
         items : '.category-sortable',
