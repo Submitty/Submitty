@@ -69,12 +69,13 @@ a.nav-bar {
 
 a.nav-bar.normal-btn:hover {
     background-color: var(--standard-pastel-blue);
+    color: var(--text-black);
     border: 1px solid gray;
     border-bottom: none;
 }
 
 a.nav-bar.disabled-btn {
-    color: var(--standard-light-gray) ;
+    color: var(--standard-medium-gray) ;
     cursor: default;
     border: none !important;
     pointer-events: none;
