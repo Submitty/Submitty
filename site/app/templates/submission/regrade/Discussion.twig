@@ -26,10 +26,10 @@
                             </script>
                             <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
                             <span class="red-message">Grade Inquiry Under Review</span>
-                        {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == 0 and is_grading %}
+                        {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is not null and grade_inquiries[component.id].status == 0 and is_grading %}
                             <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>
                             <span class="green-message">Grade Inquiry Has Been Resolved</span>
-                        {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status == 0 %}
+                        {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is not null and grade_inquiries[component.id].status == 0 %}
                             <script type="text/javascript">
                                 $("#regradeBoxSection").show();
                             </script>
@@ -75,7 +75,7 @@
                         <div style="margin-right: auto">
                         {{ self.markdown_buttons() }}
                         </div>
-                            {% if grade_inquiries[component.id] is not defined %}
+                            {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status is null %}
                                 {# No request yet #}
                                 <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
                                     Submit Grade Inquiry
