@@ -45,7 +45,8 @@ class PDFView extends AbstractView {
             'page_num' => $params["page_num"],
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
-            'localjs' => $localjs
+            'localjs' => $localjs,
+            'csrfToken' => $this->core->getCsrfToken()
         ]);
     }
 }

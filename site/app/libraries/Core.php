@@ -286,23 +286,7 @@ class Core {
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        if(!$this->getConfig()->isCourseLoaded()){
-           $this->loadSubmittyUser();
-        }
-        else{
-            $this->user = $this->database_queries->getUserById($user_id);
-        }
-    }
-
-    /**
-     * Loads the user from the main Submitty database. We should only use this function
-     * because we're accessing either a non-course specific page or we're trying to access
-     * a page of a course that the user does not have access to so $this->loadUser() fails.
-     */
-    public function loadSubmittyUser() {
-        if ($this->user_id !== null) {
-            $this->user = $this->database_queries->getSubmittyUser($this->user_id);
-        }
+        $this->user = $this->database_queries->getUserById($user_id);
     }
 
     /**
@@ -448,6 +432,32 @@ class Core {
             throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
         }
         return null;
+    }
+
+    /**
+     * Invalidates user's token by refreshing user's api key.
+     *
+     * @return bool
+     *
+     * @throws AuthenticationException
+     */
+    public function invalidateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                $this->database_queries->refreshUserApiKey($user_id);
+                return true;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return false;
     }
 
     /**

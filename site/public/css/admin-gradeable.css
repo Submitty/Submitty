@@ -67,21 +67,25 @@ a.nav-bar {
     border-radius: 6px 6px 0 0;
 }
 
-a.nav-bar:hover {
+a.nav-bar.normal-btn:hover {
+    background-color: var(--standard-pastel-blue);
+    color: var(--text-black);
     border: 1px solid gray;
     border-bottom: none;
 }
 
 a.nav-bar.disabled-btn {
-    color: var(--standard-light-gray) ;
+    color: var(--standard-medium-gray) ;
     cursor: default;
     border: none !important;
     pointer-events: none;
 }
 
 a.nav-bar.normal-btn {
-    background-color: var(--standard-white) ;
+    background-color: var(--default-white) ;
     color: var(--text-black);
+    border: 1px solid gray;
+    border-bottom: none;
 }
 
 a.nav-bar.active-btn {
