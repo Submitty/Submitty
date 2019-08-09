@@ -58,7 +58,7 @@ class GradingOrder extends AbstractModel {
      * GradingOrder constructor.
      * @param Core $core
      * @param Gradeable $gradeable
-     * @param User $user
+     * @param User $user The current user (the one that is doing the grading)
      * @param boolean $all
      */
     public function __construct(Core $core, Gradeable $gradeable, User $user, $all = false) {
@@ -184,6 +184,17 @@ class GradingOrder extends AbstractModel {
     }
 
     /**
+     * Queries the database to populate $this->not_fully_graded
+     *
+     * @param $component_id
+     */
+    private function initUsersNotFullyGraded($component_id) {
+        if(is_null($this->not_fully_graded)) {
+            $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
+        }
+    }
+
+    /**
      * Get the next ungraded submitter
      *
      * If a component_id is passed in this function will return the next submitter with that specific
@@ -197,7 +208,7 @@ class GradingOrder extends AbstractModel {
     public function getNextUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
 
         // Query database to find out which users have not been completely graded
-        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
+        $this->initUsersNotFullyGraded($component_id);
 
         return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
             return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
@@ -218,7 +229,7 @@ class GradingOrder extends AbstractModel {
     public function getPrevUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
 
         // Query database to find out which users have not been completely graded
-        $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
+        $this->initUsersNotFullyGraded($component_id);
 
         return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
             return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
