@@ -216,7 +216,7 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
         if os.path.isfile(vcs_checkout_logfile):
             shutil.move(vcs_checkout_logfile,tmp_logs)
         else:
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, message=" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
 
 
     copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
