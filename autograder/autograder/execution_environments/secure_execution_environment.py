@@ -90,7 +90,7 @@ class SecureExecutionEnvironment():
 
     if self.is_vcs:
       checkout_subdir_path = os.path.join(self.tmp_submission, 'checkout', self.checkout_subdirectory)
-      autograding_utils.pattern_copy("checkout_to_compilation",self.patterns['checkout_to_compilation'],checkout_subdir_path, directory,self.tmp_logs)
+      autograding_utils.pattern_copy("checkout_to_compilation",self.patterns['submission_to_compilation'],checkout_subdir_path, directory,self.tmp_logs)
     
     if os.path.exists(provided_code_path):
       autograding_utils.copy_contents_into(self.job_id, provided_code_path, directory, self.tmp_logs, self.log_path, self.stack_trace_log_path)
@@ -122,7 +122,7 @@ class SecureExecutionEnvironment():
     os.makedirs(directory)
 
     submission_path = os.path.join(self.tmp_submission, 'submission')
-    checkout_path = os.path.join(submission_path, "checkout")
+    checkout_path = os.path.join(self.tmp_submission, "checkout")
 
     # Copy in submitted code.
     autograding_utils.pattern_copy("submission_to_runner",self.patterns["submission_to_runner"], 
@@ -130,8 +130,8 @@ class SecureExecutionEnvironment():
 
     # Copy in checkout code.
     if self.is_vcs:
-        autograding_utils.pattern_copy("checkout_to_runner",self.patterns["checkout_to_runner"], 
-                            checkout_path, directory, self.tmp_logs)
+        autograding_utils.pattern_copy("checkout_to_runner",self.patterns["submission_to_runner"], 
+                            os.path.join(checkout_path, self.checkout_subdirectory), directory, self.tmp_logs)
 
     # For the moment, we define testcase dependencies to be on any previous compilation testcases.
     # For these testcase, we copy in compilation_to_runner.
