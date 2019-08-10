@@ -26,7 +26,8 @@ def parse_args():
     parser.add_argument('user_id', help='user_id of the user to create')
     parser.add_argument('semester', help='semester of the course')
     parser.add_argument('course', help='title of the course')
-    parser.add_argument('registration_section', help='registration section that the user is added into')
+    parser.add_argument('registration_section', nargs='?', default=None, 
+                        help='registration section that the user is added into')
 
     return parser.parse_args()
 
@@ -51,7 +52,7 @@ def main():
     user = connection.execute(select, user_id=user_id).fetchone()
 
     courses_table = Table('courses', metadata, autoload=True)
-    if not registration_section.isdigit():
+    if registration_section and not registration_section.isdigit():
         registration_section = None
     select = courses_table.select().where(and_(courses_table.c.semester == bindparam('semester'),
                                                 courses_table.c.course == bindparam('course')))
@@ -74,8 +75,8 @@ def main():
     else:
         query = courses_u_table.update(values={
             courses_u_table.c.registration_section: bindparam('registration_section')
-        }).where(courses_u_table.c.user_id == bindparam('user_id'))
-        connection.execute(query, registration_section=registration_section)
+        }).where(courses_u_table.c.user_id == bindparam('b_user_id'))
+        connection.execute(query, b_user_id=user_id, registration_section=registration_section)
 
 
 if __name__ == '__main__':
