@@ -29,14 +29,20 @@ function buildCourseUrl(parts = []) {
     return document.body.dataset.courseUrl + '/' + parts.join('/');
 }
 
+var SocketCon;
+
 function enableSocket(){
 
     var host = window.location.host;
-    var conn = new WebSocket('ws://' + host + ':8080');
+    window.SocketCon = new WebSocket('ws://' + host + ':8080');
 
-    conn.onopen = function(e) {
+    window.SocketCon.onopen = function(e) {
         console.log("Connection established!");
     };
+
+    window.SocketCon.onmessage = function(e){
+        console.log(e);
+    }
 
 }
 
