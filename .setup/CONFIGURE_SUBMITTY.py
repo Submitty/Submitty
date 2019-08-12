@@ -37,6 +37,15 @@ def get_input(question, default=""):
     return user
 
 
+def get_boolean_input(question, default=True):
+    while True:
+        user = input(f"{question} [y/n]: [{'y' if default is True else 'n'}] ")
+        user = user.strip().lower()
+        if len(user) > 0 and user[0] in ['y', 'n']:
+            break
+    return user[0] == 'y'
+
+
 ##############################################################################
 # this script must be run by root or sudo
 if os.getuid() != 0:
@@ -243,7 +252,8 @@ else:
 
     USERNAME_TEXT = defaults['username_change_text']
 
-    print("What authentication method to use:\n1. PAM\n2. Database\n")
+    options = ['Pam', 'Database', 'Ldap']
+    print("What authentication method to use:\n0. Done Adding 1. PAM\n2. Database\n")
     while True:
         try:
             auth = int(get_input('Enter number?', defaults['authentication_method']))
@@ -268,30 +278,26 @@ else:
             continue
         break
 
-    while True:
-        is_email_enabled = get_input("Will Submitty use email notifications? [y/n]", 'y')
-        if (is_email_enabled.lower() in ['yes', 'y']):
-            EMAIL_ENABLED = True
-            EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
-            EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
-            EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
-            EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
-            EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
-            try:
-                EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
-            except ValueError:
-                EMAIL_SERVER_PORT = defaults['email_server_port']
-            break
-            
-        elif (is_email_enabled.lower() in ['no', 'n']):
-            EMAIL_ENABLED = False
-            EMAIL_USER = defaults['email_user']
-            EMAIL_PASSWORD = defaults['email_password']
-            EMAIL_SENDER = defaults['email_sender']
-            EMAIL_REPLY_TO = defaults['email_reply_to']
-            EMAIL_SERVER_HOSTNAME = defaults['email_server_hostname']
+    is_email_enabled = get_boolean_input("Will Submitty use email notifications? [y/n]", 'y')
+    if is_email_enabled is True:
+        EMAIL_ENABLED = True
+        EMAIL_USER = get_input("What is the email user?", defaults['email_user'])
+        EMAIL_PASSWORD = get_input("What is the email password",defaults['email_password'])
+        EMAIL_SENDER = get_input("What is the email sender address (the address that will appear in the From: line)?",defaults['email_sender'])
+        EMAIL_REPLY_TO = get_input("What is the email reply to address?", defaults['email_reply_to'])
+        EMAIL_SERVER_HOSTNAME = get_input("What is the email server hostname?", defaults['email_server_hostname'])
+        try:
+            EMAIL_SERVER_PORT = int(get_input("What is the email server port?", defaults['email_server_port']))
+        except ValueError:
             EMAIL_SERVER_PORT = defaults['email_server_port']
-            break
+    else:
+        EMAIL_ENABLED = False
+        EMAIL_USER = defaults['email_user']
+        EMAIL_PASSWORD = defaults['email_password']
+        EMAIL_SENDER = defaults['email_sender']
+        EMAIL_REPLY_TO = defaults['email_reply_to']
+        EMAIL_SERVER_HOSTNAME = defaults['email_server_hostname']
+        EMAIL_SERVER_PORT = defaults['email_server_port']
     print()
 
 
