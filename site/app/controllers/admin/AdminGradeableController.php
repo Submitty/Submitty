@@ -6,6 +6,9 @@ use app\controllers\AbstractController;
 use app\exceptions\ValidationException;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\RedirectResponse;
+use app\libraries\response\Response;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
@@ -649,9 +652,11 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/gradeable", methods={"POST"})
+     * @Route("/api/{_semester}/{_course}/gradeable", methods={"POST"})
+     * @return Response
      */
     public function createGradeableRequest() {
-        $gradeable_id = $_POST['id'] ?? '';
+        $gradeable_id = $_POST['id'];
 
         try {
             $build_result = $this->createGradeable($gradeable_id, $_POST);
@@ -659,15 +664,34 @@ class AdminGradeableController extends AbstractController {
             // Finally, redirect to the edit page
             if ($build_result !== null) {
                 $this->core->addErrorMessage($build_result);
+                return new Response(
+                    JsonResponse::getFailResponse($build_result),
+                    null,
+                    new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']))
+                );
             }
-            $this->redirectToEdit($gradeable_id);
-        } catch (\Exception $e) {
+
+            return new Response(
+                JsonResponse::getSuccessResponse(),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']))
+            );
+        }
+        catch (\Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
-            $this->core->redirect($this->core->buildCourseUrl());
+            return new Response(
+                JsonResponse::getFailResponse($e->getMessage()),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl())
+            );
         }
     }
 
     private function createGradeable($gradeable_id, $details) {
+        if (empty($gradeable_id)) {
+            throw new \InvalidArgumentException('Gradeable id can not be empty');
+        }
+
         // Make sure the gradeable doesn't already exist
         if ($this->core->getQueries()->existsGradeable($gradeable_id)) {
             throw new \InvalidArgumentException('Gradeable already exists');
@@ -676,7 +700,7 @@ class AdminGradeableController extends AbstractController {
         $default_late_days = $this->core->getConfig()->getDefaultHwLateDays();
         // Create the gradeable with good default information
         //
-        $gradeable_type = GradeableType::stringToType($details['type']);
+        $gradeable_type = GradeableType::stringToType($details['type'] ?? '');
         $gradeable_create_data = [
             'type' => $gradeable_type,
             'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
@@ -696,7 +720,7 @@ class AdminGradeableController extends AbstractController {
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if ($details['gradeable_template'] !== '--None--') {
+        if (isset($details['gradeable_template']) && $details['gradeable_template'] !== '--None--') {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
@@ -736,7 +760,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         // VCS specific values
-        if ($details['vcs'] === 'true') {
+        if (isset($details['vcs']) && $details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
 
             // Find which radio button is pressed and what host type to use
@@ -790,12 +814,12 @@ class AdminGradeableController extends AbstractController {
             $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
 
             $gradeable_create_data = array_merge($gradeable_create_data, [
-                'team_assignment' => $details['team_assignment'] === 'true',
-                'ta_grading' => $details['ta_grading'] === 'true',
-                'team_size_max' => $details['team_size_max'],
+                'team_assignment' => isset($details['team_assignment']) && $details['team_assignment'] === 'true',
+                'ta_grading' => isset($details['ta_grading']) && $details['ta_grading'] === 'true',
+                'team_size_max' => $details['team_size_max'] ?? 0,
                 'regrade_allowed' => $regrade_allowed,
                 'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
-                'scanned_exam' => $details['scanned_exam'] === 'true',
+                'scanned_exam' => isset($details['scanned_exam']) && $details['scanned_exam'] === 'true',
                 'has_due_date' => true,
 
                 //For discussion component
@@ -861,6 +885,8 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"POST"})
+     * @Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}", methods={"PUT"})
+     * @return Response
      */
     public function updateGradeableRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -871,11 +897,17 @@ class AdminGradeableController extends AbstractController {
         try {
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
-            $this->core->getOutput()->renderJsonSuccess($response_props);
+            return Response::JsonOnlyResponse(
+                JsonResponse::getSuccessResponse($response_props)
+            );
         } catch (ValidationException $e) {
-            $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('See "data" for details', $e->getDetails())
+            );
         } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
+            return Response::JsonOnlyResponse(
+                JsonResponse::getErrorResponse($e->getMessage())
+            );
         }
     }
 
@@ -1007,6 +1039,9 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
+     * @Route("/api/{_semester}/{_course}/gradeable/{gradeable_id}", methods={"DELETE"})
+     *
+     * @return Response
      */
     public function deleteGradeable($gradeable_id) {
         $this->core->getQueries()->deleteGradeable($gradeable_id);
@@ -1015,13 +1050,23 @@ class AdminGradeableController extends AbstractController {
 
         $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $gradeable_id . ".json");
         if ((file_exists($file)) && (!unlink($file))) {
-            die("Cannot delete form_{$gradeable_id}.json");
+            $msg = "Cannot delete form_{$gradeable_id}.json";
+            $this->core->addErrorMessage($msg);
+            return new Response(
+                JsonResponse::getFailResponse($msg),
+                null,
+                new RedirectResponse($this->core->buildCourseUrl())
+            );
         }
 
         // this will cleanup the build files
         $this->enqueueBuildFile($gradeable_id);
 
-        $this->core->redirect($this->core->buildCourseUrl());
+        return new Response(
+            JsonResponse::getSuccessResponse(),
+            null,
+            new RedirectResponse($this->core->buildCourseUrl())
+        );
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1207,11 +1252,6 @@ class AdminGradeableController extends AbstractController {
         }
 
         $this->core->redirect($this->core->buildCourseUrl());
-    }
-
-    private function redirectToEdit($gradeable_id) {
-        $url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']);
-        header('Location: ' . $url);
     }
 
     /**

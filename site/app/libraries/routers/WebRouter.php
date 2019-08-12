@@ -42,6 +42,11 @@ class WebRouter {
         $this->core = $core;
         $this->request = $request;
 
+        // if the method is PUT or DELETE, put the parameters into $_POST
+        if ($request->isMethod('PUT') || $request->isMethod('DELETE')) {
+            $_POST = $request->request->all();
+        }
+
         $fileLocator = new FileLocator();
         /** @noinspection PhpUnhandledExceptionInspection */
         $this->reader = new AnnotationReader();
