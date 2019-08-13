@@ -520,7 +520,7 @@ class ForumThreadView extends AbstractView {
                 "activeThreadTitle" => $activeThreadTitle,
                 "post_box_id" => $post_box_id,
                 "total_attachments" => $totalAttachments,
-                "merge_url" => $this->core->buildNewCourseUrl(['forum', 'threads', 'merge'])
+                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
             ]);
         }
         else {
@@ -880,8 +880,8 @@ class ForumThreadView extends AbstractView {
             $post_attachment["files"] = [];
 
             $attachment_num_files = count($files);
-            $attachment_id = "attachments_{$post['author_user_id']}_{$post['id']}";
-            $attachment_button_id = "button_attachments_{$post['author_user_id']}_{$post['id']}";
+            $attachment_id = "attachments_{$post['id']}";
+            $attachment_button_id = "button_attachments_{$post['id']}";
             $attachment_file_count = 0;
             $attachment_encoded_data = [];
 

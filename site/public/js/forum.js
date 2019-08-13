@@ -160,12 +160,26 @@ function publishFormWithAttachments(form, test_category, error_message) {
     return false;
 }
 
-function createThread() {
-    return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+function createThread(e) {
+    e.preventDefault();
+    try {
+        return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
+    }
+    catch{
+        alert("Something went wrong. Please try again.");
+        return false;
+    }
 }
 
-function publishPost() {
-    return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+function publishPost(e) {
+    e.preventDefault();
+    try {
+        return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
+    }
+    catch{
+        alert("Something went wrong. Please try again.");
+        return false;
+    }
 }
 
 function changeThreadStatus(thread_id) {

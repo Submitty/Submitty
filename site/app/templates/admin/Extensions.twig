@@ -1,113 +1,132 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 <div type="hidden" id="message"></div>
 <div class="content">
     <h1>Excused Absence Extensions</h1>
-    <form id="excusedAbsenceForm" method="post" enctype="multipart/form-data" action="" onsubmit="return updateHomeworkExtensions($(this));">
+    <form id="extensions-form" class="exception-form" method="post" enctype="multipart/form-data" action="">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <input type="hidden" name="option" value="-1" />
         <div class="option">
-            <p> Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.<br><br><br></p>
-            <div class="option"><label for="g_id">Select Gradeable:</label><br>
-                <select name="g_id" id="g_id" style="margin-top: 10px; width: 50%">
-                    <option disabled selected value> -- select an option -- </option>
+            <p>Use this form to grant an extension (e.g., for an excused absence) to a user on a specific assignment.</p>
+            <div class="option">
+                <label for="g_id">Select Gradeable:</label>
+                <select name="g_id" id="gradeable-select" onchange="updateGradeableForExtensions()">
+                    <option disabled {% if current_gradeable is null %} selected {% endif %} value> -- select an option -- </option>
                     {% for index, value in gradeables %}
-                        <option value="{{value['g_id']}}" data-due-date="{{value['eg_submission_due_date']|date("m/d/Y H:i:s")}}">{{ value['g_title'] }}</option>
+                        <option 
+                            value="{{value['g_id']}}" 
+                            {% if current_gradeable['g_id'] == value['g_id'] %} selected {% endif %} 
+                        >
+                            {{ value['g_title'] }}
+                        </option>
                     {% endfor %}
                 </select>
-                <button type="button" class="btn btn-primary" style="margin-top: 10px" onclick="loadHomeworkExtensions($('#g_id').val(),$('#g_id').find('option:selected').attr('data-due-date'));clearDate();"> Apply Changes </button>
-                <p>Due Date: <span id ="due_date"></span></p>
+                {% if current_gradeable is not null %}
+                    <p id="due-date-label">Set Due Date: 
+                        <span id="due-date" data-date="{{ current_gradeable['eg_submission_due_date'] | date("Y-m-d") }}">
+                            {{ current_gradeable['eg_submission_due_date'] | date("m/d/Y H:i:s") }}
+                        <span>
+                    </p>
+                {% endif %}
             </div>
         </div>
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <div class="option-title">Single Student Entry<br></div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="user_id">Student ID:</label><br>
-            <input class="option-input" type="text" name="user_id" id="user_id" style="float:left">
-        </div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="late_days">Give the Days of Extension:</label><br>
-            <input class="option-input" type="text" name="late_days" id="late_days" style="float:left" onkeyup="clearDate()">
-        </div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="late_calendar">Or Pick a New Due Date:</label><br>
-            <input name="late_calendar" id="late_calendar" class="option-input" type="text" style="float:left">
-        </div>
-        <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" value="Submit" style="float:left"></div>
-        <div class="option-title" id="csv_upload_title">Multiple Student Entry Via CSV Upload</div>
-        <div id="csv_upload_format">Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension</div>
-        <div style="padding-bottom:20px;"><input type="file" name="csv_upload" id="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="return updateHomeworkExtensions($(this));"></div>
+         <input type="hidden" name="due_date" value="{{ due_date }}" />
+        <fieldset class="single-student">
+            <legend class="option-title">Single Student Entry</legend>
+            <label for="user_id">
+                Student ID:
+                <input name="user_id" id="user_id" class="option-input" type="text">
+            </label>
+            <label for="late_days">
+                Give the Days of Extension:
+                <input name="late_days" id="late-days" class="option-input" type="text" onkeyup="clearDate()">
+            </label>
+            <label for="late_calendar">
+                Or Pick a New Due Date:
+                <input name="late_calendar" id="late-calendar" class="option-input" type="text" autocomplete="off" onchange="setLateDays()">
+            </label>
+            <a class="btn btn-primary" href="javascript:updateHomeworkExtension()">Submit</a>
+        </fieldset>
+        <fieldset>
+            <legend class="option-title">Multiple Student Entry Via CSV Upload</legend>
+            <label for="csv_upload">
+                Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension
+            </label>
+            <input type="file" name="csv_upload" aria-labelledby="csv_upload_title csv_upload_format" onchange="updateHomeworkExtension()">
+        </fieldset>
     </form>
-    <div id="load-homework-extensions" align="center">
+    {% if current_exceptions is null %}
+        <p id="empty-table" class="warning">
+            {% if current_gradeable is null %}
+                No gradeable has been selected
+            {% else %}
+                No extensions are currently entered for this gradeable
+            {% endif %}
+        </p>
+    {% else %}
         {# This is a data table #}
-        <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
-            <div class="option-title" id="title"></div>
-            <div>
-            	<caption />
-                <thead class="persist-thead">
-                    <th>Student ID</th>
-                    <th>First Name</th>
-                    <th>Last Name</th>
-                    <th>Number of Days of Extension</th>
-                </thead>
-            </div>
+        <table id="extensions-table" class="table table-striped mobile-table">
+            <caption>Extensions</caption>
+            <thead>
+                <th>Student ID</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Number of Days of Extension</th>
+                <th>Delete</th>
+            </thead>
+            <tbody>
+                {% for user in current_exceptions %}
+                    <tr>
+                        <td class="align-left">{{ user.user_id }}</td>
+                        <td class="align-left">{{ user.user_firstname }}</td>
+                        <td class="align-left">{{ user.user_lastname }}</td>
+                        <td>{{ user.late_day_exceptions }}</td>
+                        <td>
+                            <a 
+                                aria-label="Delete {{ user.getId() }}'s extension for {{ current_gradeable['g_id'] }}" 
+                                href="javascript:deleteHomeworkExtension('{{ user.user_id }}');"
+                            >
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
         </table>
-    </div>
+    {% endif %}
 </div>
 <script>
     $("#user_id").autocomplete({
         source: {{ student_full|raw }}
     });
-    function clearDate(){
-        document.getElementById("late_calendar").value = "";
-    }
-    function calculateLateDays(inputDate){
-        let select_menu = document.getElementById("g_id");
-        if(select_menu.selectedIndex === 0){
-            alert("Please select a gradeable first!");
-            return;
-        }
-        var due_date_value = select_menu.options[select_menu.selectedIndex].getAttribute("data-due-date");
-        var new_due_date = new Date(inputDate);
-        var old_due_date = new Date(due_date_value);
-        var delta = (new_due_date.getTime() - old_due_date.getTime()) / (1000*60*60*24);
-        if (delta < 0) {
-            delta = 0;
-        }
-        var diff = Math.floor(delta);
-        document.getElementById("late_days").value = diff;    
-    }
-    $(document).ready(function() {
-        flatpickr("#late_calendar", {
-            plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Now"
-                            }, 
-                            {
-                                label: "End of time"
-                            }
-                        ],
-                        label: "or",
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0: 
-                                    date = new Date();
-                                    break;
-                                case 1: 
-                                    date = new Date("9998-01-01");
-                                    break;
-                            }
-                            fp.setDate(date, true);
+    flatpickr("#late-calendar", {
+        plugins: [ShortcutButtonsPlugin(
+                {
+                    button: [
+                        {
+                            label: "Now"
+                        }, 
+                        {
+                            label: "End of time"
                         }
+                    ],
+                    label: "or",
+                    onClick: (index, fp) => {
+                        let date;
+                        switch (index) {
+                            case 0: 
+                                date = new Date();
+                                break;
+                            case 1: 
+                                date = new Date("01/01/9998");
+                                break;
+                        }
+                        fp.setDate(date, true);
                     }
-                )],
-            allowInput: true,
-            enableTime: false,
-            enableSeconds: false,
-            time_24hr: true,
-            dateFormat: "Y-m-d",
-            onChange: function(selectedDates, dateStr, instance) {
-                calculateLateDays(selectedDates[0]);
-            },
-        });
+                }
+            )],
+        allowInput: true,
+        dateFormat: "Y-m-d"
     });
 </script>
 {% include('admin/users/MoreExtensions.twig') %}
