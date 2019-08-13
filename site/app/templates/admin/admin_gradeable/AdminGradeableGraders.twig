@@ -32,6 +32,16 @@ Variables
 {# 
 Form
 #}
+
+{% if no_rotating_sections %}
+	<div name="grader-warning-popup edit-gradeable" id="grader-warning" hidden>
+		<p> WARNING: Rotating Sections are not set up yet.  <br />
+			All Access Grading and Grading by Rotating Section rely on rotating sections. <br />
+			To set them up, go to the Manage Sections page. <br />
+		</p>
+	</div>
+{% endif %}
+
 What is the lowest privileged user group that can grade this?
     <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
@@ -150,11 +160,17 @@ What is the lowest privileged user group that can grade this?
     }
 
     function onSectionTypeChange() {
-        if($('#rotating_section').is(':checked')) {
+        if ($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
+            disableElementChildren('#grader-warning',false);
+        }
+        else if ($('#all_access').is(':checked')) {
+            disableElementChildren('#rotating_data', true);
+            disableElementChildren('#grader-warning',false);
         }
         else {
             disableElementChildren('#rotating_data', true);
+            disableElementChildren('#grader-warning',true);
         }
     }
 

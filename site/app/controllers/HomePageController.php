@@ -173,7 +173,7 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
 
@@ -230,7 +230,7 @@ class HomePageController extends AbstractController {
                 return new Response(
                     JsonResponse::getFailResponse($error),
                     null,
-                    new RedirectResponse($this->core->buildNewUrl(['home']))
+                    new RedirectResponse($this->core->buildUrl(['home']))
                 );
             }
 
