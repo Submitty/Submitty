@@ -82,7 +82,7 @@ def main():
     firstname = get_input('User firstname', defaults['user_firstname'])
     preferred = get_input('User preferred name', defaults['user_preferred_firstname'], True)
     lastname = get_input('User lastname', defaults['user_lastname'])
-    email = get_input('User email', defaults['user_email'])
+    email = get_input('User email', defaults['user_email'], True)
 
     update = {
         'user_firstname': firstname,
