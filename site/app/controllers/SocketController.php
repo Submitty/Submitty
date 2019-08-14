@@ -11,9 +11,9 @@
 
     $server = IoServer::factory(
         new HttpServer(
-            new WsServer(
-                new Socket()
-            )
+                new WsServer(
+                    new Socket()
+                )
         ),
         8080
     );

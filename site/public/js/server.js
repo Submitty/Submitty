@@ -31,14 +31,10 @@ function buildCourseUrl(parts = []) {
 
 var SocketCon;
 
-function enableSocket(){
+function enableSocket(userName){
 
     var host = window.location.host;
     window.SocketCon = new WebSocket('ws://' + host + ':8080');
-
-    window.SocketCon.onopen = function(e) {
-        console.log("Connection established!");
-    };
 
     window.SocketCon.onmessage = function(e){
         console.log(e);

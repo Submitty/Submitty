@@ -333,6 +333,7 @@ class ForumThreadView extends AbstractView {
 
         if(!$ajax) {
             $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowForumThreads.twig", [
+                "user" => $user,
                 "categories" => $categories,
                 "filterFormData" => $filterFormData,
                 "button_params" => $button_params,
@@ -356,6 +357,7 @@ class ForumThreadView extends AbstractView {
         }
         else{
             $return = $this->core->getOutput()->renderTwigTemplate("forum/GeneratePostList.twig", [
+                "user" => $user,
                 "userGroup" => $generatePostContent["userGroup"],
                 "activeThread" => $generatePostContent["activeThread"],
                 "activeThreadAnnouncement" => $generatePostContent["activeThreadAnnouncement"],
