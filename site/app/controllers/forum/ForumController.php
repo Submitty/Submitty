@@ -397,10 +397,11 @@ class ForumController extends AbstractController{
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
-                echo $_SERVER['HTTP_HOST'];
-
                 $client = new Client("ws://".$_SERVER['HTTP_HOST'].":8080");
-                $client->send("Hello WebSocket.org!");
+                $client->send(json_encode(["type" => "new_post", "data" => [
+                    "post_id" => $post_id,
+                    "thread_id" => $thread_id,
+                ]]));
                 $client->close();
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
@@ -892,6 +893,22 @@ class ForumController extends AbstractController{
                     $this->getThreadContent($_POST["thread_id"], $output);
                 }
                 return $this->core->getOutput()->renderJsonSuccess($output);
+            } else {
+                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
+            }
+        }
+        return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/forum/posts/get_html", methods={"POST"})
+     */
+    public function getHTMLPostContent(){
+        $post_id = $_POST["post_id"];
+        if(!empty($post_id)) {
+            $result = $this->core->getQueries()->getPost($post_id);
+            if($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
+                return $this->core->getOutput()->renderJsonSuccess($result);
             } else {
                 return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
             }

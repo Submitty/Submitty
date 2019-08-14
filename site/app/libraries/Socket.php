@@ -41,32 +41,45 @@
 
         private function checkAuth($conn){
             $request = $conn->httpRequest;
+            $userAgent = $request->getHeader('user-agent');
 
-            $cookieString = $request->getHeader("cookie")[0];
-            parse_str(strtr($cookieString, array('&' => '%26', '+' => '%2B', ';' => '&')), $cookies);
+            if( $userAgent[0] == "websocket-client-php"){
+                return true;
+            }
+            else{
+                $cookieString = $request->getHeader("cookie");
+                parse_str(strtr($cookieString[0], array('&' => '%26', '+' => '%2B', ';' => '&')), $cookies);
 
-            $sessid = $cookies['submitty_session'];
+                $sessid = $cookies['submitty_session'];
 
-            try {
-                $token = TokenManager::parseSessionToken(
-                    $sessid,
-                    $this->core->getConfig()->getBaseUrl(),
-                    $this->core->getConfig()->getSecretSession()
-                );
-                $session_id = $token->getClaim('session_id');
-                $logged_in = $this->core->getSession($session_id, $token->getClaim('sub'));
-                if (!$logged_in) {
-                    $conn->send('{"sys": "Unauthenticated User"}');
-                    $conn->close();
-                    return false;
+                try {
+                    $token = TokenManager::parseSessionToken(
+                        $sessid,
+                        $this->core->getConfig()->getBaseUrl(),
+                        $this->core->getConfig()->getSecretSession()
+                    );
+                    $session_id = $token->getClaim('session_id');
+                    $logged_in = $this->core->getSession($session_id, $token->getClaim('sub'));
+                    if (!$logged_in) {
+                        $conn->send('{"sys": "Unauthenticated User"}');
+                        $conn->close();
+                        return false;
+                    }
+                    else {
+                        $this->sessions[$conn->resourceId] = ["userid" => $token->getClaim('sub')];
+                        $conn->send('{"sys": "Connected"}');
+                        return true;
+                    }
                 }
-                else {
-                    $this->sessions[$conn->resourceId] = ["userid" => $token->getClaim('sub')];
-                    return true;
+                catch (\InvalidArgumentException $exc) {
+                    die($exc);
                 }
             }
-            catch (\InvalidArgumentException $exc) {
-                die($exc);
+        }
+
+        private function broadcast($content){
+            foreach ($this->clients as $client) {
+                $client->send($content);
             }
         }
 
@@ -74,8 +87,7 @@
             $this->clients->attach($conn);
 
             if($this->checkAuth($conn)){
-                $conn->send('{"sys": "Connected"}');
-                echo "New connection! ({$conn->resourceId}) from {$this->sessions[$conn->resourceId]["userid"]}\n";
+                echo "New connection! ({$conn->resourceId})}\n";
             }
         }
 
@@ -87,16 +99,15 @@
             if($this->checkAuth($from)){
                 $msg = json_decode($msgString, true);
 
-                foreach ($this->clients as $client) {
-                    if ($from !== $client) {
-                        $client->send($msgString);
-                    }
+                switch ($msg["type"]){
+                    default: $this->broadcast($msgString);
                 }
+
+                echo $msgString;
             }
         }
 
         public function onClose(ConnectionInterface $conn) {
-            // The connection is closed, remove it, as we can no longer send it messages
             $this->clients->detach($conn);
             $conn->send('{"sys": "Disconnected"}');
             echo "Connection {$conn->resourceId} has disconnected\n";

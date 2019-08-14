@@ -31,7 +31,28 @@ function categoriesFormEvents(){
 
 function forumSocketHandler() {
     window.SocketCon.onmessage = function(e){
-        console.log(e);
+        var data = JSON.parse(e.data);
+
+        if(data.type == "new_post"){
+            var postdata = data.data;
+
+            console.log(postdata);
+
+            if(parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))){
+                $.ajax({
+                    type: 'POST',
+                    url: buildCourseUrl(['forum', 'posts', 'get']),
+                    data: { 'post_id': postdata.post_id, 'csrf_token': csrfToken },
+                    dataType: "JSON",
+                    success: function(result) {
+                        console.log(result)
+                    }
+                });
+            }
+            else{
+                alert($('#current-thread').attr("value"));
+            }
+        }
     }
 }
 
