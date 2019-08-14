@@ -511,27 +511,31 @@
 
 {# Viewed Grade #}
 {% macro render_column_viewed_grade(self, context, section, graded_gradeable, index, info, column, team_gradeable_view_history) %}
-	{% if graded_gradeable.getSubmitter().isTeam() %}
-		{% if team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] == '' %}
-			<td class="viewed-red-x" title="">&#10008;</td>
-		{% else %}
-			<td class="td-viewed-grade" id="team-check-marks" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
-				{% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'hover_string' %}
-					{% if time == null %}
-						<i class="viewed-white-check">&#x2714;</i>
-					{% else %}
-						<i class="viewed-green-check">&#x2714;</i>
-					{% endif %}
-				{% endfor %}
-			</td>
-		{% endif %}
-	{% else %}
-	    {% if graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate() == null %}
-			<td class="viewed-red-x" title="">&#10008;</td>
-		{% else %}
-			<td class="viewed-green-check" title="Last Viewed: {{ graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate()|date }}">&#x2714;</td>
-		{% endif %}
-	{% endif %}
+    {% if graded_gradeable.getAutoGradedGradeable().getActiveVersion() > 0 %}
+        {% if graded_gradeable.getSubmitter().isTeam() %}
+            {% if team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] == '' %}
+                <td class="viewed-red-x" title="">&#10008;</td>
+            {% else %}
+                <td class="td-viewed-grade" id="team-check-marks" title="{{ team_gradeable_view_history[graded_gradeable.getSubmitter().getId()]['hover_string'] }}">
+                    {% for user_id,time in team_gradeable_view_history[graded_gradeable.getSubmitter().getId()] if user_id != 'hover_string' %}
+				        {% if time == null %}
+                            <i class="viewed-white-check">&#x2714;</i>
+                        {% else %}
+                            <i class="viewed-green-check">&#x2714;</i>
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            {% endif %}
+        {% else %}
+            {% if graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate() == null %}
+                <td class="viewed-red-x" title="">&#10008;</td>
+            {% else %}
+                <td class="viewed-green-check" title="Last Viewed: {{ graded_gradeable.getOrCreateTaGradedGradeable().getUserViewedDate()|date }}">&#x2714;</td>
+            {% endif %}
+        {% endif %}
+    {% else %}
+        <td></td>
+    {% endif %}
 {% endmacro %}
 
 {# /Column functions #}
