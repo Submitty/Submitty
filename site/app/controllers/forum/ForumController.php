@@ -3,6 +3,7 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\libraries\ForumUtils;
 use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
@@ -347,7 +348,7 @@ class ForumController extends AbstractController{
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+        if(strlen($post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over ". ForumUtils::FORUM_CHAR_POST_LIMIT ." characters long", $result);
         }
@@ -807,10 +808,10 @@ class ForumController extends AbstractController{
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         if(!empty($_REQUEST["ajax"])){
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
         }
     }
 
