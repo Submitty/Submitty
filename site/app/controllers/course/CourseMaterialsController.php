@@ -222,6 +222,14 @@ class CourseMaterialsController extends AbstractController {
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
         $data=$_POST['fn'];
+
+        try {
+            DateTime::createFromFormat ( string $format , string $time [, DateTimeZone $timezone ] )
+        } catch(Exception $e){
+            return "ERROR: Improperly formatted datetime";
+        }
+
+
         //only one will not iterate correctly
         if(count($data)==1){
             //so just take the single passed in
