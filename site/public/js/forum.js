@@ -29,6 +29,12 @@ function categoriesFormEvents(){
     });
 }
 
+function forumSocketHandler() {
+    window.SocketCon.onmessage = function(e){
+        console.log(e);
+    }
+}
+
 function openFileForum(directory, file, path ){
     var url = buildCourseUrl(['display_file']) + '?dir=' + directory + '&file=' + file + '&path=' + path;
     window.open(url,"_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");

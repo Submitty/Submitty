@@ -21,7 +21,8 @@
     "symfony/http-foundation": "^4.2",
     "doctrine/annotations": "^1.6",
     "doctrine/cache": "^1.8",
-    "cboden/ratchet": "^0.4.1"
+    "cboden/ratchet": "^0.4.1",
+    "textalk/websocket": "1.0.*"
   },
   "autoload-dev": {
     "psr-4": {

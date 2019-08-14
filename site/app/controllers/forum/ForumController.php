@@ -10,6 +10,7 @@ use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use WebSocket\Client;
 
 
 /**
@@ -395,6 +396,12 @@ class ForumController extends AbstractController{
                 $content = "A new message was posted in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nNew Reply:\n\n".$post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
+
+                echo $_SERVER['HTTP_HOST'];
+
+                $client = new Client("ws://".$_SERVER['HTTP_HOST'].":8080");
+                $client->send("Hello WebSocket.org!");
+                $client->close();
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
             }

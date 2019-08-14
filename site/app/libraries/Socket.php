@@ -39,14 +39,11 @@
 
         }
 
-        public function onOpen(ConnectionInterface $conn) {
-            // Store the new connection to send messages to later
-            $this->clients->attach($conn);
-
+        private function checkAuth($conn){
             $request = $conn->httpRequest;
 
-            $cookieString = $request->getHeader("cookie");
-            parse_str(strtr($cookieString[0], array('&' => '%26', '+' => '%2B', ';' => '&')), $cookies);
+            $cookieString = $request->getHeader("cookie")[0];
+            parse_str(strtr($cookieString, array('&' => '%26', '+' => '%2B', ';' => '&')), $cookies);
 
             $sessid = $cookies['submitty_session'];
 
@@ -57,22 +54,29 @@
                     $this->core->getConfig()->getSecretSession()
                 );
                 $session_id = $token->getClaim('session_id');
-                $expire_time = $token->getClaim('expire_time');
                 $logged_in = $this->core->getSession($session_id, $token->getClaim('sub'));
                 if (!$logged_in) {
                     $conn->send('{"sys": "Unauthenticated User"}');
                     $conn->close();
+                    return false;
                 }
                 else {
                     $this->sessions[$conn->resourceId] = ["userid" => $token->getClaim('sub')];
-                    $conn->send('{"sys": "Connected"}');
+                    return true;
                 }
             }
             catch (\InvalidArgumentException $exc) {
-                echo "Error";
+                die($exc);
             }
+        }
 
-            echo "New connection! ({$conn->resourceId}) from {$this->sessions[$conn->resourceId]["userid"]}\n";
+        public function onOpen(ConnectionInterface $conn) {
+            $this->clients->attach($conn);
+
+            if($this->checkAuth($conn)){
+                $conn->send('{"sys": "Connected"}');
+                echo "New connection! ({$conn->resourceId}) from {$this->sessions[$conn->resourceId]["userid"]}\n";
+            }
         }
 
         public function onMessage(ConnectionInterface $from, $msgString) {
@@ -80,20 +84,21 @@
             echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
                 , $from->resourceId, $msgString, $numRecv, $numRecv == 1 ? '' : 's');
 
-            $msg = json_decode($msgString, true);
+            if($this->checkAuth($from)){
+                $msg = json_decode($msgString, true);
 
-            foreach ($this->clients as $client) {
-//                if ($from !== $client) {
-                    // The sender is not the receiver, send to each client connected
-                    $client->send($msgString);
-//                }
+                foreach ($this->clients as $client) {
+                    if ($from !== $client) {
+                        $client->send($msgString);
+                    }
+                }
             }
         }
 
         public function onClose(ConnectionInterface $conn) {
             // The connection is closed, remove it, as we can no longer send it messages
             $this->clients->detach($conn);
-
+            $conn->send('{"sys": "Disconnected"}');
             echo "Connection {$conn->resourceId} has disconnected\n";
         }
 
