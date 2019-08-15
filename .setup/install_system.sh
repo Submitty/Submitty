@@ -767,8 +767,8 @@ fi
 
 # WIP: gets "full" ubuntu basic container for grading CS1 & DS assignments
 
-su -c 'docker pull submitty/ubuntu:20190803' ${DAEMON_USER}
-su -c 'docker tag submitty/ubuntu:20190803 ubuntu:custom' ${DAEMON_USER}
+su -c 'docker pull submitty/autograding-default:20190815' ${DAEMON_USER}
+su -c 'docker tag submitty/autograding-default:20190815 ubuntu:custom' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES
