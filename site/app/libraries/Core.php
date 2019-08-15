@@ -286,23 +286,7 @@ class Core {
     public function loadUser($user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        if(!$this->getConfig()->isCourseLoaded()){
-           $this->loadSubmittyUser();
-        }
-        else{
-            $this->user = $this->database_queries->getUserById($user_id);
-        }
-    }
-
-    /**
-     * Loads the user from the main Submitty database. We should only use this function
-     * because we're accessing either a non-course specific page or we're trying to access
-     * a page of a course that the user does not have access to so $this->loadUser() fails.
-     */
-    public function loadSubmittyUser() {
-        if ($this->user_id !== null) {
-            $this->user = $this->database_queries->getSubmittyUser($this->user_id);
-        }
+        $this->user = $this->database_queries->getUserById($user_id);
     }
 
     /**
