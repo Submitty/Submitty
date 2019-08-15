@@ -15,6 +15,12 @@
             </p>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
+        <label id="upload_dt">
+            <p>
+                <strong>Choose a time to release the files being uploaded:</strong>
+            </p>
+            <input id="upload_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
+        </label>
         <label>
             <input id="expand-zip-checkbox" type="checkbox" value="off"/>
             Unzip zip files (Note: If checked, will replace all folders/files)
@@ -30,21 +36,23 @@
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
     <script type="text/javascript">
-        function makeSubmission(expandZip,cmPath, requestedPath) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath);
+
+        function makeSubmission(expandZip,cmPath, requestedPath,cmTime) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath,cmTime);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
+                var cmTime = document.getElementById("upload_picker").value;
                 var cb = $("input#expand_zip_checkbox");
                 var expandZip = 'off';
-                if (cb.is(":checked")) {
+                if  ($('#expand-zip-checkbox').is(':checked'))  {
                     expandZip = 'on';
                 }
 
                 var cmPath = document.getElementById('cm_path').innerHTML;
 
                 var requestedPath = document.getElementById("input-provide-full-path").value;
-                makeSubmission(expandZip, cmPath, requestedPath);
+                makeSubmission(expandZip, cmPath, requestedPath,cmTime);
                 e.stopPropagation();
             });
         });

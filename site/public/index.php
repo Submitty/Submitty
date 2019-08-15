@@ -75,16 +75,16 @@ register_shutdown_function("error_handler");
 
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterConfig();
+Logger::setLogPath($core->getConfig()->getLogPath());
+ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
+ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
+
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadMasterDatabase();
 /** @noinspection PhpUnhandledExceptionInspection */
 $core->loadAuthentication();
 //Load Twig templating engine after the config is loaded but before any output is shown
 $core->getOutput()->loadTwig();
-
-Logger::setLogPath($core->getConfig()->getLogPath());
-ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
-ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 
 $core->getOutput()->setInternalResources();
 
