@@ -23,7 +23,9 @@
                 localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
             }
         }
-    } catch {
+    }
+    catch (err) {
+        console.error(err);
         alert("Can't fetch annotations");
     }
     {% if student_popup %}

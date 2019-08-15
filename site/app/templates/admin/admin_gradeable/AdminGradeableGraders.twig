@@ -43,7 +43,7 @@ Form
 {% endif %}
 
 What is the lowest privileged user group that can grade this?
-    <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
+    <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
@@ -54,7 +54,7 @@ What is the lowest privileged user group that can grade this?
 <fieldset>
     <legend>
         How should graders be assigned to grade this item?
-        <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
+        <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
 	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
         {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> All Access Grading
