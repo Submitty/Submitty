@@ -143,6 +143,7 @@
                 },
                 {
                     "actual_file" : "execute_logfile.txt",
+                    "method" : "warnIfNotEmpty",
                     "show_actual" : "never"
                 }
             ]

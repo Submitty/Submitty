@@ -10,6 +10,7 @@
 </div>
 
 <script>
+    window['csrfToken'] = "{{ csrfToken }}";
     try {
         for(let i = 0 ; i < localStorage.length; i++){
             if(localStorage.key(i).includes('annotations')){
@@ -22,7 +23,9 @@
                 localStorage.setItem('{{ filename }}/' + grader +'/annotations', annotations[grader]);
             }
         }
-    } catch {
+    }
+    catch (err) {
+        console.error(err);
         alert("Can't fetch annotations");
     }
     {% if student_popup %}

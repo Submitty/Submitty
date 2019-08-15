@@ -25,16 +25,26 @@ use app\models\SimpleStat;
 class PostgresqlDatabaseQueries extends DatabaseQueries{
 
     public function getUserById($user_id) {
-        $this->course_db->query("
+        $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
+
+        if ($this->submitty_db->getRowCount() === 0) {
+            return null;
+        }
+
+        $details = $this->submitty_db->row();
+
+        if ($this->course_db) {
+            $this->course_db->query("
 SELECT u.*, ns.merge_threads, ns.all_new_threads,
        ns.all_new_posts, ns.all_modifications_forum,
        ns.reply_in_post_thread,ns.team_invite,
        ns.team_member_submission, ns.team_joined,
+       ns.self_notification,
        ns.merge_threads_email, ns.all_new_threads_email,
        ns.all_new_posts_email, ns.all_modifications_forum_email,
        ns.reply_in_post_thread_email, ns.team_invite_email, 
        ns.team_member_submission_email, ns.team_joined_email,
-       ns.self_notification,sr.grading_registration_sections
+       ns.self_notification_email,sr.grading_registration_sections
        
 FROM users u
 LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
@@ -44,16 +54,17 @@ LEFT JOIN (
 	GROUP BY user_id
 ) as sr ON u.user_id=sr.user_id
 WHERE u.user_id=?", array($user_id));
-        if (count($this->course_db->rows()) > 0) {
-            $user = $this->course_db->row();
-            if (isset($user['grading_registration_sections'])) {
-                $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+
+            if ($this->course_db->getRowCount() > 0) {
+                $user = $this->course_db->row();
+                if (isset($user['grading_registration_sections'])) {
+                    $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                }
+                $details = array_merge($details, $user);
             }
-            return new User($this->core, $user);
         }
-        else {
-            return null;
-        }
+
+        return new User($this->core, $details);
     }
 
     public function getGradingSectionsByUserId($user_id) {

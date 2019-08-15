@@ -175,14 +175,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
-    # save the course index page
-    originalcurrentcourses=/usr/local/submitty/site/app/views/current_courses.php
-    if [ -f $originalcurrentcourses ]; then
-        mytempcurrentcourses=`mktemp`
-        echo "save this file! ${originalcurrentcourses} ${mytempcurrentcourses}"
-        mv ${originalcurrentcourses} ${mytempcurrentcourses}
-    fi
-
     rm -rf ${SUBMITTY_INSTALL_DIR}/site
     rm -rf ${SUBMITTY_INSTALL_DIR}/src
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin

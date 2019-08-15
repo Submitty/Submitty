@@ -35,6 +35,12 @@ def cleanup(test):
     os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
 
 @testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
+
+@testcase
 def solution(test):
     cleanup(test)
     shutil.copy(os.path.join(SAMPLE_SUBMISSIONS, "student.h"),

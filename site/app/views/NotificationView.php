@@ -13,14 +13,14 @@ class NotificationView extends AbstractView {
             'show_all' => $show_all,
             'notifications' => $notifications,
             'notification_saves' => $notification_saves,
-            'notifications_url' => $this->core->buildNewCourseUrl(['notifications']),
-            'mark_all_as_seen_url' => $this->core->buildNewCourseUrl(['notifications', 'seen']),
-            'notification_settings_url' => $this->core->buildNewCourseUrl(['notifications', 'settings'])
+            'notifications_url' => $this->core->buildCourseUrl(['notifications']),
+            'mark_all_as_seen_url' => $this->core->buildCourseUrl(['notifications', 'seen']),
+            'notification_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings'])
         ]);
     }
 
     public function showNotificationSettings($notification_saves) {
-        $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildNewCourseUrl(['notifications']));
+        $this->core->getOutput()->addBreadcrumb("Notifications", $this->core->buildCourseUrl(['notifications']));
         $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->addBreadcrumb("Notification Settings");
         $this->core->getOutput()->renderTwigOutput("NotificationSettings.twig", [
@@ -28,7 +28,7 @@ class NotificationView extends AbstractView {
             'email_enabled' => $this->core->getConfig()->isEmailEnabled(),
             'csrf_token' => $this->core->getCsrfToken(),
             'defaults' => User::constructNotificationSettings([]),
-            'update_settings_url' => $this->core->buildNewCourseUrl(['notifications', 'settings'])
+            'update_settings_url' => $this->core->buildCourseUrl(['notifications', 'settings'])
         ]);
     }
 }

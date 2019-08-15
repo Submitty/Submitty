@@ -11,13 +11,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class CourseMaterialsController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/course_materials")
      */
     public function viewCourseMaterialsPage() {
@@ -28,6 +21,23 @@ class CourseMaterialsController extends AbstractController {
         );
     }
 
+    public function deleteHelper($file,&$json){
+            if ((array_key_exists('name',$file))){
+                $filename = $file['path'];
+                unset($json[$filename]);
+                return;
+            }
+            else{
+                if(array_key_exists('files',$file)){
+                    $this->deleteHelper($file['files'],$json);
+                }
+                else{
+                    foreach ($file as $f){
+                        $this->deleteHelper($f,$json);
+                    }
+                }
+            }
+    }
     /**
      * @Route("/{_semester}/{_course}/course_materials/delete")
      */
@@ -39,7 +49,7 @@ class CourseMaterialsController extends AbstractController {
         if (!$this->core->getAccess()->canI("path.write", ["path" => $path, "dir" => $dir])) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+            $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
         }
 
         // remove entry from json file
@@ -49,10 +59,13 @@ class CourseMaterialsController extends AbstractController {
         if ($json != false) {
             $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
             foreach($all_files as $file) {
-                $filename = $file['path'];
-                unset($json[$filename]);
+                if(is_array($file)){
+                    $this->deleteHelper($file,$json);
+                }
+                else{
+                    unset($json[$file]);
+                }
             }
-
             file_put_contents($fp, FileUtils::encodeJson($json));
         }
 
@@ -71,7 +84,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //refresh course materials page
-        $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+        $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
     }
 
     /**
@@ -149,7 +162,7 @@ class CourseMaterialsController extends AbstractController {
             $filename = $filenames;
             if (!isset($filename) ||
                 !isset($checked)) {
-                $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
@@ -176,7 +189,7 @@ class CourseMaterialsController extends AbstractController {
             foreach ($data as $filename){
                 if (!isset($filename) ||
                     !isset($checked)) {
-                    $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                    $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
                 }
 
                 $file_name = htmlspecialchars($filename);
@@ -216,7 +229,7 @@ class CourseMaterialsController extends AbstractController {
 
             if (!isset($filename) ||
                 !isset($newdatatime)) {
-                $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
@@ -240,7 +253,7 @@ class CourseMaterialsController extends AbstractController {
             foreach ($data as $filename){
                 if (!isset($filename) ||
                     !isset($newdatatime)) {
-                    $this->core->redirect($this->core->buildNewCourseUrl(['course_materials']));
+                    $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
                 }
 
                 $file_name = htmlspecialchars($filename);
@@ -287,6 +300,15 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['requested_path'])) {
             $requested_path = $_POST['requested_path'];
         }
+
+        $release_time ="";
+        if(isset($_POST['release_time'])){
+            $release_time = $_POST['release_time'];
+        }
+        $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+        $json = FileUtils::readJsonFile($fp);
+        $json["release_time"] = $release_time;
+        FileUtils::writeJsonFile($fp,$json);
 
         $n = strpos($requested_path, '..');
         if ($n !== false) {

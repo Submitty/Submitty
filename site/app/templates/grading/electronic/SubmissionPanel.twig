@@ -167,7 +167,7 @@
             $('#save_status').show();
             return $.ajax({
                 type: 'POST',
-                url: buildNewCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
+                url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
                 data: {
                     'user_id': '{{ submitter_id }}',
                     'filename': name,

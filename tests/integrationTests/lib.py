@@ -7,6 +7,7 @@ import subprocess
 import traceback
 import sys
 import shutil
+from submitty_utils import submitty_schema_validator
 
 # global variable available to be used by the test suite modules
 # this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
@@ -215,6 +216,9 @@ class TestcaseWrapper:
             os.mkdir(os.path.join(self.testcase_path, "build"))
             # the bin directory will contain the autograding executables
             os.mkdir(os.path.join(self.testcase_path, "bin"))
+            # The data directory in which configure will be run. This is needed to
+            # make complete_config.json for schema testing
+            os.mkdir(os.path.join(self.testcase_path, "data"))
         except OSError as e:
             pass
         # copy the cmake file to the build directory
@@ -626,6 +630,14 @@ class TestcaseWrapper:
         if self.simplify_emma_coverage(filename1) != self.simplify_emma_coverage(filename2):
             raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
 
+    # Validate a configuration against the submitty complete_config_schema.json
+    def validate_complete_config(self, config_path):
+        schema_path = os.path.join(SUBMITTY_INSTALL_DIR, 'bin', 'json_schemas', 'complete_config_schema.json')
+        try:
+            submitty_schema_validator.validate_complete_config_schema_using_filenames(config_path, schema_path)
+        except submitty_schema_validator.SubmittySchemaException as s:
+            s.print_human_readable_error()
+            raise
 
 
 ###################################################################################

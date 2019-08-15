@@ -93,4 +93,14 @@
     .mobile-table td:before {
         content: none !important;
     }
+
+    .mobile-table td:first-child,
+    .mobile-table th:first-child {
+        padding-left: 15px;
+    }
+
+    .mobile-table td:last-child,
+    .mobile-table th:last-child {
+        padding-right: 15px;
+    }
 }

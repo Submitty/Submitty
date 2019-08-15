@@ -157,10 +157,21 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
-.helpicon::before {
+.fa-question-circle{
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
-  color: var(--actionable-blue);
+  color: var(--external-link-blue);
+  font-weight: 300;
+  display: inline-block;
+}
+
+.fa-question-circle.disabled,
+.fa-question-circle[disabled],
+.disabled>.fa-question-circle,
+[disabled]>.fa-question-circle{
+  font-family: 'Font Awesome 5 Free';
+  color: var(--standard-light-gray);
+  content: "\f059";
   font-weight: 300;
   display: inline-block;
 }
@@ -1184,6 +1195,16 @@ div.full_height {
 #admin-team-history-right {
     width:62%;
     display: inline-block;
+}
+
+[name^="grader-warning-popup"] {
+    background:var(--danger-red);
+    box-shadow: 0 2px 15px -5px var(--standard-light-gray);
+    border-radius: 3px;
+    overflow: auto;
+    margin: 10px;;
+    padding: 30px;
+    flex-grow: 1;
 }
 
 .fill-available {

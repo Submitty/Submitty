@@ -27,21 +27,6 @@ class HomePageController extends AbstractController {
         parent::__construct($core);
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'change_username':
-                $this->changeUserName();
-                break;
-            case 'change_password':
-                $this->changePassword();
-                break;
-            case 'home_page':
-            default:
-                $this->showHomepage();
-                break;
-        }
-    }
-
     /**
      * @Route("/home/change_password", methods={"POST"})
      * @return Response
@@ -58,7 +43,7 @@ class HomePageController extends AbstractController {
             $this->core->addErrorMessage("Must put same password in both boxes.");
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['home']))
+            new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
@@ -84,7 +69,7 @@ class HomePageController extends AbstractController {
             }
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['home']))
+            new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
@@ -180,6 +165,18 @@ class HomePageController extends AbstractController {
             );
         }
 
+        if (!isset($_POST['course_semester']) ||
+            !isset($_POST['course_title']) ||
+            !isset($_POST['head_instructor'])) {
+            $error = "Semester, course title or head instructor not set.";
+            $this->core->addErrorMessage($error);
+            return new Response(
+                JsonResponse::getFailResponse($error),
+                null,
+                new RedirectResponse($this->core->buildUrl(['home']))
+            );
+        }
+
         $semester = $_POST['course_semester'];
         $course_title = strtolower($_POST['course_title']);
         $head_instructor = $_POST['head_instructor'];
@@ -190,7 +187,7 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
 
@@ -200,16 +197,19 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getFailResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
+
+        $base_course_semester = '';
+        $base_course_title = '';
 
         if (isset($_POST['base_course'])) {
             $exploded_course = explode('|', $_POST['base_course']);
             $base_course_semester = $exploded_course[0];
             $base_course_title = $exploded_course[1];
         }
-        else {
+        elseif (isset($_POST['base_course_semester']) && isset($_POST['base_course_title'])) {
             $base_course_semester = $_POST['base_course_semester'];
             $base_course_title = $_POST['base_course_title'];
         }
@@ -223,13 +223,24 @@ class HomePageController extends AbstractController {
                     ]
                 )
             );
+
+            if (empty($group_check) || empty($base_course_semester) || empty($base_course_title)) {
+                $error = "Invalid base course.";
+                $this->core->addErrorMessage($error);
+                return new Response(
+                    JsonResponse::getFailResponse($error),
+                    null,
+                    new RedirectResponse($this->core->buildUrl(['home']))
+                );
+            }
+
             if (json_decode($group_check, true)['status'] === 'fail') {
                 $error = "The instructor is not in the correct Linux group.\n Please contact sysadmin for more information.";
                 $this->core->addErrorMessage($error);
                 return new Response(
                     JsonResponse::getFailResponse($error),
                     null,
-                    new RedirectResponse($this->core->buildNewUrl(['home']))
+                    new RedirectResponse($this->core->buildUrl(['home']))
                 );
             }
         }
@@ -239,7 +250,7 @@ class HomePageController extends AbstractController {
             return new Response(
                 JsonResponse::getErrorResponse($error),
                 null,
-                new RedirectResponse($this->core->buildNewUrl(['home']))
+                new RedirectResponse($this->core->buildUrl(['home']))
             );
         }
 
@@ -259,7 +270,7 @@ class HomePageController extends AbstractController {
         return new Response(
             JsonResponse::getSuccessResponse(null),
             null,
-            new RedirectResponse($this->core->buildNewUrl(['home']))
+            new RedirectResponse($this->core->buildUrl(['home']))
         );
     }
 
