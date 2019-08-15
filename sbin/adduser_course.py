@@ -50,6 +50,9 @@ def main():
     users_table = Table('users', metadata, autoload=True)
     select = users_table.select().where(users_table.c.user_id == bindparam('user_id'))
     user = connection.execute(select, user_id=user_id).fetchone()
+    if user is None:
+        print("User does not exist.", file=sys.stderr)
+        return False
 
     courses_table = Table('courses', metadata, autoload=True)
     if registration_section and not registration_section.isdigit():
