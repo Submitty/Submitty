@@ -223,10 +223,16 @@ class CourseMaterialsController extends AbstractController {
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
         $data=$_POST['fn'];
 
+        if(!isset($newdatatime)) {
+            $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
+        }
+
+        $new_data_time = htmlspecialchars($newdatatime);
+
         try {
-            DateTime::createFromFormat ( string $format , string $time [, DateTimeZone $timezone ] )
+          DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time );
         } catch(Exception $e){
-            return "ERROR: Improperly formatted datetime";
+          return "ERROR: Improperly formatted date";
         }
 
 
@@ -235,13 +241,11 @@ class CourseMaterialsController extends AbstractController {
             //so just take the single passed in
             $filename = $filenames;
 
-            if (!isset($filename) ||
-                !isset($newdatatime)) {
+            if (!isset($filename)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
-            $new_data_time = htmlspecialchars($newdatatime);
 
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
@@ -259,8 +263,7 @@ class CourseMaterialsController extends AbstractController {
         }
         else{
             foreach ($data as $filename){
-                if (!isset($filename) ||
-                    !isset($newdatatime)) {
+                if (!isset($filename)) {
                     $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
                 }
 
@@ -313,6 +316,13 @@ class CourseMaterialsController extends AbstractController {
         if(isset($_POST['release_time'])){
             $release_time = $_POST['release_time'];
         }
+
+        try {
+          DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time );
+        } catch(Exception $e){
+          return "ERROR: Improperly formatted date";
+        }
+
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $json["release_time"] = $release_time;
