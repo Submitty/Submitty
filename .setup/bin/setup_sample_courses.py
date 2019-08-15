@@ -169,13 +169,6 @@ def main():
     if today.month < 7:
         semester = 'Spring'
 
-    list_of_courses_file = "/usr/local/submitty/site/app/views/current_courses.php"
-    with open(list_of_courses_file, "w") as courses_file:
-        courses_file.write("")
-        for course_id in courses.keys():
-            courses_file.write('<a href="'+args.submission_url+'/'+get_current_semester()+'/'+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
-            courses_file.write('<br />')
-
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
         students = random.sample(extra_students, course.registered_students + course.no_registration_students +

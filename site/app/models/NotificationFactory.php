@@ -115,7 +115,7 @@ class NotificationFactory {
      * @param array $recipients
      */
     public function onTeamEvent(array $event, array $recipients) {
-        $current_user_id = $this->core->getUser();
+        $current_user_id = $this->core->getUser()->getId();
         $notification_recipients = [$current_user_id];
         $email_recipients = [$current_user_id];
         $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
