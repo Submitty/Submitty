@@ -72,6 +72,10 @@ class WebRouter {
                 return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
+            if ($logged_in && !$core->getUser()->accessFaculty()) {
+                return new Response(JsonResponse::getFailResponse("API is open to faculty only."));
+            }
+
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
                 return Response::JsonOnlyResponse(
