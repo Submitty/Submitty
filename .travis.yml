@@ -60,7 +60,7 @@ jobs:
       language: python
       python: 3.6
       install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings pydocstyle sqlalchemy psycopg2-binary
+        - pip3 install flake8 flake8-bugbear flake8-docstrings sqlalchemy psycopg2-binary
       script: skip
     - <<: *00-python-cache
       python: 3.7
@@ -80,7 +80,7 @@ jobs:
       language: python
       python: 3.6
       install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings pydocstyle
+        - pip3 install flake8 flake8-bugbear flake8-docstrings
       script:
         - flake8
     - <<: *01-python-lint
