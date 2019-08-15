@@ -165,7 +165,8 @@ function createThread(e) {
     try {
         return publishFormWithAttachments($(this), true, "Something went wrong while creating thread. Please try again.");
     }
-    catch{
+    catch (err) {
+        console.error(err);
         alert("Something went wrong. Please try again.");
         return false;
     }
@@ -176,7 +177,8 @@ function publishPost(e) {
     try {
         return publishFormWithAttachments($(this), false, "Something went wrong while publishing post. Please try again.");
     }
-    catch{
+    catch (err) {
+        console.error(err);
         alert("Something went wrong. Please try again.");
         return false;
     }
