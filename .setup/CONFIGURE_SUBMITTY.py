@@ -512,7 +512,7 @@ else:
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP)
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMONPHP_GROUP)
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 ##############################################################################

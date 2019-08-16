@@ -545,7 +545,7 @@ class ReportController extends AbstractController {
                 'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
-                'limited_functionality_mode' => !$this->core->getConfig()->isAutoRainbowGradesReady()
+                'limited_functionality_mode' => !$this->core->getConfig()->isSubmittyAdminUserInCourse()
             ]);
 
         }

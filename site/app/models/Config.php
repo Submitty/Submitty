@@ -430,45 +430,40 @@ class Config extends AbstractModel {
      * Determine if automatic rainbow grades is fully configured
      * For some features to be available to the instructors, the submitty-admin user must be configured
      * at the system level and also must be a member of the course in question.
-     *
-     * @return bool True if fully configured, False otherwise
      */
-    public function isAutoRainbowGradesReady() {
 
-        // Determine if submitty-admin is ready to go on the system level
-        $status_file = FileUtils::joinPaths(
+    public function getSubmittyAdminUser() {
+        // grab the name of the submitty_admin user (only if 'verified',
+        // that is, password successfully used to grab an API token.
+        $users_file = FileUtils::joinPaths(
             '/', 'usr', 'local', 'submitty', 'config', 'submitty_users.json'
         );
-
-
-        if(!is_file($status_file)) {
-            throw new FileNotFoundException('Unable to locate the submity_admin_status.json file');
+        if(!is_file($users_file)) {
+            throw new FileNotFoundException('Unable to locate the submity_users.json file');
         }
-
-        $status_file_contents = json_decode(file_get_contents($status_file));
-
+        $users_file_contents = json_decode(file_get_contents($users_file));
         $submitty_admin_user = "";
-        if (property_exists($status_file_contents,"verified_submitty_admin_user")) {
-          $submitty_admin_user = $status_file_contents->verified_submitty_admin_user;
+        if (property_exists($users_file_contents,"verified_submitty_admin_user")) {
+          $submitty_admin_user = $users_file_contents->verified_submitty_admin_user;
         }
-
-        // Determine if submitty-admin is ready to go on the course level
-        if($submitty_admin_user !== "")
-        {
-            $course = $this->getCourse();
-            $semester = $this->getSemester();
-
-            $results = $this->core->getQueries()->checkIsInstructorInCourse(
-                $submitty_admin_user,
-                $course,
-                $semester
-            );
-
-            return $results;
-        }
-
-        return false;
+        return $submitty_admin_user;
     }
+
+    public function isSubmittyAdminUserVerified() {
+        return $this->getSubmittyAdminUser() !== "";
+    }
+
+    public function isSubmittyAdminUserInCourse() {
+        $submitty_admin_user = $this->getSubmittyAdminUser();
+        if ($submitty_admin_user === "") {
+            return false;
+        }
+        $course = $this->getCourse();
+        $semester = $this->getSemester();
+        return $this->core->getQueries()->checkIsInstructorInCourse
+          ($submitty_admin_user, $course, $semester);
+    }
+
 
     /**
      * @return boolean

@@ -59,8 +59,10 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
-            'show_auto_rainbow_grades'       => $this->core->getConfig()->isAutoRainbowGradesReady()
+            'submitty_admin_user'            => $this->core->getConfig()->getSubmittyAdminUser(),
+            'submitty_admin_user_verified'   => $this->core->getConfig()->isSubmittyAdminUserVerified(),
+            'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
+            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
 
         return Response::WebOnlyResponse(
