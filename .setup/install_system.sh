@@ -267,12 +267,6 @@ else
         echo "${COURSE_BUILDERS_GROUP} already exists"
 fi
 
-# Add the daemon user to the course_builders_group, so it can scan the
-# courses for running nightly rainbow grades updates.
-if [ ${WORKER} == 0 ]; then
-    usermod -a -G ${COURSE_BUILDERS_GROUP} ${DAEMON_USER}
-fi
-
 if [ ${VAGRANT} == 1 ]; then
 	usermod -aG sudo vagrant
 fi

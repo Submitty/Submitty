@@ -10,6 +10,8 @@ the jobs daemon to automatically build or update rainbow grades for that course.
 
 import os
 import json
+from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
+
 
 # Get path to current file directory
 dir = os.path.dirname(__file__)
@@ -29,34 +31,60 @@ daemon_directory = os.path.join(data_dir, 'daemon_job_queue')
 
 courses_path = os.path.join(data_dir, 'courses')
 
-# For each semester in the courses directory
-for semester in os.listdir(courses_path):
 
-    course_path = os.path.join(courses_path, semester)
+def process_course(semester,course):
+    course_config_path = os.path.join(courses_path, semester, course, 'config', 'config.json')
 
-    # For each course in the semester directory
-    for course in os.listdir(course_path):
+    # Retrieve the auto_rainbow_grades bool from the course config.json
+    with open(course_config_path, 'r') as file:
+        data = json.load(file)
+        auto_rainbow_grades = data['course_details']['auto_rainbow_grades']
 
-        course_config_path = os.path.join(course_path, course, 'config', 'config.json')
+    # If true then schedule a RunAutoRainbowGrades job
+    if auto_rainbow_grades:
 
-        # Retrieve the auto_rainbow_grades bool from the course config.json
-        with open(course_config_path, 'r') as file:
-            data = json.load(file)
-            auto_rainbow_grades = data['course_details']['auto_rainbow_grades']
+        # Setup jobs daemon json
+        jobs_json = {
+            'job': 'RunAutoRainbowGrades',
+            'semester': semester,
+            'course': course
+        }
 
-        # If true then schedule a RunAutoRainbowGrades job
-        if auto_rainbow_grades:
+        # Prepare filename
+        job_filename = 'auto_scheduled_rainbow_' + semester + '_' + course + '.json'
 
-            # Setup jobs daemon json
-            jobs_json = {
-                'job': 'RunAutoRainbowGrades',
-                'semester': semester,
-                'course': course
-            }
+        # Drop job into jobs queue
+        with open(os.path.join(daemon_directory, job_filename), 'w') as file:
+            json.dump(jobs_json, file, indent=4)
 
-            # Prepare filename
-            job_filename = 'auto_scheduled_rainbow_' + semester + '_' + course + '.json'
 
-            # Drop job into jobs queue
-            with open(os.path.join(daemon_directory, job_filename), 'w') as file:
-                json.dump(jobs_json, file, indent=4)
+def find_all_unarchived_courses():
+    # setup connection to database
+    database_config_file = dir + '/../config/database.json'
+    with open(database_config_file) as open_file:
+        OPEN_JSON = json.load(open_file)
+    DB_HOST = OPEN_JSON['database_host']
+    DB_USER = OPEN_JSON['database_user']
+    DB_PASSWORD = OPEN_JSON['database_password']
+    db_name = "submitty"
+    # If using a UNIX socket, have to specify a slightly different connection string
+    if os.path.isdir(DB_HOST):
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
+    else:
+        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+    engine = create_engine(conn_string)
+    db = engine.connect()
+    metadata = MetaData(bind=db)
+
+    # find all courses that have status == 1 (unarchived)
+    courses_table = Table('courses', metadata, autoload=True)
+    result = db.execute(select([courses_table]).where(courses_table.c.status == 1))
+
+    for row in result:
+        semester = row.semester
+        course = row.course
+        process_course(semester,course)
+
+
+# Do the work!
+find_all_unarchived_courses()
