@@ -182,14 +182,24 @@ class Testcase():
     # Create directories, set permissions, and copy in files.
     self.secure_environment.setup_for_random_output(self.dependencies)
     with open(os.path.join(self.secure_environment.tmp_logs,"output_generator_log.txt"), 'a') as logfile:
-      arguments = [
-        self.queue_obj["gradeable"],
-        self.queue_obj["who"],
-        str(self.queue_obj["version"]),
-        self.submission_string,
-        '--testcase', str(self.number),
-        '--generation_type',str('output')
-      ]
+      if not self.queue_obj["generate_output"]:
+        arguments = [
+          self.queue_obj["gradeable"],
+          self.queue_obj["who"],
+          str(self.queue_obj["version"]),
+          self.submission_string,
+          '--testcase', str(self.number),
+          '--generation_type',str('output')
+        ]
+      else:
+        arguments = [
+          self.queue_obj["gradeable"],
+          'Generating Output',
+          '0',
+          '',
+          '--testcase', str(self.number),
+          '--generation_type',str('output')
+        ]
       
       try:
         # Generate random outputs for this testcase using our secure environment.

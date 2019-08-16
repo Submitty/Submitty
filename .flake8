@@ -32,15 +32,12 @@ exclude=
     autograder/autograder/grade_item.py,
     autograder/autograder/insert_database_version_data.py,
     autograder/autograder/packer_unpacker.py,
-<<<<<<< HEAD
-=======
     autograder/autograder/autograding_utils.py,
     autograder/autograder/testcase.py,
     autograder/autograder/execution_environments/container_network.py,
     autograder/autograder/execution_environments/__init__.py,
     autograder/autograder/execution_environments/jailed_sandbox.py,
     autograder/autograder/execution_environments/secure_execution_environment.py,
->>>>>>> 2f5560f4a570010143efe6112035f8c410246fa7
     sbin/shipper_utils/systemctl_wrapper.py,
     sbin/shipper_utils/update_and_install_workers.py,
     sbin/submitty_daemon_jobs/submitty_daemon_jobs.py,

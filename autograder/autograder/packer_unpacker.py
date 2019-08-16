@@ -132,6 +132,8 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
             raise RuntimeError("ERROR: the submission directory does not exist", submission_path)
         print(which_machine,which_untrusted,"prepare zip",submission_path)
         is_vcs,vcs_type,vcs_base_url,vcs_subdirectory = get_vcs_info(SUBMITTY_DATA_DIR,obj["semester"],obj["course"],obj["gradeable"],obj["who"],obj["team"])
+    else:
+        item_name = os.path.join(obj["semester"],obj["course"],"generated_output",obj["gradeable"])
 
     is_batch_job = "regrade" in obj and obj["regrade"]
     is_batch_job_string = "BATCH" if is_batch_job else "INTERACTIVE"
@@ -212,14 +214,15 @@ def prepare_autograding_and_submission_zip(which_machine,which_untrusted,next_di
 
     # --------------------------------------------------------------------
     # CONFIRM WE HAVE A CHECKOUT OF THE STUDENT'S REPO
-    if is_vcs and not obj["generate_output"]:
-        # there should be a checkout log file in the results directory
-        # move that file to the tmp logs directory..
-        vcs_checkout_logfile = os.path.join(results_path,"logs","vcs_checkout.txt")
-        if os.path.isfile(vcs_checkout_logfile):
-            shutil.move(vcs_checkout_logfile,tmp_logs)
-        else:
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, message=" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
+    if not obj["generate_output"]:
+        if is_vcs:
+            # there should be a checkout log file in the results directory
+            # move that file to the tmp logs directory..
+            vcs_checkout_logfile = os.path.join(results_path,"logs","vcs_checkout.txt")
+            if os.path.isfile(vcs_checkout_logfile):
+                shutil.move(vcs_checkout_logfile,tmp_logs)
+            else:
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, message=" ERROR: missing vcs_checkout.txt logfile "+str(vcs_checkout_logfile))
 
     if not obj["generate_output"]:
         copytree_if_exists(submission_path,os.path.join(tmp_submission,"submission"))
@@ -268,7 +271,9 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
         results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results",partial_path)
         results_public_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"],"results_public",partial_path)
     else:
+        item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"generated_output",queue_obj["gradeable"])
         results_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"], "generated_output",queue_obj["gradeable"])
+        results_public_path = os.path.join(SUBMITTY_DATA_DIR,"courses",queue_obj["semester"],queue_obj["course"], "generated_output",queue_obj["gradeable"])
 
 
     # clean out all of the old files if this is a re-run
@@ -299,16 +304,20 @@ def unpack_grading_results_zip(which_machine,which_untrusted,my_results_zip_file
             queue_obj["who"],
             True if queue_obj["is_team"] else False,
             str(queue_obj["version"]))
+    
+    if not queue_obj["generate_output"]:
+        submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
 
-    submission_path = os.path.join(SUBMITTY_DATA_DIR,"courses",item_name)
+        is_batch_job = queue_obj["regrade"]
+        gradingtime = queue_obj["gradingtime"]
+        grade_result = queue_obj["grade_result"]
 
-    is_batch_job = queue_obj["regrade"]
-    gradingtime = queue_obj["gradingtime"]
-    grade_result = queue_obj["grade_result"]
+        print (which_machine,which_untrusted,"unzip",item_name, " in ", int(gradingtime), " seconds")
 
-    print (which_machine,which_untrusted,"unzip",item_name, " in ", int(gradingtime), " seconds")
-
-    autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,is_batch_job,"unzip",item_name,"grade:",gradingtime,grade_result)
+    else:
+        is_batch_job = queue_obj["regrade"]
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id,is_batch_job,message="Generated Output Successfully")
     return True
 
 

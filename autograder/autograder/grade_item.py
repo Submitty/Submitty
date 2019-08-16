@@ -52,19 +52,23 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
-    with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
-        submission_string = submission_time_file.read().rstrip()
-    
     if queue_obj["generate_output"]:
+        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "generated_output", 
+                                queue_obj["gradeable"])
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "Generating Output")
+        
+        with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
+            gradeable_config_obj = json.load(infile)
+            
         testcases = list()
         testcase_num = 1
         for t in complete_config_obj['testcases']:
             tmp_test = testcase.Testcase(testcase_num, queue_obj, complete_config_obj, t,
-                                        which_untrusted, is_vcs, is_batch_job, job_id, working_directory, testcases,
-                                        submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, is_test_environment=False)
-            if not tmp_test.has_input_generator_commands and tmp_test.has_solution_commands: 
+                                        which_untrusted, False, is_batch_job, job_id, working_directory, testcases,
+                                        '', AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, is_test_environment=False)
+            if tmp_test.has_solution_commands and not tmp_test.has_input_generator_commands:
                 testcases.append( tmp_test )
-                testcase_num += 1
+            testcase_num += 1
         
         with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
             os.chdir(tmp_work)
@@ -88,9 +92,27 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
             
             subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
             overall_log.flush()
-    
+
+            print ("====================================\nARCHIVING STARTS", file=overall_log)
+            overall_log.flush()
+            for tc in testcases:
+                # Removes test input files, makes details directory for the testcase.
+                tc.setup_for_archival(overall_log)
+
+            try:
+                # Perform archival.
+                autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
+                                                    gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+            except Exception as e:
+                autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id,trace=traceback.format_exc())
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "Completed Generation")
 
     else:
+        with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
+            submission_string = submission_time_file.read().rstrip()
+    
         item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "submissions", 
                                 queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "")
@@ -245,14 +267,14 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
             subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
         
-        # Zip the results
-        filehandle, my_results_zip_file = tempfile.mkstemp()
-        autograding_utils.zip_my_directory(tmp_results, my_results_zip_file)
-        os.close(filehandle)
+    # Zip the results
+    filehandle, my_results_zip_file = tempfile.mkstemp()
+    autograding_utils.zip_my_directory(tmp_results, my_results_zip_file)
+    os.close(filehandle)
 
-        # Remove the tmp directory.
-        shutil.rmtree(working_directory)
-        return my_results_zip_file
+    # Remove the tmp directory.
+    shutil.rmtree(working_directory)
+    return my_results_zip_file
 
 if __name__ == "__main__":
     raise SystemExit('ERROR: Do not call this script directly')
