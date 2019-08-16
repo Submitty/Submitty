@@ -259,12 +259,18 @@ else
 fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
-# managers to write website custimization files and run course
+# managers to write website customization files and run course
 # management scripts.
 if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
         addgroup ${COURSE_BUILDERS_GROUP}
 else
         echo "${COURSE_BUILDERS_GROUP} already exists"
+fi
+
+# Add the daemon user to the course_builders_group, so it can scan the
+# courses for running nightly rainbow grades updates.
+if [ ${WORKER} == 0 ]; then
+    usermod -a -G ${COURSE_BUILDERS_GROUP} ${DAEMON_USER}
 fi
 
 if [ ${VAGRANT} == 1 ]; then

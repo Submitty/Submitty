@@ -16,23 +16,24 @@ current_dir = os.path.dirname(__file__)
 
 # Collect other path information from configuration file
 config_file = os.path.join(current_dir, '..', '..', 'config', 'submitty.json')
-admin_file = os.path.join(current_dir, '..', '..', 'config', 'submitty_admin.json')
+submitty_admin_file = os.path.join(current_dir, '..', '..', 'config', 'submitty_admin.json')
+submitty_users_file = os.path.join(current_dir, '..', '..', 'config', 'submitty_users.json')
 
 if not os.path.exists(config_file):
     raise Exception('Unable to locate submitty.json configuration file')
 
-with open(config_file, 'r') as file:
-    data = json.load(file)
+with open(config_file, 'r') as f:
+    data = json.load(f)
     install_dir = data['submitty_install_dir']
     host_name = data['submission_url']
 
 # Verify submitty_admin file exists
-if not os.path.exists(admin_file):
+if not os.path.exists(submitty_admin_file):
     raise Exception('Unable to locate submitty_admin.json credentials file')
 
 # Load credentials out of admin file
-with open(admin_file, 'r') as file:
-    creds = json.load(file)
+with open(submitty_admin_file, 'r') as f:
+    creds = json.load(f)
 
 # Construct request list
 request = [
@@ -71,7 +72,7 @@ except:
 if response_json['status'] != 'success':
 
     print('Failed to obtain an auth token.', flush=True)
-    print('Ask your sysadmin to confirm that ' + admin_file +
+    print('Ask your sysadmin to confirm that ' + submitty_admin_file +
           ' contains valid credentials', flush=True)
 
     token = ''
@@ -84,22 +85,26 @@ else:
 creds['token'] = token
 
 # Write back to submitty_admin json file
-with open(admin_file, 'w') as file:
-    json.dump(creds, file, indent=4)
+with open(submitty_admin_file, 'w') as f:
+    json.dump(creds, f, indent=4)
 
 # Configure path to where status file should be saved
 # This file is saved somewhere submitty_php can read from so the PHP side of
 # submitty is able to determine if it can use certain features
-status_file = os.path.join(install_dir, 'config', 'submitty_admin_status.json')
 
-does_exist = True if token else False
+# Verify submitty_admin file exists
+if not os.path.exists(submitty_users_file):
+    raise Exception('Unable to locate '+submitty_users_file)
 
-# Write to status file
-with open(status_file, 'w') as file:
-    json.dump({
-        'submitty_admin_exists': does_exist,
-        'submitty_admin_username': creds['submitty_admin_username']
-    }, file, indent=4)
+# Load credentials out of admin file
+with open(submitty_users_file, 'r') as f:
+    users_json = json.load(f)
 
-cmd_output = os.popen('chmod 0440 ' + status_file).read()
-cmd_output = os.popen('chown submitty_php:submitty_php ' + status_file).read()
+if (token):
+    users_json['verified_submitty_admin_user'] = creds['submitty_admin_username']
+else:
+    users_json['verified_submitty_admin_user'] = ""
+
+# Write back to submitty_users json file
+with open(submitty_users_file, 'w') as f:
+    json.dump(users_json, f, indent=4)

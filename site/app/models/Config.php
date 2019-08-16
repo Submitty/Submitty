@@ -437,7 +437,7 @@ class Config extends AbstractModel {
 
         // Determine if submitty-admin is ready to go on the system level
         $status_file = FileUtils::joinPaths(
-            '/', 'usr', 'local', 'submitty', 'config', 'submitty_admin_status.json'
+            '/', 'usr', 'local', 'submitty', 'config', 'submitty_users.json'
         );
 
 
@@ -447,14 +447,19 @@ class Config extends AbstractModel {
 
         $status_file_contents = json_decode(file_get_contents($status_file));
 
+        $submitty_admin_user = "";
+        if (property_exists($status_file_contents,"verified_submitty_admin_user")) {
+          $submitty_admin_user = $status_file_contents->verified_submitty_admin_user;
+        }
+
         // Determine if submitty-admin is ready to go on the course level
-        if($status_file_contents->submitty_admin_exists === true)
+        if($submitty_admin_user !== "")
         {
             $course = $this->getCourse();
             $semester = $this->getSemester();
 
             $results = $this->core->getQueries()->checkIsInstructorInCourse(
-                $status_file_contents->submitty_admin_username,
+                $submitty_admin_user,
                 $course,
                 $semester
             );

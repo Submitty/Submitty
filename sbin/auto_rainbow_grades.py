@@ -18,6 +18,7 @@ import shutil
 import pwd
 import json
 import datetime
+from pathlib import Path
 
 # Constants
 PROVIDED_JSON_NAME = 'custom_customization.json'
@@ -57,6 +58,19 @@ course = sys.argv[2]
 user = daemon_user
 rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
 courses_path = os.path.join(data_dir, 'courses')
+
+
+today = datetime.datetime.now()
+log_file_path = Path(data_dir, 'logs', 'rainbow_grades',
+                     "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
+                                                     today.day))
+
+# Read in the file
+with open(log_file_path, 'a') as file:
+    file.write(str(today) + " Auto rainbow grades " + semester + " " + course + "\n")
+
+
+
 
 # Verify user exists
 users = pwd.getpwall()
