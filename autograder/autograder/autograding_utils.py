@@ -133,8 +133,10 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
     checkout_subdirectory = complete_config["autograding"].get("use_checkout_subdirectory","")
+    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
     tmp_work_instructor_solution = os.path.join(tmp_work, "instructor_solution")
+    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
 
     os.mkdir(tmp_work_test_output)
     os.mkdir(tmp_work_instructor_solution)
