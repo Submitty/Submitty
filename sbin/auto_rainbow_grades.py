@@ -61,6 +61,9 @@ courses_path = os.path.join(data_dir, 'courses')
 
 
 def log_message(message):
+    '''
+    Helper function to globally log a message about rainbow grades.
+    '''
     today = datetime.datetime.now()
     log_file_path = Path(data_dir, 'logs', 'rainbow_grades',
                          "{:04d}{:02d}{:02d}.txt".format(today.year,
