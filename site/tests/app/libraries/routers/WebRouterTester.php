@@ -189,4 +189,16 @@ class WebRouterTester extends BaseUnitTest {
             'message' => "Unauthenticated access. Please log in."
         ], $response->json_response->json);
     }
+
+    public function testApiNotFaculty() {
+        $core = $this->createMockCore(['logged_in' => true, 'access_faculty' => false]);
+        $request = Request::create(
+            "/api/courses"
+        );
+        $response = WebRouter::getApiResponse($request, $core);
+        $this->assertEquals([
+            'status' => "fail",
+            'message' => "API is open to faculty only."
+        ], $response->json_response->json);
+    }
 }
