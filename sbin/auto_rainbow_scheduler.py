@@ -10,7 +10,7 @@ the jobs daemon to automatically build or update rainbow grades for that course.
 
 import os
 import json
-from sqlalchemy import create_engine, Table, MetaData, bindparam, select, func
+from sqlalchemy import create_engine, Table, MetaData, select
 
 
 # Get path to current file directory
@@ -32,8 +32,9 @@ daemon_directory = os.path.join(data_dir, 'daemon_job_queue')
 courses_path = os.path.join(data_dir, 'courses')
 
 
-def process_course(semester,course):
-    course_config_path = os.path.join(courses_path, semester, course, 'config', 'config.json')
+def process_course(semester, course):
+    course_config_path = os.path.join(courses_path, semester,
+                                      course, 'config', 'config.json')
 
     # Retrieve the auto_rainbow_grades bool from the course config.json
     with open(course_config_path, 'r') as file:
@@ -69,9 +70,11 @@ def find_all_unarchived_courses():
     db_name = "submitty"
     # If using a UNIX socket, have to specify a slightly different connection string
     if os.path.isdir(DB_HOST):
-        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD, db_name, DB_HOST)
+        conn_string = "postgresql://{}:{}@/{}?host={}".format(DB_USER, DB_PASSWORD,
+                                                              db_name, DB_HOST)
     else:
-        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD, DB_HOST, db_name)
+        conn_string = "postgresql://{}:{}@{}/{}".format(DB_USER, DB_PASSWORD,
+                                                        DB_HOST, db_name)
     engine = create_engine(conn_string)
     db = engine.connect()
     metadata = MetaData(bind=db)
@@ -83,7 +86,7 @@ def find_all_unarchived_courses():
     for row in result:
         semester = row.semester
         course = row.course
-        process_course(semester,course)
+        process_course(semester, course)
 
 
 # Do the work!

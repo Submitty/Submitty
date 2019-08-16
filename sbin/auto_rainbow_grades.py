@@ -72,7 +72,6 @@ def log_message(message):
         file.write(timestring + " " + message + "\n")
 
 
-
 log_message("Start processing " + semester + " " + course)
 
 
