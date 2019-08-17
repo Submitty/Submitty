@@ -47,9 +47,7 @@ courses_path = os.path.join(data_dir, 'courses')
 
 
 def process_course(semester, course):
-    '''
-    Decide if we should run rainbow grades for this specific course.
-    '''
+    """Decide if we should run rainbow grades for this specific course."""
     course_config_path = os.path.join(courses_path, semester,
                                       course, 'config', 'config.json')
 
@@ -77,10 +75,7 @@ def process_course(semester, course):
 
 
 def find_all_unarchived_courses():
-    '''
-    Loop over all unarchived courses in the database.
-    '''
-
+    """Loop over all unarchived courses in the database."""
     # setup connection to database
     database_config_file = dir + '/../config/database.json'
     with open(database_config_file) as open_file:
