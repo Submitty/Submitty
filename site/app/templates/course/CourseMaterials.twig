@@ -90,10 +90,9 @@
 
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"
-                       onChange="setNewDateTime(this, '{{ path }}'), determineRelease('date_to_release_{{ id }}',changePermission('{{ path }}','1'))"/>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 <script>
-                    //this needs to be here so the boxes can be colored on load (will say it is not declared)
+
                     function determineRelease(inputID){
                         var now = server_time;
 
@@ -124,6 +123,52 @@
 
                     }
                     document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
+
+                    document.getElementById('date_to_release_{{ id }}').flatpickr({
+                    plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        updateToServerTime(fp);
+                                        break;
+                                    case 1:
+                                        updateToTomorrowServerTime(fp);
+                                        break;
+                                    case 2:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        fp.setDate(date,true);
+                                        break;
+
+                                }
+                            }
+                        }
+                    )],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    onOpen: handleTimeZones('{{ core.getConfig().getTimezone().getName() }}'),
+                    onClose: function() {
+                                            setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
+                                            determineRelease('date_to_release_{{ id }}');
+                                            changePermission('{{ path }}','1');
+                                         }
+                    });
                 </script>
             {% endif %}
         </div>
@@ -283,150 +328,6 @@
         }
     }
 
-    function setNewDateTime(me, path) {
-        // pass filename to server to record the new date and time of the file to be released
-        var newDateTime = $(me).val();
-        changeNewDateTime(path, newDateTime);
-
-        var url = buildUrl(['server_time']);
-
-        $.get({
-            url: url,
-            success: function(data) {
-                var now = JSON.parse(data)['data'];
-                now = new Date(parseInt(now.year),
-                    parseInt(now.month) - 1,
-                    parseInt(now.day),
-                    parseInt(now.hour),
-                    parseInt(now.minute),
-                    parseInt(now.second));
-
-                function pad(str){
-                    return ('0'+str).slice(-2);
-                }
-
-                var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
-                var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-                var currentDT = date+' '+time;
-                var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
-
-                //get the value in each file so the color can be assigned
-                //based on the time chosen
-                var fileDT = newDateTime;
-                //also custom colors for this page for readability
-                if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-                    me.style.backgroundColor = green;
-                    return green;
-                }
-                else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                    me.style.backgroundColor = red;
-                    return red;
-                }
-                else{
-                    me.style.backgroundColor = yellow;
-                    return yellow;
-                }
-            },
-            error: function(e) {
-                console.log("Error getting server time.");
-            }
-        });
-    }
-
-    function setChildNewDateTime(path, changeDate,handleData) {
-        //change the date and time of the subfiles in the folder with the time chosen for the whole
-        //folder (passed in)
-        var success;
-        success = false;
-        success  = changeFolderNewDateTime(path,changeDate,function (output) {
-            if(output){
-                success =true;
-                if(handleData){
-                    handleData(success);
-                }
-            }
-        });
-    }
-
-    function handleTimeZones() {
-
-        var url = buildUrl(['server_time']);
-
-        $.get({
-            url: url,
-            success: function(data) {
-
-                // Collect server time
-                var server_time = JSON.parse(data)['data'];
-                server_time = new Date(parseInt(server_time.year),
-                    parseInt(server_time.month) - 1,
-                    parseInt(server_time.day),
-                    parseInt(server_time.hour),
-                    parseInt(server_time.minute),
-                    parseInt(server_time.second));
-
-                // Collect client time
-                var client_time = new Date();
-
-                // Calculate difference in minutes
-                var diff_in_minutes = Math.abs(server_time.valueOf() - client_time.valueOf());
-                diff_in_minutes = diff_in_minutes / 1000 / 60;
-
-                // If difference in minutes is greater than 10 minutes then append message to flatpickr
-                if(diff_in_minutes > 10) {
-                    $('.flatpickr-calendar').append('<p>Enter all times relative to the server timezone</p>');
-                    $('.flatpickr-calendar').append('<p>Server timezone: {{ core.getConfig().getTimezone().getName() }}</p>');
-                }
-            },
-            error: function(e) {
-                console.log("Error getting server time.");
-            }
-        });
-    }
-
-    $(document).ready(function() {
-        flatpickr(".date_picker", {
-            plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Now"
-                            },
-                            {
-                                label: "Tomorrow"
-                            },
-                            {
-                                label: "End of time"
-                            }
-
-                        ],
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0: 
-                                    updateToServerTime(fp);
-                                    break;
-                                case 1:
-                                    updateToTomorrowServerTime(fp);
-                                    break;
-                                case 2:
-                                    date = new Date("9998-01-01 00:00:00");
-                                    fp.setDate(date,true);
-                                    break;
-
-                            }
-                        }
-                    }
-                )],
-            allowInput: true,
-            enableTime: true,
-            enableSeconds: true,
-            time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
-            onOpen: handleTimeZones()
-        });
-    });
 </script>
 
 
