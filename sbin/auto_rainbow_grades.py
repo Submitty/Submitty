@@ -19,6 +19,7 @@ import pwd
 import json
 import datetime
 from pathlib import Path
+import getpass
 
 # Constants
 PROVIDED_JSON_NAME = 'custom_customization.json'
@@ -51,6 +52,12 @@ if not os.path.exists(users_config_file):
 with open(users_config_file, 'r') as file:
     data = json.load(file)
     daemon_user = data['daemon_user']
+
+
+# Confirm that submitty_daemon user is running this script
+if data['daemon_user'] != getpass.getuser():
+    raise Exception('ERROR: This script must be run by the submitty_daemon user')
+
 
 # Configure variables
 semester = sys.argv[1]
