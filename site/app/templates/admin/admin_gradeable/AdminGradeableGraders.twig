@@ -32,8 +32,18 @@ Variables
 {# 
 Form
 #}
+
+{% if no_rotating_sections %}
+	<div name="grader-warning-popup edit-gradeable" id="grader-warning" hidden>
+		<p> WARNING: Rotating Sections are not set up yet.  <br />
+			All Access Grading and Grading by Rotating Section rely on rotating sections. <br />
+			To set them up, go to the Manage Sections page. <br />
+		</p>
+	</div>
+{% endif %}
+
 What is the lowest privileged user group that can grade this?
-    <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
+    <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
@@ -44,7 +54,7 @@ What is the lowest privileged user group that can grade this?
 <fieldset>
     <legend>
         How should graders be assigned to grade this item?
-        <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
+        <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
 	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
         {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> All Access Grading
@@ -150,11 +160,17 @@ What is the lowest privileged user group that can grade this?
     }
 
     function onSectionTypeChange() {
-        if($('#rotating_section').is(':checked')) {
+        if ($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
+            disableElementChildren('#grader-warning',false);
+        }
+        else if ($('#all_access').is(':checked')) {
+            disableElementChildren('#rotating_data', true);
+            disableElementChildren('#grader-warning',false);
         }
         else {
             disableElementChildren('#rotating_data', true);
+            disableElementChildren('#grader-warning',true);
         }
     }
 
