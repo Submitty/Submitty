@@ -179,6 +179,11 @@ class Testcase():
     if not self.has_solution_commands:
       return
 
+    if not self.queue_obj["generate_output"]:
+      # If there is no random inputs then it will take from generated_output
+      if not self.has_input_generator_commands:
+        return  
+
     # Create directories, set permissions, and copy in files.
     self.secure_environment.setup_for_random_output(self.dependencies)
     with open(os.path.join(self.secure_environment.tmp_logs,"output_generator_log.txt"), 'a') as logfile:
