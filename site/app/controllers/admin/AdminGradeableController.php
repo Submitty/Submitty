@@ -903,6 +903,7 @@ class AdminGradeableController extends AbstractController {
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
+            'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
             'has_due_date'
