@@ -102,15 +102,6 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals($core->buildUrl(['home']), $response->redirect_response->url);
     }
 
-    public function testNoUser() {
-        $core = $this->createMockCore(['semester' => 's19', 'course' => 'sample', 'logged_in' => true], ['no_user' => true]);
-        $request = Request::create(
-            "/s19/sample"
-        );
-        $response = WebRouter::getWebResponse($request, $core);
-        $this->assertEquals($core->buildCourseUrl(['no_access']), $response->redirect_response->url);
-    }
-
     public function randomUrlProvider() {
         return [
             ["/everywhere"],
@@ -129,7 +120,7 @@ class WebRouterTester extends BaseUnitTest {
     public function testNoCsrfToken() {
         $core = $this->createMockCore(['csrf_token' => false, 'logged_in' => true]);
         $request = Request::create(
-            "/home/change_username",
+            "/current_user/change_username",
             "POST"
         );
         $response = WebRouter::getWebResponse($request, $core);
@@ -196,6 +187,18 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals([
             'status' => "fail",
             'message' => "Unauthenticated access. Please log in."
+        ], $response->json_response->json);
+    }
+
+    public function testApiNotFaculty() {
+        $core = $this->createMockCore(['logged_in' => true, 'access_faculty' => false]);
+        $request = Request::create(
+            "/api/courses"
+        );
+        $response = WebRouter::getApiResponse($request, $core);
+        $this->assertEquals([
+            'status' => "fail",
+            'message' => "API is open to faculty only."
         ], $response->json_response->json);
     }
 }

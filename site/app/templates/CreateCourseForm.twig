@@ -97,7 +97,7 @@
         let headInstructor = $('#head_instructor').val();
         $.ajax({
             type: "GET",
-            url: buildUrl(['home', 'courses', headInstructor]) + '?as_instructor=true',
+            url: buildUrl(['home', 'courses']) + `?as_instructor=true&user_id=${headInstructor}`,
             success: function(data) {
                 let json = JSON.parse(data);
                 let courses = json['data']['unarchived_courses'].concat(json['data']['archived_courses']);

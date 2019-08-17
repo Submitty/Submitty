@@ -68,7 +68,7 @@ function newUserForm() {
 
 //opens modal with initial settings for edit user
 function editUserForm(user_id) {
-    var url = buildCourseUrl(['users', user_id]);
+    var url = buildCourseUrl(['users', 'details']) + `?user_id=${user_id}`;
     $.ajax({
         url: url,
         success: function(data) {

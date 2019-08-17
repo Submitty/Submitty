@@ -2,7 +2,7 @@ if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
 
-let loaded = sessionStorage.getItem('toolbar_loaded');
+var loaded = sessionStorage.getItem('toolbar_loaded');
 window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };

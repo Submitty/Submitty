@@ -72,6 +72,10 @@ class WebRouter {
                 return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
+            if ($logged_in && !$core->getUser()->accessFaculty()) {
+                return new Response(JsonResponse::getFailResponse("API is open to faculty only."));
+            }
+
             /** @noinspection PhpUnhandledExceptionInspection */
             if (!$router->accessCheck()) {
                 return Response::JsonOnlyResponse(
@@ -211,14 +215,6 @@ class WebRouter {
                     $this->core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($old_request_url)
                 )
             );
-        }
-        elseif ($this->core->getUser() === null && $this->parameters['_method'] !== 'noAccess') {
-            $this->core->loadSubmittyUser();
-            if (!Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')) {
-                return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['no_access']))
-                );
-            }
         }
         elseif ($this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
