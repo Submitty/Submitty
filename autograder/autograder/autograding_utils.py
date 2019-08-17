@@ -128,6 +128,8 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
 # ==================================================================================
 
 def setup_for_validation(working_directory, complete_config, is_vcs, testcases, job_id, log_path, stack_trace_log_path):
+    """ Prepare a directory for validation by copying in and permissioning the required files. """
+    
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
     tmp_work = os.path.join(working_directory,"TMP_WORK")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
@@ -135,10 +137,12 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     checkout_subdirectory = complete_config["autograding"].get("use_checkout_subdirectory","")
     tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
+    tmp_work_generated_output = os.path.join(tmp_work, "generated_output")
     tmp_work_instructor_solution = os.path.join(tmp_work, "instructor_solution")
     tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
 
     os.mkdir(tmp_work_test_output)
+    os.mkdir(tmp_work_generated_output)
     os.mkdir(tmp_work_instructor_solution)
 
     patterns = complete_config['autograding']
@@ -162,6 +166,8 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     # Copy expected files into the tmp_work_test_output path
     test_output_path = os.path.join(tmp_autograding, 'test_output')
     copy_contents_into(job_id, test_output_path, tmp_work_test_output, tmp_logs, log_path, stack_trace_log_path)
+    generated_output_path = os.path.join(tmp_autograding, 'generated_output')
+    copy_contents_into(job_id, generated_output_path, tmp_work_generated_output, tmp_logs, log_path, stack_trace_log_path)
 
     # Copy in instructor solution code.
     # TODO: Is this necessary?
