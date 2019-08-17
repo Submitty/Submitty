@@ -170,7 +170,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users/{user_id}", methods={"GET"})
+     * @Route("/{_semester}/{_course}/users/details", methods={"GET"})
      */
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);

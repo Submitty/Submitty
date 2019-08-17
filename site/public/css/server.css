@@ -160,7 +160,7 @@ input[type="checkbox"]:checked:before {
 .fa-question-circle{
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
-  color: var(--actionable-blue);
+  color: var(--external-link-blue);
   font-weight: 300;
   display: inline-block;
 }

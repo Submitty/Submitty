@@ -151,7 +151,7 @@
 </div>
 </div>
 <hr/>
-{% if thread_exists %}
+{% if thread_exists and show_filter %}
 <script type="text/javascript">
 	function updateThreads(loadFirstPage, success_callback) {
 		{% if thread_exists %}

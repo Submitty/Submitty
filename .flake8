@@ -45,6 +45,7 @@ exclude=
     sbin/submitty_daemon_jobs/submitty_jobs/handler.py,
     sbin/submitty_daemon_jobs/submitty_jobs/jobs.py,
     sbin/adduser.py,
+    sbin/adduser_course.py,
     sbin/anonymize.py,
     sbin/anonymize_autograding_logs.py,
     sbin/authentication.py,
