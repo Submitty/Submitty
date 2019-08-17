@@ -90,9 +90,13 @@
     </span>
 
     {% if post_attachment.exist == true %}
-        {% for attachment in post_attachment.files %}
-            <a href="#" class="btn-default btn-sm post_button_color forum-file-open" onclick="openFileForum('forum_attachments', '{{ attachment.name }}', '{{ attachment.path }}')" > {{ attachment.name_display }} </a>
-        {% endfor %}
+
+        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm" type="button">
+                    Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
+
+
+        <div id="{{ post_attachment.params.well_id }}" class="attachment-well well well-lg"></div>
+
     {% endif %}
 
     {% set offset = offset + 30 %}
