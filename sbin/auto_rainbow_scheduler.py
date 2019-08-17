@@ -11,10 +11,24 @@ the jobs daemon to automatically build or update rainbow grades for that course.
 import os
 import json
 from sqlalchemy import create_engine, Table, MetaData, select
+import getpass
 
 
 # Get path to current file directory
 dir = os.path.dirname(__file__)
+
+
+# Confirm that submitty_daemon user is running this script
+users_config_file = dir + '/../config/submitty_users.json'
+
+if not os.path.exists(users_config_file):
+    raise Exception('Unable to locate users_submitty.json configuration file')
+
+with open(users_config_file, 'r') as f:
+    data = json.load(f)
+    if data['daemon_user'] != getpass.getuser():
+        raise Exception('ERROR: This script must be run by the submitty_daemon user')
+
 
 # Collect path information from configuration file
 config_file = dir + '/../config/submitty.json'
@@ -22,8 +36,8 @@ config_file = dir + '/../config/submitty.json'
 if not os.path.exists(config_file):
     raise Exception('Unable to locate submitty.json configuration file')
 
-with open(config_file, 'r') as file:
-    data = json.load(file)
+with open(config_file, 'r') as f:
+    data = json.load(f)
     data_dir = data['submitty_data_dir']
 
 # Get path to jobs daemon directory for later
@@ -40,8 +54,8 @@ def process_course(semester, course):
                                       course, 'config', 'config.json')
 
     # Retrieve the auto_rainbow_grades bool from the course config.json
-    with open(course_config_path, 'r') as file:
-        data = json.load(file)
+    with open(course_config_path, 'r') as f:
+        data = json.load(f)
         auto_rainbow_grades = data['course_details']['auto_rainbow_grades']
 
     # If true then schedule a RunAutoRainbowGrades job
@@ -58,8 +72,8 @@ def process_course(semester, course):
         job_filename = 'auto_scheduled_rainbow_' + semester + '_' + course + '.json'
 
         # Drop job into jobs queue
-        with open(os.path.join(daemon_directory, job_filename), 'w') as file:
-            json.dump(jobs_json, file, indent=4)
+        with open(os.path.join(daemon_directory, job_filename), 'w') as f:
+            json.dump(jobs_json, f, indent=4)
 
 
 def find_all_unarchived_courses():
