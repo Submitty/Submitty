@@ -804,6 +804,11 @@ class ForumController extends AbstractController{
         if(!empty($posts)){
             $thread_id = $posts[0]["thread_id"];
         }
+        foreach($posts as &$post) {
+            do {
+                $post['content'] = preg_replace('/(?:!\[(.*?)\]\((.*?)\))/', '$2', $post['content'], -1, $count);
+            } while($count > 0);
+        }
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
