@@ -4,6 +4,7 @@ namespace app\views\forum;
 use app\libraries\DateUtils;
 use app\views\AbstractView;
 use app\libraries\FileUtils;
+use app\libraries\ForumUtils;
 
 class ForumThreadView extends AbstractView {
 
@@ -552,6 +553,18 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
+    function renderSingleThreadListItem($threads){
+        $thread = $threads[0];
+        $currentThread = $thread["id"];
+        $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
+        $activeThreadAnnouncement = false;
+        $activeThreadTitle = "";
+        $activeThread = array();
+        $displayThreadContent = $this->displayThreadList([$thread], false, $activeThreadAnnouncement, $activeThreadTitle, $activeThread, $currentThread, $currentCategoriesIds, false);
+        $html = $this->core->getOutput()->renderTwigTemplate("forum/displayThreadList.twig", $displayThreadContent);
+        $this->core->getOutput()->renderJsonSuccess($html);
+    }
+
     function renderPost($thread_id, $post){
         $totalAttachments = 0;
         $data = $this->createPost($thread_id, $post, [], 'date_format', false, 0,'tree', true, $totalAttachments);
@@ -953,7 +966,9 @@ class ForumThreadView extends AbstractView {
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
             "parent_id" => $post["parent_id"],
-            "render_markdown" => $markdown
+            "render_markdown" => $markdown,
+            "csrf_token" => $this->core->getCsrfToken(),
+            "post_content_limit" => ForumUtils::FORUM_CHAR_POST_LIMIT
         ];
 
 		return $return;

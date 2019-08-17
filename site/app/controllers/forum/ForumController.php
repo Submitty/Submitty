@@ -322,6 +322,13 @@ class ForumController extends AbstractController{
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
+                $client = new Client("ws://".$_SERVER['HTTP_HOST'].":8080");
+                $client->send(json_encode(["type" => "new_thread", "data" => [
+                    "thread_id" => $thread_id,
+                    "user_id" => $current_user_id
+                ]]));
+                $client->close();
+
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
         }
@@ -413,7 +420,8 @@ class ForumController extends AbstractController{
                 $client->send(json_encode(["type" => "new_post", "data" => [
                     "post_id" => $post_id,
                     "thread_id" => $thread_id,
-                    "parent_id" => $parent_id
+                    "parent_id" => $parent_id,
+                    "user_id" => $current_user_id
                 ]]));
                 $client->close();
 
@@ -933,6 +941,22 @@ class ForumController extends AbstractController{
         $post = $this->core->getQueries()->getPost($post_id);
         return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderPost', $thread_id, $post);
     }
+
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads/get_list_item", methods={"POST"})
+     */
+    public function getThreadListItem(){
+        $thread_id = $_POST['thread_id'];
+        $result = $this->core->getQueries()->getThread($thread_id)[0];
+        $categories_ids = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
+        $show_deleted = $this->showDeleted();
+        $currentCourse = $this->core->getConfig()->getCourse();
+        $show_merged_thread = $this->showMergedThreads($currentCourse);
+        $pageNumber = 1;
+        $threads = $this->getSortedThreads($categories_ids, 0, $show_deleted, $show_merged_thread, [$result['status']], false, $pageNumber, $thread_id);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderSingleThreadListItem', $threads);
+    }
+
 
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThread($thread_id)[0];

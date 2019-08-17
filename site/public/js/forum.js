@@ -35,7 +35,6 @@ function forumSocketHandler() {
 
         if(data.type == "new_post"){
             var postdata = data.data;
-            console.log(postdata);
 
             if(parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))){
                 $.ajax({
@@ -45,36 +44,59 @@ function forumSocketHandler() {
                     dataType: "JSON",
                     success: function(result) {
                         var parent = $('#'+postdata.parent_id);
-                        console.log($(parent));
                         var replyLevel = 0;
                         if(parseInt($(parent).attr("parent-id")) === -1) {
-                            console.log("baap");
-
                             $(result.data).insertBefore("#post-hr");
                         }
                         else{
                             var lastPost;
                             if($("[parent-id='"+postdata.parent_id+"'").length > 0){
                                 lastPost = $("[parent-id='"+postdata.parent_id+"'").last();
+                                replyLevel = parseInt($(lastPost).attr("reply-level")) - 1;
                             }
                             else{
                                 lastPost = parent;
+                                replyLevel = parseInt($(lastPost).attr("reply-level"));
                             }
-                            console.log($(lastPost));
-                            replyLevel = parseInt($(lastPost).attr("reply-level"));
                             $(result.data).insertAfter($(lastPost));
                         }
                         replyLevel += 1;
-                        console.log(replyLevel);
+
+                        var lastPostForm = $('.thread-post-form').last();
+                        var lastPostFormId = parseInt($(lastPostForm).attr("post_box_id"));
 
                         $('#'+postdata.post_id).attr("reply-level", replyLevel).css("margin-left", ((replyLevel-1)*30)+"px");
+                        $('#'+postdata.post_id+'-reply').css("margin-left", ((replyLevel)*30)+"px");
+                        $('#'+postdata.post_id+'-reply').find(".thread-post-form").attr("post_box_id", lastPostFormId);
+
+                        $(lastPostForm).attr("post_box_id", lastPostFormId+1);
+
+                        enableTabsInTextArea('.post_content_reply');
                         addCollapsable();
+                        thread_post_handler();
+                        $(".post_reply_from").submit(event, publishPost);
+                        $("form").areYouSure();
+                        loadThreadHandler();
                     }
                 });
             }
             else{
                 alert($('#current-thread').attr("value"));
             }
+        }
+
+        if(data.type == "new_thread"){
+            var threaddata = data.data;
+            console.log(threaddata);
+            $.ajax({
+                type: 'POST',
+                url: buildCourseUrl(['forum', 'threads', 'get_list_item']),
+                data: { 'thread_id': threaddata.thread_id, 'csrf_token': csrfToken },
+                dataType: "JSON",
+                success: function(result){
+                    $(result.data).insertBefore($('.thread_box_link').first());
+                }
+            });
         }
     }
 }
@@ -1016,7 +1038,6 @@ function hidePosts(text, id) {
             text.innerHTML = "Hide Replies";
         }
     }
-
 }
 
 function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){

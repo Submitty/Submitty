@@ -57,7 +57,7 @@
                         return false;
                     }
                     else {
-                        $this->setSocketClient($user_id, $client_id);
+                        $this->setSocketClient($user_id, $conn);
                         $conn->send('{"sys": "Connected"}');
                         return true;
                     }
@@ -69,9 +69,16 @@
         }
 
         private function broadcast($from, $content, $all = true){
-            foreach ($this->clients as $client) {
-                if($all || $client != $from){
+            if($all) {
+                foreach ($this->clients as $client) {
                     $client->send($content);
+                }
+            }
+            else{
+                foreach ($this->clients as $client) {
+                    if($client != $from){
+                        $client->send($content);
+                    }
                 }
             }
         }
@@ -83,7 +90,7 @@
          */
 
         /**
-         * Fetches Client ID (s) of a given User
+         * Fetches Connection of a given User
          * @param $user_id
          * @return array
          */
@@ -92,13 +99,13 @@
         }
 
         /**
-         * Fetches User ID of a given socket client ID
-         * @param $client_id
+         * Fetches User ID of a given socket Connection
+         * @param $conn
          * @return integer
          */
-        private function getSocketUserID($client_id){
-            if(isset($this->sessions[$client_id])) {
-                return $this->sessions[$client_id];
+        private function getSocketUserID($conn){
+            if(isset($this->sessions[$conn->resourceId])) {
+                return $this->sessions[$conn->resourceId];
             }
             else
             {
@@ -107,24 +114,24 @@
         }
 
         /**
-         * Sets Client ID associativity with User
+         * Sets Connection associativity with User
          * @param $user_id
-         * @param $client_id
+         * @param $conn
          * @return void
          */
-        private function setSocketClient($user_id, $client_id){
-            $this->sessions[$client_id] = $user_id;
-            $this->users[$user_id] = $client_id;
+        private function setSocketClient($user_id, $conn){
+            $this->sessions[$conn->resourceId] = $user_id;
+            $this->users[$user_id] = $conn;
         }
 
         /**
-         * Deletes Client ID associativity with User
-         * @param $client_id
+         * Deletes Connection associativity with User
+         * @param $conn
          * @return void
          */
-        private function removeSocketClient($client_id){
-            $user_id = $this->sessions[$client_id];
-            unset($this->sessions[$client_id]);
+        private function removeSocketClient($conn){
+            $user_id = $this->getSocketUserID($conn);
+            unset($this->sessions[$conn->resourceId]);
             unset($this->users[$user_id]);
         }
 
@@ -141,13 +148,19 @@
                 $msg = json_decode($msgString, true);
 
                 switch ($msg["type"]){
+                    case "new_thread":
+                    case "new_post":
+                        $user_id = $msg["data"]["user_id"];
+                        $fromConn = $this->getSocketClientID($user_id);
+                        $this->broadcast($fromConn, $msgString, false);
+                        break;
                     default: $this->broadcast($from, $msgString, true);
                 }
             }
         }
 
         public function onClose(ConnectionInterface $conn) {
-            $this->removeSocketClient($conn->resourceId);
+            $this->removeSocketClient($conn);
             $this->clients->detach($conn);
             $conn->send('{"sys": "Disconnected"}');
             echo "Connection {$conn->resourceId} has disconnected\n";
