@@ -70,7 +70,9 @@ class HomePageView extends AbstractView {
             "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication,
             "csrf_token" => $this->core->getCsrfToken(),
             "access_level" => $access_levels[$user->getAccessLevel()],
-            "display_access_level" => $user->accessFaculty()
+            "display_access_level" => $user->accessFaculty(),
+            "change_password_url" => $this->core->buildUrl(['current_user', 'change_password']),
+            "change_username_url" => $this->core->buildUrl(['current_user', 'change_username'])
         ]);
     }
 

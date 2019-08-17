@@ -18,18 +18,18 @@
 
     <br/>
     <br/>
-    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime(this)"/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime('date_to_release')"/>
     </center>
     <script>
 
-        function getNewDateTime(me){
-            var releaseDate = document.getElementById("date_to_release");
+        function getNewDateTime(id){
+            var releaseDate = document.getElementById(id);
             // pass filename to server to record the new date and time of the file to be released
-            var newDateTime = $(me).val();
+            var newDateTime = $("#"+id).val();
             //set the value to the new date and time
             releaseDate.value = newDateTime;
-
         }
+
         function determineRelease(nDT) {
             //get current date and time to determine what color the box is based
             //on time you want released and the current date
@@ -103,9 +103,47 @@
                     });
                 }
             });
-
-
         }
+
+        document.getElementById('date_to_release').flatpickr({
+                    plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0: 
+                                        updateToServerTime(fp);
+                                        break;
+                                    case 1:
+                                        updateToTomorrowServerTime(fp);
+                                        break;
+                                    case 2:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        fp.setDate(date,true);
+                                        break;
+
+                                }
+                            }
+                        }
+                    )],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S"
+                    });
     </script>
 
 {% endblock %}

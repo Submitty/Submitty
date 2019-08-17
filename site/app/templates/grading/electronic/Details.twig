@@ -327,6 +327,7 @@
         {% if graded_gradeable.hasActiveRegradeRequest() %}
             {% set contents = contents ~ " + Grade Inquiry" %}
             {% set btn_class = "btn-danger" %}
+            {% set badge_count = graded_gradebable.getActiveGradeInquiryCount()  %}
         {%  endif %}
     {% elseif graded_gradeable.getGradeable().isTaGrading() %}
         {% set contents = "Grade" %}
@@ -345,6 +346,7 @@
         {% if graded_gradeable.hasActiveRegradeRequest() %}
             {% set contents = contents ~ " + Grade Inquiry" %}
             {% set btn_class = "btn-danger" %}
+            {% set badge_count = graded_gradeable.getActiveGradeInquiryCount() %}
         {%  endif %}
     {% else %}
         {% set contents = "View" %}
@@ -353,6 +355,9 @@
     <td>
         <a class="btn {{ btn_class }}" href="{{ context.grade_url }}?who_id={{ graded_gradeable.getSubmitter().getId() }}&sort={{ context.sort }}&direction={{ context.direction }}">
             {{ contents }}
+            {% if badge_count > 0 and graded_gradeable.getGradeable().isGradeInquiryPerComponentAllowed()%}
+                <span class="notification-badge">{{ badge_count }}</span>
+            {% endif %}
         </a>
     </td>
 {% endmacro %}

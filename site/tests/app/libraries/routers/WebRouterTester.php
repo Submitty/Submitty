@@ -120,7 +120,7 @@ class WebRouterTester extends BaseUnitTest {
     public function testNoCsrfToken() {
         $core = $this->createMockCore(['csrf_token' => false, 'logged_in' => true]);
         $request = Request::create(
-            "/home/change_username",
+            "/current_user/change_username",
             "POST"
         );
         $response = WebRouter::getWebResponse($request, $core);
@@ -187,6 +187,18 @@ class WebRouterTester extends BaseUnitTest {
         $this->assertEquals([
             'status' => "fail",
             'message' => "Unauthenticated access. Please log in."
+        ], $response->json_response->json);
+    }
+
+    public function testApiNotFaculty() {
+        $core = $this->createMockCore(['logged_in' => true, 'access_faculty' => false]);
+        $request = Request::create(
+            "/api/courses"
+        );
+        $response = WebRouter::getApiResponse($request, $core);
+        $this->assertEquals([
+            'status' => "fail",
+            'message' => "API is open to faculty only."
         ], $response->json_response->json);
     }
 }

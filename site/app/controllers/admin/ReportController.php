@@ -499,15 +499,9 @@ class ReportController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/rainbow_grades_customization")
+     * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
     public function generateCustomization(){
-
-        // Only allow course admins to access this page
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -544,22 +538,17 @@ class ReportController extends AbstractController {
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
                 'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
-                'messages' => $customization->getMessages()
+                'messages' => $customization->getMessages(),
+                'limited_functionality_mode' => !$this->core->getConfig()->isSubmittyAdminUserInCourse()
             ]);
 
         }
     }
 
     /**
-     * @Route("/{_semester}/{_course}/auto_rg_status")
+     * @Route("/{_semester}/{_course}/reports/rainbow_grades_status")
      */
-    public function autoRainbowGradesStatus()
-    {
-        // Only allow course admins to access this page
-        if (!$this->core->getUser()->accessAdmin()) {
-            $this->core->getOutput()->showError("This account cannot access admin pages");
-        }
-
+    public function autoRainbowGradesStatus() {
         // Create path to the file we expect to find in the jobs queue
         $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
             $this->core->getConfig()->getSemester() .

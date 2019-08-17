@@ -3,6 +3,7 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\libraries\ForumUtils;
 use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
@@ -253,6 +254,12 @@ class ForumController extends AbstractController{
         $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+
+        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
+        }
+
         if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
             $lock_thread_date = $_POST['lock_thread_date'];
         } else {
@@ -341,6 +348,11 @@ class ForumController extends AbstractController{
         $file_post = 'file_input';
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        if(strlen($post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over ". ForumUtils::FORUM_CHAR_POST_LIMIT ." characters long", $result);
+        }
 
         if(isset($_POST['thread_status'])){
             $this->changeThreadStatus($_POST['thread_status'], $thread_id);
@@ -638,6 +650,12 @@ class ForumController extends AbstractController{
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
+
+            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+                $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
+                return null;
+            }
+
             $post_id = $_POST["edit_post_id"];
             $original_post = $this->core->getQueries()->getPost($post_id);
             if(!empty($original_post)) {
@@ -795,14 +813,19 @@ class ForumController extends AbstractController{
         if(!empty($posts)){
             $thread_id = $posts[0]["thread_id"];
         }
+        foreach($posts as &$post) {
+            do {
+                $post['content'] = preg_replace('/(?:!\[(.*?)\]\((.*?)\))/', '$2', $post['content'], -1, $count);
+            } while($count > 0);
+        }
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
         if(!empty($_REQUEST["ajax"])){
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
         }
     }
 
