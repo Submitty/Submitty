@@ -724,4 +724,50 @@ class Core {
 
         return $logged_in;
     }
+
+    /**
+     * Fetches Client ID of a given User
+     * @param $user_id
+     * @return int
+     */
+    public function getSocketClientID($user_id){
+        return $this->course_db->query('SELECT client_id FROM socket_connections WHERE user_id = ?', [$user_id]);
+    }
+
+    /**
+     * Fetches User ID of a given socket client ID
+     * @param $client_id
+     * @return array
+     */
+    public function getSocketUserID($client_id){
+        return $this->getQueries()->getSocketUserID($client_id);
+    }
+
+    /**
+     * Sets Client ID associativity with User
+     * @param $user_id
+     * @param $client_id
+     * @return void
+     */
+    public function setSocketClient($user_id, $client_id){
+        $this->getQueries()->setSocketClient($user_id, $client_id);
+    }
+
+    /**
+     * Deletes Client ID associativity with User
+     * @param $client_id
+     * @return void
+     */
+    public function removeSocketClient($client_id){
+        $this->getQueries()->removeSocketClient($client_id);
+    }
+
+    /**
+     * Update last activity on Socket by User
+     * @param $client_id
+     * @return void
+     */
+    public function updateSocketClient($client_id){
+        $this->getQueries()->updateSocketClient($client_id);
+    }
 }

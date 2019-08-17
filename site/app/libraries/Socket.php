@@ -2,27 +2,15 @@
 
     namespace app\libraries;
 
+    use PHPUnit\Framework\ExpectationFailedException;
     use Ratchet\MessageComponentInterface;
     use Ratchet\ConnectionInterface;
-
-    use app\exceptions\BaseException;
-    use app\libraries\Core;
-    use app\libraries\ExceptionHandler;
-    use app\libraries\Logger;
-    use app\libraries\Utils;
-    use app\libraries\routers\WebRouter;
-    use app\libraries\response\Response;
-
-    use Doctrine\Common\Annotations\AnnotationRegistry;
-    use Symfony\Component\HttpFoundation\Request;
-
-//    $loader = require_once(__DIR__.'/../vendor/autoload.php');
-//    AnnotationRegistry::registerLoader([$loader, 'loadClass']);
+    use app\libraries\database;
 
     class Socket implements MessageComponentInterface {
         protected $clients;
         protected $sessions;
-
+        protected $users;
         protected $core;
 
         public function __construct() {
@@ -36,11 +24,13 @@
             $this->core->loadMasterDatabase();
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadAuthentication();
+            $this->core->loadCourseDatabase();
 
         }
 
         private function checkAuth($conn){
             $request = $conn->httpRequest;
+            $client_id = $conn->resourceId;
             $userAgent = $request->getHeader('user-agent');
 
             if( $userAgent[0] == "websocket-client-php"){
@@ -59,14 +49,15 @@
                         $this->core->getConfig()->getSecretSession()
                     );
                     $session_id = $token->getClaim('session_id');
-                    $logged_in = $this->core->getSession($session_id, $token->getClaim('sub'));
+                    $user_id = $token->getClaim('sub');
+                    $logged_in = $this->core->getSession($session_id, $user_id);
                     if (!$logged_in) {
                         $conn->send('{"sys": "Unauthenticated User"}');
                         $conn->close();
                         return false;
                     }
                     else {
-                        $this->sessions[$conn->resourceId] = ["userid" => $token->getClaim('sub')];
+                        $this->setSocketClient($user_id, $client_id);
                         $conn->send('{"sys": "Connected"}');
                         return true;
                     }
@@ -81,6 +72,52 @@
             foreach ($this->clients as $client) {
                 $client->send($content);
             }
+        }
+
+        /**
+         * Fetches Client ID (s) of a given User
+         * @param $user_id
+         * @return array
+         */
+        private function getSocketClientID($user_id){
+            return $this->users[$user_id];
+        }
+
+        /**
+         * Fetches User ID of a given socket client ID
+         * @param $client_id
+         * @return integer
+         */
+        private function getSocketUserID($client_id){
+            if(isset($this->sessions[$client_id])) {
+                return $this->sessions[$client_id];
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /**
+         * Sets Client ID associativity with User
+         * @param $user_id
+         * @param $client_id
+         * @return void
+         */
+        private function setSocketClient($user_id, $client_id){
+            $this->sessions[$client_id] = $user_id;
+            $this->users[$user_id] = $client_id;
+        }
+
+        /**
+         * Deletes Client ID associativity with User
+         * @param $client_id
+         * @return void
+         */
+        private function removeSocketClient($client_id){
+            $user_id = $this->sessions[$client_id];
+            unset($this->sessions[$client_id]);
+            unset($this->users[$user_id]);
         }
 
         public function onOpen(ConnectionInterface $conn) {
@@ -108,6 +145,7 @@
         }
 
         public function onClose(ConnectionInterface $conn) {
+            $this->removeSocketClient($conn->resourceId);
             $this->clients->detach($conn);
             $conn->send('{"sys": "Disconnected"}');
             echo "Connection {$conn->resourceId} has disconnected\n";

@@ -401,6 +401,7 @@ class ForumController extends AbstractController{
                 $client->send(json_encode(["type" => "new_post", "data" => [
                     "post_id" => $post_id,
                     "thread_id" => $thread_id,
+                    "parent_id" => $parent_id
                 ]]));
                 $client->close();
 
@@ -905,15 +906,9 @@ class ForumController extends AbstractController{
      */
     public function getHTMLPostContent(){
         $post_id = $_POST["post_id"];
-        if(!empty($post_id)) {
-            $result = $this->core->getQueries()->getPost($post_id);
-            if($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
-                return $this->core->getOutput()->renderJsonSuccess($result);
-            } else {
-                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
-            }
-        }
-        return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
+        $thread_id = $_POST['thread_id'];
+        $post = $this->core->getQueries()->getPost($post_id);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderPost', $thread_id, $post);
     }
 
     private function getThreadContent($thread_id, &$output){

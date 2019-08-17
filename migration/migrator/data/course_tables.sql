@@ -647,7 +647,7 @@ CREATE TABLE "viewed_responses" (
 CREATE TABLE socket_connections
 (
   connection_id SERIAL NOT NULL,
-  user_id       VARCHAR(500),
+  user_id       character varying NOT NULL,
   client_id     VARCHAR(100),
   last_active   TIMESTAMP,
   CONSTRAINT socket_connections_pk

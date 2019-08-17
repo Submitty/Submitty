@@ -35,17 +35,40 @@ function forumSocketHandler() {
 
         if(data.type == "new_post"){
             var postdata = data.data;
-
             console.log(postdata);
 
             if(parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))){
                 $.ajax({
                     type: 'POST',
-                    url: buildCourseUrl(['forum', 'posts', 'get']),
-                    data: { 'post_id': postdata.post_id, 'csrf_token': csrfToken },
+                    url: buildCourseUrl(['forum', 'posts', 'get_html']),
+                    data: { 'post_id': postdata.post_id, 'thread_id': postdata.thread_id, 'csrf_token': csrfToken },
                     dataType: "JSON",
                     success: function(result) {
-                        console.log(result)
+                        var parent = $('#'+postdata.parent_id);
+                        console.log($(parent));
+                        var replyLevel = 0;
+                        if(parseInt($(parent).attr("parent-id")) === -1) {
+                            console.log("baap");
+
+                            $(result.data).insertBefore("#post-hr");
+                        }
+                        else{
+                            var lastPost;
+                            if($("[parent-id='"+postdata.parent_id+"'").length > 0){
+                                lastPost = $("[parent-id='"+postdata.parent_id+"'").last();
+                            }
+                            else{
+                                lastPost = parent;
+                            }
+                            console.log($(lastPost));
+                            replyLevel = parseInt($(lastPost).attr("reply-level"));
+                            $(result.data).insertAfter($(lastPost));
+                        }
+                        replyLevel += 1;
+                        console.log(replyLevel);
+
+                        $('#'+postdata.post_id).attr("reply-level", replyLevel).css("margin-left", ((replyLevel-1)*30)+"px");
+                        addCollapsable();
                     }
                 });
             }
@@ -138,7 +161,6 @@ function publishFormWithAttachments(form, test_category, error_message) {
         return false;
     }
     if(test_category) {
-
         if((!form.prop("ignore-cat")) && form.find('.cat-selected').length == 0 && ($('.cat-buttons input').is(":checked") == false)) {
             alert("At least one category must be selected.");
             return false;

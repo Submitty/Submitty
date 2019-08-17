@@ -4064,4 +4064,5 @@ AND gc_id IN (
         }
         return $this->course_db->rows()[0]['lock_thread_date'] < date("Y-m-d H:i:S");
     }
+
 }

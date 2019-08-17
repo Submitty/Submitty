@@ -550,6 +550,13 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
+    function renderPost($thread_id, $post){
+        $totalAttachments = 0;
+        $data = $this->createPost($thread_id, $post, [], 'date_format', false, 0,'tree', true, $totalAttachments);
+        $html = $this->core->getOutput()->renderTwigTemplate("forum/CreatePost.twig", $data);
+        $this->core->getOutput()->renderJsonSuccess($html);
+    }
+
 	public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids){
 		$tempArray = array();
 		$threadAnnouncement = false;
@@ -766,7 +773,7 @@ class ForumThreadView extends AbstractView {
         $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
         $date = DateUtils::parseDateTime($post["timestamp"], $this->core->getConfig()->getTimezone());
-        if (!is_null($post["edit_timestamp"])) {
+        if (isset($post["edit_timestamp"]) && !is_null($post["edit_timestamp"])) {
             $edit_date = $function_date(DateUtils::parseDateTime($post["edit_timestamp"], $this->core->getConfig()->getTimezone()), "n/j g:i A");
         } else {
             $edit_date = null;
@@ -943,7 +950,7 @@ class ForumThreadView extends AbstractView {
             "form_post_url" => $this->core->buildCourseUrl(['forum', 'posts', 'new']),
             "post_box_id" => $post_box_id,
             "thread_id" => $thread_id,
-            "parent_id" => $post_id,
+            "parent_id" => $post["parent_id"],
             "render_markdown" => $markdown
         ];
 
