@@ -68,11 +68,19 @@
             }
         }
 
-        private function broadcast($content){
+        private function broadcast($from, $content, $all = true){
             foreach ($this->clients as $client) {
-                $client->send($content);
+                if($all || $client != $from){
+                    $client->send($content);
+                }
             }
         }
+
+        /** Note: Even if some of the below functions are not currently used,
+         * Do not remove them. Use them in the future for features like -
+         *      1. pushing notifications to a set of users
+         *      2. User to User (s) chat/communication
+         */
 
         /**
          * Fetches Client ID (s) of a given User
@@ -129,18 +137,12 @@
         }
 
         public function onMessage(ConnectionInterface $from, $msgString) {
-            $numRecv = count($this->clients) - 1;
-            echo sprintf('Connection %d sending message "%s" to %d other connection%s' . "\n"
-                , $from->resourceId, $msgString, $numRecv, $numRecv == 1 ? '' : 's');
-
             if($this->checkAuth($from)){
                 $msg = json_decode($msgString, true);
 
                 switch ($msg["type"]){
-                    default: $this->broadcast($msgString);
+                    default: $this->broadcast($from, $msgString, true);
                 }
-
-                echo $msgString;
             }
         }
 

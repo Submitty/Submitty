@@ -644,19 +644,6 @@ CREATE TABLE "viewed_responses" (
     CONSTRAINT viewed_responses_pkey PRIMARY KEY ("thread_id", "user_id")
 );
 
-CREATE TABLE socket_connections
-(
-  connection_id SERIAL NOT NULL,
-  user_id       character varying NOT NULL,
-  client_id     VARCHAR(100),
-  last_active   TIMESTAMP,
-  CONSTRAINT socket_connections_pk
-    PRIMARY KEY (connection_id),
-  CONSTRAINT socket_connections_users_user_id_fk
-    FOREIGN KEY (user_id) REFERENCES users
-      ON UPDATE CASCADE ON DELETE CASCADE
-);
-
 -- Ends Forum
 
 --
