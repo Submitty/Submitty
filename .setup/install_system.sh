@@ -189,6 +189,7 @@ pip3 install PyPDF2
 pip3 install distro
 pip3 install jsonschema
 pip3 install jsonref
+pip3 install docker
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
