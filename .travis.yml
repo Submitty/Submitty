@@ -75,7 +75,7 @@ jobs:
     - <<: *01-php-lint
       php: 7.3
       if: branch = master OR type = pull_request
-    
+
     - &01-python-lint
       language: python
       python: 3.6
@@ -168,7 +168,7 @@ jobs:
       install:
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
         - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
-        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl; a2enmod php${PHP_VERSION};
+        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds; a2enmod php${PHP_VERSION};
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
