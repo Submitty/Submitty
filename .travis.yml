@@ -90,6 +90,9 @@ jobs:
     - &02-php-unit
       stage: 02 unit test
       php: 7.2
+      install:
+        - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
+        - sudo apt-get install php${PHP_VERSION}-ds
       script:
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
