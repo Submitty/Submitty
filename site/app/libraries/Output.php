@@ -28,7 +28,9 @@ class Output {
     private $breadcrumbs = array();
     private $loaded_views = array();
 
+    /** @var Set */
     private $css;
+    /** @var Set */
     private $js;
 
     private $use_header = true;
@@ -530,14 +532,14 @@ HTML;
     /**
      * @return array
      */
-    public function getCss() {
+    public function getCss(): Set {
         return $this->css;
     }
 
     /**
      * @return array
      */
-    public function getJs() {
+    public function getJs(): Set {
         return $this->js;
     }
 
