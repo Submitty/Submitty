@@ -2,11 +2,11 @@ if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
 
+var currentTool;
+var documentId = '';
+var PAGE_HEIGHT;
+var NUM_PAGES = 0;
 
-let currentTool;
-
-let documentId = '';
-let PAGE_HEIGHT;
 window.RENDER_OPTIONS = {
     documentId,
     userId: "",
@@ -23,7 +23,7 @@ window.GENERAL_INFORMATION = {
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
-let NUM_PAGES = 0;
+
 
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
@@ -88,11 +88,11 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                             // scroll to page on load
                             let zoom = parseInt(localStorage.getItem('scale')) || 1;
                             let page1 = $(".page").filter(":first");
-                            //get css attr, remove 'px' : 
+                            //get css attr, remove 'px' :
                             let page_height = parseInt(page1.css("height").slice(0, -2));
                             let page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
                             let page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
-                            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
+                            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once
                             let scrollY = zoom*(page_num)*(page_height+page_margin_bot)+page_margin_top;
                             $('#file_content').animate({scrollTop: scrollY}, 500);
                         }
