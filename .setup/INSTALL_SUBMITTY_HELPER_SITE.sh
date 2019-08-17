@@ -6,6 +6,7 @@
 
 echo -e "Copy the submission website"
 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
 chmod 644 /tmp/index.html
 cp -p /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
