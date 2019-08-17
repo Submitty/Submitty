@@ -108,8 +108,8 @@ class RunAutoRainbowGrades(CourseJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
 
-        path = '/usr/local/submitty/sbin/auto_rainbow_grades.py'
-        debug_output = '/var/local/submitty/courses/' + semester + '/' + course + '/rainbow_grades/auto_debug_output.txt'
+        path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
+        debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
 
         try:
             with open(debug_output, "w") as file:

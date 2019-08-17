@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
+use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -412,7 +413,6 @@ class Config extends AbstractModel {
         $this->course_loaded = true;
     }
 
-
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
             throw new ConfigException("Missing config section '{$section}' in json file");
@@ -425,6 +425,45 @@ class Config extends AbstractModel {
             $this->$key = $config[$section][$key];
         }
     }
+
+    /**
+     * Determine if automatic rainbow grades is fully configured
+     * For some features to be available to the instructors, the submitty-admin user must be configured
+     * at the system level and also must be a member of the course in question.
+     */
+
+    public function getSubmittyAdminUser() {
+        // grab the name of the submitty_admin user (only if 'verified',
+        // that is, password successfully used to grab an API token.
+        $users_file = FileUtils::joinPaths(
+            '/', 'usr', 'local', 'submitty', 'config', 'submitty_users.json'
+        );
+        if(!is_file($users_file)) {
+            throw new FileNotFoundException('Unable to locate the submity_users.json file');
+        }
+        $users_file_contents = json_decode(file_get_contents($users_file));
+        $submitty_admin_user = "";
+        if (property_exists($users_file_contents,"verified_submitty_admin_user")) {
+          $submitty_admin_user = $users_file_contents->verified_submitty_admin_user;
+        }
+        return $submitty_admin_user;
+    }
+
+    public function isSubmittyAdminUserVerified() {
+        return $this->getSubmittyAdminUser() !== "";
+    }
+
+    public function isSubmittyAdminUserInCourse() {
+        $submitty_admin_user = $this->getSubmittyAdminUser();
+        if ($submitty_admin_user === "") {
+            return false;
+        }
+        $course = $this->getCourse();
+        $semester = $this->getSemester();
+        return $this->core->getQueries()->checkIsInstructorInCourse
+          ($submitty_admin_user, $course, $semester);
+    }
+
 
     /**
      * @return boolean

@@ -160,6 +160,33 @@
             </label>
         </div>
 
+        {# Only show the checkbox if the submitty-admin user is available and in the course as an instructor #}
+        {% if fields['submitty_admin_user_verified'] %}
+            {% if fields['submitty_admin_user_in_course'] %}
+                <div class="config-row checkbox-row">
+                    <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
+                    <label for="auto-rainbow-grades">
+                        <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
+                        <div class="option-alt">
+                            With a valid customization.json Rainbow Grades configuration,<br>
+                            a Submitty cron job will update Rainbow Grades every night at approximately 2am.
+                        </div>
+                    </label>
+                </div>
+            {% else %}
+            <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
+            <div class="option-alt">
+                NOTE:  To facilitate automatic nightly cron processing of Rainbow Grades,<br>
+                you must add the special user '{{ fields['submitty_admin_user'] }}' to your course as an instructor user.<br><br>
+            </div>
+            {% endif %}
+        {% else %}
+        <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
+        <div class="option-alt">
+          NOTE:  This server is not configured to allow automatic nightly cron processing of Rainbow Grades.<br>
+          Please ask your system administrator to configure this option on your server.<br><br>
+        </div>
+        {% endif %}
         <label for="room-seating-gradeable-id" class="config-row">
             <div class="option-title">Display Room Seating Guide</div>
             <div class="option-alt">Pick a gradeable for which seating will be shown to students. Select --None-- to hide seating guide.</div>
@@ -198,13 +225,5 @@
                 <div class="option-alt">Show a custom message to students at the top of the navigation page.</div>
             </label>
         </div>
-
-{#            <div class="option-desc col-md-8">#}
-{#                <div class="option-title">Automatic Rainbow Grades Generation</div>#}
-{#                <div class="option-alt">After providing a configuration, Submitty will run Rainbow Grades on a nightly basis and update student grades.</div>#}
-{#            </div>#}
-{#            <div class="option-input col-md-4"><input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ?#}
-{#                'checked': '' }} /></div>#}
-
     </div>
 </div>
