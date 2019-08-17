@@ -6,6 +6,10 @@
 
 echo -e "Copy the submission website"
 
+echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
+chmod 644 /tmp/index.html
+cp -p /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/bin/versions.sh
 
@@ -149,8 +153,4 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
-# return the course index page (only necessary when 'clean' option is used)
-if [ -f "$mytempcurrentcourses" ]; then
-    echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
-    mv ${mytempcurrentcourses} ${originalcurrentcourses}
-fi
+rm -f ${SUBMITTY_INSTALL_DIR}/site/public/index.html
