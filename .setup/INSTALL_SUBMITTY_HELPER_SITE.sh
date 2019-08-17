@@ -9,7 +9,7 @@ echo -e "Copy the submission website"
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
 chmod 644 /tmp/index.html
-cp -p /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/bin/versions.sh
