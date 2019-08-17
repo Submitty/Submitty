@@ -945,7 +945,8 @@ HTML;
             "versions" => $version_data,
             'total_points' => $gradeable->getAutogradingConfig()->getTotalNonHiddenNonExtraCredit(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "update_version_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]) . http_build_query(['ta' => true, 'who' => $submitter_id])
+            "update_version_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'version', $new_version])
+                . '?' . http_build_query(['ta' => 'true', 'who' => $submitter_id])
         ]);
     }
 
