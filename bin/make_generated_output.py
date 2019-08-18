@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 
-import time
-import argparse
-import json
-import os
-import re
-from submitty_utils import dateutils
-
-SUBMITTY_DATA_DIR = "/var/local/submitty"
-
 """
 # USAGE
 # make_generated_output.py   <path to config file for gradeable>   <assignment>   <semester>  <course> 
 """
+
+import argparse
+import json
+import os
+from submitty_utils import dateutils
+
+SUBMITTY_DATA_DIR = "/var/local/submitty"
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -24,7 +22,14 @@ def parse_args():
 
 def main():
     args = parse_args()
-    complete_config_json_path = os.path.join(SUBMITTY_DATA_DIR,'courses',args.semester,args.course,'config','complete_config','complete_config_' + args.assignment + '.json')
+    complete_config_json_path = os.path.join(SUBMITTY_DATA_DIR,
+                                            'courses',
+                                            args.semester,
+                                            args.course,
+                                            'config',
+                                            'complete_config',
+                                            'complete_config_' + args.assignment + '.json')
+                                            
     if os.path.isfile(complete_config_json_path):
         with open(complete_config_json_path,'r', encoding='utf-8') as infile:
             config_file=json.load(infile)
