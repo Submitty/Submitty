@@ -24,13 +24,6 @@ use app\exceptions\DatabaseException;
  */
 class UsersController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/users", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
      * @return Response
@@ -150,7 +143,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
      */
     public function reassignRegistrationSections() {
-        $return_url = $this->core->buildNewCourseUrl(['graders']);
+        $return_url = $this->core->buildCourseUrl(['graders']);
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
@@ -178,7 +171,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users/{user_id}", methods={"GET"})
+     * @Route("/{_semester}/{_course}/users/details", methods={"GET"})
      */
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
@@ -238,7 +231,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/users", methods={"POST"})
      */
     public function updateUser($type='users') {
-        $return_url = $this->core->buildNewCourseUrl([$type]) . '#user-' . $_POST['user_id'];
+        $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
         $semester = $this->core->getConfig()->getSemester();
@@ -399,7 +392,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
      */
     public function updateRegistrationSections() {
-        $return_url = $this->core->buildNewCourseUrl(['sections']);
+        $return_url = $this->core->buildCourseUrl(['sections']);
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
@@ -443,7 +436,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
      */
     public function updateRotatingSections() {
-        $return_url = $this->core->buildNewCourseUrl(['sections']);
+        $return_url = $this->core->buildCourseUrl(['sections']);
 
         if (!isset($_POST['sort_type'])) {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
@@ -856,7 +849,7 @@ class UsersController extends AbstractController {
             }
         };
 
-        $return_url = $this->core->buildNewCourseUrl([$set_return_url_action_function()]);
+        $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if ($_FILES['upload']['name'] == "") {

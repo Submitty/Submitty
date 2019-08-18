@@ -2,7 +2,7 @@ if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
 
-let loaded = sessionStorage.getItem('toolbar_loaded');
+var loaded = sessionStorage.getItem('toolbar_loaded');
 window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
@@ -139,7 +139,7 @@ window.onbeforeunload = function() {
 
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
-        let url = buildNewCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
+        let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',

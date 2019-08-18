@@ -21,16 +21,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AdminGradeableController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /* Page load methods */
-
-
-    /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
      */
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
@@ -71,7 +61,7 @@ class AdminGradeableController extends AbstractController {
         $gradeable = $template_id ? $this->core->getQueries()->getGradeableConfig($template_id) : null;
 
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $submit_url = $this->core->buildNewCourseUrl(['gradeable']);
+        $submit_url = $this->core->buildCourseUrl(['gradeable']);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -185,6 +175,16 @@ class AdminGradeableController extends AbstractController {
             $type_string = self::gradeable_type_strings['checkpoint'];
         }
 
+        //true if there are no students in any rotating sections.
+        //Can sometimes be true even if $num_rotating_sections > 0 (if no students are in any section)
+        $no_rotating_sections = true;
+        foreach ($this->core->getQueries()->getCountUsersRotatingSections() as $section) {
+            if ($section['rotating_section'] != null && $section['count'] > 0) {
+                $no_rotating_sections = false;
+                break;
+            }
+        }
+
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
 
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -215,6 +215,7 @@ class AdminGradeableController extends AbstractController {
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
+            'no_rotating_sections' => $no_rotating_sections,
             'rotating_gradeables' => $rotating_gradeables,
             'graders_from_usertypes' => $graders_from_usertypes,
             //'inherit_teams_list' => $inherit_teams_list
@@ -235,8 +236,8 @@ class AdminGradeableController extends AbstractController {
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
-            'upload_config_url' => $this->core->buildNewCourseUrl(['autograding_config']),
-            'rebuild_url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
+            'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
+            'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken()
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
@@ -346,7 +347,7 @@ class AdminGradeableController extends AbstractController {
         }
 
         try {
-            $this->updateRubric($gradeable, $_POST);
+            $this->updateRubric($gradeable, $_POST['values']);
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -662,7 +663,7 @@ class AdminGradeableController extends AbstractController {
             $this->redirectToEdit($gradeable_id);
         } catch (\Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
     }
 
@@ -909,6 +910,7 @@ class AdminGradeableController extends AbstractController {
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
+            'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
             'has_due_date'
@@ -1037,7 +1039,7 @@ class AdminGradeableController extends AbstractController {
         // this will cleanup the build files
         $this->enqueueBuildFile($gradeable_id);
 
-        $this->core->redirect($this->core->buildNewCourseUrl());
+        $this->core->redirect($this->core->buildCourseUrl());
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
@@ -1240,11 +1242,11 @@ class AdminGradeableController extends AbstractController {
             $this->core->addErrorMessage("Failed to update status of ".$gradeable_id);
         }
 
-        $this->core->redirect($this->core->buildNewCourseUrl());
+        $this->core->redirect($this->core->buildCourseUrl());
     }
 
     private function redirectToEdit($gradeable_id) {
-        $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']);
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']);
         header('Location: ' . $url);
     }
 
@@ -1253,7 +1255,7 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/export")
      */
     public function exportComponentsRequest($gradeable_id) {
-        $url = $this->core->buildNewCourseUrl();
+        $url = $this->core->buildCourseUrl();
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id, false);

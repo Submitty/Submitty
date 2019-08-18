@@ -1,14 +1,16 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}more_extension_popup{% endblock %}
-{% block title %}Team Extension{% endblock %}
+{% block title %}Team Update{% endblock %}
 {% block body %}
-    <h3>This student has one or more teammates, should the extension apply to them as well?</h3>
+    <h3>This student has one or more teammates, should this apply to them as well?</h3>
     <p>Team member list: </p>
+    <ul>
     {% for id, user in member_list %}
-        <p>{{ user }} ({{ id }})</p>
+        <li>{{ user }} ({{ id }})</li>
     {% endfor %}
+    </ul>
 {% endblock %}
 {% block buttons %}
-    <a class="btn btn-default" onclick="confirmExtension(0)">No</a>
-    <a class="btn btn-primary" onclick="confirmExtension(1)">Yes</a>
+    <a id="team-extension-cancel" class="btn btn-default" href="javascript:confirmExtension(0)">No</a>
+    <a class="btn btn-primary" href="javascript:confirmExtension(1)">Yes</a>
 {% endblock %}
