@@ -76,7 +76,6 @@ function forumSocketHandler() {
                         thread_post_handler();
                         $(".post_reply_from").submit(event, publishPost);
                         $("form").areYouSure();
-                        loadThreadHandler();
                     }
                 });
             }
@@ -87,7 +86,6 @@ function forumSocketHandler() {
 
         if(data.type == "new_thread"){
             var threaddata = data.data;
-            console.log(threaddata);
             $.ajax({
                 type: 'POST',
                 url: buildCourseUrl(['forum', 'threads', 'get_list_item']),
@@ -95,6 +93,8 @@ function forumSocketHandler() {
                 dataType: "JSON",
                 success: function(result){
                     $(result.data).insertBefore($('.thread_box_link').first());
+                    $('[data="'+threaddata.thread_id+'"] .thread_box').removeClass("active");
+                    loadThreadHandler();
                 }
             });
         }
