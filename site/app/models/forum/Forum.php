@@ -125,7 +125,7 @@ class Forum extends AbstractModel {
             empty($data['title']) || empty($data['status']) ||
             empty($data['announcement']) || empty($data['categories']) || 
             empty($data['email_announcement']) || $data['parent_id'] !== -1 ||
-            !$this->isValidCategories($this->core->getQueries()->getCategories(), $data['categories'])){
+            !$this->isValidCategories($this->core->getQueries()->getCategories(), $data['categories']) || (strlen($data['content']) > 5000)  ){
             return [false, null];
         }
 
@@ -138,7 +138,7 @@ class Forum extends AbstractModel {
         if( empty($data['content']) || empty($data['anon']) || 
             empty($data['thread_id']) || empty($data['parent_id']) ||
             (!$isThread && !$this->core->getQueries()->existsThread($data['thread_id'])) ||
-            (!$isThread && !$this->core->getQueries()->existsPost($data['thread_id'], $data['parent_id'])) ) {
+            (!$isThread && !$this->core->getQueries()->existsPost($data['thread_id'], $data['parent_id'])) || (strlen($data['content']) > 5000) ) {
             return [false, null];
         }
 

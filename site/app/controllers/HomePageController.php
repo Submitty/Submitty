@@ -28,7 +28,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/change_password", methods={"POST"})
+     * @Route("/current_user/change_password", methods={"POST"})
      * @return Response
      */
     public function changePassword(){
@@ -48,7 +48,7 @@ class HomePageController extends AbstractController {
     }
 
     /**
-     * @Route("/home/change_username", methods={"POST"})
+     * @Route("/current_user/change_username", methods={"POST"})
      * @return Response
      */
     public function changeUserName(){
@@ -77,9 +77,7 @@ class HomePageController extends AbstractController {
      * @param $user_id
      * @param $as_instructor
      * @Route("/api/courses", methods={"GET"})
-     * @Route("/api/courses/{user_id}", methods={"GET"})
      * @Route("/home/courses", methods={"GET"})
-     * @Route("/home/courses/{user_id}", methods={"GET"}, requirements={"user_id": "^(?!new)[^\/]+"})
      * @return Response
      */
     public function getCourses($user_id = null, $as_instructor = false) {

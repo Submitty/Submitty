@@ -189,6 +189,7 @@ pip3 install PyPDF2
 pip3 install distro
 pip3 install jsonschema
 pip3 install jsonref
+pip3 install docker
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
@@ -259,7 +260,7 @@ else
 fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
-# managers to write website custimization files and run course
+# managers to write website customization files and run course
 # management scripts.
 if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
         addgroup ${COURSE_BUILDERS_GROUP}
@@ -621,8 +622,8 @@ ${SUBMISSION_URL}
 
 
 1
-
-
+submitty-admin
+submitty-admin
 y
 
 

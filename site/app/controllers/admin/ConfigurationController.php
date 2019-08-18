@@ -3,12 +3,15 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileNotFoundException;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
+use app\models\RainbowCustomizationJSON;
+use http\Exception;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -17,6 +20,20 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class ConfigurationController extends AbstractController {
+
+    // The message that should be returned to the user if they fail the required validation to enable the nightly
+    // rainbow grades build checkbox
+    const FAIL_AUTO_RG_MSG = 'You may not enable automatic rainbow grades generation until you have supplied a ' .
+    'customization.json file.  To have one generated for you, you may use the Web-Based Rainbow Grades Generation inside the Grade ' .
+    'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
+
+    /**
+     * @deprecated
+     */
+    public function run() {
+        return null;
+    }
+
     /**
      * @Route("/{_semester}/{_course}/config")
      * @return Response
@@ -42,6 +59,9 @@ class ConfigurationController extends AbstractController {
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
+            'submitty_admin_user'            => $this->core->getConfig()->getSubmittyAdminUser(),
+            'submitty_admin_user_verified'   => $this->core->getConfig()->isSubmittyAdminUserVerified(),
+            'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
 
@@ -107,6 +127,31 @@ class ConfigurationController extends AbstractController {
                     JsonResponse::getFailResponse($entry . ' is not a valid URL')
                 );
             }
+        }
+        // Special validation for auto_rainbow_grades checkbox
+        else if($name === 'auto_rainbow_grades') {
+
+            // Get a new customization json object
+            $customization_json = new RainbowCustomizationJSON($this->core);
+
+            // If a custom_customization.json does not exist, then check for the presence of a regular one
+            if(!$customization_json->doesCustomCustomizationExist())
+            {
+                // Attempt to populate it from the customization.json in the course rainbow_grades directory
+                try {
+                    $customization_json->loadFromJsonFile();
+                }
+                // If no file exists do not allow user to enable this check mark until one is supplied
+                catch (\Exception $e) {
+
+                    return Response::JsonOnlyResponse(
+                        JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
+                    );
+
+                }
+            }
+
+            $entry = $entry === "true" ? true : false;
         }
 
         if($name === 'forum_enabled') {

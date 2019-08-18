@@ -120,7 +120,7 @@ class WebRouterTester extends BaseUnitTest {
     public function testNoCsrfToken() {
         $core = $this->createMockCore(['csrf_token' => false, 'logged_in' => true]);
         $request = Request::create(
-            "/home/change_username",
+            "/current_user/change_username",
             "POST"
         );
         $response = WebRouter::getWebResponse($request, $core);

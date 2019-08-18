@@ -5,6 +5,7 @@ import traceback
 import time
 from pwd import getpwnam
 import shutil
+import docker
 
 from submitty_utils import dateutils
 from . import secure_execution_environment
@@ -29,14 +30,14 @@ class Container():
     self.is_server = container_info['server']
     self.outgoing_connections = container_info['outgoing_connections']
     # If we are in production, we need to run as an untrusted user inside of our docker container.
-    self.container_user_argument = list()  if is_test_environment else ['-u', str(getpwnam(untrusted_user).pw_uid)]
+    self.container_user_argument = str(getpwnam(untrusted_user).pw_uid)
     self.full_name = f'{untrusted_user}_{self.name}'
-
     # This will be populated later
-    self.container_id = None
-    self.process = None
     self.return_code = None
     self.log_function = log_function
+    self.container = None
+    # A socket for communication with the container.
+    self.socket = None
 
     # Determine whether or not we need to pull the default submitty router into this container's directory.
     need_router = container_info.get('import_default_router', False)
@@ -49,45 +50,45 @@ class Container():
   def create(self, execution_script, arguments, more_than_one):
     """ Create (but don't start) this container. """
 
+    client = docker.from_env()
+
+    mount = {
+        self.directory : {
+          'bind' : self.directory,
+          'mode' : 'rw'
+        }
+      }
+
     # Only pass container name to testcases with greater than one container. (Doing otherwise breaks compilation)
-    conatiner_name_argument = ['--container_name', self.name] if more_than_one else list()
+    container_name_argument = ['--container_name', self.name] if more_than_one else list()
     # A server container does not run student code, but instead hosts a service (e.g. a database.)
     if self.is_server:
-      container_id = subprocess.check_output(['docker', 'create', '-i', '--network', 'none',
-                                              '-v', f'{self.directory}:{self.directory}',
-                                              '-w', self.directory,
-                                              '--name', self.full_name,
-                                              self.image
-                                             ]).decode('utf8').strip()
+      self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none',
+                               volumes = mount, working_dir = self.directory, name = self.full_name)
     else:
-      this_container = subprocess.check_output(['docker', 'create', '-i', '--network', 'none']
-                                                + self.container_user_argument + 
-                                                ['-v', self.directory + ':' + self.directory,
-                                                '-w', self.directory,
-                                                '--hostname', self.name,
-                                                '--name', self.full_name,
-                                                self.image, 
-                                                execution_script]
-                                                + arguments
-                                                + conatiner_name_argument
-                                              ).decode('utf8').strip()
+      command = [execution_script,] + arguments + container_name_argument
+      self.container = client.containers.create(self.image, command = command, stdin_open = True, tty = True,
+                                                network = 'none', user = self.container_user_argument, volumes=mount,
+                                                working_dir = self.directory, hostname = self.name, name = self.full_name)
+
+
+
     dockerlaunch_done = dateutils.get_current_time()
-    self.log_function(f'docker container {this_container} created')
-    self.container_id = this_container
+    self.log_function(f'docker container {self.container.short_id} created')
 
 
   def start(self, logfile):
-    """ Start the created container. (Must call create first). """
-    self.process = subprocess.Popen(['docker', 'start', '-i', '--attach', self.container_id], stdout=logfile,stdin=subprocess.PIPE)
+    self.container.start()
+    self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
 
 
   def cleanup_container(self):
     """ Remove this container. """
-    self.process.wait()
-    self.return_code = self.process.returncode
+    status = self.container.wait()
+    self.return_code = status['StatusCode']
 
-    subprocess.call(['docker', 'rm', '-f', self.container_id])
-    self.log_function(f'{dateutils.get_current_time()} docker container {self.container_id} destroyed')
+    self.container.remove(force=True)
+    self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
 
 
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
@@ -115,7 +116,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), greater_than_one, self.is_test_environment, self.log_message))
     else:
       container_spec = {
-        'container_name'  : f'{untrusted_user}_temporary_container',
+        'container_name'  : f'temporary_container',
         'container_image' : 'ubuntu:custom', 
         'server' : False,
         'outgoing_connections' : []
@@ -191,10 +192,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     """ Given a set of containers, network them per their specifications. """
     if len(containers) <= 1:
       return
+    client = docker.from_env()
 
+    none_network = client.networks.get('none')
     #remove all containers from the none network
     for container in containers:
-      subprocess.check_output(['docker', 'network','disconnect', 'none', container.container_id]).decode('utf8').strip()
+      none_network.disconnect(container.container, force=True)
 
     if self.get_router(containers) is not None:
       self.network_containers_with_router(containers)
@@ -207,15 +210,16 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
   def network_containers_routerless(self, containers):
     """ If there is no router, all containers are added to the same network. """
+    client = docker.from_env()
     network_name = f'{self.untrusted_user}_routerless_network'
 
     #create the global network
-    subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
+    network = client.networks.create(network_name, driver='bridge', internal=True)
 
     for container in containers:
-      subprocess.check_output(['docker', 'network', 'connect', '--alias', container.name, network_name, container.full_name]).decode('utf8').strip()
+      network.connect(container.container, aliases=[container.name,])
 
-    self.networks.append(network_name)
+    self.networks.append(network)
 
 
   def network_containers_with_router(self, containers):
@@ -223,7 +227,9 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     If there is a router, all containers are added to their own network, on which the only other
     endpoint is the router, which has been aliased to impersonate all other reachable endpoints.
     """
-    router_name = f"{self.untrusted_user}_router"
+    client = docker.from_env()
+
+    router = self.get_container_with_name('router', containers).container
     router_connections = dict()
 
     for container in containers:
@@ -232,11 +238,11 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       if container.name == 'router':
         continue
 
-      self.networks.append(network_name)
 
       actual_name  = '{0}_Actual'.format(container.name)
-      subprocess.check_output(['docker', 'network', 'create', '--internal', '--driver', 'bridge', network_name]).decode('utf8').strip()
-      subprocess.check_output(['docker', 'network', 'connect', '--alias', actual_name, network_name, container.full_name]).decode('utf8').strip()
+      network = client.networks.create(network_name, driver='bridge', internal=True)
+      network.connect(container.container, aliases=[actual_name,])
+      self.networks.append(network)
 
       #The router pretends to be all dockers on this network.
       aliases = []
@@ -263,14 +269,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
           continue
         aliases.append('--alias')
         aliases.append(endpoint)
-
-      subprocess.check_output(['docker', 'network', 'connect'] + aliases + [network_name, router_name]).decode('utf8').strip()
+      network = self.get_network_with_name(network_name)
+      network.connect(router, aliases=aliases)
 
   def cleanup_networks(self):
     """ Destroy all created networks. """
     for network in self.networks:
       try:
-        subprocess.call(['docker', 'network', 'rm', network])
+        network.remove()
         self.log_message(f'{dateutils.get_current_time()} docker network {network} destroyed')
       except Exception as e:
         self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
@@ -359,7 +365,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       time.sleep(.1)
 
     if len(self.dispatcher_actions) > 0:
-      self.send_message_to_processes(containers, "SUBMITTY_SIGNAL:FINALMESSAGE\n",processes, list(processes.keys()))
+      names = [c.name for c in containers]
+      self.send_message_to_processes(containers, "SUBMITTY_SIGNAL:FINALMESSAGE\n", names)
 
 
   def get_container_with_name(self, name, containers):
@@ -369,16 +376,22 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         return container
     return None
 
+  def get_network_with_name(self, name):
+    """ Given a name, grab the corresponding container. """
+    for network in self.networks:
+      if network.name == name:
+        return network
+    return None
+
 
   #targets must hold names/keys for the processes dictionary
   def send_message_to_processes(self, containers, message, targets):
     """ Given containers, targets, and a message, deliver the message to the target containers. """
     for target in targets:
       container = self.get_container_with_name(target, containers)
-      # poll returns None if the process is still running.
-      if container.process.poll() == None:
-        container.process.stdin.write(message.encode('utf-8'))
-        container.process.stdin.flush()
+      container.container.reload()
+      if container.container.status != 'exited':
+        os.write(container.socket.fileno(), message.encode('utf-8'))
       else:
         pass
 
@@ -386,17 +399,11 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
   def at_least_one_alive(self, containers):
     """ Check that at least one of a set of containers is running. """
     for container in self.get_standard_containers(containers):
-      if container.process.poll() is None:
+      # Update container variables so that status is accurate.
+      container.container.reload()
+      if container.container.status != 'exited':
         return True
     return False
-
-
-  def wait_until_standard_containers_finish(self, containers):
-    """ Wait until all non-server, non-router containers have finished. """
-    still_going = True
-    while still_going:
-      still_going = self.at_least_one_alive(containers)
-      time.sleep(.1)
 
 
   ###########################################################
@@ -517,7 +524,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       # First start the router a second before any other container, giving it time to initialize.
       if router is not None:
         router.start(logfile)
-        time.sleep(1)
+        time.sleep(2)
 
       # Next start any server containers, giving them time to initialize.
       for container in self.get_server_containers(containers):
@@ -530,17 +537,14 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       # Deliver dispatcher actions.
       self.process_dispatcher_actions(containers)
 
-      # When we are done with the dispatcher actions, keep running until all
-      # student process' finish.
-      self.wait_until_standard_containers_finish(containers)
-
     except Exception as e:
       self.log_message('ERROR grading using docker. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
       return_code = -1
 
     try:
-      # Clean up all containers.
+      # Clean up all containers. (Cleanup waits until they are finished)
+      # Note: All containers should eventually terminate, as their executable will kill them for time.
       for container in containers:
         container.cleanup_container()
     except Exception as e:
