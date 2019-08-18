@@ -923,19 +923,6 @@ function hideReplies(){
     }
 }
 
-/*This function makes sure that only posts with children will have the collapse function*/
-function addCollapsable(){
-    var posts = $(".post_box").toArray();
-    for(var i = 1; i < posts.length; i++){
-        if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
-            $(posts[i]).find(".expand")[0].innerHTML = "Hide Replies";
-        } else {
-            var button = $(posts[i]).find(".expand")[0];
-            $(button).hide();
-        }
-    }
-}
-
 function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
     if(!checkAreYouSureForm()) return;
     var type = (isDeletion ? '0' : '2');
@@ -1129,7 +1116,6 @@ function loadThreadHandler(){
 
                 enableTabsInTextArea('.post_content_reply');
                 saveScrollLocationOnRefresh('posts_list');
-                addCollapsable();
 
                 $(".post_reply_from").submit(publishPost);
 
