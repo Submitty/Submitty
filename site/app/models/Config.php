@@ -366,7 +366,10 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find authentication file: {$this->config_path}/authentication.json");
         }
 
-        $this->authentication_settings = array_replace_recursive($auth_json);
+        $this->authentication_settings = array_replace_recursive(
+            $this->authentication_settings,
+            $auth_json
+        );
         if (empty($this->authentication_settings['methods'])) {
             throw new ConfigException("Must specify an authentication method to use");
         }
