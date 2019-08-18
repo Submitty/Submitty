@@ -90,3 +90,8 @@
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+#limited_func_messages p
+{
+    margin: 12px
+}

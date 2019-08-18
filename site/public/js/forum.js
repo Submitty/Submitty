@@ -837,16 +837,16 @@ function refreshCategories() {
             var category_color = category[2];
             var selection_class = "";
             if(selected_button.has(category_id)) {
-                selection_class = "cat-selected";
+                selection_class = "btn-selected";
             }
-            var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
+            var element = ' <a class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
                                 <input type="checkbox" name="cat[]" value="'+category_id+'">\
                             </a>';
             $('#categories-pick-list').append(element);
         });
 
         $(".cat-buttons input[type='checkbox']").each(function() {
-            if($(this).parent().hasClass("cat-selected")) {
+            if($(this).parent().hasClass("btn-selected")) {
                 $(this).prop("checked",true);
             }
         });
@@ -857,28 +857,30 @@ function refreshCategories() {
     $("a.cat-buttons input").hide();
 
     $(".cat-buttons").click(function() {
-        if($(this).hasClass("cat-selected")) {
-            $(this).removeClass("cat-selected");
+        if($(this).hasClass("btn-selected")) {
+            $(this).removeClass("btn-selected");
             $(this).find("input[type='checkbox']").prop("checked", false);
         } else {
-            $(this).addClass("cat-selected");
+            $(this).addClass("btn-selected");
             $(this).find("input[type='checkbox']").prop("checked", true);
         }
         $(this).trigger("eventChangeCatClass");
     });
 
-    $(".cat-buttons").bind("eventChangeCatClass", function(){
-        var cat_color = $(this).attr('cat-color');
-        $(this).css("border-color",cat_color);
-        if($(this).hasClass("cat-selected")) {
-            $(this).css("background-color",cat_color);
-            $(this).css("color","white");
-        } else {
-            $(this).css("background-color","white");
-            $(this).css("color",cat_color);
-        }
-    });
+    $(".cat-buttons").bind("eventChangeCatClass", changeColorClass);
     $(".cat-buttons").trigger("eventChangeCatClass");
+}
+
+function changeColorClass(){
+  var color = $(this).data('color');
+  $(this).css("border-color",color);
+  if($(this).hasClass("btn-selected")) {
+    $(this).css("background-color",color);
+    $(this).css("color","white");
+  } else {
+    $(this).css("background-color","white");
+    $(this).css("color", color);
+  }
 }
 
 function reorderCategories(csrf_token) {
