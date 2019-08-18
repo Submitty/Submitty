@@ -556,11 +556,6 @@ find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
 find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
-# Obtain API auth token for submitty-admin user
-
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
-
-#####################################
 # Build & Install Lichen Modules
 
 /bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
@@ -705,6 +700,12 @@ if [ "${WORKER}" == 0 ]; then
     fi
 fi
 
+#####################################
+# Obtain API auth token for submitty-admin user
+
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+
+#############################################################################
 
 # If any of our daemon files have changed, we should reload the units:
 systemctl daemon-reload
