@@ -938,8 +938,9 @@ class ForumController extends AbstractController{
     public function getHTMLPostContent(){
         $post_id = $_POST["post_id"];
         $thread_id = $_POST['thread_id'];
+        $post_box_id = $_POST['post_box_id'];
         $post = $this->core->getQueries()->getPost($post_id);
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderPost', $thread_id, $post);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderPost', $thread_id, $post, $post_box_id);
     }
 
     /**

@@ -37,10 +37,13 @@ function forumSocketHandler() {
             var postdata = data.data;
 
             if(parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))){
+                var lastPostForm = $('.thread-post-form').last();
+                var lastPostFormId = parseInt($(lastPostForm).attr("post_box_id"));
+
                 $.ajax({
                     type: 'POST',
                     url: buildCourseUrl(['forum', 'posts', 'get_html']),
-                    data: { 'post_id': postdata.post_id, 'thread_id': postdata.thread_id, 'csrf_token': csrfToken },
+                    data: { 'post_id': postdata.post_id, 'thread_id': postdata.thread_id, 'post_box_id': lastPostFormId+1, 'csrf_token': csrfToken },
                     dataType: "JSON",
                     success: function(result) {
                         var parent = $('#'+postdata.parent_id);
@@ -62,17 +65,10 @@ function forumSocketHandler() {
                         }
                         replyLevel += 1;
 
-                        var lastPostForm = $('.thread-post-form').last();
-                        var lastPostFormId = parseInt($(lastPostForm).attr("post_box_id"));
-
                         $('#'+postdata.post_id).attr("reply-level", replyLevel).css("margin-left", ((replyLevel-1)*30)+"px");
                         $('#'+postdata.post_id+'-reply').css("margin-left", ((replyLevel)*30)+"px");
-                        $('#'+postdata.post_id+'-reply').find(".thread-post-form").attr("post_box_id", lastPostFormId);
-
-                        $(lastPostForm).attr("post_box_id", lastPostFormId+1);
 
                         enableTabsInTextArea('.post_content_reply');
-                        addCollapsable();
                         thread_post_handler();
                         $(".post_reply_from").submit(event, publishPost);
                         $("form").areYouSure();
@@ -80,7 +76,7 @@ function forumSocketHandler() {
                 });
             }
             else{
-                alert($('#current-thread').attr("value"));
+                $('[data="'+postdata.thread_id+'"] .thread_box').addClass("new_reply");
             }
         }
 
@@ -94,6 +90,7 @@ function forumSocketHandler() {
                 success: function(result){
                     $(result.data).insertBefore($('.thread_box_link').first());
                     $('[data="'+threaddata.thread_id+'"] .thread_box').removeClass("active");
+                    thread_post_handler();
                     loadThreadHandler();
                 }
             });
@@ -143,6 +140,9 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     var index = post_box_id - 1;
     // Files selected
     var files = [];
+    if(!(index in file_array)){
+        file_array[index] = [];
+    }
     for (var j = 0; j < file_array[index].length; j++) {
         if (file_array[index][j].name.indexOf("'") != -1 ||
             file_array[index][j].name.indexOf("\"") != -1) {
