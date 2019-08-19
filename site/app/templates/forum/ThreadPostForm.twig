@@ -2,6 +2,11 @@
     {% if post_box_id %}
         post_box_id="{{ post_box_id }}"
     {% endif %}
+
+    {% if new_thread %}
+        new_thread="true"
+    {% endif %}
+
 >
 
 <div class="form-group row position-relative">
@@ -42,38 +47,38 @@
         </label>
         <script>
             $(document).ready(function () {
-                        flatpickr(".date_picker", {
-                            plugins: [ShortcutButtonsPlugin(
+                flatpickr(".date_picker", {
+                    plugins: [ShortcutButtonsPlugin(
+                            {
+                                button: [
                                     {
-                                        button: [
-                                            {
-                                                label: "Now"
-                                            }, 
-                                            {
-                                                label: "End of time"
-                                            }
-                                        ],
-                                        label: "or",
-                                        onClick: (index, fp) => {
-                                            let date;
-                                            switch (index) {
-                                                case 0: 
-                                                    date = new Date();
-                                                    break;
-                                                case 1: 
-                                                    date = new Date("9998-01-01 00:00:00");
-                                                    break;
-                                            }
-                                            fp.setDate(date, true);
-                                        }
+                                        label: "Now"
+                                    },
+                                    {
+                                        label: "End of time"
                                     }
-                                )],
-                            allowInput: true,
-                            enableTime: true,
-                            enableSeconds: true,
-                            time_24hr: true,
-                            dateFormat: "Y-m-d H:i:S"
-                        });
+                                ],
+                                label: "or",
+                                onClick: (index, fp) => {
+                                    let date;
+                                    switch (index) {
+                                        case 0:
+                                            date = new Date();
+                                            break;
+                                        case 1:
+                                            date = new Date("9998-01-01 00:00:00");
+                                            break;
+                                    }
+                                    fp.setDate(date, true);
+                                }
+                            }
+                        )],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S"
+                });
             })
         </script>
 

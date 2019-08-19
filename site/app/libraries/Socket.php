@@ -158,9 +158,11 @@
                     case "new_post":
                         $user_id = $msg["data"]["user_id"];
                         if($fromConn = $this->getSocketClientID($user_id)){
-                            $this->broadcast($fromConn, $msgString, false);
+//                            $this->broadcast($fromConn, $msgString, false);
+                            $this->broadcast($fromConn, $msgString, true);
                         }else {
-                            $this->broadcast($from, $msgString, false);
+//                            $this->broadcast($from, $msgString, false);
+                            $this->broadcast($from, $msgString, true);
                         }
                         break;
                     default: $this->broadcast($from, $msgString, true);
