@@ -212,7 +212,7 @@ function checkAutoRGStatus()
     // Send request
     $.getJSON({
         type: "POST",
-        url: buildCourseUrl(['auto_rg_status']),
+        url: buildCourseUrl(['reports', 'rainbow_grades_status']),
         data: {csrf_token: csrfToken},
         success: function (response) {
             if (response.status === 'success') {
@@ -245,7 +245,7 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     {
         $('#save_status').html('Saving...');
 
-        var url = buildCourseUrl(['rainbow_grades_customization']);
+        var url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
 
         $.getJSON({
             type: "POST",

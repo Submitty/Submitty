@@ -837,16 +837,16 @@ function refreshCategories() {
             var category_color = category[2];
             var selection_class = "";
             if(selected_button.has(category_id)) {
-                selection_class = "cat-selected";
+                selection_class = "btn-selected";
             }
-            var element = ' <a class="btn cat-buttons '+selection_class+'" cat-color="'+category_color+'">'+category_desc+'\
+            var element = ' <a class="btn cat-buttons '+selection_class+'" data-color="'+category_color+'">'+category_desc+'\
                                 <input type="checkbox" name="cat[]" value="'+category_id+'">\
                             </a>';
             $('#categories-pick-list').append(element);
         });
 
         $(".cat-buttons input[type='checkbox']").each(function() {
-            if($(this).parent().hasClass("cat-selected")) {
+            if($(this).parent().hasClass("btn-selected")) {
                 $(this).prop("checked",true);
             }
         });
@@ -857,28 +857,30 @@ function refreshCategories() {
     $("a.cat-buttons input").hide();
 
     $(".cat-buttons").click(function() {
-        if($(this).hasClass("cat-selected")) {
-            $(this).removeClass("cat-selected");
+        if($(this).hasClass("btn-selected")) {
+            $(this).removeClass("btn-selected");
             $(this).find("input[type='checkbox']").prop("checked", false);
         } else {
-            $(this).addClass("cat-selected");
+            $(this).addClass("btn-selected");
             $(this).find("input[type='checkbox']").prop("checked", true);
         }
         $(this).trigger("eventChangeCatClass");
     });
 
-    $(".cat-buttons").bind("eventChangeCatClass", function(){
-        var cat_color = $(this).attr('cat-color');
-        $(this).css("border-color",cat_color);
-        if($(this).hasClass("cat-selected")) {
-            $(this).css("background-color",cat_color);
-            $(this).css("color","white");
-        } else {
-            $(this).css("background-color","white");
-            $(this).css("color",cat_color);
-        }
-    });
+    $(".cat-buttons").bind("eventChangeCatClass", changeColorClass);
     $(".cat-buttons").trigger("eventChangeCatClass");
+}
+
+function changeColorClass(){
+  var color = $(this).data('color');
+  $(this).css("border-color",color);
+  if($(this).hasClass("btn-selected")) {
+    $(this).css("background-color",color);
+    $(this).css("color","white");
+  } else {
+    $(this).css("background-color","white");
+    $(this).css("color", color);
+  }
 }
 
 function reorderCategories(csrf_token) {
@@ -919,53 +921,6 @@ function hideReplies(){
     for(var i = 0; i < hide_replies.length; i++){
         hide_replies[i].style.display = "none";
     }
-}
-
-/*This function makes sure that only posts with children will have the collapse function*/
-function addCollapsable(){
-    var posts = $(".post_box").toArray();
-    for(var i = 1; i < posts.length; i++){
-        if(parseInt($(posts[i]).next().next().attr("reply-level")) > parseInt($(posts[i]).attr("reply-level"))){
-            $(posts[i]).find(".expand")[0].innerHTML = "Hide Replies";
-        } else {
-            var button = $(posts[i]).find(".expand")[0];
-            $(button).hide();
-        }
-    }
-}
-
-function hidePosts(text, id) {
-    var currentLevel = parseInt($(text).parent().parent().attr("reply-level")); //The double parent is here because the button is in a span, which is a child of the main post.
-    var selector = $(text).parent().parent().next().next();
-    var counter = 0;
-    var parent_status = "Hide Replies";``
-    if (text.innerHTML != "Hide Replies") {
-        text.innerHTML = "Hide Replies";
-        while (selector.attr("reply-level") > currentLevel) {
-            $(selector).show();
-            if($(selector).find(".expand")[0].innerHTML != "Hide Replies"){
-                var nextLvl = parseInt($(selector).next().next().attr("reply-level"));
-                while(nextLvl > (currentLevel+1)){
-                    selector = $(selector).next().next();
-                    nextLvl = $(selector).next().next().attr("reply-level");
-                }
-            }
-            selector = $(selector).next().next();
-        }
-
-    } else {
-        while (selector.attr("reply-level") > currentLevel) {
-            $(selector).hide();
-            selector = $(selector).next().next();
-            counter++;
-        }
-        if(counter != 0){
-            text.innerHTML = "Show " + ((counter > 1) ? (counter + " Replies") : "Reply");
-        } else {
-            text.innerHTML = "Hide Replies";
-        }
-    }
-
 }
 
 function deletePostToggle(isDeletion, thread_id, post_id, author, time, csrf_token){
@@ -1161,7 +1116,6 @@ function loadThreadHandler(){
 
                 enableTabsInTextArea('.post_content_reply');
                 saveScrollLocationOnRefresh('posts_list');
-                addCollapsable();
 
                 $(".post_reply_from").submit(publishPost);
 

@@ -1530,6 +1530,113 @@ function changeFolderPermission(filenames, checked,handleData) {
     })
 }
 
+function handleTimeZones(timezone) {
+
+    var url = buildUrl(['server_time']);
+
+    $.get({
+        url: url,
+        success: function(data) {
+
+            // Collect server time
+            var server_time = JSON.parse(data)['data'];
+            server_time = new Date(parseInt(server_time.year),
+                parseInt(server_time.month) - 1,
+                parseInt(server_time.day),
+                parseInt(server_time.hour),
+                parseInt(server_time.minute),
+                parseInt(server_time.second));
+
+            // Collect client time
+            var client_time = new Date();
+
+            // Calculate difference in minutes
+            var diff_in_minutes = Math.abs(server_time.valueOf() - client_time.valueOf());
+            diff_in_minutes = diff_in_minutes / 1000 / 60;
+
+            // If difference in minutes is greater than 10 minutes then append message to flatpickr
+            if(diff_in_minutes > 10) {
+                $('.flatpickr-calendar').append('<p>Enter all times relative to the server timezone</p>');
+                $('.flatpickr-calendar').append('<p>Server timezone: '+timezone+'</p>');
+            }
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+
+function setNewDateTime(id, path) {
+    // pass filename to server to record the new date and time of the file to be released
+    var me = $('#'+id);
+    var newDateTime = me.val();
+
+    var success = changeNewDateTime(path, newDateTime);
+    if(success === false){
+        return;
+    }
+
+    var url = buildUrl(['server_time']);
+
+    $.get({
+        url: url,
+        success: function(data) {
+            var now = JSON.parse(data)['data'];
+            now = new Date(parseInt(now.year),
+                parseInt(now.month) - 1,
+                parseInt(now.day),
+                parseInt(now.hour),
+                parseInt(now.minute),
+                parseInt(now.second));
+
+            function pad(str){
+                return ('0'+str).slice(-2);
+            }
+
+            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+
+            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+            var currentDT = date+' '+time;
+            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+
+            //get the value in each file so the color can be assigned
+            //based on the time chosen
+            var fileDT = newDateTime;
+            //also custom colors for this page for readability
+            if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
+                $('#'+id).css("backgroundColor", green);
+                return green;
+            }
+            else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
+                $('#'+id).css("backgroundColor", red);
+                return red;
+            }
+            else{
+                $('#'+id).css("backgroundColor", yellow);
+                return yellow;
+            }
+        },
+        error: function(e) {
+            console.log("Error getting server time.");
+        }
+    });
+}
+
+function setChildNewDateTime(path, changeDate,handleData) {
+    //change the date and time of the subfiles in the folder with the time chosen for the whole
+    //folder (passed in)
+    var success;
+    success = false;
+    success  = changeFolderNewDateTime(path,changeDate,function (output) {
+        if(output){
+            success =true;
+            if(handleData){
+                handleData(success);
+            }
+        }
+    });
+}
+
 function updateToServerTime(fp) {
     var url = buildUrl(['server_time']);
 
@@ -1582,14 +1689,21 @@ function changeNewDateTime(filename, newdatatime,handleData) {
         url: url,
         data: {'fn':filename,csrf_token: csrfToken},
         success: function(data) {
+            var jsondata = JSON.parse(data);
+            if (jsondata.status === 'fail') {
+                alert("ERROR: Invalid date.");
+                return false;
+            }
+
             tbr=true;
             if(handleData){
                 handleData(data);
             }
+            return true;
         },
         error: function(e) {
-            alert("Encounter saving the NewDateTime.");
-
+             alert("Encounter saving the NewDateTime.");
+             return false;
         }
     })
 }
@@ -1604,14 +1718,21 @@ function changeFolderNewDateTime(filenames, newdatatime,handleData) {
         url: url,
         data: {'fn':filenames,csrf_token: csrfToken},
         success: function(data) {
+            var jsondata = JSON.parse(data);
+            if (jsondata.status === 'fail') {
+                alert("ERROR: Invalid date.");
+                return false;
+            }
+
             tbr=true;
             if(handleData){
                 handleData(data);
             }
+            return true;
         },
         error: function(e) {
             alert("Encounter saving the NewDateTime.");
-
+            return false;
         }
     })
 }
