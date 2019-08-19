@@ -29,6 +29,35 @@ function categoriesFormEvents(){
     });
 }
 
+function forumAttachmentHandler(){
+    $('div.upload_attachment_box').on('DOMNodeInserted',function(e){
+        var part = get_part_number(e);
+        if(isNaN(parseInt(part))) {
+            return;
+        }
+        var target = $(e.target);
+        var file_object = null;
+        var filename = target.attr("fname");
+        for (var j = 0; j < file_array[part-1].length; j++){
+            if (file_array[part-1][j].name == filename) {
+                file_object = file_array[part-1][j];
+                break;
+            }
+        }
+        var image = document.createElement('div');
+        $(image).addClass("thumbnail");
+        $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
+        target.prepend(image);
+    });
+
+    // Attachments on Create Thread
+    var part = "{{ post_box_id }}";
+    createArray(part);
+    $(".upload_attachment_box").each(function() {
+        this.addEventListener("click", clicked_on_box, false);
+    });
+}
+
 function forumSocketHandler() {
     window.SocketCon.onmessage = function(e){
         var data = JSON.parse(e.data);
@@ -39,11 +68,11 @@ function forumSocketHandler() {
             if(parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))){
                 var lastPostForm = $('.thread-post-form').last();
                 var lastPostFormId = parseInt($(lastPostForm).attr("post_box_id"));
-
+                var part = lastPostFormId+1;
                 $.ajax({
                     type: 'POST',
                     url: buildCourseUrl(['forum', 'posts', 'get_html']),
-                    data: { 'post_id': postdata.post_id, 'thread_id': postdata.thread_id, 'post_box_id': lastPostFormId+1, 'csrf_token': csrfToken },
+                    data: { 'post_id': postdata.post_id, 'thread_id': postdata.thread_id, 'post_box_id': part, 'csrf_token': csrfToken },
                     dataType: "JSON",
                     success: function(result) {
                         var parent = $('#'+postdata.parent_id);
@@ -72,6 +101,34 @@ function forumSocketHandler() {
                         thread_post_handler();
                         $(".post_reply_from").submit(event, publishPost);
                         $("form").areYouSure();
+
+                        previous_files[part-1] = [];
+                        label_array[part-1] = [];
+                        file_array[part-1] = [];
+
+                        $(".upload_attachment_box").each(function() {
+                            this.addEventListener("click", clicked_on_box, false);
+                        });
+
+                        $('#upload'+part).on('DOMNodeInserted',function(e){
+                            var part = get_part_number(e);
+                            if(isNaN(parseInt(part))) {
+                                return;
+                            }
+                            var target = $(e.target);
+                            var file_object = null;
+                            var filename = target.attr("fname");
+                            for (var j = 0; j < file_array[part-1].length; j++){
+                                if (file_array[part-1][j].name == filename) {
+                                    file_object = file_array[part-1][j];
+                                    break;
+                                }
+                            }
+                            var image = document.createElement('div');
+                            $(image).addClass("thumbnail");
+                            $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
+                            target.prepend(image);
+                        });
                     }
                 });
             }
