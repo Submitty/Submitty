@@ -593,7 +593,7 @@ class FileUtils {
                     break;
                 case UPLOAD_ERR_INI_SIZE:
                 case UPLOAD_ERR_FORM_SIZE:
-                   $err_msg = "File :" . $name . " too large (" . Utils::formatBytes("MB", $size) . ")";
+                   $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
                    break;
                 case UPLOAD_ERR_PARTIAL:
                     $err_msg = "The uploaded file was only partially uploaded";
@@ -613,8 +613,9 @@ class FileUtils {
             }
 
             //manually check against set size limit
+            //incase the max POST size is greater than max file size
             if($size > $max_size){
-                $err_msg = "File :" . $name . " too large (" . Utils::formatBytes("MB", $size) . ")";
+                $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }
 
             //check filename
