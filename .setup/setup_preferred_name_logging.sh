@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+# Root required
+if [[ $EUID -ne 0 ]]; then
+   echo -e "This script must be run as root"
+   exit 1
+fi
+
 function check_exit_code {
 # $1 = process return code
 # $2 = name of process
@@ -10,12 +16,6 @@ function check_exit_code {
         echo -e "Successfully set up $2."
     fi
 }
-
-# Root required
-if [[ $EUID -ne 0 ]]; then
-   echo -e "This script must be run as root"
-   exit 1
-fi
 
 # CLI argument "auto" will assume user permission to setup preferred name logging.
 if [[ $1 != "auto" ]]; then
