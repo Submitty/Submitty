@@ -566,4 +566,67 @@ class FileUtils {
 
         return $words_detected;
     }
+
+    public static function validateUploadedFiles($files){
+
+        if(!isset($files)){
+           return array("failed" => "No files sent to validate");
+        }
+
+        $ret = array();
+        $num_files = count($files['name']);
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+
+        for ($i = 0; $i < $num_files; $i++) {
+            //extract the values from each file
+            $name = $files['name'][$i];
+            $type = FileUtils::getMimeType($files['tmp_name'][$i]);
+            $size = $files['size'][$i];
+            $err_msg = "";
+            //did anything go wrong?
+            switch ($files['error'][$i]) {
+                case UPLOAD_ERR_OK:
+                    $err_msg = "success";
+                    break;
+                case UPLOAD_ERR_NO_FILE:
+                    $err_msg = "No file submitted";
+                    break;
+                case UPLOAD_ERR_INI_SIZE:
+                case UPLOAD_ERR_FORM_SIZE:
+                   $err_msg = "File :" . $name . " too large (" . Utils::formatBytes("MB", $size) . ")";
+                   break;
+                case UPLOAD_ERR_PARTIAL:
+                    $err_msg = "The uploaded file was only partially uploaded";
+                    break; 
+                case UPLOAD_ERR_NO_TMP_DIR:
+                    $err_msg = "Missing a temporary folder";
+                    break; 
+                case UPLOAD_ERR_CANT_WRITE:
+                    $err_msg = "Failed to write file to disk";
+                    break; 
+                case UPLOAD_ERR_EXTENSION:
+                    $err_msg = "File upload stopped by extension";
+                    break; 
+                default:
+                    $err_msg = "Unknown error";
+                    $success = false;
+            }
+
+            //manually check against set size limit
+            if($size > $max_size){
+                $err_msg = "File :" . $name . " too large (" . Utils::formatBytes("MB", $size) . ")";
+            }
+
+            //check filename
+            if(! FileUtils::isValidFileName($name) ){
+                $err_msg = "Invalid filename";
+            }
+
+            $success = $err_msg === "success";
+
+            $ret[] = ['name' => $name, 'type'=> $type, 'error'=> $err_msg, 'size' => $size, 'success' => $success];
+        }
+
+        return $ret;
+    }
 }
