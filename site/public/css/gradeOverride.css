@@ -1,0 +1,31 @@
+fieldset {
+    margin: 1em 0;
+}
+
+#gradeOverrideForm label {
+    display: flex;
+    flex: 1 0 auto;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 0.5em 0;
+}
+
+.single-student input,textarea {
+    width: 100%;
+}
+
+textarea {
+    height: 60px;
+}
+
+@media (min-width: 768px) {
+    .single-student label {
+        flex: 0 0 0;
+        width: 420px;
+        justify-content: space-between;
+    }
+
+    .single-student input,textarea {
+        width: auto;
+    }
+}

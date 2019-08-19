@@ -45,12 +45,20 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
-                        $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
+                       $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
 
-                        if ($isShareToOther == '1' && $release_date > $now_date_time)
+                       if ($isShareToOther == '1' && $release_date > $now_date_time)
                             $isShareToOther = '0';
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
+                    }
+                    else{
+                        //fill with upload time for new files add all files to json when uploaded
+                        $json[$expected_file_path]['checked'] = '1';
+                        $isShareToOther = $json[$expected_file_path]['checked'];
+                        $release_date = $json['release_time'];
+                        $json[$expected_file_path]['release_datetime'] = $release_date;
+                        $releaseData = $json[$expected_file_path]['release_datetime'];
                     }
 
                 }
@@ -100,6 +108,7 @@ class CourseMaterialsView extends AbstractView {
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
+
             if($json == false){
                 FileUtils::writeJsonFile($fp,$no_json);
             }
@@ -132,7 +141,7 @@ class CourseMaterialsView extends AbstractView {
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
             $this->core->addErrorMessage("You have no permission to access this page");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return;
         }
 
@@ -152,11 +161,11 @@ class CourseMaterialsView extends AbstractView {
             "userGroup" => $user_group,
             "inDir" => $in_dir,
             "csrf_token" => $this->core->getCsrfToken(),
-            "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
-            "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"]),
+            "delete_url" => $this->core->buildCourseUrl(["course_materials", "delete"]),
+            "delete_folder_url" => $this->core->buildCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
             'server_time' => $server_time,
-            "display_file_url" => $this->core->buildNewCourseUrl(['display_file'])
+            "display_file_url" => $this->core->buildCourseUrl(['display_file'])
         ]);
     }
 }

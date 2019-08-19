@@ -36,24 +36,6 @@ class AuthenticationController extends AbstractController {
         $this->logged_in = $logged_in;
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'logout':
-                $this->logout();
-                break;
-            case 'checklogin':
-                $this->checkLogin();
-                break;
-            case 'vcs_login':
-                $this->vcsLogin();
-                break;
-            case 'login':
-            default:
-                $this->loginForm();
-                break;
-        }
-    }
-    
     /**
      * Logs out the current user from the system. This is done by both deleting the current going
      * session from the database as well as invalidating the session id saved in the cookie. The latter
@@ -73,7 +55,7 @@ class AuthenticationController extends AbstractController {
         }
         $this->core->removeCurrentSession();
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['authentication', 'login']))
+            new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
         );
     }
     
@@ -163,6 +145,28 @@ class AuthenticationController extends AbstractController {
         $token = $this->core->authenticateJwt();
         if ($token) {
             return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['token' => $token]));
+        }
+        else {
+            $msg = "Could not login using that user id or password";
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+    }
+
+    /**
+     * @Route("/api/token/invalidate", methods={"POST"})
+     *
+     * @return Response
+     */
+    public function invalidateToken() {
+        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+            $msg = 'Cannot leave user id or password blank';
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        $success = $this->core->invalidateJwt();
+        if ($success) {
+            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
         }
         else {
             $msg = "Could not login using that user id or password";
