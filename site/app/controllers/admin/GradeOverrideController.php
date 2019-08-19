@@ -13,17 +13,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class GradeOverrideController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/grade_override")
      */
     public function viewOverriddenGrades() {
         $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        $this->core->getOutput()->addInternalCss('gradeOverride.css');
         $this->core->getOutput()->renderOutput(array('admin','GradeOverride'), 'displayOverriddenGrades', $gradeables);
     }
 

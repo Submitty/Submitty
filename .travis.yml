@@ -51,6 +51,7 @@ jobs:
         - pip3 install psutil
         - pip3 install jsonschema
         - pip3 install jsonref
+        - pip3 install docker
       script: skip
     - <<: *00-cache
       php: 7.3
@@ -60,7 +61,7 @@ jobs:
       language: python
       python: 3.6
       install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings pydocstyle==3.0.0 sqlalchemy psycopg2-binary
+        - pip3 install flake8 flake8-bugbear flake8-docstrings sqlalchemy psycopg2-binary
       script: skip
     - <<: *00-python-cache
       python: 3.7
@@ -80,7 +81,7 @@ jobs:
       language: python
       python: 3.6
       install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings pydocstyle==3.0.0
+        - pip3 install flake8 flake8-bugbear flake8-docstrings
       script:
         - flake8
     - <<: *01-python-lint
@@ -182,6 +183,7 @@ jobs:
         - pip3 install pause
         - pip3 install paramiko
         - pip3 install psutil
+        - pip3 install docker
         - CHROME_VERSION=$(google-chrome --version | egrep -o -e '[0-9]+\.[0-9]+\.[0-9]+')
         - CHROME_DRIVER_VERSION=$(curl -L https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION})
         - wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
@@ -227,6 +229,23 @@ jobs:
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
+        - SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+        - sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        - pushd /tmp
+        - git clone http://instructor:instructor@localhost/git/${SEMESTER}/sample/open_homework/instructor open_homework
+        - cd open_homework
+        - touch test.txt
+        - git add .
+        - git commit -m "First commit"
+        - git push
+        - touch test2.txt
+        - git add .
+        - git commit -m "Second commit"
+        - git push
+        - git reset --hard HEAD~1
+        - git pull
+        - cd ..
+        - EXIT_CODE=0; git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor || EXIT_CODE=$?; test ${EXIT_CODE} -ne 0
     - <<: *03-e2e
       php: 7.3
       if: branch = master OR type = pull_request
@@ -286,6 +305,7 @@ jobs:
         - pip3 install paramiko
         - pip3 install psycopg2-binary
         - pip3 install sqlalchemy
+        - pip3 install docker
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - pip3 install .
         - popd

@@ -143,7 +143,7 @@ class AutoGradingView extends AbstractView {
                     "pdf" => true,
                     "name" => $file_name,
                     "path" => $file_path,
-                    "url" => $this->core->buildNewCourseUrl(['display_file']) . '?' . http_build_query([
+                    "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
                         "dir" => $public ? "results_public": "results",
                         "file" => $file_name,
                         "path" => $file_path
@@ -332,7 +332,7 @@ class AutoGradingView extends AbstractView {
         $total_score = max($total_score, 0);
         $total_score = $gradeable->roundPointValue($total_score);
 
-        $late_days_url = $this->core->buildNewCourseUrl(['late_table']);
+        $late_days_url = $this->core->buildCourseUrl(['late_table']);
         $regrade_allowed = $gradeable->isRegradeAllowed();
         $regrade_date = $gradeable->getRegradeRequestDate();
         $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
@@ -435,7 +435,7 @@ class AutoGradingView extends AbstractView {
             'gradeable_id' => $gradeable->getId(),
             'can_download' =>$can_download,
             'display_version' => $display_version,
-            'student_pdf_view_url' => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
+            'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
             "annotated_file_names" =>  $annotated_file_names
         ]);
     }

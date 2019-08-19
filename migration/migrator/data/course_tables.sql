@@ -143,13 +143,15 @@ CREATE TABLE electronic_gradeable (
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}' NOT NULL,
     eg_has_discussion boolean DEFAULT FALSE NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
-    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000'))
+    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_regrade_allowed_true CHECK (eg_regrade_allowed is true or eg_grade_inquiry_per_component_allowed is false)
 );
 
 
@@ -506,7 +508,8 @@ CREATE TABLE regrade_requests (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
-    status INTEGER DEFAULT 0 NOT NULL
+    status INTEGER DEFAULT 0 NOT NULL,
+    gc_id INTEGER
 );
 
 
@@ -542,17 +545,18 @@ CREATE TABLE regrade_discussion (
     timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
-    deleted BOOLEAN DEFAULT FALSE NOT NULL
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    gc_id integer
 );
 
 --
--- Name: grade_override; Type: TABLE; Schema: 
+-- Name: grade_override; Type: TABLE; Schema:
 --
 CREATE TABLE grade_override (
     user_id character varying(255) NOT NULL,
     g_id character varying(255) NOT NULL,
     marks float NOT NULL,
-    comment character varying 
+    comment character varying
 );
 
 --
@@ -1197,6 +1201,7 @@ ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("g_id") REFERENCES "gradeable"("g_id");
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk2" FOREIGN KEY ("team_id") REFERENCES "gradeable_teams"("team_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk3" FOREIGN KEY ("gc_id") REFERENCES "gradeable_component"("gc_id");
 
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
@@ -1210,11 +1215,11 @@ ALTER TABLE ONLY thread_categories
 ALTER TABLE ONLY student_favorites
     ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
 
-ALTER TABLE ONLY regrade_requests
-    ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id);
+CREATE UNIQUE INDEX gradeable_user_unique ON regrade_requests(user_id, g_id) WHERE gc_id IS NULL;
+CREATE UNIQUE INDEX gradeable_team_unique ON regrade_requests(team_id, g_id) WHERE gc_id IS NULL;
 
-ALTER TABLE ONLY regrade_requests
-    ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id);
+ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
+ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
 
 -- End Forum Key relationships
 
