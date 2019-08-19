@@ -1,6 +1,16 @@
 {% import 'functions/Badge.twig' as Badge %}
 {% import _self as self %}
 
+<script>
+$( document ).ready(function() {
+    var numPosts = $('.post_box').length;
+    if (numPosts > 0) {
+        $("#regradeBoxSection").show();
+        $("#ShowRegradeRequestButton").hide();
+    }
+});
+</script>
+
 {% if not been_ta_graded %}
     <br>
     <h3>This assignment has not been graded yet</h3>
@@ -192,7 +202,7 @@
     </div>
     {% if regrade_available %}
         <div id="ShowRegradeRequestButton">
-            <button type="button" title="Open Grade Inquiry" onclick="$('#regradeBoxSection').show();" style="margin-right:10px;" class="btn btn-default">Open Grade Inquiry</button>
+            <button type="button" title="Open Grade Inquiry" onclick="$('#regradeBoxSection').show();$([document.documentElement, document.body]).animate({scrollTop: $('#regradeBoxSection').offset().top}, 1000);$(this).hide()" style="margin-right:10px;" class="btn btn-default">Open Grade Inquiry</button>
         </div>
     {% endif %}
 {% endif %}
