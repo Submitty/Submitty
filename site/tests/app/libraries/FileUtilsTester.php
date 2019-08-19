@@ -192,7 +192,6 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         fclose($tmpfile2);
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files1"]);
-      //  var_dump($stat);
 
         $this->assertCount(2, $stat );
         $this->assertEquals($stat[0], 

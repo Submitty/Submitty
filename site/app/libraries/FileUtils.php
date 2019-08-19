@@ -567,6 +567,15 @@ class FileUtils {
         return $words_detected;
     }
 
+    /**
+     * Given an array of uploaded files, makes sure they are properlly uploaded
+     *
+     * @param array $files - should be in the same format as the $_FILES[] variable
+     * @return array representing the status of each file
+     * e.g. array('name' => 'foo.txt','type' => 'application/octet-stream', 'error' =>      
+     *            'success','size' => 100, 'success' => true)
+     * if $files is null returns failed => no files sent to validate
+     */
     public static function validateUploadedFiles($files){
 
         if(!isset($files)){
