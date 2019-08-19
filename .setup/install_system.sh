@@ -792,5 +792,14 @@ if [ ${WORKER} == 0 ]; then
     service postgresql restart
 fi
 
+
+#####################################################################################
+# Obtain API auth token for submitty-admin user
+# (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
+# operational at that time.)
+
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+
+
 echo "Done."
 exit 0
