@@ -95,7 +95,13 @@
          * @return array
          */
         private function getSocketClientID($user_id){
-            return $this->users[$user_id];
+            if(isset($this->users[$user_id])) {
+                return $this->users[$user_id];
+            }
+            else
+            {
+                return false;
+            }
         }
 
         /**
@@ -151,8 +157,11 @@
                     case "new_thread":
                     case "new_post":
                         $user_id = $msg["data"]["user_id"];
-                        $fromConn = $this->getSocketClientID($user_id);
-                        $this->broadcast($fromConn, $msgString, false);
+                        if($fromConn = $this->getSocketClientID($user_id)){
+                            $this->broadcast($fromConn, $msgString, false);
+                        }else {
+                            $this->broadcast($from, $msgString, false);
+                        }
                         break;
                     default: $this->broadcast($from, $msgString, true);
                 }
