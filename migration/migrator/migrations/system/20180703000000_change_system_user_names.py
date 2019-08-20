@@ -45,6 +45,7 @@ def up(config):
         pass
 
     # stop all jobs that are using hwphp and hwcron
+    os.system("systemctl stop submitty_websocket_server")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop apache2.service")
@@ -70,6 +71,7 @@ def up(config):
     print ("       systemctl start php7.0-fpm.service")
     print ("       systemctl start submitty_autograding_shipper")
     print ("       systemctl start submitty_autograding_worker")
+    print ("       systemctl start submitty_websocket_server")
 
     if os.path.exists("/home/hwcron"):
         shutil.move("/home/hwcron","/home/submitty_daemon")
@@ -148,6 +150,7 @@ def down(config):
     INSTALL_SUBMITTY_filename = str(Path(config.submitty['submitty_install_dir'], '.setup', 'INSTALL_SUBMITTY.sh'))
 
     # stop all jobs that are using submitty_php and submitty_daemon
+    os.system("systemctl stop submitty_websocket_server")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop apache2.service")
@@ -173,6 +176,7 @@ def down(config):
     print ("       systemctl start php7.0-fpm.service")
     print ("       systemctl start submitty_autograding_shipper")
     print ("       systemctl start submitty_autograding_worker")
+    print ("       systemctl start submitty_websocket_server")
 
     if os.path.exists("/home/submitty_daemon"):
         shutil.move("/home/submitty_daemon","/home/hwcron")

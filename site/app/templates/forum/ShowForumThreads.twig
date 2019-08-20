@@ -3,7 +3,6 @@
 <script>
 
     $( document ).ready(function(){
-
         enableTabsInTextArea('.post_content_reply');
         saveScrollLocationOnRefresh('posts_list');
         thread_post_handler();
@@ -15,10 +14,8 @@
         $(".post_reply_from").submit(event, publishPost);
         $("form").areYouSure();
         loadThreadHandler();
-
         enableSocket();
         forumSocketHandler();
-
     });
 
 </script>

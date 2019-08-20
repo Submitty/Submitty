@@ -1220,7 +1220,6 @@ CREATE UNIQUE INDEX gradeable_team_unique ON regrade_requests(team_id, g_id) WHE
 ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
 ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
 
-
 -- End Forum Key relationships
 
 --

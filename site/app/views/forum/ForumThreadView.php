@@ -553,7 +553,7 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-    function renderSingleThreadListItem($threads){
+    public function renderSingleThreadListItem($threads){
         $thread = $threads[0];
         $currentThread = $thread["id"];
         $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
@@ -565,7 +565,7 @@ class ForumThreadView extends AbstractView {
         $this->core->getOutput()->renderJsonSuccess($html);
     }
 
-    function renderPost($thread_id, $post, $post_box_id){
+    public function renderPost($thread_id, $post, $post_box_id){
         $totalAttachments = 0;
         $data = $this->createPost($thread_id, $post, [], 'date_format', false, 0,'tree', true, $totalAttachments);
         $data["post_box_id"] = $post_box_id;

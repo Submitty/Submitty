@@ -92,6 +92,7 @@ def main():
     os.system("systemctl stop submitty_autograding_shipper")
     os.system("systemctl stop submitty_autograding_worker")
     os.system("systemctl stop submitty_daemon_jobs_handler")
+    os.system("systemctl stop submitty_websocket_server")
 
     courses = {}  # dict[str, Course]
     users = {}  # dict[str, User]
@@ -210,6 +211,7 @@ def main():
     os.system("systemctl restart submitty_autograding_shipper")
     os.system("systemctl restart submitty_autograding_worker")
     os.system("systemctl restart submitty_daemon_jobs_handler")
+    os.system("systemctl restart submitty_websocket_server")
 
     # queue up all of the newly created submissions to grade!
     os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
