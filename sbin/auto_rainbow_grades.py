@@ -17,6 +17,9 @@ import subprocess
 import shutil
 import pwd
 import json
+import datetime
+from pathlib import Path
+import getpass
 
 # Constants
 PROVIDED_JSON_NAME = 'custom_customization.json'
@@ -50,12 +53,35 @@ with open(users_config_file, 'r') as file:
     data = json.load(file)
     daemon_user = data['daemon_user']
 
+
+# Confirm that submitty_daemon user is running this script
+if data['daemon_user'] != getpass.getuser():
+    raise Exception('ERROR: This script must be run by the submitty_daemon user')
+
+
 # Configure variables
 semester = sys.argv[1]
 course = sys.argv[2]
 user = daemon_user
 rainbow_grades_path = os.path.join(install_dir, 'GIT_CHECKOUT', 'RainbowGrades')
 courses_path = os.path.join(data_dir, 'courses')
+
+
+def log_message(message):
+    """Global log message about rainbow grades."""
+    today = datetime.datetime.now()
+    log_file_path = Path(data_dir, 'logs', 'rainbow_grades',
+                         "{:04d}{:02d}{:02d}.txt".format(today.year,
+                                                         today.month,
+                                                         today.day))
+    # append to the file
+    with open(log_file_path, 'a') as file:
+        timestring = today.strftime("%Y-%m-%d %H:%M:%S%z")
+        file.write(timestring + " " + message + "\n")
+
+
+log_message("Start processing " + semester + " " + course)
+
 
 # Verify user exists
 users = pwd.getpwall()
@@ -68,6 +94,8 @@ for item in users:
 
 if user_found is False:
     raise Exception('Unable to locate the specified user {}'.format(user))
+
+print('Started build at {}'.format(datetime.datetime.now()), flush=True)
 
 # Generate path information
 rg_course_path = os.path.join(courses_path, semester, course, 'rainbow_grades')
@@ -133,34 +161,9 @@ if not os.path.exists(creds_file):
 with open(creds_file, 'r') as file:
     creds = json.load(file)
 
-# Construct request list
-request = [
-    'curl',
-    '-d',
-    'user_id={}&password={}'.format(creds['submitty_admin_username'],
-                                    creds['submitty_admin_password']),
-    '-X',
-    'POST',
-    '{}/api/token'.format(host_name)
-]
-
-# Using the credentials call the API to obtain an auth token
-print('Obtaining auth token', flush=True)
-response = subprocess.run(request, stdout=subprocess.PIPE)
-
-# Check the return code of the 'curl' execution
-if response.returncode != 0:
-    raise Exception('Failure during curl server call to obtain auth token')
-
-# Verify a token was successfully received
-response_json = json.loads(response.stdout)
-
 # Take this path if we DID NOT get an auth token
-if response_json['status'] != 'success':
+if 'token' not in creds or not creds['token']:
 
-    print('Failed to obtain an auth token.', flush=True)
-    print('Ask your sysadmin to confirm that ' + creds_file +
-          ' contains valid credentials', flush=True)
     print('Attempting to continue with previously generated grade summaries',
           flush=True)
 
@@ -181,7 +184,7 @@ else:
         semester,
         course,
         host_name,
-        response_json['data']['token']
+        creds['token']
     ]
 
     # Call generate_grade_summaries.py script to generate grade summaries for the
@@ -194,7 +197,7 @@ else:
         raise Exception('Failure generating grade summaries')
 
 # Run make pull_test (command outputs capture in cmd_output for debugging)
-print('Pulling in grade reports', flush=True)
+print('Pulling in grade summaries', flush=True)
 cmd_output = os.popen('make pull_test').read()
 
 # Run make
@@ -217,3 +220,5 @@ summary_html_path = os.path.join(courses_path,
 cmd_output = os.popen('chmod -R --silent o-rwx ' + summary_html_path).read()
 
 print('Done', flush=True)
+
+log_message("Finished         " + semester + " " + course)
