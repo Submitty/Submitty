@@ -1025,7 +1025,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + jsondata['message']);
+                    alert(jsondata['message']);
                 }
             }
             catch (e) {

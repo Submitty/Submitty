@@ -17,6 +17,7 @@ class GradeOverrideController extends AbstractController {
      */
     public function viewOverriddenGrades() {
         $gradeables = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+        $this->core->getOutput()->addInternalCss('gradeOverride.css');
         $this->core->getOutput()->renderOutput(array('admin','GradeOverride'), 'displayOverriddenGrades', $gradeables);
     }
 

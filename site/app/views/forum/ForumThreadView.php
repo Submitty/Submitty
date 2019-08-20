@@ -109,7 +109,7 @@ class ForumThreadView extends AbstractView {
 		displayed in the left panel.
 	*/
 
-    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $ajax=false) {
+    public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax=false) {
 
         if(!$this->forumAccess()){
             $this->core->redirect($this->core->buildCourseUrl([]));
@@ -351,7 +351,8 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $this->core->getCsrfToken(),
                 "edit_url" => $this->core->buildCourseUrl(['forum', 'posts', 'modify']) . '?' . http_build_query(['modify_type' => '1']),
                 "search_url" => $this->core->buildCourseUrl(['forum', 'search']),
-                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
+                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "post_content_limit" => $post_content_limit
             ]);
         }
         else{
@@ -373,7 +374,8 @@ class ForumThreadView extends AbstractView {
                 "csrf_token" => $generatePostContent["csrf_token"],
                 "activeThreadTitle" => $generatePostContent["activeThreadTitle"],
                 "post_box_id" => $generatePostContent["post_box_id"],
-                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge'])
+                "merge_url" => $this->core->buildCourseUrl(['forum', 'threads', 'merge']),
+                "post_content_limit" => $post_content_limit
             ]);
 
             $return = $this->core->getOutput()->renderJsonSuccess(["html"=> json_encode($return)]);
