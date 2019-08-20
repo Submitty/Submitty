@@ -1,11 +1,8 @@
 <?php
 
-namespace app;
+namespace app\models;
 
 use app\libraries\Core;
-use app\models\Email;
-use app\models\Notification;
-use app\models\User;
 use LogicException;
 
 /**
@@ -13,7 +10,7 @@ use LogicException;
  * Class NotificationFactory
  * @package app
  */
-class NotificationFactory {
+class NotificationFactory extends AbstractModel {
 
     /**
      * @var Core $core
