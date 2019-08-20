@@ -26,6 +26,7 @@ class CourseMaterialsView extends AbstractView {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
+            $no_json = array();
 
             foreach($course_materials_array as $file) {
 
@@ -61,6 +62,19 @@ class CourseMaterialsView extends AbstractView {
                     }
 
                 }
+                else{
+
+                    $ex_file_path = $expected_file_path;
+                    $ex_file_path = array();
+                    $ex_file_path['checked'] = '1';
+                    $isShareToOther = $ex_file_path['checked'];
+                    $date = $now_date_time->format("Y-m-d H:i:sO");
+                    $date=substr_replace($date,"9999",0,4);
+                    $ex_file_path['release_datetime'] = $date;
+                    $releaseData = $ex_file_path['release_datetime'];
+                    $no_json[$expected_file_path] = $ex_file_path;
+
+                }
 
                 if ($student_access && $isShareToOther === '0') {
                     continue; // skip this so don't add to the courseMaterialsArray
@@ -94,8 +108,13 @@ class CourseMaterialsView extends AbstractView {
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
-            if($json == true){
-                FileUtils::writeJsonFile($fp,$json);
+
+            if($json == false){
+                FileUtils::writeJsonFile($fp,$no_json);
+            }
+            $can_write =is_writable($fp);
+            if(!$can_write){
+               $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
             }
         }
 
