@@ -20,6 +20,12 @@ if [ -z ${PHP_USER+x} ]; then
     CGI_GROUP=${CGI_USER}
 fi
 
+mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
+echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
+chmod 644 /tmp/index.html
+chown ${CGI_USER}:${CGI_GROUP} /tmp/index.html
+mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
+
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
@@ -59,6 +65,8 @@ if [ -f "${SUBMITTY_INSTALL_DIR}/site/package-lock.json" ]; then
 fi
 
 su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error"
+
+echo "Copy NPM packages into place"
 NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
 VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
 # clean out the old install so we don't leave anything behind
@@ -122,38 +130,50 @@ cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
 
 # set the permissions of all files
 # $PHP_USER can read & execute all directories and read all files
+#chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
+#find ${SUBMITTY_INSTALL_DIR}/site ! -name \*.html -exec chmod 440 {} \;
+
 # "other" can cd into all subdirectories
-chmod -R 440 ${SUBMITTY_INSTALL_DIR}/site
-find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
+#find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
-# "other" can read all of these files
-array=( css otf jpg png ico txt twig map )
-for i in "${array[@]}"; do
-    find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.${i} -exec chmod o+r {} \;
-done
+# Set proper read/execute for "other" on files with certain extensions
+# so apache can properly handle them
+echo "Set permissions"
+chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
+find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod 551 {} \;
+find ${SUBMITTY_INSTALL_DIR}/site -type f -not -path \*/public/\* -exec chmod 440 {} \;
 
-# Set permissions of files
-# set special user $PHP_USER as owner & group of all website files
-find ${SUBMITTY_INSTALL_DIR}/site -exec chown ${PHP_USER}:${PHP_GROUP} {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -exec chown ${CGI_USER}:${CGI_GROUP} {} \;
-# "other" can read & execute these files
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.bcmap -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.ttf -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.eot -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.svg -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.woff -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.woff2 -exec chmod o+rx {} \;
+set_permissions () {
+    local fullpath=$1
+    filename=$(basename -- "$fullpath")
+    extension="${filename##*.}"
+    # filename="${filename%.*}"
+    case "${extension}" in
+        css|otf|jpg|png|ico|txt|twig|map)
+            chmod 444 ${fullpath}
+            ;;
+        bcmap|ttf|eot|svg|woff|woff2|js|cgi)
+            chmod 445 ${fullpath}
+            ;;
+        html)
+            if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
+                chmod 440 ${fullpath}
+            fi
+            ;;
+        *)
+            chmod 440 ${fullpath}
+            ;;
+    esac
+}
 
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f -name \*.js -exec chmod o+rx {} \;
-find ${SUBMITTY_INSTALL_DIR}/site/cgi-bin -type f -name \*.cgi -exec chmod u+x {} \;
+find ${SUBMITTY_INSTALL_DIR}/site/public -type f | while read file; do set_permissions "$file"; done
 
+# Set cgi-bin permissions
+chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
+chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
 chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
-# return the course index page (only necessary when 'clean' option is used)
-if [ -f "$mytempcurrentcourses" ]; then
-    echo "return this file! ${mytempcurrentcourses} ${originalcurrentcourses}"
-    mv ${mytempcurrentcourses} ${originalcurrentcourses}
-fi
+rm -f ${SUBMITTY_INSTALL_DIR}/site/public/index.html
