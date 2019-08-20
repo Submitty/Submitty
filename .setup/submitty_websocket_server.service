@@ -6,7 +6,7 @@ Documentation=http://submitty.org
 User=submitty_daemon
 Restart=always
 Type=simple
-ExecStart=/usr/local/submitty/site/app/controllers/SocketController.php
+ExecStart=/usr/bin/bash php /usr/local/submitty/site/app/controllers/SocketController.php
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 

@@ -1,5 +1,4 @@
 <?php
-
     namespace app\controllers;
 
     use Ratchet\Server\IoServer;
