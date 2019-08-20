@@ -17,7 +17,8 @@ function check_exit_code {
     fi
 }
 
-# CLI argument "auto" will assume user permission to setup preferred name logging.
+# CLI argument "auto" will assume user permission is d granted to setup
+# preferred name logging.
 if [[ $1 != "auto" ]]; then
     echo -e "\e[1mTo enable preferred name logging, changes are required.
 
@@ -37,7 +38,7 @@ log_line_prefix = '%m [%p] %q%u@%d '
 # Run preferred_name_logging.php every night at 2:05AM
 5 2 * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -s submitty
 
-\e[1mMake these changes and setup preferred name tracking? [y]es/[N]o?\e[0m"
+\e[1mMake these changes and setup preferred name logging? [y]es/[N]o?\e[0m"
 
     read user_permission
 else
@@ -48,6 +49,11 @@ fi
 
 if [[ ${user_permission:0:1} == "y" ]] || [[ ${user_permission:0:1} == "Y" ]]; then
     # Copy preferred_name_logging.php to sbin
+
+    # DEBUG (remove before final PR)
+    cd /usr/local/submitty/GIT_CHECKOUT/SysadminTools && git checkout preferred_name_logging_update
+    # END DEBUG
+
     rsync -qt ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
     check_exit_code $? "preferred_name_user.php"
     chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
@@ -64,7 +70,7 @@ if [[ ${user_permission:0:1} == "y" ]] || [[ ${user_permission:0:1} == "Y" ]]; t
             s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_min_messages = log~;
             s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_min_duration_statement = 0~;
             s~^#*[ tab]*log_line_prefix[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_line_prefix = '%m [%p] %q%u@%d '~" /etc/postgresql/10/main/postgresql.conf
-    check_exit_code $? "Postgresql.conf"
+    check_exit_code $? "postgresql.conf"
 
     # Check to see if crontab entry already exists
     grep -qs "${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php" /etc/cron.d/submitty
