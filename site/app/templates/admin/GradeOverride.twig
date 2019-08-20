@@ -32,17 +32,19 @@
             </div>
         </div>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <div class="option-title">Single Student Entry<br></div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="user_id">Student ID:</label><br>
-            <input class="option-input" type="text" name="user_id" id="user_id" style="float:left">
-        </div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="marks">Overridden marks:</label><br>
-            <input class="option-input" type="text" name="marks" id="marks" style="float:left" >
-        </div>
-        <div class="option" style="width:25%; display:inline-block;"><label for="comment">Comments (optional)</label><br>
-            <textarea name="comment" id="comment" class="option-input" type="text" style="float:left"></textarea>
-        </div>
-        <div class="option" style="width:10%; display:inline-block; vertical-align: bottom;"><input class="btn btn-primary" type="submit" value="Submit" style="float:left"></div>
+        <fieldset class="single-student">
+            <legend class="option-title">Single Student Entry<br></legend>
+            <label for="user_id">Student ID:
+                <input class="option-input" type="text" name="user_id" id="user_id" >
+            </label>
+            <label for="marks">New total score:
+                <input class="option-input" type="text" name="marks" id="marks"  >
+            </label>
+            <label for="comment">Comments (optional)
+                <textarea name="comment" id="comment" class="option-input" type="text" ></textarea>
+            </label>
+        </fieldset>
+        <input class="btn btn-primary" type="submit" value="Submit" >
         <div id="load-overridden-grades" align="center">
         {# This is a data table #}
             <table id="my_table" class="table table-striped table-bordered persist-area" style="width:70%" align="center">
