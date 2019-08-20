@@ -11,7 +11,7 @@ use app\libraries\FileUtils;
 use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-use WebSocket\Client;
+use WebSocket;
 
 
 /**
@@ -322,13 +322,17 @@ class ForumController extends AbstractController{
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
-                $client = new Client("ws://".$_SERVER['HTTP_HOST'].":8080");
-                $client->send(json_encode(["type" => "new_thread", "data" => [
-                    "thread_id" => $thread_id,
-                    "user_id" => $current_user_id
-                ]]));
-                $client->close();
-
+                try{
+                    $client = new Websocket\Client("ws://".$_SERVER['HTTP_HOST'].":8080");
+                    $client->send(json_encode(["type" => "new_thread", "data" => [
+                        "thread_id" => $thread_id,
+                        "user_id" => $current_user_id
+                    ]]));
+                    $client->close();
+                }
+                catch(WebSocket\ConnectionException $e){
+                    ;
+                }
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
         }
@@ -416,14 +420,19 @@ class ForumController extends AbstractController{
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
-                $client = new Client("ws://".$_SERVER['HTTP_HOST'].":8080");
-                $client->send(json_encode(["type" => "new_post", "data" => [
-                    "post_id" => $post_id,
-                    "thread_id" => $thread_id,
-                    "parent_id" => $parent_id,
-                    "user_id" => $current_user_id
-                ]]));
-                $client->close();
+                try {
+                    $client = new Websocket\Client("ws://" . $_SERVER['HTTP_HOST'] . ":8080");
+                    $client->send(json_encode(["type" => "new_post", "data" => [
+                        "post_id" => $post_id,
+                        "thread_id" => $thread_id,
+                        "parent_id" => $parent_id,
+                        "user_id" => $current_user_id
+                    ]]));
+                    $client->close();
+                }
+                catch(WebSocket\ConnectionException $e){
+                    ;
+                }
 
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
             }

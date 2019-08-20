@@ -2,10 +2,8 @@
 
     namespace app\libraries;
 
-    use PHPUnit\Framework\ExpectationFailedException;
     use Ratchet\MessageComponentInterface;
     use Ratchet\ConnectionInterface;
-    use app\libraries\database;
 
     class Socket implements MessageComponentInterface {
         protected $clients;
@@ -17,15 +15,17 @@
             $this->clients = new \SplObjectStorage;
             $this->sessions = [];
 
-            $this->core = new Core();
+            $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
+            if (is_dir($conf_path)) {
+                $this->core = new Core();
 
-            $this->core->loadMasterConfig();
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadMasterDatabase();
-            /** @noinspection PhpUnhandledExceptionInspection */
-            $this->core->loadAuthentication();
-            $this->core->loadCourseDatabase();
-
+                $this->core->loadMasterConfig();
+                /** @noinspection PhpUnhandledExceptionInspection */
+                $this->core->loadMasterDatabase();
+                /** @noinspection PhpUnhandledExceptionInspection */
+                $this->core->loadAuthentication();
+                $this->core->loadCourseDatabase();
+            }
         }
 
         private function checkAuth($conn){

@@ -61,102 +61,106 @@ function forumAttachmentHandler(){
 }
 
 function forumSocketHandler() {
-    window.SocketCon.onmessage = function(e){
-        var data = JSON.parse(e.data);
+    window.SocketCon.onmessage = function (e) {
+        if(window.socketEnabled == true) {
+            var data = JSON.parse(e.data);
 
-        if(data.type == "new_post"){
-            var postdata = data.data;
+            if (data.type == "new_post") {
+                var postdata = data.data;
 
-            if(parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))){
-                if(maxPostBoxId==-1) {
-                    var lastPostForm = $('.thread-post-form').last();
-                    maxPostBoxId = parseInt($(lastPostForm).attr("post_box_id"));
+                if (parseInt(postdata.thread_id) === parseInt($('#current-thread').attr("value"))) {
+                    if (maxPostBoxId == -1) {
+                        var lastPostForm = $('.thread-post-form').last();
+                        maxPostBoxId = parseInt($(lastPostForm).attr("post_box_id"));
+                    }
+                    var part = maxPostBoxId + 1;
+                    $.ajax({
+                        type: 'POST',
+                        url: buildCourseUrl(['forum', 'posts', 'get_html']),
+                        data: {
+                            'post_id': postdata.post_id,
+                            'thread_id': postdata.thread_id,
+                            'post_box_id': part,
+                            'csrf_token': csrfToken
+                        },
+                        dataType: "JSON",
+                        success: function (result) {
+                            var parent = $('#' + postdata.parent_id);
+                            var replyLevel = 0;
+                            if (parseInt($(parent).attr("parent-id")) === -1) {
+                                $(result.data).insertBefore("#post-hr");
+                            } else {
+                                var lastPost;
+                                if ($("[parent-id='" + postdata.parent_id + "'").length > 0) {
+                                    lastPost = $("[parent-id='" + postdata.parent_id + "'").last();
+                                    replyLevel = parseInt($(lastPost).attr("reply-level")) - 1;
+                                } else {
+                                    lastPost = parent;
+                                    replyLevel = parseInt($(lastPost).attr("reply-level"));
+                                }
+                                $(result.data).insertAfter($(lastPost));
+                            }
+                            replyLevel += 1;
+
+                            $('#' + postdata.post_id).attr("reply-level", replyLevel).css("margin-left", ((replyLevel - 1) * 30) + "px");
+                            $('#' + postdata.post_id + '-reply').css("margin-left", ((replyLevel) * 30) + "px");
+
+                            enableTabsInTextArea('.post_content_reply');
+                            thread_post_handler();
+                            $(".post_reply_from").unbind().submit(event, publishPost);
+                            $("form").areYouSure();
+
+                            previous_files[part - 1] = [];
+                            label_array[part - 1] = [];
+                            file_array[part - 1] = [];
+
+                            $(".upload_attachment_box").unbind().each(function () {
+                                this.addEventListener("click", clicked_on_box, false);
+                            });
+
+                            $('div.upload_attachment_box').on('DOMNodeInserted', function (e) {
+                                var part = get_part_number(e);
+                                if (isNaN(parseInt(part))) {
+                                    return;
+                                }
+                                var target = $(e.target);
+                                var file_object = null;
+                                var filename = target.attr("fname");
+                                for (var j = 0; j < file_array[part - 1].length; j++) {
+                                    if (file_array[part - 1][j].name == filename) {
+                                        file_object = file_array[part - 1][j];
+                                        break;
+                                    }
+                                }
+                                var image = document.createElement('div');
+                                $(image).addClass("thumbnail");
+                                $(image).css("background-image", "url(" + window.URL.createObjectURL(file_object) + ")");
+                                target.prepend(image);
+                            });
+
+                            maxPostBoxId++;
+                        }
+                    });
+                } else {
+                    $('[data="' + postdata.thread_id + '"] .thread_box').addClass("new_reply");
                 }
-                var part = maxPostBoxId + 1;
+            }
+
+            if (data.type == "new_thread") {
+                var threaddata = data.data;
                 $.ajax({
                     type: 'POST',
-                    url: buildCourseUrl(['forum', 'posts', 'get_html']),
-                    data: { 'post_id': postdata.post_id, 'thread_id': postdata.thread_id, 'post_box_id': part, 'csrf_token': csrfToken },
+                    url: buildCourseUrl(['forum', 'threads', 'get_list_item']),
+                    data: {'thread_id': threaddata.thread_id, 'csrf_token': csrfToken},
                     dataType: "JSON",
-                    success: function(result) {
-                        var parent = $('#'+postdata.parent_id);
-                        var replyLevel = 0;
-                        if(parseInt($(parent).attr("parent-id")) === -1) {
-                            $(result.data).insertBefore("#post-hr");
-                        }
-                        else{
-                            var lastPost;
-                            if($("[parent-id='"+postdata.parent_id+"'").length > 0){
-                                lastPost = $("[parent-id='"+postdata.parent_id+"'").last();
-                                replyLevel = parseInt($(lastPost).attr("reply-level")) - 1;
-                            }
-                            else{
-                                lastPost = parent;
-                                replyLevel = parseInt($(lastPost).attr("reply-level"));
-                            }
-                            $(result.data).insertAfter($(lastPost));
-                        }
-                        replyLevel += 1;
-
-                        $('#'+postdata.post_id).attr("reply-level", replyLevel).css("margin-left", ((replyLevel-1)*30)+"px");
-                        $('#'+postdata.post_id+'-reply').css("margin-left", ((replyLevel)*30)+"px");
-
-                        enableTabsInTextArea('.post_content_reply');
+                    success: function (result) {
+                        $(result.data).insertBefore($('.thread_box_link').first());
+                        $('[data="' + threaddata.thread_id + '"] .thread_box').removeClass("active");
                         thread_post_handler();
-                        $(".post_reply_from").unbind().submit(event, publishPost);
-                        $("form").areYouSure();
-
-                        previous_files[part-1] = [];
-                        label_array[part-1] = [];
-                        file_array[part-1] = [];
-
-                        $(".upload_attachment_box").unbind().each(function() {
-                            this.addEventListener("click", clicked_on_box, false);
-                        });
-
-                        $('div.upload_attachment_box').on('DOMNodeInserted',function(e){
-                            var part = get_part_number(e);
-                            if(isNaN(parseInt(part))) {
-                                return;
-                            }
-                            var target = $(e.target);
-                            var file_object = null;
-                            var filename = target.attr("fname");
-                            for (var j = 0; j < file_array[part-1].length; j++){
-                                if (file_array[part-1][j].name == filename) {
-                                    file_object = file_array[part-1][j];
-                                    break;
-                                }
-                            }
-                            var image = document.createElement('div');
-                            $(image).addClass("thumbnail");
-                            $(image).css("background-image", "url("+window.URL.createObjectURL(file_object)+")");
-                            target.prepend(image);
-                        });
-
-                        maxPostBoxId++;
+                        loadThreadHandler();
                     }
                 });
             }
-            else{
-                $('[data="'+postdata.thread_id+'"] .thread_box').addClass("new_reply");
-            }
-        }
-
-        if(data.type == "new_thread"){
-            var threaddata = data.data;
-            $.ajax({
-                type: 'POST',
-                url: buildCourseUrl(['forum', 'threads', 'get_list_item']),
-                data: { 'thread_id': threaddata.thread_id, 'csrf_token': csrfToken },
-                dataType: "JSON",
-                success: function(result){
-                    $(result.data).insertBefore($('.thread_box_link').first());
-                    $('[data="'+threaddata.thread_id+'"] .thread_box').removeClass("active");
-                    thread_post_handler();
-                    loadThreadHandler();
-                }
-            });
         }
     }
 }
@@ -287,7 +291,7 @@ function publishFormWithAttachments(form, test_category, error_message) {
                 $('#messages').append(message);
                 return;
             }
-            if(is_new_thread=="true"){
+            if(is_new_thread=="true" || window.socketEnabled == false){
                 window.location.href = json['data']['next_page'];
             }
             else {
