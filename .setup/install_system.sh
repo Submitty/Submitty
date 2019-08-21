@@ -790,7 +790,7 @@ function check_exit_code {
 rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
 check_exit_code $? "preferred_name_user.php"
 chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
-chmod 0640 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
+chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 
 # Adjust/overwrite Postgresql's configuration
 sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_destination = 'csvlog'~;
