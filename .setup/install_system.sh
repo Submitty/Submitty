@@ -748,8 +748,8 @@ if [ ${WORKER} == 0 ]; then
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/psql
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/preferred_names
-        chown -R root:$DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/preferred_names
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names ${SUBMITTY_DATA_DIR}/logs/preferred_names
+        chown -R root:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/preferred_names
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/preferred_names
 
         # Call helper script that makes the courses and refreshes the database
