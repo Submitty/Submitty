@@ -30,6 +30,7 @@ class AccessControlTester extends BaseUnitTest {
      * @param bool $logged_in
      *
      * @dataProvider data
+     * @throws \ReflectionException
      */
     public function testAccess(
         $endpoint,
@@ -40,14 +41,14 @@ class AccessControlTester extends BaseUnitTest {
         $logged_in = true
     ) {
         for ($role = User::GROUP_STUDENT; $role > $min_role; $role --) {
-            $core = $this->getAccessTestCore($role, $min_permission);
+            $core = $this->getAccessTestCore($role, $min_permission, $logged_in);
             $request = Request::create(
                 $endpoint,
                 $method,
                 $params
             );
 
-            $response = WebRouter::getWebResponse($request, $core, $logged_in);
+            $response = WebRouter::getWebResponse($request, $core);
 
             $this->assertEquals(
                 [
@@ -59,20 +60,59 @@ class AccessControlTester extends BaseUnitTest {
         }
     }
 
-    private function getAccessTestCore($role, $permission) {
+    private function getAccessTestCore($role, $permission, $logged_in) {
         switch ($role) {
             case User::GROUP_INSTRUCTOR:
-                $core = $this->createMockCore(['access_admin' => true, 'semester' => $this->semester, 'course' => $this->course], [], [], $permission);
+                $core = $this->createMockCore(
+                    [
+                        'access_admin' => true,
+                        'semester' => $this->semester,
+                        'course' => $this->course,
+                        'logged_in' => $logged_in
+                    ],
+                    [],
+                    [],
+                    $permission
+                );
                 break;
             case User::GROUP_FULL_ACCESS_GRADER:
-                $core = $this->createMockCore(['access_full_grading' => true, 'semester' => $this->semester, 'course' => $this->course], [], [], $permission);
+                $core = $this->createMockCore(
+                    [
+                        'access_full_grading' => true,
+                        'semester' => $this->semester,
+                        'course' => $this->course,
+                        'logged_in' => $logged_in
+                    ],
+                    [],
+                    [],
+                    $permission
+                );
                 break;
             case User::GROUP_LIMITED_ACCESS_GRADER:
-                $core = $this->createMockCore(['access_grading' => true, 'semester' => $this->semester, 'course' => $this->course], [], [], $permission);
+                $core = $this->createMockCore(
+                    [
+                        'access_grading' => true,
+                        'semester' => $this->semester,
+                        'course' => $this->course,
+                        'logged_in' => $logged_in
+                    ],
+                    [],
+                    [],
+                    $permission
+                );
                 break;
             case User::GROUP_STUDENT:
             default:
-                $core = $this->createMockCore(['semester' => $this->semester, 'course' => $this->course], [], [], $permission);
+                $core = $this->createMockCore(
+                    [
+                        'semester' => $this->semester,
+                        'course' => $this->course,
+                        'logged_in' => $logged_in
+                    ],
+                    [],
+                    [],
+                    $permission
+                );
                 break;
         }
         return $core;

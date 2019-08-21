@@ -15,7 +15,7 @@ class PDFView extends AbstractView {
     public function showPDFEmbedded($params){
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
-        $pdf_url = $this->core->buildNewCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
+        $pdf_url = $this->core->buildCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
         $is_student = $params["is_student"];
 
         $localcss = array();
@@ -45,7 +45,8 @@ class PDFView extends AbstractView {
             'page_num' => $params["page_num"],
             'pdf_url_base' => $pdf_url,
             'localcss' => $localcss,
-            'localjs' => $localjs
+            'localjs' => $localjs,
+            'csrfToken' => $this->core->getCsrfToken()
         ]);
     }
 }
