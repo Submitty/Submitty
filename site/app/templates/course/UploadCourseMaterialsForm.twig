@@ -42,6 +42,7 @@
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
+
                 var cmTime = document.getElementById("upload_picker").value;
                 var cb = $("input#expand_zip_checkbox");
                 var expandZip = 'off';
@@ -56,6 +57,46 @@
                 e.stopPropagation();
             });
         });
+
+        document.getElementById('upload_picker').flatpickr({
+                    plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0: 
+                                        updateToServerTime(fp);
+                                        break;
+                                    case 1:
+                                        updateToTomorrowServerTime(fp);
+                                        break;
+                                    case 2:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        fp.setDate(date,true);
+                                        break;
+
+                                }
+                            }
+                        }
+                    )],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S"
+                    });
     </script>
     <script type="text/javascript">
         createArray(1);
