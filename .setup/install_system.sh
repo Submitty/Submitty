@@ -742,6 +742,16 @@ if [ ${WORKER} == 0 ]; then
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
 
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/psql
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/psql ${SUBMITTY_DATA_DIR}/logs/psql
+        chown -R root:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/psql
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/psql
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/preferred_names
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/ta_grading ${SUBMITTY_DATA_DIR}/logs/preferred_names
+        chown -R root:$DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/preferred_names
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/preferred_names
+
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
