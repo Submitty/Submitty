@@ -6,8 +6,14 @@
     use Ratchet\ConnectionInterface;
 
     class Socket implements MessageComponentInterface {
+
+        // Holds the connections object array, used directly by the class functions
         protected $clients;
+
+        // Holds the mapping between Connection Objects (key) and User_ID (value)
         protected $sessions;
+
+        // Holds the mapping between User_ID (key) and Connection object (value)
         protected $users;
         protected $core;
 
@@ -28,6 +34,12 @@
             }
         }
 
+        /**
+         * This function checks if a given connection object is authenticated
+         * It uses the submitty_session cookie in the header data to work
+         * @param $conn
+         * @return bool
+         */
         private function checkAuth($conn){
             $request = $conn->httpRequest;
             $client_id = $conn->resourceId;
@@ -68,6 +80,12 @@
             }
         }
 
+        /**
+         * Push a given message to all or all-but-sender connections
+         * @param $from
+         * @param $content
+         * @param bool $all, true to send to all, false to send to all but $from
+         */
         private function broadcast($from, $content, $all = true){
             if($all) {
                 foreach ($this->clients as $client) {
@@ -90,7 +108,15 @@
          */
 
         /**
-         * Fetches Connection of a given User
+         * Connection object is the object stored against $this->clients for a given connection
+         * Connection object contains all details of the connection and can be used to push messages to client
+         *
+         * User_ID refers to the user_id of the user who is making a connection to the socket from a web page
+         * For example: if instructor has opened a socket connection from Forum threads page, user_id is instructor
+         */
+
+        /**
+         * Fetches Connection object of a given User_ID
          * @param $user_id
          * @return array
          */
@@ -105,7 +131,7 @@
         }
 
         /**
-         * Fetches User ID of a given socket Connection
+         * Fetches User_ID of a given socket Connection object
          * @param $conn
          * @return integer
          */
@@ -120,7 +146,7 @@
         }
 
         /**
-         * Sets Connection associativity with User
+         * Sets Connection object associativity with User_ID
          * @param $user_id
          * @param $conn
          * @return void
@@ -131,7 +157,7 @@
         }
 
         /**
-         * Deletes Connection associativity with User
+         * Deletes Connection object associativity with User_ID
          * @param $conn
          * @return void
          */
@@ -141,12 +167,21 @@
             unset($this->users[$user_id]);
         }
 
+        /**
+         * When a new user connects to the socket, check authentication
+         * @param ConnectionInterface $conn
+         */
         public function onOpen(ConnectionInterface $conn) {
             $this->clients->attach($conn);
 
             $this->checkAuth($conn);
         }
 
+        /**
+         * Function to run whenever the socket receives a new message from any client
+         * @param ConnectionInterface $from
+         * @param string $msgString
+         */
         public function onMessage(ConnectionInterface $from, $msgString) {
             if($this->checkAuth($from)){
                 $msg = json_decode($msgString, true);
@@ -156,10 +191,8 @@
                     case "new_post":
                         $user_id = $msg["data"]["user_id"];
                         if($fromConn = $this->getSocketClientID($user_id)){
-//                            $this->broadcast($fromConn, $msgString, false);
                             $this->broadcast($fromConn, $msgString, true);
                         }else {
-//                            $this->broadcast($from, $msgString, false);
                             $this->broadcast($from, $msgString, true);
                         }
                         break;
@@ -168,12 +201,21 @@
             }
         }
 
+        /**
+         * When any client closes the connection, remove information about them
+         * @param ConnectionInterface $conn
+         */
         public function onClose(ConnectionInterface $conn) {
             $this->removeSocketClient($conn);
             $this->clients->detach($conn);
             $conn->send('{"sys": "Disconnected"}');
         }
 
+        /**
+         * When any error occurs within the socket server script
+         * @param ConnectionInterface $conn
+         * @param \Exception $e
+         */
         public function onError(ConnectionInterface $conn, \Exception $e) {
             $conn->close();
         }

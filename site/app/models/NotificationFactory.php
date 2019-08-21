@@ -8,7 +8,7 @@ use LogicException;
 /**
  * A factory class that will handle all notification events and send notifications and emails accordingly
  * Class NotificationFactory
- * @package app
+ * @package app\models
  */
 class NotificationFactory extends AbstractModel {
 
