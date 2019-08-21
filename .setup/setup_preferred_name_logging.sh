@@ -71,13 +71,13 @@ if [[ ${user_permission:0:1} == "y" ]] || [[ ${user_permission:0:1} == "Y" ]]; t
     grep -qs "${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php" /etc/cron.d/submitty
     if [[ $? -eq 0 ]]; then
         # Entry exists, re-adjust it to run at 2:05AM by submitty_daemon
-        sed -ie "s~^#*[ tab]*[0-9\*][0-9]*[ tab][0-9\*][0-9]*[ tab][0-9\*][0-9]*[ tab][0-9\*][0-9]*[ tab][0-6\*][ tab]\+[A-Za-z_]\+[ tab]\+python3[ tab]\+${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging\.php.*$~5 2 * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -s submitty~" /etc/cron.d/submitty
+        sed -ie "s~^#*[ tab]*[0-9\*][0-9]*[ tab][0-9\*][0-9]*[ tab][0-9\*][0-9]*[ tab][0-9\*][0-9]*[ tab][0-6\*][ tab]\+[A-Za-z_]\+[ tab]\+python3[ tab]\+${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging\.php.*$~5 2 * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -m submitty~" /etc/cron.d/submitty
         check_exit_code $? "Crontab"
     elif [[ $? -eq 1 ]]; then
         # Entry doesn't exist, so it will be appended at end of crontab
         # This use of sed ensures that entries are appended at the end, but not after a blank line.
         sed -ie "\$a# Run preferred_name_logging.php every night at 2:05AM
-                 \$a5 2 * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -s submitty" /etc/cron.d/submitty
+                 \$a5 2 * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -m submitty" /etc/cron.d/submitty
         check_exit_code $? "Crontab"
     else
         # grep's exit status indicates an error occurred.
