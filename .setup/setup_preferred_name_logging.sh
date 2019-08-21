@@ -49,11 +49,6 @@ fi
 
 if [[ ${user_permission:0:1} == "y" ]] || [[ ${user_permission:0:1} == "Y" ]]; then
     # Copy preferred_name_logging.php to sbin
-
-    # DEBUG (remove before final PR)
-    cd /usr/local/submitty/GIT_CHECKOUT/SysadminTools && git checkout preferred_name_logging_update
-    # END DEBUG
-
     rsync -qt ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
     check_exit_code $? "preferred_name_user.php"
     chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
