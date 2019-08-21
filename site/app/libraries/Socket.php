@@ -144,9 +144,7 @@
         public function onOpen(ConnectionInterface $conn) {
             $this->clients->attach($conn);
 
-            if($this->checkAuth($conn)){
-                echo "New connection! ({$conn->resourceId})}\n";
-            }
+            $this->checkAuth($conn);
         }
 
         public function onMessage(ConnectionInterface $from, $msgString) {
@@ -174,12 +172,9 @@
             $this->removeSocketClient($conn);
             $this->clients->detach($conn);
             $conn->send('{"sys": "Disconnected"}');
-            echo "Connection {$conn->resourceId} has disconnected\n";
         }
 
         public function onError(ConnectionInterface $conn, \Exception $e) {
-            echo "An error has occurred: {$e->getMessage()}\n";
-
             $conn->close();
         }
     }

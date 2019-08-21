@@ -4,9 +4,9 @@ Documentation=http://submitty.org
 
 [Service]
 User=submitty_daemon
-Restart=always
+Restart=on-failure
 Type=simple
-ExecStart=/usr/bin/bash php /usr/local/submitty/site/app/controllers/SocketController.php
+ExecStart=/usr/bin/env php /usr/local/submitty/site/app/controllers/SocketController.php
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 
