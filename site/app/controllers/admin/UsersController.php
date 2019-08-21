@@ -273,10 +273,6 @@ class UsersController extends AbstractController {
             }
         }
         else {
-            if ($user !== null) {
-                $this->core->addErrorMessage("A user with that ID already exists");
-                $this->core->redirect($return_url);
-            }
             $user = $this->core->loadModel(User::class);
             $user->setId(trim($_POST['user_id']));
         }
