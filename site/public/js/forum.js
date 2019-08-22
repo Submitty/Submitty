@@ -102,6 +102,10 @@ function forumSocketHandler() {
                             }
                             replyLevel += 1;
 
+                            if(replyLevel > 7){
+                                replyLevel = 7;
+                            }
+
                             $('#' + postdata.post_id).attr("reply-level", replyLevel).css("margin-left", ((replyLevel - 1) * 30) + "px");
                             $('#' + postdata.post_id + '-reply').css("margin-left", ((replyLevel) * 30) + "px");
 
@@ -154,7 +158,14 @@ function forumSocketHandler() {
                     data: {'thread_id': threaddata.thread_id, 'csrf_token': csrfToken},
                     dataType: "JSON",
                     success: function (result) {
-                        $(result.data).insertBefore($('.thread_box_link').first());
+                        var lastNormal = 0;
+                        var thread_boxes = $('.thread_box_link');
+                        while($(thread_boxes[lastNormal]).hasClass("announcement") === true){
+                            lastNormal += 1;
+                        }
+                        
+                        $(result.data).insertBefore($(thread_boxes[lastNormal]));
+
                         $('[data="' + threaddata.thread_id + '"] .thread_box').removeClass("active");
                         thread_post_handler();
                         loadThreadHandler();

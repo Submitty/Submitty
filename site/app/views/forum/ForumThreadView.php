@@ -553,9 +553,14 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-    public function renderSingleThreadListItem($threads){
-        $thread = $threads[0];
-        $currentThread = $thread["id"];
+    public function renderSingleThreadListItem($threads, $currentThread){
+        $thread = [];
+        for($i=0;$i<count($threads);$i++){
+            if($threads[$i]["id"]==$currentThread){
+                $thread = $threads[$i];
+                break;
+            }
+        }
         $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
         $activeThreadAnnouncement = false;
         $activeThreadTitle = "";
@@ -794,6 +799,7 @@ class ForumThreadView extends AbstractView {
         } else {
             $edit_date = null;
         }
+
         $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
         $author_email = trim($user_info['user_email']);
         $first_name = trim($user_info["first_name"]);
