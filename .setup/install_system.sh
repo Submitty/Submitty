@@ -793,16 +793,16 @@ chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.p
 chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 
 # Adjust/overwrite Postgresql's configuration
-sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_destination = 'csvlog'~;
-        s~^#*[ tab]*logging_collector[ tab]*=[ tab]*['a-zA-Z0-9_]*~logging_collector = on~;
-        s~^#*[ tab]*log_directory[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
-        s~^#*[ tab]*log_filename[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'~;
-        s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_file_mode = 0640~;
-        s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_rotation_age = 1d~;
-        s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_rotation_size = 10MB~;
-        s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_min_messages = log~;
-        s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_min_duration_statement = 0~;
-        s~^#*[ tab]*log_line_prefix[ tab]*=[ tab]*['a-zA-Z0-9_]*~log_line_prefix = '%m [%p] %q%u@%d '~" /etc/postgresql/10/main/postgresql.conf
+sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-zA-Z0-9_]*'~log_destination = 'csvlog'~;
+        s~^#*[ tab]*logging_collector[ tab]*=[ tab]*on|off~logging_collector = on~;
+        s~^#*[ tab]*log_directory[ tab]*=[ tab]*'[a-zA-Z0-9_/\.]*'~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
+        s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[a-zA-Z0-9_%\.\-]*'~log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'~;
+        s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*[0-9_]*~log_file_mode = 0640~;
+        s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*[a-zA-Z0-9_]*~log_rotation_age = 1d~;
+        s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-zA-Z0-9_]*~log_rotation_size = 10MB~;
+        s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-zA-Z0-9_]*~log_min_messages = log~;
+        s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[0-9\-]*~log_min_duration_statement = 0~;
+        s~^#*[ tab]*log_line_prefix[ tab]*=[ tab]*'[a-zA-Z0-9_%@\.\[\]\-]*'*~log_line_prefix = '%m [%p] %q%u@%d '~" /etc/postgresql/10/main/postgresql.conf
 check_exit_code $? "postgresql.conf"
 
 echo -e "Finished preferred_name_logging setup."
