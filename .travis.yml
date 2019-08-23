@@ -169,6 +169,7 @@ jobs:
             - libboost-all-dev
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
+        - pecl install ds
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
         - sudo add-apt-repository -y ppa:ondrej/php
         - sudo apt-get -qq update
