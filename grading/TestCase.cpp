@@ -123,7 +123,7 @@ std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std:
   std::string requiredPath ;
   if (expectedPath.substr(0,11) == "test_output"){
     requiredPath = expectedPath + id + "/";
-  } else if (expectedPath.substr(0,13) == "generated_out") {
+  } else if (expectedPath.substr(0,16) == "generated_output") {
     requiredPath = expectedPath;
   } else if (expectedPath.substr(0,13) == "random_output") {
     requiredPath = expectedPath;

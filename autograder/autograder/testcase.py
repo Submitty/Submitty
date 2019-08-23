@@ -179,7 +179,7 @@ class Testcase():
     if not self.has_solution_commands:
       return
 
-    if not self.queue_obj["generate_output"]:
+    if "generate_output" not in self.queue_obj:
       # If there is no random inputs then it will take from generated_output
       if not self.has_input_generator_commands:
         return  
@@ -187,7 +187,7 @@ class Testcase():
     # Create directories, set permissions, and copy in files.
     self.secure_environment.setup_for_random_output(self.dependencies)
     with open(os.path.join(self.secure_environment.tmp_logs,"output_generator_log.txt"), 'a') as logfile:
-      if not self.queue_obj["generate_output"]:
+      if "generate_output" not in self.queue_obj:
         arguments = [
           self.queue_obj["gradeable"],
           self.queue_obj["who"],
@@ -196,7 +196,7 @@ class Testcase():
           '--testcase', str(self.number),
           '--generation_type',str('output')
         ]
-      else:
+      elif self.queue_obj['generate_output']:
         arguments = [
           self.queue_obj["gradeable"],
           'Generating Output',

@@ -295,10 +295,10 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     submission_path = os.path.join(tmp_submission, "submission")
     random_output_path = os.path.join(tmp_work, 'random_output')
 
-    if not queue_obj["generate_output"]:
+    if "generate_output" not in queue_obj:
         partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
         item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
-    else:
+    elif queue_obj["generate_output"]:
         item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"generated_output",queue_obj["gradeable"])
     results_public_dir = os.path.join(tmp_results,"results_public")
     results_details_dir = os.path.join(tmp_results, "details")
@@ -314,7 +314,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     if os.path.exists(random_output_path):
         pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
     # grab the submission time
-    if queue_obj["generate_output"]:
+    if "generate_output" in queue_obj and queue_obj["generate_output"]:
         submission_string = ""
     else:
         with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
@@ -336,7 +336,7 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
-    if not queue_obj["generate_output"]:
+    if "generate_output" not in queue_obj:
         try:
             shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
         except:

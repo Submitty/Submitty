@@ -52,7 +52,7 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
-    if queue_obj["generate_output"]:
+    if "generate_output" in queue_obj and queue_obj["generate_output"]:
         item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "generated_output", 
                                 queue_obj["gradeable"])
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "Generating Output")
