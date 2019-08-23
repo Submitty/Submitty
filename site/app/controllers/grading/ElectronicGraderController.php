@@ -381,7 +381,7 @@ class ElectronicGraderController extends AbstractController {
 
         $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
 
-        if ($gradeable->isTeamAssignment()) {
+        if ($gradeable->isTeamAssignment() && isset($order)) {
             $total_students_submitted = 0;
             foreach ($order->getSortedGradedGradeables() as $g) {
                 $team = $g->getSubmitter()->getTeam();
