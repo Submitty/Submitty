@@ -3,7 +3,8 @@ Description=Submitty WebSocket Server
 Documentation=http://submitty.org
 
 [Service]
-User=submitty_daemon
+User=submitty_php
+Group=submitty_php
 Restart=on-failure
 Type=simple
 ExecStart=/usr/bin/env php /usr/local/submitty/site/app/controllers/SocketController.php
