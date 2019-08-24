@@ -159,7 +159,7 @@ function forumSocketHandler() {
                     dataType: "JSON",
                     success: function (result) {
                         var lastAnnouncement = $('.announcement').last();
-                        var lastSelfPin = $('.thread-favorite').parent().parent();
+                        var lastSelfPin = $('.thread-favorite').last().parent().parent();
                         var last = lastSelfPin.length == 0 ? lastAnnouncement : lastSelfPin;
 
                         // No announcements
