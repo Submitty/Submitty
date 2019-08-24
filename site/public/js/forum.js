@@ -158,13 +158,16 @@ function forumSocketHandler() {
                     data: {'thread_id': threaddata.thread_id, 'csrf_token': csrfToken},
                     dataType: "JSON",
                     success: function (result) {
-                        var lastNormal = 0;
-                        var thread_boxes = $('.thread_box_link');
-                        while($(thread_boxes[lastNormal]).hasClass("announcement") === true){
-                            lastNormal += 1;
+                        var lastAnnouncement = $('.announcement').last();
+                        var lastSelfPin = $('.thread-favorite').parent().parent();
+                        var last = lastSelfPin.length == 0 ? lastAnnouncement : lastSelfPin;
+
+                        // No announcements
+                        if (last.length == 0) {
+                            $(result.data).insertBefore($('.thread_box_link').first());
+                        } else {
+                            $(result.data).insertAfter(last);
                         }
-                        
-                        $(result.data).insertBefore($(thread_boxes[lastNormal]));
 
                         $('[data="' + threaddata.thread_id + '"] .thread_box').removeClass("active");
                         thread_post_handler();
