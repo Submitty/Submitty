@@ -964,7 +964,7 @@ class ForumController extends AbstractController{
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $pageNumber = 1;
         $threads = $this->getSortedThreads($categories_ids, 0, $show_deleted, $show_merged_thread, [$result['status']], false, $pageNumber, $thread_id);
-        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderSingleThreadListItem', $threads);
+        return $this->core->getOutput()->renderOutput('forum\ForumThread', 'renderSingleThreadListItem', $threads, $thread_id);
     }
 
 
