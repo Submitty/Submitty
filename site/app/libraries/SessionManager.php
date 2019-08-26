@@ -70,7 +70,9 @@ class SessionManager {
         if (isset($this->session['session_id'])) {
             $this->core->getQueries()->removeSessionById($this->session['session_id']);
             $this->session = array();
+            return true;
         }
+        return false;
     }
 
     /**
@@ -85,5 +87,4 @@ class SessionManager {
         }
         return false;
     }
-
 }

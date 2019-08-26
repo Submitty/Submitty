@@ -45,20 +45,22 @@ class AuthenticationController extends AbstractController {
      * @return Response
      */
     public function logout() {
-        Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
-        Utils::setCookie('submitty_session', '', time() - 3600);
-        // Remove all history for checkpoint gradeables
-        foreach(array_keys($_COOKIE) as $cookie) {
-            if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
-                Utils::setCookie($cookie, '', time() - 3600);
+        if ($this->core->removeCurrentSession()) {
+            Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
+            Utils::setCookie('submitty_session', '', time() - 3600);
+            // Remove all history for checkpoint gradeables
+            foreach(array_keys($_COOKIE) as $cookie) {
+                if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
+                    Utils::setCookie($cookie, '', time() - 3600);
+                }
             }
         }
-        $this->core->removeCurrentSession();
+
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
         );
     }
-    
+
     /**
      * Display the login form to the user
      *
@@ -72,7 +74,7 @@ class AuthenticationController extends AbstractController {
             new WebResponse('Authentication', 'loginForm', $old)
         );
     }
-    
+
     /**
      * Checks the submitted login form via the configured "authentication" setting. Additionally, on successful
      * login, we want to redirect the user $_REQUEST the page they were attempting to goto before being sent to the
