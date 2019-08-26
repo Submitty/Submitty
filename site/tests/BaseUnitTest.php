@@ -14,6 +14,8 @@ use ReflectionException;
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
+    public static $mocked_cores = [];
+
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -27,6 +29,13 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @return Core
      */
     protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array()) {
+        $hashed_id = md5(
+            serialize(['config' => $config_values, 'user' => $user_config, 'queries' => $queries, 'access' => $access])
+        );
+        if (isset(BaseUnitTest::$mocked_cores[$hashed_id])) {
+            return BaseUnitTest::$mocked_cores[$hashed_id];
+        }
+
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -65,6 +74,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         if (isset($config_values['logged_in'])) {
             $core->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
             $core->method('isApiLoggedIn')->willReturn($config_values['logged_in']);
+            $core->method('removeCurrentSession')->willReturn($config_values['logged_in']);
         }
 
         if (isset($config_values['csrf_token'])) {
@@ -137,6 +147,8 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         $core->method('getOutput')->willReturn($output);
 
         /** @noinspection PhpIncompatibleReturnTypeInspection */
+        BaseUnitTest::$mocked_cores[$hashed_id] = $core;
+
         return $core;
     }
 
