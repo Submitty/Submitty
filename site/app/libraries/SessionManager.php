@@ -64,9 +64,12 @@ class SessionManager {
     }
 
     /**
-     * Deletes the session currently loaded within the SessionManager
+     * Deletes the session currently loaded within the SessionManager.
+     * Returns true if there was an active session to be removed, else return false.
+     *
+     * @return bool
      */
-    public function removeCurrentSession() {
+    public function removeCurrentSession(): bool {
         if (isset($this->session['session_id'])) {
             $this->core->getQueries()->removeSessionById($this->session['session_id']);
             $this->session = array();
