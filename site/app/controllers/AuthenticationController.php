@@ -47,14 +47,16 @@ class AuthenticationController extends AbstractController {
     public function logout() {
         if ($this->core->removeCurrentSession()) {
             Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
-            Utils::setCookie('submitty_session', '', time() - 3600);
-            // Remove all history for checkpoint gradeables
-            foreach(array_keys($_COOKIE) as $cookie) {
-                if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
-                    Utils::setCookie($cookie, '', time() - 3600);
-                }
+        }
+
+        Utils::setCookie('submitty_session', '', time() - 3600);
+        // Remove all history for checkpoint gradeables
+        foreach(array_keys($_COOKIE) as $cookie) {
+            if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
+                Utils::setCookie($cookie, '', time() - 3600);
             }
         }
+
 
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
