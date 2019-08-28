@@ -960,16 +960,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.3.3",
+            "version": "v4.3.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "a88c47a5861549f5dc1197660818084c3b67d773"
+                "reference": "ff1049f6232dc5b6023b1ff1c6de56f82bcd264f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/a88c47a5861549f5dc1197660818084c3b67d773",
-                "reference": "a88c47a5861549f5dc1197660818084c3b67d773",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/ff1049f6232dc5b6023b1ff1c6de56f82bcd264f",
+                "reference": "ff1049f6232dc5b6023b1ff1c6de56f82bcd264f",
                 "shasum": ""
             },
             "require": {
@@ -1032,7 +1032,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-07-23T14:43:56+00:00"
+            "time": "2019-08-26T08:26:39+00:00"
         },
         {
             "name": "twig/twig",
@@ -3372,8 +3372,8 @@
             "authors": [
                 {
                     "name": "Arne Blankerts",
-                    "email": "arne@blankerts.de",
-                    "role": "Developer"
+                    "role": "Developer",
+                    "email": "arne@blankerts.de"
                 }
             ],
             "description": "A small library for converting tokenized PHP source code into XML and potentially other formats",
