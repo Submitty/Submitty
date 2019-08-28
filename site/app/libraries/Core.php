@@ -343,6 +343,16 @@ class Core {
     }
 
     /**
+     * Remove the currently loaded session within the session manager, returning bool
+     * on whether this was done or not
+     *
+     * @return bool
+     */
+    public function removeCurrentSession(): bool {
+        return $this->session_manager->removeCurrentSession();
+    }
+
+    /**
      * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
      * a user id that matches the api key, and let the core load the user.
      *
@@ -357,13 +367,6 @@ class Core {
         }
         $this->loadUser($user_id);
         return true;
-    }
-
-    /**
-     * Remove the currently loaded session within the session manager
-     */
-    public function removeCurrentSession() {
-        $this->session_manager->removeCurrentSession();
     }
 
     /**
