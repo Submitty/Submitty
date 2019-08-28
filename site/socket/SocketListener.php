@@ -1,5 +1,5 @@
 <?php
-    namespace app\controllers;
+    namespace socket;
 
     use Ratchet\Server\IoServer;
     use Ratchet\Http\HttpServer;
