@@ -7,7 +7,7 @@ User=submitty_php
 Group=submitty_php
 Restart=on-failure
 Type=simple
-ExecStart=/usr/bin/env php /usr/local/submitty/site/app/controllers/SocketController.php
+ExecStart=/usr/bin/env php /usr/local/submitty/site/socket/SocketListener.php
 TimeoutSec=1min
 RuntimeMaxSec=infinity
 
