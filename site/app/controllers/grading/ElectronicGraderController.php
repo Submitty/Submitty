@@ -229,11 +229,13 @@ class ElectronicGraderController extends AbstractController {
         $autograded_average = null;
         $overall_average = null;
         $overall_scores = null;
+        $order = null;
         $num_submitted = array();
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
-        $regrade_requests = $this->core->getQueries()->getNumberRegradeRequests($gradeable_id);
+
+        $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
             $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, 'registration_section');
@@ -381,7 +383,7 @@ class ElectronicGraderController extends AbstractController {
 
         $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
 
-        if ($gradeable->isTeamAssignment()) {
+        if (isset($order) && $gradeable->isTeamAssignment()) {
             $total_students_submitted = 0;
             foreach ($order->getSortedGradedGradeables() as $g) {
                 $team = $g->getSubmitter()->getTeam();
@@ -1022,6 +1024,8 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('ta-grading.css');
         $this->core->getOutput()->addInternalCss('forum.css');
         $this->core->getOutput()->addInternalJs('forum.js');
+        $this->core->getOutput()->addInternalCss('grade-inquiry.css');
+        $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $sort, $direction, $who_id);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
