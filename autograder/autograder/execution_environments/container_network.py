@@ -32,6 +32,7 @@ class Container():
     # If we are in production, we need to run as an untrusted user inside of our docker container.
     self.container_user_argument = str(getpwnam(untrusted_user).pw_uid)
     self.full_name = f'{untrusted_user}_{self.name}'
+    self.number_of_ports = container_info.get('number_of_ports', 1)
     # This will be populated later
     self.return_code = None
     self.log_function = log_function
@@ -358,6 +359,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       for connected_container_name in sorted_connections:
         connected_container = self.get_container_with_name(connected_container_name, containers)
         network_name =  f"{container.full_name}_network"
+        num_ports = connected_container.number_of_ports
 
         # If there is a router, the router is impersonating all other
         # containers, but has only one ip address.
@@ -368,13 +370,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
         container_knownhost['hosts'][connected_container.name] = {
           'tcp_start_port' : current_tcp_port,
-          'tcp_end_port'   : current_tcp_port,
+          'tcp_end_port'   : current_tcp_port + num_ports - 1,
           'udp_start_port' : current_udp_port,
-          'udp_end_port'   : current_udp_port,
+          'udp_end_port'   : current_udp_port + num_ports - 1,
           'ip_address'     : ip_address
         }
-        current_udp_port += 1
-        current_tcp_port += 1
+        current_udp_port += num_ports
+        current_tcp_port += num_ports
 
       with open(knownhosts_location, 'w') as outfile:
         json.dump(container_knownhost, outfile, indent=4)
