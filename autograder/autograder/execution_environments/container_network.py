@@ -145,7 +145,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     # Check for dispatcher actions (standard input)
     self.dispatcher_actions = testcase_info.get('dispatcher_actions', list())
 
-    self.ports_per_container = testcase_info.get('ports_per_container', 1)
     # As new container networks are generated, they will be appended to this list.
     self.networks = list()
 
@@ -219,7 +218,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
 
   def network_containers_routerless(self, containers):
-    self.log_message('NETWORKING WITHOUT ROUTER')
     """ If there is no router, all containers are added to the same network. """
     client = docker.from_env()
     network_name = f'{self.untrusted_user}_routerless_network'
