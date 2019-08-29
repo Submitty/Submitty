@@ -38,6 +38,8 @@ class Container():
     self.container = None
     # A socket for communication with the container.
     self.socket = None
+    # Maps a network name to an ip address
+    self.ip_address_map = dict()
 
     # Determine whether or not we need to pull the default submitty router into this container's directory.
     need_router = container_info.get('import_default_router', False)
@@ -80,6 +82,12 @@ class Container():
   def start(self, logfile):
     self.container.start()
     self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
+
+  def set_ip_address(self, network_name, ip_address):
+    self.ip_address_map[network_name] = ip_address
+
+  def get_ip_address(self, network_name):
+    return self.ip_address_map[network_name]
 
 
   def cleanup_container(self):
@@ -136,7 +144,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     # Check for dispatcher actions (standard input)
     self.dispatcher_actions = testcase_info.get('dispatcher_actions', list())
 
-    self.single_port_per_container = testcase_info.get('single_port_per_container', False)
+    self.ports_per_container = testcase_info.get('ports_per_container', 1)
     # As new container networks are generated, they will be appended to this list.
     self.networks = list()
 
@@ -206,19 +214,32 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     # Provide an initialization file to each container.
     self.create_knownhosts_txt(containers)
+    self.create_knownhosts_json(containers)
 
 
   def network_containers_routerless(self, containers):
+    self.log_message('NETWORKING WITHOUT ROUTER')
     """ If there is no router, all containers are added to the same network. """
     client = docker.from_env()
     network_name = f'{self.untrusted_user}_routerless_network'
 
+
+    # Assumes untrustedXX naming scheme, where XX is a number
+    untrusted_num = int(self.untrusted_user.replace('untrusted','')) + 100
+    subnet = 1
+    ip_address_start = f'10.{untrusted_num}.{subnet}'
+    ipam_pool = docker.types.IPAMPool(subnet=f'{ip_address_start}.0/24')
+    ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
     #create the global network
-    network = client.networks.create(network_name, driver='bridge', internal=True)
-
+    # TODO: Can fail on ip conflict.
+    network = client.networks.create(network_name, driver='bridge', ipam=ipam_config, internal=True)
+ 
+    host = 2
     for container in containers:
-      network.connect(container.container, aliases=[container.name,])
-
+      ip_address = f'{ip_address_start}.{host}'
+      network.connect(container.container, ipv4_address=ip_address, aliases=[container.name,])
+      container.set_ip_address(network_name, ip_address)
+      host+=1
     self.networks.append(network)
 
 
@@ -232,20 +253,43 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     router = self.get_container_with_name('router', containers).container
     router_connections = dict()
 
+    network_num = 10
+    subnet = 0
+    # Assumes untrustedXX naming scheme, where XX is a number
+    untrusted_num = int(self.untrusted_user.replace('untrusted','')) + 100
+    ip_address_start = f'{network_num}.{untrusted_num}'
+    container_to_subnet = dict()
+
     for container in containers:
       network_name = f"{container.full_name}_network"
 
       if container.name == 'router':
         continue
-
+      # We are creating a new subnet with a new subnet number
+      subnet += 1
+      # We maintain a map of container_name to subnet for use by the router.
+      container_to_subnet[container.name] = subnet
 
       actual_name  = '{0}_Actual'.format(container.name)
-      network = client.networks.create(network_name, driver='bridge', internal=True)
-      network.connect(container.container, aliases=[actual_name,])
+
+      # Create the network with the appropriate iprange
+      ipam_pool = docker.types.IPAMPool( subnet=f'{network_num}.{untrusted_num}.{subnet}.0/24')
+      ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
+      network = client.networks.create(network_name, ipam=ipam_config, driver='bridge', internal=True)
+
+      # We connectt the container with host=1. Later we'll connect the router with host=2
+      container_ip = f'{network_num}.{untrusted_num}.{subnet}.1'
+      container.set_ip_address(network_name, container_ip)
+
+      network.connect(container.container, ipv4_address=ip_address, aliases=[actual_name,])
       self.networks.append(network)
 
       #The router pretends to be all dockers on this network.
-      aliases = []
+      if len(container.outgoing_connections) == 0:
+        connected_machines = [x.name for x in containers]
+      else:
+        connected_machines = container.outgoing_connections
+
       for connected_machine in container.outgoing_connections:
         if connected_machine == container.name:
             continue
@@ -257,20 +301,22 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         #  so we group together all connections here, and then connect later.
         router_connections[container.name].append(connected_machine)
         router_connections[connected_machine].append(container.name)
-    
     # Connect the router to all networks.
     for startpoint, endpoints in router_connections.items():
       full_startpoint_name = f'{self.untrusted_user}_{startpoint}'
       network_name = f"{full_startpoint_name}_network"
+      # Store the ip address of the router on this network
+      router_ip = f'{network_num}.{untrusted_num}.{container_to_subnet[startpoint]}.2'
+      router.set_ip_address(network_name, router_ip)
 
-      aliases = []
-      for endpoint in endpoints:
-        if endpoint in aliases:
-          continue
-        aliases.append('--alias')
-        aliases.append(endpoint)
+      # aliases = []
+      # for endpoint in endpoints:
+      #   if endpoint in aliases:
+      #     continue
+      #   #aliases.append('--alias')
+      #   aliases.append(endpoint)
       network = self.get_network_with_name(network_name)
-      network.connect(router, aliases=aliases)
+      network.connect(router, ipv4_address=router_ip, aliases=endpoints)
 
   def cleanup_networks(self):
     """ Destroy all created networks. """
@@ -281,6 +327,59 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       except Exception as e:
         self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
     self.networks.clear()
+
+  def create_knownhosts_json(self, containers):
+    """ 
+    Given a set of containers, add initialization files to each 
+    container's directory which specify how to connect to other endpoints
+    on the container's network (hostname, port).
+    """
+    tcp_connection_list = list()
+    udp_connection_list = list()
+
+    #writing complete knownhost JSON to the container directory
+    networked_containers = self.get_standard_containers(containers)
+    router = self.get_router(containers)
+
+    sorted_networked_containers = sorted(networked_containers, key=lambda x: x.name)
+    for container in sorted_networked_containers:
+      knownhosts_location = os.path.join(container.directory, 'knownhosts.json')
+      current_tcp_port = 9000
+      current_udp_port = 15000
+      container_knownhost = dict()
+      container_knownhost['hosts'] = dict()
+
+      if len(container.outgoing_connections) == 0:
+        connections = [x.name for x in containers]
+      else:
+        connections = container.outgoing_connections
+
+      sorted_connections = sorted(connections)
+      for connected_container_name in sorted_connections:
+        connected_container = self.get_container_with_name(connected_container_name, containers)
+        network_name =  f"{container.full_name}_network"
+
+        # If there is a router, the router is impersonating all other
+        # containers, but has only one ip address.
+        if router is not None:
+          ip_address = router.get_ip_address(network_name)
+        else:
+          ip_address = connected_container.get_ip_address(f'{self.untrusted_user}_routerless_network')
+
+        container_knownhost['hosts'][connected_container.name] = {
+          'tcp_start_port' : current_tcp_port,
+          'tcp_end_port'   : current_tcp_port,
+          'udp_start_port' : current_udp_port,
+          'udp_end_port'   : current_udp_port,
+          'ip_address'     : ip_address
+        }
+        current_udp_port += 1
+        current_tcp_port += 1
+
+      with open(knownhosts_location, 'w') as outfile:
+        json.dump(container_knownhost, outfile, indent=4)
+      autograding_utils.add_all_permissions(knownhosts_location)
+
 
   def create_knownhosts_txt(self, containers):
     """ 
@@ -295,20 +394,11 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     sorted_containers = sorted(containers, key=lambda x: x.name)
     for container in sorted_containers:
-      if self.single_port_per_container:
-        tcp_connection_list.append([container.name, current_tcp_port])
-        udp_connection_list.append([container.name, current_udp_port])
-        current_tcp_port += 1
-        current_udp_port += 1  
-      else:
-        for connected_machine in container.outgoing_connections:
-          if connected_machine == container.name:
-              continue
+      tcp_connection_list.append([container.name, current_tcp_port])
+      udp_connection_list.append([container.name, current_udp_port])
+      current_tcp_port += 1
+      current_udp_port += 1  
 
-          tcp_connection_list.append([container.name, connected_machine,  current_tcp_port])
-          udp_connection_list.append([container.name, connected_machine,  current_udp_port])
-          current_tcp_port += 1
-          current_udp_port += 1
 
     #writing complete knownhosts csvs to input directory'
     networked_containers = self.get_standard_containers(containers)
@@ -332,7 +422,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
           outfile.write(" ".join(map(str, tup)) + '\n')
           outfile.flush()
       autograding_utils.add_all_permissions(knownhosts_location)
-
 
   ###########################################################
   #
