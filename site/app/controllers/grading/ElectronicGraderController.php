@@ -860,27 +860,27 @@ class ElectronicGraderController extends AbstractController {
             // For full access graders, pressing the single arrow should navigate to the next submission, regardless
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
-            if($to === 'prev' AND $to_ungraded === 'false' AND $this->core->getUser()->accessFullGrading()) {
+            if($to === 'prev' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
 
                 $goToStudent = $order_all_sections->getPrevSubmitter($from_id);
 
-            } else if($to === 'prev' AND $to_ungraded === 'false') {
+            } else if($to === 'prev' && $to_ungraded === 'false') {
 
                 $goToStudent = $order_grading_sections->getPrevSubmitter($from_id);
 
-            } else if($to === 'next' AND $to_ungraded === 'false' AND $this->core->getUser()->accessFullGrading()) {
+            } else if($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
 
                 $goToStudent = $order_all_sections->getNextSubmitter($from_id);
 
-            } else if($to === 'next' AND $to_ungraded === 'false') {
+            } else if($to === 'next' && $to_ungraded === 'false') {
 
                 $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
 
-            } else if($to === 'prev' AND $to_ungraded === 'true') {
+            } else if($to === 'prev' && $to_ungraded === 'true') {
 
                 $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
 
-            } else if($to === 'next' AND $to_ungraded === 'true') {
+            } else if($to === 'next' && $to_ungraded === 'true') {
 
                 $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
 
