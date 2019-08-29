@@ -154,6 +154,10 @@ class GradedGradeable extends AbstractModel {
             });
     }
 
+    /**
+     * Gets the grade inquiry assigned to the gradeable's component supplied
+     * @param $gc_id Gradeable Component id
+     */
     public function getGradeInquiryByGcId($gc_id) {
         foreach ($this->regrade_requests as $grade_inquiry) {
             if ($grade_inquiry->getGcId() == $gc_id)
@@ -162,6 +166,10 @@ class GradedGradeable extends AbstractModel {
         return null;
     }
 
+    /**
+     * get the number of grade inquiries that are pending
+     * @return int
+     */
     public function getActiveGradeInquiryCount() {
         if (!$this->gradeable->isGradeInquiryPerComponentAllowed()) {
             return array_reduce($this->regrade_requests, function($carry, RegradeRequest $grade_inquiry) {
@@ -173,6 +181,14 @@ class GradedGradeable extends AbstractModel {
             $carry += $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0;
             return $carry;
         });
+    }
+
+    /**
+     * get number of grade inquiries pending and resolved for this gradeable
+     * @return int
+     */
+    public function getGradeInquiryCount() {
+        return count($this->regrade_requests);
     }
 
     /**
