@@ -158,7 +158,13 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         FileUtils::recursiveRmdir($base_dir);
     }
 
-    private function buildFakeFile($filename, $part = 1, $err = 0) {
+    private function buildFakeFile($fd, $filename, $part = 1, $err = 0, $target_size = 100) {
+        fseek($fd, $target_size-1,SEEK_CUR); 
+        fwrite($fd,'a'); 
+        fclose($fd);
+
+
+
         $_FILES["files{$part}"]['name'][] = $filename;
         $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($this->path . $filename);
         $_FILES["files{$part}"]['size'][] = filesize($this->path . $filename);
@@ -172,24 +178,15 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     }
 
-    private function fillToSize($fd, $target_size){
-        fseek($fd, $target_size-1,SEEK_CUR); 
-        fwrite($fd,'a'); 
-    }
-
     public function testvalidateUploadedFilesGood(){
         $name = "foo.txt";
-
+        var_dump($this->path . $name);
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name);
+        $this->buildFakeFile($tmpfile, $name);
 
         $name = "foo2.txt";
         $tmpfile2 = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile2, 100);
-        $this->buildFakeFile($name);
-        fclose($tmpfile2);
+        $this->buildFakeFile($tmpfile2, $name);
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files1"]);
 
@@ -197,7 +194,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($stat[0], 
             ['name' => 'foo.txt',
              'type' => 'application/octet-stream',
-             'error' => 'success',
+             'error' => 'No error.',
              'size' => 100,
              'success' => true
             ]);
@@ -205,7 +202,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
           $this->assertEquals($stat[1], 
             ['name' => 'foo2.txt',
              'type' => 'application/octet-stream',
-             'error' => 'success',
+             'error' => 'No error.',
              'size' => 100,
              'success' => true
             ]);
@@ -215,9 +212,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $name = "bad.txt";
 
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,3);
+        $this->buildFakeFile($tmpfile, $name,2,3);
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
@@ -225,7 +220,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($stat[0], 
             ['name' => 'bad.txt',
              'type' => 'application/octet-stream',
-             'error'=> 'The uploaded file was only partially uploaded',
+             'error'=> 'The file was only partially uploaded',
              'size' => 100,
              'success'=> false
              ]
@@ -233,9 +228,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
         $name = "bad2.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,4);
+        $this->buildFakeFile($tmpfile, $name,2,4);
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
@@ -243,7 +236,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($stat[1], 
             ['name' => 'bad2.txt',
              'type' => 'application/octet-stream',
-             'error'=> 'No file submitted',
+             'error'=> 'No file was uploaded.',
              'size' => 100,
              'success'=> false
              ]
@@ -251,27 +244,19 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
         $name = "bad3.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,5);
+        $this->buildFakeFile($tmpfile, $name, 2,5);
 
         $name = "bad3.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,6);
+        $this->buildFakeFile($tmpfile, $name, 2,6);
 
         $name = "bad3.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,7);
+        $this->buildFakeFile($tmpfile, $name, 2,7);
 
         $name = "bad3.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,8);
+        $this->buildFakeFile($tmpfile, $name, 2,8);
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
@@ -279,7 +264,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($stat[1], 
             ['name' => 'bad2.txt',
              'type' => 'application/octet-stream',
-             'error'=> 'No file submitted',
+             'error'=> 'No file was uploaded.',
              'size' => 100,
              'success'=> false
              ]
@@ -288,7 +273,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($stat[2], 
             ['name' => 'bad3.txt',
              'type' => 'application/octet-stream',
-             'error'=> 'Unknown error',
+             'error'=> 'Unknown error code.',
              'size' => 100,
              'success'=> false
              ]
@@ -296,9 +281,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
         $name = "\?<>.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100);
-        fclose($tmpfile);
-        $this->buildFakeFile($name,2,0);
+        $this->buildFakeFile($tmpfile, $name, 2,0);
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
@@ -317,9 +300,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $name = "big.txt";
 
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, 100+ Utils::returnBytes(ini_get('upload_max_filesize')));
-        fclose($tmpfile);
-        $this->buildFakeFile($name,3);
+        $this->buildFakeFile($tmpfile, $name, 3, 0, 100+ Utils::returnBytes(ini_get('upload_max_filesize')));
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
 
@@ -335,9 +316,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
         $name = "just_big_enough.txt";
         $tmpfile = fopen($this->path . $name, "w");
-        $this->fillToSize($tmpfile, Utils::returnBytes(ini_get('upload_max_filesize')));
-        fclose($tmpfile);
-        $this->buildFakeFile($name,3);
+        $this->buildFakeFile($tmpfile, $name,3, 0, Utils::returnBytes(ini_get('upload_max_filesize')));
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
 
@@ -345,7 +324,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($stat[1], 
             ['name' => 'just_big_enough.txt',
              'type' => 'application/octet-stream',
-             'error'=> 'success',
+             'error'=> 'No error.',
              'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
              'success'=> true
              ]
@@ -354,6 +333,10 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testvalidateUploadedFilesFail(){
         $stat = FileUtils::validateUploadedFiles(null);
+        $this->assertArrayHasKey("failed",$stat);
+        $this->assertEquals($stat["failed"], "No files sent to validate" );
+
+        $stat = FileUtils::validateUploadedFiles([]);
         $this->assertArrayHasKey("failed",$stat);
         $this->assertEquals($stat["failed"], "No files sent to validate" );
     }

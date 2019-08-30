@@ -3,6 +3,7 @@
 namespace app\libraries;
 use app\exceptions\FileReadException;
 use app\libraries\Utils;
+use app\libraries\ErrorMessages;
 
 /**
  * Class FileUtils
@@ -578,7 +579,7 @@ class FileUtils {
      */
     public static function validateUploadedFiles($files){
 
-        if(!isset($files)){
+        if(empty($files)){
            return array("failed" => "No files sent to validate");
         }
 
@@ -592,34 +593,9 @@ class FileUtils {
             $type = FileUtils::getMimeType($files['tmp_name'][$i]);
             $size = $files['size'][$i];
             $err_msg = "";
+
             //did anything go wrong?
-            switch ($files['error'][$i]) {
-                case UPLOAD_ERR_OK:
-                    $err_msg = "success";
-                    break;
-                case UPLOAD_ERR_NO_FILE:
-                    $err_msg = "No file submitted";
-                    break;
-                case UPLOAD_ERR_INI_SIZE:
-                case UPLOAD_ERR_FORM_SIZE:
-                   $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
-                   break;
-                case UPLOAD_ERR_PARTIAL:
-                    $err_msg = "The uploaded file was only partially uploaded";
-                    break; 
-                case UPLOAD_ERR_NO_TMP_DIR:
-                    $err_msg = "Missing a temporary folder";
-                    break; 
-                case UPLOAD_ERR_CANT_WRITE:
-                    $err_msg = "Failed to write file to disk";
-                    break; 
-                case UPLOAD_ERR_EXTENSION:
-                    $err_msg = "File upload stopped by extension";
-                    break; 
-                default:
-                    $err_msg = "Unknown error";
-                    $success = false;
-            }
+            $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
@@ -632,7 +608,7 @@ class FileUtils {
                 $err_msg = "Invalid filename";
             }
 
-            $success = $err_msg === "success";
+            $success = $err_msg === "No error.";
 
             $ret[] = ['name' => $name, 'type'=> $type, 'error'=> $err_msg, 'size' => $size, 'success' => $success];
         }
