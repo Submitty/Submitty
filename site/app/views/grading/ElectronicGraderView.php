@@ -72,7 +72,7 @@ class ElectronicGraderView extends AbstractView {
         $component_overall_score = 0;
         $component_overall_max = 0;
         $component_overall_percentage = 0;
-        $this->core->getOutput()->addInternalJs('plotly-1.48.3.min.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('plotly', 'plotly.js'));
 
         foreach ($sections as $key => $section) {
             if ($key === "NULL") {
@@ -249,7 +249,7 @@ class ElectronicGraderView extends AbstractView {
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
 
         $return = <<<HTML
-        
+
 		<div class="content_upload_content">
 
 HTML;
@@ -258,7 +258,7 @@ HTML;
         $return .= <<<HTML
 			<div style="padding-left:20px;padding-bottom: 10px;border-radius:3px;padding-right:20px;">
 				<table class="table table-striped table-bordered persist-area" id="content_upload_table">
-					<tr>			
+					<tr>
 				        <td style = "cursor:pointer;" width="25%" id="user_down">User &darr;</td>
 				        <td style = "cursor:pointer;" width="25%" id="upload_down">Upload Timestamp</td>
 				        <td style = "cursor:pointer;" width="25%" id="submission_down">Submission Timestamp</td>
@@ -305,9 +305,9 @@ HTML;
 					if($(this).attr('id')=="filepath_down"){
 						sortTable(3);
 					}
-					
+
 				});
-				
+
 				function sortTable(sort_element_index){
 					var table = document.getElementById("content_upload_table");
 					var switching = true;
@@ -328,10 +328,10 @@ HTML;
 
 					var row0 = table.getElementsByTagName("TBODY")[0].getElementsByTagName("TR")[0];
 					var headers = row0.getElementsByTagName("TD");
-					
+
 					for(var i = 0;i<headers.length;i++){
 						var index = headers[i].innerHTML.indexOf(' ↓');
-						
+
 						if(index> -1){
 
 							headers[i].innerHTML = headers[i].innerHTML.substr(0, index);

@@ -65,6 +65,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         if (isset($config_values['logged_in'])) {
             $core->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
             $core->method('isApiLoggedIn')->willReturn($config_values['logged_in']);
+            $core->method('removeCurrentSession')->willReturn($config_values['logged_in']);
         }
 
         if (isset($config_values['csrf_token'])) {
