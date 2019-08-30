@@ -311,6 +311,11 @@ function publishFormWithAttachments(form, test_category, error_message) {
             else {
                 form.find('input[name="post"]').prop("disabled", false).val(replyBtnVal);
                 form.find(".post_content_reply").val("");
+                var index = post_box_id - 1;
+                file_array[index] = [];
+                previous_files[index] = [];
+                label_array[index] = [];
+                $('.mylabel').remove();
             }
         },
         error: function(){
