@@ -5,7 +5,6 @@ namespace app\libraries;
 use app\authentication\AbstractAuthentication;
 use app\exceptions\AuthenticationException;
 use app\exceptions\CurlException;
-use app\exceptions\NotImplementedException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
@@ -271,12 +270,7 @@ class Core {
         return $this->course_db;
     }
 
-    /**
-     * Utility function to directly set the database_queries.
-     * Should only be used in testing with normal usage being
-     * to go through the appropriate loadMasterDatabase function.
-     */
-    public function setQueries($queries): void {
+    public function setQueries(DatabaseQueries $queries): void {
         $this->database_queries = $queries;
     }
 
@@ -294,10 +288,7 @@ class Core {
         return $this->forum;
     }
 
-    /**
-     * @param string $user_id
-     */
-    public function loadUser($user_id) {
+    public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
         $this->setUser($this->database_queries->getUserById($user_id));
