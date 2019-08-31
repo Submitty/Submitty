@@ -163,15 +163,12 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         fwrite($fd,'a'); 
         fclose($fd);
 
-
-
         $_FILES["files{$part}"]['name'][] = $filename;
         $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($this->path . $filename);
         $_FILES["files{$part}"]['size'][] = filesize($this->path . $filename);
 
         $tmpname = $this->path . Utils::generateRandomString() . $filename;
         copy($this->path . $filename, $tmpname);
-
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
         $_FILES["files{$part}"]['error'][] = $err;
@@ -180,7 +177,6 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function testvalidateUploadedFilesGood(){
         $name = "foo.txt";
-        var_dump($this->path . $name);
         $tmpfile = fopen($this->path . $name, "w");
         $this->buildFakeFile($tmpfile, $name);
 
