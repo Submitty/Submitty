@@ -34,7 +34,7 @@ class GradeableList extends AbstractModel {
 
     /** @property @var User */
     protected $user;
-    
+
     /** @property @var Gradeable[]  */
     protected $gradeables = array();
 
@@ -58,7 +58,7 @@ class GradeableList extends AbstractModel {
     /** @var \DateTime Timestamp of when we initially loaded the GradeableList so that all timestamp comparisons are
      against the same time (and don't have any potential mismatch of seconds */
     protected $now;
-    
+
     /**
      * GradeableList constructor.
      *
@@ -149,7 +149,7 @@ class GradeableList extends AbstractModel {
             });
         }
     }
-    
+
     /**
      * Fetch gradeable from the stored gradeables (assuming it exists). Will return
      * false if the gradeable does not exist.
@@ -170,7 +170,7 @@ class GradeableList extends AbstractModel {
         }
         return null;
     }
-    
+
     /**
      * @param GradeableType|null $type
      *
