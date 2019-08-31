@@ -101,7 +101,7 @@ class Config extends AbstractModel {
     protected $authentication;
     /** @property @var DateTimeZone */
     protected $timezone;
-    /** @property @var string */
+    /** @var string */
     protected $default_timezone = 'America/New_York';
     /** @property @var string */
     protected $submitty_path;
