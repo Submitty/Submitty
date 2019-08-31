@@ -11,7 +11,7 @@ use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
-use app\NotificationFactory;
+use app\models\NotificationFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 
