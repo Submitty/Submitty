@@ -141,8 +141,12 @@ class Core {
     public function loadMasterConfig() {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
-        $this->config = new Config($this);
+        $this->setConfig(new Config($this));
         $this->config->loadMasterConfigs($conf_path);
+    }
+
+    public function setConfig(Config $config): void {
+        $this->config = $config;
     }
 
     public function loadAuthentication() {
@@ -172,7 +176,7 @@ class Core {
         $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
-        $this->database_queries = $this->database_factory->getQueries($this);
+        $this->setQueries($this->database_factory->getQueries($this));
     }
 
     public function loadCourseDatabase() {
@@ -266,6 +270,10 @@ class Core {
         return $this->course_db;
     }
 
+    public function setQueries(DatabaseQueries $queries): void {
+        $this->database_queries = $queries;
+    }
+
     /**
      * @return DatabaseQueries
      */
@@ -280,13 +288,14 @@ class Core {
         return $this->forum;
     }
 
-    /**
-     * @param string $user_id
-     */
-    public function loadUser($user_id) {
+    public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        $this->user = $this->database_queries->getUserById($user_id);
+        $this->setUser($this->database_queries->getUserById($user_id));
+    }
+
+    public function setUser(User $user): void {
+        $this->user = $user;
     }
 
     /**
