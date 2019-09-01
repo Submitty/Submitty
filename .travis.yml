@@ -72,6 +72,7 @@ jobs:
       stage: 01 lint
       php: 7.2
       install:
+        - cd site
         - composer install
       script:
         - cd site
