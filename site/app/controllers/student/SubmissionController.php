@@ -56,48 +56,6 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * This method shouldn't be called by router.
-     * It is here only because tests are not updated.
-     * @deprecated
-     */
-    public function run() {
-        switch($_REQUEST['action']) {
-            case 'upload':
-                return $this->ajaxUploadSubmission($_REQUEST['gradeable_id']);
-                break;
-            case 'update':
-                return $this->updateSubmissionVersion($_REQUEST['gradeable_id'], $_REQUEST['new_version']);
-                break;
-            case 'check_refresh':
-                return $this->checkRefresh($_REQUEST['gradeable_id'], $_REQUEST['gradeable_version']);
-                break;
-            case 'bulk':
-                return $this->ajaxBulkUpload($_REQUEST['gradeable_id']);
-                break;
-            case 'upload_split':
-                return $this->ajaxUploadSplitItem($_REQUEST['gradeable_id']);
-                break;
-            case 'delete_split':
-                return $this->ajaxDeleteSplitItem($_REQUEST['gradeable_id']);
-                break;
-            case 'verify':
-                return $this->ajaxValidGradeable($_REQUEST['gradeable_id']);
-                break;
-            case 'stat_page':
-                return $this->showBulkStats($_REQUEST['gradeable_id']);
-                break;
-            case 'display':
-            default:
-
-                return $this->showHomeworkPage(
-                    $_REQUEST['gradeable_id'] ?? null,
-                    $_REQUEST['gradeable_version'] ?? 0
-                );
-                break;
-        }
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
      * @return array

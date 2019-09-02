@@ -28,7 +28,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     private $config = array();
     /**
-     * @var \PHPUnit\Framework\MockObject\MockObject
+     * @var Core
      */
     private $core;
 
@@ -38,8 +38,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_SERVER['REMOTE_ADDR'] = 'test';
         $_SERVER['HTTP_USER_AGENT'] = 'test';
 
-        $_REQUEST['action'] = 'upload';
-        $_REQUEST['gradeable_id'] = 'test';
         $_REQUEST['vcs_checkout'] = false;
         $_POST['previous_files'] = "";
         $_POST['csrf_token'] = "";
@@ -156,6 +154,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function tearDown(): void {
         $this->assertTrue(FileUtils::recursiveRmdir($this->config['tmp_path']));
+        $_FILES = array();
     }
 
     /**
@@ -251,29 +250,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     /**
-     * Runs the upload function in the controller using our mocked Core object, and then clearing out the $_FILES
-     * array.
-     *
-     * @param $core
-     * @return mixed
-     */
-    public function runController($core=null) {
-        if ($core === null) {
-            $core = $this->core;
-        }
-        /** @noinspection PhpParamsInspection */
-        $controller = new SubmissionController($core);
-        $return = $controller->run();
-        $_FILES = array();
-        return $return;
-    }
-
-    /**
      * Basic upload, only one part and one file, simple sanity check.
      */
     public function testUploadOneBucket() {
         $this->addUploadFile('test1.txt', 'a');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
 
@@ -320,7 +304,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->addUploadFile('test1.txt', 'a');
         $this->addUploadFile('test2.txt', 'b');
         $this->addUploadFile('test2.txt', 'c', 2);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
 
@@ -382,7 +369,9 @@ class SubmissionControllerTester extends BaseUnitTest {
             'test2.txt' => ''
         );
         $this->addUploadZip('directory_inside', $zip);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
@@ -431,7 +420,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testSecondVersionNoPrevious() {
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
@@ -447,7 +440,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($this->config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
@@ -489,7 +485,11 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testSecondVersionPreviousTwoParts() {
         $this->addUploadFile("test1.txt", "", 1);
         $this->addUploadFile("test1.txt", "", 2);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
 
@@ -499,7 +499,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
         $this->addUploadFile("test2.txt", "", 1);
         $this->addUploadFile("test2.txt", "", 2);
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
     }
@@ -510,7 +513,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testSecondVersionPreviousNoOverlap() {
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
@@ -527,7 +534,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($this->config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
@@ -546,7 +556,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testSecondVersionPreviousOverlap() {
         $this->addUploadFile('test1.txt', 'old_file');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
@@ -566,7 +580,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($this->config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
@@ -588,7 +605,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testSecondVersionPreviousOverlapZip() {
         $this->addUploadFile('test1.txt', 'old_file');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
@@ -608,7 +629,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($this->config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "2");
@@ -634,7 +658,9 @@ class SubmissionControllerTester extends BaseUnitTest {
             'basic_zip.zip'
         );
         $this->addUploadZip('zip_inside', $zip);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return =  $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
@@ -668,7 +694,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->addUploadZip('zippedfiles', array('test.txt' => 'zip_file', 'test2.txt' => 'zip_file2'));
         $this->addUploadFile('test.txt', 'non_zip_file');
 
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
@@ -685,7 +712,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->addUploadFile('test.txt', 'non_zip_file');
         $this->addUploadZip('zippedfiles', array('test.txt' => 'zip_file', 'test2.txt' => 'zip_file2'));
 
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
@@ -705,7 +733,10 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testFilenameWithSpaces() {
         $this->addUploadFile("filename with spaces.txt");
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
 
@@ -725,7 +756,10 @@ class SubmissionControllerTester extends BaseUnitTest {
             'filename with spaces.txt'
         );
         $this->addUploadZip('contains_spaces', $zip);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
@@ -759,7 +793,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testVcsUpload() {
         $_POST['git_repo_id'] = "some_repo_id";
         $_POST['vcs_checkout'] = "true";
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
 
@@ -777,7 +814,10 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testEmptyPost() {
         $_POST = array();
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertRegExp("/Empty POST request. This may mean that the sum size of your files are greater than [0-9]*M./", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -788,9 +828,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      * our gradeable list
      */
     public function testErrorInvalidGradeableId() {
-        $_REQUEST['gradeable_id'] = "fake";
         $this->core->getQueries()->method('getGradeableConfig')->with('fake')->will($this->throwException(new \InvalidArgumentException()));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('fake');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Invalid gradeable id 'fake'", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -807,7 +849,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable());
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to make folder for this assignment.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -815,7 +860,10 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testFailureToCreateStudentFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to make folder for this assignment for the user.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -825,7 +873,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testFailureToCreateVersionFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"));
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to make folder for the current version.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -838,7 +889,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testFailureToCreatePartFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to make the folder for part 1.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -851,14 +905,19 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_FILES["files1"]['size'][] = 0;
         $_FILES["files1"]['tmp_name'][] = "";
         $_FILES["files1"]['error'][] = UPLOAD_ERR_PARTIAL;
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Upload Failed: test.txt failed to upload. Error message: The file was only partially uploaded.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
     public function testNoFilesToSubmit() {
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("No files to be submitted.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -866,7 +925,10 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorPreviousFilesFirstVersion() {
         $_POST['previous_files'] = json_encode(array(0=>array('test.txt')));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("No submission found. There should not be any files from a previous submission.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -877,7 +939,10 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testErrorMissingPreviousFolder() {
         $_POST['previous_files'] = json_encode(array(0 => array('test.txt')));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Files from previous submission not found. Folder for previous submission does not exist.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -885,7 +950,11 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorMissingPreviousFile() {
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertTrue($return['status'] == 'success');
 
         $_POST['previous_files'] = json_encode(array(0 => array('missing.txt')));
@@ -893,7 +962,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($this->config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("File 'missing.txt' does not exist in previous submission.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -905,7 +977,10 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testInvalidFilename() {
         $this->addUploadFile('in"valid.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your file name in\"valid.txt.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -913,7 +988,10 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testInvalidFilenameInZip() {
         $this->addUploadZip("invalid", array('in"valid.txt'));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside invalid.zip.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -924,7 +1002,10 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testErrorFileTooBig() {
         $this->addUploadFile('test1.txt', 'a');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("File(s) uploaded too large.  Maximum size is 0 kb. Uploaded file(s) was 0.001 kb.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -936,7 +1017,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testErrorFilesInZipTooBig() {
         $this->addUploadZip('zip_bomb', array('bomb.txt' => str_repeat('01', 5120000)));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail', "An error should have happened");
         $this->assertEquals("File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
@@ -953,7 +1036,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $stat = fstat($fh);
         ftruncate($fh, $stat['size']-1);
         fclose($fh);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Could not properly unpack zip file. Error message: Invalid or uninitialized Zip object.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -961,7 +1047,11 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorOnCopyingPrevious() {
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertTrue($return['status'] == 'success');
         $prev = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1", "test1.txt");
@@ -971,7 +1061,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($this->config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to copy previously submitted file test1.txt to current submission.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -982,7 +1075,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->addUploadFile('test1.txt');
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to copy uploaded file test1.txt to current submission.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -999,7 +1095,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_FILES["files1"]['tmp_name'][] = $dst_file;
         $_FILES["files1"]['error'][] = null;
         chmod($dst_dir, 0550);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to delete the uploaded file test1.txt from temporary storage.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1017,7 +1116,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $core = $this->createMockCore($config);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
         $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable());
-        $return = $this->runController($core);
+
+        $controller = new SubmissionController($core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("The tmp file 'test1.txt' was not properly uploaded.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1028,7 +1130,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_POST['vcs_checkout'] = "true";
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to touch file for vcs submission.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1039,7 +1144,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
         $this->assertTrue(FileUtils::createDir($dir, 0444));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to create file for grading queue.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1050,7 +1158,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         FileUtils::createDir($tmp, null, true);
         file_put_contents(FileUtils::joinPaths($tmp, "user_assignment_settings.json"), "]invalid_json[");
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to open settings file.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1061,7 +1172,11 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testErrorHistorySecondVersion() {
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+        $_FILES = [];
+
         $this->assertTrue($return['status'] == 'success');
 
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
@@ -1069,7 +1184,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue(FileUtils::createDir($dir, 0444));
 
         $this->addUploadFile('test1.txt');
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to create file for grading queue.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1099,7 +1217,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $settings = FileUtils::joinPaths($dir, "user_assignment_settings.json");
         file_put_contents($settings, '{"active_version": 0, "history": []}');
         chmod($settings, 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to write to settings file.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
@@ -1113,21 +1234,24 @@ class SubmissionControllerTester extends BaseUnitTest {
         $timestamp = FileUtils::joinPaths($dir, ".submit.timestamp");
         file_put_contents($timestamp, "Failed to save timestamp file for this submission.");
         chmod($timestamp, 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->ajaxUploadSubmission('test');
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to save timestamp file for this submission.", $return['message']);
         $this->assertFalse($return['status'] == 'success');
     }
 
     public function testShowHomeworkPageNoGradeable() {
-        $_REQUEST['action'] = 'display';
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->showHomeworkPage('test');
+
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
     public function testShowHomework() {
-        $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
 
@@ -1145,13 +1269,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $graded_gradeable->method('getOrCreateTaGradedGradeable')->willReturn($ta_graded_gradeable);
         $core->getQueries()->method('getGradedGradeable')->willReturn($graded_gradeable);
 
-        $return = $this->runController($core);
+        $controller = new SubmissionController($core);
+        $return = $controller->showHomeworkPage('test');
+
         $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);
     }
 
     public function testShowHomeworkNoConfig() {
-        $_REQUEST['action'] = 'display';
         $core = $this->createMockCore();
         $now = new \DateTime("now", $core->getConfig()->getTimezone());
 
@@ -1161,13 +1286,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('isSubmissionOpen')->willReturn(true);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
-        $return = $this->runController($core);
+        $controller = new SubmissionController($core);
+        $return = $controller->showHomeworkPage('test');
+
         $this->assertEquals("test", $return['id']);
         $this->assertTrue($return['error']);
     }
 
     public function testShowHomeworkNoAccess() {
-        $_REQUEST['action'] = 'display';
         $core = $this->createMockCore(array(), array('access_grading' => false));
         /** @noinspection PhpUndefinedMethodInspection */
         $now = new \DateTime("tomorrow", $core->getConfig()->getTimezone());
@@ -1177,15 +1303,17 @@ class SubmissionControllerTester extends BaseUnitTest {
         $gradeable->method('getSubmissionOpenDate')->willReturn($now);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
-        $return = $this->runController($core);
+        $controller = new SubmissionController($core);
+        $return = $controller->showHomeworkPage('test');
+
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
     public function testUpdateNegativeVersion() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['new_version'] = -1;
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('test', -1);
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Cannot set the version below 0.", $return['message']);
     }
@@ -1194,9 +1322,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @highestVersion 1
      */
     public function testUpdateInvalidVersion() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['new_version'] = 2;
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('test', 2);
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Cannot set the version past 1.", $return['message']);
     }
@@ -1205,9 +1333,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @highestVersion 2
      */
     public function testUpdateNoInvalidSettingsFile() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['new_version'] = 1;
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('test', 1);
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Failed to open settings file.", $return['message']);
     }
@@ -1216,28 +1344,30 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @highestVersion 2
      */
     public function testUpdateCannotWriteSettingsFile() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['new_version'] = 1;
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         FileUtils::createDir($tmp, null, true);
         $json = json_encode(array('active_version' => 1, 'history' => array('version' => 0, 'time' => '')));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
         chmod($settings, 0444);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('test', 1);
+
         $this->assertTrue($return['status'] == 'fail');
         $this->assertEquals("Could not write to settings file.", $return['message']);
     }
 
     public function testUpdateCancelSubmission() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['new_version'] = 0;
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         FileUtils::createDir($tmp, null, true);
         $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('test', 0);
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertEquals("Cancelled submission for gradeable.", $return['data']['message']);
         $this->assertEquals(0, $return['data']['version']);
@@ -1253,14 +1383,15 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @highestVersion 5
      */
     public function testUpdateSubmission() {
-        $_REQUEST['action'] = 'update';
-        $_REQUEST['new_version'] = 4;
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
         FileUtils::createDir($tmp, null, true);
         $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('test', 4);
+
         $this->assertFalse($return['status'] == 'fail');
         $this->assertEquals("Updated version of gradeable to version #4.", $return['data']['message']);
         $this->assertEquals(4, $return['data']['version']);
@@ -1276,9 +1407,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Test should fail with no results.json
      */
     public function testCheckRefreshFailed1() {
-        $_REQUEST['action'] = 'check_refresh';
-        $_REQUEST['gradeable_version'] = 1;
-        $return = $this->runController();
+        $controller = new SubmissionController($this->core);
+        $return = $controller->checkRefresh('test', 1);
+
         $this->assertFalse($return['refresh']);
         $this->assertEquals("NO_REFRESH", $return['string']);
     }
@@ -1287,12 +1418,13 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Test should fail with no database data
      */
     public function testCheckRefreshFailed2() {
-        $_REQUEST['action'] = 'check_refresh';
-        $_REQUEST['gradeable_version'] = 1;
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
         FileUtils::createDir($tmp, null, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->checkRefresh('test', 1);
+
         $this->assertFalse($return['refresh']);
         $this->assertEquals("NO_REFRESH", $return['string']);
     }
@@ -1302,13 +1434,14 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Test should pass with database data and results.json
      */
     public function testCheckRefreshSuccess() {
-        $_REQUEST['action'] = 'check_refresh';
-        $_REQUEST['gradeable_version'] = 1;
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
         FileUtils::createDir($tmp, null, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
         $this->core->getQueries()->method('getGradeableVersionHasAutogradingResults')->willReturn(true);
-        $return = $this->runController();
+
+        $controller = new SubmissionController($this->core);
+        $return = $controller->checkRefresh('test', 1);
+
         $this->assertTrue($return['refresh']);
         $this->assertEquals("REFRESH_ME", $return['string']);
     }
