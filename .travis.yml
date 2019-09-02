@@ -72,12 +72,14 @@ jobs:
       stage: 01 lint
       php: 7.2
       install:
-        - cd site
+        - pushd site
         - composer install
+        - popd
       script:
-        - cd site
+        - pushd site
         - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
         - vendor/bin/phpcs --standard=tests/ruleset.xml
+        - popd
     - <<: *01-php-lint
       php: 7.3
       if: branch = master OR type = pull_request
