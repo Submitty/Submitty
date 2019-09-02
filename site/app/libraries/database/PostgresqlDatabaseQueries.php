@@ -68,7 +68,7 @@ WHERE u.user_id=?", array($user_id));
     }
 
     public function getUserByNumericId($numeric_id) {
-        $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id=?", array($user_id));
+        $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id=?", array($numeric_id));
 
         if ($this->submitty_db->getRowCount() === 0) {
             return null;
@@ -90,13 +90,13 @@ SELECT u.*, ns.merge_threads, ns.all_new_threads,
        ns.self_notification_email,sr.grading_registration_sections
        
 FROM users u
-LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
+LEFT JOIN notification_settings as ns ON u.user_numeric_id = ns.user_numeric_id
 LEFT JOIN (
   SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
   FROM grading_registration
-  GROUP BY user_id
-) as sr ON u.user_id=sr.user_id
-WHERE u.user_id=?", array($user_id));
+  GROUP BY user_numeric_id
+) as sr ON u.user_numeric_id=sr.user_numeric_id
+WHERE u.user_numeric_id=?", array($numeric_id));
 
             if ($this->course_db->getRowCount() > 0) {
                 $user = $this->course_db->row();
