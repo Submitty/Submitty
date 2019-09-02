@@ -280,19 +280,19 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertCount(0, $actual);
 
         $actual = $list->getOpenGradeables();
-        $this->assertCount(1, $actual);
+        $this->assertCount(2, $actual);
         $this->assertArrayHasKey('01_no_submit_no_due', $actual);
-        $this->assertEquals($gradeables['01_no_submit_no_due'], $actual['01_no_submit_no_due']);
-
-        $actual = $list->getClosedGradeables();
-        $this->assertCount(1, $actual);
         $this->assertArrayHasKey('02_submitted_no_due', $actual);
+        $this->assertEquals($gradeables['01_no_submit_no_due'], $actual['01_no_submit_no_due']);
         $this->assertEquals($gradeables['02_submitted_no_due'], $actual['02_submitted_no_due']);
 
         $actual = $list->getGradingGradeables();
         $this->assertCount(1, $actual);
         $this->assertArrayHasKey('03_ta_submit_no_due', $actual);
         $this->assertEquals($gradeables['03_ta_submit_no_due'], $actual['03_ta_submit_no_due']);
+
+        $actual = $list->getClosedGradeables();
+        $this->assertCount(0, $actual);
 
         $actual = $list->getGradedGradeables();
         $this->assertCount(0, $actual);
