@@ -2,34 +2,37 @@
 
 namespace tests\app\controllers\student;
 
-use app\libraries\Core;
-use app\libraries\GradeableType;
-use app\models\gradeable\AutoGradedGradeable;
-use app\models\gradeable\AutogradingConfig;
-use app\models\gradeable\GradedGradeable;
-use app\models\gradeable\Submitter;
-use app\models\gradeable\TaGradedGradeable;
 use \ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
+use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\libraries\GradeableType;
 use app\libraries\Utils;
-use app\models\gradeable\Gradeable;
-use tests\BaseUnitTest;
+use app\libraries\database\DatabaseQueries;
+use app\models\Config;
 use app\models\User;
+use app\models\gradeable\AutoGradedGradeable;
+use app\models\gradeable\AutoGradedVersion;
+use app\models\gradeable\AutogradingConfig;
+use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
+use app\models\gradeable\Submitter;
+use app\models\gradeable\TaGradedGradeable;
+use tests\BaseUnitTest;
+use tests\utils\NullOutput;
 
 /**
  * @runTestsInSeparateProcesses
  */
 class SubmissionControllerTester extends BaseUnitTest {
+    private static $annotations = [];
 
     /**
      * @var array
      */
-    private $config = array();
-    /**
-     * @var Core
-     */
+    private $config = [];
+    /** @var Core */
     private $core;
 
     public function setUp(): void {
@@ -44,63 +47,78 @@ class SubmissionControllerTester extends BaseUnitTest {
         $_POST['user_id'] = "testUser";
         $_POST['repo_id'] = "";
 
-        $config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
-        $config['semester'] = "test";
-        $config['course'] = "test";
-        $config['course_path'] = FileUtils::joinPaths($config['tmp_path'], "courses", $config['semester'],
-            $config['course']);
+        $this->config['tmp_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        $this->config['semester'] = "test";
+        $this->config['course'] = "test";
+        $this->config['course_path'] = FileUtils::joinPaths(
+            $this->config['tmp_path'],
+            "courses",
+            $this->config['semester'],
+            $this->config['course']
+        );
 
-        $this->assertTrue(FileUtils::createDir($config['course_path'], null, true));
-        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['course_path'], "submissions")));
-        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($config['tmp_path'], "to_be_graded_queue")));
+        $this->assertTrue(FileUtils::createDir($this->config['course_path'], null, true));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions")));
+        $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue")));
 
-        $this->config = $config;
+        $this->core = new Core();
+        $this->core->setOutput(new NullOutput($this->core));
+        $this->core->setTesting(true);
 
-        $this->core = $this->createMockCore($this->config);
+        $this->core->setUser(new User($this->core, [
+            'user_id' => 'testUser',
+            'user_firstname' => 'Test',
+            'user_lastname' => 'Person',
+            'user_email' => '',
+            'user_group' => 4
+        ]));
+
+        $config = new Config($this->core);
+        $config->setSemester($this->config['semester']);
+        $config->setCourse($this->config['course']);
+        $config->setCoursePath($this->config['course_path']);
+        $config->setSubmittyPath($this->config['tmp_path']);
+        $this->core->setConfig($config);
+        $this->core->getOutput()->loadTwig();
 
         $highest_version = 0;
         $num_parts = 1;
         $max_size = 1000000; // 1 MB
 
-        $annotations = $this->getAnnotations();
-        if (isset($annotations['method']['highestVersion'][0])) {
-            $highest_version = intval($annotations['method']['highestVersion'][0]);
+        if (empty(static::$annotations)) {
+            static::$annotations = $this->getAnnotations();
+        }
+        if (isset(static::$annotations['method']['highestVersion'][0])) {
+            $highest_version = intval(static::$annotations['method']['highestVersion'][0]);
         }
 
-        if (isset($annotations['method']['numParts'][0])) {
-            $num_parts = intval($annotations['method']['numParts'][0]);
+        if (isset(static::$annotations['method']['numParts'][0])) {
+            $num_parts = intval(static::$annotations['method']['numParts'][0]);
         }
 
-        if (isset($annotations['method']['maxSize'][0])) {
-            $max_size = intval($annotations['method']['maxSize'][0]);
+        if (isset(static::$annotations['method']['maxSize'][0])) {
+            $max_size = intval(static::$annotations['method']['maxSize'][0]);
         }
 
         $gradeable = $this->createMockGradeable($num_parts, $max_size);
-        $graded_gradeable = $this->createMockGradedGradeable($highest_version);
+        $graded_gradeable = $this->createMockGradedGradeable($gradeable, $highest_version);
 
-        $this->core->getQueries()->method('getGradedGradeable')->willReturn($graded_gradeable);
-        $this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
-    }
+        $database_queries = $this->createMock(DatabaseQueries::class);
 
-    protected function createMockUser($id, $group = null) {
-        $return = $this->createMockModel(User::class);
-        $return->method("getId")->willReturn($id);
-        if($group !== null) {
-            $return->method("getGroup")->willReturn($group);
-        }
-        return $return;
-    }
+        $database_queries
+            ->expects($this->any())
+            ->method('getGradeableConfig')
+            ->will($this->returnCallback(function ($arg) use ($gradeable) {
+                if ($arg === 'test') {
+                    return $gradeable;
+                }
+                else {
+                    throw new \InvalidArgumentException();
+                }
+            }));
+        $database_queries->method('getGradedGradeable')->willReturn($graded_gradeable);
 
-    /**
-     * Helper method to generate a Mock generic submitter (not a user or a team).
-     *  It only has an id
-     * @param $id
-     * @return \PHPUnit\Framework\MockObject\MockObject
-     */
-    protected function createMockSubmitter($id) {
-        $return = $this->createMockModel(Submitter::class);
-        $return->method("getId")->willReturn($id);
-        return $return;
+        $this->core->setQueries($database_queries);
     }
 
     /**
@@ -112,24 +130,66 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param double $max_size
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradeable($num_parts = 1, $max_size = 1000000.) {
-        $gradeable = $this->createMockModel(Gradeable::class);
-        $gradeable->method('getId')->willReturn("test");
-        $gradeable->method('getTitle')->willReturn("Test Gradeable");
-        // $gradeable->method('getUser')->willReturn("testUser");
-        $gradeable->method('isStudentSubmit')->willReturn(true);
-        $gradeable->method('getType')->willReturn(GradeableType::ELECTRONIC_FILE);
+    private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true) {
+        if ($has_autograding_config) {
+            $details = [
+                'max_submission_size' => $max_size,
+                'part_names' => array_fill(0, $num_parts, "")
+            ];
+            $auto_grading_config = new AutogradingConfig($this->core, $details);
+        }
 
-        // Any future calls that get now are going to be later than this now
-        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
-        $gradeable->method('getSubmissionOpenDate')->willReturn($now);
-        $gradeable->method('getTaViewStartDate')->willReturn($now);
-        $gradeable->method('canStudentSubmit')->willReturn(true);
-
-        $autograding_config = $this->createMockModel(AutogradingConfig::class);
-        $autograding_config->method('getNumParts')->willReturn(intval($num_parts));
-        $autograding_config->method('getMaxSubmissionSize')->willReturn($max_size);
-        $gradeable->method('getAutogradingConfig')->willReturn($autograding_config);
+        $submission_open_date = new \DateTime("now", $this->core->getConfig()->getTimezone());
+        if ($student_view) {
+            $submission_open_date->sub(new \DateInterval('PT1H'));
+        }
+        else {
+            $submission_open_date->add(new \DateInterval('PT1H'));
+        }
+        $details = [
+            'id' => 'test',
+            'title' => 'Test Gradeable',
+            'instructions_url' => '',
+            'ta_instructions' => '',
+            'type' => GradeableType::ELECTRONIC_FILE,
+            'grader_assignment_method' => 0,
+            'min_grading_group' => 3,
+            'syllabus_bucket' => 'homework',
+            'autograding_config_path' => '/path/to/autograding',
+            'vcs' => false,
+            'vcs_subdirectory' => '',
+            'vcs_host_type' => -1,
+            'team_assignment' => false,
+            'team_size_max' => 1,
+            'ta_grading' => true,
+            'scanned_exam' => false,
+            'student_view' => $student_view,
+            'student_view_after_grades' => false,
+            'student_submit' => true,
+            'has_due_date' => true,
+            'peer_grading' => false,
+            'peer_grade_set' => false,
+            'late_submission_allowed' => true,
+            'precision' => 0.5,
+            'regrade_allowed' => true,
+            'grade_inquiry_per_component_allowed' => true,
+            'discussion_based' => false,
+            'discussion_thread_ids' => '',
+            'ta_view_start_date' => (new \DateTime("now", $this->core->getConfig()->getTimezone()))->sub(new \DateInterval('PT2H')),
+            'submission_open_date' => $submission_open_date,
+            'team_lock_date' => new \DateTime("now", $this->core->getConfig()->getTimezone()),
+            'submission_due_date' => new \DateTime("9991-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
+            'grade_start_date' => new \DateTime("9992-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
+            'grade_due_date' => new \DateTime("9993-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
+            'grade_released_date' => new \DateTime("9994-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
+            'grade_locked_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone()),
+            'late_days' => 2,
+            'regrade_request_date' => new \DateTime("9995-01-01 01:01:01", $this->core->getConfig()->getTimezone())
+        ];
+        $gradeable = new Gradeable($this->core, $details);
+        if ($has_autograding_config) {
+            $gradeable->setAutogradingConfig($auto_grading_config);
+        }
         return $gradeable;
     }
 
@@ -139,12 +199,37 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param int    $highest_version
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function createMockGradedGradeable($highest_version = 0) {
-        $graded_gradeable = $this->createMockModel(GradedGradeable::class);
-        $graded_gradeable->method('getSubmitter')->willReturn($this->createMockSubmitter('testUser'));
-        $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
-        $auto_graded_gradeable->method('getHighestVersion')->willReturn(intval($highest_version));
-        $graded_gradeable->method('getAutoGradedGradeable')->willReturn($auto_graded_gradeable);
+    private function createMockGradedGradeable($gradeable, int $highest_version = 0) {
+        $graded_gradeable = new GradedGradeable(
+            $this->core,
+            $gradeable,
+            new Submitter($this->core, $this->core->getUser()),
+            []
+        );
+
+        $auto_graded_gradeable = new AutoGradedGradeable(
+            $this->core,
+            $graded_gradeable,
+            [
+                'active_version' => 0
+            ]
+        );
+
+        $auto_graded_version = new AutoGradedVersion(
+            $this->core,
+            $graded_gradeable,
+            [
+                'version' => $highest_version,
+                'non_hidden_non_extra_credit' => 0,
+                'non_hidden_extra_credit' => 0,
+                'hidden_non_extra_credit' => 0,
+                'hidden_extra_credit' => 0,
+                'submission_time' => '9999-01-01 01:01:01',
+                'autograding_complete' => true
+            ]
+        );
+        $auto_graded_gradeable->setAutoGradedVersions([$auto_graded_version]);
+        $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
         return $graded_gradeable;
     }
 
@@ -258,8 +343,8 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
-        $this->assertFalse($return['status'] == 'fail');
-        $this->assertTrue($return['status'] == 'success');
+        $this->assertNotEquals($return['status'], 'fail');
+        $this->assertEquals($return['status'], 'success');
 
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertStringEqualsFile(FileUtils::joinPaths($tmp, 'test1.txt'), "a");
@@ -437,11 +522,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(array('.submit.timestamp', 'test1.txt'), $files);
 
         $this->addUploadFile('test2.txt');
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
@@ -494,13 +582,17 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['status'] == 'success');
 
         $_POST['previous_files'] = json_encode(array(0 => array('test1.txt'), 1 => array('test1.txt')));
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable(2));
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable(2);
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
         $this->addUploadFile("test2.txt", "", 1);
         $this->addUploadFile("test2.txt", "", 2);
 
-        $controller = new SubmissionController($core);
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
@@ -531,11 +623,15 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->addUploadFile('test2.txt');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
 
-        $controller = new SubmissionController($core);
+
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
@@ -577,11 +673,14 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->addUploadFile('test1.txt', 'new_file');
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
@@ -626,11 +725,14 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->addUploadZip('overlap', array('test1.txt' => 'new_file'));
         $_POST['previous_files'] = json_encode(array(array('test1.txt')));
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertFalse($return['status'] == 'fail');
@@ -843,14 +945,16 @@ class SubmissionControllerTester extends BaseUnitTest {
      * folder) and it cannot.
      */
     public function testFailureToCreateGradeableFolder() {
-        $config = $this->config;
-        $config['tmp_path'] = "invalid_folder_that_does_not_exist";
-        $config['course_path'] = "invalid_folder_that_does_not_exist";
-        $core = $this->createMockCore($config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable());
+        $this->core->getConfig()->setCoursePath('/invalid/folder/that/does/not/exist');
+        $this->core->getConfig()->setSubmittyPath('/invalid/folder/that/does/not/exist');
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable));
+        $this->core->setQueries($database_queries);
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
@@ -959,11 +1063,15 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $_POST['previous_files'] = json_encode(array(0 => array('missing.txt')));
         $this->addUploadFile('test1.txt');
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
@@ -1058,11 +1166,15 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $_POST['previous_files'] = json_encode(array(0 => array('test1.txt')));
         chmod($prev, 0000);
-        $core = $this->createMockCore($this->config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable(1));
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable, 1));
+        $this->core->setQueries($database_queries);
+
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
@@ -1111,13 +1223,16 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testErrorFakeFiles() {
         $this->addUploadFile('test1.txt');
-        $config = $this->config;
-        $config['testing'] = false;
-        $core = $this->createMockCore($config);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable());
-        $core->getQueries()->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable());
+        $this->core->setTesting(false);
 
-        $controller = new SubmissionController($core);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $gradeable = $this->createMockGradeable();
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($this->createMockGradedGradeable($gradeable));
+        $this->core->setQueries($database_queries);
+
+
+        $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail');
@@ -1245,48 +1360,41 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testShowHomeworkPageNoGradeable() {
         $controller = new SubmissionController($this->core);
-        $return = $controller->showHomeworkPage('test');
+        $return = $controller->showHomeworkPage('invalid');
 
         $this->assertTrue($return['error']);
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
-    public function testShowHomework() {
-        $core = $this->createMockCore();
-        $now = new \DateTime("now", $core->getConfig()->getTimezone());
+    public function testShowHomeworkValid() {
+        $now = new \DateTime("now", $this->core->getConfig()->getTimezone());
 
         $gradeable = $this->createMockGradeable();
-        $gradeable->method('hasAutogradingConfig')->willReturn(true);
-        $gradeable->method('getSubmissionOpenDate')->willReturn($now);
-        $gradeable->method('isSubmissionOpen')->willReturn(true);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $graded_gradeable = $this->createMockGradedGradeable($gradeable);
 
         $ta_graded_gradeable = $this->createMockModel(TaGradedGradeable::class);
-        $ta_graded_gradeable->method('getGradedVersion')->willReturn(0);
+        $graded_gradeable->setTaGradedGradeable($ta_graded_gradeable);
 
-        $graded_gradeable = $this->createMockGradedGradeable();
-        $graded_gradeable->method('getSubmitter')->willReturn($this->createMockSubmitter('testUser'));
-        $graded_gradeable->method('getOrCreateTaGradedGradeable')->willReturn($ta_graded_gradeable);
-        $core->getQueries()->method('getGradedGradeable')->willReturn($graded_gradeable);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries->method('getGradedGradeable')->willReturn($graded_gradeable);
+        $this->core->setQueries($database_queries);
 
-        $controller = new SubmissionController($core);
+        $controller = new SubmissionController($this->core);
         $return = $controller->showHomeworkPage('test');
 
-        $this->assertEquals("test", $return['id']);
         $this->assertFalse($return['error']);
+        $this->assertEquals("test", $return['id']);
     }
 
     public function testShowHomeworkNoConfig() {
-        $core = $this->createMockCore();
-        $now = new \DateTime("now", $core->getConfig()->getTimezone());
+        $gradeable = $this->createMockGradeable(1, 1000, false);
 
-        $gradeable = $this->createMockGradeable();
-        $gradeable->method('hasAutogradingConfig')->willReturn(false);
-        $gradeable->method('getSubmissionOpenDate')->willReturn($now);
-        $gradeable->method('isSubmissionOpen')->willReturn(true);
-        $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $database_queries = $this->createMock(DatabaseQueries::class);
+        $database_queries->method('getGradeableConfig')->with('test')->willReturn($gradeable);
+        $this->core->setQueries($database_queries);
 
-        $controller = new SubmissionController($core);
+        $controller = new SubmissionController($this->core);
         $return = $controller->showHomeworkPage('test');
 
         $this->assertEquals("test", $return['id']);
@@ -1295,12 +1403,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testShowHomeworkNoAccess() {
         $core = $this->createMockCore(array(), array('access_grading' => false));
-        /** @noinspection PhpUndefinedMethodInspection */
-        $now = new \DateTime("tomorrow", $core->getConfig()->getTimezone());
-
-        $gradeable = $this->createMockGradeable();
-        $gradeable->method('hasAutogradingConfig')->willReturn(false);
-        $gradeable->method('getSubmissionOpenDate')->willReturn($now);
+        $gradeable = $this->createMockGradeable(1, 1000, true, false);
         $core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($gradeable);
 
         $controller = new SubmissionController($core);
