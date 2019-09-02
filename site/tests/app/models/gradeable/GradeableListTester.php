@@ -266,12 +266,18 @@ class GradeableListTester extends BaseUnitTest {
         $gradeables['03_ta_submit_no_due'] = $this->mockGradeable($core, "03_ta_submit_no_due",
             GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
             '9999-01-01', true, false, false);
+        $gradeables['04_no_submit_grades_released'] = $this->mockGradeable($core, "04_no_submit_grades_released",
+            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
+            '1004-01-01', true, true, false);
+        $gradeables['05_submitted_grades_released'] = $this->mockGradeable($core, "05_submitted_grades_released",
+            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
+            '1004-01-01', true, true, false);
 
         $this->mockGetGradeables($core, $gradeables);
-        $core->getQueries()->method('getHasSubmission')->will($this->onConsecutiveCalls(false, true, false));
+        $core->getQueries()->method('getHasSubmission')->will($this->onConsecutiveCalls(false, true, false, false, true));
 
         $list = new GradeableList($core);
-        $this->assertCount(3, $list->getSubmittableElectronicGradeables());
+        $this->assertCount(5, $list->getSubmittableElectronicGradeables());
 
         $actual = $list->getFutureGradeables();
         $this->assertCount(0, $actual);
@@ -295,7 +301,11 @@ class GradeableListTester extends BaseUnitTest {
         $this->assertCount(0, $actual);
 
         $actual = $list->getGradedGradeables();
-        $this->assertCount(0, $actual);
+        $this->assertCount(2, $actual);
+        $this->assertArrayHasKey('04_no_submit_grades_released', $actual);
+        $this->assertArrayHasKey('05_submitted_grades_released', $actual);
+        $this->assertEquals($gradeables['04_no_submit_grades_released'], $actual['04_no_submit_grades_released']);
+        $this->assertEquals($gradeables['05_submitted_grades_released'], $actual['05_submitted_grades_released']);
     }
 
     public function testNoSubmittableGradeables() {
