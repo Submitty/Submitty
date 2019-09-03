@@ -84,7 +84,6 @@ class SubmissionController extends AbstractController {
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
-
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
         if (!$this->core->getUser()->accessGrading() && (
                 !$gradeable->isSubmissionOpen()

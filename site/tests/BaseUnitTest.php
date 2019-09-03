@@ -13,6 +13,7 @@ use ReflectionException;
 
 
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
+    protected static $mock_builders = [];
 
     /** @noinspection PhpDocSignatureInspection */
     /**
@@ -156,30 +157,33 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    public function createMockModel($class) {
-        $builder = $this->getMockBuilder($class)
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes();
+    public function createMockModel(string $class) {
+        if (!isset(static::$mock_builders[$class])) {
+            $builder = $this->getMockBuilder($class)
+                ->disableOriginalConstructor()
+                ->disableOriginalClone()
+                ->disableArgumentCloning()
+                ->disallowMockingUnknownTypes();
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $reflection = new \ReflectionClass($class);
-        $methods = array();
-        $matches = array();
-        preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
-        foreach ($matches[1] as $match) {
-            if (strlen($match) > 0) {
-                $methods[] = $match;
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $reflection = new \ReflectionClass($class);
+            $methods = array();
+            $matches = array();
+            preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
+            foreach ($matches[1] as $match) {
+                if (strlen($match) > 0) {
+                    $methods[] = $match;
+                }
             }
-        }
-        foreach ($reflection->getMethods() as $method) {
-            if (!Utils::startsWith($method->getName(), "__")) {
-                $methods[] = $method->getName();
+            foreach ($reflection->getMethods() as $method) {
+                if (!Utils::startsWith($method->getName(), "__")) {
+                    $methods[] = $method->getName();
+                }
             }
+            $builder->setMethods(array_unique($methods));
+            static::$mock_builders[$class] = $builder;
         }
-        $builder->setMethods(array_unique($methods));
-        return $builder->getMock();
+        return static::$mock_builders[$class]->getMock();
     }
 
     /**

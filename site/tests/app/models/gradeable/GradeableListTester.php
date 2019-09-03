@@ -410,7 +410,7 @@ class GradeableListTester extends BaseUnitTest {
             'ta_grading' => $ta_grading,
             'scanned_exam' => false,
             'student_view' => true,
-            'student_view_after_grades' => true,
+            'student_view_after_grades' => false,
             'student_submit' => $student_submit,
             'has_due_date' => $has_due_date,
             'peer_grading' => false,

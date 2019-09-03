@@ -69,6 +69,8 @@ class Core {
     /** @var bool */
     private $redirect = true;
 
+    private $testing = false;
+
 
     /**
      * Core constructor.
@@ -77,7 +79,7 @@ class Core {
      * need. This should be called first, then loadConfig() and then loadDatabases().
      */
     public function __construct() {
-        $this->output = new Output($this);
+        $this->setOutput(new Output($this));
         $this->access = new Access($this);
 
         // initialize our alert queue if it doesn't exist
@@ -583,8 +585,12 @@ class Core {
     /**
      * @return Output
      */
-    public function getOutput() {
+    public function getOutput(): Output {
         return $this->output;
+    }
+
+    public function setOutput(Output $output): void {
+        $this->output = $output;
     }
 
     /**
@@ -649,14 +655,15 @@ class Core {
 
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
-     * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
-     * ALWAYS returns FALSE we can mock to return TRUE for testing. It's probably not "best practices",
-     * and the proper way is using "phpt" files, but
-     *
+     * bypass via mocking or some other method (like is_uploaded_file).
      * @return bool
      */
-    public function isTesting() {
-        return false;
+    public function isTesting(): bool {
+        return $this->testing;
+    }
+
+    public function setTesting(bool $testing): void {
+        $this->testing = $testing;
     }
 
     public function getNotificationFactory() {
