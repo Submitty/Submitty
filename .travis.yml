@@ -71,12 +71,19 @@ jobs:
     - &01-php-lint
       stage: 01 lint
       php: 7.2
+      install:
+        - pushd site
+        - composer install --prefer-dist --no-interaction
+        - popd
       script:
-        - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+        - pushd site
+        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+        - vendor/bin/phpcs --standard=tests/ruleset.xml
+        - popd
     - <<: *01-php-lint
       php: 7.3
       if: branch = master OR type = pull_request
-    
+
     - &01-python-lint
       language: python
       python: 3.6
@@ -95,11 +102,11 @@ jobs:
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
         - vendor/bin/phpunit --version
-        - vendor/bin/phpunit --configuration tests/phpunit.xml
+        - vendor/bin/phpunit -c tests/phpunit.xml
         - popd
       after_success:
         - pushd site
-        - travis_retry php vendor/bin/php-coveralls -v -c tests/coveralls.yml
+        - travis_retry php vendor/bin/php-coveralls -v coveralls.yml
         - popd
     - <<: *02-php-unit
       php: 7.3
