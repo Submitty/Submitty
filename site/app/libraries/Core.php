@@ -69,6 +69,7 @@ class Core {
     /** @var bool */
     private $redirect = true;
 
+    /** @var bool */
     private $testing = false;
 
 
@@ -522,12 +523,15 @@ class Core {
      * @param     $url
      * @param int $status_code
      */
-    public function redirect($url, $status_code = 302) {
+    public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
             return;
         }
-        header('Location: ' . $url, true, $status_code);
-        die();
+        header('Location: ' . $url, true, $http_response_code);
+        if (!$this->testing) {
+            die();
+        }
+
     }
 
     /**
