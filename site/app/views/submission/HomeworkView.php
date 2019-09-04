@@ -502,11 +502,7 @@ class HomeworkView extends AbstractView {
             if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
                 if(array_key_exists('id', $data)){
                     $id = $data['id'];
-                    $is_valid = null !== $this->core->getQueries()->getUserById($id);
-                    //if we didn't find the user by id, try numeric id
-                    if(!$is_valid){
-                        $is_valid = null !== $this->core->getQueries()->getUserByNumericId($id);
-                    } 
+                    $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
                 }else{
                     //set the blank id as invalid for now, after a page refresh it will recorrect
                     $id = '';
