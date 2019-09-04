@@ -105,9 +105,8 @@ jobs:
         - vendor/bin/phpunit -c tests/phpunit.xml
         - popd
       after_success:
-        - pushd site
-        - travis_retry php vendor/bin/php-coveralls -v coveralls.yml
-        - popd
+        # must run from root folder or else coveralls.io shows messed up paths for files
+        - travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
     - <<: *02-php-unit
       php: 7.3
       if: branch = master OR type = pull_request
