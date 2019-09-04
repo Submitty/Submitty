@@ -690,8 +690,7 @@
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     onKeyPress="handle_input_keypress()"
-                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}
-                </textarea>
+                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)

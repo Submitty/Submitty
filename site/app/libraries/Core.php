@@ -11,7 +11,7 @@ use app\libraries\database\DatabaseQueries;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
-use app\NotificationFactory;
+use app\models\NotificationFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -69,6 +69,9 @@ class Core {
     /** @var bool */
     private $redirect = true;
 
+    /** @var bool */
+    private $testing = false;
+
 
     /**
      * Core constructor.
@@ -77,7 +80,7 @@ class Core {
      * need. This should be called first, then loadConfig() and then loadDatabases().
      */
     public function __construct() {
-        $this->output = new Output($this);
+        $this->setOutput(new Output($this));
         $this->access = new Access($this);
 
         // initialize our alert queue if it doesn't exist
@@ -141,8 +144,12 @@ class Core {
     public function loadMasterConfig() {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
-        $this->config = new Config($this);
+        $this->setConfig(new Config($this));
         $this->config->loadMasterConfigs($conf_path);
+    }
+
+    public function setConfig(Config $config): void {
+        $this->config = $config;
     }
 
     public function loadAuthentication() {
@@ -172,7 +179,7 @@ class Core {
         $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
-        $this->database_queries = $this->database_factory->getQueries($this);
+        $this->setQueries($this->database_factory->getQueries($this));
     }
 
     public function loadCourseDatabase() {
@@ -266,6 +273,10 @@ class Core {
         return $this->course_db;
     }
 
+    public function setQueries(DatabaseQueries $queries): void {
+        $this->database_queries = $queries;
+    }
+
     /**
      * @return DatabaseQueries
      */
@@ -280,13 +291,14 @@ class Core {
         return $this->forum;
     }
 
-    /**
-     * @param string $user_id
-     */
-    public function loadUser($user_id) {
+    public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        $this->user = $this->database_queries->getUserById($user_id);
+        $this->setUser($this->database_queries->getUserById($user_id));
+    }
+
+    public function setUser(User $user): void {
+        $this->user = $user;
     }
 
     /**
@@ -511,12 +523,15 @@ class Core {
      * @param     $url
      * @param int $status_code
      */
-    public function redirect($url, $status_code = 302) {
+    public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
             return;
         }
-        header('Location: ' . $url, true, $status_code);
-        die();
+        header('Location: ' . $url, true, $http_response_code);
+        if (!$this->testing) {
+            die();
+        }
+
     }
 
     /**
@@ -574,8 +589,12 @@ class Core {
     /**
      * @return Output
      */
-    public function getOutput() {
+    public function getOutput(): Output {
         return $this->output;
+    }
+
+    public function setOutput(Output $output): void {
+        $this->output = $output;
     }
 
     /**
@@ -640,14 +659,15 @@ class Core {
 
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
-     * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
-     * ALWAYS returns FALSE we can mock to return TRUE for testing. It's probably not "best practices",
-     * and the proper way is using "phpt" files, but
-     *
+     * bypass via mocking or some other method (like is_uploaded_file).
      * @return bool
      */
-    public function isTesting() {
-        return false;
+    public function isTesting(): bool {
+        return $this->testing;
+    }
+
+    public function setTesting(bool $testing): void {
+        $this->testing = $testing;
     }
 
     public function getNotificationFactory() {

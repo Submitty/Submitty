@@ -747,9 +747,8 @@ class Gradeable extends AbstractModel {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
-    /** @internal */
-    public function setAutogradingConfig() {
-        throw new \BadFunctionCallException('Cannot set the autograding config data');
+    public function setAutogradingConfig(AutogradingConfig $autograding_config): void {
+        $this->autograding_config = $autograding_config;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace app;
+namespace app\models;
 
 use app\libraries\Core;
 use app\models\Email;

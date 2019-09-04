@@ -99,8 +99,10 @@ class Config extends AbstractModel {
     protected $cgi_url;
     /** @property @var string */
     protected $authentication;
-    /** @property @var string */
-    protected $timezone = 'America/New_York';
+    /** @property @var DateTimeZone */
+    protected $timezone;
+    /** @var string */
+    protected $default_timezone = 'America/New_York';
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -214,6 +216,7 @@ class Config extends AbstractModel {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $this->timezone = new \DateTimeZone($this->default_timezone);
     }
 
     public function loadMasterConfigs($config_path) {
@@ -254,10 +257,10 @@ class Config extends AbstractModel {
         $this->submitty_path = $submitty_json['submitty_data_dir'];
 
         if (isset($submitty_json['timezone'])) {
-            $this->timezone = $submitty_json['timezone'];
-            if (!in_array($this->timezone, \DateTimeZone::listIdentifiers())) {
-                throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
+            if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
+                throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");
             }
+            $this->timezone = new \DateTimeZone($submitty_json['timezone']);
         }
 
         if (isset($submitty_json['institution_name'])) {
@@ -280,7 +283,6 @@ class Config extends AbstractModel {
             $this->system_message = strval($submitty_json['system_message']);
         }
 
-        $this->timezone = new \DateTimeZone($this->timezone);
         $this->base_url = rtrim($this->base_url, "/")."/";
 
         if (!empty($submitty_json['cgi_url'])){
