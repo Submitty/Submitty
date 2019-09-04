@@ -84,10 +84,7 @@ class GradeableList extends AbstractModel {
             else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
                 // Filter out gradeables with no due date
                 if ($gradeable->isStudentSubmit()) {
-                    if ($gradeable->hasSubmission($submitter)) {
-                        // Once the user has a submission for this gradeable, move it to the 'closed' section
-                        $this->closed_gradeables[$gradeable->getId()] = $gradeable;
-                    } else if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
+                    if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
                         // Put in 'grading' category only if user is a grader
                         $this->grading_gradeables[$gradeable->getId()] = $gradeable;
                     } else {

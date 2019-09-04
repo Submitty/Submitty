@@ -27,6 +27,9 @@
             <th>Assignment submitted # of days after deadline</th>
             <th>Student granted # of days extension for this assignment</th>
             <th>Status</th>
+            {% if grade_inquiry_enabled %}
+                <th>Grade Inquiries</th>
+            {% endif %}
             <th>Late days charged for this assignment</th>
         </tr>
     </thead>
@@ -47,6 +50,9 @@
             <td class="{{ class }}">{{ (late_day_info.getDaysLate() != 0) ? late_day_info.getDaysLate() : "N/A" }}</td>
             <td class="{{ class }}">{{ (late_day_info.getLateDayException() != 0) ? late_day_info.getLateDayException() : "N/A" }}</td>
             <td class="{{ class }}" id="{{ id }}">{{ late_day_info.getStatusMessage() }}</td>
+            {% if grade_inquiry_enabled %}
+                <td class="{{ class }}" id="{{ id }}">{{ gradeable.isRegradeAllowed() ? late_day_info.getGradeInquiryCount() : "N/A" }}</td>
+            {% endif %}
             <td class="{{ class }}">{{ (late_day_info.getLateDaysCharged() != 0 ) ? late_day_info.getLateDaysCharged() : "N/A" }}</td>
         </tr>
     {% endfor %}
