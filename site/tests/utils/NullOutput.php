@@ -4,6 +4,7 @@ namespace tests\utils;
 
 use app\libraries\Core;
 use app\libraries\Output;
+use Ds\Set;
 
 class NullOutput extends Output{
     public function __construct(Core $core) {
@@ -194,7 +195,7 @@ class NullOutput extends Output{
     public function addVendorCss($file) {
     }
 
-    public function addCss($url) {
+    public function addCss(string $url): void {
     }
 
     public function addInternalJs($file, $folder='js') {
@@ -203,7 +204,7 @@ class NullOutput extends Output{
     public function addVendorJs($file) {
     }
 
-    public function addJs($url) {
+    public function addJs(string $url): void {
     }
 
     public function timestampResource($file, $folder) {
@@ -224,10 +225,10 @@ class NullOutput extends Output{
     public function getBreadcrumbs() {
     }
 
-    public function getCss() {
+    public function getCss(): Set {
     }
 
-    public function getJs() {
+    public function getJs(): Set {
     }
 
     public function getRunTime() {
