@@ -194,7 +194,7 @@ class NullOutput extends Output{
     public function addVendorCss($file) {
     }
 
-    public function addCss(string $url) {
+    public function addCss(string $url): void {
     }
 
     public function addInternalJs($file, $folder='js') {
@@ -203,7 +203,7 @@ class NullOutput extends Output{
     public function addVendorJs($file) {
     }
 
-    public function addJs(string $url) {
+    public function addJs(string $url): void {
     }
 
     public function timestampResource($file, $folder) {
