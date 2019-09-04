@@ -17,6 +17,7 @@ __pycache__/
 *.synctex.gz
 .coverage
 
+/site/cache/
 /site/vendor/
 /site/node_modules/
 /site/public/vendor/

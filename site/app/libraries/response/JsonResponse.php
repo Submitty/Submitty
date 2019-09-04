@@ -22,7 +22,7 @@ class JsonResponse extends AbstractResponse {
      * @param $type
      * @param mixed|null $data
      * @param string|null $message
-     * @param int|null $code
+     * @param string|null $code
      */
     private function __construct($type, $data = null, $message = null, $code = null) {
         $this->json = [
@@ -38,7 +38,7 @@ class JsonResponse extends AbstractResponse {
         }
 
         if ($code) {
-            $this->json['message'] = $code;
+            $this->json['code'] = $code;
         }
     }
 
@@ -73,7 +73,7 @@ class JsonResponse extends AbstractResponse {
      * Returns an error JsonResponse.
      * @param string $message
      * @param mixed|null $data
-     * @param int $code
+     * @param string|null $code
      * @return JsonResponse
      */
     public static function getErrorResponse($message, $data = null, $code = null) {

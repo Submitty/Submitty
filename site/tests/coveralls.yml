@@ -1,2 +1,3 @@
-coverage_clover: tests/report/clover.xml
-json_path: tests/report/coveralls-upload.json
+# Must run this from root folder or else the paths get messed up on coveralls.io
+coverage_clover: site/tests/report/clover.xml
+json_path: site/tests/report/coveralls-upload.json
