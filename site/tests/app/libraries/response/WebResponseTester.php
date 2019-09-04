@@ -11,12 +11,13 @@ use PHPUnit\Framework\TestCase;
 class WebResponseTester extends TestCase {
     public function testWebResponse() {
         $core = new Core();
-        $core->getOutput()->loadTwig(false);
-        $core->getOutput()->useHeader(false);
-        $core->getOutput()->useFooter(false);
         $config = new Config($core);
         $config->setBaseUrl('http://example.com');
+        $config->setDebug(true);
         $core->setConfig($config);
+        $core->getOutput()->loadTwig();
+        $core->getOutput()->useHeader(false);
+        $core->getOutput()->useFooter(false);
 
         $response = new WebResponse("Error", "errorPage", "You don't have access to this page.");
         $response->render($core);

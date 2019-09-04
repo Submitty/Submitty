@@ -15,12 +15,13 @@ class ResponseTester extends TestCase {
     public function setUp(): void {
         $this->core = new Core();
         $this->core->setTesting(true);
-        $this->core->getOutput()->loadTwig(false);
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
         $config = new Config($this->core);
         $config->setBaseUrl('http://example.com');
+        $config->setDebug(true);
         $this->core->setConfig($config);
+        $this->core->getOutput()->loadTwig();
+        $this->core->getOutput()->useHeader(false);
+        $this->core->getOutput()->useFooter(false);
     }
 
     private function validateWebResponse(): void {
