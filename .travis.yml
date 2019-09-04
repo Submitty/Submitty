@@ -106,7 +106,7 @@ jobs:
         - popd
       after_success:
         # must run from root folder or else coveralls.io shows messed up paths for files
-        - travis_retry php vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        - travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
     - <<: *02-php-unit
       php: 7.3
       if: branch = master OR type = pull_request
