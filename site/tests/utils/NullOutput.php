@@ -4,6 +4,7 @@ namespace tests\utils;
 
 use app\libraries\Core;
 use app\libraries\Output;
+use Ds\Set;
 
 class NullOutput extends Output{
     public function __construct(Core $core) {
@@ -224,10 +225,10 @@ class NullOutput extends Output{
     public function getBreadcrumbs() {
     }
 
-    public function getCss() {
+    public function getCss(): Set {
     }
 
-    public function getJs() {
+    public function getJs(): Set {
     }
 
     public function getRunTime() {
