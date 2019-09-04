@@ -98,6 +98,8 @@ jobs:
     - &02-php-unit
       stage: 02 unit test
       php: 7.2
+      install:
+        - pecl install ds
       script:
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
@@ -173,9 +175,12 @@ jobs:
             - libboost-all-dev
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
+        - pecl install ds
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
-        - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
-        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl; a2enmod php${PHP_VERSION};
+        - sudo add-apt-repository -y ppa:ondrej/php
+        - sudo apt-get -qq update
+        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds
+        - sudo a2enmod php${PHP_VERSION}
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
