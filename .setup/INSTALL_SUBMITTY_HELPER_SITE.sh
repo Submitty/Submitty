@@ -176,4 +176,8 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
+# reload PHP-FPM before we re-enable website
+PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+systemctl reload php${PHP_VERSION}-fpm
+
 rm -f ${SUBMITTY_INSTALL_DIR}/site/public/index.html
