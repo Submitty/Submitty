@@ -123,15 +123,21 @@ jobs:
         - pip3 install sqlalchemy
         - pip3 install jsonschema
         - pip3 install jsonref
+        - pip3 install coverage
       script:
         - pushd python_submitty_utils
-        - python3 setup.py test
+        - coverage run python3 setup.py test
         - popd
         - pushd migration
-        - python3 -m unittest discover
+        - converage run python3 -m unittest discover
         - popd
       after_success:
-        - bash <(curl -s https://codecov.io/bash) -cF python
+        - pushd python_submitty_utils
+        - bash <(curl -s https://codecov.io/bash) -cF submitty_utils
+        - popd
+        - pushd migration
+        - bash <(curl -s https://codecov.io/bash) -cF migrator
+        - popd
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request
