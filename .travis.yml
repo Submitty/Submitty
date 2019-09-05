@@ -132,12 +132,7 @@ jobs:
         - coverage run -m unittest discover
         - popd
       after_success:
-        - pushd python_submitty_utils
-        - bash <(curl -s https://codecov.io/bash) -cF submitty_utils
-        - popd
-        - pushd migration
-        - bash <(curl -s https://codecov.io/bash) -cF migrator
-        - popd
+        - bash <(curl -s https://codecov.io/bash) -cF python
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request

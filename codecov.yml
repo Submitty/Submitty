@@ -4,3 +4,4 @@ codecov:
 
 ignore:
   - tests/integrationTests/**/*.txt
+  - tests/**/*
