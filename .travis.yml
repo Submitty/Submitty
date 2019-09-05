@@ -123,6 +123,7 @@ jobs:
         - pip3 install sqlalchemy
         - pip3 install jsonschema
         - pip3 install jsonref
+        - pip3 install docker
         - pip3 install coverage
       script:
         - pushd python_submitty_utils

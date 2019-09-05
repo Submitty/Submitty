@@ -1,6 +1,12 @@
 codecov:
   notify:
-    require_ci_to_pass: no
+    require_ci_to_pass: true
 
 ignore:
   - "tests/integrationTests"
+
+coverage:
+  status:
+    project: false
+    patch: false
+    changes: false
