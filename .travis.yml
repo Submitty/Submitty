@@ -109,6 +109,7 @@ jobs:
       after_success:
         # must run from root folder or else coveralls.io shows messed up paths for files
         - travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        - bash <(curl -s https://codecov.io/bash) -cF php -f site/tests/report/clover.xml
     - <<: *02-php-unit
       php: 7.3
       if: branch = master OR type = pull_request
@@ -129,6 +130,8 @@ jobs:
         - pushd migration
         - python3 -m unittest discover
         - popd
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -cF python
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request
