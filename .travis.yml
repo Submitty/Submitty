@@ -132,6 +132,7 @@ jobs:
         - coverage run -m unittest discover
         - popd
       after_success:
+        - coverage combine python_submitty_utils/.coverage migration/.coverage
         - bash <(curl -s https://codecov.io/bash) -cF python
     - <<: *02-python-unit
       python: 3.7
