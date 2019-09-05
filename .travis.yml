@@ -140,9 +140,9 @@ jobs:
         - coverage xml
         - popd
       after_success:
-        - bash <(curl -s https://codecov.io/bash) -cF python_autograder -f autograder/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF autograder -f autograder/coverage.xml
         - bash <(curl -s https://codecov.io/bash) -cF python_submitty_utils -f python_submitty_utils/coverage.xml
-        - bash <(curl -s https://codecov.io/bash) -cF python_migrator -f migration/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF migrator -f migration/coverage.xml
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request
