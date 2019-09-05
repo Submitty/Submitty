@@ -16,6 +16,7 @@ __pycache__/
 *.out
 *.synctex.gz
 .coverage
+coverage.xml
 
 /site/cache/
 /site/vendor/
