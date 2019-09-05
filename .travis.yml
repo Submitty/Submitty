@@ -126,10 +126,10 @@ jobs:
         - pip3 install coverage
       script:
         - pushd python_submitty_utils
-        - coverage run python3 setup.py test
+        - coverage run -m unittest discover
         - popd
         - pushd migration
-        - converage run python3 -m unittest discover
+        - coverage run -m unittest discover
         - popd
       after_success:
         - pushd python_submitty_utils
