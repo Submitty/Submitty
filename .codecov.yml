@@ -10,3 +10,7 @@ coverage:
     project: false
     patch: false
     changes: false
+
+comment:
+  layout: "reach, diff, flags"
+  behavior: default

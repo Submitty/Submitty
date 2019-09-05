@@ -137,8 +137,9 @@ jobs:
         - coverage run -m unittest discover
         - popd
       after_success:
-        - coverage combine autograder/.coverage python_submitty_utils/.coverage migration/.coverage
-        - bash <(curl -s https://codecov.io/bash) -cF python
+        - bash <(curl -s https://codecov.io/bash) -cF python_autograder -f autograder/.coverage
+        - bash <(curl -s https://codecov.io/bash) -cF python_submitty_utils -f python_submitty_utils/.coverage
+        - bash <(curl -s https://codecov.io/bash) -cF python_migrator -f migration/.coverage
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request
