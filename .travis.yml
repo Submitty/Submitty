@@ -108,7 +108,7 @@ jobs:
         - popd
       after_success:
         # must run from root folder or else coveralls.io shows messed up paths for files
-        - travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        #- travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
         - bash <(curl -s https://codecov.io/bash) -cF php -f site/tests/report/clover.xml
     - <<: *02-php-unit
       php: 7.3
