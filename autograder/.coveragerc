@@ -1,4 +1,5 @@
 [run]
+source = autograder
 omit = 
     *_test*.py
-    test/*.py
+    tests/*.py

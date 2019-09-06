@@ -727,6 +727,7 @@ class ForumController extends AbstractController{
     }
 
     /**
+     * @Route("/{_semester}/{_course}/forum", methods={"GET"})
      * @Route("/{_semester}/{_course}/forum/threads", methods={"GET"})
      * @Route("/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
