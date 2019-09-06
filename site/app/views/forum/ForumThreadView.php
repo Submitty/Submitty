@@ -13,7 +13,7 @@ class ForumThreadView extends AbstractView {
 
     public function searchResult($threads){
 
-    	$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum', 'threads']));
+    	$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
     	$this->core->getOutput()->addBreadcrumb("Search");
 
 		$buttons = array(
@@ -124,7 +124,7 @@ class ForumThreadView extends AbstractView {
         $threadFiltering = $threadExists && !$filteredThreadExists && !(empty($_COOKIE[$currentCourse . '_forum_categories']) && empty($_COOKIE['forum_thread_status']) && empty($_COOKIE['unread_select_value']) === 'false');
 
         if(!$ajax) {
-            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum', 'threads']));
+            $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
 
             //Body Style is necessary to make sure that the forum is still readable...
             $this->core->getOutput()->addVendorCss('codemirror/codemirror.css');
@@ -956,7 +956,7 @@ class ForumThreadView extends AbstractView {
 			return;
 		}
 
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum', 'threads']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -1016,7 +1016,7 @@ class ForumThreadView extends AbstractView {
             return;
         }
 
-        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum', 'threads']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
         $this->core->getOutput()->addBreadcrumb("Manage Categories", $this->core->buildCourseUrl(['forum', 'categories']));
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -1078,7 +1078,7 @@ class ForumThreadView extends AbstractView {
 			return;
 		}
 
-		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum', 'threads']));
+		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
 		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 
         $this->core->getOutput()->addInternalJs('forum.js');
