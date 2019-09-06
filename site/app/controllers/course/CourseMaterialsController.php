@@ -324,7 +324,6 @@ class CourseMaterialsController extends AbstractController {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $json["release_time"] = $release_time;
-        FileUtils::writeJsonFile($fp,$json);
 
         $n = strpos($requested_path, '..');
         if ($n !== false) {
@@ -392,7 +391,7 @@ class CourseMaterialsController extends AbstractController {
             for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-                    //
+                    
                     $is_zip_file = false;
 
                     if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
@@ -409,12 +408,18 @@ class CourseMaterialsController extends AbstractController {
                         if ($res === true) {
                             $zip->extractTo($upload_path);
                             $zip->close();
+                            $subfiles = FileUtils::getAllFiles($upload_path, array(), true );
+                            foreach ($subfiles as $file) {
+                                $json[$file['path']] = array('checked' => '1', 'release_datetime' => $release_time  );
+                            }
                         }
                     }
                     else
                     {
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
+                        }else{
+                            $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time  );
                         }
                     }
                     //
@@ -429,7 +434,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-
+        FileUtils::writeJsonFile($fp,$json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }
 }
