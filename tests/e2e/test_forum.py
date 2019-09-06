@@ -24,7 +24,7 @@ class TestForum(BaseTestCase):
     def switch_to_page_create_thread(self):
         if '/threads/new' in self.driver.current_url:
             pass
-        elif '/threads' in self.driver.current_url:
+        elif '/forum' in self.driver.current_url:
             self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
         else:
             assert False
