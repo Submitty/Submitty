@@ -1,4 +1,5 @@
 [run]
+source = submitty_utils
 omit = 
     *_test*.py
-    test/*.py
+    tests/*.py
