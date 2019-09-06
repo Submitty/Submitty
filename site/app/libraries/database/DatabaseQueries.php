@@ -137,6 +137,14 @@ class DatabaseQueries {
         throw new NotImplementedException();
     }
 
+    public function getUserByNumericId($numeric_id){
+        throw new NotImplementedException();
+    }
+
+    public function getUserByIdOrNumericId($id){
+        throw new NotImplementedException();
+    }
+
     public function getGradingSectionsByUserId($user_id) {
         throw new NotImplementedException();
     }
