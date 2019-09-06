@@ -108,7 +108,8 @@ jobs:
         - popd
       after_success:
         # must run from root folder or else coveralls.io shows messed up paths for files
-        - travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        #- travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        - bash <(curl -s https://codecov.io/bash) -cF php -f site/tests/report/clover.xml
     - <<: *02-php-unit
       php: 7.3
       if: branch = master OR type = pull_request
@@ -122,13 +123,26 @@ jobs:
         - pip3 install sqlalchemy
         - pip3 install jsonschema
         - pip3 install jsonref
+        - pip3 install docker
+        - pip3 install coverage
       script:
         - pushd python_submitty_utils
-        - python3 setup.py test
+        - coverage run -m unittest discover
+        - coverage xml
+        - python3 setup.py install
         - popd
         - pushd migration
-        - python3 -m unittest discover
+        - coverage run -m unittest discover
+        - coverage xml
         - popd
+        - pushd autograder
+        - coverage run -m unittest discover
+        - coverage xml
+        - popd
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -cF autograder -f autograder/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF python_submitty_utils -f python_submitty_utils/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF migrator -f migration/coverage.xml
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request
