@@ -49,11 +49,7 @@ EOD;
         $this->assertEquals($expected, $this->core->getOutput()->getOutput());
     }
 
-    private function validateRedirectResponse(): void {
-        $this->assertTrue(function_exists('xdebug_get_headers'), 'Make sure the xdebug extension is loaded');
-        $headers = xdebug_get_headers();
-        $this->assertCount(1, $headers);
-        $this->assertEquals("Location: http://example.com", $headers[0]);
+    private function validateRedirectResponse(RedirectRes $redirect_response): void {
         $this->assertEquals(302, http_response_code());
     }
 
