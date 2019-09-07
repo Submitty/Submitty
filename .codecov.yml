@@ -10,6 +10,23 @@ coverage:
     project: false
     patch: false
     changes: false
+    migrator:
+      flags: migrator
+      target: 100%
+
+flags:
+  php:
+    paths:
+      - site/app
+  autograder:
+    paths:
+      - autograder/autograder
+  python_submitty_utils:
+    paths:
+      - python_submitty_utils/submitty_utils
+  migrator:
+    paths:
+      - migration/migrator
 
 comment:
   layout: "reach, diff, flags"
