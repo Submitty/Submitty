@@ -49,7 +49,7 @@ EOD;
         $this->assertEquals($expected, $this->core->getOutput()->getOutput());
     }
 
-    private function validateRedirectResponse(RedirectRes $redirect_response): void {
+    private function validateRedirectResponse(): void {
         $this->assertEquals(302, http_response_code());
     }
 
