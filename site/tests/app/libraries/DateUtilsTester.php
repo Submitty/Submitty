@@ -142,10 +142,10 @@ class DateUtilsTester extends \PHPUnit\Framework\TestCase {
         $config = new Config($core);
         $core->setConfig($config);
         $time = DateUtils::getServerTimeJson($core);
-        $this->assertRegExp("/20[1-9]{2}/", $time['year']);
+        $this->assertRegExp("/20[0-9]{2}/", $time['year']);
         $this->assertRegExp("/[0-1][0-9]/", $time['month']);
         $this->assertRegExp("/([0-9]|[1-3][0-9])/", $time['day']);
-        $this->assertRegExp("/([0-1][0-9]|2[0-3])/", $time['hour']);
+        $this->assertRegExp("/^([0-9]|1[0-9]|2[0-3])$/", $time['hour']);
         $this->assertRegExp("/[0-5][0-9]/", $time['minute']);
         $this->assertRegExp("/[0-5][0-9]/", $time['second']);
     }
