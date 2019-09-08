@@ -766,6 +766,30 @@ fi
 # DOCKER SETUP
 #################
 
+# If we are in vagrant and http_proxy is set, then vagrant-proxyconf
+# is probably being used, and it will work for the rest of this script,
+# but fail here if we do not manually set the proxy for docker
+if [[ ${VAGRANT} == 1 ]]; then
+    if [ ! -z ${http_proxy+x} ]; then
+        mkdir -p /home/${DAEMON_USER}/.docker
+        proxy="            \"httpProxy\": \"${http_proxy}\""
+        if [ ! -z ${https_proxy+x} ]; then
+            proxy="${proxy},\n            \"httpsProxy\": \"${https_proxy}\""
+        fi
+        if [ ! -z ${no_proxy+x} ]; then
+            proxy="${proxy},\n            \"noProxy\": \"${no_proxy}\""
+        fi
+        echo -e "{
+    \"proxies\": {
+        \"default\": {
+${proxy}
+        }
+    }
+}" > /home/${DAEMON_USER}/.docker/config.json
+        chown -R ${DAEMON_USER}:${DAEMON_USER} /home/${DAEMON_USER}/.docker
+    fi
+fi
+
 # WIP: creates basic container for grading CS1 & DS assignments
 # CAUTION: needs users/groups for security
 # These commands should be run manually if testing Docker integration
@@ -791,6 +815,15 @@ if [ ${WORKER} == 0 ]; then
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
+
+
+#####################################################################################
+# Obtain API auth token for submitty-admin user
+# (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
+# operational at that time.)
+
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+
 
 echo "Done."
 exit 0

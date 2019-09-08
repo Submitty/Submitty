@@ -2,8 +2,7 @@
 
 namespace app\libraries;
 use app\exceptions\FileReadException;
-use app\libraries\Utils;
-
+    
 /**
  * Class FileUtils
  *
@@ -565,5 +564,53 @@ class FileUtils {
         }
 
         return $words_detected;
+    }
+
+    /**
+     * Given an array of uploaded files, makes sure they are properlly uploaded
+     *
+     * @param array $files - should be in the same format as the $_FILES[] variable
+     * @return array representing the status of each file
+     * e.g. array('name' => 'foo.txt','type' => 'application/octet-stream', 'error' =>      
+     *            'success','size' => 100, 'success' => true)
+     * if $files is null returns failed => no files sent to validate
+     */
+    public static function validateUploadedFiles($files){
+
+        if(empty($files)){
+           return array("failed" => "No files sent to validate");
+        }
+
+        $ret = array();
+        $num_files = count($files['name']);
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+
+        for ($i = 0; $i < $num_files; $i++) {
+            //extract the values from each file
+            $name = $files['name'][$i];
+            $type = FileUtils::getMimeType($files['tmp_name'][$i]);
+            $size = $files['size'][$i];
+            $err_msg = "";
+
+            //did anything go wrong?
+            $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
+
+            //manually check against set size limit
+            //incase the max POST size is greater than max file size
+            if($size > $max_size){
+                $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
+            }
+
+            //check filename
+            if(! FileUtils::isValidFileName($name) ){
+                $err_msg = "Invalid filename";
+            }
+
+            $success = $err_msg === "No error.";
+
+            $ret[] = ['name' => $name, 'type'=> $type, 'error'=> $err_msg, 'size' => $size, 'success' => $success];
+        }
+
+        return $ret;
     }
 }

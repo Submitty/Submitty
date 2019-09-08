@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace app\exceptions;
 
@@ -9,11 +9,11 @@ namespace app\exceptions;
  * This allows us to send additional details to be logged within our ExceptionHandler
  * (@see ExceptionHandler). We should
  */
-class BaseException extends \RuntimeException{
+class BaseException extends \RuntimeException {
     protected $details;
     protected $log_exception = true;
     protected $show_exception_message = false;
-    
+
     /**
      * BaseException constructor.
      *
@@ -22,9 +22,9 @@ class BaseException extends \RuntimeException{
      * @param int               $code
      * @param \Exception|null   $previous
      */
-    public function __construct($message, $details = array(), $code = 0, $previous = null) {
+    public function __construct($message, $details = [], $code = 0, $previous = null) {
         if (!is_array($details)) {
-            $this->details = array("extra_details" => $details);
+            $this->details = ["extra_details" => $details];
         }
         else {
             $this->details = $details;
