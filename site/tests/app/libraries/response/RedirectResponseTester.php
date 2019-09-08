@@ -15,10 +15,7 @@ class RedirectResponseTester extends TestCase {
         $core->setTesting(true);
         $response = new RedirectResponse('http://example.com');
         $response->render($core);
-        $this->assertTrue(function_exists('xdebug_get_headers'), 'Make sure the xdebug extension is loaded');
-        $headers = xdebug_get_headers();
-        $this->assertCount(1, $headers);
-        $this->assertEquals("Location: http://example.com", $headers[0]);
+        $this->assertEquals("http://example.com", $response->url);
         $this->assertEquals(302, http_response_code());
     }
 }

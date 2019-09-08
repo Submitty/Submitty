@@ -98,11 +98,16 @@ jobs:
     - &02-php-unit
       stage: 02 unit test
       php: 7.2
+      before_install:
+        - phpenv config-rm xdebug.ini
       install:
         - pecl install ds
-      script:
+        - pecl install pcov
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
+        - popd
+      script:
+        - pushd site
         - vendor/bin/phpunit --version
         - vendor/bin/phpunit -c tests/phpunit.xml
         - popd
@@ -187,7 +192,9 @@ jobs:
             - google-chrome-stable
             - libpam-passwdqc
             - libboost-all-dev
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+        - phpenv config-rm xdebug.ini
       install:
         - pecl install ds
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
