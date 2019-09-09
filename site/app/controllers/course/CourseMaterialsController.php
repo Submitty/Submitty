@@ -406,11 +406,18 @@ class CourseMaterialsController extends AbstractController {
                         $zip = new \ZipArchive();
                         $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
                         if ($res === true) {
+                            //don't update all the files that were previouslly uploaded
+                            $subfiles_before = FileUtils::getAllFiles($upload_path, array(), true );
                             $zip->extractTo($upload_path);
                             $zip->close();
                             $subfiles = FileUtils::getAllFiles($upload_path, array(), true );
                             foreach ($subfiles as $file) {
-                                $json[$file['path']] = array('checked' => '1', 'release_datetime' => $release_time  );
+                                //skip the files that aren't new
+                                if ( in_array($file, $subfiles_before))
+                                    continue;
+
+                                $json[$file['path']] = array('checked' => '1',
+                                'release_datetime' => $release_time  );
                             }
                         }
                     }
