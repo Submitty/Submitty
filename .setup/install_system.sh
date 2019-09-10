@@ -775,20 +775,8 @@ fi
 # Setup preferred_name_logging
 echo -e "Setup preferred name logging."
 
-function check_exit_code {
-# $1 = process return code
-# $2 = name of process
-    if [[ $1 -ne 0 ]]; then
-        echo -e "Error setting up $2.  Aborting."
-        exit 1
-    else
-        echo -e "Successfully set up $2."
-    fi
-}
-
 # Copy preferred_name_logging.php to sbin
 rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferred_name_logging.php ${SUBMITTY_INSTALL_DIR}/sbin
-check_exit_code $? "preferred_name_user.php"
 chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 
@@ -803,7 +791,6 @@ sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'c
         s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = log~;
         s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = 0~;
         s~^#*[ tab]*log_line_prefix[ tab]*=[ tab]*'.\+'~log_line_prefix = '%t '~" /etc/postgresql/10/main/postgresql.conf
-check_exit_code $? "postgresql.conf"
 
 echo -e "Finished preferred_name_logging setup."
 
