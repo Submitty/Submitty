@@ -7,6 +7,8 @@
 # The format for each entry is (anything marked optional can be omitted from any entry):
 #   user_id: string representing the id for the user both in the database as well as linux
 #
+#   user_numeric_id: string represented the numeric id, e.g a RIN used in the database
+#
 #   anon_id: string representing an alternate anonymous id for the user that can be used when anonymity is required
 #
 #   user_firstname: string for the user's first name
