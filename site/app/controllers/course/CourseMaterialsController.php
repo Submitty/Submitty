@@ -176,7 +176,7 @@ class CourseMaterialsController extends AbstractController {
             $end_of_time = new \DateTime("9998-01-01");
             $release_datetime = $end_of_time->format("Y-m-d H:i:sO");
             $json = FileUtils::readJsonFile($fp);
-            
+
             if ($json != false) {
                 $release_datetime  = $json[$file_name]['release_datetime'];
             }
@@ -219,8 +219,6 @@ class CourseMaterialsController extends AbstractController {
             }
 
             $file_name = htmlspecialchars($filename);
-            $new_data_time = htmlspecialchars($newdatatime);
-
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
             $checked = '0';
