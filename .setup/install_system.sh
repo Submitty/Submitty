@@ -491,7 +491,7 @@ EOF
     sed -i -e 's/^post_max_size = 8M/post_max_size = 10M/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^allow_url_fopen = On/allow_url_fopen = Off/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     sed -i -e 's/^session.cookie_httponly =/session.cookie_httponly = 1/g' /etc/php/${PHP_VERSION}/fpm/php.ini
-    sed -i -e 's/^max_file_uploads = 20/max_file_uploads = 20/g' /etc/php/${PHP_VERSION}/fpm/php.ini
+    sed -i -e 's/^max_file_uploads = 20/max_file_uploads = 100/g' /etc/php/${PHP_VERSION}/fpm/php.ini
     # This should mimic the list of disabled functions that RPI uses on the HSS machine with the sole difference
     # being that we do not disable phpinfo() on the vagrant machine as it's not a function that could be used for
     # development of some feature, but it is useful for seeing information that could help debug something going wrong

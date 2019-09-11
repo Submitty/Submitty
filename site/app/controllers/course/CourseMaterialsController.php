@@ -158,7 +158,7 @@ class CourseMaterialsController extends AbstractController {
      */
     public function modifyCourseMaterialsFilePermission($checked) {
         $data=$_POST['fn'];
-        if(is_string($data) || count($data)==1){
+        if(is_string($data)){
             $data = [$data];
         }
     
@@ -172,14 +172,13 @@ class CourseMaterialsController extends AbstractController {
 
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-            $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+
+            $end_of_time = new \DateTime("9998-01-01");
+            $release_datetime = $end_of_time->format("Y-m-d H:i:sO");
             $json = FileUtils::readJsonFile($fp);
+            
             if ($json != false) {
                 $release_datetime  = $json[$file_name]['release_datetime'];
-            }
-
-            if (!isset($release_datetime)) {
-                $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
             }
 
             $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
@@ -210,7 +209,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //only one will not iterate correctly
-        if(is_string($data) || sizeof($data) == 1){
+        if(is_string($data)){
             $data = [$data];
         }
     
