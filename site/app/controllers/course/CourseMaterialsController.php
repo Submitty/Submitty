@@ -403,22 +403,26 @@ class CourseMaterialsController extends AbstractController {
                     //cannot check if there are duplicates inside zip file, will overwrite
                     //it is convenient for bulk uploads
                     if ($expand_zip == 'on' && $is_zip_file === true) {
+                        //get the file names inside the zip to write to the JSON file
+                        $zip = zip_open($uploaded_files[1]["tmp_name"][$j]);
+                        while ($zip_entry = zip_read($zip)) {
+                            $zfiles[] =  zip_entry_name($zip_entry);
+                        }
+                        zip_close($zip);
+
                         $zip = new \ZipArchive();
                         $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
                         if ($res === true) {
-                            //don't update all the files that were previouslly uploaded
-                            $subfiles_before = FileUtils::getAllFiles($upload_path, array(), true );
                             $zip->extractTo($upload_path);
                             $zip->close();
-                            $subfiles = FileUtils::getAllFiles($upload_path, array(), true );
-                            foreach ($subfiles as $file) {
-                                //skip the files that aren't new
-                                if ( in_array($file, $subfiles_before))
-                                    continue;
+                        }
 
-                                $json[$file['path']] = array('checked' => '1',
-                                'release_datetime' => $release_time  );
-                            }
+                        foreach ($zfiles as $zfile) {
+                            $path = FileUtils::joinPaths( $upload_path, $zfile );
+                            $json[$path] = [
+                                'checked' => '1',
+                                'release_datetime' => $release_time
+                            ];
                         }
                     }
                     else
