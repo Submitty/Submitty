@@ -8,7 +8,7 @@ import shutil
 import docker
 
 from submitty_utils import dateutils
-from . import secure_execution_environment
+from . import secure_execution_environment, rlimit_utils
 from .. import autograding_utils
 
 class Container():
@@ -29,6 +29,7 @@ class Container():
     self.image = container_info['container_image']
     self.is_server = container_info['server']
     self.outgoing_connections = container_info['outgoing_connections']
+    self.container_rlimits = container_info['container_rlimits']
     # If we are in production, we need to run as an untrusted user inside of our docker container.
     self.container_user_argument = str(getpwnam(untrusted_user).pw_uid)
     self.full_name = f'{untrusted_user}_{self.name}'
@@ -61,14 +62,15 @@ class Container():
 
     # Only pass container name to testcases with greater than one container. (Doing otherwise breaks compilation)
     container_name_argument = ['--container_name', self.name] if more_than_one else list()
+    container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits)
     # A server container does not run student code, but instead hosts a service (e.g. a database.)
     if self.is_server:
-      self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none',
-                               volumes = mount, working_dir = self.directory, name = self.full_name)
+      self.container = client.containers.create(self.image,  ulimits = container_ulimits, stdin_open = True, 
+                               tty = True, network = 'none', volumes = mount, working_dir = self.directory, name = self.full_name)
     else:
       command = [execution_script,] + arguments + container_name_argument
-      self.container = client.containers.create(self.image, command = command, stdin_open = True, tty = True,
-                                                network = 'none', user = self.container_user_argument, volumes=mount,
+      self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
+                                                tty = True, network = 'none', user = self.container_user_argument, volumes=mount,
                                                 working_dir = self.directory, hostname = self.name, name = self.full_name)
 
 
@@ -107,19 +109,21 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     containers = list()
     container_specs = testcase_info.get('containers', list())
     solution_container_specs = testcase_info.get('solution_containers', list())
-    
+    gradeable_rlimits = complete_config_obj.get('resource_limits', {})
     # If there are container specifications in the complete_config, create objects for them,
     # else, create a single default container.
     if len(container_specs) > 0:
       greater_than_one = True if len(container_specs) > 1 else False
       for container_spec in container_specs:
+        container_spec['container_rlimits'] = gradeable_rlimits
         containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), greater_than_one, self.is_test_environment, self.log_message))
     else:
       container_spec = {
         'container_name'  : f'temporary_container',
         'container_image' : 'ubuntu:custom', 
         'server' : False,
-        'outgoing_connections' : []
+        'outgoing_connections' : [],
+        'container_rlimits': gradeable_rlimits
       }
       containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), False, self.is_test_environment, self.log_message))
     self.containers = containers
@@ -130,6 +134,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     solution_containers = list()
     greater_than_one_solution_container = True if len(solution_container_specs) > 1 else False
     for solution_container_spec in solution_container_specs:
+      solution_container_spec['container_rlimits'] = gradeable_rlimits 
       solution_containers.append(Container(solution_container_spec, untrusted_user, self.random_output_directory, greater_than_one_solution_container, self.is_test_environment, self.log_message))
     self.solution_containers = solution_containers
 
