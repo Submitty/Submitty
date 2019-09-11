@@ -202,7 +202,7 @@
             </select>
             <label id="seating-only-label" class="option-alt" for="seating-only-for-instructor">
                 Visible only to Instructors?
-                <input type="checkbox" name="seating-only-for-instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
+                <input type="checkbox" name="seating_only_for_instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
             </label>
         </div>
 
@@ -212,10 +212,10 @@
         {% if not email_enabled %}
             <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
         {% else %}
-            <button id="email-seating-assignment" class ="option-alt bare-button"> 
+            <button id="email-seating-assignment" class ="option-alt bare-button">
                 <a href="{{ email_room_seating_url }}" class="btn btn-primary">
                     Email Seating Assignments
-                </a> 
+                </a>
             </button>
         {% endif %}
 
