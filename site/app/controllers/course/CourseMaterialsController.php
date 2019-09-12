@@ -156,10 +156,13 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/{_semester}/{_course}/course_materials/modify_permission")
      * @AccessControl(role="INSTRUCTOR")
      */
-    public function modifyCourseMaterialsFilePermission($filenames, $checked) {
+    public function modifyCourseMaterialsFilePermission($checked) {
         $data=$_POST['fn'];
-        if(count($data)==1){
-            $filename = $filenames;
+        if(is_string($data)){
+            $data = [$data];
+        }
+    
+        foreach ($data as $filename){
             if (!isset($filename) ||
                 !isset($checked)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -169,14 +172,13 @@ class CourseMaterialsController extends AbstractController {
 
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-            $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
+
+            $end_of_time = new \DateTime("9998-01-01");
+            $release_datetime = $end_of_time->format("Y-m-d H:i:sO");
             $json = FileUtils::readJsonFile($fp);
+
             if ($json != false) {
                 $release_datetime  = $json[$file_name]['release_datetime'];
-            }
-
-            if (!isset($release_datetime)) {
-                $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
             }
 
             $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
@@ -185,34 +187,7 @@ class CourseMaterialsController extends AbstractController {
                 return "Failed to write to file {$fp}";
             }
         }
-        else{
-            foreach ($data as $filename){
-                if (!isset($filename) ||
-                    !isset($checked)) {
-                    $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
-                }
-
-                $file_name = htmlspecialchars($filename);
-
-                $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-
-                $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
-                $json = FileUtils::readJsonFile($fp);
-                if ($json != false) {
-                    $release_datetime  = $json[$file_name]['release_datetime'];
-                }
-
-                if (!isset($release_datetime)) {
-                    $release_datetime = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
-                }
-
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
-
-                if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
-                    return "Failed to write to file {$fp}";
-                }
-            }
-        }
+        
 
     }
 
@@ -233,18 +208,17 @@ class CourseMaterialsController extends AbstractController {
           return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
-
         //only one will not iterate correctly
-        if(is_string($data) || sizeof($data) == 1){
-            //so just take the single passed in
-            $filename = $filenames;
-
+        if(is_string($data)){
+            $data = [$data];
+        }
+    
+        foreach ($data as $filename){
             if (!isset($filename)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
             }
 
             $file_name = htmlspecialchars($filename);
-
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
             $checked = '0';
@@ -254,35 +228,11 @@ class CourseMaterialsController extends AbstractController {
             }
 
             $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
-
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
             }
         }
-        else{
-            foreach ($data as $filename){
-                if (!isset($filename)) {
-                    $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
-                }
-
-                $file_name = htmlspecialchars($filename);
-                $new_data_time = htmlspecialchars($newdatatime);
-
-                $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-
-                $checked = '0';
-                $json = FileUtils::readJsonFile($fp);
-                if ($json != false) {
-                    $checked  = $json[$file_name]['checked'];
-                }
-
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
-                if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
-                    return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
-                }
-            }
-        }
-
+    
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
 
@@ -334,36 +284,21 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
         }
-        $errors = array();
-        if (isset($uploaded_files[1])) {
-            $count_item = count($uploaded_files[1]["name"]);
-            for ($j = 0; $j < $count_item[1]; $j++) {
-                if (!isset($uploaded_files[1]["tmp_name"][$j]) || $uploaded_files[1]["tmp_name"][$j] === "") {
-                    $error_message = $uploaded_files[1]["name"][$j]." failed to upload. ";
-                    if (isset($uploaded_files[1]["error"][$j])) {
-                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[1]["error"][$j]). ".";
-                    }
-                    $errors[] = $error_message;
-                }
-            }
-        }
-
-        if (count($errors) > 0) {
-            $error_text = implode("\n", $errors);
-            return $this->core->getOutput()->renderResultMessage("ERROR: Upload Failed: ".$error_text, false);
-        }
 
         if (empty($uploaded_files)) {
             return $this->core->getOutput()->renderResultMessage("ERROR: No files were submitted.", false);
         }
 
+        $status = FileUtils::validateUploadedFiles($_FILES["files1"]);  
+        if(array_key_exists("failed", $status)){
+            return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
+        }
+        
         $file_size = 0;
-        if (isset($uploaded_files[1])) {
-            for ($j = 0; $j < $count_item; $j++) {
-                if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                    return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
-                }
-                $file_size += $uploaded_files[1]["size"][$j];
+        foreach ($status as $stat) {
+            $file_size += $stat['size'];
+            if($stat['success'] === false){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
             }
         }
 
@@ -387,6 +322,7 @@ class CourseMaterialsController extends AbstractController {
             $upload_path = $upload_nested_path;
         }
 
+        $count_item = count($status);   
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
