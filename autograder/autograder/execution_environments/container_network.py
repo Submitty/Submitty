@@ -253,7 +253,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     router_connections = dict()
 
     network_num = 10
-    subnet = 0
+    subnet = 1
     # Assumes untrustedXX naming scheme, where XX is a number
     untrusted_num = int(self.untrusted_user.replace('untrusted','')) + 100
     ip_address_start = f'{network_num}.{untrusted_num}'
@@ -277,7 +277,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       network = client.networks.create(network_name, ipam=ipam_config, driver='bridge', internal=True)
 
       # We connectt the container with host=1. Later we'll connect the router with host=2
-      container_ip = f'{network_num}.{untrusted_num}.{subnet}.1'
+      container_ip = f'{network_num}.{untrusted_num}.{subnet}.2'
       container.set_ip_address(network_name, container_ip)
 
       network.connect(container.container, ipv4_address=ip_address, aliases=[actual_name,])
@@ -290,12 +290,17 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         connected_machines = container.outgoing_connections
 
       for connected_machine in container.outgoing_connections:
+        if connected_machine == 'router':
+          continue
+
         if connected_machine == container.name:
-            continue
+          continue
+
         if not container.name in router_connections:
-            router_connections[container.name] = list()
+          router_connections[container.name] = list()
+
         if not connected_machine in router_connections:
-            router_connections[connected_machine] = list()
+          router_connections[connected_machine] = list()
         #The router must be in both endpoints' network, and must connect to all endpoints on a network simultaneously,
         #  so we group together all connections here, and then connect later.
         router_connections[container.name].append(connected_machine)
@@ -305,17 +310,16 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       full_startpoint_name = f'{self.untrusted_user}_{startpoint}'
       network_name = f"{full_startpoint_name}_network"
       # Store the ip address of the router on this network
-      router_ip = f'{network_num}.{untrusted_num}.{container_to_subnet[startpoint]}.2'
+      router_ip = f'{network_num}.{untrusted_num}.{container_to_subnet[startpoint]}.3'
       router.set_ip_address(network_name, router_ip)
 
-      # aliases = []
-      # for endpoint in endpoints:
-      #   if endpoint in aliases:
-      #     continue
-      #   #aliases.append('--alias')
-      #   aliases.append(endpoint)
+      aliases = []
+      for endpoint in endpoints:
+        if endpoint in aliases:
+          continue
+        aliases.append(endpoint)
       network = self.get_network_with_name(network_name)
-      network.connect(router, ipv4_address=router_ip, aliases=endpoints)
+      network.connect(router, ipv4_address=router_ip, aliases=aliases)
 
   def cleanup_networks(self):
     """ Destroy all created networks. """
@@ -333,8 +337,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     container's directory which specify how to connect to other endpoints
     on the container's network (hostname, port).
     """
-    tcp_connection_list = list()
-    udp_connection_list = list()
 
     #writing complete knownhost JSON to the container directory
     networked_containers = self.get_standard_containers(containers)
@@ -362,7 +364,19 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         # If there is a router, the router is impersonating all other
         # containers, but has only one ip address.
         if router is not None:
-          ip_address = router.get_ip_address(network_name)
+          # Even if we are injecting the router, we know who WE are.
+          if container.name == connected_container_name:
+            network_name =  f"{container.full_name}_network"
+            ip_address = name_to_ip[container.name][network_name]
+          # If this node is not the router, we must inject the router
+          elif container.name != 'router':
+            # Get the router's ip on outer's network
+            network_name =  f"{container.full_name}_network"
+            ip_address = name_to_ip['router'][network_name]
+          else:
+            # If we are the router, get the connected container's ip on its own network
+            network_name =  f"{self.untrusted_user}_{connected_container_name}_network"
+            ip_address = name_to_ip[connected_container_name][network_name]
         else:
           ip_address = connected_container.get_ip_address(f'{self.untrusted_user}_routerless_network')
 
