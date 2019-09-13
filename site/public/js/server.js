@@ -1056,12 +1056,12 @@ function check_lichen_jobs(url, semester, course) {
     $.get(url,
         function(data) {
             var last_data = localStorage.getItem("last_data");
-            if (data == "REFRESH_ME") {
+            if (data === "REFRESH_ME") {
                 last_data= "REFRESH_ME";
                 localStorage.setItem("last_data", last_data);
                 window.location.href = buildCourseUrl(['plagiarism']);
             }
-            else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
+            else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
                 window.location.href = buildCourseUrl(['plagiarism']);

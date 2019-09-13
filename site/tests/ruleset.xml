@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<ruleset name="SubmittyStandard">
+    <description>Non-Complete Standard for the Submitty Project</description>
+    <rule ref="Submitty" />
+
+    <file>../app</file>
+    <exclude-pattern>*/controllers/*</exclude-pattern>
+    <exclude-pattern>*/libraries/*</exclude-pattern>
+    <exclude-pattern>*/models/*</exclude-pattern>
+    <exclude-pattern>*/templates/*</exclude-pattern>
+    <exclude-pattern>*/views/*</exclude-pattern>
+</ruleset>

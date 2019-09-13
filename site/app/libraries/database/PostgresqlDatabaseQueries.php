@@ -24,8 +24,15 @@ use app\models\SimpleStat;
 
 class PostgresqlDatabaseQueries extends DatabaseQueries{
 
-    public function getUserById($user_id) {
-        $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
+    //given a user_id check the users table for a valid entry, returns a user object if found, null otherwise
+    //if is_numeric is true, the numeric_id key will be used to lookup the user
+    //this should be called through getUserById() or getUserByNumericId()
+    private function getUser($user_id, $is_numeric = false ){
+        if(!$is_numeric){
+            $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
+        }else{
+            $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id=?", array($user_id));
+        }
 
         if ($this->submitty_db->getRowCount() === 0) {
             return null;
@@ -35,25 +42,25 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
 
         if ($this->course_db) {
             $this->course_db->query("
-SELECT u.*, ns.merge_threads, ns.all_new_threads,
-       ns.all_new_posts, ns.all_modifications_forum,
-       ns.reply_in_post_thread,ns.team_invite,
-       ns.team_member_submission, ns.team_joined,
-       ns.self_notification,
-       ns.merge_threads_email, ns.all_new_threads_email,
-       ns.all_new_posts_email, ns.all_modifications_forum_email,
-       ns.reply_in_post_thread_email, ns.team_invite_email, 
-       ns.team_member_submission_email, ns.team_joined_email,
-       ns.self_notification_email,sr.grading_registration_sections
-       
-FROM users u
-LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
-LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
-) as sr ON u.user_id=sr.user_id
-WHERE u.user_id=?", array($user_id));
+            SELECT u.*, ns.merge_threads, ns.all_new_threads,
+                 ns.all_new_posts, ns.all_modifications_forum,
+                 ns.reply_in_post_thread,ns.team_invite,
+                 ns.team_member_submission, ns.team_joined,
+                 ns.self_notification,
+                 ns.merge_threads_email, ns.all_new_threads_email,
+                 ns.all_new_posts_email, ns.all_modifications_forum_email,
+                 ns.reply_in_post_thread_email, ns.team_invite_email, 
+                 ns.team_member_submission_email, ns.team_joined_email,
+                 ns.self_notification_email,sr.grading_registration_sections
+     
+            FROM users u
+            LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
+            LEFT JOIN (
+              SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+              FROM grading_registration
+              GROUP BY user_id
+            ) as sr ON u.user_id=sr.user_id
+            WHERE u.user_id=?", array($user_id));
 
             if ($this->course_db->getRowCount() > 0) {
                 $user = $this->course_db->row();
@@ -65,6 +72,25 @@ WHERE u.user_id=?", array($user_id));
         }
 
         return new User($this->core, $details);
+    }
+
+    public function getUserById($user_id) {
+        return $this->getUser($user_id);
+    }
+
+    public function getUserByNumericId($numeric_id) {
+        return $this->getUser($numeric_id, true);
+    }
+
+    //looks up if the given id is a user_id, if null will then check
+    //the numerical_id table
+    public function getUserByIdOrNumericId($id){
+        $ret = $this->getUser($id);
+        if($ret === null ){
+            return $this->getUser($id, true);
+        }
+
+        return $ret;
     }
 
     public function getGradingSectionsByUserId($user_id) {

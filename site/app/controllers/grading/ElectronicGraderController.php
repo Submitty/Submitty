@@ -229,10 +229,12 @@ class ElectronicGraderController extends AbstractController {
         $autograded_average = null;
         $overall_average = null;
         $overall_scores = null;
+        $order = null;
         $num_submitted = array();
         $num_unsubmitted = 0 ;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
+
         $regrade_requests = $this->core->getQueries()->getNumberGradeInquiries($gradeable_id, $gradeable->isGradeInquiryPerComponentAllowed());
         if ($peer) {
             $peer_grade_set = $gradeable->getPeerGradeSet();
@@ -381,7 +383,7 @@ class ElectronicGraderController extends AbstractController {
 
         $show_warnings = $this->core->getAccess()->canI("grading.electronic.status.warnings");
 
-        if ($gradeable->isTeamAssignment()) {
+        if (isset($order) && $gradeable->isTeamAssignment()) {
             $total_students_submitted = 0;
             foreach ($order->getSortedGradedGradeables() as $g) {
                 $team = $g->getSubmitter()->getTeam();
