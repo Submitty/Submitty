@@ -2,7 +2,6 @@
     "hide_submitted_files" : true,
     "hide_version_and_test_details" : true,
 
-    
     "assignment_message" : "To better accomodate students for the tests and final exam, please let us know if you are left-handed or right-handed.  \nWe will use this information to make the seating assignments.",
     "autograding": {
         "submission_to_validation" : [ "left_right.txt" ],
@@ -23,12 +22,5 @@
         }
     ],
     "testcases": [
-/*    	{
-    	    "type" : "FileCheck",
-    	    "title" : "Review",
-    	    "actual_file" : "left_right.txt",
-    	    "points" : 0
-    	}
-*/
     ]
 }

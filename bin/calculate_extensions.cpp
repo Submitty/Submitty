@@ -151,7 +151,7 @@ int main(int argc, char* argv[]) {
   for (unsigned int i = 0; i < testcases.size(); i++) { std::cout << " " << testcases[i]; }
   std::cout << std::endl;
 
-  
+
   std::map<std::string,std::map<int,std::pair<int,int> > > data;
 
 
