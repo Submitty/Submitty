@@ -246,14 +246,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $_FILES = array();
         //create a file
         $name = "foo.txt";
-        $_POST['fn'] = array($name);
+        $_POST['fn'] = array($this->upload_path . "/" .  $name);
         file_put_contents($this->upload_path . "/" .  $name, 'a');
         $this->buildFakeFile($name);
 
         //'upload it'
         $ret = $controller->ajaxUploadCourseMaterialsFiles();
 
-        $controller->modifyCourseMaterialsFilePermission($this->upload_path . "/" . $name, 0);
+        $controller->modifyCourseMaterialsFilePermission('0');
         $json = FileUtils::readJsonFile($this->json_path);
 
         $expected_json = [
