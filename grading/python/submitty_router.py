@@ -106,7 +106,6 @@ class submitty_router():
       self.known_hosts = data['hosts']
 
   def get_hostname_with_ip(self, ip_address):
-    print(f'looking up {ip_address}')
     for host, details in self.known_hosts.items():
       if details['ip_address'] == ip_address:
         return host
@@ -170,7 +169,6 @@ class submitty_router():
 
   def listen_for_tcp(self, recipient, recv_port):
     recipient = f'{recipient}_Actual'
-    print(f'Hooking up tcp {recipient} {recv_port}')
     listener_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     listener_socket.bind(('', recv_port))
     listener_socket.listen(5)
@@ -210,7 +208,6 @@ class submitty_router():
       message = listen_socket.recv(1024)
 
       if message == b'':
-        print('closing socket.')
         try:
           listen_socket.close()
         except socket.error:

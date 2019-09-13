@@ -32,7 +32,8 @@ class Container():
     # If we are in production, we need to run as an untrusted user inside of our docker container.
     self.container_user_argument = str(getpwnam(untrusted_user).pw_uid)
     self.full_name = f'{untrusted_user}_{self.name}'
-    self.number_of_ports = container_info.get('number_of_ports', 1)
+    self.tcp_port_range = container_info['tcp_port_range']
+    self.udp_port_range = container_info['udp_port_range']
     # This will be populated later
     self.return_code = None
     self.log_function = log_function
@@ -121,14 +122,22 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     # else, create a single default container.
     if len(container_specs) > 0:
       greater_than_one = True if len(container_specs) > 1 else False
+      current_tcp_port = 9000
+      current_udp_port = 15000
       for container_spec in container_specs:
+        container_spec['tcp_port_range'] = (current_tcp_port, current_tcp_port + container_spec.get('number_of_ports', 1) - 1)
+        container_spec['udp_port_range'] = (current_udp_port, current_udp_port + container_spec.get('number_of_ports', 1) - 1)
+        current_udp_port += container_spec.get('number_of_ports', 1)
+        current_tcp_port += container_spec.get('number_of_ports', 1)
         containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), greater_than_one, self.is_test_environment, self.log_message))
     else:
       container_spec = {
         'container_name'  : f'temporary_container',
         'container_image' : 'ubuntu:custom', 
         'server' : False,
-        'outgoing_connections' : []
+        'outgoing_connections' : [],
+        'tcp_port_range' : (9000, 9000),
+        'udp_port_range' : (1500, 1500)
       }
       containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), False, self.is_test_environment, self.log_message))
     self.containers = containers
@@ -138,7 +147,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     # execution containers (above), but do not add a default container if they are not present.
     solution_containers = list()
     greater_than_one_solution_container = True if len(solution_container_specs) > 1 else False
+    current_tcp_port = 9000
+    current_udp_port = 15000
     for solution_container_spec in solution_container_specs:
+      solution_container_spec['tcp_port_range'] = (current_tcp_port, current_tcp_port + solution_container_spec.get('number_of_ports', 1) - 1)
+      solution_container_spec['udp_port_range'] = (current_udp_port, current_udp_port + solution_container_spec.get('number_of_ports', 1) - 1)
+      current_udp_port += solution_container_spec.get('number_of_ports', 1)
+      current_tcp_port += solution_container_spec.get('number_of_ports', 1)
       solution_containers.append(Container(solution_container_spec, untrusted_user, self.random_output_directory, greater_than_one_solution_container, self.is_test_environment, self.log_message))
     self.solution_containers = solution_containers
 
@@ -249,14 +264,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     """
     client = docker.from_env()
 
-    router = self.get_container_with_name('router', containers).container
+    router = self.get_container_with_name('router', containers)
     router_connections = dict()
 
     network_num = 10
     subnet = 1
     # Assumes untrustedXX naming scheme, where XX is a number
     untrusted_num = int(self.untrusted_user.replace('untrusted','')) + 100
-    ip_address_start = f'{network_num}.{untrusted_num}'
     container_to_subnet = dict()
 
     for container in containers:
@@ -280,7 +294,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       container_ip = f'{network_num}.{untrusted_num}.{subnet}.2'
       container.set_ip_address(network_name, container_ip)
 
-      network.connect(container.container, ipv4_address=ip_address, aliases=[actual_name,])
+      network.connect(container.container, ipv4_address=container_ip, aliases=[actual_name,])
       self.networks.append(network)
 
       #The router pretends to be all dockers on this network.
@@ -289,7 +303,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       else:
         connected_machines = container.outgoing_connections
 
-      for connected_machine in container.outgoing_connections:
+      for connected_machine in connected_machines:
         if connected_machine == 'router':
           continue
 
@@ -319,7 +333,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
           continue
         aliases.append(endpoint)
       network = self.get_network_with_name(network_name)
-      network.connect(router, ipv4_address=router_ip, aliases=aliases)
+      network.connect(router.container, ipv4_address=router_ip, aliases=aliases)
 
   def cleanup_networks(self):
     """ Destroy all created networks. """
@@ -339,14 +353,11 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     """
 
     #writing complete knownhost JSON to the container directory
-    networked_containers = self.get_standard_containers(containers)
     router = self.get_router(containers)
 
-    sorted_networked_containers = sorted(networked_containers, key=lambda x: x.name)
+    sorted_networked_containers = sorted(containers, key=lambda x: x.name)
     for container in sorted_networked_containers:
       knownhosts_location = os.path.join(container.directory, 'knownhosts.json')
-      current_tcp_port = 9000
-      current_udp_port = 15000
       container_knownhost = dict()
       container_knownhost['hosts'] = dict()
 
@@ -354,41 +365,41 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         connections = [x.name for x in containers]
       else:
         connections = container.outgoing_connections
+      if not container.name in connections:
+        connections.append(container.name)
 
       sorted_connections = sorted(connections)
       for connected_container_name in sorted_connections:
         connected_container = self.get_container_with_name(connected_container_name, containers)
         network_name =  f"{container.full_name}_network"
-        num_ports = connected_container.number_of_ports
-
         # If there is a router, the router is impersonating all other
         # containers, but has only one ip address.
         if router is not None:
           # Even if we are injecting the router, we know who WE are.
-          if container.name == connected_container_name:
+          if container.name == 'router' and connected_container_name == 'router':
+            continue
+          elif container.name == connected_container_name:
             network_name =  f"{container.full_name}_network"
-            ip_address = name_to_ip[container.name][network_name]
+            ip_address = container.get_ip_address(network_name)
           # If this node is not the router, we must inject the router
           elif container.name != 'router':
-            # Get the router's ip on outer's network
+            # Get the router's ip on the container's network
             network_name =  f"{container.full_name}_network"
-            ip_address = name_to_ip['router'][network_name]
+            ip_address = router.get_ip_address(network_name)
           else:
             # If we are the router, get the connected container's ip on its own network
             network_name =  f"{self.untrusted_user}_{connected_container_name}_network"
-            ip_address = name_to_ip[connected_container_name][network_name]
+            ip_address = connected_container.get_ip_address(network_name)
         else:
           ip_address = connected_container.get_ip_address(f'{self.untrusted_user}_routerless_network')
 
         container_knownhost['hosts'][connected_container.name] = {
-          'tcp_start_port' : current_tcp_port,
-          'tcp_end_port'   : current_tcp_port + num_ports - 1,
-          'udp_start_port' : current_udp_port,
-          'udp_end_port'   : current_udp_port + num_ports - 1,
+          'tcp_start_port' : connected_container.tcp_port_range[0],
+          'tcp_end_port'   : connected_container.tcp_port_range[1],
+          'udp_start_port' : connected_container.udp_port_range[0],
+          'udp_end_port'   : connected_container.udp_port_range[1],
           'ip_address'     : ip_address
         }
-        current_udp_port += num_ports
-        current_tcp_port += num_ports
 
       with open(knownhosts_location, 'w') as outfile:
         json.dump(container_knownhost, outfile, indent=4)
@@ -403,15 +414,11 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     """
     tcp_connection_list = list()
     udp_connection_list = list()
-    current_tcp_port = 9000
-    current_udp_port = 15000
 
     sorted_containers = sorted(containers, key=lambda x: x.name)
     for container in sorted_containers:
-      tcp_connection_list.append([container.name, current_tcp_port])
-      udp_connection_list.append([container.name, current_udp_port])
-      current_tcp_port += 1
-      current_udp_port += 1  
+      tcp_connection_list.append([container.name, container.tcp_port_range[0]])
+      udp_connection_list.append([container.name, container.udp_port_range[0]])
 
 
     #writing complete knownhosts csvs to input directory'
