@@ -4,11 +4,14 @@ import csv
 import traceback
 import queue
 import errno
+import json
 from time import sleep
 import os
 import datetime
 import random
-from datetime import timedelta  
+from datetime import timedelta
+import threading 
+import time
 
 class submitty_router():
   '''
@@ -24,10 +27,12 @@ class submitty_router():
     self.execution_start_time = None
     self.log_file = log_file
     self.sequence_diagram_file = 'sequence_diagram.txt'
-    self.switchboard = {}
+    self.known_hosts = None
     self.ports = list()
+    # Priority queue is thread safe.
     self.p_queue = queue.PriorityQueue()
     self.running = False
+    self.udp_sockets = dict()
 
   ##################################################################################################################
   # INSTRUCTOR FUNCTIONS
@@ -54,14 +59,6 @@ class submitty_router():
   def manipulate_received_message(self, data):
     return data
 
-
-  ##################################################################################################################
-  # LOGGING FUNCTIONS
-  ##################################################################################################################
-  def convert_queue_obj_to_string(self, obj):
-    str = '\tSENDER: {0}\n\tRECIPIENT: {1}\n\tPORT: {2}\n\tCONTENT: {3}'.format(obj['sender'], obj['recipient'], obj['port'], obj['message'])
-    return str
-
   def log(self, line):
     if os.path.exists(self.log_file):
       append_write = 'a' # append if already exists
@@ -73,17 +70,18 @@ class submitty_router():
     print(line)
     sys.stdout.flush()
 
+
   def write_sequence_file(self, obj, status, message_type):
     append_write = 'a' if os.path.exists(self.sequence_diagram_file) else 'w'
 
     #select the proper arrow type for the message
     if status == 'success':
-      arrow = '->>' if message_type == 'tcp' else '-->>'
+      arrow = '->>' #if message_type == 'tcp' else '-->>'
     else:
-      arrow = '-x' if message_type == 'tcp' else '--x'
+      arrow = '-x' #if message_type == 'tcp' else '--x'
 
-    sender = obj['sender'].replace('_Actual', '')
-    recipient = obj['recipient'].replace('_Actual', '')
+    sender = obj['sender']
+    recipient = obj['recipient']
 
     with open(self.sequence_diagram_file, append_write) as outfile:
       outfile.write('{0}{1}{2}: {3}\n'.format(sender, arrow, recipient, str(obj['message'])))
@@ -91,278 +89,218 @@ class submitty_router():
         outfile.write('Note over {0},{1}: {2}\n'.format(sender, recipient, obj['diagram_label']))
 
 
-  ##################################################################################################################
-  # SWITCHBOARD FUNCTION
-  ##################################################################################################################
+  """
+  {
+    "alpha" : {
+      ip_address : "xxx.xxx.xxx.xxx",
+      "udp_start_port" : num,
+      "udp_end_port" : num,
+      "tcp_start_port" : num,
+      "tcp_end_port" : num
+    }
+  }
+  """
+  def parse_knownhosts(self):
+    with open('knownhosts.json', 'r') as infile:
+      data = json.load(infile)
+      self.known_hosts = data['hosts']
 
-  '''
-  knownhosts_tcp.txt and knownhosts_udp.txt are of the form
-  sender recipient port_number
-  such that sender sends all communications to recipient via port_number. 
-  '''
-  def build_switchboard(self):
-    try:
-      #Read the known_hosts.csv see the top of the file for the specification
-      for connection_type in ["tcp", "udp"]:
-        filename = 'knownhosts_{0}.txt'.format(connection_type)
-        with open(filename, 'r') as infile:
-          content = infile.readlines()    
-          
-        for line in content:
-          sender, recipient, port = line.split()
-          #Strip away trailing or leading whitespace
-          sender = '{0}_Actual'.format(sender.strip())
-          recipient = '{0}_Actual'.format(recipient.strip())
-          port = port.strip()
-
-          if not port in self.ports:
-            self.ports.append(port)
-          else:
-            raise SystemExit("ERROR: port {0} was encountered twice. Please keep all ports independant.".format(port))
-
-          self.switchboard[port] = {}
-          self.switchboard[port]['connection_type'] = connection_type
-          self.switchboard[port]['sender'] = sender
-          self.switchboard[port]['recipient'] = recipient
-          self.switchboard[port]['connected'] = False
-          self.switchboard[port]['connection'] = None
-    except IOError as e:
-      self.log("ERROR: Could not read {0}.".format(filename))
-      self.log(traceback.format_exc())
-    except ValueError as e:
-      self.log("ERROR: {0} was improperly formatted. Please include lines of the form (SENDER, RECIPIENT, PORT)".format(filename))
-    except Exception as e:
-      self.log('Encountered an error while reading and parsing {0}'.format(filename))
-      self.log(traceback.format_exc())
+  def get_hostname_with_ip(self, ip_address):
+    for host, details in self.known_hosts.items():
+      if details['ip_address'] == ip_address:
+        return host
+    raise Exception(f'unknown ip {ip_address}')
 
 
-  ##################################################################################################################
-  # OUTGOING CONNECTION/QUEUE FUNCTIONS
-  ##################################################################################################################
-
-
-  def connect_outgoing_socket(self, port):
-    if self.switchboard[port]['connected']:
-      return
-
-    connection_type = self.switchboard[port]["connection_type"]
-
-    recipient = self.switchboard[port]['recipient']
-    server_address = (recipient, int(port))
-
-    if connection_type == 'tcp':
-      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-      sock.connect(server_address)
-    else:
-      sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    #We catch errors one level up.
-    name = recipient.replace('_Actual', '')
-    self.log("Established outgoing connection to {0} on port {1}".format(name, port))
-    self.switchboard[port]['connected'] = True
-    self.switchboard[port]['outgoing_socket'] = sock
-
-  def send_outgoing_message(self, data):
-    status = 'unset'
-    message_type = 'unset'
-    try:
-      drop_message = data.get('drop_message', False)
-      port = data['port']
-      message = data['message']
-      sock = self.switchboard[port]['outgoing_socket']
-      recipient = data['recipient']
-    except:
-      status = 'router_error'
-      self.log("An error occurred internal to the router. Please report the following error to a Submitty Administrator")
-      self.log(traceback.format_exc())
-      self.write_sequence_file(data, status, message_type)
-      return
-    try:
-      message_type = self.switchboard[port]['connection_type']
-      if drop_message:
-        success = "dropped"
-        self.log("Choosing not to deliver message {!r} to {}".format(message, recipient.replace('_Actual', '')))
-      elif message_type == 'tcp':
-        sock.sendall(message)
-        self.log('Sent message {!r} to {}'.format(message,recipient.replace('_Actual', '')))
-        status = 'success'
-      else:
-        destination_address = (recipient, int(port))
-        sock.sendto(message,destination_address)
-        self.log('Sent message {!r} to {}'.format(message,recipient.replace('_Actual', '')))
-        status = 'success'
-    except:
-      self.log('Could not deliver message {!r} to {}'.format(message,recipient))
-      self.switchboard[port]['connected'] = False
-      self.switchboard[port]['connection'].close()
-      self.switchboard[port]['connection'] = None
-      status = 'failure'
-    self.write_sequence_file(data, status, message_type)
-
-  def process_queue(self):
-    # The still_going variable/loop protects us against multiple 
-    #  enqueued items with the same send time.
-    still_going = True
-    while still_going:
+  def handle_queue(self):
+    while self.running:
       try:
         now = datetime.datetime.now()
         #priority queue has no peek function due to threading issues.
         #  as a result, pull it off, check it, then put it back on.
         value = self.p_queue.get_nowait()
         if value[0] <= now:
-          self.send_outgoing_message(value[1])
+          self.forward_message(value[1])
         else:
           self.p_queue.put(value)
-          still_going = False
       except queue.Empty:
-        still_going = False
-
-
-  ##################################################################################################################
-  # INCOMING CONNECTION FUNCTIONS
-  ##################################################################################################################
-
-  def connect_incoming_sockets(self):
-    for port in self.ports:
-      self.open_incoming_socket(port)
-
-  def open_incoming_socket(self, port):
-    # Create a TCP/IP socket
-
-    connection_type = self.switchboard[port]['connection_type']
-    sender = self.switchboard[port]['sender']
-
-    if connection_type == "tcp":
-      sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    elif connection_type == "udp":
-      sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    else:
-      self.log("ERROR: bad connection type {0}. Please contact an administrator".format(connection_type))
-      sys.exit(1)
-
-    #Bind the socket to the port
-    server_address = ('', int(port))
-    sock.bind(server_address)
-    sock.setblocking(False)
-
-    self.log('Bound socket port {0}'.format(port))
-
-    if connection_type == 'tcp':
-      #listen for at most 1 incoming connections at a time.
-      sock.listen(1)
-
-    self.switchboard[port]['incoming_socket'] = sock
-
-    if connection_type == 'udp':
-      self.switchboard[port]['connection'] = sock
-
-  def listen_to_sockets(self):
-    for port in self.ports:
-      try:
-        connection_type = self.switchboard[port]["connection_type"]
-        if connection_type == 'tcp':
-          if self.switchboard[port]["connection"] == None:
-            sock = self.switchboard[port]['incoming_socket']
-            # Accept the message
-            connection, client_address = sock.accept()
-            # Set the connection to non_blocking
-            connection.setblocking(False)
-            self.switchboard[port]['connection'] = connection
-            name = self.switchboard[port]['sender'].replace('_Actual', '')
-            self.log('established connection with {0} on port {1}'.format(name, port))
-          else:
-            connection = self.switchboard[port]['connection']
-        elif connection_type == 'udp':
-            connection = self.switchboard[port]["connection"]
-        else:
-          self.log('Invalid connection type {0}. Please contact an administrator with this error.'.format(connection_type))
-          sys.exit(1)
-
-        #TODO: May have to the max recvfrom size.
-        #The recvfrom call will raise a OSError if there is nothing to receive. 
-        message, snd = connection.recvfrom(4096)
-        sender = self.switchboard[port]['sender'].replace("_Actual", "")
-
-        if message.decode('utf-8') == '' and connection_type == 'tcp':
-          self.log('Host {0} disconnected on port {1}.'.format(sender,port))
-          self.switchboard[port]['connected'] = False
-          self.switchboard[port]['connection'].close()
-          self.switchboard[port]['connection'] = None
-          continue
-
-        self.log('Received message {!r} from {} on port {}'.format(message,sender,port))
-
-        #if we did not error:
-        self.connect_outgoing_socket(port)
-        recipient = self.switchboard[port]['recipient']
-        
-        self.messages_intercepted += 1
-
-        now = datetime.datetime.now()
-        data = {
-          'sender' : sender,
-          'recipient' : recipient, 
-          'port' : port,
-          'message' : message,
-          'message_number' : self.messages_intercepted,
-          'receipt_time' : now,
-          'forward_time' : now,
-          'time_since_test_start' : now - self.execution_start_time,
-          'drop_message' : False,
-          'diagram_label' : None
-        }
-        
-        tup = self.manipulate_received_message(data)
-
-        self.p_queue.put((data['forward_time'], data))
-      except socket.timeout as e:
-        #This is likely an acceptable error caused by non-blocking sockets having nothing to read.
-        err = e.args[0]
-        if err == 'timed out':
-          self.log('no data')
-        else:
-          self.log('real error!')
-          self.log(traceback.format_exc())
-      except BlockingIOError as e:
+        # Sleep a thousandth of a second.
+        time.sleep(.001)
         pass
-      except ConnectionRefusedError as e:
-        #this means that connect_outgoing_tcp didn't work.
-        self.log('Connection on outgoing channel not established. Message dropped.')
-        self.log(traceback.format_exc())
-        self.switchboard[port]['connected'] = False
-      except socket.gaierror as e:
-        self.log("Unable to connect to unknown/not set up entity.")
-        self.log(traceback.format_exc())
-      except Exception as e:
-        self.log("ERROR: error listening to socket {0}".format(port))
-        self.log(traceback.format_exc())
+
+  def forward_message(self, data):
+    status = 'unset'
+    message_type = 'unset'
+    
+    try:
+      drop_message = data.get('drop_message', False)
+      send_port = data['send_port']
+      recv_port = data['recv_port']
+      message = data['message']
+      sock = data['socket']
+      recipient = data['recipient']
+      message_type = data['socket_type']
+    except:
+      status = 'router_error'
+      self.log("An error occurred internal to the router. Please report the following error to a Submitty Administrator")
+      self.log(traceback.format_exc())
+      return
+    
+    try:
+      if drop_message:
+        success = "dropped"
+        self.log("Choosing not to deliver message {!r} to {}".format(message, recipient))
+      elif message_type == 'tcp':
+        sock.sendall(message)
+        self.log(f'Delivered the message {data["sender"]} -> {data["recipient"]}: {data["message"]}')
+        status = 'success'
+      else:
+        destination_address = (recipient, int(recv_port))
+        sock.sendto(message, destination_address)
+        self.log(f'Delivered the message ({data["sender"]} {send_port}) -> ({recipient} {recv_port}): {data["message"]}')
+        status = 'success'
+    except:
+      self.log('Could not deliver message {!r} to {}'.format(message,recipient))
+      traceback.print_exc()
+      # TODO: close the socket here?
+      status = 'failure'
+    self.write_sequence_file(data, status, message_type)
 
 
-  ##################################################################################################################
-  # CONTROL FUNCTIONS
-  ##################################################################################################################
+  def listen_for_tcp(self, recipient, recv_port):
+    recipient = f'{recipient}_Actual'
+    listener_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    listener_socket.bind(('', recv_port))
+    listener_socket.listen(5)
+    listener_socket.settimeout(1)
+
+    while self.running:
+      try:
+        (clientsocket, address) = listener_socket.accept()
+      except socket.timeout as e:
+        continue
+
+      try:
+        sender = self.get_hostname_with_ip(address[0])
+      except Exception:
+        print(f"ERROR: we don't know the address {address[0]}")
+        print(json.dumps(self.known_hosts,indent=4))
+        continue
+
+      try:
+        serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        serversocket.connect((recipient, recv_port))
+      except Exception:
+        # TODO: Write to sequence diagram in this case.
+        clientsocket.close()
+        continue
+
+      client_handler = threading.Thread(target=self.handle_tcp_throughput, args=(clientsocket, serversocket, sender, recipient, 'client'))
+      server_handler = threading.Thread(target=self.handle_tcp_throughput, args=(serversocket, clientsocket, recipient, sender, 'server'))
+      client_handler.start()
+      server_handler.start()
 
 
-  #Do everything that should happen before multiprocessing kicks in.
+  def handle_tcp_throughput(self, listen_socket, forward_socket, listen_name, forward_name, printable):
+
+    disconnected = False
+    while self.running and not disconnected:
+      message = listen_socket.recv(1024)
+
+      if message == b'':
+        try:
+          listen_socket.close()
+        except socket.error:
+          pass
+
+        disconnected = True
+
+      else: # if echo_request == False:
+        recv_port = listen_socket.getsockname()[1]
+        self.enqueue_message(listen_name, forward_name, recv_port, recv_port, message, forward_socket, 'tcp')
+
+
+  def handle_udp_connection(self, recipient, recv_port, udp_socket):
+    recipient = f'{recipient}_Actual'
+
+    while self.running:
+      try:
+        msg, addr = udp_socket.recvfrom(1024)
+      except socket.timeout as e:
+        continue
+      try:
+        sender = self.get_hostname_with_ip(addr[0])
+      except Exception:
+        print(f"ERROR: we don't know this address {addr[0]}")
+        continue
+      send_port = addr[1]
+      # TODO: Need to grab socket with the correct outgoing port, can't just use this udp_socket 
+      if send_port not in self.udp_sockets:
+        # We need to create and listen to a new socket.
+        forward_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        forward_socket.bind(('', send_port))
+        forward_socket.settimeout(1)
+        self.udp_sockets[send_port] = forward_socket
+
+        t = threading.Thread(target = self.handle_udp_connection, args=(recipient, send_port, forward_socket))
+        t.start()
+      else:
+        forward_socket = self.udp_sockets[send_port]
+
+      self.enqueue_message(sender, recipient, send_port, recv_port, msg, forward_socket, 'udp')
+
+
+  def enqueue_message(self, sender, recipient, send_port, recv_port, message, socket, socket_type):
+    self.log(f'Enqueueing a new message ({sender}, {send_port})-({socket_type})-> ({recipient}, {recv_port}): {message}')
+    now = datetime.datetime.now()
+    data = {
+      'sender' : sender,
+      'recipient' : recipient, 
+      'recv_port' : recv_port,
+      'send_port' : send_port,
+      'socket' : socket,
+      'message' : message,
+      'socket_type' : socket_type,
+      'message_number' : self.messages_intercepted,
+      'receipt_time' : now,
+      'forward_time' : now,
+      'time_since_test_start' : now - self.execution_start_time,
+      'drop_message' : False,
+      'diagram_label' : None
+    }
+    
+    tup = self.manipulate_received_message(data)
+
+    self.p_queue.put((data['forward_time'], data))
+
+
   def init(self):
-    self.log('Booting up the router...')
-    self.build_switchboard()
-    #Only supporting tcp at the moment.
-    self.log('Connecting incoming sockets...')
-    self.connect_incoming_sockets()
+    self.parse_knownhosts()
 
   def run(self):
     self.running = True
-    #sleep(1)
     self.execution_start_time = datetime.datetime.now()
-    self.log('Listening for incoming connections...')
-    while self.running:
-      self.listen_to_sockets()
-      self.process_queue()
+    for host, details in self.known_hosts.items():
+      # Start tcp threads
+      for port in range(details['tcp_start_port'], details['tcp_end_port'] + 1):
+        t = threading.Thread(target = self.listen_for_tcp, args=(host, port))
+        t.start()
 
+      # Start udp threads
+      for port in range(details['udp_start_port'], details['udp_end_port'] + 1):
+        print(f'Hooking up udp {host} {port}')
+        udp_socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        udp_socket.bind(('', port))
+        udp_socket.settimeout(1)
+        self.udp_sockets[port] = udp_socket
+        t = threading.Thread(target = self.handle_udp_connection, args=(host, port, udp_socket))
+        t.start()
+    queue_thread = threading.Thread(target=self.handle_queue)
+    queue_thread.start()
+    queue_thread.join()
+    self.running = False
 
 if __name__ == '__main__':
   router = submitty_router()
   router.init()
   router.run()
-
