@@ -13,4 +13,4 @@ coverage:
 
 comment:
   layout: "reach, diff, flags"
-  behavior: default
+  behavior: once
