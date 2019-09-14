@@ -7,12 +7,14 @@ ignore:
 
 coverage:
   status:
-    project: false
+    project:
+      default: false
+      migrator:
+        flags: migrator
+        target: 100%
     patch: false
     changes: false
-    migrator:
-      flags: migrator
-      target: 100%
+
 
 flags:
   php:
@@ -30,4 +32,4 @@ flags:
 
 comment:
   layout: "reach, diff, flags"
-  behavior: default
+  behavior: once

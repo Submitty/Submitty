@@ -327,6 +327,10 @@
             "type" : "string",
             "description" : "The default docker image from which containers should be built."
           },
+          "number_of_ports" : {
+            "type" : "integer",
+            "description" : "A default number of ports to be assigned to each container on a network."
+          },
           "single_port_per_container" : {
             "type" : "boolean",
             "description" : "Specifies whether container communications should happen over a single port per container."
@@ -867,6 +871,10 @@
         "container_name" : {
           "type" : "string",
           "description" : "When grading using 'autograding_method' : 'docker', container_name defines 1) The name by which this container may be contacted on a network, 2. If there are more than one containers being used, the name of the folder in which the container output will be stored."
+        },
+        "number_of_ports" : {
+          "type" : "integer",
+          "description" : "The number of ports to be assigned to this container in the knownhosts.json file."
         },
         "outgoing_connections" : {
           "type" : "array",
