@@ -29,6 +29,7 @@
         {% endif %}
     {% if wrapper_urls['bottom_bar.html'] != null %}
         {# uploaded homepage redirect can go here? #}
+        {{ dump(wrapper_urls) }}
         <iframe sandbox="allow-top-navigation-by-user-activation allow-top-navigation" id="bottom_bar" src="{{ wrapper_urls['bottom_bar.html'] }}" frameborder="0"></iframe>
     {% endif %}
 {% if is_debug %}

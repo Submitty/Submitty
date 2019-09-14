@@ -317,6 +317,10 @@ class Access {
      * @return bool True if they are allowed to do that action
      */
     public function canI(string $action, $args = []) {
+        echo '<script>console.log("new canI()")</script>';
+
+        echo '<script>console.log('. json_encode( $action ) .')</script>';
+
         $user = $args["user"] ?? $this->core->getUser();
         return $this->canUser($user, $action, $args);
     }
@@ -334,10 +338,18 @@ class Access {
         }
         $checks = $this->permissions[$action];
 
+        echo '<script>console.log("new canUser()")</script>';
+
+        echo '<script>console.log('. json_encode( $action ) .')</script>';
+
+        echo '<script>console.log('. json_encode( $checks ) .')</script>';
+
         //Because sometimes we need to explicitly deny permissions to everyone
         if ($checks === self::DENY_ALL) {
             return false;
         }
+
+        echo '<script>console.log('. json_encode( $user ) .')</script>';
 
         //Some things may be available when there is no user
         if ($user === null) {
@@ -348,6 +360,8 @@ class Access {
         } else {
             $group = $user->getGroup();
         }
+
+        echo '<script>console.log('. json_encode( $group ) .')</script>';
 
         //Check user group first
         if ($group === User::GROUP_STUDENT && !self::checkBits($checks, self::ALLOW_STUDENT)) {
@@ -360,17 +374,23 @@ class Access {
             return false;
         }
 
+        echo '<script>console.log("a")</script>';
+
         if (self::checkBits($checks, self::CHECK_CSRF)) {
             if (!$this->core->checkCsrfToken()) {
                 return false;
             }
         }
 
+        echo '<script>console.log("b")</script>';
+
         if (self::checkBits($checks, self::REQUIRE_FORUM_SAME_STUDENT)) {
             if ($group === User::GROUP_STUDENT && array_key_exists('post_author', $args) && $this->core->getUser()->getId() != $args['post_author']) {
                 return false;
             }
         }
+
+        echo '<script>console.log("c")</script>';
 
         /** @var GradedGradeable|null $graded_gradeable */
         $graded_gradeable = null;
@@ -387,9 +407,13 @@ class Access {
                 }
             }
 
+            echo '<script>console.log('. json_encode( $gradeable ) .')</script>';
+
             //Check if they pass the grading-related checks. There are overrides at the end so
             // we can't just immediately return false.
             $grading_checks = true;
+
+            echo '<script>console.log('. json_encode( $grading_checks ) .')</script>';
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
@@ -409,11 +433,15 @@ class Access {
                 }
             }
 
+            echo '<script>console.log("1")</script>';
+
             if ($grading_checks && self::checkBits($checks, self::CHECK_HAS_SUBMISSION)) {
                 if ($graded_gradeable !== null && $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() <= 0) {
                     $grading_checks = false;
                 }
             }
+
+            echo '<script>console.log("2")</script>';
 
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADING_SECTION_GRADER) && $group === User::GROUP_LIMITED_ACCESS_GRADER) {
                 //Check their grading section
@@ -432,6 +460,8 @@ class Access {
                 }
             }
 
+            echo '<script>console.log("3")</script>';
+
             if ($grading_checks && self::checkBits($checks, self::CHECK_PEER_ASSIGNMENT_STUDENT) && $group === User::GROUP_STUDENT) {
                 //Check their peer assignment
                 if (!$this->isGradedGradeableInPeerAssignment($graded_gradeable, $user)) {
@@ -439,20 +469,29 @@ class Access {
                 }
             }
 
+            echo '<script>console.log("4")</script>';
+
             //Sometimes they're allowed to view their own even if the other checks fail
             if (!$grading_checks && self::checkBits($checks, self::ALLOW_SELF_GRADEABLE) && $this->isGradedGradeableByUser($graded_gradeable, $user)) {
                 $grading_checks = true;
             }
+
+            echo '<script>console.log("5")</script>';
+
             //Sometimes they're only allowed to access their own gradeable, even if they are able to
             // grade another (eg students cannot edit others' files during peer grading)
             if ($grading_checks && self::checkBits($checks, self::ALLOW_ONLY_SELF_GRADEABLE) && !$this->isGradedGradeableByUser($graded_gradeable, $user)) {
                 $grading_checks = false;
             }
 
+            echo '<script>console.log("6")</script>';
+
             if (!$grading_checks) {
                 //Not allowed to do this action to this gradeable
                 return false;
             }
+
+            echo '<script>console.log("7")</script>';
 
             //As these are not grading-related they can return false immediately
             if ($group === User::GROUP_STUDENT) {
@@ -463,6 +502,7 @@ class Access {
                 }
             }
 
+            echo '<script>console.log("8")</script>';
 
             if (self::checkBits($checks, self::REQUIRE_ARG_VERSION)) {
                 /* @var int $version */
@@ -476,6 +516,8 @@ class Access {
                 }
             }
         }
+
+        echo '<script>console.log("00")</script>';
 
         if (self::checkBits($checks, self::REQUIRE_ARG_COMPONENT)) {
             /* @var Component|null $component */
@@ -492,24 +534,31 @@ class Access {
             }
         }
 
+        echo '<script>console.log("01")</script>';
+
         //These are always done together
         if (self::checkBits($checks, self::REQUIRE_ARGS_DIR_PATH)) {
             $dir = $this->requireArg($args, "dir");
             $path = $this->requireArg($args, "path");
 
+            echo '<script>console.log(' . json_encode( $dir ) . ')</script>';
+            echo '<script>console.log(' . json_encode( $path ) . ')</script>';
+
             if ($this->directories === null) {
                 $this->loadDirectories();
             }
+            echo '<script>console.log(' . json_encode( $this->directories ) . ')</script>';
             //This is not a valid directory
             if (!array_key_exists($dir, $this->directories)) {
                 return false;
             }
-
+            echo '<script>console.log(' . json_encode( $args ) . ')</script>';
             //Check if they can access the path!
             if (!$this->canUserAccessPath($action, $path, $dir, $user, $args)) {
                 return false;
             }
         }
+        echo '<script>console.log("02")</script>';
 
         if (self::checkBits($checks, self::REQUIRE_ARGS_SEMESTER_COURSE)) {
             $semester = $this->requireArg($args, "semester");
@@ -530,6 +579,8 @@ class Access {
                 }
             }
         }
+
+        echo '<script>console.log("03")</script>';
 
         return true;
     }
@@ -687,9 +738,16 @@ class Access {
      * @return bool True if they are allowed to access this file
      */
     public function canUserAccessPath(string $action, string $path, string $dir, User $user, array $args = []) {
+        echo '<script>console.log("new canUserAccessPath()")</script>';
+        echo '<script>console.log('. json_encode( $this->directories ) .')</script>';
+        
         if ($this->directories === null) {
             $this->loadDirectories();
         }
+        echo '<script>console.log('. json_encode( "dir" ) .')</script>';
+
+        echo '<script>console.log('. json_encode( $dir ) .')</script>';
+
         if (!array_key_exists($dir, $this->directories)) {
             return false;
         }
@@ -700,6 +758,12 @@ class Access {
         //Get the real path
         $path = $this->resolveDirPath($dir, $path);
         $relative_path = substr($path, strlen($info["base"]) + 1);
+        echo '<script>console.log('. json_encode( "checks" ) .')</script>';
+
+        echo '<script>console.log('. json_encode( $checks ) .')</script>';
+
+        echo '<script>console.log('. json_encode( self::checkBits($checks, self::CHECK_FILE_EXISTS) ) .')</script>';
+        echo '<script>console.log('. json_encode( file_exists($path) ) .')</script>';
 
         //If it doesn't exist we can't read it
         if (self::checkBits($checks, self::CHECK_FILE_EXISTS) && !file_exists($path)) {
@@ -709,6 +773,10 @@ class Access {
         //Check if the relative path starts with the right directory
         $subpart_types = $info["subparts"];
         $subpart_values = explode("/", $relative_path);
+        echo '<script>console.log('. json_encode( "subpart" ) .')</script>';
+
+        echo '<script>console.log('. json_encode( $subpart_values ) .')</script>';
+
 
         //Missing necessary directory path
         if (count($subpart_values) <= count($subpart_types)) {
@@ -722,9 +790,13 @@ class Access {
         //To array of [type, value]
         $subparts = array_combine($subpart_types, $subpart_values);
 
+        echo '<script>console.log('. json_encode( "subpart_types" ) .')</script>';
+        echo '<script>console.log('. json_encode( $subpart_types ) .')</script>';
+
+
         //So we can extract parameters from the path
         foreach ($subpart_types as $type) {
-            $value = $subparts[$type];
+            $value = $subparts[$type];    
             switch ($type) {
                 case "gradeable":
                     //If we already have a gradeable in the args, make sure this file actually belongs to it
@@ -777,6 +849,9 @@ class Access {
                     break;
             }
         }
+
+        echo '<script>console.log('. json_encode( "user" ) .')</script>';
+        echo '<script>console.log('. json_encode( $user ) .')</script>';
 
         //So now that we know the file is valid, we need to make sure they have the specific
         // permissions to access what the file is part of. Generally this is either a
