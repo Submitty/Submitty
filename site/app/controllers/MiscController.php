@@ -128,11 +128,6 @@ class MiscController extends AbstractController {
      * @Route("/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
-        echo '<script>console.log("new readFile()")</script>';
-        echo '<script>console.log('. json_encode( $dir ) .')</script>';
-        echo '<script>console.log('. json_encode( $path ) .')</script>';
-        echo '<script>console.log('. json_encode( $csrf_token ) .')</script>';
-
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
