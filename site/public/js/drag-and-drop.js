@@ -1018,7 +1018,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
         contentType: false,
         type: 'POST',
         success: function(data) {
-            console.log(data);
             try {
                 var jsondata = JSON.parse(data);
 
@@ -1035,7 +1034,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             }
         },
         error: function(data) {
-            console.log(data);
             window.location.href = buildCourseUrl(['course_materials']);
         }
     });
