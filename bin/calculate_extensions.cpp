@@ -139,16 +139,18 @@ int main(int argc, char* argv[]) {
     usage(argv[0]);
   }
 
-  std::cout << " on this date " << year << " " << month << " " << day <<std::endl;
+  std::cout << "Calculating extension earned by this date: " << year << " " << month << " " << day <<std::endl;
 
   int cutoff = atoi(argv[5]);
   assert (cutoff > 0 && cutoff < 100);
 
 
-  std::cout << "cutoff is " << cutoff << std::endl;
+  std::cout << "Cutoff is: " << cutoff << std::endl;
 
-  std::cout << "testcases: ";
-  for (unsigned int i = 0; i < testcases.size(); i++) { std::cout << " " << testcases[i] << std::endl; }
+  std::cout << "Testcases: ";
+  for (unsigned int i = 0; i < testcases.size(); i++) { std::cout << " " << testcases[i]; }
+  std::cout << std::endl;
+
 
   std::map<std::string,std::map<int,std::pair<int,int> > > data;
 
@@ -209,7 +211,7 @@ int main(int argc, char* argv[]) {
       int version_int = atoi(version.c_str());
       assert (version_int >= 1);
       data[username][version_int] = std::make_pair(days_diff,points);
-
+      //std::cout << "thing "<< username << " " << days_diff << " " << points << std::endl;
     }
   }
 

@@ -273,7 +273,6 @@ class CourseMaterialsController extends AbstractController {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $json["release_time"] = $release_time;
 
         $n = strpos($requested_path, '..');
         if ($n !== false) {
