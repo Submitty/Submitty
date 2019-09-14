@@ -6,7 +6,8 @@
 
 ### 04_numeric_ids.txt
 
-04_numeric_ids.txt are a list of fake numeric_ids that are used in setting up sample users,
-the associated user id is listed next to the numeric id but not all are being used currently
-
-These fake numeric ids are being used in the Submitty bulk upload OCR scanner.
+04_numeric_ids.txt is a list of fake numeric_ids that are shown in 04_numeric_id_scan.pdf
+and is used to test the bulk upload OCR scanner feature. Some of the ids in this txt file are
+associated with the user_id of one of the fake generated test users. When adding a
+new fake user yml, please use one of the ids in this file for their numeric_id, and put the
+user_id next to the numeric_id in the txt file.
