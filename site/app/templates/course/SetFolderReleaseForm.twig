@@ -18,7 +18,7 @@
 
     <br/>
     <br/>
-    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value=" " data-fp=" " onChange="getNewDateTime('date_to_release')"/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
     </center>
     <script>
 
@@ -105,7 +105,7 @@
             });
         }
 
-        document.getElementById('date_to_release').flatpickr({
+        flatpickr("#date_to_release", {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
