@@ -135,7 +135,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         $files = FileUtils::getAllFiles($this->upload_path, array(), true);
         $this->assertEquals(4, count($files));
 
-        $f1 = array_key_first($files);
+        $f1 = Utils::getFirstArrayElement($files);
         $keys =     array_keys($json);
 
         $expected_json1 = ['checked' => '1', 'release_datetime' => $_POST['release_time']];
