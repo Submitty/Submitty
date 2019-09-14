@@ -1,37 +1,31 @@
 {
   "name": "submitty/submitty",
-  "config": {
-    "platform": {
-      "php": "7.2"
-    }
-  },
   "autoload": {
     "psr-4": {
       "app\\": "app/"
     }
-  },
-  "require": {
-    "twig/twig": "^2.9.0",
-    "ramsey/uuid": "^3.8.0",
-    "aptoma/twig-markdown": "^3.1.0",
-    "erusev/parsedown": "^1.7.3",
-    "lcobucci/jwt": "^3.2.5",
-    "symfony/routing": "^4.2",
-    "symfony/config": "^4.2",
-    "symfony/http-foundation": "^4.2",
-    "doctrine/annotations": "^1.6",
-    "doctrine/cache": "^1.8",
-    "php-ds/php-ds": "^1.2"
   },
   "autoload-dev": {
     "psr-4": {
       "tests\\": "tests/"
     }
   },
+  "require": {
+    "twig/twig": "2.11.3",
+    "ramsey/uuid": "3.8.0",
+    "aptoma/twig-markdown": "3.2.0",
+    "erusev/parsedown": "1.7.3",
+    "lcobucci/jwt": "3.3.1",
+    "symfony/routing": "4.3.4",
+    "symfony/config": "4.3.4",
+    "symfony/http-foundation": "4.3.4",
+    "doctrine/annotations": "1.7.0",
+    "doctrine/cache": "1.8.0",
+    "php-ds/php-ds": "1.2.0"
+  },
   "require-dev": {
-    "phpunit/phpunit": "^8.1.3",
-    "php-coveralls/php-coveralls": "^2.1.0",
-    "submitty/php-codesniffer": "^1.0.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
+    "phpunit/phpunit": "8.3.5",
+    "submitty/php-codesniffer": "1.1.0",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0"
   }
 }
