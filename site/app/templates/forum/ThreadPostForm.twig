@@ -48,7 +48,7 @@
                                         button: [
                                             {
                                                 label: "Now"
-                                            }, 
+                                            },
                                             {
                                                 label: "End of time"
                                             }
@@ -57,10 +57,10 @@
                                         onClick: (index, fp) => {
                                             let date;
                                             switch (index) {
-                                                case 0: 
+                                                case 0:
                                                     date = new Date();
                                                     break;
-                                                case 1: 
+                                                case 1:
                                                     date = new Date("9998-01-01 00:00:00");
                                                     break;
                                             }
@@ -150,6 +150,7 @@
 
                     // Attachments on Create Thread
                     var part = "{{ post_box_id }}";
+                    initializeDragAndDrop();
                     createArray(part);
                     $(".upload_attachment_box").each(function() {
                         this.addEventListener("click", clicked_on_box, false);
