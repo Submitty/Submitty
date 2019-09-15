@@ -139,7 +139,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         'container_image' : 'ubuntu:custom', 
         'server' : False,
         'outgoing_connections' : [],
-        'container_rlimits': gradeable_rlimits
+        'container_rlimits': gradeable_rlimits,
         'tcp_port_range' : (9000, 9000),
         'udp_port_range' : (1500, 1500)
       }
