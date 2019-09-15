@@ -3,6 +3,7 @@ user_firstname: Tim
 user_id: grader
 anon_id: grader
 user_lastname: Grader
+user_numeric_id: 281149139
 courses:
   sample:
     user_group: 3
