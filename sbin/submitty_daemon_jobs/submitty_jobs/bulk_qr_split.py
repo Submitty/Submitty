@@ -74,7 +74,7 @@ def main(args):
 
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
-                    data = scanner.getDigits(cv_img, val[0][2])
+                    data = scanner.getDigits(inverted, val[0][2])
                     buff += "Found student ID number of \'" + data + "\' on"
                     buff += " page " + str(page_number) + ", "
 

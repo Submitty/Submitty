@@ -77,13 +77,14 @@ def preprocess(img):
     for c in contours:
         x, y, w, h = cv2.boundingRect(c)
         # TODO Find better way to determine what cotnours are the boxes and whats not
-        if(w > 20 and w < 500):
+        if(w > 20 and w < 50):
             idx += 1
             new_img = img[y:y+h, x:x+w]
             # convert to MNIST expected img
             # resize to 28x28,invert, and leave only 1 channel
             new_img = cv2.resize(new_img, (28, 28), interpolation=cv2.INTER_AREA)
             new_img = 255 - new_img
+            new_img = new_img / np.max(new_img)
 
             # convert image to expected tensor (vector)
             new_img = np.expand_dims(new_img, axis=0)
@@ -123,7 +124,7 @@ def scanForDigits(images):
                 max_index = i
 
         # and the digit....*drumroll*....is
-        ret += str(max_index) if out[max_index] > 0.5 else '*'
+        ret += str(max_index) if out[max_index] >= 0.94 else '*'
 
     return ret
 
