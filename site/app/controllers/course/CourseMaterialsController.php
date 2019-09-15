@@ -17,7 +17,7 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
             'listCourseMaterials',
-            $user_group = $this->core->getUser()->getGroup()
+            $user = $this->core->getUser()
         );
     }
 
@@ -315,6 +315,11 @@ class CourseMaterialsController extends AbstractController {
             $release_time = $_POST['release_time'];
         }
 
+        $sections = [];
+        if(isset($_POST['sections'])){
+            $sections = $_POST['sections'];
+        }
+
         //Check if the datetime is correct
         if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === FALSE){
           return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
@@ -324,6 +329,7 @@ class CourseMaterialsController extends AbstractController {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $json["release_time"] = $release_time;
+        $json["sections"] = $sections;
         FileUtils::writeJsonFile($fp,$json);
 
         $n = strpos($requested_path, '..');
