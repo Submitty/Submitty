@@ -69,8 +69,8 @@ class Container():
     container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits)
     # A server container does not run student code, but instead hosts a service (e.g. a database.)
     if self.is_server:
-      self.container = client.containers.create(self.image,  ulimits = container_ulimits, stdin_open = True, 
-                               tty = True, network = 'none', volumes = mount, working_dir = self.directory, name = self.full_name)
+      self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none', 
+                                                volumes = mount, working_dir = self.directory, name = self.full_name)
     else:
       command = [execution_script,] + arguments + container_name_argument
       self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
@@ -96,8 +96,9 @@ class Container():
 
   def cleanup_container(self):
     """ Remove this container. """
-    status = self.container.wait()
-    self.return_code = status['StatusCode']
+    if not self.is_server:
+      status = self.container.wait()
+      self.return_code = status['StatusCode']
 
     self.container.remove(force=True)
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
@@ -660,8 +661,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     try:
       # Clean up all containers. (Cleanup waits until they are finished)
       # Note: All containers should eventually terminate, as their executable will kill them for time.
-      for container in containers:
+      for container in self.get_standard_containers(containers):
         container.cleanup_container()
+      for container in self.get_server_containers(containers):
+        container.cleanup_container()
+      if router is not None:
+        self.get_router(containers).cleanup_container()
     except Exception as e:
       self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())

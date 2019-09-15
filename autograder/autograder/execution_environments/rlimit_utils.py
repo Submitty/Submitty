@@ -5,11 +5,20 @@ Contains default values for container gradeables and helper functions.
 """
 import docker
 
+"""
+Default limits for containers
+Units increment 1024 byte increments
+"""
 default_limits = {
-    "RLIMIT_CPU": 20
+    "RLIMIT_CPU": 20,            # 20 second CPU time
+    "RLIMIT_STACK": 48828,       # 50 MB Stack
+    "RLIMIT_DATA": 9765625       # 1GB Heap
 }
 
-# maps gradeable config file terms to docker ulimit terms
+"""
+maps gradeable config file terms to docker ulimit terms
+NPROC and AS are omitted due to unexpected behavior
+"""
 rlimit_to_ulimit_mapping = {
     "RLIMIT_CPU": "cpu",
     "RLIMIT_FSIZE": "fsize",
@@ -17,7 +26,6 @@ rlimit_to_ulimit_mapping = {
     "RLIMIT_STACK": "stack",
     "RLIMIT_CORE": "core",
     "RLIMIT_RSS": "rss",
-    "RLIMIT_NPROC": "nproc",
     "RLIMIT_NOFILE": "nofile",
     "RLIMIT_MEMLOCK": "memlock",
     "RLIMIT_LOCKS": "locks",
@@ -37,7 +45,7 @@ def build_ulimit_argument(resource_limits):
     if len(resource_limits) == 0:
         for resource, limit in default_limits.items():
             ulimit_name = rlimit_to_ulimit_mapping[resource]
-            arguments += [docker.types.Ulimit(name=ulimit_name, hard=limit)]
+            arguments += [docker.types.Ulimit(name=ulimit_name, soft=limit, hard=limit)]
         return arguments
 
     # instructor provided resource limits
@@ -46,5 +54,5 @@ def build_ulimit_argument(resource_limits):
             print('Unknown RLIMIT resource')
         else:
             ulimit_name = rlimit_to_ulimit_mapping[resource]
-            arguments += [docker.types.Ulimit(name=ulimit_name, hard=limit)]
+            arguments += [docker.types.Ulimit(name=ulimit_name, soft=limit, hard=limit)]
     return arguments
