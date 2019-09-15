@@ -816,9 +816,16 @@ class ElectronicGraderController extends AbstractController {
     /**
      * Display the electronic grading page
      *
+     * @param $who_id This is the user we wish to view, this field will only be passed on when the request originates
+     *                  on the grading index page
+     * @param $from This is the user that was being viewed when a navigation button was clicked on the TA grading
+     *                  interface.  Knowing who we were viewing allows us to decide who to view next.
+     * @param $to Used to determine the direction to move in, either 'prev' or 'next'
+     * @param $to_ungraded Should the next student we go to be the next submission or next ungraded submission?
+     *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id='', $gradeable_version=null, $sort="id", $direction="ASC") {
+    public function showGrading($gradeable_id, $who_id='', $from=null, $to=null, $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=null, $component_id="-1") {
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -826,9 +833,69 @@ class ElectronicGraderController extends AbstractController {
             $this->core->redirect($this->core->buildCourseUrl());
         }
 
+        // If $who_id is empty string then this request came from the TA grading interface navigation buttons
+        // We must decide who to display prev/next and assign them to $who_id
+        if($who_id === '') {
+
+            $order_grading_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser());
+            $order_grading_sections->sort($sort, $direction);
+
+            // Only need to instantiate this order if the user is a full access grader
+            // Limited access graders should never need the order that includes all sections
+            if($this->core->getUser()->accessFullGrading()) {
+                $order_all_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
+                $order_all_sections->sort($sort, $direction);
+            }
+
+            // Get the graded gradeable for the $from user
+            $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $from, false);
+            if($from_graded_gradeable === false) {
+                $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            }
+
+            // Get the user ID of the user we were viewing on the TA grading interface
+            $from_id = $from_graded_gradeable->getSubmitter();
+
+            // Determine the student to go to based on the button that was pressed
+            // For full access graders, pressing the single arrow should navigate to the next submission, regardless
+            // of if that submission is in their assigned section
+            // Limited access graders should only be able to navigate to submissions in their assigned sections
+            if($to === 'prev' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
+
+                $goToStudent = $order_all_sections->getPrevSubmitter($from_id);
+
+            } else if($to === 'prev' && $to_ungraded === 'false') {
+
+                $goToStudent = $order_grading_sections->getPrevSubmitter($from_id);
+
+            } else if($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
+
+                $goToStudent = $order_all_sections->getNextSubmitter($from_id);
+
+            } else if($to === 'next' && $to_ungraded === 'false') {
+
+                $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
+
+            } else if($to === 'prev' && $to_ungraded === 'true') {
+
+                $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
+
+            } else if($to === 'next' && $to_ungraded === 'true') {
+
+                $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
+
+            }
+
+            // Reassign who_id
+            if(!is_null($goToStudent)) {
+                $who_id = $goToStudent->getId();
+            }
+        }
+
+        // Get the graded gradeable for the submitter we are requesting
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $who_id, false);
         if($graded_gradeable === false) {
-            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details'])  . '?' . http_build_query(['sort' => $sort, 'direction' => $direction, 'view' => 'all']));
         }
 
         $peer = false;
@@ -839,7 +906,7 @@ class ElectronicGraderController extends AbstractController {
         $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         $this->core->getOutput()->addBreadcrumb("{$gradeable->getTitle()} Grading", $gradeableUrl);
         $indexUrl = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
-        $this->core->getOutput()->addBreadcrumb('Student Index', $indexUrl);
+        $this->core->getOutput()->addBreadcrumb('Grading Interface ' . GradingOrder::getGradingOrderMessage($sort, $direction));
 
         $graded = 0;
         $total = 0;
@@ -900,16 +967,6 @@ class ElectronicGraderController extends AbstractController {
             $progress = round(($graded / $total_submitted) * 100, 1);
         }
 
-        $order = new GradingOrder($this->core, $gradeable, $this->core->getUser());
-        $order->sort($sort, $direction);
-
-        $prev = $order->getPrevSubmitter($graded_gradeable->getSubmitter());
-        $next = $order->getNextSubmitter($graded_gradeable->getSubmitter());
-
-        $prev_id = $prev ? $prev->getId() : "";
-        $next_id = $next ? $next->getId() : "";
-
-        $not_in_my_section = !$order->containsSubmitter($graded_gradeable->getSubmitter());
 
         if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
@@ -970,7 +1027,7 @@ class ElectronicGraderController extends AbstractController {
         $this->core->getOutput()->addInternalCss('grade-inquiry.css');
         $this->core->getOutput()->addInternalJs('grade-inquiry.js');
         $show_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable]);
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $prev_id, $next_id, $not_in_my_section, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $sort, $direction);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'hwGradingPage', $gradeable, $graded_gradeable, $display_version, $progress, $show_hidden, $can_inquiry, $can_verify, $show_verify_all, $show_silent_edit, $late_status, $sort, $direction, $who_id);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupSettings');
