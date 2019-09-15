@@ -698,7 +698,6 @@ class Access {
         $info = $this->directories[$dir];
 
         //Get the real path
-        $path = $this->resolveDirPath($dir, $path);
         $relative_path = substr($path, strlen($info["base"]) + 1);
 
         //If it doesn't exist we can't read it

@@ -12,9 +12,9 @@
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">../../site/app</directory>
+            <directory suffix=".php">../app</directory>
             <exclude>
-                <directory suffix=".php">../../site/app/views</directory>
+                <directory suffix=".php">../app/views</directory>
             </exclude>
         </whitelist>
     </filter>

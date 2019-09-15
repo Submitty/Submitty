@@ -171,6 +171,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     whole_config["container_options"]["single_port_per_container"] = false; // connection
   }
 
+  if (!whole_config["container_options"]["number_of_ports"].is_number_integer()){
+    whole_config["container_options"]["number_of_ports"] = 1; // connection
+  }
+
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
 
@@ -250,6 +254,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
         if(this_testcase[container_type][container_num]["container_name"].is_null()){
           this_testcase[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
+        }
+
+        if (!this_testcase[container_type][container_num]["number_of_ports"].is_number_integer()){
+          this_testcase[container_type][container_num]["number_of_ports"] = whole_config["container_options"]["number_of_ports"];
         }
 
         if (this_testcase[container_type][container_num]["container_name"] == "router"){

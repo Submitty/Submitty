@@ -7,6 +7,7 @@ use app\libraries\FileUtils;
 use app\models\Breadcrumb;
 use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
+use Ds\Set;
 
 /**
  * Class Output
@@ -26,12 +27,15 @@ class Output {
     private $output_buffer = "";
     private $breadcrumbs = array();
     private $loaded_views = array();
-    private $css = array();
-    private $js = array();
-    
+
+    /** @var Set */
+    private $css;
+    /** @var Set */
+    private $js;
+
     private $use_header = true;
     private $use_footer = true;
-    
+
     private $start_time;
 
     /** @var \Twig\Environment $twig */
@@ -45,11 +49,14 @@ class Output {
      * @var Core
      */
     private $core;
-    
+
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
+
+        $this->css = new Set();
+        $this->js = new Set();
     }
 
     /**
@@ -82,7 +89,7 @@ class Output {
         if($debug){
             $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         }
-        
+
 
         $this->twig->addGlobal("core", $this->core);
 
@@ -302,11 +309,11 @@ HTML;
             return $this->renderJsonFail($message);
         }
     }
-    
+
     public function renderString($string) {
         $this->output_buffer .= $string;
     }
-    
+
     public function renderFile($contents, $filename, $filetype = "text/plain") {
         $this->useFooter(false);
         $this->useHeader(false);
@@ -465,17 +472,17 @@ HTML;
 
         return $this->getOutput();
     }
-    
+
     public function addInternalCss($file, $folder='css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
-    
+
     public function addVendorCss($file) {
         $this->addCss($this->timestampResource($file, "vendor"));
     }
 
-    public function addCss($url) {
-        $this->css[] = $url;
+    public function addCss(string $url): void {
+        $this->css->add($url);
     }
 
     public function addInternalJs($file, $folder='js') {
@@ -486,15 +493,15 @@ HTML;
         $this->addJs($this->timestampResource($file, "vendor"));
     }
 
-    public function addJs($url) {
-        $this->js[] = $url;
+    public function addJs(string $url): void {
+        $this->js->add($url);
     }
 
     public function timestampResource($file, $folder) {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
         return $this->core->getConfig()->getBaseUrl().$folder."/".$file.(($timestamp !== 0) ? "?v={$timestamp}" : "");
     }
-    
+
     /**
      * Enable or disable whether to use the global header
      * @param bool $bool
@@ -502,11 +509,11 @@ HTML;
     public function useHeader($bool = true) {
         $this->use_header = $bool;
     }
-    
+
     public function useFooter($bool = true) {
         $this->use_footer = $bool;
     }
-    
+
     public function addBreadcrumb($string, $url=null, $external_link=false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
     }
@@ -525,14 +532,14 @@ HTML;
     /**
      * @return array
      */
-    public function getCss() {
+    public function getCss(): Set {
         return $this->css;
     }
 
     /**
      * @return array
      */
-    public function getJs() {
+    public function getJs(): Set {
         return $this->js;
     }
 
