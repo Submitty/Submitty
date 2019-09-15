@@ -338,15 +338,49 @@ class CourseMaterialsController extends AbstractController {
                     //cannot check if there are duplicates inside zip file, will overwrite
                     //it is convenient for bulk uploads
                     if ($expand_zip == 'on' && $is_zip_file === true) {
+                        //get the file names inside the zip to write to the JSON file
+                        
                         $zip = new \ZipArchive();
-                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
-                        if ($res === true) {
-                            $zip->extractTo($upload_path);
-                            $zip->close();
-                            $subfiles = FileUtils::getAllFiles($upload_path, array(), true );
-                            foreach ($subfiles as $file) {
-                                $json[$file['path']] = array('checked' => '1', 'release_datetime' => $release_time  );
+-                       $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+
+                        if(!$res){
+                            return $this->core->getOutput()->renderResultMessage("ERROR: Failed to open zip archive", false);
+                        }
+
+                        $entries = [];
+                        $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
+                        $disallowed_files = ['.ds_store'];
+                        for ($i = 0; $i < $zip->numFiles; $i++) {
+                            $entries[] = $zip->getNameIndex($i);
+                        }
+                        $entries = array_filter($entries, function($entry) use ($disallowed_folders, $disallowed_files) {
+                            $name = strtolower($entry);
+                            foreach ($disallowed_folders as $folder) {
+                                if (Utils::startsWith($folder, $name)) {
+                                    return false;
+                                }
                             }
+                            if (substr($name, -1) !== '/') {
+                                foreach ($disallowed_files as $file) {
+                                    if (basename($name) === $file) {
+                                        return false;
+                                    }
+                                }
+                            }
+                            return true;
+                        });
+                        $zfiles = array_filter($entries, function($entry) {
+                            return substr($entry, -1) !== '/';
+                        });
+
+                        $zip->extractTo($upload_path, $entries);
+
+                        foreach ($zfiles as $zfile) {
+                            $path = FileUtils::joinPaths( $upload_path, $zfile );
+                            $json[$path] = [
+                                'checked' => '1',
+                                'release_datetime' => $release_time
+                            ];
                         }
                     }
                     else
