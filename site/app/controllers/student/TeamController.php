@@ -3,6 +3,7 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -62,6 +63,12 @@ class TeamController extends AbstractController {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
             return $this->core->getOutput()->renderJsonFail("Failed to write to team history to settings file");
         }
+
+        if ($gradeable->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+        }
+
         $this->core->redirect($return_url);
         return $this->core->getOutput()->renderJsonSuccess();
     }

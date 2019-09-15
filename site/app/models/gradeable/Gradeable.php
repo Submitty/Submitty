@@ -14,6 +14,7 @@ use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
+use app\controllers\admin\AdminGradeableController;
 
 /**
  * All data describing the configuration of a gradeable
@@ -1218,11 +1219,11 @@ class Gradeable extends AbstractModel {
 
     /**
      * Used to decide whether a gradeable can be deleted or not.
-     * This means: No submissions, No manual grades entered, and No teams formed
+     * This means: No submissions, No manual grades entered, No teams formed, and No VCS repos created
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
     }
 
     /**
@@ -1668,6 +1669,11 @@ class Gradeable extends AbstractModel {
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
+        }
+
+        if ($this->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
         }
     }
 
