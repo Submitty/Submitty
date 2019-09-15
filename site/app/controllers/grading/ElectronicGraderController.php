@@ -1590,7 +1590,15 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $component = $gradeable->addComponent('Problem ' . strval(count($gradeable->getComponents()) + 1), '', '', 0, 0,
                 0, 0, false, false, $page);
-            $component->addMark('No Credit', 0.0, false);
+            if($component->isExtraCredit()){
+                $component->addMark('No Extra Credit Given', 0.0, false);
+            }
+            elseif($component->isCountUp()){
+                $component->addMark('No Credit', 0.0, false);
+            }
+            else {
+                $component->addMark('No Penalty', 0.0, false);
+            }
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
         } catch (\InvalidArgumentException $e) {
