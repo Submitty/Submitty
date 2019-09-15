@@ -140,12 +140,18 @@ class RunGenerateRepos(CourseGradeableJob):
         course = self.job_details['course']
         gradeable = self.job_details['gradeable']
 
-        build_script = os.path.join(INSTALL_DIR,'bin','generate_repos.py')
-        build_output = os.path.join(DATA_DIR,'logs','vcs_generation','repo_generation_{}'.format(gradeable))
+        gen_script = os.path.join(INSTALL_DIR,'bin','generate_repos.py')
 
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "vcs_generation")
+        datestring = "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,today.day)
+        log_file_path = os.path.join(log_path, datestring)
+        current_time = today.strftime("%m/%d/%Y, %H:%M:%S")
         try:
-            with open(build_output, "a") as output_file:
-                subprocess.run(["sudo", build_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+            with open(log_file_path, "a") as output_file:
+                print ("At time: "+current_time, file=output_file)
+                output_file.flush()
+                subprocess.run(["sudo", gen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
         except PermissionError:
             print("error, could not open " + output_file + " for writing")
 
