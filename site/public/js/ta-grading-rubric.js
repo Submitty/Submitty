@@ -2465,7 +2465,7 @@ function scrollToPage(page_num){
                 page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
             }
             // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
-            let scrollY = zoom*(page_num-1)*(page_height+page_margin_bot)+page_margin_top;
+            let scrollY = (page_num-1)*(page_height+page_margin_bot)+page_margin_top;
             if($("#file_view").is(":visible")){
                 $('#file_content').animate({scrollTop: scrollY}, 500);
             } else {
