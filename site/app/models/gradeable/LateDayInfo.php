@@ -67,7 +67,8 @@ class LateDayInfo extends AbstractModel {
             'status' => $this->getStatus(),
             'late_days_remaining' => $this->late_days_remaining,
             'days_late' => $this->hasLateDaysInfo() ? $this->getDaysLate() : null,
-            'charged_late_days' => $this->hasLateDaysInfo() ? $this->getLateDaysCharged() : null
+            'charged_late_days' => $this->hasLateDaysInfo() ? $this->getLateDaysCharged() : null,
+            'grade_inquiries' => $this->graded_gradeable->getGradeInquiryCount()
         ];
     }
 
@@ -185,5 +186,13 @@ class LateDayInfo extends AbstractModel {
             return 0;
         }
         return $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate();
+    }
+
+    /**
+     * Get number of grade inquiries pending and resolved for this gradeable
+     * @return int
+     */
+    public function getGradeInquiryCount() {
+        return $this->graded_gradeable->getGradeInquiryCount();
     }
 }

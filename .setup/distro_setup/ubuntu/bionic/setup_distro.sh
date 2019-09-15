@@ -47,7 +47,7 @@ apt-get install -qqy libpam-passwdqc
 apt-get install -qqy ssh sshpass unzip
 apt-get install -qqy postgresql-10
 apt-get install -qqy apache2 apache2-suexec-custom libapache2-mod-authnz-external libapache2-mod-authz-unixgroup libapache2-mod-wsgi-py3
-apt-get install -qqy php php-cli php-fpm php-curl php-pgsql php-zip php-mbstring php-xml
+apt-get install -qqy php php-cli php-fpm php-curl php-pgsql php-zip php-mbstring php-xml php-ds
 
 if [ ${VAGRANT} == 1 ]; then
     apt-get install -qqy php-xdebug
@@ -92,7 +92,7 @@ apt-get install -qqy imagemagick
 # miscellaneous usability
 apt-get install -qqy emacs
 
-# fix networking on vagrants 
+# fix networking on vagrants
 # https://bugs.launchpad.net/ubuntu/+source/netplan.io/+bug/1768560
 # When the vagrant box comes with netplan.io 0.40+ we can remove this
 if [ ${VAGRANT} == 1 ]; then

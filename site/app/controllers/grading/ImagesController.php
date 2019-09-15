@@ -59,33 +59,28 @@ class ImagesController extends AbstractController {
             return $this->core->getOutput()->renderResultMessage("Invalid CSRF token.", false, false);
         }
 
+        if (empty($_FILES["files1"])) {
+            return $this->core->getOutput()->renderResultMessage("No files to be submitted.", false);
+        }
+
+        $status = Fileutils::validateUploadedFiles($_FILES["files1"]);
+        //check if we couldn't validate the uploaded files
+        if(array_key_exists("failed", $status)){
+            return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
+        }
+        
+        foreach ($status as $stat) {
+            if($stat['success'] === false){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
+            }
+        }
+
         $uploaded_files = array();
         if (isset($_FILES["files1"])) {
             $uploaded_files[1] = $_FILES["files1"];
         }
-        $errors = array();
-        $count_item = 0;
-        if (isset($uploaded_files[1])) {
-            $count_item = count($uploaded_files[1]["name"]);
-            for ($j = 0; $j < $count_item[1]; $j++) {
-                if (!isset($uploaded_files[1]["tmp_name"][$j]) || $uploaded_files[1]["tmp_name"][$j] === "") {
-                    $error_message = $uploaded_files[1]["name"][$j]." failed to upload. ";
-                    if (isset($uploaded_files[1]["error"][$j])) {
-                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[1]["error"][$j]). ".";
-                    }
-                    $errors[] = $error_message;
-                }
-            }
-        }
 
-        if (count($errors) > 0) {
-            $error_text = implode("\n", $errors);
-            return $this->core->getOutput()->renderResultMessage("Upload Failed: ".$error_text, false);
-        }
-
-        if (empty($uploaded_files)) {
-            return $this->core->getOutput()->renderResultMessage("No files to be submitted.", false);
-        }
+        $count_item = count($uploaded_files[1]['name']);
 
         $file_size = 0;
         if (isset($uploaded_files[1])) {
