@@ -38,6 +38,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
      */
     public function testReadFileSite($user_details): void {
         $core = new Core();
+        $core->setTesting(true);
         $user = new User($core, $user_details);
         $core->setUser($user);
         $core->setOutput(new NullOutput($core));
@@ -67,6 +68,7 @@ class MiscControllerTester extends \PHPUnit\Framework\TestCase {
      */
     public function testReadFileDirectoryTraversal($user_details): void {
         $core = new Core();
+        $core->setTesting(true);
         $user = new User($core, $user_details);
         $core->setUser($user);
         $core->setOutput(new NullOutput($core));
