@@ -559,9 +559,10 @@ find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
 # Obtain API auth token for submitty-admin user
+if [ "${WORKER}" == 0 ]; then
 
-python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
-
+    python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+fi
 #####################################
 # Build & Install Lichen Modules
 

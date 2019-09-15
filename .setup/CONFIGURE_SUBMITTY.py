@@ -512,8 +512,8 @@ else:
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-if not args.worker:
-    shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMONPHP_GROUP)
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
+
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 ##############################################################################
