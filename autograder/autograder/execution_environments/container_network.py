@@ -8,7 +8,7 @@ import shutil
 import docker
 
 from submitty_utils import dateutils
-from . import secure_execution_environment
+from . import secure_execution_environment, rlimit_utils
 from .. import autograding_utils
 
 class Container():
@@ -29,6 +29,7 @@ class Container():
     self.image = container_info['container_image']
     self.is_server = container_info['server']
     self.outgoing_connections = container_info['outgoing_connections']
+    self.container_rlimits = container_info['container_rlimits']
     # If we are in production, we need to run as an untrusted user inside of our docker container.
     self.container_user_argument = str(getpwnam(untrusted_user).pw_uid)
     self.full_name = f'{untrusted_user}_{self.name}'
@@ -65,14 +66,15 @@ class Container():
 
     # Only pass container name to testcases with greater than one container. (Doing otherwise breaks compilation)
     container_name_argument = ['--container_name', self.name] if more_than_one else list()
+    container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits)
     # A server container does not run student code, but instead hosts a service (e.g. a database.)
     if self.is_server:
-      self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none',
-                               volumes = mount, working_dir = self.directory, name = self.full_name)
+      self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none', 
+                                                volumes = mount, working_dir = self.directory, name = self.full_name)
     else:
       command = [execution_script,] + arguments + container_name_argument
-      self.container = client.containers.create(self.image, command = command, stdin_open = True, tty = True,
-                                                network = 'none', user = self.container_user_argument, volumes=mount,
+      self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
+                                                tty = True, network = 'none', user = self.container_user_argument, volumes=mount,
                                                 working_dir = self.directory, hostname = self.name, name = self.full_name)
 
 
@@ -94,8 +96,9 @@ class Container():
 
   def cleanup_container(self):
     """ Remove this container. """
-    status = self.container.wait()
-    self.return_code = status['StatusCode']
+    if not self.is_server:
+      status = self.container.wait()
+      self.return_code = status['StatusCode']
 
     self.container.remove(force=True)
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
@@ -117,7 +120,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     containers = list()
     container_specs = testcase_info.get('containers', list())
     solution_container_specs = testcase_info.get('solution_containers', list())
-    
+    gradeable_rlimits = complete_config_obj.get('resource_limits', {})
     # If there are container specifications in the complete_config, create objects for them,
     # else, create a single default container.
     if len(container_specs) > 0:
@@ -125,6 +128,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       current_tcp_port = 9000
       current_udp_port = 15000
       for container_spec in container_specs:
+        container_spec['container_rlimits'] = gradeable_rlimits
         container_spec['tcp_port_range'] = (current_tcp_port, current_tcp_port + container_spec.get('number_of_ports', 1) - 1)
         container_spec['udp_port_range'] = (current_udp_port, current_udp_port + container_spec.get('number_of_ports', 1) - 1)
         current_udp_port += container_spec.get('number_of_ports', 1)
@@ -136,6 +140,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         'container_image' : 'ubuntu:custom', 
         'server' : False,
         'outgoing_connections' : [],
+        'container_rlimits': gradeable_rlimits,
         'tcp_port_range' : (9000, 9000),
         'udp_port_range' : (1500, 1500)
       }
@@ -150,6 +155,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     current_tcp_port = 9000
     current_udp_port = 15000
     for solution_container_spec in solution_container_specs:
+      solution_container_spec['container_rlimits'] = gradeable_rlimits 
       solution_container_spec['tcp_port_range'] = (current_tcp_port, current_tcp_port + solution_container_spec.get('number_of_ports', 1) - 1)
       solution_container_spec['udp_port_range'] = (current_udp_port, current_udp_port + solution_container_spec.get('number_of_ports', 1) - 1)
       current_udp_port += solution_container_spec.get('number_of_ports', 1)
@@ -655,8 +661,12 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     try:
       # Clean up all containers. (Cleanup waits until they are finished)
       # Note: All containers should eventually terminate, as their executable will kill them for time.
-      for container in containers:
+      for container in self.get_standard_containers(containers):
         container.cleanup_container()
+      for container in self.get_server_containers(containers):
+        container.cleanup_container()
+      if router is not None:
+        self.get_router(containers).cleanup_container()
     except Exception as e:
       self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())

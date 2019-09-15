@@ -128,8 +128,6 @@ class MiscController extends AbstractController {
      * @Route("/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
-
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");

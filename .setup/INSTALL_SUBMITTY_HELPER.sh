@@ -222,6 +222,7 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
+  	mkdir -p ${SUBMITTY_DATA_DIR}/logs/vcs_generation
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
 fi
 # ------------------------------------------------------------------------
@@ -254,6 +255,7 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
+	chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
 fi
 # Set permissions of all files in the logs directories
 find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;

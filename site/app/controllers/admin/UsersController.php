@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\Response;
@@ -233,6 +234,8 @@ class UsersController extends AbstractController {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("User ID cannot be empty");
@@ -321,20 +324,32 @@ class UsersController extends AbstractController {
         }
 
         if ($_POST['edit_user'] == "true") {
-            $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($user, $semester, $course);
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
             if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
                 $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
+            }
+
+            $all_gradeable_ids = $this->core->getQueries()->getAllGradeablesIds();
+            foreach ($all_gradeable_ids as $row) {
+                $g_id = $row['g_id'];
+                $gradeable = $this->tryGetGradeable($g_id, false);
+                if ($gradeable === false) {
+                    continue;
+                }
+                if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+                    AdminGradeableController::enqueueGenerateRepos($semester,$course,$g_id);
+                }
             }
 
         }

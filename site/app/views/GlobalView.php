@@ -24,7 +24,13 @@ class GlobalView extends AbstractView {
         if ($course_name == ucwords(strtolower($page_name))) {
             $page_name = "Gradeables";
         }
-        $page_title = $this->core->getConfig()->isCourseLoaded() ? "Submitty ".$course_name." ".$page_name : "Submitty";
+
+        $page_title = "Submitty";
+        if ($this->core->getUser() === null) {
+            $page_title = "Submitty Login";
+        } else if ($this->core->getConfig()->isCourseLoaded()) {
+            $page_title = "Submitty ".$course_name." ".$page_name;
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
