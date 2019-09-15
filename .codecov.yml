@@ -7,9 +7,28 @@ ignore:
 
 coverage:
   status:
-    project: false
+    project:
+      default: false
+      migrator:
+        flags: migrator
+        target: 100%
     patch: false
     changes: false
+
+
+flags:
+  php:
+    paths:
+      - site/app
+  autograder:
+    paths:
+      - autograder/autograder
+  python_submitty_utils:
+    paths:
+      - python_submitty_utils/submitty_utils
+  migrator:
+    paths:
+      - migration/migrator
 
 comment:
   layout: "reach, diff, flags"

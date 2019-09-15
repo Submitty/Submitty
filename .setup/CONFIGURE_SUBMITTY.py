@@ -512,7 +512,8 @@ else:
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMONPHP_GROUP)
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
+
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 ##############################################################################
@@ -530,14 +531,15 @@ if not args.worker:
 ##############################################################################
 # Write submitty_admin json
 
-config = OrderedDict()
-config['submitty_admin_username'] = SUBMITTY_ADMIN_USERNAME
-config['submitty_admin_password'] = SUBMITTY_ADMIN_PASSWORD
+if not args.worker:
+    config = OrderedDict()
+    config['submitty_admin_username'] = SUBMITTY_ADMIN_USERNAME
+    config['submitty_admin_password'] = SUBMITTY_ADMIN_PASSWORD
 
-with open(SUBMITTY_ADMIN_JSON, 'w') as json_file:
-    json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_ADMIN_JSON, 'root', DAEMON_GROUP)
-os.chmod(SUBMITTY_ADMIN_JSON, 0o440)
+    with open(SUBMITTY_ADMIN_JSON, 'w') as json_file:
+        json.dump(config, json_file, indent=2)
+    shutil.chown(SUBMITTY_ADMIN_JSON, 'root', DAEMON_GROUP)
+    os.chmod(SUBMITTY_ADMIN_JSON, 0o440)
 
 ##############################################################################
 # Write email json
