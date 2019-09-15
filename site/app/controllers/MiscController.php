@@ -125,7 +125,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/read_file")
+     * @Route("/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
