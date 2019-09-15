@@ -168,9 +168,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
   // ---------------------------------------------------------------
   // C/C++ COMPILATION
   else if (my_program == "/usr/bin/g++" ||
-           my_program == "/usr/bin/clang++" ||
-           my_program == "/usr/bin/gcc") {
-    categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
+           my_program == "/usr/bin/gcc" || 
+           my_program.find("/usr/bin/clang") != std::string::npos) {
     categories.insert("FILE_MANAGEMENT_MOVE_DELETE_RENAME_FILE_DIRECTORY");
     categories.insert("FILE_MANAGEMENT_PERMISSIONS");
     categories.insert("FILE_MANAGEMENT_RARE");
@@ -178,6 +177,8 @@ int install_syscall_filter(bool is_32, const std::string &my_program, std::ofstr
     categories.insert("PROCESS_CONTROL_NEW_PROCESS_THREAD");
     categories.insert("TGKILL");
     categories.insert("COMMUNICATIONS_AND_NETWORKING_SIGNALS");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_INTERPROCESS_COMMUNICATION");
+    categories.insert("COMMUNICATIONS_AND_NETWORKING_SOCKETS_MINIMAL");
   }
 
   // ---------------------------------------------------------------
