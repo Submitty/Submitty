@@ -281,7 +281,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
         try:
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,message=f'connecting to {user}@{host}')
-            ssh.connect(hostname = host, username = user, timeout=10)
+            ssh.connect(hostname = host, username = user)
             sftp = ssh.open_sftp()
             fd1, local_done_queue_file = tempfile.mkstemp()
             fd2, local_results_zip     = tempfile.mkstemp()
