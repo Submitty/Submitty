@@ -68,16 +68,19 @@ class Container():
     container_name_argument = ['--container_name', self.name] if more_than_one else list()
     container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits)
     # A server container does not run student code, but instead hosts a service (e.g. a database.)
-    if self.is_server:
-      self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none', 
-                                                volumes = mount, working_dir = self.directory, name = self.full_name)
-    else:
-      command = [execution_script,] + arguments + container_name_argument
-      self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
-                                                tty = True, network = 'none', user = self.container_user_argument, volumes=mount,
-                                                working_dir = self.directory, hostname = self.name, name = self.full_name)
 
-
+    try:
+      if self.is_server:
+        self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none', 
+                                                  volumes = mount, working_dir = self.directory, name = self.full_name)
+      else:
+        command = [execution_script,] + arguments + container_name_argument
+        self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
+                                                  tty = True, network = 'none', user = self.container_user_argument, volumes=mount,
+                                                  working_dir = self.directory, hostname = self.name, name = self.full_name)
+    except docker.errors.ImageNotFound:
+      self.log_function(f'ERROR: The image {self.image} is not available on this worker')
+      raise
 
     dockerlaunch_done = dateutils.get_current_time()
     self.log_function(f'docker container {self.container.short_id} created')
@@ -137,7 +140,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     else:
       container_spec = {
         'container_name'  : f'temporary_container',
-        'container_image' : 'ubuntu:custom', 
+        'container_image' : 'submitty/autograding-default:latest', 
         'server' : False,
         'outgoing_connections' : [],
         'container_rlimits': gradeable_rlimits,
@@ -586,7 +589,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
 
     container_spec = {
         'container_name'  : f'{untrusted_user}_temporary_container',
-        'container_image' : 'ubuntu:custom', 
+        'container_image' : 'submitty/autograding-default:latest', 
         'server' : False,
         'outgoing_connections' : []
     }
@@ -634,6 +637,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     except Exception as e:
       self.log_message('ERROR: Could not create or network containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
+      return -1
 
     try:
       router = self.get_router(containers)
