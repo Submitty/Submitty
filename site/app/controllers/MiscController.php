@@ -143,6 +143,7 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         readfile($path);
+        return true;
     }
 
     /**
