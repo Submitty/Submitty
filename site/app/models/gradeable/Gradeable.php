@@ -14,6 +14,7 @@ use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
+use app\controllers\admin\AdminGradeableController;
 
 /**
  * All data describing the configuration of a gradeable
@@ -1671,6 +1672,11 @@ class Gradeable extends AbstractModel {
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
+        }
+
+        if ($this->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
         }
     }
 
