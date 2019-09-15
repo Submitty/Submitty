@@ -105,6 +105,21 @@ class Utils {
         return (count($temp) > 0) ? array_pop($temp) : null;
     }
 
+    /**
+     * Gets the first element of an array. This can be used for associate arrays like the above 
+     * getLastArrayElement defined above.
+     *
+     * @param $array
+     * @return mixed|null
+     */
+    public static function getFirstArrayElement($array) {
+        foreach($array as $key => $unused) {
+            return $key;
+        }
+        return NULL;
+    }
+
+
 
     /**
      * Checks if string $haystack begins with the string $needle, returning TRUE if it does or FALSE otherwise.

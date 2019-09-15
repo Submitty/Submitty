@@ -1557,7 +1557,6 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_registration_id'];
             }
-            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
         } else {
             if ($this->isTeamAssignment()) {
@@ -1577,7 +1576,6 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_rotating_id'];
             }
-            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
         }
 
