@@ -338,33 +338,64 @@ function changeEditorStyle(newStyle){
 
 //-----------------------------------------------------------------------------
 // Student navigation
-function gotoPrevStudent() {
+function gotoPrevStudent(to_ungraded = false) {
+
+    var selector;
+    var window_location;
+
+    if(to_ungraded === true) {
+        selector = "#prev-ungraded-student";
+        window_location = $(selector)[0].dataset.href;
+
+        // Append extra get param
+        window_location += '&component_id=' + getFirstOpenComponentId();
+
+    } else {
+        selector = "#prev-student";
+        window_location = $(selector)[0].dataset.href
+    }
+
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(function () {
-            window.location = $("#prev-student")[0].dataset.href;
+            window.location = window_location;
         }).catch(function () {
             if (confirm("Could not save open component, change student anyway?")) {
-                window.location = $("#prev-student")[0].dataset.href;
+                window.location = window_location;
             }
         });
     }
     else {
-        window.location = $("#prev-student")[0].dataset.href;
+        window.location = window_location;
     }
 }
 
-function gotoNextStudent() {
+function gotoNextStudent(to_ungraded = false) {
+
+    var selector;
+    var window_location;
+
+    if(to_ungraded === true) {
+        selector = "#next-ungraded-student";
+        window_location = $(selector)[0].dataset.href;
+
+        // Append extra get param
+        window_location += '&component_id=' + getFirstOpenComponentId();
+    } else {
+        selector = "#next-student";
+        window_location = $(selector)[0].dataset.href
+    }
+
     if (getGradeableId() !== '') {
         closeAllComponents(true).then(function () {
-            window.location = $("#next-student")[0].dataset.href;
+            window.location = window_location;
         }).catch(function () {
             if (confirm("Could not save open component, change student anyway?")) {
-                window.location = $("#next-student")[0].dataset.href;
+                window.location = window_location;
             }
         });
     }
     else {
-        window.location = $("#next-student")[0].dataset.href;
+        window.location = window_location;
     }
 }
 //Navigate to the prev / next student buttons
@@ -373,6 +404,14 @@ registerKeyHandler({name: "Previous Student", code: "ArrowLeft"}, function() {
 });
 registerKeyHandler({name: "Next Student", code: "ArrowRight"}, function() {
     gotoNextStudent();
+});
+
+//Navigate to the prev / next student buttons
+registerKeyHandler({name: "Previous Ungraded Student", code: "Shift ArrowLeft"}, function() {
+    gotoPrevStudent(true);
+});
+registerKeyHandler({name: "Next Ungraded Student", code: "Shift ArrowRight"}, function() {
+    gotoNextStudent(true);
 });
 
 //-----------------------------------------------------------------------------

@@ -5,12 +5,12 @@
 <div class="content">
 
     <script>
-        var year = {{ server_time['year'] }};
-        var month = {{ server_time['month'] }} - 1;
-        var day = {{ server_time['day'] }};
-        var hour = {{ server_time['hour'] }};
-        var minute = {{ server_time['minute'] }};
-        var second = {{ server_time['second'] }};
+        var year = parseInt("{{ server_time['year'] }}", 10);
+        var month = parseInt("{{ server_time['month'] }}", 10) - 1;
+        var day = parseInt("{{ server_time['day'] }}", 10);
+        var hour = parseInt("{{ server_time['hour'] }}", 10);
+        var minute = parseInt("{{ server_time['minute'] }}", 10);
+        var second = parseInt("{{ server_time['second'] }}", 10);
 
         server_time = new Date(year, month, day, hour, minute, second);
 
@@ -101,7 +101,6 @@
                         }
 
                         var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
                         var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
                         var currentDT = date+' '+time;
                         var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
@@ -124,7 +123,7 @@
                     }
                     document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
 
-                    document.getElementById('date_to_release_{{ id }}').flatpickr({
+                    flatpickr("#date_to_release_{{ id }}",{
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -149,7 +148,7 @@
                                         updateToTomorrowServerTime(fp);
                                         break;
                                     case 2:
-                                        date = new Date("9998-01-01 00:00:00");
+                                        date = new Date("9998-01-01");
                                         fp.setDate(date,true);
                                         break;
 

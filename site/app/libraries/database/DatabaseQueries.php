@@ -4085,4 +4085,67 @@ AND gc_id IN (
         }
         return $this->course_db->rows()[0]['lock_thread_date'] < date("Y-m-d H:i:S");
     }
+
+    /**
+     * Returns an array of users in the current course which have not been completely graded for the given gradeable.
+     * Excludes users in the null section
+     *
+     * If a component_id is passed in, then the list of returned users will be limited to users with
+     * that specific component ungraded
+     *
+     * @param Gradeable\Gradeable $gradeable
+     * @return array
+     */
+    public function getUsersNotFullyGraded(Gradeable\Gradeable $gradeable, $component_id = "-1") {
+
+        // Get variables needed for query
+        $component_count = count($gradeable->getComponents());
+        $gradeable_id = $gradeable->getId();
+
+        // Configure which type of grading this gradeable is using
+        // If there are graders assigned to rotating sections we are very likely using rotating sections
+        $rotation_sections = $gradeable->getRotatingGraderSections();
+        count($rotation_sections) ? $section_type = 'rotating_section' : $section_type = 'registration_section';
+
+        // Configure variables related to user vs team submission
+        if($gradeable->isTeamAssignment()) {
+            $id_string = 'team_id';
+            $table = 'gradeable_teams';
+        } else {
+            $id_string = 'user_id';
+            $table = 'users';
+        }
+
+        $main_query = "select $id_string from $table where $section_type is not null and $id_string not in";
+
+        // Select which subquery to use
+        if($component_id != "-1") {
+
+            // Use this sub query to select users who do not have a specific component within this gradable graded
+            $sub_query = "(select gd_$id_string
+                from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
+                where g_id = '$gradeable_id' and gc_id = $component_id);";
+
+        } else {
+
+            // Use this sub query to select users who have at least one component not graded
+            $sub_query = "(select gradeable_data.gd_$id_string
+             from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
+             where g_id = '$gradeable_id' group by gradeable_data.gd_id having count(gradeable_data.gd_id) = $component_count);";
+        }
+
+        // Assemble complete query
+        $query = "$main_query $sub_query";
+
+        // Run query
+        $this->course_db->query($query);
+
+        // Capture results
+        $not_fully_graded = $this->course_db->rows();
+
+        // Clean up results
+        $not_fully_graded = array_column($not_fully_graded, $id_string);
+
+        return $not_fully_graded;
+    }
 }
