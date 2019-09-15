@@ -280,7 +280,8 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         try:
-            ssh.connect(hostname = host, username = user, timeout=5)
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,message=f'connecting to {user}@{host}')
+            ssh.connect(hostname = host, username = user, timeout=10)
 
             sftp = ssh.open_sftp()
             fd1, local_done_queue_file = tempfile.mkstemp()
