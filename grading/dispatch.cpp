@@ -1077,6 +1077,14 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   }
   float score = result["data"]["score"];
 
+  // Clamp the score between 0 and 1
+  if(score > 1){
+    score = 1;
+  }
+  else if(score < 0){
+    score = 0;
+  }
+
   std::string message = "";
   if(result["data"]["message"].is_string()){
       message = result["data"]["message"];

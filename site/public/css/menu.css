@@ -81,8 +81,9 @@
     font-size: 31px;
 }
 
-.icon-title { 
-    flex: 1 0 auto;
+.icon-title {
+    /* commenting this out because the sidebar text was not wrapping */
+    /*flex: 1 0 auto;*/
 }
 
 #menu-button .notification-badge {

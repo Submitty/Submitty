@@ -276,10 +276,6 @@ class UsersController extends AbstractController {
             }
         }
         else {
-            if ($user !== null) {
-                $this->core->addErrorMessage("A user with that ID already exists");
-                $this->core->redirect($return_url);
-            }
             $user = $this->core->loadModel(User::class);
             $user->setId(trim($_POST['user_id']));
         }
@@ -339,8 +335,8 @@ class UsersController extends AbstractController {
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
-                $this->core->getQueries()->updateUser($user, $semester, $course);
-                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                $this->core->getQueries()->updateUser($user);
+                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
             }
 

@@ -696,7 +696,7 @@ class AdminGradeableController extends AbstractController {
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if ($details['gradeable_template'] !== '--None--') {
+        if (array_key_exists('gradeable_template',$details) && $details['gradeable_template'] !== '--None--') {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
@@ -1086,7 +1086,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public function enqueueGenerateRepos($semester,$course,$g_id) {
+    public static function enqueueGenerateRepos($semester,$course,$g_id) {
         // FIXME:  should use a variable intead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 

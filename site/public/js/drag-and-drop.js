@@ -22,10 +22,21 @@ var empty_inputs = true;
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
+function initializeDragAndDrop() {
+    file_array = [];
+    previous_files = [];
+    label_array = [];
+    use_previous = false;
+    changed = false;
+    empty_inputs = true;
+    student_ids = [];
+    student_without_ids = [];
+}
+
 // initializing file_array and previous_files
-function createArray(num_parts){
-    if(file_array.length == 0){
-        for(var i=0; i<num_parts; i++){
+function createArray(num_parts) {
+    if (file_array.length == 0){
+        for (var i=0; i<num_parts; i++){
             file_array.push([]);
             previous_files.push([]);
             label_array.push([]);
@@ -393,7 +404,7 @@ function validateUserId(csrf_token, gradeable_id, user_id){
                 'user_id' : user_id
             },
             type : 'POST',
-            success : function(response){ 
+            success : function(response){
                 response = JSON.parse(response);
                 if(response['status'] === 'success'){
                     resolve(response);
@@ -417,7 +428,7 @@ function displaySubmissionMessage(json){
     let d = new Date();
     let t = String(d.getTime());
 
-    let class_str = 'class="inner-message alert ' + (json['status'] === 'success' ? 'alert-success' : 'alert-error') + '"' ; 
+    let class_str = 'class="inner-message alert ' + (json['status'] === 'success' ? 'alert-success' : 'alert-error') + '"' ;
     let close_btn = '<a class="fas fa-times message-close" onclick="removeMessagePopup(' + t + ');"></a>';
     let fa_icon = '<i class="' + (json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>';
     let response = (json['status'] === 'success' ? json['data'] : json['message'] )
@@ -443,7 +454,7 @@ function displayPreviousSubmissionOptions(callback){
     submit_btn.attr('tabindex', '0');
     closer_btn.attr('tabindex', '0');
     // on click, make submission based on which radio input was checked
-    submit_btn.on('click', function() { 
+    submit_btn.on('click', function() {
         if($("#instructor-submit-option-new").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "0");
             option = 1;
@@ -558,14 +569,14 @@ function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous
                 'path' : path
             },
             type: 'POST',
-            success: function(response) {     
+            success: function(response) {
                 response = JSON.parse(response);
                 if (response['status'] === 'success') {
                     resolve(response);
                 }
                 else {
                     reject(response);
-                }    
+                }
             },
             error: function(err) {
                 console.log("Failed while submiting split item");
@@ -823,7 +834,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-    
+
     var short_answer_object    = gatherInputAnswersByType("short_answer");
     var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
     var codebox_object         = gatherInputAnswersByType("codebox");

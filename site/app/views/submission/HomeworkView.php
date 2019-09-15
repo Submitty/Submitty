@@ -205,7 +205,7 @@ class HomeworkView extends AbstractView {
                     $messages[] = ['type' => 'would_get_zero'];
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
-                    $new_late_charged = $would_be_days_late-$active_days_late;
+                    $new_late_charged = max(0,$would_be_days_late-$active_days_late - $extensions);
                     $new_late_days_remaining = $late_days_remaining-$new_late_charged;
                     $messages[] = ['type' => 'would_allowed', 'info' => [
                         'charged' => $new_late_charged,
@@ -502,7 +502,7 @@ class HomeworkView extends AbstractView {
             if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
                 if(array_key_exists('id', $data)){
                     $id = $data['id'];
-                    $is_valid = $this->core->getQueries()->getUserById($id);
+                    $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
                 }else{
                     //set the blank id as invalid for now, after a page refresh it will recorrect
                     $id = '';
