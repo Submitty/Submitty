@@ -24,36 +24,73 @@ use app\models\SimpleStat;
 
 class PostgresqlDatabaseQueries extends DatabaseQueries{
 
-    public function getUserById($user_id) {
-        $this->course_db->query("
-SELECT u.*, ns.merge_threads, ns.all_new_threads,
-       ns.all_new_posts, ns.all_modifications_forum,
-       ns.reply_in_post_thread,ns.team_invite,
-       ns.team_member_submission, ns.team_joined,
-       ns.merge_threads_email, ns.all_new_threads_email,
-       ns.all_new_posts_email, ns.all_modifications_forum_email,
-       ns.reply_in_post_thread_email, ns.team_invite_email, 
-       ns.team_member_submission_email, ns.team_joined_email,
-       ns.self_notification,sr.grading_registration_sections
-       
-FROM users u
-LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
-LEFT JOIN (
-	SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
-	FROM grading_registration
-	GROUP BY user_id
-) as sr ON u.user_id=sr.user_id
-WHERE u.user_id=?", array($user_id));
-        if (count($this->course_db->rows()) > 0) {
-            $user = $this->course_db->row();
-            if (isset($user['grading_registration_sections'])) {
-                $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
-            }
-            return new User($this->core, $user);
+    //given a user_id check the users table for a valid entry, returns a user object if found, null otherwise
+    //if is_numeric is true, the numeric_id key will be used to lookup the user
+    //this should be called through getUserById() or getUserByNumericId()
+    private function getUser($user_id, $is_numeric = false ){
+        if(!$is_numeric){
+            $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
+        }else{
+            $this->submitty_db->query("SELECT * FROM users WHERE user_numeric_id=?", array($user_id));
         }
-        else {
+
+        if ($this->submitty_db->getRowCount() === 0) {
             return null;
         }
+
+        $details = $this->submitty_db->row();
+
+        if ($this->course_db) {
+            $this->course_db->query("
+            SELECT u.*, ns.merge_threads, ns.all_new_threads,
+                 ns.all_new_posts, ns.all_modifications_forum,
+                 ns.reply_in_post_thread,ns.team_invite,
+                 ns.team_member_submission, ns.team_joined,
+                 ns.self_notification,
+                 ns.merge_threads_email, ns.all_new_threads_email,
+                 ns.all_new_posts_email, ns.all_modifications_forum_email,
+                 ns.reply_in_post_thread_email, ns.team_invite_email, 
+                 ns.team_member_submission_email, ns.team_joined_email,
+                 ns.self_notification_email,sr.grading_registration_sections
+     
+            FROM users u
+            LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
+            LEFT JOIN (
+              SELECT array_agg(sections_registration_id) as grading_registration_sections, user_id
+              FROM grading_registration
+              GROUP BY user_id
+            ) as sr ON u.user_id=sr.user_id
+            WHERE u.user_id=?", array($user_id));
+
+            if ($this->course_db->getRowCount() > 0) {
+                $user = $this->course_db->row();
+                if (isset($user['grading_registration_sections'])) {
+                    $user['grading_registration_sections'] = $this->course_db->fromDatabaseToPHPArray($user['grading_registration_sections']);
+                }
+                $details = array_merge($details, $user);
+            }
+        }
+
+        return new User($this->core, $details);
+    }
+
+    public function getUserById($user_id) {
+        return $this->getUser($user_id);
+    }
+
+    public function getUserByNumericId($numeric_id) {
+        return $this->getUser($numeric_id, true);
+    }
+
+    //looks up if the given id is a user_id, if null will then check
+    //the numerical_id table
+    public function getUserByIdOrNumericId($id){
+        $ret = $this->getUser($id);
+        if($ret === null ){
+            return $this->getUser($id, true);
+        }
+
+        return $ret;
     }
 
     public function getGradingSectionsByUserId($user_id) {
@@ -1071,9 +1108,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               egv.active_version,
 
               /* Grade inquiry data */
-              rr.id AS regrade_request_id,
-              rr.status AS regrade_request_status,
-              rr.timestamp AS regrade_request_timestamp,
+             rr.array_grade_inquiries,
 
               {$submitter_data_inject}
 
@@ -1169,7 +1204,11 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
               ) AS egv ON egv.{$submitter_type}=egd.{$submitter_type} AND egv.g_id=egd.g_id
 
               /* Join grade inquiry */
-              LEFT JOIN regrade_requests AS rr ON rr.{$submitter_type}={$submitter_type_ext} AND rr.g_id=g.g_id
+              LEFT JOIN (
+  				SELECT json_agg(rr) as array_grade_inquiries, user_id, team_id, g_id
+  				FROM regrade_requests AS rr
+  				GROUP BY rr.user_id, rr.team_id, rr.g_id
+  			  ) AS rr on egv.{$submitter_type}=rr.{$submitter_type} AND egv.g_id=rr.g_id
             WHERE $selector
             $order";
 
@@ -1229,17 +1268,14 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $auto_graded_gradeable = new AutoGradedGradeable($this->core, $graded_gradeable, $row);
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
 
-            if (isset($row['regrade_request_id'])) {
-                $regrade_request_properties = [
-                    'id',
-                    'status',
-                    'timestamp'
-                ];
-                $regrade_request_arr = array_combine($regrade_request_properties, array_map(function($prop) use($row) {
-                    return $row['regrade_request_'.$prop];
-                }, $regrade_request_properties));
+            if (isset($row['array_grade_inquiries'])) {
+                $grade_inquiries = json_decode($row['array_grade_inquiries'],true);
+                $grade_inquiries_arr = array();
+                foreach ($grade_inquiries as $grade_inquiry) {
+                    $grade_inquiries_arr[] = new RegradeRequest($this->core, $grade_inquiry);
+                }
 
-                $graded_gradeable->setRegradeRequest(new RegradeRequest($this->core, $regrade_request_arr));
+                $graded_gradeable->setRegradeRequests($grade_inquiries_arr);
             }
 
             $graded_components_by_id = [];
@@ -1416,6 +1452,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                   eg_team_lock_date AS team_lock_date,
                   eg_regrade_request_date AS regrade_request_date,
                   eg_regrade_allowed AS regrade_allowed,
+                  eg_grade_inquiry_per_component_allowed AS grade_inquiry_per_component_allowed,
                   eg_thread_ids AS discussion_thread_ids,
                   eg_has_discussion AS discussion_based,
                   eg_use_ta_grading AS ta_grading,

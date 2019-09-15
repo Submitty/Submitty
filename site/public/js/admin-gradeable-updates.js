@@ -155,7 +155,7 @@ $(document).ready(function () {
 function ajaxRebuildGradeableButton() {
     var gradeable_id = $('#g_id').val();
     $.ajax({
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'rebuild']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'rebuild']),
         success: function (response) {
             ajaxCheckBuildStatus();
         },
@@ -168,7 +168,7 @@ function ajaxRebuildGradeableButton() {
 function ajaxGetBuildLogs(gradeable_id) {
     $.getJSON({
         type: "GET",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_log']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'build_log']),
         success: function (response) {
             var build_info = response['data'][0];
             var cmake_info = response['data'][1];
@@ -209,7 +209,7 @@ function ajaxCheckBuildStatus() {
     hideBuildLog();
     $.getJSON({
         type: "GET",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'build_status']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'build_status']),
         success: function (response) {
             $('#rebuild-log-button').css('display','block');
             if (response['data'] == 'queued') {
@@ -255,7 +255,7 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
     setGradeableUpdateInProgress();
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['gradeable', gradeable_id, 'update']),
+        url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
         data: p_values,
         success: function (response) {
             if (Array.isArray(response['data'])) {
@@ -409,14 +409,17 @@ function saveRubric(redirect = true) {
     $('#save_status').html('Saving Rubric...');
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
-        data: values,
+        url: buildCourseUrl(['gradeable', $('#g_id').val(), 'rubric']),
+        data: {
+            values: values,
+            csrf_token: csrfToken
+        },
         success: function (response) {
             if (response.status === 'success') {
                 delete errors['rubric'];
                 updateErrorMessage();
                 if (redirect) {
-                    window.location.replace(buildNewCourseUrl(['gradeable', $('#g_id').val(), 'update']) + '?nav_tab=2');
+                    window.location.replace(buildCourseUrl(['gradeable', $('#g_id').val(), 'update']) + '?nav_tab=2');
                 }
             } else {
                 errors['rubric'] = response.message;
@@ -471,7 +474,7 @@ function saveGraders() {
     $('#save_status').html('Saving Graders...');
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['gradeable', $('#g_id').val(), 'graders']),
+        url: buildCourseUrl(['gradeable', $('#g_id').val(), 'graders']),
         data: {
             graders: values,
             csrf_token: csrfToken

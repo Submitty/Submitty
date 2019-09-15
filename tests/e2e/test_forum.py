@@ -24,7 +24,7 @@ class TestForum(BaseTestCase):
     def switch_to_page_create_thread(self):
         if '/threads/new' in self.driver.current_url:
             pass
-        elif '/threads' in self.driver.current_url:
+        elif '/forum' in self.driver.current_url:
             self.driver.find_element_by_xpath("//a[contains(text(),'Create Thread')]").click()
         else:
             assert False
@@ -52,7 +52,7 @@ class TestForum(BaseTestCase):
                 category_button.click()
 
     def create_thread(self, title, first_post, ignore_if_exists = False, upload_attachment = False, categories_list = [("Question",True)]):
-        assert '/threads' in self.driver.current_url
+        assert '/forum' in self.driver.current_url
         if ignore_if_exists and self.thread_exists(title):
             return
         attachment_file = None
@@ -75,7 +75,7 @@ class TestForum(BaseTestCase):
         return attachment_file
 
     def thread_exists(self, title):
-        assert '/threads' in self.driver.current_url
+        assert '/forum' in self.driver.current_url
         target_xpath = "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title)
         self.driver.execute_script('$("#thread_list").scrollTop(0);')
         thread_count = int(self.driver.execute_script('return $("#thread_list .thread_box").length;'))
@@ -119,7 +119,10 @@ class TestForum(BaseTestCase):
         if must_exists:
             assert len(posts) > 0
         if check_attachment is not None:
-            assert len(posts[0].find_elements(By.XPATH, ".//a[contains(normalize-space(.), '{}')]".format(check_attachment))) > 0
+            posts[0].find_element(By.XPATH, ".//a[starts-with(@id, 'button_attachments_')]").click()
+            self.wait_after_ajax()
+            attachmentSrc = posts[0].find_elements(By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment))
+            assert len(attachmentSrc) > 0
         return posts
 
     def reply_and_test(self, post_content, newcontent, first_post, upload_attachment = False):

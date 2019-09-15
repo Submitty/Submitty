@@ -14,12 +14,6 @@ use Symfony\Component\Routing\Annotation\Route;
 
 
 class MiscController extends AbstractController {
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
 
     /**
      * Get the current server time
@@ -31,9 +25,8 @@ class MiscController extends AbstractController {
      * @return Response
      */
     public function getServerTime() {
-        $json = DateUtils::getServerTimeJson($this->core);
         return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($json)
+            JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core))
         );
     }
 
@@ -135,8 +128,6 @@ class MiscController extends AbstractController {
      * @Route("/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
-
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
@@ -192,7 +183,7 @@ class MiscController extends AbstractController {
         if ($gradeable === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
@@ -200,7 +191,7 @@ class MiscController extends AbstractController {
         if ($graded_gradeable === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $gradeable_version = $graded_gradeable->getAutoGradedGradeable()->getAutoGradedVersionInstance($version);
@@ -208,7 +199,7 @@ class MiscController extends AbstractController {
         if ($gradeable_version === null) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $folder_names = array();
@@ -237,7 +228,7 @@ class MiscController extends AbstractController {
         if (count($folder_names) === 0) {
             $message = "You do not have access to that page.";
             $this->core->addErrorMessage($message);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $zip_file_name = $gradeable_id . "_" . $user_id . "_" . date("m-d-Y") . ".zip";
@@ -303,7 +294,7 @@ class MiscController extends AbstractController {
             if (!($this->core->getUser()->accessFullGrading())) {
                 $message = "You do not have access to that page.";
                 $this->core->addErrorMessage($message);
-                $this->core->redirect($this->core->buildNewCourseUrl());
+                $this->core->redirect($this->core->buildCourseUrl());
             }
         }
         else
@@ -335,7 +326,7 @@ class MiscController extends AbstractController {
                     if (!is_dir($gradeable_path)) { //if dir is already present, but it's a file
                         $message = "Oops! That page is not available.";
                         $this->core->addErrorMessage($message);
-                        $this->core->redirect($this->core->buildNewCourseUrl());
+                        $this->core->redirect($this->core->buildCourseUrl());
                     }
                     else{
                         $files = new \RecursiveIteratorIterator(
@@ -358,7 +349,7 @@ class MiscController extends AbstractController {
                 } else { //no dir exists with this name
                     $message = "Oops! That page is not available.";
                     $this->core->addErrorMessage($message);
-                    $this->core->redirect($this->core->buildNewCourseUrl());
+                    $this->core->redirect($this->core->buildCourseUrl());
                 }
 
             } else {
@@ -451,11 +442,10 @@ class MiscController extends AbstractController {
                         $complete_count++;
                 }
             }
-            $result = ['success' => true, 'found' => $found, 'job_data' => $result, 'count' => $complete_count];
+            $result = ['found' => $found, 'job_data' => $result, 'count' => $complete_count];
+            return $this->core->getOutput()->renderJsonSuccess($result);
         }catch(\Exception $e){
-            $result = ['error' => $e->getMessage()];
+            return $this->core->getOutput()->renderJsonError($e->getMessage());
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
     }
 }

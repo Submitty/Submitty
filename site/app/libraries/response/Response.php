@@ -40,7 +40,7 @@ class Response extends AbstractResponse {
      * @param WebResponse $web_response
      * @return Response
      */
-    static public function WebOnlyResponse(WebResponse $web_response) {
+    static public function WebOnlyResponse(WebResponse $web_response): Response {
         return new self(null, $web_response, null);
     }
 
@@ -48,7 +48,7 @@ class Response extends AbstractResponse {
      * @param JsonResponse $json_response
      * @return Response
      */
-    static public function JsonOnlyResponse(JsonResponse $json_response) {
+    static public function JsonOnlyResponse(JsonResponse $json_response): Response {
         return new self($json_response, null, null);
     }
 
@@ -56,7 +56,7 @@ class Response extends AbstractResponse {
      * @param RedirectResponse $redirect_response
      * @return Response
      */
-    static public function RedirectOnlyResponse(RedirectResponse $redirect_response) {
+    static public function RedirectOnlyResponse(RedirectResponse $redirect_response): Response {
         return new self(null, null, $redirect_response);
     }
 

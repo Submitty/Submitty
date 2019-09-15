@@ -359,7 +359,7 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => $team_button_text,
             "subtitle" => $team_display_date,
-            "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'team']),
+            "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'team']),
             "class" => "btn {$team_button_type} btn-nav",
             "name" => "team-btn"
         ]);
@@ -382,7 +382,7 @@ class NavigationView extends AbstractView {
             "(due " . $gradeable->getSubmissionDueDate()->format(self::DATE_FORMAT) . ")";
         $points_percent = NAN;
 
-        $href = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
+        $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
         $progress = null;
         $disabled = false;
 
@@ -551,9 +551,9 @@ class NavigationView extends AbstractView {
             $view=null;
         }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            $href = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
         } else if ($gradeable->getType() === GradeableType::CHECKPOINTS || $gradeable->getType() === GradeableType::NUMERIC_TEXT) {
-            $href = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'grading']) . '?view=' . $view;
+            $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading']) . '?view=' . $view;
         }
         else {
             //Unknown type of gradeable
@@ -664,7 +664,7 @@ class NavigationView extends AbstractView {
     private function getEditButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
             "title" => "Edit Gradeable Configuration",
-            "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'update']),
+            "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']),
             "class" => "fas fa-pencil-alt black-btn",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getTitle()}"
@@ -680,7 +680,7 @@ class NavigationView extends AbstractView {
         $button = new Button($this->core, [
             "title" => "Delete Gradeable",
             "href" => "javascript:newDeleteGradeableForm('" . 
-                $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
+                $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
                 . "', '{$gradeable->getTitle()}');",
             "class" => "fas fa-trash fa-fw black-btn",
             "title_on_hover" => true,
@@ -699,7 +699,7 @@ class NavigationView extends AbstractView {
         if ($list_section === GradeableList::GRADING) {
             $button = new Button($this->core, [
                 "subtitle" => "RELEASE GRADES NOW",
-                "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                     . http_build_query(['action' => 'release_grades_now']),
                 "class" => "btn btn-primary btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
@@ -707,7 +707,7 @@ class NavigationView extends AbstractView {
         } else if ($list_section === GradeableList::FUTURE) {
             $button = new Button($this->core, [
                 "subtitle" => "OPEN TO TAS NOW",
-                "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                     . http_build_query(['action' => 'open_ta_now']),
                 "class" => "btn btn-primary btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
@@ -716,7 +716,7 @@ class NavigationView extends AbstractView {
             if ($gradeable->getType() == GradeableType::ELECTRONIC_FILE) {
                 $button = new Button($this->core, [
                     "subtitle" => "OPEN NOW",
-                    "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                         . http_build_query(['action' => 'open_students_now']),
                     "class" => "btn btn-primary btn-nav btn-nav-open",
                     "name" => "quick-link-btn"
@@ -724,7 +724,7 @@ class NavigationView extends AbstractView {
             } else {
                 $button = new Button($this->core, [
                     "subtitle" => "OPEN TO GRADING NOW",
-                    "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                    "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                         . http_build_query(['action' => 'open_grading_now']),
                     "class" => "btn btn-primary btn-nav btn-nav-open",
                     "name" => "quick-link-btn"
@@ -733,13 +733,13 @@ class NavigationView extends AbstractView {
         } else if ($list_section === GradeableList::CLOSED) {
             $button = new Button($this->core, [
                 "subtitle" => "OPEN TO GRADING NOW",
-                "href" => $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+                "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                     . http_build_query(['action' => 'open_grading_now']),
                 "class" => "btn btn-primary btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);
         } else if ($list_section === GradeableList::OPEN) {
-            $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
+            $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'quick_link']) . '?'
                 . http_build_query(['action' => 'close_submissions']);
 
             $button = new Button($this->core, [

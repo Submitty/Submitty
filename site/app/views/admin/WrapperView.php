@@ -10,8 +10,8 @@ class WrapperView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("admin/UploadWrapperForm.twig", [
             "wrapper_files" => $wrapper_files,
             "csrf_token" => $this->core->getCsrfToken(),
-            "upload_url" => $this->core->buildNewCourseUrl(['theme', 'upload']),
-            "delete_url" => $this->core->buildNewCourseUrl(['theme', 'delete'])
+            "upload_url" => $this->core->buildCourseUrl(['theme', 'upload']),
+            "delete_url" => $this->core->buildCourseUrl(['theme', 'delete'])
         ]);
     }
 }

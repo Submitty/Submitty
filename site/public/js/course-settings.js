@@ -14,7 +14,7 @@ $(function() {
         formData.append("entry", entry);
 
         $.ajax({
-            url: buildNewCourseUrl(['config', 'update']),
+            url: buildCourseUrl(['config', 'update']),
             data: formData,
             type: "POST",
             processData: false,
@@ -25,6 +25,11 @@ $(function() {
                     alert(response['message']);
                     $(elem).focus();
                     elem.value = $(elem).attr("value");
+
+                    // Ensure auto_rainbow_grades checkbox reverts to unchecked if it failed validation
+                    if($(elem).attr('name') == 'auto_rainbow_grades') {
+                        $(elem).prop('checked', false);
+                    }
                 }
                 $(elem).attr("value", elem.value);
             }

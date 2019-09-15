@@ -4,6 +4,7 @@ namespace app\models;
 
 use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
+use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -21,7 +22,6 @@ use app\libraries\Utils;
  * @method string getBaseUrl()
  * @method string getVcsUrl()
  * @method string getCgiUrl()
- * @method string getSiteUrl()
  * @method string getSubmittyPath()
  * @method string getCgiTmpPath()
  * @method string getCoursePath()
@@ -98,11 +98,11 @@ class Config extends AbstractModel {
     /** @property @var string */
     protected $cgi_url;
     /** @property @var string */
-    protected $site_url;
-    /** @property @var string */
     protected $authentication;
-    /** @property @var string */
-    protected $timezone = 'America/New_York';
+    /** @property @var DateTimeZone */
+    protected $timezone;
+    /** @var string */
+    protected $default_timezone = 'America/New_York';
     /** @property @var string */
     protected $submitty_path;
     /** @property @var string */
@@ -213,14 +213,10 @@ class Config extends AbstractModel {
      * Config constructor.
      *
      * @param Core   $core
-     * @param $semester
-     * @param $course
      */
-    public function __construct(Core $core, $semester, $course) {
+    public function __construct(Core $core) {
         parent::__construct($core);
-
-        $this->semester = $semester;
-        $this->course = $course;
+        $this->timezone = new \DateTimeZone($this->default_timezone);
     }
 
     public function loadMasterConfigs($config_path) {
@@ -261,10 +257,10 @@ class Config extends AbstractModel {
         $this->submitty_path = $submitty_json['submitty_data_dir'];
 
         if (isset($submitty_json['timezone'])) {
-            $this->timezone = $submitty_json['timezone'];
-            if (!in_array($this->timezone, \DateTimeZone::listIdentifiers())) {
-                throw new ConfigException("Invalid Timezone identifier: {$this->timezone}");
+            if (!in_array($submitty_json['timezone'], \DateTimeZone::listIdentifiers())) {
+                throw new ConfigException("Invalid Timezone identifier: {$submitty_json['timezone']}");
             }
+            $this->timezone = new \DateTimeZone($submitty_json['timezone']);
         }
 
         if (isset($submitty_json['institution_name'])) {
@@ -287,7 +283,6 @@ class Config extends AbstractModel {
             $this->system_message = strval($submitty_json['system_message']);
         }
 
-        $this->timezone = new \DateTimeZone($this->timezone);
         $this->base_url = rtrim($this->base_url, "/")."/";
 
         if (!empty($submitty_json['cgi_url'])){
@@ -318,11 +313,6 @@ class Config extends AbstractModel {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
-        }
-        $this->site_url = $this->base_url."index.php?";
-
-        if (!empty($this->semester) && !empty($this->course)) {
-            $this->course_path = FileUtils::joinPaths($this->submitty_path, "courses", $this->semester, $this->course);
         }
 
         $secrets_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'secrets_submitty_php.json'));
@@ -362,7 +352,11 @@ class Config extends AbstractModel {
         $this->latest_commit = $version_json['short_installed_commit'];
     }
 
-    public function loadCourseJson($course_json_path) {
+    public function loadCourseJson($semester, $course, $course_json_path) {
+        $this->semester = $semester;
+        $this->course = $course;
+        $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
+
         if (!file_exists($course_json_path)) {
             throw new ConfigException("Could not find course config file: ".$course_json_path, true);
         }
@@ -410,8 +404,6 @@ class Config extends AbstractModel {
             $this->$key = ($this->$key == true) ? true : false;
         }
 
-        $this->site_url = $this->base_url."index.php?semester=".$this->semester."&course=".$this->course;
-
         $wrapper_files_path = FileUtils::joinPaths($this->getCoursePath(), 'site');
         foreach (WrapperController::WRAPPER_FILES as $file) {
             $path = FileUtils::joinPaths($wrapper_files_path, $file);
@@ -422,7 +414,6 @@ class Config extends AbstractModel {
 
         $this->course_loaded = true;
     }
-
 
     private function setConfigValues($config, $section, $keys) {
         if (!isset($config[$section]) || !is_array($config[$section])) {
@@ -436,6 +427,45 @@ class Config extends AbstractModel {
             $this->$key = $config[$section][$key];
         }
     }
+
+    /**
+     * Determine if automatic rainbow grades is fully configured
+     * For some features to be available to the instructors, the submitty-admin user must be configured
+     * at the system level and also must be a member of the course in question.
+     */
+
+    public function getSubmittyAdminUser() {
+        // grab the name of the submitty_admin user (only if 'verified',
+        // that is, password successfully used to grab an API token.
+        $users_file = FileUtils::joinPaths(
+            '/', 'usr', 'local', 'submitty', 'config', 'submitty_users.json'
+        );
+        if(!is_file($users_file)) {
+            throw new FileNotFoundException('Unable to locate the submity_users.json file');
+        }
+        $users_file_contents = json_decode(file_get_contents($users_file));
+        $submitty_admin_user = "";
+        if (property_exists($users_file_contents,"verified_submitty_admin_user")) {
+          $submitty_admin_user = $users_file_contents->verified_submitty_admin_user;
+        }
+        return $submitty_admin_user;
+    }
+
+    public function isSubmittyAdminUserVerified() {
+        return $this->getSubmittyAdminUser() !== "";
+    }
+
+    public function isSubmittyAdminUserInCourse() {
+        $submitty_admin_user = $this->getSubmittyAdminUser();
+        if ($submitty_admin_user === "") {
+            return false;
+        }
+        $course = $this->getCourse();
+        $semester = $this->getSemester();
+        return $this->core->getQueries()->checkIsInstructorInCourse
+          ($submitty_admin_user, $course, $semester);
+    }
+
 
     /**
      * @return boolean

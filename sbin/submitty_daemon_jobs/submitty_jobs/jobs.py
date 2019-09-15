@@ -108,8 +108,8 @@ class RunAutoRainbowGrades(CourseJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
 
-        path = '/usr/local/submitty/sbin/auto_rainbow_grades.py'
-        debug_output = '/var/local/submitty/courses/' + semester + '/' + course + '/rainbow_grades/auto_debug_output.txt'
+        path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
+        debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
 
         try:
             with open(debug_output, "w") as file:
@@ -329,4 +329,4 @@ class CreateCourse(AbstractJob):
 
         with log_file_path.open("w") as output_file:
             subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
-            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser.py", "--course", semester, course, "null", head_instructor], input="\n\n\n\n", encoding='ascii', stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)

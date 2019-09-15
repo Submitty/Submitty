@@ -1,11 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace app\authentication;
 
 use app\exceptions\AuthenticationException;
 use app\exceptions\CurlException;
-use app\libraries\Core;
-use app\libraries\FileUtils;
 
 /**
  * Class PamAuthentication

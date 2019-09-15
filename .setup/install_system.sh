@@ -189,6 +189,7 @@ pip3 install PyPDF2
 pip3 install distro
 pip3 install jsonschema
 pip3 install jsonref
+pip3 install docker
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
@@ -262,7 +263,7 @@ else
 fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
-# managers to write website custimization files and run course
+# managers to write website customization files and run course
 # management scripts.
 if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
         addgroup ${COURSE_BUILDERS_GROUP}
@@ -624,8 +625,8 @@ ${SUBMISSION_URL}
 
 
 1
-
-
+submitty-admin
+submitty-admin
 y
 
 
@@ -768,6 +769,30 @@ fi
 # DOCKER SETUP
 #################
 
+# If we are in vagrant and http_proxy is set, then vagrant-proxyconf
+# is probably being used, and it will work for the rest of this script,
+# but fail here if we do not manually set the proxy for docker
+if [[ ${VAGRANT} == 1 ]]; then
+    if [ ! -z ${http_proxy+x} ]; then
+        mkdir -p /home/${DAEMON_USER}/.docker
+        proxy="            \"httpProxy\": \"${http_proxy}\""
+        if [ ! -z ${https_proxy+x} ]; then
+            proxy="${proxy},\n            \"httpsProxy\": \"${https_proxy}\""
+        fi
+        if [ ! -z ${no_proxy+x} ]; then
+            proxy="${proxy},\n            \"noProxy\": \"${no_proxy}\""
+        fi
+        echo -e "{
+    \"proxies\": {
+        \"default\": {
+${proxy}
+        }
+    }
+}" > /home/${DAEMON_USER}/.docker/config.json
+        chown -R ${DAEMON_USER}:${DAEMON_USER} /home/${DAEMON_USER}/.docker
+    fi
+fi
+
 # WIP: creates basic container for grading CS1 & DS assignments
 # CAUTION: needs users/groups for security
 # These commands should be run manually if testing Docker integration
@@ -793,6 +818,15 @@ if [ ${WORKER} == 0 ]; then
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
+
+
+#####################################################################################
+# Obtain API auth token for submitty-admin user
+# (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
+# operational at that time.)
+
+python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+
 
 echo "Done."
 exit 0

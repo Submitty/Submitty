@@ -14,10 +14,6 @@ class PDFController extends AbstractController {
         parent::__construct($core);
     }
 
-    public function run() {
-        return null;
-    }
-
     /**
      * @param $gradeable_id
      * @param $filename
