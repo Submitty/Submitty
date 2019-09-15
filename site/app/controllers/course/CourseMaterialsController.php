@@ -351,10 +351,10 @@ class CourseMaterialsController extends AbstractController {
                         $disallowed_folders = [".svn", ".git", ".idea", "__macosx"];
                         $disallowed_files = ['.ds_store'];
                         for ($i = 0; $i < $zip->numFiles; $i++) {
-                            $entries[] = $zip->statIndex($i);
+                            $entries[] = $zip->getNameIndex($i);
                         }
                         $entries = array_filter($entries, function($entry) use ($disallowed_folders, $disallowed_files) {
-                            $name = strtolower($entry['name']);
+                            $name = strtolower($entry);
                             foreach ($disallowed_folders as $folder) {
                                 if (Utils::startsWith($folder, $name)) {
                                     return false;
@@ -370,23 +370,13 @@ class CourseMaterialsController extends AbstractController {
                             return true;
                         });
                         $zfiles = array_filter($entries, function($entry) {
-                            return substr($entry['name'], -1) !== '/';
+                            return substr($entry, -1) !== '/';
                         });
 
-                        $entry_names = [];
-                        $zfiles_names = [];
-                        foreach ($entries as $e) {
-                            $entry_names[] = $e['name'];
-                        }
+                        $zip->extractTo($upload_path, $entries);
 
-                        foreach ($zfiles as $z) {
-                            $zfiles_names[] = $z['name'];
-                        }
-
-                        $zip->extractTo($upload_path, $entry_names);
-
-                        foreach ($zfiles_names as $zfile_name) {
-                            $path = FileUtils::joinPaths( $upload_path, $zfile_name );
+                        foreach ($zfiles as $zfile) {
+                            $path = FileUtils::joinPaths( $upload_path, $zfile );
                             $json[$path] = [
                                 'checked' => '1',
                                 'release_datetime' => $release_time
