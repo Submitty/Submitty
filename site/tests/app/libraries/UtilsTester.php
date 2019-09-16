@@ -101,4 +101,43 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertNull(Utils::stripStringFromArray(null, array()));
         $this->assertNull(Utils::stripStringFromArray(1, array()));
     }
+
+    public function elementDataProvider() {
+        return [
+            [[], null, null],
+            [[1], 1, 1],
+            [[1, 2, 3], 1, 3]
+        ];
+    }
+
+    /**
+     * @dataProvider elementDataProvider
+     */
+    public function testGetLastArrayElement($array, $first_element, $last_element) {
+        $this->assertEquals($last_element, Utils::getLastArrayElement($array));
+    }
+
+    /**
+     * @dataProvider elementDataProvider
+     */
+    public function testGetFirstArrayElement($array, $first_element, $last_element) {
+        $this->assertEquals($first_element, Utils::getFirstArrayElement($array));
+    }
+
+    public function imageDataProvider() {
+        return [
+            ['test', false],
+            ['test.txt', false],
+            ['test.gif', true],
+            ['test.jpg', true],
+            ['test.jpeg', true],
+            ['test.png', true]
+        ];
+    }
+    /**
+     * @dataProvider imageDataProvider
+     */
+    public function testIsImage($name, $is_image) {
+        $this->assertEquals($is_image, Utils::isImage($name));
+    }
 }
