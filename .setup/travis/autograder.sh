@@ -44,7 +44,7 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/DrMemory
 pushd /tmp
 DRMEM_TAG=release_2.0.1
 DRMEM_VER=2.0.1-2
-travis_retry wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz
+travis_retry wget --progress=dot https://github.com/DynamoRIO/drmemory/releases/download/${DRMEM_TAG}/DrMemory-Linux-${DRMEM_VER}.tar.gz
 tar -xpzf DrMemory-Linux-${DRMEM_VER}.tar.gz -C ${SUBMITTY_INSTALL_DIR}/DrMemory
 ln -s ${SUBMITTY_INSTALL_DIR}/DrMemory/DrMemory-Linux-${DRMEM_VER} ${SUBMITTY_INSTALL_DIR}/drmemory
 rm DrMemory-Linux-${DRMEM_VER}.tar.gz
@@ -54,7 +54,7 @@ popd
 pushd /tmp
 
 echo "Getting TCLAPP"
-wget https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz -o /dev/null > /dev/null 2>&1
+travis_retry wget --progress=dot https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz
 tar -xpzf tclap-1.2.2.tar.gz
 rm /tmp/tclap-1.2.2.tar.gz
 cd tclap-1.2.2/
@@ -79,12 +79,12 @@ JUNIT_VER=4.12
 HAMCREST_VER=1.3
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
-travis_retry wget https://maven-central.storage-download.googleapis.com/repos/central/data/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar
+travis_retry wget --progress=dot https://maven-central.storage-download.googleapis.com/repos/central/data/junit/junit/${JUNIT_VER}/junit-${JUNIT_VER}.jar
 chmod o+r . *.jar
 popd
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-travis_retry wget https://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar
+travis_retry wget --progress=dot https://maven-central.storage-download.googleapis.com/repos/central/data/org/hamcrest/hamcrest-core/${HAMCREST_VER}/hamcrest-core-${HAMCREST_VER}.jar
 chmod o+r . *.jar
 popd
 
@@ -92,7 +92,7 @@ popd
 echo "Getting JaCoCo..."
 JACOCO_VER=0.8.0
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
-travis_retry wget https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip
+travis_retry wget --progress=dot https://github.com/jacoco/jacoco/releases/download/v${JACOCO_VER}/jacoco-${JACOCO_VER}.zip
 mkdir jacoco-${JACOCO_VER}
 unzip jacoco-${JACOCO_VER}.zip -d jacoco-${JACOCO_VER} > /dev/null
 mv jacoco-${JACOCO_VER}/lib/jacococli.jar jacococli.jar
