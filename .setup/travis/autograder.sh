@@ -53,8 +53,8 @@ popd
 # --------------------------------------
 pushd /tmp
 
-echo "Getting TCLAPP"
-travis_retry wget --progress=dot https://sourceforge.net/projects/tclap/files/tclap-1.2.2.tar.gz
+echo "Getting TCLAP"
+travis_retry wget --progress=dot https://github.com/mirror/tclap/archive/v1.2.2.tar.gz
 tar -xpzf tclap-1.2.2.tar.gz
 rm /tmp/tclap-1.2.2.tar.gz
 cd tclap-1.2.2/
