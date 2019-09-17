@@ -1596,9 +1596,10 @@ class ElectronicGraderController extends AbstractController {
             elseif($component->isCountUp()){
                 $component->addMark('No Credit', 0.0, false);
             }
-            else {
+            elseif($component->hasPenalty()){
                 $component->addMark('No Penalty', 0.0, false);
             }
+
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
         } catch (\InvalidArgumentException $e) {
