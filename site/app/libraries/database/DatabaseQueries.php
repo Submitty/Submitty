@@ -528,6 +528,11 @@ class DatabaseQueries {
         $this->course_db->query("UPDATE threads SET pinned = ? WHERE id = ?", array($onOff, $thread_id));
     }
 
+    public function getNumberOfPinnedThreadsAndAttachments() {
+        $this->course_db->query("SELECT COUNT(*) FROM threads WHERE pinned=true");
+        return $this->course_db->row();
+    }
+
     public function addPinnedThread($user_id, $thread_id, $added){
         if($added) {
             $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", array($user_id, $thread_id));

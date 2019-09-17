@@ -129,6 +129,15 @@ class ForumController extends AbstractController{
         }
         return false;
     }
+    /*
+     * Checks if there are a significant amount of announcements and pinned threads and adds a notice
+     * @param $type is adding a pinned thread or making a thread an announcement
+     */
+    private function checkNotifyToUnPin($type) {
+        if ($type && $this->core->getQueries()->getNumberOfPinnedThreadsAndAttachments() > 5 && $this->core->getUser()->accessFullGrading()) {
+            $this->core->addNoticeMessage("Pinned threads drowning new threads? Consider removing some announcements or unpinning some threads.");
+        }
+    }
 
     /**
      * @Route("/{_semester}/{_course}/forum/categories/new", methods={"POST"})
@@ -321,6 +330,7 @@ class ForumController extends AbstractController{
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
 
+                $this->checkNotifyToUnPin(true);
                 $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
         }
@@ -421,7 +431,9 @@ class ForumController extends AbstractController{
     public function alterAnnouncement($type){
         $thread_id = $_POST["thread_id"];
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
-
+        $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
+        $this->checkNotifyToUnPin($type);
+        return $this->core->getOutput()->renderJsonSuccess($response);
         //TODO: notify on edited announcement
     }
 
@@ -433,6 +445,7 @@ class ForumController extends AbstractController{
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
         $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
+        $this->checkNotifyToUnPin($type);
         return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
