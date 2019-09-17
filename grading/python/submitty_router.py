@@ -80,8 +80,8 @@ class submitty_router():
     else:
       arrow = '-x' #if message_type == 'tcp' else '--x'
 
-    sender = obj['sender']
-    recipient = obj['recipient']
+    sender = obj['sender'].replace('_Actual', '')
+    recipient = obj['recipient'].replace('_Actual', '')
 
     with open(self.sequence_diagram_file, append_write) as outfile:
       outfile.write('{0}{1}{2}: {3}\n'.format(sender, arrow, recipient, str(obj['message'])))
