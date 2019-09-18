@@ -344,6 +344,8 @@ class ForumThreadView extends AbstractView {
                 "display_thread_count" => empty($displayThreadContent) ? 0 : count($displayThreadContent["thread_content"]),
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
+                "accessGrading" => $this->core->getUser()->accessGrading(),
+                "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
                 "display_option" => $display_option,
@@ -955,6 +957,10 @@ class ForumThreadView extends AbstractView {
 			$this->core->redirect($this->core->buildCourseUrl());
 			return;
 		}
+        if(empty($this->core->getQueries()->getCategories())){
+            $this->core->redirect($this->core->buildCourseUrl(["forum", "threads"]));
+            return;
+        }
 
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));
@@ -975,8 +981,8 @@ class ForumThreadView extends AbstractView {
 
         $categories = $this->core->getQueries()->getCategories();
 
-        $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-        array_unshift($categories, $dummy_category);
+        // $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+        // array_unshift($categories, $dummy_category);
 
 
         $buttons = array(
@@ -1032,8 +1038,8 @@ class ForumThreadView extends AbstractView {
         if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
 
-            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-            array_unshift($categories, $dummy_category);
+            // $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
+            // array_unshift($categories, $dummy_category);
         }
 
         $buttons = array(

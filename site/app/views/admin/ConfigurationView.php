@@ -10,9 +10,11 @@ class ConfigurationView extends AbstractView {
         $this->core->getOutput()->addInternalJs("configuration.js");
         $this->core->getOutput()->addInternalCss("configuration.css");
         $this->core->getOutput()->addBreadcrumb('Course Settings');
+        $categories = empty($this->core->getQueries()->getCategories());
         return $this->core->getOutput()->renderTwigTemplate("admin/Configuration.twig", [
             "fields" => $fields,
             "gradeable_seating_options" => $gradeable_seating_options,
+            "categories_empty" => $categories,
             "theme_url" => $this->core->buildCourseUrl(['theme']),
             "email_room_seating_url" => $this->core->buildCourseUrl(['email_room_seating']),
             "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),

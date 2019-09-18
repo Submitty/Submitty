@@ -49,7 +49,39 @@
             "show_filter": true
         } %}
 
-        <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
+        {# discussion forum with no categories #}
+        {% if categories | length  == 0 %}
+            {% if accessGrading == true %}
+                <h4 class="text-center red-message">
+                    No categories have been created yet. Please create categories to use the Discussion Forum
+                </h4>
+                <a class= "text-center" id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a>
+
+            {% else %}
+                <h4 class="text-center red-message">No categories have been created yet. Please contact your instructor.</h4>
+            
+            {% endif %}
+            <pre class="text-center red-message">           ,-.
+       ,--' ~.).
+     ,'         `.
+    ; (((__   __)))
+    ;  ( (#) ( (#)
+    |   \_/___\_/|
+   ,"  ,-'    `__".
+               (   ( ._   ____`.)--._        _
+                `._ `-.`-' \(`-'  _  `-. _,-' `-/`.
+                 ,')   `.`._))  ,' `.   `.  ,','  ;
+               .'  .     `--'  /     ).   `.      ;
+              ;     `-        /     '  )         ;
+              \                       ')       ,'
+               \                     ,'       ;
+                \               `~~~'       ,'
+                 `.                      _,'
+                   `.                ,--'
+                     `-._________,--'</pre> 
+        {% else %}    
+            <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
+        {% endif %} 
 
     {% else %}
 
