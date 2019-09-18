@@ -125,7 +125,7 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/read_file")
+     * @Route("/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
         // security check
@@ -142,7 +142,24 @@ class MiscController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
+
+        if (!$this->core->isTesting()) {
+            $mime_type = FileUtils::getMimeType($path);
+            if ($mime_type === 'text/plain') {
+                if (substr($path, '-3') === '.js') {
+                    $mime_type = 'application/javascript';
+                }
+                elseif (substr($path, '-4') === '.css') {
+                    $mime_type = 'text/css';
+                }
+                else if (substr($path, '-5') === '.html') {
+                    $mime_type = 'text/html';
+                }
+            }
+            header('Content-type: ' . $mime_type);
+        }
         readfile($path);
+        return true;
     }
 
     /**
