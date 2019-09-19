@@ -4,6 +4,7 @@ import shutil
 import tempfile
 from datetime import date
 import os
+import time
 import unittest
 
 from urllib.parse import urlencode
@@ -154,6 +155,7 @@ class BaseTestCase(unittest.TestCase):
 
     def wait_after_ajax(self):
         WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
+        time.sleep(0.5)
 
     @staticmethod
     def wait_user_input():
