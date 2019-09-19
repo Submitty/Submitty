@@ -981,10 +981,6 @@ class ForumThreadView extends AbstractView {
 
         $categories = $this->core->getQueries()->getCategories();
 
-        // $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-        // array_unshift($categories, $dummy_category);
-
-
         $buttons = array(
             array(
                 "required_rank" => 4,
@@ -1037,9 +1033,6 @@ class ForumThreadView extends AbstractView {
 
         if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
-
-            // $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-            // array_unshift($categories, $dummy_category);
         }
 
         $buttons = array(
