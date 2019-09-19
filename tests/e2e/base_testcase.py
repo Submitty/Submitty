@@ -155,6 +155,10 @@ class BaseTestCase(unittest.TestCase):
 
     def wait_after_ajax(self):
         WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
+        # FIXME
+        # A hacky solution for where the response for jQuery.ajax may take a bit of time to process,
+        # which happens after jQuery.active starts returning 0 and this function returns.
+        # see #4511
         time.sleep(0.5)
 
     @staticmethod
