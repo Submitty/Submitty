@@ -184,7 +184,7 @@ class Utils {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
                     $mime_type = FileUtils::getMimeType($file_name);
-                    if (getimagesize($file_name) === false || substr($mime_type, 0, strrpos($mime_type, "/")) !== "image") {
+                    if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
                         return false;
                     }
                 }
@@ -196,12 +196,12 @@ class Utils {
 
     /**
      * Compares two potentially null values using greater-than comparison.
-     * @param mixed $gtL Left operand for greater-than comparison
-     * @param mixed $gtR Righ operand for greater-than comparison
+     * @param mixed $gt_left Left operand for greater-than comparison
+     * @param mixed $gt_right Righ operand for greater-than comparison
      * @return bool True if $dtL > $dtR and neither are null, otherwise false
      */
-    public static function compareNullableGt($gtL, $gtR) {
-        return $gtL !== null && $gtR !== null && $gtL > $gtR;
+    public static function compareNullableGt($gt_left, $gt_right) {
+        return $gt_left !== null && $gt_right !== null && $gt_left > $gt_right;
     }
 
     /**
@@ -303,12 +303,12 @@ class Utils {
     * @param string $size_str
     * @return int
     */
-    public static function returnBytes ($size_str){
+    public static function returnBytes($size_str){
         switch (substr ($size_str, -1)){
-            case 'M': case 'm': return (int)$size_str * 1048576;
-            case 'K': case 'k': return (int)$size_str * 1024;
-            case 'G': case 'g': return (int)$size_str * 1073741824;
-            default: return $size_str;
+            case 'M': case 'm': return (int) $size_str * 1048576;
+            case 'K': case 'k': return (int) $size_str * 1024;
+            case 'G': case 'g': return (int) $size_str * 1073741824;
+            default: return (int) $size_str;
         }
     }
 
