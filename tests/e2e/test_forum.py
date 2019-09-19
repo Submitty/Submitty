@@ -66,7 +66,7 @@ class TestForum(BaseTestCase):
         self.driver.find_element_by_xpath("//input[@value='Submit Post']").click()
         if len([cat for cat in categories_list if cat[1]]) == 0:
             # Test thread should not be created
-            self.driver.switch_to.alert.accept();
+            self.driver.switch_to.alert.accept()
             self.switch_to_page_view_thread()
             assert not self.thread_exists(title)
             return None
