@@ -3,10 +3,21 @@ $(document).ready(function() {
     updateEmailSeatingOption();
 
     function updateForumMessage() {
+        updateForumCategoryWarning();
         if ($("#forum-enabled").is(":checked")) {
             $("#forum-enabled-message").show();
         } else {
             $("#forum-enabled-message").hide();
+        }
+    }
+
+    function updateForumCategoryWarning() {
+        if ($("#forum-category-warning").length) {
+            if ($("#forum-enabled").is(":checked")) {
+                $("#forum-category-warning").show();
+            } else {
+                $("#forum-category-warning").hide();
+            }
         }
     }
 

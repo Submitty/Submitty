@@ -30,7 +30,7 @@
         <ul id='ui-category-list' style="padding-left: 1em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
-                <li id="categorylistitem-{{ category.category_id }}" {% if loop.index != 1 %} class="category-sortable"{% endif %} style="color: {{ category.color }}; {% if loop.index == 1 %}display: none;{% endif %}">
+                <li id="categorylistitem-{{ category.category_id }}" class="category-sortable" style="color: {{ category.color }};">
                     <i class="fas fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
                             <span style="word-wrap: break-word;">{{ category.category_desc }}</span>
