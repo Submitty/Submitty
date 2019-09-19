@@ -33,7 +33,7 @@ def up(config):
         pass
 
     # Postgresql configuration (FIX ME)
-    psql_version = os.popen("psql -V | grep -m 1 -o '[[:digit:]]\+' | head -1").read().translate({0x0a: None})
+    psql_version = os.popen("psql -V | grep -m 1 -o '[0-9]\+' | head -1").read().translate({0x0a: None})
     process = f"""\
 sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'csvlog'~;
         s~^#*[ tab]*logging_collector[ tab]*=[ tab]*[a-z01]\+~logging_collector = on~;
