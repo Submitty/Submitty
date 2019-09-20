@@ -1,5 +1,7 @@
 <?php
 
+namespace tests\app\models\gradeable;
+
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
