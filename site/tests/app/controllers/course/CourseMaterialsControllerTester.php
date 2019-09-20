@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace tests\app\controllers\course;
 
@@ -66,7 +66,7 @@ class CourseMaterialsTester extends BaseUnitTest{
                 }
                 $lev .= "/lev" . $i . "";
                 FileUtils::createDir($this->config['course_path'] . $lev);
-                
+
             }
 
             $zip->close();
@@ -75,7 +75,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         $_FILES["files{$part}"]['name'][] = $name;
         $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($filename_full);
         $_FILES["files{$part}"]['size'][] = filesize($this->config['course_path'] . "/" .   $name);
-        
+
         $tmpname = $this->config['course_path'] . "/" . Utils::generateRandomString() . $name;
         copy($this->config['course_path'] . "/" . $name, $tmpname);
 
@@ -97,17 +97,17 @@ class CourseMaterialsTester extends BaseUnitTest{
         $json = FileUtils::readJsonFile($this->json_path);
         //we need to check that the file exists in the correct folder and also the JSON file
         $filename_full = FileUtils::joinPaths( $this->upload_path, $name );
-        $expected_json = [ 
+        $expected_json = [
             $filename_full => [
                 "checked" => 1,
                 "release_datetime" => $_POST['release_time']
             ]
         ];
         $this->assertEquals($expected_json, $json);
-        //check the uploads directory now 
+        //check the uploads directory now
         $files = FileUtils::getAllFiles($this->upload_path, array(), true);
 
-        $expected_files = [ 
+        $expected_files = [
             $name => [
                 'name' => $name,
                 'path' => $filename_full,
@@ -128,7 +128,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         $fake_files = $this->buildFakeZipFile('foo.zip', 1, 2, 2);
         $ret = $controller->ajaxUploadCourseMaterialsFiles();
         $json = FileUtils::readJsonFile($this->json_path);
-        
+
         $expected_ret = array('status' => 'success', 'data' => 'Successfully uploaded!');
         $this->assertEquals($expected_ret, $ret);
 
@@ -145,10 +145,10 @@ class CourseMaterialsTester extends BaseUnitTest{
             'name' => 'test0.txt',
             'path' => $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
             'size' => 0,
-            'relative_name' => ltrim($this->config['course_path'], '/') . '/lev0/test0.txt' 
+            'relative_name' => ltrim($this->config['course_path'], '/') . '/lev0/test0.txt'
         ];
 
-        $this->assertEquals($expected_files1, $files[$f1]);
+        $this->assertEquals($expected_files1, $f1);
 
     }
 
@@ -191,11 +191,11 @@ class CourseMaterialsTester extends BaseUnitTest{
                 'release_datetime' => $new_date
             ]
         ];
-    
+
         $this->assertEquals($expected_json, $json);
 
         $_FILES = array();
-        //try multiple 
+        //try multiple
         //create a file
         $name = "foo2.txt";
         file_put_contents($this->upload_path . "/" .  $name, 'a');

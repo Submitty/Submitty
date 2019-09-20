@@ -7,8 +7,7 @@ use app\exceptions\NotImplementedException;
 use app\exceptions\ValidationException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
+use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
 use app\models\Gradeable;
 use app\models\gradeable\Component;
@@ -20,10 +19,8 @@ use app\models\gradeable\Submitter;
 use app\models\gradeable\TaGradedGradeable;
 use app\models\GradeableComponent;
 use app\models\GradeableComponentMark;
-use app\models\GradeableVersion;
 use app\models\User;
 use app\models\Notification;
-use app\models\Email;
 use app\models\SimpleLateUser;
 use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
@@ -220,8 +217,8 @@ class DatabaseQueries {
             $query_raw_select[]     = "t.*";
             $query_raw_select[]     = "({$query_favorite}) as favorite";
             $query_raw_select[]     = "CASE
-                                        WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true 
-                                        ELSE false 
+                                        WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true
+                                        ELSE false
                                         END as current_user_posted";
 
             $query_parameters[]     = $current_user;
@@ -260,16 +257,16 @@ class DatabaseQueries {
         }
         // Unread Threads
         if($unread_threads) {
-            $query_raw_where[] = 
+            $query_raw_where[] =
 
             "EXISTS(
-                SELECT thread_id 
+                SELECT thread_id
                 FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp
                 WHERE(
                     jp.thread_id = t.id
                     AND NOT EXISTS(
-                        SELECT thread_id 
-                        FROM viewed_responses v 
+                        SELECT thread_id
+                        FROM viewed_responses v
                         WHERE v.thread_id = jp.thread_id
                             AND v.user_id = ?
                             AND (v.timestamp >= jp.timestamp
@@ -472,7 +469,7 @@ class DatabaseQueries {
                 // No thread found, hence no posts found
                 return array();
             }
-        } 
+        }
         $this->course_db->query("SELECT DISTINCT id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS pfph WHERE pfph.thread_id = ? AND NOT EXISTS(SELECT * FROM viewed_responses v WHERE v.thread_id = ? AND v.user_id = ? AND (v.timestamp >= pfph.timestamp AND (pfph.edit_timestamp IS NULL OR (pfph.edit_timestamp IS NOT NULL AND v.timestamp >= pfph.edit_timestamp))))", array($thread_id, $thread_id, $user_id));
         $rows = $this->course_db->rows();
         if(empty($rows)){
@@ -623,7 +620,7 @@ class DatabaseQueries {
             $this->course_db->query("UPDATE posts SET content =  ?, anonymous = ?, render_markdown = ? where id = ?", array($content, $anon, $markdown, $post_id));
             // Insert latest version of post into forum_posts_history
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
-            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", array(Utils::getDisplayNameForum($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
+            $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", array(ForumUtils::getDisplayName($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->commit();
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
@@ -1074,7 +1071,7 @@ SELECT COUNT(*) from gradeable_component where g_id=?
               )AS parts_of_comp
             )AS comp
             GROUP BY gd_id, autograding
-          )g 
+          )g
       ", array($g_id));
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
@@ -1552,7 +1549,7 @@ ORDER BY user_id ASC");
      */
     public function getUsersOnTeamsForGradeable($gradeable) {
         $params = array($gradeable->getId());
-        $this->course_db->query("SELECT user_id FROM teams WHERE 
+        $this->course_db->query("SELECT user_id FROM teams WHERE
                 team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
 
         $users = [];
@@ -1836,7 +1833,7 @@ WHERE gcm_id=?", $params);
      */
     public function getAllTeamViewedTimesForGradeable($gradeable) {
         $params = array($gradeable->getId());
-        $this->course_db->query("SELECT team_id,user_id,last_viewed_time FROM teams WHERE 
+        $this->course_db->query("SELECT team_id,user_id,last_viewed_time FROM teams WHERE
                 team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
 
         $user_viewed_info = [];
@@ -1925,7 +1922,7 @@ WHERE gcm_id=?", $params);
     public function getAllElectronicGradeablesIds() {
         $this->course_db->query("
             SELECT gradeable.g_id, g_title, eg_submission_due_date
-            FROM gradeable INNER JOIN electronic_gradeable 
+            FROM gradeable INNER JOIN electronic_gradeable
                 ON gradeable.g_id = electronic_gradeable.g_id
             WHERE g_gradeable_type=0 and eg_scanned_exam=FALSE and eg_has_due_date=TRUE
             ORDER BY g_grade_released_date DESC
@@ -2942,7 +2939,7 @@ AND gc_id IN (
                   FROM
                     posts p
                    INNER JOIN parents pa ON pa.parent_id = p.id
-                  ) SELECT DISTINCT 
+                  ) SELECT DISTINCT
                     author_user_id AS user_id
                   FROM
                     parents) AS parents;";
