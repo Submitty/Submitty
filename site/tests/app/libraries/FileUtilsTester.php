@@ -56,7 +56,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertFileNotExists($this->path);
     }
 
-    public function testRecursiveCopyImages() {
+    public function testRecursiveFlattenImageCopy() {
         FileUtils::createDir($this->path);
         $src = FileUtils::joinPaths($this->path, 'src');
         $sub = FileUtils::joinPaths($this->path, 'src', 'sub');
