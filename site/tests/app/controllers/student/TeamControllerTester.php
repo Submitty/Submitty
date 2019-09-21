@@ -31,14 +31,14 @@ class TeamControllerTester extends BaseUnitTest {
 		$this->assertTrue(FileUtils::recursiveRmdir($this->config['course_path']));
 	}
 
-	//Test making teams 
+	//Test making teams
 	public function testCreateTeamOnNullGradeable(){
 		$controller = new TeamController($this->core);
 		$response = $controller->createNewTeam(false);
 		$this->assertEquals(["status" => "fail", "message" => "Invalid or missing gradeable id!"] , $response);
 	}
 
-	//create a normal gradeable, we should not be able to create a team 
+	//create a normal gradeable, we should not be able to create a team
 	public function testCreateTeamOnNonTeamGradeable(){
 		$this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable(false));
 		$controller = new TeamController($this->core);
@@ -58,9 +58,9 @@ class TeamControllerTester extends BaseUnitTest {
 		$this->core->getQueries()->method('createTeam')->willReturn("test");
 
 		//build folders for new team
-		$this->assertTrue(FileUtils::createDir($this->config['gradeable_path'], null, true));
+		$this->assertTrue(FileUtils::createDir($this->config['gradeable_path'], true));
 		$tmp = FileUtils::joinPaths($this->config['gradeable_path'], "test");
-		$this->assertTrue(FileUtils::createDir($tmp, null, true));
+		$this->assertTrue(FileUtils::createDir($tmp, true));
 
 		$response = $controller->createNewTeam($this->config['gradeable_id']);
 		$this->assertEquals(["status" => "success", "data" => null] , $response);
@@ -69,9 +69,9 @@ class TeamControllerTester extends BaseUnitTest {
 		$this->assertTrue(file_exists($settings_file));
 
 		$current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
-		
+
 		$team_history = FileUtils::encodeJson(array("team_history" => array(array("action" => "create", "time" => $current_time, "user" => "testUser"))));
-		
+
 		$this->assertJsonStringEqualsJsonFile($settings_file, $team_history);
 	}
 

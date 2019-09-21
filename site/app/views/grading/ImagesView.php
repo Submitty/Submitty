@@ -40,7 +40,7 @@ class ImagesView extends AbstractView {
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
-                list($mime_type, $mime_subtype) = explode('/', FileUtils::getMimeType($expected_image), 2);
+                list($mime_type, $mime_subtype) = explode('/', mime_content_type($expected_image), 2);
                 if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
                     $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {
@@ -60,7 +60,7 @@ class ImagesView extends AbstractView {
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")"; 
+        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
 
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
