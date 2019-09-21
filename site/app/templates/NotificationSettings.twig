@@ -14,6 +14,7 @@
             {% endif %}
             <div class="header">
                 <h1>{{ header }}</h1>
+                {# When adding a new notification setting make sure to add the notification-setting-input or the email-setting-input #}
                 <div class="button-group">
                     <div class="button-row">
                         <button type="button" class="notification-setting-button btn" data-selector=".notification-setting-input" onclick="checkAll(this)">Subscribe to all notifications</button>
@@ -265,9 +266,9 @@
                         <div class="option-alt">Alert me when I perform the actions selected above</div>
                     </label>
                 </div>
-                <div class="option-input col-md-3"><input type="checkbox" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
+                <div class="option-input col-md-3 notification-setting-input"><input type="checkbox" name="self_notification" id="self_notification" {% if notification_saves['self_notification'] %}checked="true"{% endif %}></div>
                 {% if email_enabled %}
-                    <div class="option-input col-md-5"><input type="checkbox" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="true"{% endif %}></div>
+                    <div class="option-input col-md-5 email-setting-input"><input type="checkbox" name="self_notification_email" id="self_notification_email" {% if notification_saves['self_notification_email'] %}checked="true"{% endif %}></div>
                 {% endif %}
             </div>
 
