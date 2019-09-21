@@ -14,6 +14,7 @@ use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
+use app\controllers\admin\AdminGradeableController;
 
 /**
  * All data describing the configuration of a gradeable
@@ -747,9 +748,8 @@ class Gradeable extends AbstractModel {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
-    /** @internal */
-    public function setAutogradingConfig() {
-        throw new \BadFunctionCallException('Cannot set the autograding config data');
+    public function setAutogradingConfig(AutogradingConfig $autograding_config): void {
+        $this->autograding_config = $autograding_config;
     }
 
     /**
@@ -1219,11 +1219,11 @@ class Gradeable extends AbstractModel {
 
     /**
      * Used to decide whether a gradeable can be deleted or not.
-     * This means: No submissions, No manual grades entered, and No teams formed
+     * This means: No submissions, No manual grades entered, No teams formed, and No VCS repos created
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
     }
 
     /**
@@ -1558,7 +1558,6 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_registration_id'];
             }
-            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
         } else {
             if ($this->isTeamAssignment()) {
@@ -1578,7 +1577,6 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_rotating_id'];
             }
-            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
         }
 
@@ -1671,6 +1669,11 @@ class Gradeable extends AbstractModel {
         }
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
+        }
+
+        if ($this->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
         }
     }
 

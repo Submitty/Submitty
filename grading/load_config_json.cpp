@@ -160,7 +160,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   //Fill in the defaults.
   if(!whole_config["container_options"]["container_image"].is_string()){
-    whole_config["container_options"]["container_image"] = "ubuntu:custom";
+    whole_config["container_options"]["container_image"] = "submitty/autograding-default:latest";
   }
 
   if (!whole_config["container_options"]["use_router"].is_boolean()){
@@ -169,6 +169,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   if (!whole_config["container_options"]["single_port_per_container"].is_boolean()){
     whole_config["container_options"]["single_port_per_container"] = false; // connection
+  }
+
+  if (!whole_config["container_options"]["number_of_ports"].is_number_integer()){
+    whole_config["container_options"]["number_of_ports"] = 1; // connection
   }
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
@@ -252,6 +256,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
           this_testcase[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
         }
 
+        if (!this_testcase[container_type][container_num]["number_of_ports"].is_number_integer()){
+          this_testcase[container_type][container_num]["number_of_ports"] = whole_config["container_options"]["number_of_ports"];
+        }
+
         if (this_testcase[container_type][container_num]["container_name"] == "router"){
           assert(router_container == -1);
           router_container = container_num;
@@ -288,7 +296,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         insert_router["commands"].push_back("python3 submitty_router.py");
         insert_router["container_name"] = "router";
         insert_router["import_default_router"] = true;
-        insert_router["container_image"] = "ubuntu:custom";
+        insert_router["container_image"] = "submitty/autograding-default:latest";
         insert_router["server"] = false;
         this_testcase[container_type].push_back(insert_router);
       }

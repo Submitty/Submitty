@@ -157,4 +157,183 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($folders, $dirs);
         FileUtils::recursiveRmdir($base_dir);
     }
+
+    private function buildFakeFile($fd, $filename, $part = 1, $err = 0, $target_size = 100) {
+        fseek($fd, $target_size-1,SEEK_CUR); 
+        fwrite($fd,'a'); 
+        fclose($fd);
+
+        $_FILES["files{$part}"]['name'][] = $filename;
+        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($this->path . $filename);
+        $_FILES["files{$part}"]['size'][] = filesize($this->path . $filename);
+
+        $tmpname = $this->path . Utils::generateRandomString() . $filename;
+        copy($this->path . $filename, $tmpname);
+
+        $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
+        $_FILES["files{$part}"]['error'][] = $err;
+
+    }
+
+    public function testvalidateUploadedFilesGood(){
+        $name = "foo.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name);
+
+        $name = "foo2.txt";
+        $tmpfile2 = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile2, $name);
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files1"]);
+
+        $this->assertCount(2, $stat );
+        $this->assertEquals($stat[0], 
+            ['name' => 'foo.txt',
+             'type' => 'application/octet-stream',
+             'error' => 'No error.',
+             'size' => 100,
+             'success' => true
+            ]);
+
+          $this->assertEquals($stat[1], 
+            ['name' => 'foo2.txt',
+             'type' => 'application/octet-stream',
+             'error' => 'No error.',
+             'size' => 100,
+             'success' => true
+            ]);
+    }
+
+    public function testvalidateUploadedFilesBad(){
+        $name = "bad.txt";
+
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name,2,3);
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
+
+        $this->assertCount(1, $stat);
+        $this->assertEquals($stat[0], 
+            ['name' => 'bad.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'The file was only partially uploaded',
+             'size' => 100,
+             'success'=> false
+             ]
+        );
+
+        $name = "bad2.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name,2,4);
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
+
+        $this->assertCount(2, $stat);
+        $this->assertEquals($stat[1], 
+            ['name' => 'bad2.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'No file was uploaded.',
+             'size' => 100,
+             'success'=> false
+             ]
+        );
+
+        $name = "bad3.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name, 2,5);
+
+        $name = "bad3.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name, 2,6);
+
+        $name = "bad3.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name, 2,7);
+
+        $name = "bad3.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name, 2,8);
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
+
+        $this->assertCount(6, $stat);
+        $this->assertEquals($stat[1], 
+            ['name' => 'bad2.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'No file was uploaded.',
+             'size' => 100,
+             'success'=> false
+             ]
+        );
+
+        $this->assertEquals($stat[2], 
+            ['name' => 'bad3.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'Unknown error code.',
+             'size' => 100,
+             'success'=> false
+             ]
+        );
+
+        $name = "\?<>.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name, 2,0);
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
+
+        $this->assertCount(7, $stat);
+        $this->assertEquals($stat[6], 
+            ['name' => '\?<>.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'Invalid filename',
+             'size' => 100,
+             'success'=> false
+             ]
+        );
+    }
+
+    public function testvalidateUploadedFilesBig(){
+        $name = "big.txt";
+
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name, 3, 0, 100+ Utils::returnBytes(ini_get('upload_max_filesize')));
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
+
+        $this->assertCount(1, $stat);
+        $this->assertEquals($stat[0], 
+            ['name' => 'big.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'File "big.txt" too large got (2.0000953674316MB)',
+             'size' => 100+ Utils::returnBytes(ini_get('upload_max_filesize')),
+             'success'=> false
+             ]
+        );
+
+        $name = "just_big_enough.txt";
+        $tmpfile = fopen($this->path . $name, "w");
+        $this->buildFakeFile($tmpfile, $name,3, 0, Utils::returnBytes(ini_get('upload_max_filesize')));
+
+        $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
+
+        $this->assertCount(2, $stat);
+        $this->assertEquals($stat[1], 
+            ['name' => 'just_big_enough.txt',
+             'type' => 'application/octet-stream',
+             'error'=> 'No error.',
+             'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
+             'success'=> true
+             ]
+        );
+    }
+
+    public function testvalidateUploadedFilesFail(){
+        $stat = FileUtils::validateUploadedFiles(null);
+        $this->assertArrayHasKey("failed",$stat);
+        $this->assertEquals($stat["failed"], "No files sent to validate" );
+
+        $stat = FileUtils::validateUploadedFiles([]);
+        $this->assertArrayHasKey("failed",$stat);
+        $this->assertEquals($stat["failed"], "No files sent to validate" );
+    }
 }

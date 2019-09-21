@@ -50,10 +50,15 @@ class GradingOrder extends AbstractModel {
     protected $all_team_ids;
 
     /**
+     * @var string[] $not_fully_graded
+     */
+    protected $not_fully_graded;
+
+    /**
      * GradingOrder constructor.
      * @param Core $core
      * @param Gradeable $gradeable
-     * @param User $user
+     * @param User $user The current user (the one that is doing the grading)
      * @param boolean $all
      */
     public function __construct(Core $core, Gradeable $gradeable, User $user, $all = false) {
@@ -178,6 +183,59 @@ class GradingOrder extends AbstractModel {
 
     }
 
+    /**
+     * Queries the database to populate $this->not_fully_graded
+     *
+     * @param $component_id
+     */
+    private function initUsersNotFullyGraded($component_id) {
+        if(is_null($this->not_fully_graded)) {
+            $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
+        }
+    }
+
+    /**
+     * Get the next ungraded submitter
+     *
+     * If a component_id is passed in this function will return the next submitter with that specific
+     * component ungraded.  If component_id is not passed in this function returns the next submitter with
+     * any components ungraded.  Skips students with no submissions.
+     *
+     * @param Submitter $submitter Current grading submitter
+     * @param string $component_id The id of a gradeable component
+     * @return Submitter
+     */
+    public function getNextUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
+
+        // Query database to find out which users have not been completely graded
+        $this->initUsersNotFullyGraded($component_id);
+
+        return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
+            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+        });
+    }
+
+    /**
+     * Get the prev ungraded submitter
+     *
+     * If a component_id is passed in this function will return the prev submitter with that specific
+     * component ungraded.  If component_id is not passed in this function returns the prev submitter with
+     * any components ungraded.  Skips students with no submissions.
+     *
+     * @param Submitter $submitter Current grading submitter
+     * @param string $component_id The id of a gradeable component
+     * @return Submitter
+     */
+    public function getPrevUngradedSubmitter(Submitter $submitter, $component_id = "-1") {
+
+        // Query database to find out which users have not been completely graded
+        $this->initUsersNotFullyGraded($component_id);
+
+        return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
+            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+        });
+    }
+
 
     /**
      * Given the current submitter, get the previous submitter to grade.
@@ -187,9 +245,23 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Previous submitter to grade
      */
     public function getPrevSubmitterMatching(Submitter $submitter, callable $fn) {
-        $index = $this->getSubmitterIndex($submitter);
-        if ($index === false) {
-            return null;
+
+        // If $submitter is in one of our sections, then get the $submitters index in the GradingOrder
+        if($this->containsSubmitter($submitter)) {
+            $index = $this->getSubmitterIndex($submitter);
+            if ($index === false) {
+                return null;
+            }
+
+        // Else $submitter is not in one of our sections so set $index to number of submitters in our sections
+        } else {
+            $count = 0;
+
+            foreach ($this->section_submitters as $section) {
+                $count += count($section);
+            }
+
+            $index = $count;
         }
 
         do {
@@ -212,9 +284,17 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Next submitter to grade
      */
     public function getNextSubmitterMatching(Submitter $submitter, callable $fn) {
-        $index = $this->getSubmitterIndex($submitter);
-        if ($index === false) {
-            return null;
+
+        // If $submitter is in one of our sections, then get the $submitters index in the GradingOrder
+        if($this->containsSubmitter($submitter)) {
+            $index = $this->getSubmitterIndex($submitter);
+            if ($index === false) {
+                return null;
+            }
+
+        // Else $submitter is not in one of our sections so set $index to -1
+        } else {
+            $index = -1;
         }
 
         do {
@@ -368,6 +448,37 @@ class GradingOrder extends AbstractModel {
         //Since the array's elements were not added in the same order as the indices, sort to fix it
         ksort($gg_idx);
         return array_merge($gg_idx, $unsorted);
+    }
+
+    /**
+     * Returns an string describing the ordering based on its sort type and direction, or an empty string
+     * if an unknown sort / direction combination is passed in.
+     *
+     * @param $sort Sort type
+     * @param $direction Direction of sort (ASC or DESC)
+     * @return string
+     */
+    public static function getGradingOrderMessage($sort, $direction) {
+
+        if($sort == 'first' AND $direction == 'ASC') {
+            $msg = 'First Name Ascending';
+        } else if ($sort == 'first' AND $direction == 'DESC') {
+            $msg = 'First Name Descending';
+        } else if ($sort == 'last' AND $direction == 'ASC') {
+            $msg = 'Last Name Ascending';
+        } else if ($sort == 'last' AND $direction == 'DESC') {
+            $msg = 'Last Name Descending';
+        } else if ($sort == 'id' AND $direction == 'ASC') {
+            $msg = 'ID Ascending';
+        } else if ($sort == 'id' AND $direction == 'DESC') {
+            $msg = 'ID Descending';
+        } else if ($sort == 'random') {
+            $msg = 'Randomized';
+        } else {
+            $msg = false;
+        }
+
+        return $msg === false ? '' : "$msg Order";
     }
 }
 

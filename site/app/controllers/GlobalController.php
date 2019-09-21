@@ -14,7 +14,7 @@ class GlobalController extends AbstractController {
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl(['read_file']) . '?' . http_build_query([
+            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
@@ -112,7 +112,7 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getConfig()->isForumEnabled()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildCourseUrl(['forum', 'threads']),
+                    "href" => $this->core->buildCourseUrl(['forum']),
                     "title" => "Discussion Forum",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-forum",
@@ -328,7 +328,7 @@ class GlobalController extends AbstractController {
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
         $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl(['read_file']) . '?' . http_build_query([
+            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),

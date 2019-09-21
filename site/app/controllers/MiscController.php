@@ -25,9 +25,8 @@ class MiscController extends AbstractController {
      * @return Response
      */
     public function getServerTime() {
-        $json = DateUtils::getServerTimeJson($this->core);
         return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($json)
+            JsonResponse::getSuccessResponse(DateUtils::getServerTimeJson($this->core))
         );
     }
 
@@ -126,11 +125,9 @@ class MiscController extends AbstractController {
     }
 
     /**
-     * @Route("/read_file")
+     * @Route("/{_semester}/{_course}/read_file")
      */
     public function readFile($dir, $path, $csrf_token = null) {
-        $path = $this->core->getAccess()->resolveDirPath($dir, htmlspecialchars_decode(urldecode($path)));
-
         // security check
         if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
             $this->core->getOutput()->showError("You do not have access to this file");
@@ -145,7 +142,24 @@ class MiscController extends AbstractController {
 
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
+
+        if (!$this->core->isTesting()) {
+            $mime_type = FileUtils::getMimeType($path);
+            if ($mime_type === 'text/plain') {
+                if (substr($path, '-3') === '.js') {
+                    $mime_type = 'application/javascript';
+                }
+                elseif (substr($path, '-4') === '.css') {
+                    $mime_type = 'text/css';
+                }
+                else if (substr($path, '-5') === '.html') {
+                    $mime_type = 'text/html';
+                }
+            }
+            header('Content-type: ' . $mime_type);
+        }
         readfile($path);
+        return true;
     }
 
     /**
