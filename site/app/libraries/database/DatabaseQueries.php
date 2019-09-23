@@ -9,6 +9,7 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\ForumUtils;
 use app\libraries\GradeableType;
+use app\models\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedGradeable;

@@ -2,6 +2,8 @@
 
 namespace app\views;
 
+use app\libraries\GradeableType;
+use app\models\Gradeable;
 use app\views\AbstractView;
 use app\models\gradeable\LateDays;
 
@@ -27,3 +29,4 @@ class LateDaysTableView extends AbstractView {
         ]);
     }
 }
+
