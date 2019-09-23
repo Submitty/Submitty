@@ -4,10 +4,15 @@ namespace tests\app\libraries;
 
 use app\libraries\Access;
 use app\libraries\Core;
+use app\models\Gradeable;
+use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
+use app\models\gradeable\TaGradedGradeable;
 use app\models\Team;
 use app\models\User;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use tests\BaseUnitTest;
 
 class AccessTester extends BaseUnitTest {

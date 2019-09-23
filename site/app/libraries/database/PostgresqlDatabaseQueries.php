@@ -6,6 +6,7 @@ use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\libraries\CascadingIterator;
 use \app\libraries\GradeableType;
+use app\models\Gradeable;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\GradedComponent;
@@ -48,10 +49,10 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
                  ns.self_notification,
                  ns.merge_threads_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
-                 ns.reply_in_post_thread_email, ns.team_invite_email,
+                 ns.reply_in_post_thread_email, ns.team_invite_email, 
                  ns.team_member_submission_email, ns.team_joined_email,
                  ns.self_notification_email,sr.grading_registration_sections
-
+     
             FROM users u
             LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
             LEFT JOIN (
