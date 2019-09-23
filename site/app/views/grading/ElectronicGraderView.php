@@ -9,6 +9,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
+use app\models\gradeable\RegradeRequest;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -493,7 +494,7 @@ HTML;
                 if ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
-                } else if ($grade_inquiry !== null) {
+                } else if ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE) {
                     $info["graded_groups"][] = "grade-inquiry";
                 } else if(!$graded_component->getVerifier()){
                     //no verifier exists, show the grader group
