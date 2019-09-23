@@ -66,7 +66,6 @@ class Container():
 
     # Only pass container name to testcases with greater than one container. (Doing otherwise breaks compilation)
     container_name_argument = ['--container_name', self.name] if more_than_one else list()
-    container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits)
     # A server container does not run student code, but instead hosts a service (e.g. a database.)
 
     try:
@@ -74,6 +73,7 @@ class Container():
         self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none', 
                                                   volumes = mount, working_dir = self.directory, name = self.full_name)
       else:
+        container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits, self.image)
         command = [execution_script,] + arguments + container_name_argument
         self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
                                                   tty = True, network = 'none', user = self.container_user_argument, volumes=mount,
