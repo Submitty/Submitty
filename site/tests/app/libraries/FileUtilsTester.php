@@ -15,7 +15,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function tearDown(): void {
         if (file_exists($this->path)) {
-            FileUtils::recursiveRmdir($this->path);
+            $this->assertTrue(FileUtils::recursiveRmdir($this->path), "Could not clean up {$this->path}");
         }
     }
 
@@ -56,6 +56,82 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertFileNotExists($this->path);
     }
 
+    public function testRecursiveFlattenImageCopy() {
+        FileUtils::createDir($this->path);
+        $src = FileUtils::joinPaths($this->path, 'src');
+        $sub = FileUtils::joinPaths($this->path, 'src', 'sub');
+        FileUtils::createDir($src);
+        FileUtils::createDir($sub);
+        FileUtils::createDir(FileUtils::joinPaths($src, '.git'));
+        $test_images = FileUtils::joinPaths(__TEST_DATA__, 'images');
+        foreach (['jpg', 'jpeg', 'gif', 'png'] as $ext) {
+            copy(
+                FileUtils::joinPaths($test_images, "test_image.{$ext}"),
+                FileUtils::joinPaths($src, "TeSt_ImAgE.{$ext}")
+            );
+            copy(
+                FileUtils::joinPaths($test_images, "test_image.{$ext}"),
+                FileUtils::joinPaths($sub, "TeSt_ImAgE_2.{$ext}")
+            );
+        }
+        copy(FileUtils::joinPaths($test_images, 'test_image.jpg'), FileUtils::joinPaths($src, '.git', 'test_image_3.jpg'));
+        copy(FileUtils::joinPaths(__TEST_DATA__, 'test.txt'), FileUtils::joinPaths($src, 'test.txt'));
+        $dst = FileUtils::joinPaths($this->path, 'dst');
+        FileUtils::createDir($dst);
+        FileUtils::recursiveFlattenImageCopy($src, $dst);
+        $expected = [
+            "test_image.gif" => [
+                "name" => "test_image.gif",
+                "path" => FileUtils::joinPaths($dst, "test_image.gif"),
+                "size" => 10041,
+                "relative_name" => "test_image.gif"
+            ],
+            "test_image.jpeg" => [
+                "name" => "test_image.jpeg",
+                "path" => FileUtils::joinPaths($dst, "test_image.jpeg"),
+                "size" => 14040,
+                "relative_name" => "test_image.jpeg"
+            ],
+            "test_image.jpg" => [
+                "name" => "test_image.jpg",
+                "path" => FileUtils::joinPaths($dst, "test_image.jpg"),
+                "size" => 767,
+                "relative_name" => "test_image.jpg"
+            ],
+            "test_image.png" => [
+                "name" => "test_image.png",
+                "path" => FileUtils::joinPaths($dst, "test_image.png"),
+                "size" => 3440,
+                "relative_name" => "test_image.png"
+            ],
+            "test_image_2.gif" => [
+                "name" => "test_image_2.gif",
+                "path" => FileUtils::joinPaths($dst, "test_image_2.gif"),
+                "size" => 10041,
+                "relative_name" => "test_image_2.gif"
+            ],
+            "test_image_2.jpeg" => [
+                "name" => "test_image_2.jpeg",
+                "path" => FileUtils::joinPaths($dst, "test_image_2.jpeg"),
+                "size" => 14040,
+                "relative_name" => "test_image_2.jpeg"
+            ],
+            "test_image_2.jpg" => [
+                "name" => "test_image_2.jpg",
+                "path" => FileUtils::joinPaths($dst, "test_image_2.jpg"),
+                "size" => 767,
+                "relative_name" => "test_image_2.jpg"
+            ],
+            "test_image_2.png" => [
+                "name" => "test_image_2.png",
+                "path" => FileUtils::joinPaths($dst, "test_image_2.png"),
+                "size" => 3440,
+                "relative_name" => "test_image_2.png"
+            ]
+        ];
+        $this->assertEquals($expected, FileUtils::getAllFiles($dst, [], true));
+    }
+
     public function testEmptyDir() {
         $this->assertFileNotExists($this->path);
         FileUtils::createDir($this->path);
@@ -75,9 +151,25 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse(FileUtils::isValidFileName("file\""));
         $this->assertFalse(FileUtils::isValidFileName("<file"));
         $this->assertFalse(FileUtils::isValidFileName("file>"));
-	//$this->assertFalse(FileUtils::isValidFileName("file/"));
         $this->assertFalse(FileUtils::isValidFileName("file\\"));
         $this->assertFalse(FileUtils::isValidFileName(0));
+    }
+
+    public function validImageProvider() {
+        return [
+            [FileUtils::joinPaths(__TEST_DATA__, 'images', 'test_image.gif'), true],
+            [FileUtils::joinPaths(__TEST_DATA__, 'images', 'test_image.jpeg'), true],
+            [FileUtils::joinPaths(__TEST_DATA__, 'images', 'test_image.jpg'), true],
+            [FileUtils::joinPaths(__TEST_DATA__, 'images', 'test_image.png'), true],
+            [FileUtils::joinPaths(__TEST_DATA__, 'test.txt'), false],
+        ];
+    }
+
+    /**
+     * @dataProvider validImageProvider
+     */
+    public function testIsValidImage($path, $expected) {
+        $this->assertSame($expected, FileUtils::isValidImage($path));
     }
 
     public function joinPathsData() {

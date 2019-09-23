@@ -2,13 +2,17 @@
 
 namespace app\libraries;
 use app\exceptions\FileReadException;
-    
+
 /**
  * Class FileUtils
  *
  * Contains various useful functions for interacting with files and directories.
  */
 class FileUtils {
+    const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
+    const IGNORE_FILES = ['.ds_store'];
+    const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+
     /**
      * Return all files from a given directory.  All subdirectories
      * are an array pointing to their files (and additional
@@ -100,44 +104,42 @@ class FileUtils {
                     }
                 }
             }
-            reset($objects);
             rmdir($dir);
         }
         return true;
     }
 
     /**
-     * Copies all files from given dir ($src) and its subdirs into one destination folder, $dst
+     * Copies all image files from a source folder ($src) and each of its
+     * subfolders to a flattened destination folder ($dst), making all
+     * filenames lowercase, ignoring subfolders that match our IGNORE_FOLDERS
+     *
+     * Ex:
+     *  src/
+     *   image.jpg
+     *   sub/
+     *     image_2.jpg
+     *  dest/
+     *   image.jpg
+     *   image_2.jpg
      *
      * @param string $src
      * @param string $dst
-     * @param boolean $forceLowerCase, optional, default to true
      */
-    public static function recursiveCopy($src, $dst, $forceLowerCase = true) {
-        $iter = new \RecursiveDirectoryIterator($src);
-        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
-            if ($iter->isDot()) {
-                $iter->next();
-                continue;
-            }
-            else if ($iter->isFile()) {
-                $extension = strtolower(pathinfo($iter->getFilename(), PATHINFO_EXTENSION));
-                if ($extension === 'png') { // just get all png file only
-                    $newFilename = $iter->getFilename();
-                    if ($forceLowerCase) {
-                        $newFilename = strtolower($newFilename);
-                    }
-                    copy($src . '/' . $iter->getFilename(),$dst . '/' . $newFilename);
+    public static function recursiveFlattenImageCopy(string $src, string $dst): void {
+        foreach (new \FilesystemIterator($src) as $iter) {
+            /** @var \SplFileInfo $iter */
+            if ($iter->isFile()) {
+                if (FileUtils::isValidImage($iter->getPathname())) {
+                    copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
             else if ($iter->isDir()) {
-                if (in_array($iter->getFilename(), array('__MACOSX'))) {
-                    $iter->next();
+                if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
-                FileUtils::recursiveCopy($src . '/' . $iter->getFilename(), $dst);
+                FileUtils::recursiveFlattenImageCopy($iter->getPathname(), $dst);
             }
-            $iter->next();
         }
     }
 
@@ -390,6 +392,15 @@ class FileUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * Given an image path, validates that the mime type of the file is "image"
+     * and its subtype is one of our allowed subtypes
+     */
+    public static function isValidImage(string $image_path): bool {
+        [$mime_type, $mime_subtype] = explode('/', mime_content_type($image_path), 2);
+        return $mime_type === 'image' && in_array($mime_subtype, FileUtils::ALLOWED_IMAGE_TYPES);
     }
 
     /**

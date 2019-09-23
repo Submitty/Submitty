@@ -2,6 +2,9 @@
 
 namespace app\libraries;
 
+use app\models\User;
+use Ds\Set;
+
 /**
  * Class Utils
  */
@@ -249,52 +252,35 @@ class Utils {
      * students_version is an array of user and their highest submitted version
      */
 
-    public static function getAutoFillData($students, $students_version = null) {
-        $students_full = array();
-        $null_section = array();
+    public static function getAutoFillData($students, $students_version = null): string {
+        $students_full = new Set();
+        $null_students = new Set();
         foreach ($students as $student) {
-            $student_entry = array('value' => $student->getId(),
-                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+            $student_entry = [
+                'value' => $student->getId(),
+                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
+            ];
 
-            if($students_version !== null) {
-                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)) {
+            if ($students_version !== null) {
+                if($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
                     if ($students_version[$student->getId()] !== 0) {
-                        $student_entry['label'] .= ' (' .
-                        $students_version[$student->getId()] . ' Prev Submission)';
+                        $student_entry['label'] .= ' (' . $students_version[$student->getId()] . ' Prev Submission)';
                     }
                 }
+                $students_full->add($student_entry);
             }
-            $students_full[] = $student_entry;
-            if($students_version === null){
-                $null_entry = array('value' => $student->getId(),
-                'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
-
-                $in_null_section = false;
-                foreach ($null_section as $null_student) {
-                    if($null_student['value'] === $student->getId()) $in_null_section = true;
+            elseif ($students_version === null) {
+                if ($student->getRegistrationSection() === null) {
+                    $student_entry['label'] = '[NULL section] ' . $student_entry['label'];
+                    $null_students->add($student_entry);
                 }
-                if(!$in_null_section && $student->getRegistrationSection() == null) {
-                    $null_section[] = $null_entry;
-                    $students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
+                else {
+                    $students_full->add($student_entry);
                 }
             }
         }
-        $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
-        return json_encode($students_full);
+        return json_encode(array_merge($students_full->toArray(), $null_students->toArray()));
     }
-
-    /*
-     * Given a multidimensional array of students, key, and id, removeStudentWithId deletes matching student row(s).
-     */
-
-    public static function removeStudentWithId($students, $key, $id) {
-        foreach($students as $subKey => $student) {
-             if($student[$key] === $id) {
-                  unset($students[$subKey]);
-             }
-        }
-        return $students;
-   }
 
    /**
     * Convert the shorthand byte notation in php.ini to bytes.
