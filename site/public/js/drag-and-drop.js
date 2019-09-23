@@ -949,6 +949,7 @@ function handleDownloadImages(csrf_token) {
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
             }
         },
         error: function(data) {
@@ -1042,6 +1043,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+                console.log(data);
             }
         },
         error: function(data) {

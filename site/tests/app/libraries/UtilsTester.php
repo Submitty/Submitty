@@ -2,7 +2,9 @@
 
 namespace tests\app\libraries;
 
+use app\libraries\Core;
 use \app\libraries\Utils;
+use app\models\User;
 
 class UtilsTester extends \PHPUnit\Framework\TestCase {
     use \phpmock\phpunit\PHPMock;
@@ -321,14 +323,283 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertNan(Utils::safeCalcPercent(1, 0));
     }
 
-    public function testRemoveStudentWithId() {
-        $data = [
-            ['user_id' => 'test'],
-            ['user_id' => 'test2']
+    public function testGetCompareByReference() {
+        $array1 = [];
+        $array2 = [];
+        for ($i = 0; $i < 5; $i++) {
+            $obj = new \stdClass();
+            $obj->i = $i;
+            $array1[] = $obj;
+            $array2[] = $obj;
+        }
+        $inferior_func = function($a, $b) {
+            return $a === $b ? -1 : 1;
+        };
+        $this->assertCount(5, array_udiff($array1, $array2, $inferior_func));
+        $this->assertCount(0, array_udiff($array1, $array2, Utils::getCompareByReference()));
+        $this->assertCount(5, array_udiff($array1, [$array2[3]], $inferior_func));
+        $this->assertCount(4, array_udiff($array1, [$array2[3]], Utils::getCompareByReference()));
+    }
+
+    public function testGetAutoFillData() {
+        $details = [];
+        $details[] = [
+            'user_id' => "test",
+            'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_preferred_lastname' => null,
+            'user_email' => "test@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => null,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
         ];
-        $expected = [1 => ['user_id' => 'test2']];
-        $this->assertEquals($expected, Utils::removeStudentWithId($data, 'user_id', 'test'));
-        $this->assertEquals($data, Utils::removeStudentWithId($data, 'user_id', ''));
+
+        $details[] = [
+            'user_id' => "aphacker",
+            'anon_id' => "anon_id",
+            'user_numeric_id' => '987654321',
+            'user_password' => "aphacker",
+            'user_firstname' => "Alyss",
+            'user_preferred_firstname' => "Allison",
+            'user_lastname' => "Hacker",
+            'user_preferred_lastname' => "Hacks",
+            'user_email' => "aphacker@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $core = new Core();
+        $users = [];
+        foreach ($details as $detail) {
+            $users[] = new User($core, $detail);
+        }
+
+        $expected = '[{"value":"aphacker","label":"Allison Hacks <aphacker>"},{"value":"test","label":"[NULL section] User Tester <test>"}]';
+        $this->assertEquals($expected, Utils::getAutoFillData($users));
+    }
+
+    public function testGetAutoFillDataDuplicateIds() {
+        $details = [];
+        $details[] = [
+            'user_id' => "test",
+            'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_preferred_lastname' => null,
+            'user_email' => "test@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => null,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "aphacker",
+            'anon_id' => "anon_id",
+            'user_numeric_id' => '987654321',
+            'user_password' => "aphacker",
+            'user_firstname' => "Alyss",
+            'user_preferred_firstname' => "Allison",
+            'user_lastname' => "Hacker",
+            'user_preferred_lastname' => "Hacks",
+            'user_email' => "aphacker@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "test",
+            'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_preferred_lastname' => null,
+            'user_email' => "test@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => null,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "aphacker",
+            'anon_id' => "anon_id",
+            'user_numeric_id' => '987654321',
+            'user_password' => "aphacker",
+            'user_firstname' => "Alyss",
+            'user_preferred_firstname' => "Allison",
+            'user_lastname' => "Hacker",
+            'user_preferred_lastname' => "Hacks",
+            'user_email' => "aphacker@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $core = new Core();
+        $users = [];
+        foreach ($details as $detail) {
+            $users[] = new User($core, $detail);
+        }
+
+        $expected = '[{"value":"aphacker","label":"Allison Hacks <aphacker>"},{"value":"test","label":"[NULL section] User Tester <test>"}]';
+        $this->assertEquals($expected, Utils::getAutoFillData($users));
+    }
+
+    public function testGetAutoFillDataVersion() {
+        $details = [];
+        $details[] = [
+            'user_id' => "test",
+            'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_preferred_lastname' => null,
+            'user_email' => "test@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => null,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "aphacker",
+            'anon_id' => "anon_id",
+            'user_numeric_id' => '987654321',
+            'user_password' => "aphacker",
+            'user_firstname' => "Alyss",
+            'user_preferred_firstname' => "Allison",
+            'user_lastname' => "Hacker",
+            'user_preferred_lastname' => "Hacks",
+            'user_email' => "aphacker@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $core = new Core();
+        $users = [];
+        foreach ($details as $detail) {
+            $users[] = new User($core, $detail);
+        }
+        $versions = [
+            'test' => 0,
+            'aphacker' => 5
+        ];
+
+        $expected = '[{"value":"test","label":"User Tester <test>"},{"value":"aphacker","label":"Allison Hacks <aphacker> (5 Prev Submission)"}]';
+        $this->assertEquals($expected, Utils::getAutoFillData($users, $versions));
+    }
+
+    public function testGetAutoFillDataVersionsDuplicates() {
+        $details = [];
+        $details[] = [
+            'user_id' => "test",
+            'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_preferred_lastname' => null,
+            'user_email' => "test@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => null,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "aphacker",
+            'anon_id' => "anon_id",
+            'user_numeric_id' => '987654321',
+            'user_password' => "aphacker",
+            'user_firstname' => "Alyss",
+            'user_preferred_firstname' => "Allison",
+            'user_lastname' => "Hacker",
+            'user_preferred_lastname' => "Hacks",
+            'user_email' => "aphacker@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "test",
+            'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
+            'user_password' => "test",
+            'user_firstname' => "User",
+            'user_preferred_firstname' => null,
+            'user_lastname' => "Tester",
+            'user_preferred_lastname' => null,
+            'user_email' => "test@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => null,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $details[] = [
+            'user_id' => "aphacker",
+            'anon_id' => "anon_id",
+            'user_numeric_id' => '987654321',
+            'user_password' => "aphacker",
+            'user_firstname' => "Alyss",
+            'user_preferred_firstname' => "Allison",
+            'user_lastname' => "Hacker",
+            'user_preferred_lastname' => "Hacks",
+            'user_email' => "aphacker@example.com",
+            'user_group' => User::GROUP_STUDENT,
+            'registration_section' => 1,
+            'rotating_section' => null,
+            'manual_registration' => false,
+            'grading_registration_sections' => array(1, 2)
+        ];
+
+        $core = new Core();
+        $users = [];
+        foreach ($details as $detail) {
+            $users[] = new User($core, $detail);
+        }
+
+        $versions = [
+            'test' => 0,
+            'aphacker' => 2
+        ];
+
+        $expected = '[{"value":"test","label":"User Tester <test>"},{"value":"aphacker","label":"Allison Hacks <aphacker> (2 Prev Submission)"}]';
+        $this->assertEquals($expected, Utils::getAutoFillData($users, $versions));
     }
 
     public function returnBytesProvider() {

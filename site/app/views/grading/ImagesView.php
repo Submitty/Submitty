@@ -27,7 +27,6 @@ class ImagesView extends AbstractView {
             }
         }
 
-
         $image_data = [];
         $error_image_data = '_NONE_';
 
@@ -35,13 +34,11 @@ class ImagesView extends AbstractView {
         $expected_images_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
 
         $dir = new \DirectoryIterator($expected_images_path);
-        //Extensions array can be extended if we want to support more types
-        $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
-                list($mime_type, $mime_subtype) = explode('/', mime_content_type($expected_image), 2);
-                if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
+                $mime_subtype = explode('/', FileUtils::getMimeType($expected_image), 2)[1];
+                if (FileUtils::isValidImage($expected_image)) {
                     $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {
                         $error_image_data = [
