@@ -109,6 +109,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         $this->assertTrue(unlink(FileUtils::joinPaths($this->path, "a", "test.txt")));
         $this->assertTrue(rmdir(FileUtils::joinPaths($this->path, "a")));
         $this->assertTrue(rmdir($this->path));
+    }
 
     public function testRecursiveFlattenImageCopy() {
         FileUtils::createDir($this->path);
