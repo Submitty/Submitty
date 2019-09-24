@@ -494,7 +494,7 @@ HTML;
                 if ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
-                } else if ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE) {
+                } else if ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
                     $info["graded_groups"][] = "grade-inquiry";
                 } else if(!$graded_component->getVerifier()){
                     //no verifier exists, show the grader group
