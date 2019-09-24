@@ -186,7 +186,7 @@ class Utils {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
-                    $mime_type = FileUtils::getMimeType($file_name);
+                    $mime_type = mime_content_type($file_name);
                     if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
                         return false;
                     }

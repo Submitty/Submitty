@@ -86,7 +86,7 @@ class ImagesController extends AbstractController {
         if (isset($uploaded_files[1])) {
             $uploaded_files[1]["is_zip"] = array();
             for ($j = 0; $j < $count_item; $j++) {
-                if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                         return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
                     }
