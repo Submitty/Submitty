@@ -315,6 +315,7 @@ if [ ${VAGRANT} == 1 ]; then
     if [ ${WORKER} == 0 ]; then
         usermod -a -G vagrant "${PHP_USER}"
         usermod -a -G vagrant "${CGI_USER}"
+        usermod -a -G vagrant postgres # needed by preferred_name_logging
     fi
     usermod -a -G vagrant "${DAEMON_USER}"
 fi
