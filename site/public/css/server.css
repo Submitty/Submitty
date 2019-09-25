@@ -1393,8 +1393,8 @@ end of styles used in the admin gradeable page
     color: var(--standard-vibrant-dark-blue)  /* dark blue */
 }
 
-.grader-invalid{
-   color: var(--standard-light-red);
+.grader-grade-inquiry {
+    color: var(--standard-light-red);
 }
 
 .grader-invalid{
