@@ -209,7 +209,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            ssh.connect(hostname = host, username = user, timeout=5)
+            ssh.connect(hostname = host, username = user)
             sftp = ssh.open_sftp()
 
             sftp.put(autograding_zip_tmp,autograding_zip)
@@ -293,7 +293,7 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             sftp.remove(target_results_zip)
             success = True
         #This is the normal case (still grading on the other end) so we don't need to print anything.
-        except socket.timeout:
+        except (socket.timeout, TimeoutError) as e:
             success = False
         except FileNotFoundError:
             try:
