@@ -280,8 +280,8 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
         try:
-            ssh.connect(hostname = host, username = user, timeout=5)
-
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,message=f'connecting to {user}@{host}')
+            ssh.connect(hostname = host, username = user)
             sftp = ssh.open_sftp()
             fd1, local_done_queue_file = tempfile.mkstemp()
             fd2, local_results_zip     = tempfile.mkstemp()
@@ -293,9 +293,17 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             sftp.remove(target_results_zip)
             success = True
         #This is the normal case (still grading on the other end) so we don't need to print anything.
+        except socket.timeout:
+            success = False
         except FileNotFoundError:
-            os.remove(local_results_zip)
-            os.remove(local_done_queue_file)
+            try:
+                os.remove(local_results_zip)
+            except Exception as e:
+                pass
+            try:
+                os.remove(local_done_queue_file)
+            except Exception as e:
+                pass
             success = False
         #In this more general case, we do want to print what the error was.
         #TODO catch other types of exception as we identify them.
@@ -303,13 +311,25 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: Could not retrieve the file from the foreign machine "+str(e))
             print("ERROR: Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
-            os.remove(local_results_zip)
-            os.remove(local_done_queue_file)
+            try:
+                os.remove(local_results_zip)
+            except Exception as e:
+                pass
+            try:
+                os.remove(local_done_queue_file)
+            except Exception as e:
+                pass
             success = False
         finally:
-            os.close(fd1)
-            os.close(fd2)
-            sftp.close()
+            try:
+                os.close(fd1)
+                os.close(fd2)
+            except Exception as e:
+                pass
+            try:
+                sftp.close()
+            except Exception as e:
+                pass
             ssh.close()
             if not success:
                 return False

@@ -2,7 +2,8 @@
 {% block popup_id %}delete-gradeable-form{% endblock %}
 {% block title %}Delete Gradeable{% endblock %}
 {% block body %}
-    <p>Note: A gradeable can only be deleted if it has no formed student teams and it has no student submission files and it has no TA grading data.
+    <p>Note: A gradeable can only be deleted if it has no formed student teams, 
+	it has no student submission files, it has no TA grading data, and it does not have VCS repos created.
     </p>
     <br />
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />

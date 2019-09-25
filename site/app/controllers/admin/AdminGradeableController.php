@@ -704,7 +704,7 @@ class AdminGradeableController extends AbstractController {
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if ($details['gradeable_template'] !== '--None--') {
+        if (array_key_exists('gradeable_template',$details) && $details['gradeable_template'] !== '--None--') {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
@@ -864,7 +864,14 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
 
         // start the build
-        return $this->enqueueBuild($gradeable);
+        $build_status = $this->enqueueBuild($gradeable);
+
+        $config = $this->core->getConfig();
+        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+            $this->enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+        }
+
+        return $build_status;
     }
 
     /**
@@ -1018,6 +1025,16 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
      */
     public function deleteGradeable($gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable == false) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
+        if (!$gradeable->canDelete()) {
+            $this->core->addErrorMessage("Gradeable ".$gradeable_id." cannot be deleted.");
+            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
+
         $this->core->getQueries()->deleteGradeable($gradeable_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
@@ -1065,6 +1082,24 @@ class AdminGradeableController extends AbstractController {
 
         $config_build_data = [
             "job" => "BuildConfig",
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $g_id
+        ];
+
+        if ((!is_writable($config_build_file) && file_exists($config_build_file))
+            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+            return "Failed to write to file {$config_build_file}";
+        }
+        return null;
+    }
+
+    public static function enqueueGenerateRepos($semester,$course,$g_id) {
+        // FIXME:  should use a variable intead of hardcoded top level path
+        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+
+        $config_build_data = [
+            "job" => "RunGenerateRepos",
             "semester" => $semester,
             "course" => $course,
             "gradeable" => $g_id

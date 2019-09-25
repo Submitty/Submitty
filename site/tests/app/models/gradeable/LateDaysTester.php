@@ -1,5 +1,7 @@
 <?php
 
+namespace tests\app\models\gradeable;
+
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\GradeableType;
@@ -50,7 +52,7 @@ class LateDaysTester extends BaseUnitTest {
 
     private function mockCore(int $default_late_days, array $updates) {
         $core = $this->createMockModel(Core::class);
-        $core->method('getDateTimeNow')->willReturn(new DateTime());
+        $core->method('getDateTimeNow')->willReturn(new \DateTime());
 
         $config = $this->createMockModel(Config::class);
         $config->method('getDefaultStudentLateDays')->willReturn($default_late_days);
