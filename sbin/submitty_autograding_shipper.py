@@ -209,7 +209,7 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            ssh.connect(hostname = host, username = user)
+            ssh.connect(hostname = host, username = user, timeout=15) #, timeout=240)  # FIXME: temporary 
             sftp = ssh.open_sftp()
 
             sftp.put(autograding_zip_tmp,autograding_zip)
@@ -226,7 +226,11 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             print("Could not move files due to the following error: {0}".format(e))
             success = False
         finally:
-            sftp.close()
+            try:
+                sftp.close()
+            except Exception as e:
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: in prepare_job, stfp close failed (not defined)"+str(e))
+                pass
             ssh.close()
             os.remove(autograding_zip_tmp)
             os.remove(submission_zip_tmp)
@@ -374,7 +378,12 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         # prepare the job
         shipper_counter=0
 
-        prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
+        #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
+        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR going to re-try prepare_job: " + queue_file)
+            pass
+        prep_job_success = True
+        
         if not prep_job_success:
             print (my_name, " ERROR unable to prepare job: ", queue_file)
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR unable to prepare job: " + queue_file)
