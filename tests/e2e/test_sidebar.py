@@ -86,7 +86,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
-            [base_url + '/course_materials', 'Course Materials'],
+            # sample course has no course materials to start, so this link will not appear
+            # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/student_photos', 'Student Photos'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
@@ -101,7 +102,8 @@ class TestSidebar(BaseTestCase):
         expected = [
             [base_url, 'Gradeables'],
             [base_url + '/notifications', 'Notifications'],
-            [base_url + '/course_materials', 'Course Materials'],
+            # sample course has no course materials in start, so this link will not appear
+            # [base_url + '/course_materials', 'Course Materials'],
             [base_url + '/forum', 'Discussion Forum'],
             [base_url + '/late_table', 'My Late Days/Extensions'],
             ['javascript: toggleSidebar();', 'Collapse Sidebar'],
