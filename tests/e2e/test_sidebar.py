@@ -29,7 +29,8 @@ class TestSidebar(BaseTestCase):
                 [link.find_element_by_tag_name('a').get_attribute('href'), link.text]
                 for link in links
             ]
-
+            self.assertListEqual(expected, actual)
+            
             a = links[current_idx].find_element_by_tag_name('a')
             href = a.get_attribute('href')
             if not href.startswith(base_url):
@@ -39,7 +40,6 @@ class TestSidebar(BaseTestCase):
                 current_idx += 1
                 continue
 
-            self.assertListEqual(expected, actual)
             links[current_idx].click()
             WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(
                 EC.presence_of_element_located((By.TAG_NAME, 'h1'))
