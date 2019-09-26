@@ -164,6 +164,7 @@ def establish_ssh_connection(my_name, user, host, only_try_once = False):
     """
     connected = False
     ssh = None
+    retry_delay = .1
     while not connected:
         ssh = paramiko.SSHClient()
         ssh.get_host_keys()
@@ -174,6 +175,8 @@ def establish_ssh_connection(my_name, user, host, only_try_once = False):
         except:
             if only_try_once:
                 raise
+            time.sleep(retry_delay)
+            retry_relay = min(10, retry_delay * 2)
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=f"{my_name} Could not establish connection with {user}@{host} going to re-try.")
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
     return ssh
@@ -295,7 +298,6 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
         ssh = sftp = fd1 = fd2 = local_done_queue_file = local_results_zip = None
         try:
             user, host = which_machine.split("@")
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,message=f'connecting to {user}@{host}')
             ssh = establish_ssh_connection(which_machine, user, host)
             sftp = ssh.open_sftp()
             fd1, local_done_queue_file = tempfile.mkstemp()
