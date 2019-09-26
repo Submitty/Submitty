@@ -26,7 +26,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->core = $this->createMockCore($this->config);
         $_POST['release_time'] = $this->core->getDateTimeNow()->format("Y-m-d H:i:s");
 
-        FileUtils::createDir($this->core->getConfig()->getCoursePath() . "/uploads/course_materials" , null, true);
+        FileUtils::createDir($this->core->getConfig()->getCoursePath() . "/uploads/course_materials", true);
         $this->json_path = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $this->upload_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials";
     }
@@ -39,7 +39,7 @@ class CourseMaterialsTester extends BaseUnitTest{
 
     private function buildFakeFile($filename, $part = 1) {
         $_FILES["files{$part}"]['name'][] = $filename;
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($this->upload_path . "/" . $filename);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($this->upload_path . "/" . $filename);
         $_FILES["files{$part}"]['size'][] = filesize($this->upload_path . "/" . $filename);
 
         $tmpname = $this->upload_path . "/" . Utils::generateRandomString() . $filename;
@@ -73,7 +73,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         }
 
         $_FILES["files{$part}"]['name'][] = $name;
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($filename_full);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($filename_full);
         $_FILES["files{$part}"]['size'][] = filesize($this->config['course_path'] . "/" .   $name);
 
         $tmpname = $this->config['course_path'] . "/" . Utils::generateRandomString() . $name;
