@@ -341,11 +341,11 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
             # Close file descriptors
             for var in [fd1, fd2]:
-              if var:
-                try:
-                  os.close(var)
-                except Exception:
-                  pass
+                if var:
+                    try:
+                        os.close(var)
+                    except Exception:
+                        pass
 
             if not success:
                 return False
