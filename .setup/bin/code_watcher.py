@@ -33,8 +33,12 @@ class FileHandler(FileSystemEventHandler):
         self.helper = helper
 
     def run_installer(self, event):
-        print('Running INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
-        installer = Path(self.setup_path, 'INSTALL_SUBMITTY_HELPER_{}.sh'.format(self.helper.upper()))
+        print('Running install_{}.sh'.format(self.helper.upper()))
+        installer = Path(
+            self.setup_path,
+            'install_submitty',
+            'install_{}.sh'.format(self.helper.lower())
+        )
         if event.src_path.endswith('.swp') or event.src_path == '.DS_Store':
             return
         run(["bash", str(installer)], stdout=sys.stdout, stderr=sys.stderr)
@@ -60,16 +64,22 @@ def main():
         raise SystemExit("ERROR: this script should be run as root")
 
     parser = ArgumentParser(description='Watch a directory and install the code')
-    args = parser.parse_args()
+    parser.parse_args()
 
     current_path = Path(__file__).resolve().parent
     setup_path = Path(current_path, '..').resolve()
     git_path = Path(current_path, '..', '..').resolve()
 
     observer = Observer()
-    observer.schedule(FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True)
-    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True)
-    observer.schedule(FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True)
+    observer.schedule(
+        FileHandler(setup_path, 'site'), str(Path(git_path, 'site')), True
+    )
+    observer.schedule(
+        FileHandler(setup_path, 'bin'), str(Path(git_path, 'bin')), True
+    )
+    observer.schedule(
+        FileHandler(setup_path, 'bin'), str(Path(git_path, 'sbin')), True
+    )
 
     observer.start()
     try:
