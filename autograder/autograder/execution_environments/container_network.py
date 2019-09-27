@@ -103,6 +103,7 @@ class Container():
       status = self.container.wait()
       self.return_code = status['StatusCode']
 
+    self.socket.close()
     self.container.remove(force=True)
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
 
