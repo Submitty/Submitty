@@ -52,7 +52,7 @@
             <label for="csv-upload" id="csv-upload-format">
                 Do not use column headers. CSV must be of the following form: student_id, gradeable_id, days_of_extension
             </label>
-            <input type="file" name="csv-upload" id="csv-upload" aria-labelledby="csv-upload-title csv-upload-format" onchange="updateHomeworkExtension()">
+            <input type="file" name="csv_upload" id="csv-upload" aria-labelledby="csv-upload-title csv-upload-format" onchange="updateHomeworkExtension()">
         </fieldset>
     </form>
     {% if current_exceptions is null %}
