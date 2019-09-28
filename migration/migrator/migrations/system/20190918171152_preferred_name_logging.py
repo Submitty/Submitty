@@ -61,7 +61,7 @@ def up(config):
     patterns = {r"^#*\s*log_destination\s*=\s*'[a-z]+'":                               "log_destination = 'csvlog'",
                 r"^#*\s*logging_collector\s*=\s*[a-z01]+":                             "logging_collector = on",
                 r"^#*\s*log_directory\s*=\s*'[^(){}<>|:;&#=!'~?*$`\x5b\x5d\x22\s]+'": f"log_directory = '{config.submitty['submitty_data_dir']}/logs/psql'",
-                r"^#*\s*log_filename\s*=\s*'[a-zA-Z0-9_%\x2d\x2e]+'":                  "log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'",
+                r"^#*\s*log_filename\s*=\s*'[a-zA-Z0-9_%\x2d\x2e]+'":                  "log_filename = 'postgresql_%Y-%m-%d-%H%M%S.log'",
                 r"^#*\s*log_file_mode\s*=\s*[0-9]+":                                   "log_file_mode = 0640",
                 r"^#*\s*log_rotation_age\s*=\s*[a-z0-9]+":                             "log_rotation_age = 1d",
                 r"^#*\s*log_rotation_size\s*=\s*[a-zA-Z0-9]+":                         "log_rotation_size = 10MB",
