@@ -970,7 +970,9 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
     formData.append('expand_zip', expand_zip);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
-    formData.append('sections', sections);
+    if(sections !== null){
+        formData.append('sections', sections);
+    }
     var target_path = cmPath; // this one has slash at the end.
     if (requested_path && requested_path.trim().length) {
         target_path = cmPath + requested_path;

@@ -42,9 +42,6 @@
                     <td>Section {{ section['sections_registration_id'] }}</td>
                     <td><input id="section_{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
                 </tr>
-                {% if section['sections_registration_id'] is divisible by (5) %}
-                   <tr></br></tr> 
-                {% endif %}
             {% endfor %}
             </div>
         </label>

@@ -61,7 +61,6 @@
 
 {% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections) %}
     {# Files on top #}
-    {% if userGroup != 4 or user_section in file_sections or file_sections == null %}
         {% for dir, path in files|filter((path,dir) => path is not iterable) %}
             {% if userGroup != 4 or fileShares[path] == "1" %}
                 {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections) }}
@@ -72,17 +71,14 @@
         {% for dir, path in files if path is iterable %}
             {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections) }}
         {% endfor %}
-    {% endif %}
 {% endmacro %}
 
 
 {% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections) %}
-    {% if userGroup != 4 or user_section in file_sections or file_sections == null %}
+    {% set this_file_section = file_sections[path] %}
+    {% if userGroup != 4 or user_section in this_file_section or this_file_section is null %}
     <div>
         <div class="file-viewer">
-            <pre>
-                {{ dump(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections) }}
-            </pre>
             <k class="fas fa-file" style='vertical-align:text-bottom;'></k>
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
@@ -95,11 +91,20 @@
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
-                <label>Sections:
-                    {% for section in file_sections %}
-                        {{ section }}
-                    {% endfor %}
+                {% if not(this_file_section is null) and this_file_section|length > 0 %}
+                <label>Sections: 
+                {% for key,value in this_file_section %}
+                    {{value}}
+                    {% if key < this_file_section|length - 1%}
+                        ,
+                    {% endif %}
+                {% endfor %}
                 </label>
+                {% endif %}
+                {% if not (this_file_section is null) and this_file_section|length == 0 %}
+                <label>Sections: []
+                </label>
+                {% endif %}
                 <script>
 
                     function determineRelease(inputID){

@@ -22,7 +22,6 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        $file_sections = 'Check';
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
         function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp, &$file_sections) {
@@ -47,7 +46,9 @@ class CourseMaterialsView extends AbstractView {
                     {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
-                        $file_sections = $json['sections'];
+                        if ( isset( $json[$expected_file_path]['sections'] ) ){
+                            $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
+                        }
                         $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
 
                        if ($isShareToOther == '1' && $release_date > $now_date_time)
@@ -60,8 +61,10 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
                         $release_date = $json['release_time'];
-                        $file_sections = $json['sections'];
                         $json[$expected_file_path]['release_datetime'] = $release_date;
+                        if ( isset( $json[$expected_file_path]['sections'] ) ){
+                            $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
+                        }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
                     }
 
