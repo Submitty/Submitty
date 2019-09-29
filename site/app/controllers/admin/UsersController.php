@@ -639,7 +639,7 @@ class UsersController extends AbstractController {
         );
 
         $content_type = FileUtils::getContentType($filename);
-        $mime_type = FileUtils::getMimeType($tmp_name);
+        $mime_type = mime_content_type($tmp_name);
 
         // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {

@@ -221,7 +221,6 @@ class submitty_router():
 
 
   def handle_udp_connection(self, recipient, recv_port, udp_socket):
-    recipient = f'{recipient}_Actual'
 
     while self.running:
       try:
@@ -242,12 +241,12 @@ class submitty_router():
         forward_socket.settimeout(1)
         self.udp_sockets[send_port] = forward_socket
 
-        t = threading.Thread(target = self.handle_udp_connection, args=(recipient, send_port, forward_socket))
+        t = threading.Thread(target = self.handle_udp_connection, args=(sender, send_port, forward_socket))
         t.start()
       else:
         forward_socket = self.udp_sockets[send_port]
 
-      self.enqueue_message(sender, recipient, send_port, recv_port, msg, forward_socket, 'udp')
+      self.enqueue_message(sender, f'{recipient}_Actual', send_port, recv_port, msg, forward_socket, 'udp')
 
 
   def enqueue_message(self, sender, recipient, send_port, recv_port, message, socket, socket_type):
