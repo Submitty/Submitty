@@ -70,21 +70,22 @@ class Container():
 
     try:
       if self.is_server:
-        self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none', 
+        self.container = client.containers.create(self.image, stdin_open = True, tty = True, network = 'none',
                                                   volumes = mount, working_dir = self.directory, name = self.full_name)
       else:
         container_ulimits = rlimit_utils.build_ulimit_argument(self.container_rlimits, self.image)
         command = [execution_script,] + arguments + container_name_argument
-        self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True, 
+        self.container = client.containers.create(self.image, command = command, ulimits = container_ulimits, stdin_open = True,
                                                   tty = True, network = 'none', user = self.container_user_argument, volumes=mount,
                                                   working_dir = self.directory, hostname = self.name, name = self.full_name)
     except docker.errors.ImageNotFound:
       self.log_function(f'ERROR: The image {self.image} is not available on this worker')
+      client.close()
       raise
 
     dockerlaunch_done = dateutils.get_current_time()
     self.log_function(f'docker container {self.container.short_id} created')
-
+    client.close()
 
   def start(self, logfile):
     self.container.start()
@@ -103,8 +104,13 @@ class Container():
       status = self.container.wait()
       self.return_code = status['StatusCode']
 
+    self.socket._response.close()
     self.socket.close()
+    self.socket._response = None
+
     self.container.remove(force=True)
+    self.container.client.api.close()
+    self.container.client.close()
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
 
 
@@ -226,8 +232,9 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     if len(containers) <= 1:
       return
     client = docker.from_env()
-
     none_network = client.networks.get('none')
+    client.close()
+
     #remove all containers from the none network
     for container in containers:
       none_network.disconnect(container.container, force=True)
@@ -240,7 +247,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     # Provide an initialization file to each container.
     self.create_knownhosts_txt(containers)
     self.create_knownhosts_json(containers)
-
 
   def network_containers_routerless(self, containers):
     """ If there is no router, all containers are added to the same network. """
@@ -257,7 +263,8 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     #create the global network
     # TODO: Can fail on ip conflict.
     network = client.networks.create(network_name, driver='bridge', ipam=ipam_config, internal=True)
- 
+    client.close()
+
     host = 2
     for container in containers:
       ip_address = f'{ip_address_start}.{host}'
@@ -265,7 +272,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       container.set_ip_address(network_name, ip_address)
       host+=1
     self.networks.append(network)
-
 
   def network_containers_with_router(self, containers):
     """ 
@@ -300,7 +306,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
       network = client.networks.create(network_name, ipam=ipam_config, driver='bridge', internal=True)
 
-      # We connectt the container with host=1. Later we'll connect the router with host=2
+      # We connect the container with host=2. Later we'll connect the router with host=3
       container_ip = f'{network_num}.{untrusted_num}.{subnet}.2'
       container.set_ip_address(network_name, container_ip)
 
@@ -344,13 +350,16 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         aliases.append(endpoint)
       network = self.get_network_with_name(network_name)
       network.connect(router.container, ipv4_address=router_ip, aliases=aliases)
+    client.close()
 
   def cleanup_networks(self):
     """ Destroy all created networks. """
     for network in self.networks:
       try:
         network.remove()
-        self.log_message(f'{dateutils.get_current_time()} docker network {network} destroyed')
+        network.client.api.close()
+        network.client.close()
+        self.log_message(f'{dateutils.get_current_time()} destroying docker network {network}')
       except Exception as e:
         self.log_message(f'{dateutils.get_current_time()} ERROR: Could not remove docker network {network}')
     self.networks.clear()
@@ -671,7 +680,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       for container in self.get_server_containers(containers):
         container.cleanup_container()
       if router is not None:
-        self.get_router(containers).cleanup_container()
+        router.cleanup_container()
     except Exception as e:
       self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
