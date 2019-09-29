@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "591eec59dcd85351ee14cd0728d1832e",
+    "content-hash": "455cff71907b1966ec06c0fd2db2cdd6",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1319,87 +1319,6 @@
                 "object graph"
             ],
             "time": "2019-08-09T12:45:53+00:00"
-        },
-        {
-            "name": "nikic/php-parser",
-            "version": "v4.2.4",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "97e59c7a16464196a8b9c77c47df68e4a39a45c4"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/97e59c7a16464196a8b9c77c47df68e4a39a45c4",
-                "reference": "97e59c7a16464196a8b9c77c47df68e4a39a45c4",
-                "shasum": ""
-            },
-            "require": {
-                "ext-tokenizer": "*",
-                "php": ">=7.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0"
-            },
-            "bin": [
-                "bin/php-parse"
-            ],
-            "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.2-dev"
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "PhpParser\\": "lib/PhpParser"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD-3-Clause"
-            ],
-            "authors": [
-                {
-                    "name": "Nikita Popov"
-                }
-            ],
-            "description": "A PHP parser written in PHP",
-            "keywords": [
-                "parser",
-                "php"
-            ],
-            "time": "2019-09-01T07:51:21+00:00"
-        },
-        {
-            "name": "pcov/clobber",
-            "version": "v2.0.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/krakjoe/pcov-clobber.git",
-                "reference": "191f54df9a60fc38f1891248d9e3220121a43e6b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/krakjoe/pcov-clobber/zipball/191f54df9a60fc38f1891248d9e3220121a43e6b",
-                "reference": "191f54df9a60fc38f1891248d9e3220121a43e6b",
-                "shasum": ""
-            },
-            "require": {
-                "ext-pcov": "^1.0",
-                "nikic/php-parser": "^4.2"
-            },
-            "bin": [
-                "bin/pcov"
-            ],
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "pcov\\Clobber\\": "src/pcov/clobber"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "time": "2019-08-02T04:24:11+00:00"
         },
         {
             "name": "phar-io/manifest",
@@ -2974,26 +2893,26 @@
         },
         {
             "name": "submitty/php-codesniffer",
-            "version": "2.0.0",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/submitty-php-codesniffer.git",
-                "reference": "1bb8f1fa69584316b3514253b70fe97e339fa030"
+                "reference": "2d83803e9c7248803f04433ad62bd9669243b9c8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/1bb8f1fa69584316b3514253b70fe97e339fa030",
-                "reference": "1bb8f1fa69584316b3514253b70fe97e339fa030",
+                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/2d83803e9c7248803f04433ad62bd9669243b9c8",
+                "reference": "2d83803e9c7248803f04433ad62bd9669243b9c8",
                 "shasum": ""
             },
             "require": {
-                "pcov/clobber": "^2.0",
                 "php": ">=7.1",
                 "slevomat/coding-standard": "^5.0",
                 "squizlabs/php_codesniffer": "^3.5.0"
             },
             "require-dev": {
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0",
+                "pcov/clobber": "^2.0",
                 "phpunit/phpunit": "^7.5.12"
             },
             "suggest": {
@@ -3016,7 +2935,7 @@
                 }
             ],
             "description": "Submitty PHP CodeSniffer Standard",
-            "time": "2019-09-29T14:34:50+00:00"
+            "time": "2019-09-29T17:13:50+00:00"
         },
         {
             "name": "theseer/tokenizer",
