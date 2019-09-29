@@ -839,7 +839,7 @@ HTML;
      * @return string
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        function add_files(&$files, $new_files, $start_dir_name) {
+        $add_files = function (&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             if($new_files) {
                 foreach ($new_files as $file) {
@@ -855,7 +855,7 @@ HTML;
                     $working_dir[$file['name']] = $file['path'];
                 }
             }
-        }
+        };
         $submissions = array();
         $results = array();
         $results_public = array();
@@ -871,10 +871,10 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
-            add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
-            add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
-            add_files($results, $display_version_instance->getResultsFiles(), 'results');
-            add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
+            $add_files($results, $display_version_instance->getResultsFiles(), 'results');
+            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
 
         // For PDFAnnotationBar.twig
