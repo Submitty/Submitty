@@ -93,7 +93,7 @@ function ajaxGetGradeableRubric(gradeable_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'rubric']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'rubric']),
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable rubric: ' + response.message);
@@ -129,7 +129,7 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'save']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -170,7 +170,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components']) + `?component_id=${component_id}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components']) + `?component_id=${component_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component rubric: ' + response.message);
@@ -198,7 +198,7 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable grade: ' + response.message);
@@ -227,7 +227,7 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']) + `?anon_id=${anon_id}&component_id=${component_id}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']) + `?anon_id=${anon_id}&component_id=${component_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component grade: ' + response.message);
@@ -265,7 +265,7 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url:  buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']),
+            url:  buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -303,7 +303,7 @@ function ajaxGetOverallComment(gradeable_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']) + `?anon_id=${anon_id}`,
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']) + `?anon_id=${anon_id}`,
             data: null,
             success: function (response) {
                 if (response.status !== 'success') {
@@ -333,7 +333,7 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']),
             data: {
                 'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
@@ -370,7 +370,7 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points, publish) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'add']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'add']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -406,7 +406,7 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'delete']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'delete']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -443,7 +443,7 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -480,7 +480,7 @@ function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'stats']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'stats']),
             data: {
                 'component_id': component_id,
                 'mark_id': mark_id,
@@ -514,7 +514,7 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -547,7 +547,7 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'save_pages']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save_pages']),
             data: {
                 'csrf_token': csrfToken,
                 'pages': JSON.stringify(pages)
@@ -579,7 +579,7 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'order']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'order']),
             data: {
                 'csrf_token': csrfToken,
                 'order': JSON.stringify(order)
@@ -610,7 +610,7 @@ function ajaxAddComponent(gradeable_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
             },
@@ -641,7 +641,7 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'delete']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'delete']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id
@@ -674,7 +674,7 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'verify']),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']),
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -707,7 +707,7 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildNewCourseUrl(['gradeable', gradeable_id, 'components', 'verify']) + '?verify_all=true',
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']) + '?verify_all=true',
             data: {
                 'csrf_token': csrfToken,
                 'component_id': component_id,
@@ -1565,9 +1565,11 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
 
     // Create an array of links for each submitter
     let submitterHtmlElements = [];
+    let [base_url, search_params] = location.href.split('?');
+    search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
-        let href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, '&who_id=' + id);
-        submitterHtmlElements.push('<a href="' + href + '">' + id + '</a>');
+        search_params.set('who_id', id);
+        submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
     });
     popup.find('.student-names').html(submitterHtmlElements.join(', '));
 
@@ -1713,7 +1715,7 @@ function onAddComponent() {
  * Called when the 'Import Components' button is pressed
  */
 function importComponentsFromFile() {
-    let submit_url = buildNewCourseUrl(['gradeable', getGradeableId(), 'components', 'import']);
+    let submit_url = buildCourseUrl(['gradeable', getGradeableId(), 'components', 'import']);
     let formData = new FormData();
 
     let files = $('#import-components-file')[0].files;
@@ -1773,7 +1775,7 @@ function onGetMarkStats(me) {
         .then(function (stats) {
             let component_title = getComponentFromDOM(component_id).title;
             let mark_title = getMarkFromDOM(mark_id).title;
-            
+
             openMarkStatsPopup(component_title, mark_title, stats);
         })
         .catch(function (err) {
@@ -2449,25 +2451,14 @@ function openComponentGrading(component_id) {
  * @return {void}
  */
 function scrollToPage(page_num){
-    let files = $('.openable-element-submissions');
+    let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
-        let zoom = parseInt(localStorage.getItem('scale')) || 1;
         if(files[i].innerText.trim() == "upload.pdf"){
-            let page1 = $(".page").filter(":first");
-            // default to 0 if no pages
-            let page_height = 0;
-            let page_margin_top = 0;
-            let page_margin_bot = 0;
-            if (page1.length) {
-                //get css attr, remove 'px' : 
-                page_height = parseInt(page1.css("height").slice(0, -2));
-                page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
-                page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
-            }
-            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
-            let scrollY = zoom*(page_num-1)*(page_height+page_margin_bot)+page_margin_top;
+            let page = $("#pageContainer" + page_num);
             if($("#file_view").is(":visible")){
-                $('#file_content').animate({scrollTop: scrollY}, 500);
+                if(page.length) {
+                    $('#file_content').animate({scrollTop: page[0].offsetTop}, 500);
+                }
             } else {
                 expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }

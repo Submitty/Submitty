@@ -160,7 +160,7 @@ input[type="checkbox"]:checked:before {
 .fa-question-circle{
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
-  color: var(--actionable-blue);
+  color: var(--external-link-blue);
   font-weight: 300;
   display: inline-block;
 }
@@ -1197,6 +1197,16 @@ div.full_height {
     display: inline-block;
 }
 
+[name^="grader-warning-popup"] {
+    background:var(--danger-red);
+    box-shadow: 0 2px 15px -5px var(--standard-light-gray);
+    border-radius: 3px;
+    overflow: auto;
+    margin: 10px;;
+    padding: 30px;
+    flex-grow: 1;
+}
+
 .fill-available {
     width: 100%;
     width: -webkit-fill-available;
@@ -1383,8 +1393,8 @@ end of styles used in the admin gradeable page
     color: var(--standard-vibrant-dark-blue)  /* dark blue */
 }
 
-.grader-invalid{
-   color: var(--standard-light-red);
+.grader-grade-inquiry {
+    color: var(--standard-light-red);
 }
 
 .grader-invalid{

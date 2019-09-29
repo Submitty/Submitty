@@ -4,6 +4,7 @@ namespace app\controllers\admin;
 
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\Response;
@@ -22,13 +23,6 @@ use app\exceptions\DatabaseException;
  * @AccessControl(role="INSTRUCTOR")
  */
 class UsersController extends AbstractController {
-    /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
     /**
      * @Route("/{_semester}/{_course}/users", methods={"GET"})
      * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
@@ -149,7 +143,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
      */
     public function reassignRegistrationSections() {
-        $return_url = $this->core->buildNewCourseUrl(['graders']);
+        $return_url = $this->core->buildCourseUrl(['graders']);
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
@@ -177,7 +171,7 @@ class UsersController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/users/{user_id}", methods={"GET"})
+     * @Route("/{_semester}/{_course}/users/details", methods={"GET"})
      */
     public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
@@ -237,9 +231,11 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/users", methods={"POST"})
      */
     public function updateUser($type='users') {
-        $return_url = $this->core->buildNewCourseUrl([$type]) . '#user-' . $_POST['user_id'];
+        $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("User ID cannot be empty");
@@ -280,10 +276,6 @@ class UsersController extends AbstractController {
             }
         }
         else {
-            if ($user !== null) {
-                $this->core->addErrorMessage("A user with that ID already exists");
-                $this->core->redirect($return_url);
-            }
             $user = $this->core->loadModel(User::class);
             $user->setId(trim($_POST['user_id']));
         }
@@ -332,20 +324,32 @@ class UsersController extends AbstractController {
         }
 
         if ($_POST['edit_user'] == "true") {
-            $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($user, $semester, $course);
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
             if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
-                $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
+            }
+
+            $all_gradeable_ids = $this->core->getQueries()->getAllGradeablesIds();
+            foreach ($all_gradeable_ids as $row) {
+                $g_id = $row['g_id'];
+                $gradeable = $this->tryGetGradeable($g_id, false);
+                if ($gradeable === false) {
+                    continue;
+                }
+                if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+                    AdminGradeableController::enqueueGenerateRepos($semester,$course,$g_id);
+                }
             }
 
         }
@@ -384,7 +388,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
      */
     public function updateRegistrationSections() {
-        $return_url = $this->core->buildNewCourseUrl(['sections']);
+        $return_url = $this->core->buildCourseUrl(['sections']);
 
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
@@ -428,7 +432,7 @@ class UsersController extends AbstractController {
      * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
      */
     public function updateRotatingSections() {
-        $return_url = $this->core->buildNewCourseUrl(['sections']);
+        $return_url = $this->core->buildCourseUrl(['sections']);
 
         if (!isset($_POST['sort_type'])) {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
@@ -625,7 +629,7 @@ class UsersController extends AbstractController {
         );
 
         $content_type = FileUtils::getContentType($filename);
-        $mime_type = FileUtils::getMimeType($tmp_name);
+        $mime_type = mime_content_type($tmp_name);
 
         // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
@@ -841,7 +845,7 @@ class UsersController extends AbstractController {
             }
         };
 
-        $return_url = $this->core->buildNewCourseUrl([$set_return_url_action_function()]);
+        $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if ($_FILES['upload']['name'] == "") {

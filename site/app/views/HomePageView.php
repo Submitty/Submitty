@@ -70,7 +70,9 @@ class HomePageView extends AbstractView {
             "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication,
             "csrf_token" => $this->core->getCsrfToken(),
             "access_level" => $access_levels[$user->getAccessLevel()],
-            "display_access_level" => $user->accessFaculty()
+            "display_access_level" => $user->accessFaculty(),
+            "change_password_url" => $this->core->buildUrl(['current_user', 'change_password']),
+            "change_username_url" => $this->core->buildUrl(['current_user', 'change_username'])
         ]);
     }
 
@@ -82,7 +84,7 @@ class HomePageView extends AbstractView {
             "faculty" => $faculty,
             "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
             "semesters" => $semesters,
-            "course_creation_url" => $this->core->buildNewUrl(['home', 'courses', 'new']),
+            "course_creation_url" => $this->core->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements()
         ]);
     }

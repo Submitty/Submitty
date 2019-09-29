@@ -24,7 +24,13 @@ class GlobalView extends AbstractView {
         if ($course_name == ucwords(strtolower($page_name))) {
             $page_name = "Gradeables";
         }
-        $page_title = $this->core->getConfig()->isCourseLoaded() ? "Submitty ".$course_name." ".$page_name : "Submitty";
+
+        $page_title = "Submitty";
+        if ($this->core->getUser() === null) {
+            $page_title = "Submitty Login";
+        } else if ($this->core->getConfig()->isCourseLoaded()) {
+            $page_title = "Submitty ".$course_name." ".$page_name;
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("GlobalHeader.twig", [
             "messages" => $messages,
@@ -35,8 +41,7 @@ class GlobalView extends AbstractView {
             "breadcrumbs" => $breadcrumbs,
             "user_first_name" => $this->core->getUser() ? $this->core->getUser()->getDisplayedFirstName() : "",
             "base_url" => $this->core->getConfig()->getBaseUrl(),
-            "site_url" => $this->core->getConfig()->getSiteUrl(),
-            "course_url" => $this->core->buildNewCourseUrl(),
+            "course_url" => $this->core->buildCourseUrl(),
             "notifications_info" => $notifications_info,
             "wrapper_enabled" => $this->core->getConfig()->wrapperEnabled(),
             "wrapper_urls" => $wrapper_urls,

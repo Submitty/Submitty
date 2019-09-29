@@ -56,48 +56,6 @@ class SubmissionController extends AbstractController {
     }
 
     /**
-     * This method shouldn't be called by router.
-     * It is here only because tests are not updated.
-     * @deprecated
-     */
-    public function run() {
-        switch($_REQUEST['action']) {
-            case 'upload':
-                return $this->ajaxUploadSubmission($_REQUEST['gradeable_id']);
-                break;
-            case 'update':
-                return $this->updateSubmissionVersion($_REQUEST['gradeable_id'], $_REQUEST['new_version']);
-                break;
-            case 'check_refresh':
-                return $this->checkRefresh($_REQUEST['gradeable_id'], $_REQUEST['gradeable_version']);
-                break;
-            case 'bulk':
-                return $this->ajaxBulkUpload($_REQUEST['gradeable_id']);
-                break;
-            case 'upload_split':
-                return $this->ajaxUploadSplitItem($_REQUEST['gradeable_id']);
-                break;
-            case 'delete_split':
-                return $this->ajaxDeleteSplitItem($_REQUEST['gradeable_id']);
-                break;
-            case 'verify':
-                return $this->ajaxValidGradeable($_REQUEST['gradeable_id']);
-                break;
-            case 'stat_page':
-                return $this->showBulkStats($_REQUEST['gradeable_id']);
-                break;
-            case 'display':
-            default:
-
-                return $this->showHomeworkPage(
-                    $_REQUEST['gradeable_id'] ?? null,
-                    $_REQUEST['gradeable_version'] ?? 0
-                );
-                break;
-        }
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
      * @return array
@@ -126,7 +84,6 @@ class SubmissionController extends AbstractController {
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
-
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
         if (!$this->core->getUser()->accessGrading() && (
                 !$gradeable->isSubmissionOpen()
@@ -137,11 +94,11 @@ class SubmissionController extends AbstractController {
         }
         else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage('Must be on a team to access submission');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
+            $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
                 $this->core->getOutput()->renderOutput('Error',
@@ -170,6 +127,8 @@ class SubmissionController extends AbstractController {
                 // If we get here, then we can safely construct the old model w/o checks
                 $this->core->getOutput()->addInternalCss('forum.css');
                 $this->core->getOutput()->addInternalJs('forum.js');
+                $this->core->getOutput()->addInternalCss('grade-inquiry.css');
+                $this->core->getOutput()->addInternalJs('grade-inquiry.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
                                                        'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
             }
@@ -860,7 +819,7 @@ class SubmissionController extends AbstractController {
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
-                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+            return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -941,18 +900,19 @@ class SubmissionController extends AbstractController {
             $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
 
             foreach($this_config_inputs as $this_input) {
-                if($this_input instanceof SubmissionTextBox){
+                if ($this_input instanceof SubmissionTextBox) {
                     $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
                     $num_short_answers += 1;
                 }
-                else if($this_input instanceof SubmissionCodeBox){
+                else if ($this_input instanceof SubmissionCodeBox) {
                     $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? array();
                     $num_codeboxes += 1;
                 }
-                else if($this_input instanceof SubmissionMultipleChoice){
+                else if ($this_input instanceof SubmissionMultipleChoice) {
                     $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
                     $num_multiple_choice += 1;
-                }else{
+                }
+                else {
                     //TODO: How should we handle this case?
                     continue;
                 }
@@ -965,7 +925,7 @@ class SubmissionController extends AbstractController {
                 // FIXME: add error checking
                 $file = fopen($dst, "w");
 
-                foreach($answers as $answer_val){
+                foreach ($answers as $answer_val) {
                     fwrite($file, $answer_val . "\n");
                 }
                 fclose($file);
@@ -1053,13 +1013,13 @@ class SubmissionController extends AbstractController {
 
             // Determine the size of the uploaded files as well as whether or not they're a zip or not.
             // We save that information for later so we know which files need unpacking or not and can save
-            // a check to getMimeType()
+            // a check for its mime type
             $file_size = 0;
             for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
                     $uploaded_files[$i]["is_zip"] = array();
                     for ($j = 0; $j < $count[$i]; $j++) {
-                        if (FileUtils::getMimeType($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
+                        if (mime_content_type($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
                             if(FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
                             }
@@ -1242,12 +1202,16 @@ class SubmissionController extends AbstractController {
         // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
         $vcs_queue_file = "";
         if ($vcs_checkout === true) {
-          $vcs_queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-                                                 "VCS__".$queue_file_helper);
+            $vcs_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "to_be_graded_queue",
+                "VCS__".$queue_file_helper
+            );
         }
 
         // create json file...
-        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = array(
+            "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
             "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
@@ -1258,7 +1222,8 @@ class SubmissionController extends AbstractController {
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
             "version" => $new_version,
-            "vcs_checkout" => $vcs_checkout);
+            "vcs_checkout" => $vcs_checkout
+        );
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
@@ -1286,27 +1251,26 @@ class SubmissionController extends AbstractController {
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+
             // notify other team members that a submission has been made
-            $metadata = json_encode(['url' => $this->core->buildNewCourseUrl(['gradeable',$gradeable_id])]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id])]);
             $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
             $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
             $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
-
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        if ($user_id == $original_user_id) {
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()}");
+        if ($user_id === $original_user_id) {
+            $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()}";
         }
         else {
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
+            $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}";
         }
 
-
-        return $this->uploadResult("Successfully uploaded files");
+        return $this->uploadResult($message);
     }
 
     private function uploadResult($message, $success = true) {
@@ -1347,7 +1311,7 @@ class SubmissionController extends AbstractController {
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                $this->core->redirect($this->core->buildNewCourseUrl());
+                $this->core->redirect($this->core->buildCourseUrl());
                 return $this->core->getOutput()->renderJsonFail($msg);
             }
             $ta = true;
@@ -1357,19 +1321,19 @@ class SubmissionController extends AbstractController {
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $who = $who ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]);
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
 
         // If $graded_gradeable is null, that means its a team assignment and the user is on no team
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
@@ -1417,7 +1381,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable->getId()]));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
             return $this->core->getOutput()->renderJsonFail($msg);
         }
 
@@ -1441,11 +1405,11 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage($msg);
         }
         if($ta) {
-            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
                 . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
         }
         else {
-            $this->core->redirect($this->core->buildNewCourseUrl(['gradeable', $gradeable->getId(), $new_version]));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]));
         }
 
         return $this->core->getOutput()->renderJsonSuccess(['version' => $new_version, 'message' => $msg]);

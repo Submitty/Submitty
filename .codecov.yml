@@ -1,0 +1,35 @@
+codecov:
+  notify:
+    require_ci_to_pass: true
+
+ignore:
+  - "tests/integrationTests"
+
+coverage:
+  status:
+    project:
+      default: false
+      migrator:
+        flags: migrator
+        target: 100%
+    patch: false
+    changes: false
+
+
+flags:
+  php:
+    paths:
+      - site/app
+  autograder:
+    paths:
+      - autograder/autograder
+  python_submitty_utils:
+    paths:
+      - python_submitty_utils/submitty_utils
+  migrator:
+    paths:
+      - migration/migrator
+
+comment:
+  layout: "reach, diff, flags"
+  behavior: once
