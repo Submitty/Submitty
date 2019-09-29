@@ -19,13 +19,6 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class AutogradingConfigController extends AbstractController {
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/autograding_config", methods={"GET"})
      * @return Response
      */
@@ -63,7 +56,7 @@ class AutogradingConfigController extends AbstractController {
         if (empty($_FILES) || !isset($_FILES['config_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+                new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
             );
         }
 
@@ -71,7 +64,7 @@ class AutogradingConfigController extends AbstractController {
         if (!isset($upload['tmp_name']) || $upload['tmp_name'] === "") {
             $this->core->addErrorMessage("Upload failed: Empty tmp name for file");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+                new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
             );
         }
 
@@ -85,7 +78,7 @@ class AutogradingConfigController extends AbstractController {
         $target_dir = $try_dir;
         FileUtils::createDir($target_dir);
 
-        if (FileUtils::getMimeType($upload["tmp_name"]) == "application/zip") {
+        if (mime_content_type($upload["tmp_name"]) == "application/zip") {
             $zip = new \ZipArchive();
             $res = $zip->open($upload['tmp_name']);
             if ($res === true) {
@@ -97,7 +90,7 @@ class AutogradingConfigController extends AbstractController {
                 $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
                 $this->core->addErrorMessage("Upload failed: {$error_message}");
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+                    new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
                 );
             }
         }
@@ -106,13 +99,13 @@ class AutogradingConfigController extends AbstractController {
                 FileUtils::recursiveRmdir($target_dir);
                 $this->core->addErrorMessage("Upload failed: Could not copy file");
                 return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+                    new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
                 );
             }
         }
         $this->core->addSuccessMessage("Gradeable config uploaded");
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+            new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
         );
     }
 
@@ -144,7 +137,7 @@ class AutogradingConfigController extends AbstractController {
             }
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+            new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
         );
     }
 
@@ -175,7 +168,7 @@ class AutogradingConfigController extends AbstractController {
             }
         }
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['autograding_config']))
+            new RedirectResponse($this->core->buildCourseUrl(['autograding_config']))
         );
     }
 

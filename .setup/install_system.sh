@@ -189,6 +189,7 @@ pip3 install PyPDF2
 pip3 install distro
 pip3 install jsonschema
 pip3 install jsonref
+pip3 install docker
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
@@ -259,7 +260,7 @@ else
 fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
-# managers to write website custimization files and run course
+# managers to write website customization files and run course
 # management scripts.
 if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
         addgroup ${COURSE_BUILDERS_GROUP}
@@ -621,8 +622,8 @@ ${SUBMISSION_URL}
 
 
 1
-
-
+submitty-admin
+submitty-admin
 y
 
 
@@ -765,22 +766,32 @@ fi
 # DOCKER SETUP
 #################
 
-# WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security
-# These commands should be run manually if testing Docker integration
+# If we are in vagrant and http_proxy is set, then vagrant-proxyconf
+# is probably being used, and it will work for the rest of this script,
+# but fail here if we do not manually set the proxy for docker
+if [[ ${VAGRANT} == 1 ]]; then
+    if [ ! -z ${http_proxy+x} ]; then
+        mkdir -p /home/${DAEMON_USER}/.docker
+        proxy="            \"httpProxy\": \"${http_proxy}\""
+        if [ ! -z ${https_proxy+x} ]; then
+            proxy="${proxy},\n            \"httpsProxy\": \"${https_proxy}\""
+        fi
+        if [ ! -z ${no_proxy+x} ]; then
+            proxy="${proxy},\n            \"noProxy\": \"${no_proxy}\""
+        fi
+        echo -e "{
+    \"proxies\": {
+        \"default\": {
+${proxy}
+        }
+    }
+}" > /home/${DAEMON_USER}/.docker/config.json
+        chown -R ${DAEMON_USER}:${DAEMON_USER} /home/${DAEMON_USER}/.docker
+    fi
+fi
 
-rm -rf /tmp/docker
-mkdir -p /tmp/docker
-cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
-cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
-
-chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
-
-pushd /tmp/docker
-su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
-popd > /dev/null
-
+su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
+su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES
@@ -790,6 +801,18 @@ if [ ${WORKER} == 0 ]; then
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
+
+
+#####################################################################################
+# Obtain API auth token for submitty-admin user
+# (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
+# operational at that time.)
+if [ ${WORKER} == 0 ]; then
+
+    python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+
+fi
+
 
 echo "Done."
 exit 0

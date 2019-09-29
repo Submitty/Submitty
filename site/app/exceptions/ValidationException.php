@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace app\exceptions;
 
@@ -19,6 +19,6 @@ class ValidationException extends BaseException {
      * @param \Exception  $previous
      */
     public function __construct($message, $details, $code = 0, $previous = null) {
-        parent::__construct($message, $details , $code, $previous);
+        parent::__construct($message, $details, $code, $previous);
     }
 }

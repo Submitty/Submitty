@@ -22,10 +22,11 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir) {
+        function add_files(Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
+            $no_json = array();
 
             foreach($course_materials_array as $file) {
 
@@ -44,13 +45,34 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
-                        $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
+                       $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
 
-                        if ($isShareToOther == '1' && $release_date > $now_date_time)
+                       if ($isShareToOther == '1' && $release_date > $now_date_time)
                             $isShareToOther = '0';
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
                     }
+                    else{
+                        //fill with upload time for new files add all files to json when uploaded
+                        $json[$expected_file_path]['checked'] = '1';
+                        $isShareToOther = $json[$expected_file_path]['checked'];
+                        $release_date = $json['release_time'];
+                        $json[$expected_file_path]['release_datetime'] = $release_date;
+                        $releaseData = $json[$expected_file_path]['release_datetime'];
+                    }
+
+                }
+                else{
+
+                    $ex_file_path = $expected_file_path;
+                    $ex_file_path = array();
+                    $ex_file_path['checked'] = '1';
+                    $isShareToOther = $ex_file_path['checked'];
+                    $date = $now_date_time->format("Y-m-d H:i:sO");
+                    $date=substr_replace($date,"9999",0,4);
+                    $ex_file_path['release_datetime'] = $date;
+                    $releaseData = $ex_file_path['release_datetime'];
+                    $no_json[$expected_file_path] = $ex_file_path;
 
                 }
 
@@ -86,6 +108,14 @@ class CourseMaterialsView extends AbstractView {
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
+
+            if($json == false){
+                FileUtils::writeJsonFile($fp,$no_json);
+            }
+            $can_write =is_writable($fp);
+            if(!$can_write){
+               $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
+            }
         }
 
         $submissions = array();
@@ -105,20 +135,20 @@ class CourseMaterialsView extends AbstractView {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
 
-        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir);
+        add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
             // nothing to view
             $this->core->addErrorMessage("You have no permission to access this page");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return;
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
 
-        $server_time = (array)DateUtils::getServerTimeJson($this->core);
+        $server_time = DateUtils::getServerTimeJson($this->core);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
@@ -131,11 +161,11 @@ class CourseMaterialsView extends AbstractView {
             "userGroup" => $user_group,
             "inDir" => $in_dir,
             "csrf_token" => $this->core->getCsrfToken(),
-            "delete_url" => $this->core->buildNewCourseUrl(["course_materials", "delete"]),
-            "delete_folder_url" => $this->core->buildNewCourseUrl(["course_materials", "delete_folder"]),
+            "delete_url" => $this->core->buildCourseUrl(["course_materials", "delete"]),
+            "delete_folder_url" => $this->core->buildCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
             'server_time' => $server_time,
-            "display_file_url" => $this->core->buildNewCourseUrl(['display_file'])
+            "display_file_url" => $this->core->buildCourseUrl(['display_file'])
         ]);
     }
 }
