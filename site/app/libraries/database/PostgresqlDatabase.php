@@ -184,13 +184,13 @@ class PostgresqlDatabase extends AbstractDatabase {
             }
             else if (is_string($e)) {
                 //Turn every \ into \\ that's either preceding a " another \ or the end
-                $elements[] .= '"'. str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) .'"';
+                $elements[] = '"'. str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) .'"';
             }
             else if (is_bool($e)) {
-                $elements[] .= ($e === true) ? "true" : "false";
+                $elements[] = ($e === true) ? "true" : "false";
             }
             else {
-                $elements[] .= "{$e}";
+                $elements[] = "{$e}";
             }
         }
         $text = "{".implode(", ", $elements)."}";
