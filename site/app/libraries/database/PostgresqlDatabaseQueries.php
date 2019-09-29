@@ -5,10 +5,10 @@ namespace app\libraries\database;
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\libraries\CascadingIterator;
-use \app\libraries\GradeableType;
-use app\models\Gradeable;
+use app\libraries\GradeableType;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\GradedGradeable;
@@ -49,10 +49,10 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
                  ns.self_notification,
                  ns.merge_threads_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
-                 ns.reply_in_post_thread_email, ns.team_invite_email, 
+                 ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
                  ns.self_notification_email,sr.grading_registration_sections
-     
+
             FROM users u
             LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
             LEFT JOIN (
@@ -1214,7 +1214,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
-            /** @var \app\models\gradeable\Gradeable $gradeable */
+            /** @var Gradeable $gradeable */
             $gradeable = $gradeables_by_id[$row['g_id']];
 
             // Get the submitter
@@ -1610,7 +1610,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $gradeable_constructor);
     }
 
-    public function getActiveVersions(Gradeable\Gradeable $gradeable, array $submitter_ids) {
+    public function getActiveVersions(Gradeable $gradeable, array $submitter_ids) {
         if (count($submitter_ids) === 0) {
             return [];
         }
