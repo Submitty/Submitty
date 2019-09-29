@@ -29,8 +29,8 @@
         <div id="upload-boxes">
             {# upload1 and input_file1 required for drag-and-drop.js #}
             <div id="upload1" class="file-input">
-                <label class="label" for="input-file">"Drag your file(s) here or click to open file browser"</label>
-                <input type="file" name="files" id="input_file1" onchange="addFilesFromInput(1,false)" multiple />
+                <label class="label" for="input-file1">"Drag your file(s) here or click to open file browser"</label>
+                <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
             </div>
         </div>
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
@@ -76,7 +76,7 @@
                             onClick: (index, fp) => {
                                 let date;
                                 switch (index) {
-                                    case 0: 
+                                    case 0:
                                         updateToServerTime(fp);
                                         break;
                                     case 1:
