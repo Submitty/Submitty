@@ -1,7 +1,0 @@
-No Credit=0
-Extra credit done poorly=2
-Extra credit is acceptable=5
-Full Credit=0
-Code is unreadable=-5
-Code is very difficult to understand=-3
-Code is difficult to understand=-1

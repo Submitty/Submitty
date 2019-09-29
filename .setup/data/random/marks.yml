@@ -1,0 +1,39 @@
+count_up:
+  - - gcm_note: No Credit
+      gcm_points: 0
+    - gcm_note: Code works poorly
+      gcm_points: 2
+    - gcm_note: Code is acceptable
+      gcm_points: 5
+  - - gcm_note: No Credit
+      gcm_points: 0
+    - gcm_note: Code works well
+      gcm_points: 3
+    - gcm_note: Wrong loop type used
+      gcm_points: -1
+    - gcm_note: Inefficient
+      gcm_points: -3
+    - gcm_note: Code works perfectly
+      gcm_points: 5
+count_down:
+  - - gcm_note: Full Credit
+      gcm_points: 0
+    - gcm_note: Code is unreadable
+      gcm_points: -5
+    - gcm_note: Code is very difficult to understand
+      gcm_points: -3
+    - gcm_note: Code is difficult to understand
+      gcm_points: -1
+
+  - - gcm_note: Full Credit
+      gcm_points: 0
+    - gcm_note: Code does not work
+      gcm_points: -5
+    - gcm_note: Good comments
+      gcm_points: 2
+    - gcm_note: Code has some slight mistakes
+      gcm_points: -2
+    - gcm_note: Uses classes
+      gcm_points: 1
+    - gcm_note: Wrong loop type
+      gcm_points: -1
