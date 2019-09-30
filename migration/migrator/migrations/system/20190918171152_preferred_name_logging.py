@@ -64,7 +64,7 @@ def up(config):
                 r"^#*\s*log_filename\s*=\s*'[a-zA-Z0-9_%\x2d\x2e]+'":                  "log_filename = 'postgresql_%Y-%m-%d-%H%M%S.log'",
                 r"^#*\s*log_file_mode\s*=\s*[0-9]+":                                   "log_file_mode = 0640",
                 r"^#*\s*log_rotation_age\s*=\s*[a-z0-9]+":                             "log_rotation_age = 1d",
-                r"^#*\s*log_rotation_size\s*=\s*[a-zA-Z0-9]+":                         "log_rotation_size = 10MB",
+                r"^#*\s*log_rotation_size\s*=\s*[a-zA-Z0-9]+":                         "log_rotation_size = 0",
                 r"^#*\s*log_min_messages\s*=\s*[a-z]+":                                "log_min_messages = log",
                 r"^#*\s*log_min_duration_statement\s*=\s*[0-9\x2d]+":                  "log_min_duration_statement = 0",
                 r"^#*\s*log_line_prefix\s*=\s*.+":                                     "log_line_prefix = '%t '"}
