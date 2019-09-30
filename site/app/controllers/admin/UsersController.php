@@ -428,8 +428,8 @@ class UsersController extends AbstractController {
                 if ($num_del_sections === 0) {
                     $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
                 }
-                else {  
-                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed."); 
+                else {
+                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed.");
                 }
             }
             else {

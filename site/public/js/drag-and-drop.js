@@ -1035,6 +1035,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
         success: function(data) {
             try {
                 var jsondata = JSON.parse(data);
+
                 if (jsondata['status'] === 'success') {
                     window.location.href = return_url;
                 }
