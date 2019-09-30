@@ -4,7 +4,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\models\user;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 

@@ -1013,7 +1013,7 @@ class SubmissionController extends AbstractController {
 
             // Determine the size of the uploaded files as well as whether or not they're a zip or not.
             // We save that information for later so we know which files need unpacking or not and can save
-            // a check to getMimeType()
+            // a check for its mime type
             $file_size = 0;
             for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
