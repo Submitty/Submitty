@@ -161,6 +161,7 @@ class CourseMaterialsController extends AbstractController {
         if(is_string($data)){
             $data = [$data];
         }
+
         foreach ($data as $filename){
             if (!isset($filename) ||
                 !isset($checked)) {
