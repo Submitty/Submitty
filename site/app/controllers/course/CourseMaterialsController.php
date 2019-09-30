@@ -294,8 +294,10 @@ class CourseMaterialsController extends AbstractController {
           return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
+
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
+
         $n = strpos($requested_path, '..');
         if ($n !== false) {
             return $this->core->getOutput()->renderResultMessage("ERROR: .. is not supported in a course materials filepath.", false, false);
