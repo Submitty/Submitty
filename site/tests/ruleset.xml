@@ -8,7 +8,7 @@
 
     <exclude-pattern>../app/models/Gradeable.php</exclude-pattern>
 
-    <rule ref="Submitty">
+    <rule ref="SubmittyStandard">
         <exclude name="SubmittyStandard.ControlStructures.StroustrupStructure.Found" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
@@ -43,7 +43,6 @@
         <exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterDecrement" />
         <exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterIncrement" />
 
-        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
         <exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody" />
