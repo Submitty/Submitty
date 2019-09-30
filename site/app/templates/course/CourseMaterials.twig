@@ -91,7 +91,7 @@
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
-                {% if not(this_file_section is null) and this_file_section|length > 0 %}
+                {% if not(this_file_section is null) %}
                 <label>Sections: 
                 {% for key,value in this_file_section %}
                     {{value}}
@@ -99,10 +99,6 @@
                         ,
                     {% endif %}
                 {% endfor %}
-                </label>
-                {% endif %}
-                {% if not (this_file_section is null) and this_file_section|length == 0 %}
-                <label>Sections: []
                 </label>
                 {% endif %}
                 <script>

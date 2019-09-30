@@ -412,12 +412,13 @@ class UsersController extends AbstractController {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
                 // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
                 $fp = '/var/local/submitty/courses/f19/sample/uploads/course_materials_file_data.json';
+                //$fp = $this->core->getConfig()->getCoursePath();
                 $json = file_get_contents($fp);
                 $jsonArray = json_decode(stripslashes($json), true);
                 foreach ($jsonArray as $key => $value){
                     if(isset($value['sections'])){
                         $sections = $value['sections'];
-                        if ($key = array_search($_POST['delete_reg_section'], explode(',', $sections)) !== false) {
+                        if ($key = array_search($_POST['delete_reg_section'], $sections) !== false) {
                             $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  This section is refernced in course materials");
                             $this->core->redirect($return_url);
                         }
