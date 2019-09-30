@@ -259,6 +259,8 @@ if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
 	chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
     chown  -R postgres:${DAEMON_GROUP}                ${SUBMITTY_DATA_DIR}/logs/psql
+    # Folder g+w permission needed to permit DAEMON_GROUP to remove expired Postgresql logs.
+    chmod  g+w                                        ${SUBMITTY_DATA_DIR}/logs/psql
     chown  -R ${DAEMON_USER}:${DAEMON_GROUP}          ${SUBMITTY_DATA_DIR}/logs/preferred_names
 fi
 

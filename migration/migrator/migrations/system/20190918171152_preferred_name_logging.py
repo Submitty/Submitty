@@ -29,6 +29,7 @@ def up(config):
     try:
         os.mkdir(psql_log_folder)
         os.chown(psql_log_folder, postgres_uid, config.submitty_users['daemon_gid'])
+        os.chmod(path=psql_log_folder, mode=0o2770, follow_symlinks=False)
     except FileExistsError:
         pass
     except Exception as e:
