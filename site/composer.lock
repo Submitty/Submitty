@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "455cff71907b1966ec06c0fd2db2cdd6",
+    "content-hash": "857d88a02607be2d1cbc7ff7fa68e6d4",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2893,16 +2893,16 @@
         },
         {
             "name": "submitty/php-codesniffer",
-            "version": "2.0.1",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/submitty-php-codesniffer.git",
-                "reference": "2d83803e9c7248803f04433ad62bd9669243b9c8"
+                "reference": "43b1cecc972df14866d909e34703a3ca43cc4cf7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/2d83803e9c7248803f04433ad62bd9669243b9c8",
-                "reference": "2d83803e9c7248803f04433ad62bd9669243b9c8",
+                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/43b1cecc972df14866d909e34703a3ca43cc4cf7",
+                "reference": "43b1cecc972df14866d909e34703a3ca43cc4cf7",
                 "shasum": ""
             },
             "require": {
@@ -2921,7 +2921,7 @@
             "type": "phpcodesniffer-standard",
             "autoload": {
                 "psr-4": {
-                    "SubmittyStandard\\": "Submitty"
+                    "SubmittyStandard\\": "SubmittyStandard"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -2935,7 +2935,7 @@
                 }
             ],
             "description": "Submitty PHP CodeSniffer Standard",
-            "time": "2019-09-29T17:13:50+00:00"
+            "time": "2019-09-30T01:48:48+00:00"
         },
         {
             "name": "theseer/tokenizer",
