@@ -156,7 +156,7 @@ class CourseMaterialsView extends AbstractView {
         $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $server_time = DateUtils::getServerTimeJson($this->core);
-        
+
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
             "courseMaterialsArray" => $course_materials_array,
             'date_format' => 'Y-m-d H:i:sO',

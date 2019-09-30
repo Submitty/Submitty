@@ -161,7 +161,6 @@ class CourseMaterialsController extends AbstractController {
         if(is_string($data)){
             $data = [$data];
         }
-    
         foreach ($data as $filename){
             if (!isset($filename) ||
                 !isset($checked)) {
@@ -190,7 +189,6 @@ class CourseMaterialsController extends AbstractController {
             else{
                 $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
             }
-
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return "Failed to write to file {$fp}";
             }
@@ -215,7 +213,6 @@ class CourseMaterialsController extends AbstractController {
         if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === FALSE){
           return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
-
         //only one will not iterate correctly
         if(is_string($data)){
             $data = [$data];
@@ -228,7 +225,6 @@ class CourseMaterialsController extends AbstractController {
 
             $file_name = htmlspecialchars($filename);
             $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
-
             $checked = '0';
             $sections = null;
             $json = FileUtils::readJsonFile($fp);
@@ -248,7 +244,6 @@ class CourseMaterialsController extends AbstractController {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
             }
         }
-    
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
 
@@ -295,7 +290,6 @@ class CourseMaterialsController extends AbstractController {
           return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
-
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $n = strpos($requested_path, '..');
@@ -339,7 +333,7 @@ class CourseMaterialsController extends AbstractController {
         // create nested path
         if (!empty($requested_path)) {
             $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
-            if (!FileUtils::createDir($upload_nested_path, null, true)) {
+            if (!FileUtils::createDir($upload_nested_path, true)) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to make image path.", false);
             }
             $upload_path = $upload_nested_path;
@@ -350,9 +344,7 @@ class CourseMaterialsController extends AbstractController {
             for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-                    
                     $is_zip_file = false;
-
                     if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                         if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                             return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
@@ -363,7 +355,6 @@ class CourseMaterialsController extends AbstractController {
                     //it is convenient for bulk uploads
                     if ($expand_zip == 'on' && $is_zip_file === true) {
                         //get the file names inside the zip to write to the JSON file
-                        
                         $zip = new \ZipArchive();
 -                       $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
 
@@ -449,6 +440,7 @@ class CourseMaterialsController extends AbstractController {
                 }
             }
         }
+        
         FileUtils::writeJsonFile($fp,$json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }

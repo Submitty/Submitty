@@ -414,7 +414,7 @@ class UsersController extends AbstractController {
                 //why doesn't $this->core->getConfig()->getCoursePath(); work?
                 $fp = '/var/local/submitty/courses/f19/sample/uploads/course_materials_file_data.json';
                 $json = file_get_contents($fp);
-                $jsonArray = json_decode(stripslashes($json), true);
+                $jsonArray = json_decode($json), true);
                 foreach ($jsonArray as $key => $value){
                     if(isset($value['sections'])){
                         $sections = $value['sections'];
@@ -424,10 +424,12 @@ class UsersController extends AbstractController {
                         }
                     }
                 }
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
-                
+                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);        
                 if ($num_del_sections === 0) {
                     $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
+                }
+                else {  
+                    $this->core->addSuccessMessage("Registration section {$_POST['delete_reg_section']} removed."); 
                 }
             }
             else {
