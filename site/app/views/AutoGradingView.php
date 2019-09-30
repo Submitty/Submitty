@@ -13,7 +13,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\DateUtils;
-use function GuzzleHttp\Psr7\build_query;
 
 class AutoGradingView extends AbstractView {
 

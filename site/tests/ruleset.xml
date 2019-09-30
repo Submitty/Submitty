@@ -1,12 +1,163 @@
 <?xml version="1.0"?>
 <ruleset name="SubmittyStandard">
     <description>Non-Complete Standard for the Submitty Project</description>
-    <rule ref="Submitty" />
+    <arg name="extensions" value="php" />
 
     <file>../app</file>
-    <exclude-pattern>*/controllers/*</exclude-pattern>
-    <exclude-pattern>*/libraries/*</exclude-pattern>
-    <exclude-pattern>*/models/*</exclude-pattern>
-    <exclude-pattern>*/templates/*</exclude-pattern>
-    <exclude-pattern>*/views/*</exclude-pattern>
+    <file>../tests</file>
+
+    <exclude-pattern>../app/models/Gradeable.php</exclude-pattern>
+
+    <rule ref="Submitty">
+        <exclude name="SubmittyStandard.ControlStructures.StroustrupStructure.Found" />
+        <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
+        <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
+
+        <exclude name="Generic.Arrays.DisallowLongArraySyntax.Found" />
+        <exclude name="Generic.Classes.OpeningBraceSameLine.SpaceBeforeBrace" />
+        <exclude name="Generic.Classes.OpeningBraceSameLine.BraceOnNewLine" />
+        <exclude name="Generic.Classes.OpeningBraceSameLine.ContentAfterBrace" />
+        <exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed" />
+        <exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" />
+        <exclude name="Generic.Files.LineLength.TooLong" />
+        <exclude name="Generic.Formatting.DisallowMultipleStatements.SameLine" />
+        <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
+        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
+        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
+        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.SpaceBeforeComma" />
+        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.NoSpaceAfterComma" />
+        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
+        <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
+        <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
+        <exclude name="Generic.NamingConventions.ConstructorName.OldStyle" />
+        <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
+        <exclude name="Generic.PHP.ForbiddenFunctions.FoundWithAlternative" />
+        <exclude name="Generic.PHP.LowerCaseConstant.Found" />
+        <exclude name="Generic.PHP.LowerCaseKeyword.Found" />
+        <exclude name="Generic.PHP.LowerCaseType.ReturnTypeFound" />
+        <exclude name="Generic.PHP.LowerCaseType.ParamTypeFound" />
+        <exclude name="Generic.WhiteSpace.DisallowTabIndent.TabsUsed" />
+        <exclude name="Generic.WhiteSpace.DisallowTabIndent.NonIndentTabsUsed" />
+        <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
+        <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
+        <exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterDecrement" />
+        <exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterIncrement" />
+
+        <exclude name="PSR1.Classes.ClassDeclaration.MissingNamespace" />
+        <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
+
+        <exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody" />
+        <exclude name="PSR2.Classes.PropertyDeclaration.StaticBeforeVisibility" />
+        <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
+        <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
+        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BreakIndent" />
+        <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed" />
+        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BodyOnNextLineCASE" />
+        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BreakNotNewLine" />
+        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BodyOnNextLineDEFAULT" />
+        <exclude name="PSR2.Files.EndFileNewline.NoneFound" />
+        <exclude name="PSR2.Files.EndFileNewline.TooMany" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.Indent" />
+        <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceAfterOpenBracket" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeOpenBracket" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.CloseBracketLine" />
+        <exclude name="PSR2.Methods.FunctionCallSignature.MultipleArguments" />
+        <exclude name="PSR2.Methods.MethodDeclaration.StaticBeforeVisibility" />
+        <exclude name="PSR2.Namespaces.UseDeclaration.SpaceAfterLastUse" />
+        <exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
+
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.LineIndent" />
+        <exclude name="PSR12.Files.OpenTag.NotAlone"/>
+        <exclude name="PSR12.Files.DeclareStatement.SpaceFoundAfterDirective"/>
+        <exclude name="PSR12.Files.DeclareStatement.SpaceFoundBeforeDirectiveValue"/>
+        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" />
+        <exclude name="PSR12.Files.FileHeader.SpacingInsideBlock" />
+        <exclude name="PSR12.Files.ImportStatement.LeadingSlash"/>
+        <exclude name="PSR12.Functions.ReturnTypeDeclaration.SpaceBeforeColon" />
+        <exclude name="PSR12.Classes.ClassInstantiation.MissingParentheses" />
+        <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMixed"/>
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>
+        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
+        <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMiddle"/>
+        <exclude name="PSR12.Keywords.ShortFormTypeKeywords.LongFound" />
+        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceBefore"/>
+        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter"/>
+        <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
+
+        <exclude name="PEAR.Functions.ValidDefaultValue.NotAtEnd" />
+
+        <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
+        <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceBeforeBracket" />
+        <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
+        <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
+        <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
+        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterFirst" />
+        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterSecond" />
+        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceBeforeArrow" />
+        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceAfterArrow" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterVariadic" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceAfterEquals" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeEquals" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeComma" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeArg" />
+        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeHint" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterUse" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.CloseBracketLine" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnNewLine" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing" />
+        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceBeforeBrace" />
+        <exclude name="Squiz.Operators.ValidLogicalOperators.NotAllowed" />
+        <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
+        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
+        <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
+        <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
+        <exclude name="Squiz.Scope.MethodScope.Missing" />
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
+        <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
+        <exclude name="Squiz.WhiteSpace.LanguageConstructSpacing.IncorrectSingle" />
+        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceAfter" />
+        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceBefore" />
+        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.NoSpaceBefore" />
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
+        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
+        <exclude name="Squiz.WhiteSpace.SemicolonSpacing.Incorrect" />
+        <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace.EndLine" />
+
+        <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
+        <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />
+        <exclude name="SlevomatCodingStandard.Classes.ClassConstantVisibility.MissingConstantVisibility" />
+        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedMethod" />
+        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.WriteOnlyProperty" />
+        <exclude name="SlevomatCodingStandard.Classes.UnusedPrivateElements.UnusedProperty" />
+        <exclude name="SlevomatCodingStandard.ControlStructures.UselessTernaryOperator.UselessTernaryOperator" />
+        <exclude name="SlevomatCodingStandard.ControlStructures.UselessIfConditionWithReturn" />
+        <exclude name="SlevomatCodingStandard.Exceptions.ReferenceThrowableOnly.ReferencedGeneralException" />
+        <exclude name="SlevomatCodingStandard.Functions.UnusedParameter.UnusedParameter" />
+        <exclude name="SlevomatCodingStandard.Functions.UselessParameterDefaultValue.UselessParameterDefaultValue" />
+        <exclude name="SlevomatCodingStandard.Namespaces.UnusedUses.UnusedUse" />
+        <exclude name="SlevomatCodingStandard.Namespaces.UseDoesNotStartWithBackslash.UseStartsWithBackslash" />
+        <exclude name="SlevomatCodingStandard.Namespaces.UseFromSameNamespace.UseFromSameNamespace" />
+        <exclude name="SlevomatCodingStandard.Namespaces.UnusedUses.MismatchingCaseSensitivity" />
+        <exclude name="SlevomatCodingStandard.Operators.DisallowEqualOperators.DisallowedEqualOperator" />
+        <exclude name="SlevomatCodingStandard.Operators.DisallowEqualOperators.DisallowedNotEqualOperator" />
+        <exclude name="SlevomatCodingStandard.PHP.ShortList.LongListUsed" />
+        <exclude name="SlevomatCodingStandard.PHP.UselessSemicolon.UselessSemicolon" />
+        <exclude name="SlevomatCodingStandard.PHP.TypeCast.InvalidCastUsed" />
+        <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing.WhitespaceBeforeColon" />
+        <exclude name="SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable" />
+        <exclude name="SlevomatCodingStandard.Variables.UselessVariable.UselessVariable" />
+        <exclude name="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable.DuplicateAssignment" />
+    </rule>
 </ruleset>
