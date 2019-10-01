@@ -621,12 +621,9 @@ class PlagiarismController extends AbstractController {
                             $userMatchesEnds[] = $user_2_matchingposition["end"];
 
                         }
-
-
                     }
-
                 }
-                    else if($match["type"] == "common") {
+                else if($match["type"] == "common") {
                     //Color is grey -- common matches among all students
                     $color = '#cccccc';
                 }
