@@ -66,10 +66,11 @@ def main(args):
                     if qr_suffix != '' and suf == qr_suffix:
                         data = data[:-len(qr_suffix)]
 
-                #since QR splitting doesn't know the max page assume length of 3
+                # since QR splitting doesn't know the max page assume length of 3
                 prepended_index = str(i).zfill(3)
 
-                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], prepended_index)
+                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
+                                                          prepended_index)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
 
                 output[output_filename] = {}
@@ -114,7 +115,8 @@ def main(args):
                 if i == 0:
                     prepended_index = str(i).zfill(3)
                     output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
-                    cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], prepended_index)
+                    cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
+                                                              prepended_index)
                     output[output_filename] = {}
                     # set the value as blank so a human can check what happened
                     output[output_filename]['id'] = "BLANK"
