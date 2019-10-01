@@ -12,40 +12,7 @@ class HomePageView extends AbstractView {
     /*
     *@param List of courses the student is in.
     */
-    public function showHomePage(User $user, $unarchived_courses = array(), $archived_courses = array(), $change_name_text) {
-        $statuses = array();
-        $course_types = [$unarchived_courses, $archived_courses];
-        $rank_titles = [
-            User::GROUP_INSTRUCTOR              => "Instructor:",
-            User::GROUP_FULL_ACCESS_GRADER      => "Full Access Grader:",
-            User::GROUP_LIMITED_ACCESS_GRADER   => "Grader:",
-            User::GROUP_STUDENT                 => "Student:"
-        ];
-
-        foreach($course_types as $course_type) {
-            $ranks = array();
-
-            //Create rank lists
-            for ($i = 1; $i < 5; $i++){
-                $ranks[$i] = [];
-                $ranks[$i]["title"] = $rank_titles[$i];
-                $ranks[$i]["courses"] = [];
-            }
-
-            //Assemble courses into rank lists
-            foreach ($course_type as $course) {
-                $rank = $this->core->getQueries()->getGroupForUserInClass($course['semester'], $course['title'], $user->getId());
-                array_push($ranks[$rank]["courses"], $course);
-            }
-
-            //Filter any ranks with no courses
-            $ranks = array_filter($ranks, function($rank) {
-                return count($rank["courses"]) > 0;
-            });
-            $statuses[] = $ranks;
-        }
-
-
+    public function showHomePage(User $user, $statuses = array(), $change_name_text) {
         $autofill_preferred_name = [$user->getLegalFirstName(),$user->getLegalLastName()];
         if ($user->getPreferredFirstName() != "") {
             $autofill_preferred_name[0] = $user->getPreferredFirstName();

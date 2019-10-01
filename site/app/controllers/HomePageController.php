@@ -90,8 +90,9 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user_id);
-        $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user_id);
+        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesByIdWithGroup($user_id);
+        $archived_courses = $this->core->getQueries()->getArchivedCoursesByIdWithGroup($user_id);
+
 
         // Filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
@@ -135,19 +136,66 @@ class HomePageController extends AbstractController {
      * @return Response
      */
     public function showHomepage() {
-        $courses = $this->getCourses()->json_response->json;
+        $courses = $this->getCourses()->json_response->json;        
+        $archived_courses = $courses["data"]["archived_courses"];
+        $unarchived_courses = $courses["data"]["unarchived_courses"];
+        $course_types = [$unarchived_courses, $archived_courses];
+        $rank_titles = [
+            User::GROUP_INSTRUCTOR              => "Instructor:",
+            User::GROUP_FULL_ACCESS_GRADER      => "Full Access Grader:",
+            User::GROUP_LIMITED_ACCESS_GRADER   => "Grader:",
+            User::GROUP_STUDENT                 => "Student:"
+        ];
+        $statuses = array();
+
+        foreach($course_types as $course_type) {
+
+            $ranks = array();
+
+            //Create rank lists
+            for ($i = 1; $i < 5; $i++){
+                $ranks[$i] = [];
+                $ranks[$i]["title"] = $rank_titles[$i];
+                $ranks[$i]["courses"] = [];
+            }
+
+            foreach ($course_type as $course) {
+                array_push($ranks[$course["user_group"]]["courses"], $course);
+            }
+
+            //Filter any ranks with no courses
+            $ranks = array_filter($ranks, function($rank) {
+                return count($rank["courses"]) > 0;
+            });
+            $statuses[] = $ranks;
+        }
+
+        $user = $this->core->getUser();
+
+        // $ranks = $this->appendRank($archived_courses, $user);
+        // array_push($ranks, $this->appendRank($unarchived_courses, $user));
 
         return new Response(
             null,
             new WebResponse(
                 ['HomePage'],
                 'showHomePage',
-                $user = $this->core->getUser(),
-                $courses["data"]["unarchived_courses"],
-                $courses["data"]["archived_courses"],
+                $user,
+                $statuses,
                 $this->core->getConfig()->getUsernameChangeText()
             )
         );
+    }
+
+    private function appendRank($courses, $user) {
+        //Assemble courses into rank lists
+        $ranks = array();
+        foreach ($courses as $course) {
+            $rank = $this->core->getQueries()->getGroupForUserInClass($course['semester'], $course['title'], $user->getId());
+            $ranks[$course['semester']][$course['title']] = $rank;
+            // array_push($ranks[$rank]["courses"], $course);
+        }
+        return $ranks;
     }
 
     /**
