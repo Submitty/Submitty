@@ -957,10 +957,6 @@ class ForumThreadView extends AbstractView {
 			$this->core->redirect($this->core->buildCourseUrl());
 			return;
 		}
-        if(empty($this->core->getQueries()->getCategories())){
-            $this->core->redirect($this->core->buildCourseUrl(["forum", "threads"]));
-            return;
-        }
 
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));

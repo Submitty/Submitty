@@ -5,12 +5,11 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class ConfigurationView extends AbstractView {
-    public function viewConfig($fields, $gradeable_seating_options) {
+    public function viewConfig($fields, $gradeable_seating_options, $categories) {
         $this->core->getOutput()->addInternalJs("course-settings.js");
         $this->core->getOutput()->addInternalJs("configuration.js");
         $this->core->getOutput()->addInternalCss("configuration.css");
         $this->core->getOutput()->addBreadcrumb('Course Settings');
-        $categories = empty($this->core->getQueries()->getCategories());
         return $this->core->getOutput()->renderTwigTemplate("admin/Configuration.twig", [
             "fields" => $fields,
             "gradeable_seating_options" => $gradeable_seating_options,

@@ -1,15 +1,9 @@
 $(document).ready(function() {
-    updateForumMessage();
     updateEmailSeatingOption();
 
     function updateForumMessage() {
-        if ($("#forum-enabled").is(":checked")) {
-            $("#forum-enabled-message").show();
-            $("#forum-category-warning").show();
-        } else {
-            $("#forum-enabled-message").hide();
-            $("#forum-category-warning").hide();
-        }
+        $("#forum-enabled-message").toggle();
+        $("#forum-category-warning").toggle();
     }
 
     $(document).on("change", "#forum-enabled", updateForumMessage);

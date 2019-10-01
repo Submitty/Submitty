@@ -64,13 +64,15 @@ class ConfigurationController extends AbstractController {
             'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
+        $categoriesCreated = empty($this->core->getQueries()->getCategories());
 
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'Configuration'],
                 'viewConfig',
                 $fields,
-                $this->getGradeableSeatingOptions()
+                $this->getGradeableSeatingOptions(),
+                $categoriesCreated
             )
         );
     }
