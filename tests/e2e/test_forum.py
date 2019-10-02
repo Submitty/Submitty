@@ -129,7 +129,8 @@ class TestForum(BaseTestCase):
             posts[0].find_element(By.XPATH, ".//a[starts-with(@id, 'button_attachments_')]").click()
             self.wait_after_ajax()
             self.wait_for_element(
-                (By.XPATH, (posts_selector + "//div[contains(@class, 'attachment-well')]").format(content)))
+                (By.XPATH, (posts_selector + "//div[contains(@class, 'attachment-well')]").format(content))
+            )
             attachmentSrc = posts[0].find_elements(By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment))
             assert len(attachmentSrc) > 0
         return posts
@@ -138,8 +139,7 @@ class TestForum(BaseTestCase):
         attachment_file = None
         post = self.find_posts(post_content)[0]
         post_id = post.get_attribute("id")
-        edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[
-            -1]  # Last One
+        edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1]  # Last One
         text_area = edit_form.find_element(By.XPATH, ".//textarea")
         upload_button = edit_form.find_element(By.XPATH, ".//input[@type='file']")
         submit_button = edit_form.find_element(By.XPATH, ".//input[@type='submit']")
