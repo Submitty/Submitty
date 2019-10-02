@@ -28,7 +28,7 @@ def up(config):
 
     try:
         os.mkdir(psql_log_folder)
-        os.chown(psql_log_folder, postgres_uid, config.submitty_users['daemon_gid'])
+        os.chown(psql_log_folder, postgres_uid, config.submitty_users['daemon_gid'], follow_symlinks=False)
         os.chmod(path=psql_log_folder, mode=0o2770, follow_symlinks=False)
     except FileExistsError:
         pass
@@ -37,7 +37,7 @@ def up(config):
 
     try:
         os.mkdir(pfn_log_folder)
-        os.chown(pfn_log_folder, config.submitty_users['daemon_uid'], config.submitty_users['daemon_gid'])
+        os.chown(pfn_log_folder, config.submitty_users['daemon_uid'], config.submitty_users['daemon_gid'], follow_symlinks=False)
     except FileExistsError:
         pass
     except Exception as e:
@@ -46,6 +46,14 @@ def up(config):
     # Postgresql configuration
     psql_version = os.popen("psql -V | grep -m 1 -o '[0-9]\+' | head -1").read().translate({0x0a: None})
     psql_conf_file = str(Path('/', 'etc', 'postgresql', psql_version, 'main', 'postgresql.conf'))
+    backup_conf_file = str(Path('/', 'etc', 'postgresql', psql_version, 'main', 'postgresql.conf.backup'))
+
+    try:
+        shutil.copy2(psql_conf_file, backup_conf_file, follow_symlinks=False)
+    except shutil.SameFileError:
+        pass
+    except Exception as e:
+        raise SystemExit("Error backing up original psql configuration.\n" + str(e))
 
     try:
         psql_conf_fh = open(psql_conf_file, mode='r')
@@ -62,13 +70,14 @@ def up(config):
     patterns = {r"^#*\s*log_destination\s*=\s*'[a-z]+'":                               "log_destination = 'csvlog'",
                 r"^#*\s*logging_collector\s*=\s*[a-z01]+":                             "logging_collector = on",
                 r"^#*\s*log_directory\s*=\s*'[^(){}<>|:;&#=!'~?*$`\x5b\x5d\x22\s]+'": f"log_directory = '{config.submitty['submitty_data_dir']}/logs/psql'",
-                r"^#*\s*log_filename\s*=\s*'[a-zA-Z0-9_%\x2d\x2e]+'":                  "log_filename = 'postgresql_%Y-%m-%d-%H%M%S.log'",
+                r"^#*\s*log_filename\s*=\s*'[a-zA-Z0-9_%\x2d\x2e]+'":                  "log_filename = 'postgresql_%Y-%m-%dT%H%M%S.log'",
                 r"^#*\s*log_file_mode\s*=\s*[0-9]+":                                   "log_file_mode = 0640",
                 r"^#*\s*log_rotation_age\s*=\s*[a-z0-9]+":                             "log_rotation_age = 1d",
                 r"^#*\s*log_rotation_size\s*=\s*[a-zA-Z0-9]+":                         "log_rotation_size = 0",
-                r"^#*\s*log_min_messages\s*=\s*[a-z]+":                                "log_min_messages = log",
-                r"^#*\s*log_min_duration_statement\s*=\s*[0-9\x2d]+":                  "log_min_duration_statement = 0",
-                r"^#*\s*log_line_prefix\s*=\s*.+":                                     "log_line_prefix = '%t '"}
+                r"^#*\s*log_min_messages\s*=\s*[a-z]+":                                "log_min_messages = warning",
+                r"^#*\s*log_min_duration_statement\s*=\s*[0-9\x2d]+":                  "log_min_duration_statement = -1",
+                r"^#*\s*log_statement\s*=\s*'[a-z]+'":                                 "log_statement = 'ddl'",
+                r"^#*\s*log_error_verbosity\s*=\s*[a-z]+":                             "log_error_verbosity = default"}
 
     for regex, replacement in patterns.items():
         psql_config = re.sub(regex, replacement, psql_config, count = 1, flags = re.MULTILINE)
@@ -77,18 +86,18 @@ def up(config):
         psql_conf_fh = open(psql_conf_file, mode='w')
         psql_conf_fh.write(psql_config)
         psql_conf_fh.close()
-        os.chown(psql_conf_file, postgres_uid, postgres_gid)
+        os.chown(psql_conf_file, postgres_uid, postgres_gid, follow_symlinks=False)
     except Exception as e:
         raise SystemExit("Error trying to write updates to postgresql.conf.\n" + str(e))
 
     # Copy preferred_name_logging.php from SysadminTools to sbin
-    src = str(Path(config.submitty['submitty_repository'], '..', 'SysadminTools', 'preferred_name_logging', 'preferred_name_logging.php'))
-    dst = str(Path(config.submitty['submitty_install_dir'], 'sbin', 'preferred_name_logging.php'))
+    pfn_script_src = str(Path(config.submitty['submitty_repository'], '..', 'SysadminTools', 'preferred_name_logging', 'preferred_name_logging.php'))
+    pfn_script_dst = str(Path(config.submitty['submitty_install_dir'], 'sbin', 'preferred_name_logging.php'))
 
     try:
-        shutil.copyfile(src, dst)
-        os.chown(dst, 0, config.submitty_users['daemon_gid'])
-        os.chmod(dst, 0o0550)
+        shutil.copyfile(pfn_script_src, pfn_script_dst, follow_symlinks=False)
+        os.chown(pfn_script_dst, 0, config.submitty_users['daemon_gid'], follow_symlinks=False)
+        os.chmod(pfn_script_dst, 0o0550, follow_symlinks=False)
     except shutil.SameFileError:
         pass
     except Exception as e:
@@ -104,10 +113,6 @@ def down(config):
     :type config: migrator.config.Config
     """
 
-    # User 'postgres' uid and gid are needed for postgresql to keep ownership of its conf file.
-    postgres_uid = pwd.getpwnam('postgres').pw_uid
-    postgres_gid = pwd.getpwnam('postgres').pw_gid
-
     # Remove preferred_name_logging.php from sbin
     pfn_script_file = str(Path(config.submitty['submitty_install_dir'], 'sbin', 'preferred_name_logging.php'))
 
@@ -116,46 +121,21 @@ def down(config):
     except Exception as e:
         raise SystemExit("Could not delete preferred_name_logging.php from sbin.\n" + str(e))
 
-    # Undo changes to postgresql.conf
+    # Restore original postgresql.conf from backup.
     psql_version = os.popen("psql -V | grep -m 1 -o '[0-9]\+' | head -1").read().translate({0x0a: None})
     psql_conf_file = str(Path('/', 'etc', 'postgresql', psql_version, 'main', 'postgresql.conf'))
+    backup_conf_file = str(Path('/', 'etc', 'postgresql', psql_version, 'main', 'postgresql.conf.backup'))
 
     try:
-        psql_conf_fh = open(psql_conf_file, mode='r')
-        psql_config = psql_conf_fh.read()
-        psql_conf_fh.close()
+        shutil.copy2(backup_conf_file, psql_conf_file, follow_symlinks=False)
+    except shutil.SameFileError:
+        pass
     except Exception as e:
-        raise SystemExit("Error trying to read postgresql.conf for reverting.\n" + str(e))
-
-
-    # Regexs used to revert Postgresql's configuration via match and substitute.
-    # Dict key is regex, value is associated replacement text.
-    # Third pattern:  x5b = '[', x5d = ']', x22 = double quotes
-    # Fourth pattern: x2d = '-', x2e = '.'
-    # Ninth pattern:  x2d = '-'
-    patterns = {r"^#*\s*log_destination\s*=\s*'[a-z]+'":                              "#log_destination = 'stderr'",
-                r"^#*\s*logging_collector\s*=\s*[a-z01]+":                            "#logging_collector = off",
-                r"^#*\s*log_directory\s*=\s*'[^(){}<>|:;&#=!'~?*$`\x5b\x5d\x22\s]+'": "#log_directory = 'log'",
-                r"^#*\s*log_filename\s*=\s*'[a-zA-Z0-9_%\x2d\x2e]+'":                 "#log_filename = 'postgresql-%Y-%m-%d_%H%M%S.log'",
-                r"^#*\s*log_file_mode\s*=\s*[0-9]+":                                  "#log_file_mode = 0600",
-                r"^#*\s*log_rotation_age\s*=\s*[a-z0-9]+":                            "#log_rotation_age = 1d",
-                r"^#*\s*log_rotation_size\s*=\s*[a-zA-Z0-9]+":                        "#log_rotation_size = 10MB",
-                r"^#*\s*log_min_messages\s*=\s*[a-z]+":                               "#log_min_messages = warning",
-                r"^#*\s*log_min_duration_statement\s*=\s*[0-9\x2d]+":                 "#log_min_duration_statement = -1",
-                r"^#*\s*log_line_prefix\s*=\s*.+":                                    "log_line_prefix = '%m [%p] %q%u@%d '"}
-
-    for regex, revert in patterns.items():
-        psql_config = re.sub(regex, revert, psql_config, count = 1, flags = re.MULTILINE)
-
-    try:
-        psql_conf_fh = open(psql_conf_file, mode='w')
-        psql_conf_fh.write(psql_config)
-        psql_conf_fh.close()
-        os.chown(psql_conf_file, postgres_uid, postgres_gid)
-    except Exception as e:
-        raise SystemExit("Error trying to write reversions to postgresql.conf.\n" + str(e))
+        raise SystemExit("Error restoring original psql configuration.\n" + str(e))
 
     print("A sysadmin needs to restart postgresql so the reverted configuration is active.")
 
     # Do NOT remove log folders, so to preserve any existing logs.
     # Should we re-up, error checking will elegantly handle "file exists" exceptions.
+
+# EOF

@@ -745,8 +745,8 @@ if [ ${WORKER} == 0 ]; then
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/psql
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/psql ${SUBMITTY_DATA_DIR}/logs/psql
+        # Having postgresql log to a shared folder can break postgresql, so use a local folder instead.
+        mkdir -p ${SUBMITTY_DATA_DIR}/logs/psql
         chown -R postgres:${DAEMON_GROUP} ${SUBMITTY_DATA_DIR}/logs/psql
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/psql
 
@@ -783,18 +783,19 @@ rsync -qt ${SUBMITTY_REPOSITORY}/../SysadminTools/preferred_name_logging/preferr
 chown root:${DAEMON_GROUP} ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 chmod 0550 ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php
 
-# Adjust/overwrite Postgresql's configuration
-cp /etc/postgresql/${PG_VERSION}/main/postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf.backup
+# Backup and adjust/overwrite Postgresql's configuration
+cp -a /etc/postgresql/${PG_VERSION}/main/postgresql.conf /etc/postgresql/${PG_VERSION}/main/postgresql.conf.backup
 sed -i "s~^#*[ tab]*log_destination[ tab]*=[ tab]*'[a-z]\+'~log_destination = 'csvlog'~;
         s~^#*[ tab]*logging_collector[ tab]*=[ tab]*[a-z01]\+~logging_collector = on~;
         s~^#*[ tab]*log_directory[ tab]*=[ tab]*'[^][(){}<>|:;&#=!'?\*\~\$\"\` tab]\+'~log_directory = '${SUBMITTY_DATA_DIR}/logs/psql'~;
-        s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[-a-zA-Z0-9_%\.]\+'~log_filename = 'postgresql_%Y-%m-%d-%H%M%S.log'~;
+        s~^#*[ tab]*log_filename[ tab]*=[ tab]*'[-a-zA-Z0-9_%\.]\+'~log_filename = 'postgresql_%Y-%m-%dT%H%M%S.log'~;
         s~^#*[ tab]*log_file_mode[ tab]*=[ tab]*[0-9]\+~log_file_mode = 0640~;
         s~^#*[ tab]*log_rotation_age[ tab]*=[ tab]*[a-z0-9]\+~log_rotation_age = 1d~;
-        s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-zA-Z0-9]\+~log_rotation_size = 0~;
-        s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = log~;
-        s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = 0~;
-        s~^#*[ tab]*log_line_prefix[ tab]*=[ tab]*'.\+'~log_line_prefix = '%t '~" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
+        s~^#*[ tab]*log_rotation_size[ tab]*=[ tab]*[a-z0-9]\+~log_rotation_size = 0~;
+        s~^#*[ tab]*log_min_messages[ tab]*=[ tab]*[a-z]\+~log_min_messages = warning~;
+        s~^#*[ tab]*log_min_duration_statement[ tab]*=[ tab]*[-0-9]\+~log_min_duration_statement = -1~;
+        s~^#*[ tab]*log_statement[ tab]*=[ tab]*'[a-z]\+'~log_statement = 'ddl'~;
+        s~^#*[ tab]*log_error_verbosity[ tab]*=[ tab]*[a-z]\+~log_error_verbosity = default~" /etc/postgresql/${PG_VERSION}/main/postgresql.conf
 
 echo -e "Finished preferred_name_logging setup."
 
