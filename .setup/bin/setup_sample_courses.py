@@ -34,6 +34,7 @@ import sys
 import configparser
 import csv
 import pdb
+from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
@@ -289,7 +290,7 @@ def generate_random_users(total, real_users):
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
-            #create a binary string for the numeric ID 
+            #create a binary string for the numeric ID
             numeric_id = '{0:09b}'.format(i)
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
@@ -990,6 +991,16 @@ class Course(object):
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
+
+        if self.code == 'sample':
+            student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
+            zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
+            with TemporaryDirectory() as tmpdir:
+                with ZipFile(zip_path) as open_file:
+                    open_file.extractall(tmpdir)
+                inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
+                for f in os.listdir(inner_folder):
+                    shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
 
     def check_rotating(self, users):
         for gradeable in self.gradeables:
