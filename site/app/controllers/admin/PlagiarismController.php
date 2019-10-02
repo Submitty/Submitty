@@ -116,7 +116,9 @@ class PlagiarismController extends AbstractController {
 
         $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null);
+        $incomingTitle = '';
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null, $incomingTitle);
     }
 
     /**
@@ -382,9 +384,11 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $saved_config= json_decode(file_get_contents("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json"),true);
+        $saved_config = json_decode(file_get_contents("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json"),true);
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null , $prior_term_gradeables, $saved_config);
+        $incomingTitle = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null , $prior_term_gradeables, $saved_config, $incomingTitle);
 
     }
 
