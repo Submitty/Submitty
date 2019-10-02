@@ -40,11 +40,13 @@ def main(args):
         prev_file = data = "BLANK"
         output = {"filename": filename, "is_qr": True}
         json_file = os.path.join(split_path, "decoded.json")
+
         for page_number in range(pdfPages.numPages):
             # convert pdf to series of images for scanning
             page = convert_from_bytes(
                 open(filename, 'rb').read(),
                 first_page=page_number+1, last_page=page_number+2)[0]
+
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
             mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
@@ -74,7 +76,7 @@ def main(args):
 
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
-                    data = scanner.getDigits(inverted, val[0][2])
+                    data = scanner.getDigits(cv_img, val)
                     buff += "Found student ID number of \'" + data + "\' on"
                     buff += " page " + str(page_number) + ", "
 
