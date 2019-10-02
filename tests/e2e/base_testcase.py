@@ -67,8 +67,7 @@ class BaseTestCase(unittest.TestCase):
         self.use_log_in = log_in
 
     def setUp(self):
-        self.driver = webdriver.Chrome(options=self.options,
-                                       executable_path="C:\\Users\\dell\\Utilities\\chromedriver_win32\\chromedriver.exe")
+        self.driver = webdriver.Chrome(options=self.options)
         self.driver.set_window_size(1600, 900)
         self.enable_download_in_headless_chrome(self.download_dir)
         if self.use_log_in:
