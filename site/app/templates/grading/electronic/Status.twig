@@ -650,10 +650,13 @@
                             {% endif %}
                         {% endif %}
 
-                        {% if core.getConfig().isRegradeEnabled() and not peer %}
+                        {% if regrade_allowed and not peer %}
                             <br/>
                             <br/>
                             <b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}
+                            {% if grade_inquiry_per_component_allowed %}
+                                <b></b>
+                            {% endif %}
                         {% endif %}
                         {# LEFT CHUNK #}
                     </div>
