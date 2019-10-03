@@ -325,7 +325,7 @@ class SubmissionController extends AbstractController {
         // delete the temporary file
         if (isset($uploaded_file)) {
             for ($j = 0; $j < $count; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
                     if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
@@ -1077,7 +1077,7 @@ class SubmissionController extends AbstractController {
                             }
                         }
                         else {
-                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
