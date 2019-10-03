@@ -207,42 +207,41 @@ class DatabaseQueries {
         }
         $query_favorite = "case when sf.user_id is NULL then false else true end";
 
-        // General
-        {
-            if($want_order){
-                $query_raw_select[]     = "row_number() over(ORDER BY pinned DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
-            }
-            $query_raw_select[]     = "t.*";
-            $query_raw_select[]     = "({$query_favorite}) as favorite";
-            $query_raw_select[]     = "CASE
-                                        WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true
-                                        ELSE false
-                                        END as current_user_posted";
-
-            $query_parameters[]     = $current_user;
-            $query_parameters[]     = $current_user;
-            $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
-            $query_parameters[]     = $current_user;
-
-            if(!$show_deleted) {
-                $query_raw_where[]  = "deleted = false";
-            }
-            if(!$show_merged_thread) {
-                $query_raw_where[]  = "merged_thread_id = -1";
-            }
-
-            $query_raw_where[]  = "? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks}))";
-            $query_parameters[] = count($categories_ids);
-            $query_parameters   = array_merge($query_parameters, $categories_ids);
-            $query_raw_where[]  = "{$query_status}";
-            $query_parameters   = array_merge($query_parameters, $thread_status);
-
-            if($want_order){
-                $query_raw_order[]  = "row_number";
-            } else {
-                $query_raw_order[]  = "true";
-            }
+        if($want_order){
+            $query_raw_select[]     = "row_number() over(ORDER BY pinned DESC, ({$query_favorite}) DESC, t.id DESC) AS row_number";
         }
+        $query_raw_select[]     = "t.*";
+        $query_raw_select[]     = "({$query_favorite}) as favorite";
+        $query_raw_select[]     = "CASE
+                                    WHEN EXISTS(SELECT * FROM (posts p LEFT JOIN forum_posts_history fp ON p.id = fp.post_id AND p.author_user_id != fp.edit_author) AS pfp WHERE (pfp.author_user_id = ? OR pfp.edit_author = ?) AND pfp.thread_id = t.id) THEN true
+                                    ELSE false
+                                    END as current_user_posted";
+
+        $query_parameters[]     = $current_user;
+        $query_parameters[]     = $current_user;
+        $query_raw_join[]       = "LEFT JOIN student_favorites sf ON sf.thread_id = t.id and sf.user_id = ?";
+        $query_parameters[]     = $current_user;
+
+        if(!$show_deleted) {
+            $query_raw_where[]  = "deleted = false";
+        }
+        if(!$show_merged_thread) {
+            $query_raw_where[]  = "merged_thread_id = -1";
+        }
+
+        $query_raw_where[]  = "? = (SELECT count(*) FROM thread_categories tc WHERE tc.thread_id = t.id and category_id IN ({$query_multiple_qmarks}))";
+        $query_parameters[] = count($categories_ids);
+        $query_parameters   = array_merge($query_parameters, $categories_ids);
+        $query_raw_where[]  = "{$query_status}";
+        $query_parameters   = array_merge($query_parameters, $thread_status);
+
+        if($want_order){
+            $query_raw_order[]  = "row_number";
+        }
+        else {
+            $query_raw_order[]  = "true";
+        }
+
         // Categories
         if($want_categories) {
             $query_select_categories = "SELECT thread_id, array_to_string(array_agg(cl.category_id order by cl.rank nulls last, cl.category_id),'|')  as categories_ids, array_to_string(array_agg(cl.category_desc order by cl.rank nulls last, cl.category_id),'|') as categories_desc, array_to_string(array_agg(cl.color order by cl.rank nulls last, cl.category_id),'|') as categories_color FROM categories_list cl JOIN thread_categories e ON e.category_id = cl.category_id GROUP BY thread_id";
@@ -763,13 +762,13 @@ class DatabaseQueries {
         return $return;
     }
 
-    public function getUsersInNullSection($orderBy="user_id"){
-      $return = array();
-      $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IS NULL ORDER BY {$orderBy}");
-      foreach ($this->course_db->rows() as $row) {
-        $return[] = new User($this->core, $row);
-      }
-      return $return;
+    public function getUsersInNullSection($orderBy="user_id") {
+        $return = array();
+        $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IS NULL ORDER BY {$orderBy}");
+        foreach ($this->course_db->rows() as $row) {
+            $return[] = new User($this->core, $row);
+        }
+        return $return;
     }
 
     public function getTotalUserCountByGradingSections($sections, $section_key) {
@@ -1427,7 +1426,9 @@ SELECT user_id
 FROM users
 WHERE rotating_section IS NULL AND registration_section IS NOT NULL
 ORDER BY user_id ASC");
-        return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
+        return array_map(function($elem) {
+            return $elem['user_id'];
+        }, $this->course_db->rows());
     }
 
     public function getRegisteredUserIds() {
@@ -1436,7 +1437,9 @@ SELECT user_id
 FROM users
 WHERE registration_section IS NOT NULL
 ORDER BY user_id ASC");
-        return array_map(function($elem) { return $elem['user_id']; }, $this->course_db->rows());
+        return array_map(function($elem) {
+            return $elem['user_id'];
+        }, $this->course_db->rows());
     }
 
     /**
@@ -1592,8 +1595,10 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
             $this->updateActiveVersion($g_id, $user_id, $team_id, $version);
         }
         else {
-            $this->course_db->query("INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
-                array($g_id, $user_id, $team_id, $version));
+            $this->course_db->query(
+                "INSERT INTO electronic_gradeable_version (g_id, user_id, team_id, active_version) VALUES(?, ?, ?, ?)",
+                array($g_id, $user_id, $team_id, $version)
+            );
         }
     }
 
@@ -1620,24 +1625,28 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
 
 
     public function getAllSectionsForGradeable($gradeable) {
-         $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
+        $grade_type = $gradeable->isGradeByRegistration() ? 'registration' : 'rotating';
 
-         if ($gradeable->isGradeByRegistration()) {
-             $this->course_db->query("
-                 SELECT * FROM sections_registration
-                 ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'),
-                 COALESCE(SUBSTRING(sections_registration_id, '[0-9]+')::INT, -1),
-                 SUBSTRING(sections_registration_id, '[^0-9]*$') ");
-         } else {
-             $this->course_db->query("
-                 SELECT * FROM sections_rotating
-                 ORDER BY sections_rotating_id ");
-         }
+        if ($gradeable->isGradeByRegistration()) {
+            $this->course_db->query("
+                SELECT * FROM sections_registration
+                ORDER BY SUBSTRING(sections_registration_id, '^[^0-9]*'),
+                COALESCE(SUBSTRING(sections_registration_id, '[0-9]+')::INT, -1),
+                SUBSTRING(sections_registration_id, '[^0-9]*$')"
+            );
+        }
+        else {
+            $this->course_db->query("
+                SELECT * FROM sections_rotating
+                ORDER BY sections_rotating_id"
+            );
+        }
 
-         $sections = $this->course_db->rows();
-         foreach ($sections as $i => $section)
-             $sections[$i] = $section["sections_{$grade_type}_id"];
-         return $sections;
+        $sections = $this->course_db->rows();
+        foreach ($sections as $i => $section) {
+            $sections[$i] = $section["sections_{$grade_type}_id"];
+        }
+        return $sections;
     }
 
     /**
@@ -2054,7 +2063,8 @@ ORDER BY {$section_key}", $params);
         ksort($return);
         return $return;
     }
-public function getSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
+
+    public function getSubmittedTeamCountByGradingSections($g_id, $sections, $section_key) {
         $return = array();
         $params = array($g_id);
         $where = "";
@@ -2622,35 +2632,37 @@ AND gc_id IN (
     }
 
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = NULL){
-      $query_delete = $show_deleted?"true":"deleted = false";
-      $query_filter_on_user = '';
-      $param_list = array();
-      if(!empty($filterOnUser)) {
-        $query_filter_on_user = ' and author_user_id = ? ';
-        $param_list[] = $filterOnUser;
-      }
-      if($thread_id == -1) {
-        $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
-        $rows = $this->course_db->rows();
-        if(!empty($rows)) {
-            $thread_id = $rows[0]["max"];
-        } else {
-            // No thread found, hence no posts found
-            return array();
+        $query_delete = $show_deleted?"true":"deleted = false";
+        $query_filter_on_user = '';
+        $param_list = array();
+        if (!empty($filterOnUser)) {
+            $query_filter_on_user = ' and author_user_id = ? ';
+            $param_list[] = $filterOnUser;
         }
-      }
-      $param_list[] = $thread_id;
-      $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
-      if($option == 'alpha'){
-
-        $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
-      } else if ( $option == 'reverse-time' ){
-        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC ", array_reverse($param_list));
-      } else {
-        $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", array_reverse($param_list));
-      }
-      $result_rows = $this->course_db->rows();
-      return $result_rows;
+        if ($thread_id == -1) {
+            $this->course_db->query("SELECT MAX(id) as max from threads WHERE deleted = false and merged_thread_id = -1 GROUP BY pinned ORDER BY pinned DESC");
+            $rows = $this->course_db->rows();
+            if(!empty($rows)) {
+                $thread_id = $rows[0]["max"];
+            }
+            else {
+                // No thread found, hence no posts found
+                return array();
+            }
+        }
+        $param_list[] = $thread_id;
+        $history_query = "LEFT JOIN forum_posts_history fph ON (fph.post_id is NULL OR (fph.post_id = posts.id and NOT EXISTS (SELECT 1 from forum_posts_history WHERE post_id = fph.post_id and edit_timestamp > fph.edit_timestamp )))";
+        if($option == 'alpha') {
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
+        }
+        else if ( $option == 'reverse-time' ) {
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC ", array_reverse($param_list));
+        }
+        else {
+            $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", array_reverse($param_list));
+        }
+        $result_rows = $this->course_db->rows();
+        return $result_rows;
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {

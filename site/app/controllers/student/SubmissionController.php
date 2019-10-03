@@ -909,7 +909,7 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 else if ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1232,14 +1232,15 @@ class SubmissionController extends AbstractController {
         // Create the vcs file first!  (avoid race condition, we must
         // check out the files before trying to grade them)
         if ($vcs_queue_file !== "") {
-          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
-          }
-        } else {
-          // Then create the file that will trigger autograding
-          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
-          }
+            if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+            }
+        }
+        else {
+            // Then create the file that will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
         }
 
         Logger::logAccess(
