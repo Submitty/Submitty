@@ -1,5 +1,10 @@
 {
   "name": "submitty/submitty",
+  "config": {
+    "platform": {
+      "php": "7.2"
+    }
+  },
   "autoload": {
     "psr-4": {
       "app\\": "app/"
@@ -27,6 +32,7 @@
     "phpunit/phpunit": "8.3.5",
     "submitty/php-codesniffer": "2.1.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
-    "php-mock/php-mock-phpunit": "^2.4"
+    "php-mock/php-mock-phpunit": "2.4.0",
+    "phpstan/phpstan": "0.11.16"
   }
 }
