@@ -325,7 +325,7 @@ class SubmissionController extends AbstractController {
         // delete the temporary file
         if (isset($uploaded_file)) {
             for ($j = 0; $j < $count; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
                     if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
@@ -909,7 +909,7 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 else if ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1077,7 +1077,7 @@ class SubmissionController extends AbstractController {
                             }
                         }
                         else {
-                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
@@ -1232,14 +1232,15 @@ class SubmissionController extends AbstractController {
         // Create the vcs file first!  (avoid race condition, we must
         // check out the files before trying to grade them)
         if ($vcs_queue_file !== "") {
-          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
-          }
-        } else {
-          // Then create the file that will trigger autograding
-          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
-          }
+            if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+            }
+        }
+        else {
+            // Then create the file that will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
         }
 
         Logger::logAccess(

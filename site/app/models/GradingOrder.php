@@ -109,11 +109,15 @@ class GradingOrder extends AbstractModel {
      */
     public function sort($type, $direction) {
         //Function to turn submitters into "keys" that are sorted (like python's list.sort)
-        $keyFn = function(Submitter $a) { return $a->getId(); };
+        $keyFn = function(Submitter $a) {
+            return $a->getId();
+        };
 
         switch ($type) {
             case "id":
-                $keyFn = function(Submitter $a) { return $a->getId(); };
+                $keyFn = function(Submitter $a) {
+                    return $a->getId();
+                };
                 break;
             case "first":
                 $keyFn = function(Submitter $a) {
@@ -481,4 +485,3 @@ class GradingOrder extends AbstractModel {
         return $msg === false ? '' : "$msg Order";
     }
 }
-

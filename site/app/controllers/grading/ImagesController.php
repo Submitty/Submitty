@@ -144,7 +144,7 @@ class ImagesController extends AbstractController {
                     }
                 }
                 else {
-                    if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                    if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
                             return $this->core->getOutput()->renderResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);

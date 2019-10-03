@@ -113,12 +113,12 @@ class BaseTestCase(unittest.TestCase):
         self.driver.find_element_by_name('password').send_keys(user_password)
         self.driver.find_element_by_name('login').click()
 
-        #OLD self.assertEqual(user_name, self.driver.find_element_by_id("login-id").get_attribute('innerText').strip(' \t\r\n'))
+        # OLD self.assertEqual(user_name, self.driver.find_element_by_id("login-id").get_attribute('innerText').strip(' \t\r\n'))
 
-        #FIXME: WANT SOMETHING LIKE THIS...  WHEN WE HAVE JUST ONE ELEMENT WITH THIS ID
-        #self.assertEqual("Logout "+user_name, self.driver.find_element_by_id("logout").get_attribute('innerText').strip(' \t\r\n'))
+        # FIXME: WANT SOMETHING LIKE THIS...  WHEN WE HAVE JUST ONE ELEMENT WITH THIS ID
+        # self.assertEqual("Logout "+user_name, self.driver.find_element_by_id("logout").get_attribute('innerText').strip(' \t\r\n'))
 
-        #instead, just make sure this element exists
+        # instead, just make sure this element exists
         self.driver.find_element_by_id("logout")
 
         self.logged_in = True
@@ -140,26 +140,37 @@ class BaseTestCase(unittest.TestCase):
     # see Navigation.twig for html attributes to use as arguments
     # loaded_selector must recognize an element on the page being loaded (test_simple_grader.py has xpath example)
     def click_nav_grade_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='{}']/div[@class='course-button']/a[contains(@class, 'btn-nav-grade')]".format(gradeable_id)).click()
+        self.driver.find_element_by_xpath(
+            "//div[@id='{}']/div[@class='course-button']/a[contains(@class, 'btn-nav-grade')]".format(
+                gradeable_id)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     def click_nav_submit_button(self, gradeable_category, gradeable_id, button_name, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='{}']/div[@class='course-button']/a[contains(@class, 'btn-nav-submit')]".format(gradeable_id)).click()
+        self.driver.find_element_by_xpath(
+            "//div[@id='{}']/div[@class='course-button']/a[contains(@class, 'btn-nav-submit')]".format(
+                gradeable_id)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     # clicks the navigation header text to 'go back' pages
     # for homepage, selector can be gradeable list
     def click_header_link_text(self, text, loaded_selector):
-        self.driver.find_element_by_xpath("//div[@id='breadcrumbs']/div[@class='breadcrumb']/a[text()='{}']".format(text)).click()
+        self.driver.find_element_by_xpath(
+            "//div[@id='breadcrumbs']/div[@class='breadcrumb']/a[text()='{}']".format(text)).click()
         WebDriverWait(self.driver, BaseTestCase.WAIT_TIME).until(EC.presence_of_element_located(loaded_selector))
 
     def wait_after_ajax(self):
         WebDriverWait(self.driver, 10).until(lambda driver: driver.execute_script("return jQuery.active == 0"))
-        # FIXME
-        # A hacky solution for where the response for jQuery.ajax may take a bit of time to process,
-        # which happens after jQuery.active starts returning 0 and this function returns.
-        # see #4511
-        time.sleep(0.5)
+
+    def wait_for_element(self, element_selector, visibility=True, timeout=WAIT_TIME):
+        """
+        Waits for an element to be present in the DOM. By default, also waits for the element to be
+        visible/interactable
+        """
+        if visibility:
+            WebDriverWait(self.driver, timeout).until(EC.visibility_of_element_located(element_selector))
+        else:
+            WebDriverWait(self.driver, timeout).until(EC.presence_of_element_located(element_selector))
+
 
     @staticmethod
     def wait_user_input():

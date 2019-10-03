@@ -310,11 +310,12 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
-public function getAverageComponentScores($g_id, $section_key, $is_team) {
+
+    public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
-        if($is_team){
+        if($is_team) {
             $u_or_t="t";
             $users_or_teams="gradeable_teams";
             $user_or_team_id="team_id";
@@ -358,11 +359,13 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
 GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
 ORDER BY gc_order
         ", array($g_id, $g_id, $g_id));
+
         foreach ($this->course_db->rows() as $row) {
             $return[] = new SimpleStat($this->core, $row);
         }
         return $return;
     }
+
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -391,11 +394,11 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
 
-public function getAverageForGradeable($g_id, $section_key, $is_team) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
-        if($is_team){
+        if ($is_team) {
             $u_or_t="t";
             $users_or_teams="gradeable_teams";
             $user_or_team_id="team_id";
@@ -439,6 +442,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
+
     public function getGradeablesRotatingGraderHistory($gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query("
@@ -550,15 +554,15 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $vals = array($user_id, $timestamp, $days, $days, $user_id, $timestamp);
 
         switch ($csv_option) {
-        case 'csv_option_preserve_higher':
-        	//Does NOT overwrite a higher (or same) value of allowed late days.
-        	$query .= "AND late_days.allowed_late_days<?";
-        	$vals[] = $days;
-        	break;
-        case 'csv_option_overwrite_all':
-        default:
-        	//Default behavior: overwrite all late days for user and timestamp.
-        	//No adjustment to SQL query.
+            case 'csv_option_preserve_higher':
+                //Does NOT overwrite a higher (or same) value of allowed late days.
+                $query .= "AND late_days.allowed_late_days<?";
+                $vals[] = $days;
+        	    break;
+            case 'csv_option_overwrite_all':
+            default:
+                //Default behavior: overwrite all late days for user and timestamp.
+                //No adjustment to SQL query.
     	}
 
         $this->course_db->query($query, $vals);
@@ -839,7 +843,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             if (empty($key_map)) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
             }
-            return 'ORDER BY ' . implode(',', array_filter(array_map(function ($key_ext) use ($key_map) {
+            return 'ORDER BY ' . implode(',', array_filter(
+                array_map(function ($key_ext) use ($key_map) {
                     $split_key = explode(' ', $key_ext);
                     $key = $split_key[0];
                     $order = '';
@@ -851,7 +856,10 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     }
                     // Map any keys with special requirements to the proper statements and preserve specified order
                     return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
-                }, $sort_keys), function($a) { return $a !== ''; }));
+                }, $sort_keys),
+                function($a) {
+                    return $a !== '';
+                }));
         }
         return '';
     }

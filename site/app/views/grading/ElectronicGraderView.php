@@ -580,8 +580,9 @@ HTML;
         }
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function($a,$b)
-            { return ($a['title'] == 'NULL' or $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);   });
+        usort($sections, function($a,$b) {
+            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
+        });
 
 
         $empty_team_info = [];
@@ -602,23 +603,23 @@ HTML;
             $hover_over_string = "";
             ksort($team_gradeable_view_history[$team_id]);
             ksort($team);
-                foreach ($team as $user => $value) {
-                    if ($value != null) {
-                        $not_viewed_yet = false;
-                        $date_object = new \DateTime($value);
-                        $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
-                    }
-                    else {
-                        $hover_over_string.= "Not viewed by ".$user."\n";
-                    }
-                }
-
-                if ($not_viewed_yet) {
-                    $team_gradeable_view_history[$team_id]['hover_string'] = '';
+            foreach ($team as $user => $value) {
+                if ($value != null) {
+                    $not_viewed_yet = false;
+                    $date_object = new \DateTime($value);
+                    $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
                 }
                 else {
-                    $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+                    $hover_over_string.= "Not viewed by ".$user."\n";
                 }
+            }
+
+            if ($not_viewed_yet) {
+                $team_gradeable_view_history[$team_id]['hover_string'] = '';
+            }
+            else {
+                $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+            }
         }
 
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
