@@ -44,7 +44,7 @@ class RainbowCustomization extends AbstractModel{
 
 
     public function __construct(Core $main_core) {
-        $this->core = $main_core;
+        parent::__construct($main_core);
         $this->has_error = "false";
         $this->error_messages = [];
 
