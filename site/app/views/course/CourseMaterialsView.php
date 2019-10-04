@@ -12,8 +12,7 @@ use app\libraries\Utils;
 
 class CourseMaterialsView extends AbstractView {
     /**
-     * @param User[] $students
-     * @return string
+     * @param User $user
      */
     public function listCourseMaterials($user) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));

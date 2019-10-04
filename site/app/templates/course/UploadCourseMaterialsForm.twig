@@ -16,31 +16,27 @@
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
         <label id="upload_sections">
-            <p>
-                <strong>Do you want to restrict this course material to some sections?</strong><br />
+            <p class="black-message">
+                Do you want to restrict this course material to some sections?
             </p>
             <label class = "radio">
-                <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="showDiv(0)" checked>
+                <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
                 No
             </label>
             <label class = "radio">
-                <input name="show_Some_Section_Selection" type = "radio" onchange="showDiv(1)">
+                <input name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
                 Yes
             </label>
             <script type="text/javascript">
-                function showDiv(val){
-                    if(val==1){
-                        document.getElementById('show_Some_Section_Selection').style.display = "block";
-                    } else{
-                        document.getElementById('show_Some_Section_Selection').style.display = "none";
-                    }
+                function toggleRegistrationSections(){
+                    $("#show_Some_Section_Selection").toggle();
                 } 
             </script>
             <div id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
                     <td>Section {{ section['sections_registration_id'] }}</td>
-                    <td><input id="section_{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                    <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
                 </tr>
             {% endfor %}
             </div>
@@ -82,14 +78,14 @@
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section_' +element['sections_registration_id']
+                    var currentSection = '#section-' +element['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
                 });
                 
                 /*for (section in reg_sectionArray){
-                    var currentSection = '#section_' +section['sections_registration_id']
+                    var currentSection = '#section-' +section['sections_registration_id']
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(section['sections_registration_id']);
                     }

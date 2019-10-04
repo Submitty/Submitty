@@ -414,7 +414,7 @@ class UsersController extends AbstractController {
                 //why doesn't $this->core->getConfig()->getCoursePath(); work?
                 $fp = '/var/local/submitty/courses/f19/sample/uploads/course_materials_file_data.json';
                 $json = file_get_contents($fp);
-                $jsonArray = json_decode($json), true);
+                $jsonArray = json_decode($json, true);
                 foreach ($jsonArray as $key => $value){
                     if(isset($value['sections'])){
                         $sections = $value['sections'];
