@@ -165,7 +165,7 @@ class LateController extends AbstractController {
             }
             $late_days = null;
             if (isset($_POST['late_days'])) {
-                $late_days = $_POST['late_days'];  
+                $late_days = $_POST['late_days'];
                 if (intval($late_days) < 0 || !ctype_digit($late_days)) {
                     $error = "Extensions must be a nonnegative integer";
                     $this->core->addErrorMessage($error);
@@ -273,7 +273,10 @@ class LateController extends AbstractController {
         foreach($rows as $row) {
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
-            $fields = array_map(function($k) { return trim($k); }, $fields);
+            $fields = array_map(function($k) {
+                return trim($k);
+            }, $fields);
+
             //Each row has three fields
             if (count($fields) !== 3) {
                 $data = null;
