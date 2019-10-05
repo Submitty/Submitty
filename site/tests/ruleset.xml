@@ -4,6 +4,7 @@
     <arg name="extensions" value="php" />
 
     <file>../app</file>
+    <file>../public/index.php</file>
     <file>../tests</file>
 
     <exclude-pattern>../app/models/Gradeable.php</exclude-pattern>
@@ -37,8 +38,6 @@
         <exclude name="Generic.PHP.LowerCaseType.ParamTypeFound" />
         <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
         <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
-        <exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterDecrement" />
-        <exclude name="Generic.WhiteSpace.IncrementDecrementSpacing.SpaceAfterIncrement" />
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
@@ -155,5 +154,9 @@
         <exclude name="SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable" />
         <exclude name="SlevomatCodingStandard.Variables.UselessVariable.UselessVariable" />
         <exclude name="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable.DuplicateAssignment" />
+    </rule>
+
+    <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
+        <exclude-pattern>../public/index.php</exclude-pattern>
     </rule>
 </ruleset>
