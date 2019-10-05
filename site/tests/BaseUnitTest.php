@@ -75,12 +75,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         else {
             $core->method('checkCsrfToken')->willReturn(true);
         }
-        if (isset($config_values['testing'])) {
-            $core->method('isTesting')->willReturn($config_values['testing'] === true);
-        }
-        else {
-            $core->method('isTesting')->willReturn(true);
-        }
 
         $mock_access = $this->createMock(Access::class);
         $mock_access->expects($this->any())->method('canI')->willReturnCallback(

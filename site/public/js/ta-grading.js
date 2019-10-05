@@ -47,8 +47,13 @@ $(function() {
         value = progressbar.val();
     $(".progress-value").html("<b>" + value + '%</b>');
 
+    $(".draggable").draggable({
+        snap: false,
+        grid: [2, 2],
+        stack: ".draggable",
+        cancel: ".draggable div#file_view div#file_content, .draggable div#file_view div#pdf_annotation_bar div#size_selector_menu"
+    }).resizable();
 
-    $( ".draggable" ).draggable({snap:false, grid:[2, 2], stack:".draggable"}).resizable();
 
     $("#bar_wrapper").resizable("destroy"); //We don't want the toolbar to be resizable
     // $('#pdf_annotation_bar').length != 0 && $('#pdf_annotation_bar').resizable("destroy"); //Same with PDF annotation.

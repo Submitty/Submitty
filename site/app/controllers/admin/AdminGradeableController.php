@@ -90,7 +90,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
         // Serialize the components for numeric/checkpoint rubrics
-        $gradeable_components_enc = array_map(function(Component $c) {return $c->toArray(); }, $gradeable->getComponents());
+        $gradeable_components_enc = array_map(function(Component $c) {
+            return $c->toArray();
+        }, $gradeable->getComponents());
 
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
@@ -158,7 +160,9 @@ class AdminGradeableController extends AbstractController {
             }
             $repo_id_number++;
         }
-        usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
+        usort($all_repository_config_paths, function($a,$b) {
+            return $a[0] > $b[0];
+        });
 
         $type_string = 'UNKNOWN';
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {

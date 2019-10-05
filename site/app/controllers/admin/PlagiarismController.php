@@ -22,36 +22,38 @@ class PlagiarismController extends AbstractController {
         );
 
         if (file_exists($filename)) {
-          $file = fopen($filename, "r") or exit("Unable to open file!");
+            $file = fopen($filename, "r") or exit("Unable to open file!");
 
-          while(!feof($file)){
-            $line = fgets($file);
-            $line = trim($line," ");
-            $line = explode("/",$line);
-            $sem = $line[5];
-            $course = $line[6];
-            $gradeables= array();
-            while (!feof($file)) {
+            while(!feof($file)) {
                 $line = fgets($file);
-                if (trim(trim($line, " "),"\n") === "") {
-                    break;
+                $line = trim($line," ");
+                $line = explode("/",$line);
+                $sem = $line[5];
+                $course = $line[6];
+                $gradeables= array();
+                while (!feof($file)) {
+                    $line = fgets($file);
+                    if (trim(trim($line, " "),"\n") === "") {
+                        break;
+                    }
+                    array_push($gradeables, trim(trim($line, " "), "\n"));
                 }
-                array_push($gradeables, trim(trim($line, " "), "\n"));
+                $return[$sem][$course] = $gradeables;
             }
-            $return[$sem][$course] = $gradeables;
 
-          }
-          fclose($file);
-          uksort($return, function($semester_a, $semester_b) {
-              $year_a = (int) substr($semester_a, 1);
-              $year_b = (int) substr($semester_b, 1);
-              if($year_a > $year_b)
-                return 0;
-              else if ($year_a < $year_b)
-                return 1;
-              else {
-                return ($semester_a[0] === 'f')? 0 : 1 ;
-              }
+            fclose($file);
+            uksort($return, function($semester_a, $semester_b) {
+                $year_a = (int) substr($semester_a, 1);
+                $year_b = (int) substr($semester_b, 1);
+                if($year_a > $year_b) {
+                    return 0;
+                }
+                else if ($year_a < $year_b) {
+                    return 1;
+                }
+                else {
+                    return ($semester_a[0] === 'f')? 0 : 1 ;
+                }
             });
         }
         return $return;
@@ -84,9 +86,10 @@ class PlagiarismController extends AbstractController {
             $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
             foreach ($nightly_rerun_info as $gradeable_id => $nightly_rerun_status) {
                 $flag=0;
-                foreach($gradeables_with_plagiarism_result as $gradeable_id_title) {
-                   if($gradeable_id_title['g_id'] == $gradeable_id) {
-                        $flag=1;break;
+                foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
+                   if ($gradeable_id_title['g_id'] == $gradeable_id) {
+                        $flag = 1;
+                        break;
                    }
                 }
                 if ($flag == 0) {
@@ -617,35 +620,30 @@ class PlagiarismController extends AbstractController {
                             $userMatchesStarts[] = $user_2_matchingposition["start"];
                             $userMatchesEnds[] = $user_2_matchingposition["end"];
 
+                        }
+                    }
+                }
+                else if($match["type"] == "common") {
+                    //Color is grey -- common matches among all students
+                    $color = '#cccccc';
+                }
+                else if($match["type"] == "provided") {
+                    //Color is green -- instructor provided code #b5e3b5
+                    $color = '#b5e3b5';
                 }
 
+                array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
 
+                // foreach($color_info as $i=>$color_info_for_line) {
+                // 	ksort($color_info[$i]);
+                // }
             }
-
-            } else if($match["type"] == "common") {
-                //Color is grey -- common matches among all students
-                $color = '#cccccc';
-            }
-            else if($match["type"] == "provided") {
-                //Color is green -- instructor provided code #b5e3b5
-                $color = '#b5e3b5';
-            }
-
-
-
-            array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
-
-
-    	// foreach($color_info as $i=>$color_info_for_line) {
-	    // 	ksort($color_info[$i]);
-    	// }
-    }
-}
+        }
     	return $color_info;
     }
 
     public function getDisplayForCode($file_name , $color_info){
-    	$content= file_get_contents($file_name);
+    	$content = file_get_contents($file_name);
 	    return $content;
 	}
 
