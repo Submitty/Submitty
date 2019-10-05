@@ -51,7 +51,7 @@ $(function() {
         snap: false,
         grid: [2, 2],
         stack: ".draggable",
-        cancel: ".draggable div#file_view div#file_content, .draggable div#file_view div#pdf_annotation_bar div#size_selector_menu"
+        cancel: "input,textarea,button,select,option,div#file_content,div#size_selector_menu"
     }).resizable();
 
 
