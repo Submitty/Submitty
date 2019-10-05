@@ -323,7 +323,7 @@ class GradingOrder extends AbstractModel {
 
         //Iterate through all sections and their submitters to find this one
         foreach ($this->section_submitters as $name => $section) {
-            for ($i = 0; $i < count($section); $i ++) {
+            for ($i = 0; $i < count($section); $i++) {
                 $testSub = $section[$i];
 
                 //Found them
@@ -331,7 +331,7 @@ class GradingOrder extends AbstractModel {
                     return $count;
                 }
 
-                $count ++;
+                $count++;
             }
         }
         return false;
