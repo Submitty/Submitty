@@ -12,7 +12,7 @@ echo -e "
 # is now deprecated and these scripts will be removed in a future
 # version of Submitty. Instead, please run the following script from
 # now on:
-#   ${SUBMITTY_REPOSITORY}/.setup/install_submitty.sh
+#   bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty.sh
 #
 #####################################################################
 \033[0m

@@ -181,7 +181,7 @@ if os.path.isfile(EMAIL_JSON):
         else:
             loaded_defaults['authentication_method'] = 2
 
-# grab anything not loaded in (useful for backwards compatibility if a new default is added that 
+# grab anything not loaded in (useful for backwards compatibility if a new default is added that
 # is not in an existing config file.)
 for key in defaults.keys():
     if key not in loaded_defaults:
@@ -231,7 +231,7 @@ else:
     INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
                              defaults['institution_name'])
     print()
-    
+
     if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
         INSTITUTION_HOMEPAGE = ''
     else:
@@ -282,7 +282,7 @@ else:
             except ValueError:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
             break
-            
+
         elif (is_email_enabled.lower() in ['no', 'n']):
             EMAIL_ENABLED = False
             EMAIL_USER = defaults['email_user']
@@ -561,8 +561,10 @@ if not args.worker:
 
 ##############################################################################
 
+INSTALL_FILE = os.path.join(SUBMITTY_REPOSITORY, '.setup', 'install_submitty.sh')
+
 print('Configuration completed. Now you may run the installation script')
-print('    sudo ' + CONFIGURATION_FILE)
+print('    sudo bash ' + INSTALL_FILE)
 print('          or')
-print('    sudo {} clean'.format(CONFIGURATION_FILE))
+print('    sudo {} clean'.format(INSTALL_FILE))
 print("\n")
