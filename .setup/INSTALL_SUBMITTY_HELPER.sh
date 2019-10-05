@@ -19,4 +19,4 @@ echo -e "
 "
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
-source ${THIS_DIR}/install_submitty.sh
+bash ${THIS_DIR}/install_submitty.sh

@@ -18,6 +18,7 @@ CONF_DIR=${THIS_DIR}/../../../config
 
 SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
 SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+WORKER=$(jq -r '.worker' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
 
 source ${THIS_DIR}/bin/versions.sh
 
@@ -34,16 +35,16 @@ fi
 # check optional argument
 if [[ "$#" -ge 1 && "$1" != "test" && "$1" != "clean" && "$1" != "test_rainbow" && "$1" != "restart_web" ]]; then
     echo -e "Usage:"
-    echo -e "   ./install_submitty.sh"
-    echo -e "   ./install_submitty.sh clean"
-    echo -e "   ./install_submitty.sh clean test"
-    echo -e "   ./install_submitty.sh clear test  <test_case_1>"
-    echo -e "   ./install_submitty.sh clear test  <test_case_1> ... <test_case_n>"
-    echo -e "   ./install_submitty.sh test"
-    echo -e "   ./INSTALL_SUBMITTY.sh test  <test_case_1>"
-    echo -e "   ./install_submitty.sh test  <test_case_1> ... <test_case_n>"
-    echo -e "   ./install_submitty.sh test_rainbow"
-    echo -e "   ./install_submitty.sh restart_web"
+    echo -e "   bash install_submitty.sh"
+    echo -e "   bash install_submitty.sh clean"
+    echo -e "   bash install_submitty.sh clean test"
+    echo -e "   bash install_submitty.sh clear test  <test_case_1>"
+    echo -e "   bash install_submitty.sh clear test  <test_case_1> ... <test_case_n>"
+    echo -e "   bash install_submitty.sh test"
+    echo -e "   bash INSTALL_SUBMITTY.sh test  <test_case_1>"
+    echo -e "   bash install_submitty.sh test  <test_case_1> ... <test_case_n>"
+    echo -e "   bash install_submitty.sh test_rainbow"
+    echo -e "   bash install_submitty.sh restart_web"
     exit 1
 fi
 
@@ -53,7 +54,7 @@ fi
 # CLONE OR UPDATE THE HELPER SUBMITTY CODE REPOSITORIES
 
 set +e
-/bin/bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
+bash ${SUBMITTY_REPOSITORY}/.setup/bin/update_repos.sh
 
 if [ $? -eq 1 ]; then
     echo -e "\nERROR: FAILURE TO CLONE OR UPDATE SUBMITTY HELPER REPOSITORIES\n"
@@ -79,7 +80,7 @@ set -e
 ################################################################################################################
 # RUN THE SYSTEM AND DATABASE MIGRATIONS
 
-if [ ${WORKER} == 0 ]; then
+if [ ${WORKER} = false ]; then
     echo -e 'Checking for system and database migrations'
 
     mkdir -p ${SUBMITTY_INSTALL_DIR}/migrations
@@ -114,6 +115,7 @@ popd > /dev/null
 # Re-Read other variables from submitty.json and submitty_users.json
 
 SUBMITTY_DATA_DIR=$(jq -r '.submitty_data_dir' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
+WORKER=$(jq -r '.worker' ${SUBMITTY_INSTALL_DIR}/config/submitty.json)
 COURSE_BUILDERS_GROUP=$(jq -r '.course_builders_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 NUM_UNTRUSTED=$(jq -r '.num_untrusted' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 FIRST_UNTRUSTED_UID=$(jq -r '.first_untrusted_uid' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
@@ -126,6 +128,10 @@ PHP_USER=$(jq -r '.php_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 CGI_USER=$(jq -r '.cgi_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONPHP_GROUP=$(jq -r '.daemonphp_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
 DAEMONCGI_GROUP=$(jq -r '.daemoncgi_group' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+
+if [ ${WORKER} = true ]; then
+    SUPERVISOR_USER=$(jq -r '.supervisor_user' ${SUBMITTY_INSTALL_DIR}/config/submitty_users.json)
+fi
 
 ########################################################################################################################
 ########################################################################################################################
@@ -183,14 +189,14 @@ echo -e "Make top level SUBMITTY DATA directories & set permissions"
 
 mkdir -p ${SUBMITTY_DATA_DIR}
 
-if [ "${WORKER}" == 1 ]; then
+if [ ${WORKER} = true ]; then
     echo -e "INSTALLING SUBMITTY IN WORKER MODE"
 else
     echo -e "INSTALLING PRIMARY SUBMITTY"
 fi
 
 #Make a courses and checkouts directory if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/courses
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs
     mkdir -p ${SUBMITTY_DATA_DIR}/vcs/git
@@ -203,7 +209,7 @@ mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
 # Create the logs directories that only exist on the primary machine
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
@@ -220,7 +226,7 @@ chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}
 chmod  751                                        ${SUBMITTY_DATA_DIR}
 
 #Set up courses and version control ownership if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     chown  root:${COURSE_BUILDERS_GROUP}              ${SUBMITTY_DATA_DIR}/courses
     chmod  751                                        ${SUBMITTY_DATA_DIR}/courses
     chown  root:${DAEMONCGI_GROUP}                    ${SUBMITTY_DATA_DIR}/vcs
@@ -235,7 +241,7 @@ chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
 # Set owner/group for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
 # Set owner/group for logs directories that exist only on the primary machine
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
@@ -258,7 +264,7 @@ chmod 751 ${SUBMITTY_DATA_DIR}/logs/
 
 
 #Set up shipper grading directories if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     # remove the old versions of the queues
     rm -rf $SUBMITTY_DATA_DIR/to_be_graded_interactive
     rm -rf $SUBMITTY_DATA_DIR/to_be_graded_batch
@@ -335,7 +341,7 @@ chmod g+wrx ${SUBMITTY_INSTALL_DIR}/src/grading/python/submitty_router.py
 
 
 #Set up sample files if not in worker mode.
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     ########################################################################################################################
     ########################################################################################################################
     # COPY THE SAMPLE FILES FOR COURSE MANAGEMENT
@@ -445,7 +451,7 @@ popd > /dev/null
 ################################################################################################################
 ################################################################################################################
 # COPY THE 1.0 Grading Website if not in worker mode
-if [ ${WORKER} == 0 ]; then
+if [ ${WORKER} == false ]; then
     bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty/install_site.sh
 fi
 
@@ -547,14 +553,14 @@ find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
 
 #####################################
 # Obtain API auth token for submitty-admin user
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
 
     python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
 fi
 #####################################
 # Build & Install Lichen Modules
 
-/bin/bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
+bash ${SUBMITTY_REPOSITORY}/../Lichen/install_lichen.sh
 
 
 ################################################################################################################
@@ -608,7 +614,7 @@ for i in "${DAEMONS[@]}"; do
     fi
 done
 
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     # Stop all foreign worker daemons
     echo -e -n "Stopping worker machine daemons..."
     sudo -H -u ${DAEMON_USER} ${SUBMITTY_INSTALL_DIR}/sbin/shipper_utils/systemctl_wrapper.py stop --target perform_on_all_workers
@@ -684,7 +690,7 @@ fi
 #############################################################################
 
 # Restart php-fpm and apache
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     if [[ "$#" -ge 1 && $1 == "restart_web" ]]; then
         PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
         echo -n "restarting php${PHP_VERSION}-fpm..."
@@ -723,7 +729,7 @@ done
 ################################################################################################################
 ################################################################################################################
 # INSTALL TEST SUITE if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     # one optional argument installs & runs test suite
     if [[ "$#" -ge 1 && $1 == "test" ]]; then
 
@@ -750,7 +756,7 @@ fi
 ################################################################################################################
 
 # INSTALL RAINBOW GRADES TEST SUITE if not in worker mode
-if [ "${WORKER}" == 0 ]; then
+if [ ${WORKER} = false ]; then
     # one optional argument installs & runs test suite
     if [[ "$#" -ge 1 && $1 == "test_rainbow" ]]; then
 
@@ -788,7 +794,7 @@ fi
 ################################################################################################################
 # confirm permissions on the repository (to allow push updates from primary to worker)
 echo "Preparing to update Submitty installation on worker machines"
-if [ "${WORKER}" == 1 ]; then
+if [ ${WORKER} = true ]; then
     # the supervisor user/group must have write access on the worker machine
     chgrp -R ${SUPERVISOR_USER} ${SUBMITTY_REPOSITORY}
     chmod -R g+rw ${SUBMITTY_REPOSITORY}

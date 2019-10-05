@@ -669,7 +669,7 @@ if [ ${WORKER} == 0 ]; then
     fi
 fi
 
-echo Beginning Install Submitty Script
+echo "Beginning Install Submitty Script"
 bash ${SUBMITTY_REPOSITORY}/.setup/install_submitty.sh clean
 
 
