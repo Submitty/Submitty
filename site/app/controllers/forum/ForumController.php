@@ -41,9 +41,9 @@ class ForumController extends AbstractController{
             //Notify User
             $this->core->addErrorMessage($error);
             if($isThread){
-            $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+                $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
             } else {
-            $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+                $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
             return array(-1, $url);
     }
