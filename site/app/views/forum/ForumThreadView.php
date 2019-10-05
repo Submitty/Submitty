@@ -18,13 +18,13 @@ class ForumThreadView extends AbstractView {
 
         $buttons = array(
             array(
-            "required_rank" => 4,
-            "display_text" => 'Create Thread',
-            "style" => 'position:relative;float:right;top:3px;',
-            "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
-            "optional_class" => '',
-            "title" => 'Create Thread',
-            "onclick" => array(false)
+                "required_rank" => 4,
+                "display_text" => 'Create Thread',
+                "style" => 'position:relative;float:right;top:3px;',
+                "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
+                "optional_class" => '',
+                "title" => 'Create Thread',
+                "onclick" => array(false)
             ),
             array(
                 "required_rank" => 4,
