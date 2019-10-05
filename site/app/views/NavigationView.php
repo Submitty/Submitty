@@ -105,7 +105,7 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
-    $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
+        $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
         if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
             $display_room_seating = false;
         }
@@ -679,7 +679,7 @@ class NavigationView extends AbstractView {
     private function getDeleteButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
             "title" => "Delete Gradeable",
-            "href" => "javascript:newDeleteGradeableForm('" . 
+            "href" => "javascript:newDeleteGradeableForm('" .
                 $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
                 . "', '{$gradeable->getTitle()}');",
             "class" => "fas fa-trash fa-fw black-btn",
