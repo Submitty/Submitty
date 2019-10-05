@@ -10,16 +10,13 @@ echo -e "Copy the submission website"
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/../bin/versions.sh
 
-if [ -z ${PHP_USER+x} ]; then
-    # constants are not initialized,
-    CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
-    SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
-    SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
-    PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
-    PHP_GROUP=${PHP_USER}
-    CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
-    CGI_GROUP=${CGI_USER}
-fi
+CONF_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"/../../../config
+SUBMITTY_REPOSITORY=$(jq -r '.submitty_repository' ${CONF_DIR}/submitty.json)
+SUBMITTY_INSTALL_DIR=$(jq -r '.submitty_install_dir' ${CONF_DIR}/submitty.json)
+PHP_USER=$(jq -r '.php_user' ${CONF_DIR}/submitty_users.json)
+PHP_GROUP=${PHP_USER}
+CGI_USER=$(jq -r '.cgi_user' ${CONF_DIR}/submitty_users.json)
+CGI_GROUP=${CGI_USER}
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
