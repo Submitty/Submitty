@@ -138,3 +138,26 @@ footer .footer-separator {
         transform: translateX(-50%);
     }
 }
+
+#loading_bar{
+    height: 26px;
+    display: none;
+    border: 1px solid grey;
+    width: 100%;
+}
+
+#loading_bar #loading_bar_element{
+    width: 0%;
+    background: green;
+    height: 100%;
+    position: relative;
+}
+
+#loading_bar #loading_bar_percentage{
+    min-width: 50px;
+    width: 20px;
+    position: absolute;
+    right: 0;
+    color: white;
+    top: 1px;
+}
