@@ -82,14 +82,8 @@ def suite(api_url: str, token: str):
     return suite
 
 
-def get_current_semester():
-    """
-    Given today's date, generates a three character code that represents the semester to use for
-    courses such that the first half of the year is considered "Spring" and the last half is
-    considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
-    F. The next two characters are the last two digits in the current year.
-    :return:
-    """
+def get_current_semester() -> str:
+    """Get the current semester for today's date."""
     today = datetime.today()
     semester = "f" + str(today.year)[-2:]
     if today.month < 7:
@@ -97,11 +91,13 @@ def get_current_semester():
     return semester
 
 
-def get_current_year():
+def get_current_year() -> int:
+    """Get the year for today's date."""
     return datetime.today().year
 
 
 def initialize_values(test: dict):
+    """Initialize values for API tests."""
     if 'method' not in test:
         test['method'] = 'get'
     test['method'] = test['method'].lower()
