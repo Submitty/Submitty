@@ -1,0 +1,41 @@
+{
+  "tests": [
+    {
+      "name": "get courses",
+      "endpoint": "/courses",
+      "method": "get",
+      "response": {
+        "status": "success",
+        "data": {
+          "unarchived_courses": [
+            {
+              "semester": "f19",
+              "title": "blank",
+              "display_name": "",
+              "display_semester": "Fall 2019"
+            },
+            {
+              "semester": "f19",
+              "title": "development",
+              "display_name": "",
+              "display_semester": "Fall 2019"
+            },
+            {
+              "semester": "f19",
+              "title": "sample",
+              "display_name": "",
+              "display_semester": "Fall 2019"
+            },
+            {
+              "semester": "f19",
+              "title": "tutorial",
+              "display_name": "",
+              "display_semester": "Fall 2019"
+            }
+          ],
+          "archived_courses": []
+        }
+      }
+    }
+  ]
+}

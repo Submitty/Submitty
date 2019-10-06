@@ -290,6 +290,11 @@ jobs:
       php: 7.3
       env: AUTH_METHOD=2
       if: branch = master OR type = pull_request
+    - <<: *03-e2e
+      python: 3.6
+      script:
+        - python3 tests/api/run_tests.py
+
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
     # it
