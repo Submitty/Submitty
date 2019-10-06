@@ -5,6 +5,7 @@ use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\libraries\FileUtils;
 use app\models\Breadcrumb;
+use app\views\ErrorView;
 use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
 use Ds\Set;
@@ -48,7 +49,7 @@ class Output {
     /**
      * @var Core
      */
-    private $core;
+    protected $core;
 
     public function __construct(Core $core) {
         $this->core = $core;
@@ -156,16 +157,16 @@ HTML;
      * using renderTemplate when you plan to then use that rendered View in
      * rendering another View
      */
-    public function renderOutput() {
+    public function renderOutput($view, string $function, ...$args) {
         if (!$this->render) {
             return null;
         }
 
         if ($this->buffer_output) {
-            $this->output_buffer .= call_user_func_array('self::renderTemplate', func_get_args());
+            $this->output_buffer .= $this->renderTemplate($view, $function, ...$args);
         }
         else {
-            echo call_user_func_array('self::renderTemplate', func_get_args());
+            $this->renderTemplate($view, $function, ...$args);
         }
     }
 
@@ -185,21 +186,17 @@ HTML;
      *
      * @return string
      */
-    public function renderTemplate() {
+    public function renderTemplate($view, string $function, ...$args) {
         if (!$this->render) {
             return null;
         }
 
-        if (func_num_args() < 2) {
-            throw new \InvalidArgumentException("Render requires at least two parameters (View, Function)");
+        if (is_array($view)) {
+            $view = implode("\\", $view);
         }
-        $args = func_get_args();
-        if (is_array($args[0])) {
-            $args[0] = implode("\\", $args[0]);
-        }
-        $func = call_user_func_array(array(static::getView($args[0]), $args[1]), array_slice($args, 2));
+        $func = call_user_func_array(array($this->getView($view), $function), $args);
         if ($func === false) {
-            throw new OutputException("Cannot find function '{$args[1]}' in requested view '{$args[0]}'");
+            throw new OutputException("Cannot find function '{$function}' in requested view '{$view}'");
         }
         return $func;
     }
@@ -329,7 +326,7 @@ HTML;
      * @param array $context Associative array of variables to pass into the Twig renderer
      * @return string Rendered page content
      */
-    public function renderTwigTemplate($filename, $context = []) {
+    public function renderTwigTemplate(string $filename, array $context = []): string {
         try {
             return $this->twig->render($filename, $context);
         } catch (\Twig_Error $e) {
@@ -344,7 +341,7 @@ HTML;
      * @param string $filename Template file basename, file should be in site/app/templates
      * @param array $context Associative array of variables to pass into the Twig renderer
      */
-    public function renderTwigOutput($filename, $context = []) {
+    public function renderTwigOutput(string $filename, array $context = []): void {
         if ($this->buffer_output) {
             $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
         } else {
@@ -361,14 +358,16 @@ HTML;
      *
      * @return string
      */
-    private function getView($view) {
-        if(!isset($this->loaded_views[$view])) {
-            $class = "app\\views\\{$view}View";
+    private function getView($class) {
+        if (!Utils::startsWith($class, "app\\views")) {
+            $class = "app\\views\\{$class}View";
+        }
+        if(!isset($this->loaded_views[$class])) {
             /** @noinspection PhpUndefinedMethodInspection */
-            $this->loaded_views[$view] = new $class($this->core);
+            $this->loaded_views[$class] = new $class($this->core, $this);
         }
 
-        return $this->loaded_views[$view];
+        return $this->loaded_views[$class];
     }
 
     public function getOutput() {
@@ -379,7 +378,7 @@ HTML;
         return $return;
     }
 
-    private function renderHeader() {
+    protected function renderHeader() {
         if ($this->use_header) {
             return $this->controller->header();
         }
@@ -388,7 +387,7 @@ HTML;
         }
     }
 
-    private function renderFooter() {
+    protected function renderFooter() {
         if ($this->use_footer) {
             return $this->controller->footer();
         } else {
@@ -440,7 +439,7 @@ HTML;
             $this->loadTwig(false);
         }
         /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = $this->getView("Error")->exceptionPage($exception);
+        $exceptionPage = $this->getView(ErrorView::class)->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -464,7 +463,7 @@ HTML;
      * @return string
      */
     public function showError($error = "", $die = true) {
-        $this->renderOutput("Error", "errorPage", $error);
+        $this->renderOutput(ErrorView::class, "errorPage", $error);
         // @codeCoverageIgnore
         if ($die) {
             die($this->getOutput());
@@ -548,5 +547,13 @@ HTML;
      */
     public function getRunTime() {
         return (microtime(true) - $this->start_time);
+    }
+
+    public function buildUrl(string ...$parts): string {
+        return $this->core->buildUrl($parts);
+    }
+
+    public function buildCourseUrl(string ...$parts): string {
+        return $this->core->buildCourseUrl($parts);
     }
 }

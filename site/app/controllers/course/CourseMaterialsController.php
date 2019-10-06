@@ -324,7 +324,7 @@ class CourseMaterialsController extends AbstractController {
         $count_item = count($status);
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
                     $is_zip_file = false;

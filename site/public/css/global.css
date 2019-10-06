@@ -137,8 +137,4 @@ footer .footer-separator {
         min-width: 450px;
         transform: translateX(-50%);
     }
-
-    footer {
-        margin-top: -20px; /* 30px content padding and 10px footer padding */
-    }
 }

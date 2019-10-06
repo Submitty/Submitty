@@ -103,12 +103,12 @@ Please email your instructor with any questions or concerns.';
         ];
 
         foreach($replaces as $key => $variable) {
-        	if(isset($data[$key])) {
-        		$message = str_replace('{$' . $variable . '}', $data[$key], $message);
-        	}
+            if(isset($data[$key])) {
+                $message = str_replace('{$' . $variable . '}', $data[$key], $message);
+            }
         }
 
-		$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+        $message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
         return $message;
     }
 
