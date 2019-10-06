@@ -29,9 +29,7 @@
         <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
-        <exclude name="Generic.NamingConventions.ConstructorName.OldStyle" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
-        <exclude name="Generic.PHP.ForbiddenFunctions.FoundWithAlternative" />
         <exclude name="Generic.PHP.LowerCaseConstant.Found" />
         <exclude name="Generic.PHP.LowerCaseKeyword.Found" />
         <exclude name="Generic.PHP.LowerCaseType.ReturnTypeFound" />
