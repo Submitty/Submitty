@@ -1,0 +1,1343 @@
+[
+  {
+    "name": "get users for sample",
+    "endpoint": "/<current_semester>/sample/users",
+    "response": {
+      "status": "success",
+      "data": [
+        {
+          "email": "alyssaphacker@example.com",
+          "first_name": "Alyssa P",
+          "group": "Student",
+          "last_name": "Hacker",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "aphacker"
+        },
+        {
+          "email": "aufded@example.com",
+          "first_name": "Delphia",
+          "group": "Student",
+          "last_name": "Aufderhar",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "aufded"
+        },
+        {
+          "email": "bauchg@example.com",
+          "first_name": "Gwen",
+          "group": "Student",
+          "last_name": "Bauch",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "bauchg"
+        },
+        {
+          "email": "bechta@example.com",
+          "first_name": "Abigale",
+          "group": "Student",
+          "last_name": "Bechtelar",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "bechta"
+        },
+        {
+          "email": "bitdiddle@example.com",
+          "first_name": "Ben",
+          "group": "Student",
+          "last_name": "Bitdiddle",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "bitdiddle"
+        },
+        {
+          "email": "cronar@example.com",
+          "first_name": "Rachel",
+          "group": "Student",
+          "last_name": "Crona",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "cronar"
+        },
+        {
+          "email": "glovem@example.com",
+          "first_name": "Mason",
+          "group": "Student",
+          "last_name": "Glover",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "glovem"
+        },
+        {
+          "email": "keelia@example.com",
+          "first_name": "Ayden",
+          "group": "Student",
+          "last_name": "Keeling",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "keelia"
+        },
+        {
+          "email": "kshles@example.com",
+          "first_name": "Serenity",
+          "group": "Student",
+          "last_name": "Kshlerin",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "kshles"
+        },
+        {
+          "email": "lakinh@example.com",
+          "first_name": "Hazel",
+          "group": "Student",
+          "last_name": "Lakin",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "lakinh"
+        },
+        {
+          "email": "leannn@example.com",
+          "first_name": "Nigel",
+          "group": "Student",
+          "last_name": "Leannon",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "leannn"
+        },
+        {
+          "email": "smithj@example.com",
+          "first_name": "John",
+          "group": "Student",
+          "last_name": "Smith",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "smithj"
+        },
+        {
+          "email": "student@example.com",
+          "first_name": "Joe",
+          "group": "Student",
+          "last_name": "Student",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "student"
+        },
+        {
+          "email": "whitel@example.com",
+          "first_name": "Lizeth",
+          "group": "Student",
+          "last_name": "White",
+          "reg_section": "1",
+          "rot_section": 1,
+          "user_id": "whitel"
+        },
+        {
+          "email": "browna@example.com",
+          "first_name": "Alex",
+          "group": "Student",
+          "last_name": "Brown",
+          "reg_section": "2",
+          "rot_section": "NULL",
+          "user_id": "browna"
+        },
+        {
+          "email": "chrisw@example.com",
+          "first_name": "Willy",
+          "group": "Student",
+          "last_name": "Christiansen",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "chrisw"
+        },
+        {
+          "email": "handc@example.com",
+          "first_name": "Charlotte",
+          "group": "Student",
+          "last_name": "Hand",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "handc"
+        },
+        {
+          "email": "hettim@example.com",
+          "first_name": "Mauricio",
+          "group": "Student",
+          "last_name": "Hettinger",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "hettim"
+        },
+        {
+          "email": "hintzf@example.com",
+          "first_name": "Freida",
+          "group": "Student",
+          "last_name": "Hintz",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "hintzf"
+        },
+        {
+          "email": "huele@example.com",
+          "first_name": "Ena",
+          "group": "Student",
+          "last_name": "Huel",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "huele"
+        },
+        {
+          "email": "johnsr@example.com",
+          "first_name": "Reece",
+          "group": "Student",
+          "last_name": "Johnson",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "johnsr"
+        },
+        {
+          "email": "joness@example.com",
+          "first_name": "Sally",
+          "group": "Student",
+          "last_name": "Jones",
+          "reg_section": "2",
+          "rot_section": "NULL",
+          "user_id": "joness"
+        },
+        {
+          "email": "kuhicl@example.com",
+          "first_name": "Laurel",
+          "group": "Student",
+          "last_name": "Kuhic",
+          "reg_section": "2",
+          "rot_section": "NULL",
+          "user_id": "kuhicl"
+        },
+        {
+          "email": "metza@example.com",
+          "first_name": "Allene",
+          "group": "Student",
+          "last_name": "Metz",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "metza"
+        },
+        {
+          "email": "stracm@example.com",
+          "first_name": "Malvina",
+          "group": "Student",
+          "last_name": "Stracke",
+          "reg_section": "2",
+          "rot_section": 2,
+          "user_id": "stracm"
+        },
+        {
+          "email": "vonruf@example.com",
+          "first_name": "Florence",
+          "group": "Student",
+          "last_name": "VonRueden",
+          "reg_section": "2",
+          "rot_section": "NULL",
+          "user_id": "vonruf"
+        },
+        {
+          "email": "feestj@example.com",
+          "first_name": "Jamaal",
+          "group": "Student",
+          "last_name": "Feest",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "feestj"
+        },
+        {
+          "email": "hartmj@example.com",
+          "first_name": "Jakayla",
+          "group": "Student",
+          "last_name": "Hartmann",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "hartmj"
+        },
+        {
+          "email": "hodkid@example.com",
+          "first_name": "Damien",
+          "group": "Student",
+          "last_name": "Hodkiewicz",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "hodkid"
+        },
+        {
+          "email": "leuscj@example.com",
+          "first_name": "Jordi",
+          "group": "Student",
+          "last_name": "Leuschke",
+          "reg_section": "3",
+          "rot_section": "NULL",
+          "user_id": "leuscj"
+        },
+        {
+          "email": "reichb@example.com",
+          "first_name": "Brandy",
+          "group": "Student",
+          "last_name": "Reichert",
+          "reg_section": "3",
+          "rot_section": "NULL",
+          "user_id": "reichb"
+        },
+        {
+          "email": "roobf@example.com",
+          "first_name": "Francesco",
+          "group": "Student",
+          "last_name": "Roob",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "roobf"
+        },
+        {
+          "email": "schadd@example.com",
+          "first_name": "Desiree",
+          "group": "Student",
+          "last_name": "Schaden",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "schadd"
+        },
+        {
+          "email": "vonm@example.com",
+          "first_name": "Mylene",
+          "group": "Student",
+          "last_name": "Von",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "vonm"
+        },
+        {
+          "email": "wardm@example.com",
+          "first_name": "Marty",
+          "group": "Student",
+          "last_name": "Ward",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "wardm"
+        },
+        {
+          "email": "weissf@example.com",
+          "first_name": "Francesco",
+          "group": "Student",
+          "last_name": "Weissnat",
+          "reg_section": "3",
+          "rot_section": 3,
+          "user_id": "weissf"
+        },
+        {
+          "email": "heanec@example.com",
+          "first_name": "Cornelius",
+          "group": "Student",
+          "last_name": "Heaney",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "heanec"
+        },
+        {
+          "email": "jacobs@example.com",
+          "first_name": "Stephania",
+          "group": "Student",
+          "last_name": "Jacobi",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "jacobs"
+        },
+        {
+          "email": "jastm@example.com",
+          "first_name": "Marcellus",
+          "group": "Student",
+          "last_name": "Jast",
+          "reg_section": "4",
+          "rot_section": "NULL",
+          "user_id": "jastm"
+        },
+        {
+          "email": "kovaco@example.com",
+          "first_name": "Ozella",
+          "group": "Student",
+          "last_name": "Kovacek",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "kovaco"
+        },
+        {
+          "email": "mcculc@example.com",
+          "first_name": "Chad",
+          "group": "Student",
+          "last_name": "McCullough",
+          "reg_section": "4",
+          "rot_section": "NULL",
+          "user_id": "mcculc"
+        },
+        {
+          "email": "runolz@example.com",
+          "first_name": "Zoie",
+          "group": "Student",
+          "last_name": "Runolfsson",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "runolz"
+        },
+        {
+          "email": "thompc@example.com",
+          "first_name": "Carli",
+          "group": "Student",
+          "last_name": "Thompson",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "thompc"
+        },
+        {
+          "email": "turnej@example.com",
+          "first_name": "Juliana",
+          "group": "Student",
+          "last_name": "Turner",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "turnej"
+        },
+        {
+          "email": "uptonr@example.com",
+          "first_name": "Rita",
+          "group": "Student",
+          "last_name": "Upton",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "uptonr"
+        },
+        {
+          "email": "willia@example.com",
+          "first_name": "Annabel",
+          "group": "Student",
+          "last_name": "Williamson",
+          "reg_section": "4",
+          "rot_section": 4,
+          "user_id": "willia"
+        },
+        {
+          "email": "hamill@example.com",
+          "first_name": "Libbie",
+          "group": "Student",
+          "last_name": "Hamill",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "hamill"
+        },
+        {
+          "email": "harric@example.com",
+          "first_name": "Christopher",
+          "group": "Student",
+          "last_name": "Harris",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "harric"
+        },
+        {
+          "email": "hoegea@example.com",
+          "first_name": "Antwan",
+          "group": "Student",
+          "last_name": "Hoeger",
+          "reg_section": "5",
+          "rot_section": "NULL",
+          "user_id": "hoegea"
+        },
+        {
+          "email": "homeno@example.com",
+          "first_name": "Osborne",
+          "group": "Student",
+          "last_name": "Homenick",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "homeno"
+        },
+        {
+          "email": "jastv@example.com",
+          "first_name": "Vilma",
+          "group": "Student",
+          "last_name": "Jast",
+          "reg_section": "5",
+          "rot_section": "NULL",
+          "user_id": "jastv"
+        },
+        {
+          "email": "kerluh@example.com",
+          "first_name": "Hermina",
+          "group": "Student",
+          "last_name": "Kerluke",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "kerluh"
+        },
+        {
+          "email": "klingd@example.com",
+          "first_name": "Diego",
+          "group": "Student",
+          "last_name": "Kling",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "klingd"
+        },
+        {
+          "email": "metzv@example.com",
+          "first_name": "Verdie",
+          "group": "Student",
+          "last_name": "Metz",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "metzv"
+        },
+        {
+          "email": "sauere@example.com",
+          "first_name": "Ewell",
+          "group": "Student",
+          "last_name": "Sauer",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "sauere"
+        },
+        {
+          "email": "trembb@example.com",
+          "first_name": "Buford",
+          "group": "Student",
+          "last_name": "Tremblay",
+          "reg_section": "5",
+          "rot_section": 5,
+          "user_id": "trembb"
+        },
+        {
+          "email": "adamss@example.com",
+          "first_name": "Sigurd",
+          "group": "Student",
+          "last_name": "Adams",
+          "reg_section": "6",
+          "rot_section": "NULL",
+          "user_id": "adamss"
+        },
+        {
+          "email": "conrob@example.com",
+          "first_name": "Brionna",
+          "group": "Student",
+          "last_name": "Conroy",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "conrob"
+        },
+        {
+          "email": "durgac@example.com",
+          "first_name": "Clementina",
+          "group": "Student",
+          "last_name": "Durgan",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "durgac"
+        },
+        {
+          "email": "kilbad@example.com",
+          "first_name": "Dean",
+          "group": "Student",
+          "last_name": "Kilback",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "kilbad"
+        },
+        {
+          "email": "marvic@example.com",
+          "first_name": "Cortez",
+          "group": "Student",
+          "last_name": "Marvin",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "marvic"
+        },
+        {
+          "email": "morisf@example.com",
+          "first_name": "Ford",
+          "group": "Student",
+          "last_name": "Morissette",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "morisf"
+        },
+        {
+          "email": "mullem@example.com",
+          "first_name": "Mack",
+          "group": "Student",
+          "last_name": "Muller",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "mullem"
+        },
+        {
+          "email": "rutheh@example.com",
+          "first_name": "Hudson",
+          "group": "Student",
+          "last_name": "Rutherford",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "rutheh"
+        },
+        {
+          "email": "shielo@example.com",
+          "first_name": "Olaf",
+          "group": "Student",
+          "last_name": "Shields",
+          "reg_section": "6",
+          "rot_section": 1,
+          "user_id": "shielo"
+        },
+        {
+          "email": "bartec@example.com",
+          "first_name": "Cleora",
+          "group": "Student",
+          "last_name": "Bartell",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "bartec"
+        },
+        {
+          "email": "gislal@example.com",
+          "first_name": "Lou",
+          "group": "Student",
+          "last_name": "Gislason",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "gislal"
+        },
+        {
+          "email": "larkim@example.com",
+          "first_name": "Madelynn",
+          "group": "Student",
+          "last_name": "Larkin",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "larkim"
+        },
+        {
+          "email": "mckenh@example.com",
+          "first_name": "Hannah",
+          "group": "Student",
+          "last_name": "McKenzie",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "mckenh"
+        },
+        {
+          "email": "medhug@example.com",
+          "first_name": "Geovany",
+          "group": "Student",
+          "last_name": "Medhurst",
+          "reg_section": "7",
+          "rot_section": "NULL",
+          "user_id": "medhug"
+        },
+        {
+          "email": "moscit@example.com",
+          "first_name": "Trace",
+          "group": "Student",
+          "last_name": "Mosciski",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "moscit"
+        },
+        {
+          "email": "pagaca@example.com",
+          "first_name": "Antwon",
+          "group": "Student",
+          "last_name": "Pagac",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "pagaca"
+        },
+        {
+          "email": "schims@example.com",
+          "first_name": "Sydnee",
+          "group": "Student",
+          "last_name": "Schimmel",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "schims"
+        },
+        {
+          "email": "starkd@example.com",
+          "first_name": "Dora",
+          "group": "Student",
+          "last_name": "Stark",
+          "reg_section": "7",
+          "rot_section": 2,
+          "user_id": "starkd"
+        },
+        {
+          "email": "borerd@example.com",
+          "first_name": "Dustin",
+          "group": "Student",
+          "last_name": "Borer",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "borerd"
+        },
+        {
+          "email": "botsfj@example.com",
+          "first_name": "Jamie",
+          "group": "Student",
+          "last_name": "Botsford",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "botsfj"
+        },
+        {
+          "email": "brakur@example.com",
+          "first_name": "Ramon",
+          "group": "Student",
+          "last_name": "Brakus",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "brakur"
+        },
+        {
+          "email": "daniet@example.com",
+          "first_name": "Tremaine",
+          "group": "Student",
+          "last_name": "Daniel",
+          "reg_section": "8",
+          "rot_section": "NULL",
+          "user_id": "daniet"
+        },
+        {
+          "email": "gottlj@example.com",
+          "first_name": "Janet",
+          "group": "Student",
+          "last_name": "Gottlieb",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "gottlj"
+        },
+        {
+          "email": "kinge@example.com",
+          "first_name": "Edison",
+          "group": "Student",
+          "last_name": "King",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "kinge"
+        },
+        {
+          "email": "rathm@example.com",
+          "first_name": "Maud",
+          "group": "Student",
+          "last_name": "Rath",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "rathm"
+        },
+        {
+          "email": "sauerd@example.com",
+          "first_name": "Diamond",
+          "group": "Student",
+          "last_name": "Sauer",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "sauerd"
+        },
+        {
+          "email": "sporea@example.com",
+          "first_name": "Avery",
+          "group": "Student",
+          "last_name": "Sporer",
+          "reg_section": "8",
+          "rot_section": 3,
+          "user_id": "sporea"
+        },
+        {
+          "email": "bergeb@example.com",
+          "first_name": "Birdie",
+          "group": "Student",
+          "last_name": "Berge",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "bergeb"
+        },
+        {
+          "email": "damorw@example.com",
+          "first_name": "Wendell",
+          "group": "Student",
+          "last_name": "D'Amore",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "damorw"
+        },
+        {
+          "email": "douglg@example.com",
+          "first_name": "Glen",
+          "group": "Student",
+          "last_name": "Douglas",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "douglg"
+        },
+        {
+          "email": "kiehnr@example.com",
+          "first_name": "Ryan",
+          "group": "Student",
+          "last_name": "Kiehn",
+          "reg_section": "9",
+          "rot_section": "NULL",
+          "user_id": "kiehnr"
+        },
+        {
+          "email": "ortizr@example.com",
+          "first_name": "Rubie",
+          "group": "Student",
+          "last_name": "Ortiz",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "ortizr"
+        },
+        {
+          "email": "schroj@example.com",
+          "first_name": "Jaime",
+          "group": "Student",
+          "last_name": "Schroeder",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "schroj"
+        },
+        {
+          "email": "smithj1@example.com",
+          "first_name": "Jorge",
+          "group": "Student",
+          "last_name": "Smith",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "smithj1"
+        },
+        {
+          "email": "towneo@example.com",
+          "first_name": "Omari",
+          "group": "Student",
+          "last_name": "Towne",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "towneo"
+        },
+        {
+          "email": "ullril@example.com",
+          "first_name": "Loy",
+          "group": "Student",
+          "last_name": "Ullrich",
+          "reg_section": "9",
+          "rot_section": 4,
+          "user_id": "ullril"
+        },
+        {
+          "email": "gutmai@example.com",
+          "first_name": "Irwin",
+          "group": "Student",
+          "last_name": "Gutmann",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "gutmai"
+        },
+        {
+          "email": "lindgf@example.com",
+          "first_name": "Freeda",
+          "group": "Student",
+          "last_name": "Lindgren",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "lindgf"
+        },
+        {
+          "email": "reingn@example.com",
+          "first_name": "Nash",
+          "group": "Student",
+          "last_name": "Reinger",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "reingn"
+        },
+        {
+          "email": "reynoa@example.com",
+          "first_name": "Alysha",
+          "group": "Student",
+          "last_name": "Reynolds",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "reynoa"
+        },
+        {
+          "email": "runtem@example.com",
+          "first_name": "Magdalen",
+          "group": "Student",
+          "last_name": "Runte",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "runtem"
+        },
+        {
+          "email": "russec@example.com",
+          "first_name": "Cordie",
+          "group": "Student",
+          "last_name": "Russel",
+          "reg_section": "10",
+          "rot_section": "NULL",
+          "user_id": "russec"
+        },
+        {
+          "email": "satted@example.com",
+          "first_name": "Dorthy",
+          "group": "Student",
+          "last_name": "Satterfield",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "satted"
+        },
+        {
+          "email": "sengec@example.com",
+          "first_name": "Cary",
+          "group": "Student",
+          "last_name": "Senger",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "sengec"
+        },
+        {
+          "email": "trompa@example.com",
+          "first_name": "Arnaldo",
+          "group": "Student",
+          "last_name": "Tromp",
+          "reg_section": "10",
+          "rot_section": 5,
+          "user_id": "trompa"
+        },
+        {
+          "email": "baliss@example.com",
+          "first_name": "Selina",
+          "group": "Student",
+          "last_name": "Balistreri",
+          "reg_section": "NULL",
+          "rot_section": 4,
+          "user_id": "baliss"
+        },
+        {
+          "email": "bodew@example.com",
+          "first_name": "Wyman",
+          "group": "Student",
+          "last_name": "Bode",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "bodew"
+        },
+        {
+          "email": "bruenl@example.com",
+          "first_name": "Lelia",
+          "group": "Student",
+          "last_name": "Bruen",
+          "reg_section": "NULL",
+          "rot_section": 5,
+          "user_id": "bruenl"
+        },
+        {
+          "email": "dibbea@example.com",
+          "first_name": "Alfreda",
+          "group": "Student",
+          "last_name": "Dibbert",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "dibbea"
+        },
+        {
+          "email": "emardv@example.com",
+          "first_name": "Verda",
+          "group": "Student",
+          "last_name": "Emard",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "emardv"
+        },
+        {
+          "email": "grader@example.com",
+          "first_name": "Tim",
+          "group": "Limited Access Grader (Mentor)",
+          "last_name": "Grader",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "grader"
+        },
+        {
+          "email": "grader2@example.com",
+          "first_name": "Noby",
+          "group": "Limited Access Grader (Mentor)",
+          "last_name": "Grader",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "grader2"
+        },
+        {
+          "email": "hammef@example.com",
+          "first_name": "Felicity",
+          "group": "Student",
+          "last_name": "Hammes",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "hammef"
+        },
+        {
+          "email": "harbel@example.com",
+          "first_name": "Luz",
+          "group": "Student",
+          "last_name": "Harber",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "harbel"
+        },
+        {
+          "email": "hayesk@example.com",
+          "first_name": "Kaley",
+          "group": "Student",
+          "last_name": "Hayes",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "hayesk"
+        },
+        {
+          "email": "instructor@example.com",
+          "first_name": "Quinn",
+          "group": "Instructor",
+          "last_name": "Instructor",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "instructor"
+        },
+        {
+          "email": "jakubr@example.com",
+          "first_name": "Rollin",
+          "group": "Student",
+          "last_name": "Jakubowski",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "jakubr"
+        },
+        {
+          "email": "kessle@example.com",
+          "first_name": "Earline",
+          "group": "Student",
+          "last_name": "Kessler",
+          "reg_section": "NULL",
+          "rot_section": 1,
+          "user_id": "kessle"
+        },
+        {
+          "email": "kessll@example.com",
+          "first_name": "Lindsey",
+          "group": "Student",
+          "last_name": "Kessler",
+          "reg_section": "NULL",
+          "rot_section": 5,
+          "user_id": "kessll"
+        },
+        {
+          "email": "kingm@example.com",
+          "first_name": "Muhammad",
+          "group": "Student",
+          "last_name": "King",
+          "reg_section": "NULL",
+          "rot_section": 3,
+          "user_id": "kingm"
+        },
+        {
+          "email": "kocht@example.com",
+          "first_name": "Travon",
+          "group": "Student",
+          "last_name": "Koch",
+          "reg_section": "NULL",
+          "rot_section": 1,
+          "user_id": "kocht"
+        },
+        {
+          "email": "kundeb@example.com",
+          "first_name": "Bridget",
+          "group": "Student",
+          "last_name": "Kunde",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "kundeb"
+        },
+        {
+          "email": "labadc@example.com",
+          "first_name": "Cecelia",
+          "group": "Student",
+          "last_name": "Labadie",
+          "reg_section": "NULL",
+          "rot_section": 4,
+          "user_id": "labadc"
+        },
+        {
+          "email": "lockmc@example.com",
+          "first_name": "Chelsea",
+          "group": "Student",
+          "last_name": "Lockman",
+          "reg_section": "NULL",
+          "rot_section": 2,
+          "user_id": "lockmc"
+        },
+        {
+          "email": "lubowc@example.com",
+          "first_name": "Courtney",
+          "group": "Student",
+          "last_name": "Lubowitz",
+          "reg_section": "NULL",
+          "rot_section": 5,
+          "user_id": "lubowc"
+        },
+        {
+          "email": "manne@example.com",
+          "first_name": "Emmett",
+          "group": "Instructor",
+          "last_name": "Mann",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "manne"
+        },
+        {
+          "email": "mrazt@example.com",
+          "first_name": "Toy",
+          "group": "Student",
+          "last_name": "Mraz",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "mrazt"
+        },
+        {
+          "email": "prosaj@example.com",
+          "first_name": "Jamarcus",
+          "group": "Student",
+          "last_name": "Prosacco",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "prosaj"
+        },
+        {
+          "email": "renneh@example.com",
+          "first_name": "Herta",
+          "group": "Student",
+          "last_name": "Renner",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "renneh"
+        },
+        {
+          "email": "rogahl@example.com",
+          "first_name": "Layne",
+          "group": "Student",
+          "last_name": "Rogahn",
+          "reg_section": "NULL",
+          "rot_section": 2,
+          "user_id": "rogahl"
+        },
+        {
+          "email": "roobc@example.com",
+          "first_name": "Cali",
+          "group": "Student",
+          "last_name": "Roob",
+          "reg_section": "NULL",
+          "rot_section": 4,
+          "user_id": "roobc"
+        },
+        {
+          "email": "ruecke@example.com",
+          "first_name": "Esteban",
+          "group": "Student",
+          "last_name": "Ruecker",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "ruecke"
+        },
+        {
+          "email": "rueckm@example.com",
+          "first_name": "Maryjane",
+          "group": "Student",
+          "last_name": "Ruecker",
+          "reg_section": "NULL",
+          "rot_section": 1,
+          "user_id": "rueckm"
+        },
+        {
+          "email": "runolm@example.com",
+          "first_name": "Montana",
+          "group": "Student",
+          "last_name": "Runolfsdottir",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "runolm"
+        },
+        {
+          "email": "schowb@example.com",
+          "first_name": "Brayan",
+          "group": "Student",
+          "last_name": "Schowalter",
+          "reg_section": "NULL",
+          "rot_section": 3,
+          "user_id": "schowb"
+        },
+        {
+          "email": "spinko@example.com",
+          "first_name": "Otho",
+          "group": "Student",
+          "last_name": "Spinka",
+          "reg_section": "NULL",
+          "rot_section": 3,
+          "user_id": "spinko"
+        },
+        {
+          "email": "submitty-admin@example.com",
+          "first_name": "Submitty Admin",
+          "group": "Instructor",
+          "last_name": "Submitty Admin",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "submitty-admin"
+        },
+        {
+          "email": "ta@example.com",
+          "first_name": "Jill",
+          "group": "Full Access Grader (Grad TA)",
+          "last_name": "TA",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "ta"
+        },
+        {
+          "email": "ta2@example.com",
+          "first_name": "Jack",
+          "group": "Full Access Grader (Grad TA)",
+          "last_name": "TA",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "ta2"
+        },
+        {
+          "email": "ta3@example.com",
+          "first_name": "Jamie",
+          "group": "Full Access Grader (Grad TA)",
+          "last_name": "TA",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "ta3"
+        },
+        {
+          "email": "warde@example.com",
+          "first_name": "Eliezer",
+          "group": "Student",
+          "last_name": "Ward",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "warde"
+        },
+        {
+          "email": "waterw@example.com",
+          "first_name": "Wiley",
+          "group": "Student",
+          "last_name": "Waters",
+          "reg_section": "NULL",
+          "rot_section": "NULL",
+          "user_id": "waterw"
+        },
+        {
+          "email": "wilkic@example.com",
+          "first_name": "Casey",
+          "group": "Student",
+          "last_name": "Wilkinson",
+          "reg_section": "NULL",
+          "rot_section": 2,
+          "user_id": "wilkic"
+        }
+      ]
+    }
+  },
+  {
+    "name": "get graders for sample",
+    "endpoint": "/<current_semester>/sample/graders",
+    "response": {
+      "status": "success",
+      "data": [
+        {
+          "email": "grader@example.com",
+          "first_name": "Tim",
+          "group": "Limited Access Grader (Mentor)",
+          "last_name": "Grader",
+          "reg_section": "4,5",
+          "rot_section": "NULL",
+          "user_id": "grader"
+        },
+        {
+          "email": "grader2@example.com",
+          "first_name": "Noby",
+          "group": "Limited Access Grader (Mentor)",
+          "last_name": "Grader",
+          "reg_section": "",
+          "rot_section": "NULL",
+          "user_id": "grader2"
+        },
+        {
+          "email": "instructor@example.com",
+          "first_name": "Quinn",
+          "group": "Instructor",
+          "last_name": "Instructor",
+          "reg_section": "All",
+          "rot_section": "NULL",
+          "user_id": "instructor"
+        },
+        {
+          "email": "manne@example.com",
+          "first_name": "Emmett",
+          "group": "Instructor",
+          "last_name": "Mann",
+          "reg_section": "All",
+          "rot_section": "NULL",
+          "user_id": "manne"
+        },
+        {
+          "email": "submitty-admin@example.com",
+          "first_name": "Submitty Admin",
+          "group": "Instructor",
+          "last_name": "Submitty Admin",
+          "reg_section": "All",
+          "rot_section": "NULL",
+          "user_id": "submitty-admin"
+        },
+        {
+          "email": "ta@example.com",
+          "first_name": "Jill",
+          "group": "Full Access Grader (Grad TA)",
+          "last_name": "TA",
+          "reg_section": "",
+          "rot_section": "NULL",
+          "user_id": "ta"
+        },
+        {
+          "email": "ta2@example.com",
+          "first_name": "Jack",
+          "group": "Full Access Grader (Grad TA)",
+          "last_name": "TA",
+          "reg_section": "1",
+          "rot_section": "NULL",
+          "user_id": "ta2"
+        },
+        {
+          "email": "ta3@example.com",
+          "first_name": "Jamie",
+          "group": "Full Access Grader (Grad TA)",
+          "last_name": "TA",
+          "reg_section": "1,3",
+          "rot_section": "NULL",
+          "user_id": "ta3"
+        }
+      ]
+    }
+  }
+]

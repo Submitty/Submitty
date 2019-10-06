@@ -6,11 +6,13 @@ runs them against the Submitty API.
 """
 
 from argparse import ArgumentParser
-from json import load
+from datetime import datetime
+from json import load, loads, dumps
 from os import walk
 from os.path import dirname, join, realpath
 import requests
 import unittest
+from uuid import uuid1
 
 
 DIR_PATH = dirname(realpath(__file__))
@@ -28,10 +30,9 @@ class ApiTestCase(unittest.TestCase):
         :param test: test instance to be run
         """
         super().__init__()
+        self.maxDiff = None
         self.url = url
         self.token = token
-        if 'method' not in test:
-            test['method'] = 'get'
         self.test = test
 
     def runTest(self):
@@ -39,7 +40,10 @@ class ApiTestCase(unittest.TestCase):
         if self.test['method'] == 'get':
             actual = self.get(self.test['endpoint'])
         else:
-            actual = self.post(self.test['endpoint'], self.test['data'])
+            actual = self.post(
+                self.test['endpoint'],
+                self.test['data'] if 'data' in self.test else dict()
+            )
         self.assertEqual(self.test['response'], actual)
 
     def get(self, endpoint):
@@ -71,10 +75,47 @@ def suite(api_url: str, token: str):
         for name in files:
             with open(join(root, name)) as test_file:
                 test_details = load(test_file)
-            for test in test_details['tests']:
+            for test in test_details:
+                initialize_values(test)
                 test_class = ApiTestCase(api_url, token, test)
                 suite.addTest(test_class)
     return suite
+
+
+def get_current_semester():
+    """
+    Given today's date, generates a three character code that represents the semester to use for
+    courses such that the first half of the year is considered "Spring" and the last half is
+    considered "Fall". The "Spring" semester  gets an S as the first letter while "Fall" gets an
+    F. The next two characters are the last two digits in the current year.
+    :return:
+    """
+    today = datetime.today()
+    semester = "f" + str(today.year)[-2:]
+    if today.month < 7:
+        semester = "s" + str(today.year)[-2:]
+    return semester
+
+
+def get_current_year():
+    return datetime.today().year
+
+
+def initialize_values(test: dict):
+    if 'method' not in test:
+        test['method'] = 'get'
+    test['method'] = test['method'].lower()
+    for val in ['endpoint', 'data', 'response']:
+        if val in test:
+            tmp = dumps(test[val])
+            replacements = {
+                'current_semester': get_current_semester,
+                'current_year': get_current_year,
+                'random_uuid': uuid1
+            }
+            for key, func in replacements.items():
+                tmp = tmp.replace(f'<{key}>', f'{func()}')
+            test[val] = loads(tmp)
 
 
 def get_token(api_url: str, user_id: str) -> str:

@@ -1,0 +1,11 @@
+[
+  {
+    "name": "generate grade summaries",
+    "endpoint": "/<current_semester>/sample/reports/summaries",
+    "method": "post",
+    "response": {
+      "data": null,
+      "status": "success"
+    }
+  }
+]

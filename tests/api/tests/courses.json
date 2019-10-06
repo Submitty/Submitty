@@ -1,41 +1,55 @@
-{
-  "tests": [
-    {
-      "name": "get courses",
-      "endpoint": "/courses",
-      "method": "get",
-      "response": {
-        "status": "success",
-        "data": {
-          "unarchived_courses": [
-            {
-              "semester": "f19",
-              "title": "blank",
-              "display_name": "",
-              "display_semester": "Fall 2019"
-            },
-            {
-              "semester": "f19",
-              "title": "development",
-              "display_name": "",
-              "display_semester": "Fall 2019"
-            },
-            {
-              "semester": "f19",
-              "title": "sample",
-              "display_name": "",
-              "display_semester": "Fall 2019"
-            },
-            {
-              "semester": "f19",
-              "title": "tutorial",
-              "display_name": "",
-              "display_semester": "Fall 2019"
-            }
-          ],
-          "archived_courses": []
-        }
+[
+  {
+    "name": "get courses",
+    "endpoint": "/courses",
+    "method": "get",
+    "response": {
+      "status": "success",
+      "data": {
+        "unarchived_courses": [
+          {
+            "semester": "<current_semester>",
+            "title": "blank",
+            "display_name": "",
+            "display_semester": "Fall <current_year>"
+          },
+          {
+            "semester": "<current_semester>",
+            "title": "development",
+            "display_name": "",
+            "display_semester": "Fall <current_year>"
+          },
+          {
+            "semester": "<current_semester>",
+            "title": "sample",
+            "display_name": "",
+            "display_semester": "Fall <current_year>"
+          },
+          {
+            "semester": "<current_semester>",
+            "title": "tutorial",
+            "display_name": "",
+            "display_semester": "Fall <current_year>"
+          }
+        ],
+        "archived_courses": []
       }
     }
-  ]
-}
+  },
+  {
+    "name": "create course",
+    "endpoint": "/courses",
+    "method": "post",
+    "data": {
+      "course_semester": "<current_semester>",
+      "course_title": "<random_uuid>",
+      "head_instructor": "instructor2",
+      "base_course_semester": "<current_semester>",
+      "base_course_title": "sample"
+    },
+    "response": {
+      "status": "fail",
+      "message": "You can only create course for yourself."
+    }
+  }
+]
