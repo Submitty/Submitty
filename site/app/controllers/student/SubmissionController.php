@@ -283,9 +283,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {

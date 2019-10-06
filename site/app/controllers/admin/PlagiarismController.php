@@ -504,108 +504,108 @@ class PlagiarismController extends AbstractController {
         $active_version_user_1 =  (string)$graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-			$return = array('error' => 'Ranking file not exists.');
-        	$return = json_encode($return);
-        	echo($return);
-        	return;
+            $return = array('error' => 'Ranking file not exists.');
+            $return = json_encode($return);
+            echo($return);
+            return;
         }
-    	$content =file_get_contents($file_path);
-    	$content = trim(str_replace(array("\r", "\n"), '', $content));
-    	$rankings = preg_split('/ +/', $content);
-		$rankings = array_chunk($rankings,3);
-		foreach($rankings as $ranking) {
-			if($ranking[1] == $user_id_1) {
-				$max_matching_version = $ranking[2];
-			}
-		}
+        $content =file_get_contents($file_path);
+        $content = trim(str_replace(array("\r", "\n"), '', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings,3);
+        foreach($rankings as $ranking) {
+            if($ranking[1] == $user_id_1) {
+                $max_matching_version = $ranking[2];
+            }
+        }
         if($version_user_1 == "max_matching") {
-        	$version_user_1 = $max_matching_version;
+            $version_user_1 = $max_matching_version;
         }
         $all_versions_user_1 = array_diff(scandir($course_path."/submissions/".$gradeable_id."/".$user_id_1), array(".", "..", "user_assignment_settings.json"));
 
         $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id_1."/".$version_user_1."/submission.concatenated";
         $data="";
-    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-    		if(isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2 , '1');
-    		}
-    		else {
-    			$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
-    		}
-    		$data= array('display_code1'=> $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
+        if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
+            if(isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2 , '1');
+            }
+            else {
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
+            }
+            $data= array('display_code1'=> $this->getDisplayForCode($file_name, $color_info), 'code_version_user_1' => $version_user_1, 'max_matching_version' => $max_matching_version, 'active_version_user_1' => $active_version_user_1, 'all_versions_user_1' => $all_versions_user_1, 'ci'=> $color_info);
         }
         else {
-        	$return = array('error' => 'User 1 submission.concatenated for specified version not found.');
-        	$return = json_encode($return);
-        	echo($return);
-        	return;
+            $return = array('error' => 'User 1 submission.concatenated for specified version not found.');
+            $return = json_encode($return);
+            echo($return);
+            return;
         }
         if(isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-        	$file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id_2."/".$version_user_2."/submission.concatenated";
+            $file_name= $course_path."/lichen/concatenated/".$gradeable_id."/".$user_id_2."/".$version_user_2."/submission.concatenated";
 
-	    	if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
-	    		$color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
-	  			$data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
-	        }
-	        else {
-	        	$return = array('error' => 'User 2 submission.concatenated for matching version not found.');
-		    	$return = json_encode($return);
-		    	echo($return);
-		    	return;
-	        }
+            if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '2');
+                $data['display_code2'] = $this->getDisplayForCode($file_name, $color_info);
+            }
+            else {
+                $return = array('error' => 'User 2 submission.concatenated for matching version not found.');
+                $return = json_encode($return);
+                echo($return);
+                return;
+            }
         }
         $data['ci'] = $color_info;
-       	$return= json_encode($data);
-    	echo($return);
+        $return= json_encode($data);
+        echo($return);
     }
 
     public function getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, $codebox) {
-    	$color_info = array();
+        $color_info = array();
 
         //Represents left and right display users
         $color_info[1] = array();
         $color_info[2] = array();
 
-		$file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
+        $file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version_user_1."/matches.json";
         if (!file_exists($file_path)) {
-        	return $color_info;
+            return $color_info;
         }
         else {
-        	$matches = json_decode(file_get_contents($file_path), true);
-        	$file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
-        	$tokens_user_1 = json_decode(file_get_contents($file_path), true);
-        	if($user_id_2 != "") {
-        		$file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_2."/".$version_user_2."/tokens.json";
-        		$tokens_user_2 = json_decode(file_get_contents($file_path), true);
-        	}
-	    	foreach($matches as $match) {
-	    		$start_pos =$tokens_user_1[$match["start"]-1]["char"]-1;
-	    		$start_line= $tokens_user_1[$match["start"]-1]["line"]-1;
-	    		$end_pos =$tokens_user_1[$match["end"]-1]["char"]-1; //!!!!!
-	    		$end_line= $tokens_user_1[$match["end"]-1]["line"]-1;
+            $matches = json_decode(file_get_contents($file_path), true);
+            $file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_1."/".$version_user_1."/tokens.json";
+            $tokens_user_1 = json_decode(file_get_contents($file_path), true);
+            if($user_id_2 != "") {
+                $file_path= $course_path."/lichen/tokenized/".$gradeable_id."/".$user_id_2."/".$version_user_2."/tokens.json";
+                $tokens_user_2 = json_decode(file_get_contents($file_path), true);
+            }
+            foreach($matches as $match) {
+                $start_pos =$tokens_user_1[$match["start"]-1]["char"]-1;
+                $start_line= $tokens_user_1[$match["start"]-1]["line"]-1;
+                $end_pos =$tokens_user_1[$match["end"]-1]["char"]-1; //!!!!!
+                $end_line= $tokens_user_1[$match["end"]-1]["line"]-1;
                 $start_value = $tokens_user_1[$match["start"]-1]["value"];
-	    		$end_value =$tokens_user_1[$match["end"]-1]["value"];
+                $end_value =$tokens_user_1[$match["end"]-1]["value"];
                 $userMatchesStarts = array();
                 $userMatchesEnds = array();
-	    		if($match["type"] == "match") {
-	    			$orange_color = false;
-	    			if($user_id_2 != "") {
-		    			foreach($match['others'] as $i=>$other) {
-	    					if($other["username"] == $user_id_2) {
-	    						$orange_color = true;
+                if($match["type"] == "match") {
+                    $orange_color = false;
+                    if($user_id_2 != "") {
+                        foreach($match['others'] as $i=>$other) {
+                            if($other["username"] == $user_id_2) {
+                                $orange_color = true;
                                 $user_2_index_in_others=$i;
-	    					}
-	    				}
-	    			}
+                            }
+                        }
+                    }
 
-	    			if($orange_color) {
+                    if($orange_color) {
                         //Color is orange -- general match from selected match
                         $color = '#ffa500';
-	    			}
-	    			else if(!$orange_color) {
+                    }
+                    else if(!$orange_color) {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
-	    			}
+                    }
 
                     if($codebox == "2" && $user_id_2 !="" && $orange_color) {
                          foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
@@ -635,17 +635,17 @@ class PlagiarismController extends AbstractController {
                 array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
 
                 // foreach($color_info as $i=>$color_info_for_line) {
-                // 	ksort($color_info[$i]);
+                //  ksort($color_info[$i]);
                 // }
             }
         }
-    	return $color_info;
+        return $color_info;
     }
 
     public function getDisplayForCode($file_name , $color_info){
-    	$content = file_get_contents($file_name);
-	    return $content;
-	}
+        $content = file_get_contents($file_name);
+        return $content;
+    }
 
     /**
      * @Route("/{_semester}/{_course}/plagiarism/gradeable/{gradeable_id}/match")
@@ -659,46 +659,46 @@ class PlagiarismController extends AbstractController {
         $error="";
         $file_path= $course_path."/lichen/ranking/".$gradeable_id.".txt";
         if(!file_exists($file_path)) {
-			$return = array('error' => 'Ranking file not exists.');
-        	$return = json_encode($return);
-        	echo($return);
-        	return;
+            $return = array('error' => 'Ranking file not exists.');
+            $return = json_encode($return);
+            echo($return);
+            return;
         }
-    	$content =file_get_contents($file_path);
-    	$content = trim(str_replace(array("\r", "\n"), '', $content));
-    	$rankings = preg_split('/ +/', $content);
-		$rankings = array_chunk($rankings,3);
-		foreach($rankings as $ranking) {
-			if($ranking[1] == $user_id_1) {
-				$max_matching_version = $ranking[2];
-			}
-		}
-		$version = $version_user_1;
+        $content =file_get_contents($file_path);
+        $content = trim(str_replace(array("\r", "\n"), '', $content));
+        $rankings = preg_split('/ +/', $content);
+        $rankings = array_chunk($rankings,3);
+        foreach($rankings as $ranking) {
+            if($ranking[1] == $user_id_1) {
+                $max_matching_version = $ranking[2];
+            }
+        }
+        $version = $version_user_1;
         if($version_user_1 == "max_matching") {
-        	$version = $max_matching_version;
+            $version = $max_matching_version;
         }
         $file_path= $course_path."/lichen/matches/".$gradeable_id."/".$user_id_1."/".$version."/matches.json";
         if (!file_exists($file_path)) {
-        	echo("no_match_for_this_version");
+            echo("no_match_for_this_version");
         }
         else {
-	        $content = json_decode(file_get_contents($file_path), true);
-	    	foreach($content as $match) {
-	    		if($match["type"] == "match") {
-	    			foreach ($match["others"] as $match_info) {
-	    				if(!in_array(array($match_info["username"],$match_info["version"]), $return )) {
-	    					array_push($return, array($match_info["username"],$match_info["version"]));
-	    				}
-	    			}
-	    		}
-	    	}
-	    	foreach($return as $i => $match_user) {
-    			array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());
+            $content = json_decode(file_get_contents($file_path), true);
+            foreach($content as $match) {
+                if($match["type"] == "match") {
+                    foreach ($match["others"] as $match_info) {
+                        if(!in_array(array($match_info["username"],$match_info["version"]), $return )) {
+                            array_push($return, array($match_info["username"],$match_info["version"]));
+                        }
+                    }
+                }
+            }
+            foreach($return as $i => $match_user) {
+                array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedFirstName());
                 array_push($return[$i], $this->core->getQueries()->getUserById($match_user[0])->getDisplayedLastName());
-    		}
-	    	$return = json_encode($return);
-	        echo($return);
-	    }
+            }
+            $return = json_encode($return);
+            echo($return);
+        }
     }
 
     /**

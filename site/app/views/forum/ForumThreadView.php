@@ -7,78 +7,78 @@ use app\libraries\FileUtils;
 
 class ForumThreadView extends AbstractView {
 
-	public function forumAccess(){
+    public function forumAccess(){
         return $this->core->getConfig()->isForumEnabled();
     }
 
     public function searchResult($threads){
 
-    	$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
-    	$this->core->getOutput()->addBreadcrumb("Search");
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+        $this->core->getOutput()->addBreadcrumb("Search");
 
-		$buttons = array(
-			array(
-			"required_rank" => 4,
-			"display_text" => 'Create Thread',
-			"style" => 'position:relative;float:right;top:3px;',
-			"link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
-			"optional_class" => '',
-			"title" => 'Create Thread',
-			"onclick" => array(false)
-			),
-			array(
-				"required_rank" => 4,
-				"display_text" => 'Back to Threads',
-				"style" => 'position:relative;float:right;top:3px;margin-right:5px;',
-				"link" => array(true, $this->core->buildCourseUrl(['forum', 'threads'])),
-				"optional_class" => '',
-				"title" => 'Back to threads',
-				"onclick" => array(false)
-			)
-		);
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Create Thread',
+                "style" => 'position:relative;float:right;top:3px;',
+                "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads', 'new'])),
+                "optional_class" => '',
+                "title" => 'Create Thread',
+                "onclick" => array(false)
+            ),
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;float:right;top:3px;margin-right:5px;',
+                "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads'])),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
 
-		$threadArray = array();
-		$fromIdtoTitle = array();
-		foreach($threads as $thread){
-			if(!array_key_exists($thread["thread_id"], $threadArray)) {
-				$threadArray[$thread["thread_id"]] = array();
-				$fromIdtoTitle[$thread["thread_id"]] = $thread["thread_title"];
-			}
-			$threadArray[$thread["thread_id"]][] = $thread;
-		}
-		$count = 1;
+        $threadArray = array();
+        $fromIdtoTitle = array();
+        foreach($threads as $thread){
+            if(!array_key_exists($thread["thread_id"], $threadArray)) {
+                $threadArray[$thread["thread_id"]] = array();
+                $fromIdtoTitle[$thread["thread_id"]] = $thread["thread_title"];
+            }
+            $threadArray[$thread["thread_id"]][] = $thread;
+        }
+        $count = 1;
 
-		$thread_list = [];
+        $thread_list = [];
 
-		foreach($threadArray as $thread_id => $data){
-			$thread_title = $fromIdtoTitle[$thread_id];
+        foreach($threadArray as $thread_id => $data){
+            $thread_title = $fromIdtoTitle[$thread_id];
 
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
 
             $thread_list[$count-1] = Array("thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => Array());
 
-			foreach($data as $post) {
-				$author = $post['author'];
-				$user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
-				$first_name = trim($user_info["first_name"]);
-				$last_name = trim($user_info["last_name"]);
-				$visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
+            foreach($data as $post) {
+                $author = $post['author'];
+                $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
+                $first_name = trim($user_info["first_name"]);
+                $last_name = trim($user_info["last_name"]);
+                $visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
 
-				if($post["anonymous"]){
-					$visible_username = 'Anonymous';
-				}
+                if($post["anonymous"]){
+                    $visible_username = 'Anonymous';
+                }
 
-				//convert legacy htmlentities being saved in db
+                //convert legacy htmlentities being saved in db
                 $post_content = html_entity_decode($post["post_content"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
 
                 if(!empty($pre_post)){
                     $post_content = $pre_post;
-				}
+                }
 
                 $post_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . "#" . $post['p_id'];
 
-				$posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
+                $posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
 
                 $thread_list[$count-1]["posts"][] = Array(
                     "post_link" => $post_link,
@@ -88,9 +88,9 @@ class ForumThreadView extends AbstractView {
                     "posted_on" => $posted_on
                 );
 
-				$count++;
-			}
-		}
+                $count++;
+            }
+        }
 
 
         $return = $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
@@ -100,14 +100,14 @@ class ForumThreadView extends AbstractView {
             "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
         ]);
 
-    	return $return;
+        return $return;
     }
 
-	/** Shows Forums thread splash page, including all posts
-		for a specific thread, in addition to head of the threads
-		that have been created after applying filter and to be
-		displayed in the left panel.
-	*/
+    /** Shows Forums thread splash page, including all posts
+        for a specific thread, in addition to head of the threads
+        that have been created after applying filter and to be
+        displayed in the left panel.
+    */
 
     public function showForumThreads($user, $posts, $unviewed_posts, $threadsHead, $show_deleted, $show_merged_thread, $display_option, $max_thread, $initialPageNumber, $thread_resolve_state, $post_content_limit, $ajax=false) {
 
@@ -550,14 +550,14 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-	public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids){
-		$tempArray = array();
-		$threadAnnouncement = false;
-		$activeThreadTitle = "";
-		return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
-	}
+    public function showAlteredDisplayList($threads, $filtering, $thread_id, $categories_ids){
+        $tempArray = array();
+        $threadAnnouncement = false;
+        $activeThreadTitle = "";
+        return $this->displayThreadList($threads, $filtering, $threadAnnouncement, $activeThreadTitle, $tempArray, $thread_id, $categories_ids, true);
+    }
 
-	public function contentMarkdownToPlain($str){
+    public function contentMarkdownToPlain($str){
         $str = preg_replace("/\[[^)]+\]/","",$str);
         $str = preg_replace('/\(([^)]+)\)/s', '$1', $str);
         $str = str_replace("```","", $str);
@@ -718,47 +718,47 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-	public function filter_post_content($original_post_content) {
-		$post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-		$pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
+    public function filter_post_content($original_post_content) {
+        $post_content = html_entity_decode($original_post_content, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $pre_post = preg_replace('#(<a href=[\'"])(.*?)([\'"].*>)(.*?)(</a>)#', '[url=$2]$4[/url]', $post_content);
 
-		if(!empty($pre_post)){
-			$post_content = $pre_post;
-		}
+        if(!empty($pre_post)){
+            $post_content = $pre_post;
+        }
 
-		preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
-		$accepted_schemes = array("https", "http");
-		$pos = 0;
-		if(count($result) > 0) {
-			foreach($result[1] as $url){
-				$decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
-				$parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
-				if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
-					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
-				} else {
-					$pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
-				}
-				if(!empty($pre_post)){
-					$post_content = $pre_post;
-				}
+        preg_match_all('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', $post_content, $result);
+        $accepted_schemes = array("https", "http");
+        $pos = 0;
+        if(count($result) > 0) {
+            foreach($result[1] as $url){
+                $decoded_url = filter_var(trim(strip_tags(html_entity_decode($url, ENT_QUOTES | ENT_HTML5, 'UTF-8'))), FILTER_SANITIZE_URL);
+                $parsed_url = parse_url($decoded_url, PHP_URL_SCHEME);
+                if(filter_var($decoded_url, FILTER_VALIDATE_URL, FILTER_FLAG_SCHEME_REQUIRED | FILTER_FLAG_HOST_REQUIRED) !== false && in_array($parsed_url, $accepted_schemes, true)){
+                    $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', '<a href="' . htmlspecialchars($decoded_url, ENT_QUOTES) . '" target="_blank" rel="noopener nofollow">'. $result[2][$pos] .'</a>', $post_content, 1);
+                } else {
+                    $pre_post = preg_replace('#\&lbrack;url&equals;(.*?)&rsqb;(.*?)(&lbrack;&sol;url&rsqb;)#', htmlentities(htmlspecialchars($decoded_url), ENT_QUOTES | ENT_HTML5, 'UTF-8'), $post_content, 1);
+                }
+                if(!empty($pre_post)){
+                    $post_content = $pre_post;
+                }
 
-				$pos++;
-			}
-		}
-		//This code is for legacy posts that had an extra \r per newline
-		if(strpos($original_post_content, "\r") !== false){
-			$post_content = str_replace("\r","", $post_content);
-		}
+                $pos++;
+            }
+        }
+        //This code is for legacy posts that had an extra \r per newline
+        if(strpos($original_post_content, "\r") !== false){
+            $post_content = str_replace("\r","", $post_content);
+        }
 
-		//end link handling
+        //end link handling
 
-		//handle converting code segments
-		$post_content = preg_replace('/&lbrack;code&rsqb;(.*?)&lbrack;&sol;code&rsqb;/', '<textarea class="code">$1</textarea>', $post_content);
+        //handle converting code segments
+        $post_content = preg_replace('/&lbrack;code&rsqb;(.*?)&lbrack;&sol;code&rsqb;/', '<textarea class="code">$1</textarea>', $post_content);
 
-		return $post_content;
-	}
+        return $post_content;
+    }
 
-	public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, &$totalAttachments)
+    public function createPost($thread_id, $post, $unviewed_posts, $function_date, $first, $reply_level, $display_option, $includeReply, &$totalAttachments)
     {
         $current_user = $this->core->getUser()->getId();
         $post_id = $post["id"];
@@ -832,46 +832,46 @@ class ForumThreadView extends AbstractView {
 
         $post_button = [];
 
-		if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-			if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
+        if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
+            if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
 
-			} else {
-				if($deleted && $this->core->getUser()->getGroup() <= 3){
-					$ud_toggle_status = "false";
-					$ud_button_title = "Undelete post";
-					$ud_button_icon = "fa-undo";
-				} else {
-					$ud_toggle_status = "true";
-					$ud_button_title = "Remove post";
-					$ud_button_icon = "fa-trash";
-				}
+            } else {
+                if($deleted && $this->core->getUser()->getGroup() <= 3){
+                    $ud_toggle_status = "false";
+                    $ud_button_title = "Undelete post";
+                    $ud_button_icon = "fa-undo";
+                } else {
+                    $ud_toggle_status = "true";
+                    $ud_button_title = "Remove post";
+                    $ud_button_icon = "fa-trash";
+                }
 
-				$post_button["delete"] = [
-				    "ud_toggle_status" => $ud_toggle_status,
+                $post_button["delete"] = [
+                    "ud_toggle_status" => $ud_toggle_status,
                     "csrf_token" => $this->core->getCsrfToken(),
                     "ud_button_title" => $ud_button_title,
                     "ud_button_icon" => $ud_button_icon
                 ];
 
-				$shouldEditThread = null;
+                $shouldEditThread = null;
 
-				if($first) {
-					$shouldEditThread = "true";
-					$edit_button_title = "Edit thread and post";
-				} else {
-					$shouldEditThread = "false";
-					$edit_button_title = "Edit post";
-				}
+                if($first) {
+                    $shouldEditThread = "true";
+                    $edit_button_title = "Edit thread and post";
+                } else {
+                    $shouldEditThread = "false";
+                    $edit_button_title = "Edit post";
+                }
 
-				$post_button["edit"] = [
-				    "shouldEditThread" => $shouldEditThread,
+                $post_button["edit"] = [
+                    "shouldEditThread" => $shouldEditThread,
                     "edit_button_title" => $edit_button_title,
                     "csrf_token" => $this->core->getCsrfToken()
                 ];
-			}
+            }
         }
 
-		$post_attachment = ["exist" => false];
+        $post_attachment = ["exist" => false];
 
         if ($post["has_attachment"]) {
             $post_attachment["exist"] = true;
@@ -947,14 +947,14 @@ class ForumThreadView extends AbstractView {
             "render_markdown" => $markdown
         ];
 
-		return $return;
-	}
+        return $return;
+    }
 
     public function createThread($category_colors){
-		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildCourseUrl());
-			return;
-		}
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildCourseUrl());
+            return;
+        }
 
         $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
         $this->core->getOutput()->addBreadcrumb("Create Thread", $this->core->buildCourseUrl(['forum', 'threads', 'new']));
@@ -1067,59 +1067,59 @@ class ForumThreadView extends AbstractView {
         return $return;
     }
 
-	public function statPage($users) {
-		if(!$this->forumAccess()){
-			$this->core->redirect($this->core->buildCourseUrl());
-			return;
-		}
+    public function statPage($users) {
+        if(!$this->forumAccess()){
+            $this->core->redirect($this->core->buildCourseUrl());
+            return;
+        }
 
-		if(!$this->core->getUser()->accessFullGrading()){
-			$this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
-			return;
-		}
+        if(!$this->core->getUser()->accessFullGrading()){
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
+            return;
+        }
 
-		$this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
-		$this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
+        $this->core->getOutput()->addBreadcrumb("Discussion Forum", $this->core->buildCourseUrl(['forum']));
+        $this->core->getOutput()->addBreadcrumb("Statistics", $this->core->buildCourseUrl(['forum', 'stats']));
 
         $this->core->getOutput()->addInternalJs('forum.js');
         $this->core->getOutput()->addInternalCss('forum.css');
 
-		$buttons = array(
-			array(
-				"required_rank" => 4,
-				"display_text" => 'Back to Threads',
-				"style" => 'position:relative;float:right;top:3px;',
-				"link" => array(true, $this->core->buildCourseUrl(['forum', 'threads'])),
-				"optional_class" => '',
-				"title" => 'Back to threads',
-				"onclick" => array(false)
-			)
-		);
+        $buttons = array(
+            array(
+                "required_rank" => 4,
+                "display_text" => 'Back to Threads',
+                "style" => 'position:relative;float:right;top:3px;',
+                "link" => array(true, $this->core->buildCourseUrl(['forum', 'threads'])),
+                "optional_class" => '',
+                "title" => 'Back to threads',
+                "onclick" => array(false)
+            )
+        );
 
-		$thread_exists = $this->core->getQueries()->threadExists();
+        $thread_exists = $this->core->getQueries()->threadExists();
 
-		$forumBarData = [
+        $forumBarData = [
             "forum_bar_buttons_right" => $buttons,
             "forum_bar_buttons_left" => [],
             "show_threads" => false,
             "thread_exists" => $thread_exists
-		];
+        ];
 
-		$userData = [];
+        $userData = [];
 
-		foreach($users as $user => $details){
-			$first_name = $details["first_name"];
-			$last_name = $details["last_name"];
+        foreach($users as $user => $details){
+            $first_name = $details["first_name"];
+            $last_name = $details["last_name"];
             $post_count = count($details["posts"]);
-			$posts = json_encode($details["posts"]);
-			$ids = json_encode($details["id"]);
-			$timestamps = json_encode($details["timestamps"]);
-			$thread_ids = json_encode($details["thread_id"]);
-			$thread_titles = json_encode($details["thread_title"]);
-			$num_deleted = ($details["num_deleted_posts"]);
+            $posts = json_encode($details["posts"]);
+            $ids = json_encode($details["id"]);
+            $timestamps = json_encode($details["timestamps"]);
+            $thread_ids = json_encode($details["thread_id"]);
+            $thread_titles = json_encode($details["thread_title"]);
+            $num_deleted = ($details["num_deleted_posts"]);
 
-			$userData[] = [
-			    "last_name" => $last_name,
+            $userData[] = [
+                "last_name" => $last_name,
                 "first_name" => $first_name,
                 "post_count" => $post_count,
                 "details_total_threads" => $details["total_threads"],
@@ -1130,7 +1130,7 @@ class ForumThreadView extends AbstractView {
                 "thread_ids" => $thread_ids,
                 "thread_titles" => $thread_titles
             ];
-		}
+        }
 
     $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
         "forumBarData" => $forumBarData,
@@ -1138,8 +1138,8 @@ class ForumThreadView extends AbstractView {
         "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
     ]);
 
-		return $return;
+        return $return;
 
-	}
+    }
 
 }

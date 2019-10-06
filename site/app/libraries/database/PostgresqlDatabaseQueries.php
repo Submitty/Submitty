@@ -545,7 +545,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      */
     public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
         //Update query and values list.
-		$query = "
+        $query = "
             INSERT INTO late_days (user_id, since_timestamp, allowed_late_days)
             VALUES(?,?,?)
             ON CONFLICT (user_id, since_timestamp) DO UPDATE
@@ -558,12 +558,12 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 //Does NOT overwrite a higher (or same) value of allowed late days.
                 $query .= "AND late_days.allowed_late_days<?";
                 $vals[] = $days;
-        	    break;
+                break;
             case 'csv_option_overwrite_all':
             default:
                 //Default behavior: overwrite all late days for user and timestamp.
                 //No adjustment to SQL query.
-    	}
+        }
 
         $this->course_db->query($query, $vals);
     }
