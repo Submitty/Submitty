@@ -128,6 +128,7 @@ class CourseMaterialsView extends AbstractView {
         $file_shares = array();
         $file_release_dates = array();
         $in_dir = array();
+        $file_sections = array();
 
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
