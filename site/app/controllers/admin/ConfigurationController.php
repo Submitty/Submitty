@@ -3,7 +3,6 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\exceptions\FileNotFoundException;
 use app\libraries\FileUtils;
 use app\libraries\ForumUtils;
 use app\libraries\response\JsonResponse;
@@ -11,7 +10,7 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\models\RainbowCustomizationJSON;
-use http\Exception;
+use app\views\admin\ConfigurationView;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -28,18 +27,10 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
-     * @Route("/{_semester}/{_course}/config")
+     * @Route("/{_semester}/{_course}/config", methods={"GET"})
      * @return Response
      */
-    public function viewConfiguration()
-    {
+    public function viewConfiguration(): Response {
         $fields = array(
             'course_name'                    => $this->core->getConfig()->getCourseName(),
             'course_home_url'                => $this->core->getConfig()->getCourseHomeUrl(),
@@ -65,12 +56,15 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
 
-        return Response::WebOnlyResponse(
+        return new Response(
+            JsonResponse::getSuccessResponse($fields),
             new WebResponse(
-                ['admin', 'Configuration'],
+                ConfigurationView::class,
                 'viewConfig',
                 $fields,
-                $this->getGradeableSeatingOptions()
+                $this->getGradeableSeatingOptions(),
+                $this->core->getConfig()->isEmailEnabled(),
+                $this->core->getCsrfToken()
             )
         );
     }
@@ -79,7 +73,7 @@ class ConfigurationController extends AbstractController {
      * @Route("/{_semester}/{_course}/config/update", methods={"POST"})
      * @return Response
      */
-    public function updateConfiguration() {
+    public function updateConfiguration(): Response {
         if(!isset($_POST['name'])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Name of config value not provided')
@@ -183,7 +177,7 @@ class ConfigurationController extends AbstractController {
         );
     }
 
-    private function getGradeableSeatingOptions() {
+    private function getGradeableSeatingOptions(): array {
         $gradeable_seating_options = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
         $seating_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating');
