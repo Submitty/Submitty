@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3d0ea4a5d96fc26f92396a77240a4018",
+    "content-hash": "bc304a540d67dc33779ad69fabc52c5c",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -2257,16 +2257,16 @@
         },
         {
             "name": "php-mock/php-mock-phpunit",
-            "version": "2.4.0",
+            "version": "2.5.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/php-mock/php-mock-phpunit.git",
-                "reference": "04f78fe83df4855654373188aca8cccf8bf472ce"
+                "reference": "7df4bd123ce196bbba19f142c4906c20be8ec546"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/04f78fe83df4855654373188aca8cccf8bf472ce",
-                "reference": "04f78fe83df4855654373188aca8cccf8bf472ce",
+                "url": "https://api.github.com/repos/php-mock/php-mock-phpunit/zipball/7df4bd123ce196bbba19f142c4906c20be8ec546",
+                "reference": "7df4bd123ce196bbba19f142c4906c20be8ec546",
                 "shasum": ""
             },
             "require": {
@@ -2307,7 +2307,7 @@
                 "test",
                 "test double"
             ],
-            "time": "2019-06-07T12:26:51+00:00"
+            "time": "2019-10-05T21:44:04+00:00"
         },
         {
             "name": "phpdocumentor/reflection-common",
