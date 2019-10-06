@@ -104,20 +104,20 @@ class User extends AbstractModel {
      */
     protected $manual_registration = false;
 
-	/**
-	 * @property
-	 * @var bool This flag is set TRUE when a user edits their own preferred firstname.  When TRUE, preferred firstname
-	 *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
-	 *           permitted to change (correct?) a user's legal firstname/lastname and email address.
-	 */
+    /**
+     * @property
+     * @var bool This flag is set TRUE when a user edits their own preferred firstname.  When TRUE, preferred firstname
+     *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
+     *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+     */
     protected $user_updated = false;
 
-	/**
-	 * @property
-	 * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred firstname
-	 *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
-	 *           permitted to change (correct?) a user's legal firstname/lastname and email address.
-	 */
+    /**
+     * @property
+     * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred firstname
+     *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
+     *           permitted to change (correct?) a user's legal firstname/lastname and email address.
+     */
     protected $instructor_updated = false;
 
     /** @property @var array */
@@ -322,40 +322,40 @@ class User extends AbstractModel {
      */
     static public function validateUserData($field, $data) {
 
-    	switch($field) {
-		case 'user_id':
-			//Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
-			return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
-		case 'user_legal_firstname':
-		case 'user_legal_lastname':
-			//First and last name must be alpha characters, white-space, or certain punctuation.
-        	return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
-   		case 'user_preferred_firstname':
-   		case 'user_preferred_lastname':
-   		    //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
-   		    return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
-		case 'user_email':
-                    // emails are allowed to be the empty string...
-                    if ($data === "") return true;
-                    // -- or ---
-                    // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-                    return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
-		case 'user_group':
+        switch($field) {
+        case 'user_id':
+             //Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
+            return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;
+        case 'user_legal_firstname':
+        case 'user_legal_lastname':
+            //First and last name must be alpha characters, white-space, or certain punctuation.
+            return preg_match("~^[a-zA-Z'`\-\.\(\) ]+$~", $data) === 1;
+        case 'user_preferred_firstname':
+        case 'user_preferred_lastname':
+            //Preferred first and last name may be "", alpha chars, white-space, certain punctuation AND between 0 and 30 chars.
+            return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
+        case 'user_email':
+            // emails are allowed to be the empty string...
+            if ($data === "") return true;
+            // -- or ---
+            // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
+            return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;
+        case 'user_group':
             //user_group check is a digit between 1 - 4.
-			return preg_match("~^[1-4]{1}$~", $data) === 1;
-		case 'registration_section':
-			//Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
-			//"NULL" registration section should be validated as a datatype, not as a string.
-			return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
-		case 'user_password':
-	        //Database password cannot be blank, no check on format
-			return $data !== "";
-		default:
-			//$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
-			$ex_field = '$field: ' . var_export(htmlentities($field), true);
-			$ex_data = '$data:  ' . var_export(htmlentities($data), true);
-			throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
-    	}
+            return preg_match("~^[1-4]{1}$~", $data) === 1;
+        case 'registration_section':
+            //Registration section must contain only alpha (upper and lower permitted), numbers, underscores, hyphens.
+            //"NULL" registration section should be validated as a datatype, not as a string.
+            return preg_match("~^(?!^null$)[a-z0-9_\-]+$~i", $data) === 1 || is_null($data);
+        case 'user_password':
+            //Database password cannot be blank, no check on format
+            return $data !== "";
+        default:
+            //$data can't be validated since $field is unknown.  Notify developer with an exception (also protectes data record integrity).
+            $ex_field = '$field: ' . var_export(htmlentities($field), true);
+            $ex_data = '$data:  ' . var_export(htmlentities($data), true);
+            throw new ValidationException('User::validateUserData() called with unknown $field.  See extra details, below.', array($ex_field, $ex_data));
+        }
     }
 
     static public function constructNotificationSettings($details) {

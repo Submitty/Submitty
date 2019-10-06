@@ -58,7 +58,7 @@ function setUsePrevious() {
 //========================================================================================
 // open a file browser if clicked on drop zone
 function clicked_on_box(e){
-  document.getElementById("input_file" + get_part_number(e)).click();
+  document.getElementById("input-file" + get_part_number(e)).click();
   e.stopPropagation();
 }
 
@@ -102,11 +102,11 @@ function get_part_number(e){
 
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip=true){
-    var filestream = document.getElementById("input_file" + part).files;
+    var filestream = document.getElementById("input-file" + part).files;
     for(var i=0; i<filestream.length; i++){
         addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
-    $('#input_file' + part).val("");
+    $('#input-file' + part).val("");
 }
 
 // Check for duplicate file names. This function returns an array.

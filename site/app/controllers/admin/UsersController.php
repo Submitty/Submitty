@@ -499,7 +499,7 @@ class UsersController extends AbstractController {
                 }
             }
             //remove people who should not be added to rotating sections
-            for ($j = 0;$j < count($users_with_reg_section);) {
+            for ($j = 0; $j < count($users_with_reg_section);) {
                 for ($i = 0;$i < count($exclude_sections);++$i) {
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
                         array_splice($users_with_reg_section,$j,1);
@@ -510,16 +510,16 @@ class UsersController extends AbstractController {
                 ++$j;
 
             }
-            for ($i = 0;$i < count($users);) {
+            for ($i = 0; $i < count($users);) {
                 $found_in = false;
-                for ($j = 0;$j < count($users_with_reg_section);++$j) {
+                for ($j = 0; $j < count($users_with_reg_section); ++$j) {
                     if ($users[$i] == $users_with_reg_section[$j]->getId()) {
                         $found_in = true;
                         break;
                     }
                 }
                 if (!$found_in) {
-                    array_splice($users,$i,1);
+                    array_splice($users, $i, 1);
                     continue;
                 }
                 ++$i;
@@ -542,7 +542,7 @@ class UsersController extends AbstractController {
                 $section_counts[$section]++;
             }
             foreach ($teams as $g_id => $team_ids) {
-                for ($i = 0; $i < count($team_ids); $i ++) {
+                for ($i = 0; $i < count($team_ids); $i++) {
                     $section = $i % $section_count;
 
                     if (!array_key_exists($g_id, $team_section_counts)) {
@@ -585,7 +585,7 @@ class UsersController extends AbstractController {
                 $use_section = ($use_section + 1) % $section_count;
             }
             foreach ($teams as $g_id => $team_ids) {
-                for ($i = 0; $i < count($team_ids); $i ++) {
+                for ($i = 0; $i < count($team_ids); $i++) {
                     $use_section = ($use_section + 1) % $section_count;
 
                     if (!array_key_exists($g_id, $team_section_counts)) {
@@ -606,7 +606,7 @@ class UsersController extends AbstractController {
         }
 
         foreach ($team_section_counts as $g_id => $counts) {
-            for ($i = 0; $i < $section_count; $i ++) {
+            for ($i = 0; $i < $section_count; $i++) {
                 $update_teams = array_splice($teams[$g_id], 0, $team_section_counts[$g_id][$i]);
 
                 foreach ($update_teams as $team_id) {
