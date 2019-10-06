@@ -57,11 +57,16 @@ class ConfigurationController extends AbstractController {
             'regrade_enabled'                => $this->core->getConfig()->isRegradeEnabled(),
             'regrade_message'                => $this->core->getConfig()->getRegradeMessage(),
             'private_repository'             => $this->core->getConfig()->getPrivateRepository(),
+            'room_seating_options'           => $this->getGradeableSeatingOptions(),
             'room_seating_gradeable_id'      => $this->core->getConfig()->getRoomSeatingGradeableId(),
             'seating_only_for_instructor'    => $this->core->getConfig()->isSeatingOnlyForInstructor(),
-            'submitty_admin_user'            => $this->core->getConfig()->getSubmittyAdminUser(),
+            'submitty_admin_user'            => $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
             'submitty_admin_user_verified'   => $this->core->getConfig()->isSubmittyAdminUserVerified(),
-            'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
+            'submitty_admin_user_in_course'  => $this->core->getQueries()->checkIsInstructorInCourse(
+                $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
+                $this->core->getConfig()->getCourse(),
+                $this->core->getConfig()->getSemester()
+            ),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
 

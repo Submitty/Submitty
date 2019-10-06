@@ -303,7 +303,7 @@ class ReportController extends AbstractController {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-            
+
             if (!$gg->hasOverriddenGrades()){
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -374,7 +374,7 @@ class ReportController extends AbstractController {
 
         if ($gg->hasOverriddenGrades()){
             $entry['status'] = 'Overridden';
-            $entry['comment'] = $gg->getOverriddenComment(); 
+            $entry['comment'] = $gg->getOverriddenComment();
         }
         else {
             // Add information special to electronic file submissions
@@ -539,7 +539,11 @@ class ReportController extends AbstractController {
                 'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
-                'limited_functionality_mode' => !$this->core->getConfig()->isSubmittyAdminUserInCourse()
+                'limited_functionality_mode' => !$this->core->getQueries()->checkIsInstructorInCourse(
+                    $this->core->getConfig()->getVerifiedSubmittyAdminUser(),
+                    $this->core->getConfig()->getCourse(),
+                    $this->core->getConfig()->getSemester()
+                ),
             ]);
 
         }
@@ -615,4 +619,3 @@ class ReportController extends AbstractController {
         }
     }
 }
-
