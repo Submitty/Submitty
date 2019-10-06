@@ -293,7 +293,7 @@ jobs:
     - <<: *03-e2e
       python: 3.6
       script:
-        - python3 tests/api/run_tests.py
+        - python3 tests/api/run_tests.py http://localhost
 
 
     # To add additional test cases of Clang, you should choose a version that has a binary built and distributed for
