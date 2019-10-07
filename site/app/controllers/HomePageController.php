@@ -172,9 +172,6 @@ class HomePageController extends AbstractController {
 
         $user = $this->core->getUser();
 
-        // $ranks = $this->appendRank($archived_courses, $user);
-        // array_push($ranks, $this->appendRank($unarchived_courses, $user));
-
         return new Response(
             null,
             new WebResponse(
@@ -193,7 +190,6 @@ class HomePageController extends AbstractController {
         foreach ($courses as $course) {
             $rank = $this->core->getQueries()->getGroupForUserInClass($course['semester'], $course['title'], $user->getId());
             $ranks[$course['semester']][$course['title']] = $rank;
-            // array_push($ranks[$rank]["courses"], $course);
         }
         return $ranks;
     }
