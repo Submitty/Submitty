@@ -120,6 +120,7 @@ class NavigationView extends AbstractView {
             $this->core->getOutput()->addRoomTemplatesTwigPath();
             // use the room seating gradeable id to find the title to display.
             $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
+            // TODO (stephenermshar)
             $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
             foreach($gradeable_ids_and_titles as $gradeable_id_and_title) {
                 if($gradeable_id_and_title['g_id'] === $gradeable_id) {
@@ -339,6 +340,7 @@ class NavigationView extends AbstractView {
                 $team_button_type = 'btn-danger';
             }
             $team_button_text = 'CREATE TEAM';
+            // TODO (stephenermshar)
             $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
             foreach ($teams as $t) {
                 if ($t->sentInvite($this->core->getUser()->getId())) {
@@ -427,6 +429,7 @@ class NavigationView extends AbstractView {
                 $list_section === GradeableList::GRADED;
             if ($gradeable->isTeamAssignment()) {
                 if ($grade_ready_for_view &&
+                    // TODO (stephenermshar)
                     $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId()) === null) {
                     $class = "btn-success";
                 }
@@ -679,7 +682,7 @@ class NavigationView extends AbstractView {
     private function getDeleteButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
             "title" => "Delete Gradeable",
-            "href" => "javascript:newDeleteGradeableForm('" . 
+            "href" => "javascript:newDeleteGradeableForm('" .
                 $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
                 . "', '{$gradeable->getTitle()}');",
             "class" => "fas fa-trash fa-fw black-btn",
