@@ -50,10 +50,10 @@ def main(args):
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
             mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
-            inverted = 255 - cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+            contrast = 255 - cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
 
             # decode img - only look for QR codes
-            val = pyzbar.decode(inverted, symbols=[ZBarSymbol.QRCODE])
+            val = pyzbar.decode(contrast, symbols=[ZBarSymbol.QRCODE])
             if val != []:
                 # found a new qr code, split here
                 # convert byte literal to string
@@ -76,7 +76,7 @@ def main(args):
 
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
-                    data = scanner.getDigits(cv_img, val)
+                    data = scanner.getDigits(contrast, val)
                     buff += "Found student ID number of \'" + data + "\' on"
                     buff += " page " + str(page_number) + ", "
 
