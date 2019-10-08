@@ -432,8 +432,12 @@ class PlagiarismController extends AbstractController {
         }
 
         $saved_config = json_decode(file_get_contents("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json"), true);
+        $title = "";
+        if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
+            $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
+         }
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config, $title);
     }
 
     /**
