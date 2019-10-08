@@ -238,9 +238,11 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param int $late_days_use
+     * @param $students
+     * @param $ggs
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use): string {
+    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, $students, $ggs): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
@@ -256,14 +258,17 @@ class HomeworkView extends AbstractView {
         $display_version = 0;
 
         if ($this->core->getUser()->accessGrading()) {
-            $students = $this->core->getQueries()->getAllUsers();
+// TODO: Move to controller
+//            $students = $this->core->getQueries()->getAllUsers();
             $student_ids = array();
             foreach ($students as $student) {
                 $student_ids[] = $student->getId();
             }
 
             $students_version = array();
-            foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+// TODO: Move to controller
+//            $ggs = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids);
+            foreach ($ggs as $gg) {
                 /** @var GradedGradeable $gg */
                 $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
             }
@@ -413,9 +418,10 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param Gradeable $gradeable
+     * @param $is_valid
      * @return string
      */
-    private function renderBulkUploadBox(Gradeable $gradeable): string {
+    private function renderBulkUploadBox(Gradeable $gradeable, $is_valid): string {
         $all_directories = $gradeable->getSplitPdfFiles();
 
         $files = [];
@@ -495,14 +501,16 @@ class HomeworkView extends AbstractView {
             }
 
             $page_count = 0;
-            $is_valid = true;
+// TODO: Delete if possible
+//            $is_valid = true;
             $id = '';
 
             //decoded.json may be read before the assoicated data is written, check if key exists first
             if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
                 if(array_key_exists('id', $data)){
                     $id = $data['id'];
-                    $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
+// TODO: Move to controller
+//                    $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
                 }else{
                     //set the blank id as invalid for now, after a page refresh it will recorrect
                     $id = '';
@@ -725,10 +733,13 @@ class HomeworkView extends AbstractView {
 
     /**
      * @param GradedGradeable $graded_gradeable
-     * @param bool $can_inquirye
+     * @param bool $can_inquiry
+     * @param $grade_inquiry_posts
+     * @param $is_staff
+     * @param $name
      * @return string
      */
-    public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry): string {
+    public function showRegradeDiscussion(GradedGradeable $graded_gradeable, bool $can_inquiry, $grade_inquiry_posts, $is_staff, $name): string {
         $grade_inquiry_per_component_allowed = $graded_gradeable->getGradeable()->isGradeInquiryPerComponentAllowed();
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         $request_regrade_url = $this->core->buildCourseUrl([
@@ -757,7 +768,8 @@ class HomeworkView extends AbstractView {
         $grade_inquiries_twig_array = [];
         if (!empty($grade_inquiries)) {
             $grade_inquiries_twig_array[0] = ['posts' => []];
-            $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
+// TODO: Move to controller
+//            $grade_inquiry_posts = $this->core->getQueries()->getRegradeDiscussions($grade_inquiries);
             foreach ($grade_inquiries as $grade_inquiry) {
                 $gc_id = $grade_inquiry->getGcId() ?? 0;
                 $gc_title = '';
@@ -770,8 +782,9 @@ class HomeworkView extends AbstractView {
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
                     if (empty($post)) break;
-                    $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
-                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
+// TODO: Move to controller
+//                    $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
+//                    $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
                     $content = $post['content'];
                     $posts[] = [
