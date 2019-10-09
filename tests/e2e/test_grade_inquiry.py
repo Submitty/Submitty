@@ -25,8 +25,9 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element_by_xpath("//a[@id='nav-sidebar-submitty']").click()
 
 
-    def test_grade_inquiry_panel(self):
+    def test_normal_submission_grade_inquiry_panel(self):
         gradeable_id = 'grades_released_homework'
+
         # login as instructor
         self.login(user_id='instructor', password='instructor')
         self.set_grade_inquiries_for_course(self, True)
@@ -35,6 +36,7 @@ class TestGradeInquiry(BaseTestCase):
        # navigate to TA grading interface
        self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//a[@class='btn-nav-grade']").click()
        self.driver.find_element_by_xpath("//a[text()='Grading Index']").click()
+       self.driver.find_element_by_xpath("//a[contains(@href,'grading/grade?who_id=aphacker')]").click()
 
 
 
