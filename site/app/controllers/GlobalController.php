@@ -36,6 +36,13 @@ class GlobalController extends AbstractController {
         }
 
         $sidebar_buttons = [];
+        $sidebar_buttons[] = new Button($this->core, [
+          "href" => $this->core->buildUrl(['queue']),
+          "title" => "Office Hours",
+          "class" => "nav-row",
+          "id" => "nav-sidebar-submitty",
+          "icon" => "fa-star"
+        ]);
         if ($this->core->userLoaded()) {
 
             if ($this->core->getConfig()->isCourseLoaded()) {
