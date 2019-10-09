@@ -81,7 +81,7 @@ Vagrant.configure(2) do |config|
   owner = 'root'
   group = 'vagrant'
   mount_options = %w(dmode=775 fmode=664)
-  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options
+  config.vm.synced_folder '.', '/usr/local/submitty/GIT_CHECKOUT/Submitty', create: true, owner: owner, group: group, mount_options: mount_options, type: "rsync", rsync__exclude: ".git/"
 
   optional_repos = %w(AnalysisTools Lichen RainbowGrades Tutorial CrashCourseCPPSyntax)
   optional_repos.each {|repo|
