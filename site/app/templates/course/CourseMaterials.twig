@@ -94,12 +94,7 @@
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
                 <label>Sections: 
-                {% for key,value in this_file_section %}
-                    {{value}}
-                    {% if key < this_file_section|length - 1%}
-                        ,
-                    {% endif %}
-                {% endfor %}
+                {{this_file_section|join(',')}}
                 </label>
                 {% endif %}
                 <script>
