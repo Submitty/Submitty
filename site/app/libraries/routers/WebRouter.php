@@ -17,6 +17,7 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
+use Exception;
 
 
 class WebRouter {
@@ -49,7 +50,6 @@ class WebRouter {
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
-
         $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         $this->parameters = $matcher->matchRequest($this->request);
     }
@@ -106,7 +106,7 @@ class WebRouter {
      */
     static public function getWebResponse(Request $request, Core $core) {
         $logged_in = false;
-        try {
+        //try {
             $router = new self($request, $core);
             $router->loadCourse();
 
@@ -129,9 +129,8 @@ class WebRouter {
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
                 );
             }
-        }
-        catch (ResourceNotFoundException | MethodNotAllowedException $e) {
-          echo $e->getMessage();
+        //}
+        /*catch (ResourceNotFoundException | MethodNotAllowedException $e) {
             // redirect to login page or home page
             if (!$logged_in) {
                 return Response::RedirectOnlyResponse(
@@ -139,11 +138,12 @@ class WebRouter {
                 );
             }
             else {
+
                 return Response::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );
             }
-        }
+        }*/
 
         return $router->run();
     }

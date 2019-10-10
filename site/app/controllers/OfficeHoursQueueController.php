@@ -11,7 +11,7 @@ use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
- * Class NotificationController
+ * Class OfficeHourQueueController
  *
  */
 class OfficeHourQueueController extends AbstractController {
@@ -19,4 +19,19 @@ class OfficeHourQueueController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
     }
+
+    /**
+     * @param $show_all
+     * @Route("/{_semester}/{_course}/OfficeHoursQueue")
+     * @return Response
+     */
+     public function showQueue(){
+       return Response::WebOnlyResponse(
+           new WebResponse(
+               'OfficeHoursQueue',
+               'showQueue',
+               $this->core->getConfig()->getCourse()
+           )
+       );
+     }
 }
