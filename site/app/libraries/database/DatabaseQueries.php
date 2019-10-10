@@ -24,6 +24,8 @@ use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
+use app\models\OfficeHoursQueue;
+use Exception;
 
 
 /**
@@ -4058,5 +4060,35 @@ AND gc_id IN (
         $not_fully_graded = array_column($not_fully_graded, $id_string);
 
         return $not_fully_graded;
+    }
+
+    public function addUserToQueue($user_id, $name){
+      $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
+      if(count($this->course_db->rows() == 0)){
+        $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, status) VALUES(?, ?, current_timestamp, NULL, NULL, 0)", array($user_id, $name));
+      }
+    }
+
+    public function getQueueByUser($user_id){
+      $this->course_db->query("SELECT * FROM queue where status = 0");
+      $num_in_queue = count($this->course_db->rows());
+      $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
+      if(count($this->course_db->rows()) == 0){
+        return new OfficeHoursQueue($this->core, $this->core->getUser(), "name not set", false, $num_in_queue, -1);
+      }
+      $row = $this->course_db->rows()[0];
+      $this->course_db->query("SELECT * FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
+      $position_in_queue = count($this->course_db->rows());
+      $oh_queue = new OfficeHoursQueue($this->core, $this->core->getUser(), $row['name'], $row['status'] == 0, $num_in_queue, $position_in_queue);
+      return $oh_queue;
+    }
+
+    public function removeUserFromQueue($user_id){
+        //$this->course_db->query("DELETE FROM queue");
+        $this->course_db->query("UPDATE queue SET status = 3 where user_id = ? and status = 0", array($user_id));
+    }
+
+    public function getNextInQueue(){
+      return $this->course_db->query("SELECT * FROM queue where status = 0 order by time_in limit 1");
     }
 }

@@ -2,10 +2,18 @@
 
 <div class="content">
   <h1> This is a page for office hours </h1> <br/>
-  <h3> The queue is currently has 10 people in it </h3> <br/>
-  <form method="post" id="add_to_queue" action="">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <input type="text" name="name" value="Ben K">
-    <input type="submit" value="Join">
-  </form>
+  <h3> The queue is currently has {{num_in_queue}} people in the queue</h3> <br/>
+  {% if not in_queue %}
+    <form method="post" id="add_to_queue" action="{{add_url}}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="text" name="name" placeholder="Your name here">
+      <input type="submit" value="Join">
+    </form>
+  {% else %}
+    <h3> You are number {{position_in_queue}} in the queue as {{name}} </h3> <br/>
+    <form method="post" id="remove_from_queue" action="{{remove_url}}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+      <input type="submit" value="Remove me from the queue">
+    </form>
+  {% endif %}
 </div>
