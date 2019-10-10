@@ -291,6 +291,8 @@ class ForumController extends AbstractController{
                 $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
+                $this->core->getQueries()->visitThread($current_user_id, $thread_id);
+
                 if($hasGoodAttachment[0] == 1) {
                     $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
                     FileUtils::createDir($thread_dir);
