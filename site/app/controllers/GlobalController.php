@@ -36,13 +36,6 @@ class GlobalController extends AbstractController {
         }
 
         $sidebar_buttons = [];
-        $sidebar_buttons[] = new Button($this->core, [
-          "href" => $this->core->buildUrl(['queue']),
-          "title" => "Office Hours",
-          "class" => "nav-row",
-          "id" => "nav-sidebar-submitty",
-          "icon" => "fa-star"
-        ]);
         if ($this->core->userLoaded()) {
 
             if ($this->core->getConfig()->isCourseLoaded()) {
@@ -103,6 +96,14 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-cog"
                 ]);
             }
+
+            $sidebar_buttons[] = new Button($this->core, [
+              "href" => $this->core->buildCourseUrl(['OfficeHoursQueue']),
+              "title" => "Office Hours",
+              "class" => "nav-row",
+              "id" => "nav-sidebar-submitty",
+              "icon" => "fa-star"
+            ]);
 
             $course_path = $this->core->getConfig()->getCoursePath();
             $course_materials_path = $course_path . "/uploads/course_materials";

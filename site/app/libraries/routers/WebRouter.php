@@ -131,6 +131,7 @@ class WebRouter {
             }
         }
         catch (ResourceNotFoundException | MethodNotAllowedException $e) {
+          echo $e->getMessage();
             // redirect to login page or home page
             if (!$logged_in) {
                 return Response::RedirectOnlyResponse(
