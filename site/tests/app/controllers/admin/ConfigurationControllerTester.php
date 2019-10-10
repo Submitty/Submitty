@@ -111,14 +111,15 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'submitty_admin_user'            => 'submitty-admin',
             'submitty_admin_user_verified'   => true,
             'submitty_admin_user_in_course'  => true,
-            'auto_rainbow_grades'            => false
+            'auto_rainbow_grades'            => false,
+            'email_enabled'                  => true
         ];
 
         $this->assertNotNull($response->json_response);
         $this->assertEquals(['status' => 'success', 'data' => $expected], $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([0 => $expected, 1 => true, 2 => false], $response->web_response->parameters);
+        $this->assertEquals([$expected, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingCharts(): void {
@@ -180,14 +181,15 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'submitty_admin_user'            => 'submitty-admin',
             'submitty_admin_user_verified'   => true,
             'submitty_admin_user_in_course'  => true,
-            'auto_rainbow_grades'            => false
+            'auto_rainbow_grades'            => false,
+            'email_enabled'                  => true
         ];
 
         $this->assertNotNull($response->json_response);
         $this->assertEquals(['status' => 'success', 'data' => $expected], $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([0 => $expected, 1 => true, 2 => false], $response->web_response->parameters);
+        $this->assertEquals([$expected, false], $response->web_response->parameters);
     }
 
     public function testUpdateConfigurationNoName() {

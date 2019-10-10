@@ -194,7 +194,7 @@
         </label>
         <div id="instructor-seating" class="config-row">
             <select name="room_seating_gradeable_id" id="room-seating-gradeable-id">
-                {% for seating_option in gradeable_seating_options %}
+                {% for seating_option in fields['room_seating_options'] %}
                     <option value="{{ seating_option['g_id'] }}"{{ fields['room_seating_gradeable_id'] == seating_option['g_id'] ? ' selected' : ''}}>
                         {{ seating_option['g_title'] }} {{ seating_option['g_id'] != "" ? "<" ~ seating_option['g_id'] ~ ">" : "" }}
                     </option>
@@ -209,7 +209,7 @@
         <div id="email-seating-assignment-label" class="option-desc option-title config-row">
             Customize an email to send to each students
         </div>
-        {% if not email_enabled %}
+        {% if not fields['email_enabled'] %}
             <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
         {% else %}
             <button id="email-seating-assignment" class ="option-alt bare-button">

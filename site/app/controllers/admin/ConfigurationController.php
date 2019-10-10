@@ -27,6 +27,7 @@ class ConfigurationController extends AbstractController {
     'Reports tab.  You may also manually create the file and upload it to your course\'s rainbow_grades directory.';
 
     /**
+     * @Route("/api/{_semester}/{_course}/config", methods={"GET"})
      * @Route("/{_semester}/{_course}/config", methods={"GET"})
      * @return Response
      */
@@ -58,7 +59,8 @@ class ConfigurationController extends AbstractController {
                 $this->core->getConfig()->getCourse(),
                 $this->core->getConfig()->getSemester()
             ),
-            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
+            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
+            'email_enabled'                  => $this->core->getConfig()->isEmailEnabled()
         );
 
         return new Response(
@@ -67,15 +69,14 @@ class ConfigurationController extends AbstractController {
                 ConfigurationView::class,
                 'viewConfig',
                 $fields,
-                $this->getGradeableSeatingOptions(),
-                $this->core->getConfig()->isEmailEnabled(),
                 $this->core->getCsrfToken()
             )
         );
     }
 
     /**
-     * @Route("/{_semester}/{_course}/config/update", methods={"POST"})
+     * @Route("/api/{_semester}/{_course}/config", methods={"POST"})
+     * @Route("/{_semester}/{_course}/config", methods={"POST"})
      * @return Response
      */
     public function updateConfiguration(): Response {
