@@ -106,7 +106,7 @@ class WebRouter {
      */
     static public function getWebResponse(Request $request, Core $core) {
         $logged_in = false;
-        //try {
+        try {
             $router = new self($request, $core);
             $router->loadCourse();
 
@@ -129,8 +129,8 @@ class WebRouter {
                     new WebResponse("Error", "errorPage", "You don't have access to this page.")
                 );
             }
-        //}
-        /*catch (ResourceNotFoundException | MethodNotAllowedException $e) {
+        }
+        catch (ResourceNotFoundException | MethodNotAllowedException $e) {
             // redirect to login page or home page
             if (!$logged_in) {
                 return Response::RedirectOnlyResponse(
@@ -143,7 +143,7 @@ class WebRouter {
                     new RedirectResponse($core->buildUrl(['home']))
                 );
             }
-        }*/
+        }
 
         return $router->run();
     }
