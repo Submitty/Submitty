@@ -1,5 +1,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
 <div class="content">
-  <h1> This is a page for office hours </h1>
+  <h1> This is a page for office hours </h1> <br/>
+  <h3> The queue is currently has 10 people in it </h3> <br/>
+  <form method="post" id="add_to_queue" action="">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="text" name="name" value="Ben K">
+    <input type="submit" value="Join">
+  </form>
 </div>

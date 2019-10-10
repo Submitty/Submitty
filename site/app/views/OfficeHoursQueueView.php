@@ -8,6 +8,8 @@ class OfficeHoursQueueView extends AbstractView {
     public function showQueue() {
         /*$this->core->getOutput()->addBreadcrumb("Notifications");
         $this->core->getOutput()->addInternalCss('notifications.css');*/
-        $this->core->getOutput()->renderTwigOutput("OfficeHoursQueue.twig");
+        $this->core->getOutput()->renderTwigOutput("OfficeHoursQueue.twig",[
+          'csrf_token' => $this->core->getCsrfToken()
+        ]);
     }
 }
