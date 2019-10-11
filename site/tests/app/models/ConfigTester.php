@@ -45,7 +45,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $log_path = FileUtils::joinPaths($this->temp_dir, "logs");
 
         FileUtils::createDir($this->config_path);
-        FileUtils::createDir($course_path, 0777, true);
+        FileUtils::createDir($course_path, true, 0777);
         FileUtils::createDir(FileUtils::joinPaths($course_path, "config"));
         FileUtils::createDir($log_path);
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'access'));

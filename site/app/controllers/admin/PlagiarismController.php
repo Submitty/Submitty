@@ -12,6 +12,50 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class PlagiarismController extends AbstractController {
+    private function getGradeablesFromPriorTerm(){
+        $return = array();
+
+        $filename = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyPath(),
+            "courses",
+            "gradeables_from_prior_terms.txt"
+        );
+
+        if (file_exists($filename)) {
+          $file = fopen($filename, "r") or exit("Unable to open file!");
+
+          while(!feof($file)){
+            $line = fgets($file);
+            $line = trim($line," ");
+            $line = explode("/",$line);
+            $sem = $line[5];
+            $course = $line[6];
+            $gradeables= array();
+            while (!feof($file)) {
+                $line = fgets($file);
+                if (trim(trim($line, " "),"\n") === "") {
+                    break;
+                }
+                array_push($gradeables, trim(trim($line, " "), "\n"));
+            }
+            $return[$sem][$course] = $gradeables;
+
+          }
+          fclose($file);
+          uksort($return, function($semester_a, $semester_b) {
+              $year_a = (int) substr($semester_a, 1);
+              $year_b = (int) substr($semester_b, 1);
+              if($year_a > $year_b)
+                return 0;
+              else if ($year_a < $year_b)
+                return 1;
+              else {
+                return ($semester_a[0] === 'f')? 0 : 1 ;
+              }
+            });
+        }
+        return $return;
+    }
     /**
      * @Route("/{_semester}/{_course}/plagiarism")
      */
@@ -114,7 +158,7 @@ class PlagiarismController extends AbstractController {
             }
         }
 
-        $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
+        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
 
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'new', $gradeable_ids_titles, $prior_term_gradeables, null);
     }
@@ -234,7 +278,7 @@ class PlagiarismController extends AbstractController {
 
                 $instructor_provided_code_path = $target_dir;
 
-                if (FileUtils::getMimeType($upload["tmp_name"]) == "application/zip") {
+                if (mime_content_type($upload["tmp_name"]) == "application/zip") {
                     $zip = new \ZipArchive();
                     $res = $zip->open($upload['tmp_name']);
                     if ($res === true) {
@@ -375,7 +419,7 @@ class PlagiarismController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
         $return_url = $this->core->buildCourseUrl(['plagiarism']);
 
-        $prior_term_gradeables = FileUtils::getGradeablesFromPriorTerm();
+        $prior_term_gradeables = $this->getGradeablesFromPriorTerm();
 
         if(!file_exists("/var/local/submitty/courses/".$semester."/".$course."/lichen/config/lichen_".$semester."_".$course."_".$gradeable_id.".json")) {
             $this->core->addErrorMessage("Saved configuration not found.");
@@ -550,7 +594,7 @@ class PlagiarismController extends AbstractController {
 	    					}
 	    				}
 	    			}
-                    
+
 	    			if($orange_color) {
                         //Color is orange -- general match from selected match
                         $color = '#ffa500';
@@ -569,15 +613,15 @@ class PlagiarismController extends AbstractController {
                             $start_value_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["value"];
                             $end_value_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["value"];
                             $color_info[2][] = [$start_pos_2, $start_line_2, $end_pos_2, $end_line_2, '#ffa500', $start_value_2, $end_value_2, $user_2_matchingposition["start"], $user_2_matchingposition["end"]];
-                            
+
                             $userMatchesStarts[] = $user_2_matchingposition["start"];
                             $userMatchesEnds[] = $user_2_matchingposition["end"];
 
                 }
-                
-              
+
+
             }
-	    	
+
             } else if($match["type"] == "common") {
                 //Color is grey -- common matches among all students
                 $color = '#cccccc';
@@ -587,11 +631,11 @@ class PlagiarismController extends AbstractController {
                 $color = '#b5e3b5';
             }
 
-             
+
 
             array_push($color_info[1], [$start_pos, $start_line, $end_pos, $end_line, $color, $start_value, $end_value, count($userMatchesStarts) > 0 ? $userMatchesStarts[0] : [], count($userMatchesEnds) > 0 ? $userMatchesEnds[0] : [] ]);
-            
-        
+
+
     	// foreach($color_info as $i=>$color_info_for_line) {
 	    // 	ksort($color_info[$i]);
     	// }
@@ -686,7 +730,7 @@ class PlagiarismController extends AbstractController {
                         $token_path_2= $course_path."/lichen/tokenized/".$gradeable_id."/".$match_info['username']."/".$match_info['version']."/tokens.json";
                         $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
                         foreach($match_info['matchingpositions'] as $matchingpos) {
-                            
+
                             array_push($matchingpositions, array("start_line"=> $tokens_user_2[$matchingpos["start"]-1]["line"]-1 , "start_ch" => $tokens_user_2[$matchingpos["start"]-1]["char"]-1,
                                  "end_line"=> $tokens_user_2[$matchingpos["end"]-1]["line"]-1, "end_ch" => $tokens_user_2[$matchingpos["end"]-1]["char"]-1 ));
                         }

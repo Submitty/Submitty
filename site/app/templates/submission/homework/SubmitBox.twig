@@ -596,9 +596,16 @@
             else {
                 validateUserId("{{ csrf_token }}", "{{ gradeable_id }}", user_id)
                 .then(function(response){
-                    if(response['highest_version']){
-                        var option = displayPreviousSubmissionOptions(getSubmissionOption);
-                        function getSubmissionOption(option){
+                    if(response['data']['previous_submission']){
+                        let has_been_called = false;
+                        var option = displayPreviousSubmissionOptions(getSubmissionOptionForStudentOnly);
+
+                        return;
+
+                        function getSubmissionOptionForStudentOnly(option){
+                            if(has_been_called)
+                                return;
+
                             var merge_previous = false;
                             var clobber = false;
 
@@ -609,10 +616,10 @@
                                 clobber = true;
                             }
 
-                            makeSubmission(user_id,response['highest_version'], false, "", "", merge_previous,clobber);
+                            makeSubmission(user_id,response['data']['highest_version'], false, "", "", "", merge_previous,clobber);
                         }
                     }else{
-                        makeSubmission(user_id, response['highest_version'], false, "", "");
+                        makeSubmission(user_id, response['data']['highest_version'], false, "", "", "");
                     }
                 });
             }
