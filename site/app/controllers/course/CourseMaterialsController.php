@@ -177,18 +177,20 @@ class CourseMaterialsController extends AbstractController {
             $release_datetime = $end_of_time->format("Y-m-d H:i:sO");
             $json = FileUtils::readJsonFile($fp);
             $sections = null;
+            $hide_from_students = "off";
             if ($json != false) {
                 $release_datetime  = $json[$file_name]['release_datetime'];
                 if(isset($json[$file_name]['sections'])){
                     $sections = $json[$file_name]['sections'];
                 }
+                $hide_from_students = $json[$file_name]['hide_from_students'];
             }
 
             if(!is_null($sections)){
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime, 'sections' => $sections);
+                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
             }
             else{
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime);
+                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $release_datetime, 'hide_from_students' => $hide_from_students);
             }
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return "Failed to write to file {$fp}";
@@ -236,12 +238,15 @@ class CourseMaterialsController extends AbstractController {
                 if(isset($json[$file_name]['sections'])){
                     $sections  = $json[$file_name]['sections'];
                 }
+                if(isset($json[$file_name]['hide_from_students'])){
+                    $hide_from_students  = $json[$file_name]['hide_from_students'];
+                }
             }
             if(!is_null($sections)){
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time, 'sections' => $sections);
+                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time, 'sections' => $sections, 'hide_from_students' => $hide_from_students);
             }
             else{
-                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time);
+                $json[$file_name] = array('checked' => $checked, 'release_datetime' => $new_data_time, 'hide_from_students' => $hide_from_students);
             }
             if (file_put_contents($fp, FileUtils::encodeJson($json)) === false) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
@@ -283,6 +288,11 @@ class CourseMaterialsController extends AbstractController {
         $sections = null;
         if(isset($_POST['sections'])){
             $sections = $_POST['sections'];
+        }
+        
+        $hide_from_students = null;
+        if(isset($_POST['hide_from_students'])){
+            $hide_from_students = $_POST['hide_from_students'];
         }
         
         if(empty($sections) && !is_null($sections)){
@@ -409,14 +419,16 @@ class CourseMaterialsController extends AbstractController {
                                 $json[$path] = [
                                     'checked' => '1',
                                     'release_datetime' => $release_time,
-                                    'sections' => $sections_exploded
+                                    'sections' => $sections_exploded,
+                                    'hide_from_students' => $hide_from_students
                                 ];
                             }
                             
                             else{
                                 $json[$path] = [
                                     'checked' => '1',
-                                    'release_datetime' => $release_time
+                                    'release_datetime' => $release_time,
+                                    'hide_from_students' => $hide_from_students
                                 ];
                             }
                         }
@@ -431,10 +443,10 @@ class CourseMaterialsController extends AbstractController {
                                 if($sections_exploded == null){
                                     $sections_exploded = [];
                                 }
-                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded);
+                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
                             }
                             else{
-                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time);
+                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'hide_from_students' => $hide_from_students);
                             }
                         }
                     }

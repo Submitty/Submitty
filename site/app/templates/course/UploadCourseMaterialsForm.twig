@@ -51,6 +51,10 @@
             <input id="expand-zip-checkbox" type="checkbox" value="off"/>
             Unzip zip files (Note: If checked, will replace all folders/files)
         </label>
+        <label>
+            <input id="hide-materials-checkbox" type="checkbox" value="off"/>
+            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
+        </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div id="upload-boxes">
             {# upload1 and input-file1 required for drag-and-drop.js #}
@@ -62,8 +66,8 @@
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
     <script type="text/javascript">
-        function makeSubmission(expandZip,cmPath, requestedPath,cmTime, sections) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath,cmTime, sections);
+        function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
@@ -74,6 +78,10 @@
                 var expandZip = 'off';
                 if  ($('#expand-zip-checkbox').is(':checked'))  {
                     expandZip = 'on';
+                }
+                var hideFromStudents = 'off';
+                if  ($('#hide-materials-checkbox').is(':checked'))  {
+                    hideFromStudents = 'on';
                 }
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 
@@ -90,7 +98,7 @@
                 var cmPath = document.getElementById('cm_path').innerHTML;
 
                 var requestedPath = document.getElementById("input-provide-full-path").value;
-                makeSubmission(expandZip, cmPath, requestedPath,cmTime, sections);
+                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
                 e.stopPropagation();
             });
         });
