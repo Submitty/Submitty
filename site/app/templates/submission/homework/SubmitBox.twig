@@ -654,6 +654,8 @@
 
                 <input
                     type="text"
+                    autocapitalization="off"
+                    spellcheck="false"
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
                     class="sa-box"
@@ -687,6 +689,7 @@
                     name="short_answer_{{ index }}"
                     id="short_answer_{{ index }}"
                     class="sa-box"
+                    spellcheck="false"
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     onKeyPress="handle_input_keypress()"
