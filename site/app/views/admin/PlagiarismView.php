@@ -426,7 +426,7 @@ HTML;
         return $return;       
     }
 
-    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles = null, $prior_term_gradeables, $saved_config = null) {
+    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles = null, $prior_term_gradeables, $saved_config = null, $title = '') {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
@@ -515,10 +515,6 @@ HTML;
         }
 
         else if($new_or_edit == "edit") {
-            $title = '';
-            if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
-               $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
-            }
             $return .= <<<HTML
                     $title
 HTML;
