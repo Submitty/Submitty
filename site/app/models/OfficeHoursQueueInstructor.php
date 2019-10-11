@@ -16,12 +16,12 @@ class OfficeHoursQueueInstructor extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, User $user, OfficeHoursQueueStudent ...$entries) {
+    public function __construct(Core $core, array $entries) {
         parent::__construct($core);
         $this->entries = $entries;
     }
-
+    
     public function getEntries(){
-      return $entries;
+      return $this->entries;
     }
 }

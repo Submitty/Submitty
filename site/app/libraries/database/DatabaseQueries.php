@@ -4091,7 +4091,15 @@ AND gc_id IN (
 
     public function removeUserFromQueue($user_id){
         //$this->course_db->query("DELETE FROM queue");
-        $this->course_db->query("UPDATE queue SET status = 3 where user_id = ? and (status = 0 or status = 1)", array($user_id));
+        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where user_id = ? and (status = 0 or status = 1)", array($user_id));
+    }
+
+    public function startHelpUser($user_id){
+        $this->course_db->query("UPDATE queue SET status = 1, time_helped = current_timestamp where user_id = ? and (status = 0)", array($user_id));
+    }
+
+    public function finishHelpUser($user_id){
+      $this->course_db->query("UPDATE queue SET status = 2, time_out = current_timestamp where user_id = ? and (status = 1)", array($user_id));
     }
 
     public function getNextInQueue(){
@@ -4105,10 +4113,11 @@ AND gc_id IN (
       $arr = array();
       $index = 1;
       foreach($rows as $row){
-        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in']);
-        array_append($arr, $oh_queue_student);
+        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in']);
+        array_push($arr, $oh_queue_student);
         $index = $index + 1;
       }
-      $oh_queue_nstr = new OfficeHoursQueueInstructor($this->core, $arr);
+      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $arr);
+      return $oh_queue_instr;
     }
 }

@@ -73,6 +73,32 @@ class OfficeHourQueueController extends AbstractController {
 
       /**
        * @param
+       * @Route("/{_semester}/{_course}/OfficeHoursQueue/startHelp")
+       * @return Response
+       */
+      public function startHelpPerson(){
+        if($this->core->getUser()->accessGrading())
+          $this->core->getQueries()->startHelpUser($_POST['user_id']);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+        );
+      }
+
+      /**
+       * @param
+       * @Route("/{_semester}/{_course}/OfficeHoursQueue/finishHelp")
+       * @return Response
+       */
+      public function finishHelpPerson(){
+        if($this->core->getUser()->accessGrading())
+          $this->core->getQueries()->finishHelpUser($_POST['user_id']);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+        );
+      }
+
+      /**
+       * @param
        * @Route("/{_semester}/{_course}/OfficeHoursQueue/remove")
        * @return Response
        */

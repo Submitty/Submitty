@@ -3,5 +3,29 @@
 <div class="content">
   <h1> This is a page for office hours instructors </h1> <br/>
   <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
-  
+  {% for entry in entries %}
+    <h1>
+      {{entry.getPositionInQueue() }}
+      &nbsp; &nbsp;
+      {{ entry.getName() }}
+      &nbsp; &nbsp;
+      {{ entry.getTimeIn() }}
+      &nbsp; &nbsp;
+      </h1>
+      {% if entry.getStatus() == 0 %}
+        <form method="post" id="start_help" action="{{start_help_url}}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="hidden" name="user_id" value="{{entry.getUserId()}}"/>
+          <input type="submit" value="Help">
+        </form>
+      {% endif %}
+      {% if entry.getStatus() == 1 %}
+        <form method="post" id="start_help" action="{{finish_help_url}}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="hidden" name="user_id" value="{{entry.getUserId()}}"/>
+          <input type="submit" value="Finish Helping">
+        </form>
+      {% endif %}
+     <br/>
+  {% endfor %}
 </div>
