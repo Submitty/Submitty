@@ -364,7 +364,7 @@ HTML;
      * @param bool $show_edit_teams
      * @return string
      */
-    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction) {
+    public function detailsPage(Gradeable $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $team_gradeable_view_history, $posts) {
 
         $peer = false;
         if ($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -596,7 +596,6 @@ HTML;
             ];
         }
 
-        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : array();
         foreach ($team_gradeable_view_history as $team_id => $team) {
             $not_viewed_yet = true;
             $hover_over_string = "";
@@ -649,8 +648,8 @@ HTML;
         ]);
     }
 
-    public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections) {
-        $students = $this->core->getQueries()->getAllUsers();
+    public function adminTeamForm(Gradeable $gradeable, $all_reg_sections, $all_rot_sections, $students) {
+        
         $student_full = Utils::getAutoFillData($students);
 
         return $this->core->getOutput()->renderTwigTemplate("grading/AdminTeamForm.twig", [
@@ -805,7 +804,7 @@ HTML;
         }
 
         foreach($threadIds as $threadId) {
-            $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
+            
             if(count($posts) > 0) {
                 $posts_view .= $this->core->getOutput()->renderTemplate('forum\ForumThread', 'generatePostList', $threadId, $posts, [], $currentCourse, false, true, $submitter_id);
             } else {
