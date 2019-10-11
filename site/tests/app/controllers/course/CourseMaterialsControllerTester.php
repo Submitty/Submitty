@@ -11,7 +11,6 @@ use \ZipArchive;
 class CourseMaterialsControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
 
-
     private $core;
     private $config;
     private $json_path;
