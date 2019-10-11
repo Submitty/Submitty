@@ -4,10 +4,14 @@
 ################################################################################################################
 # COPY THE 1.0 Grading Website
 
+start=$SECONDS
+
 echo -e "Copy the submission website"
 
 THIS_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 source ${THIS_DIR}/bin/versions.sh
+
+echo "SOURCE TOOK $(($SECONDS - start)) SECONDS"
 
 if [ -z ${PHP_USER+x} ]; then
     # constants are not initialized,
@@ -20,6 +24,8 @@ if [ -z ${PHP_USER+x} ]; then
     CGI_GROUP=${CGI_USER}
 fi
 
+echo "CONSTANTS TOOK $(($SECONDS - start)) SECONDS"
+
 mkdir -p ${SUBMITTY_INSTALL_DIR}/site/public
 echo "Submitty is being updated. Please try again in 2 minutes." > /tmp/index.html
 chmod 644 /tmp/index.html
@@ -30,6 +36,8 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
 rsync -rtz --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+
+echo "RSYNC TOOK $(($SECONDS - start)) SECONDS"
 
 # clear old twig cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
@@ -49,132 +57,136 @@ if [ -d "${SUBMITTY_INSTALL_DIR}/site/vendor/composer" ]; then
     chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/vendor
 fi
 
+echo "FIND TOOK $(($SECONDS - start)) SECONDS"
+
 # install composer dependencies and generate classmap
 su - ${PHP_USER} -c "composer install -d \"${SUBMITTY_INSTALL_DIR}/site\" --no-dev --optimize-autoloader --no-suggest"
 
-# Install JS dependencies and then copy them into place
-# We need to create the node_modules folder initially if it
-# doesn't exist, or else submitty_php won't be able to make it
-if [ ! -d "${SUBMITTY_INSTALL_DIR}/site/node_modules" ]; then
-    mkdir -p ${SUBMITTY_INSTALL_DIR}/site/node_modules
-    chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}/site/node_modules
-fi
-chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/node_modules
-if [ -f "${SUBMITTY_INSTALL_DIR}/site/package-lock.json" ]; then
-    chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
-fi
+echo "SU TOOK $(($SECONDS - start)) SECONDS"
 
-su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error"
+# # Install JS dependencies and then copy them into place
+# # We need to create the node_modules folder initially if it
+# # doesn't exist, or else submitty_php won't be able to make it
+# if [ ! -d "${SUBMITTY_INSTALL_DIR}/site/node_modules" ]; then
+#     mkdir -p ${SUBMITTY_INSTALL_DIR}/site/node_modules
+#     chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}/site/node_modules
+# fi
+# chmod -R 740 ${SUBMITTY_INSTALL_DIR}/site/node_modules
+# if [ -f "${SUBMITTY_INSTALL_DIR}/site/package-lock.json" ]; then
+#     chmod 640 ${SUBMITTY_INSTALL_DIR}/site/package-lock.json
+# fi
 
-echo "Copy NPM packages into place"
-NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
-VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
-# clean out the old install so we don't leave anything behind
-rm -rf ${VENDOR_FOLDER}
-mkdir ${VENDOR_FOLDER}
-# fontawesome
-mkdir ${VENDOR_FOLDER}/fontawesome
-mkdir ${VENDOR_FOLDER}/fontawesome/css
-cp ${NODE_FOLDER}/@fortawesome/fontawesome-free/css/all.min.css ${VENDOR_FOLDER}/fontawesome/css/all.min.css
-cp -R ${NODE_FOLDER}/@fortawesome/fontawesome-free/webfonts/ ${VENDOR_FOLDER}/fontawesome/
-# bootstrap
-cp -R ${NODE_FOLDER}/bootstrap/dist/ ${VENDOR_FOLDER}/bootstrap
-# chosen.js
-cp -R ${NODE_FOLDER}/chosen-js ${VENDOR_FOLDER}/chosen-js
-# codemirror
-mkdir ${VENDOR_FOLDER}/codemirror
-mkdir ${VENDOR_FOLDER}/codemirror/theme
-cp ${NODE_FOLDER}/codemirror/lib/codemirror.js ${VENDOR_FOLDER}/codemirror/
-cp ${NODE_FOLDER}/codemirror/lib/codemirror.css ${VENDOR_FOLDER}/codemirror/
-cp -R ${NODE_FOLDER}/codemirror/mode/ ${VENDOR_FOLDER}/codemirror
-cp ${NODE_FOLDER}/codemirror/theme/monokai.css ${VENDOR_FOLDER}/codemirror/theme
-cp ${NODE_FOLDER}/codemirror/theme/eclipse.css ${VENDOR_FOLDER}/codemirror/theme
-# flatpickr
-mkdir ${VENDOR_FOLDER}/flatpickr
-cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
-# shortcut-buttons-flatpickr
-mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
-cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
-# jquery
-mkdir ${VENDOR_FOLDER}/jquery
-cp ${NODE_FOLDER}/jquery/dist/jquery.min.* ${VENDOR_FOLDER}/jquery
-# jquery.are-you-sure
-mkdir ${VENDOR_FOLDER}/jquery.are-you-sure
-cp ${NODE_FOLDER}/jquery.are-you-sure/jquery.are-you-sure.js ${VENDOR_FOLDER}/jquery.are-you-sure
-# jquery-ui
-mkdir ${VENDOR_FOLDER}/jquery-ui
-cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
-cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
-# jquery-ui-timepicker-addon
-mkdir ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
-cp ${NODE_FOLDER}/jquery-ui-timepicker-addon/dist/*.min.* ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
-# pdfjs
-mkdir ${VENDOR_FOLDER}/pdfjs
-cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
-cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
-cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
-cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
-cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
-# plotly
-mkdir ${VENDOR_FOLDER}/plotly
-cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
+# su - ${PHP_USER} -c "cd ${SUBMITTY_INSTALL_DIR}/site && npm install --loglevel=error"
 
-mkdir ${VENDOR_FOLDER}/mermaid
-cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
+# echo "Copy NPM packages into place"
+# NODE_FOLDER=${SUBMITTY_INSTALL_DIR}/site/node_modules
+# VENDOR_FOLDER=${SUBMITTY_INSTALL_DIR}/site/public/vendor
+# # clean out the old install so we don't leave anything behind
+# rm -rf ${VENDOR_FOLDER}
+# mkdir ${VENDOR_FOLDER}
+# # fontawesome
+# mkdir ${VENDOR_FOLDER}/fontawesome
+# mkdir ${VENDOR_FOLDER}/fontawesome/css
+# cp ${NODE_FOLDER}/@fortawesome/fontawesome-free/css/all.min.css ${VENDOR_FOLDER}/fontawesome/css/all.min.css
+# cp -R ${NODE_FOLDER}/@fortawesome/fontawesome-free/webfonts/ ${VENDOR_FOLDER}/fontawesome/
+# # bootstrap
+# cp -R ${NODE_FOLDER}/bootstrap/dist/ ${VENDOR_FOLDER}/bootstrap
+# # chosen.js
+# cp -R ${NODE_FOLDER}/chosen-js ${VENDOR_FOLDER}/chosen-js
+# # codemirror
+# mkdir ${VENDOR_FOLDER}/codemirror
+# mkdir ${VENDOR_FOLDER}/codemirror/theme
+# cp ${NODE_FOLDER}/codemirror/lib/codemirror.js ${VENDOR_FOLDER}/codemirror/
+# cp ${NODE_FOLDER}/codemirror/lib/codemirror.css ${VENDOR_FOLDER}/codemirror/
+# cp -R ${NODE_FOLDER}/codemirror/mode/ ${VENDOR_FOLDER}/codemirror
+# cp ${NODE_FOLDER}/codemirror/theme/monokai.css ${VENDOR_FOLDER}/codemirror/theme
+# cp ${NODE_FOLDER}/codemirror/theme/eclipse.css ${VENDOR_FOLDER}/codemirror/theme
+# # flatpickr
+# mkdir ${VENDOR_FOLDER}/flatpickr
+# cp -R ${NODE_FOLDER}/flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr
+# # shortcut-buttons-flatpickr
+# mkdir ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
+# cp -R ${NODE_FOLDER}/shortcut-buttons-flatpickr/dist/* ${VENDOR_FOLDER}/flatpickr/plugins/shortcutButtons
+# # jquery
+# mkdir ${VENDOR_FOLDER}/jquery
+# cp ${NODE_FOLDER}/jquery/dist/jquery.min.* ${VENDOR_FOLDER}/jquery
+# # jquery.are-you-sure
+# mkdir ${VENDOR_FOLDER}/jquery.are-you-sure
+# cp ${NODE_FOLDER}/jquery.are-you-sure/jquery.are-you-sure.js ${VENDOR_FOLDER}/jquery.are-you-sure
+# # jquery-ui
+# mkdir ${VENDOR_FOLDER}/jquery-ui
+# cp ${NODE_FOLDER}/jquery-ui-dist/*.min.* ${VENDOR_FOLDER}/jquery-ui
+# cp -R ${NODE_FOLDER}/jquery-ui-dist/images ${VENDOR_FOLDER}/jquery-ui/
+# # jquery-ui-timepicker-addon
+# mkdir ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
+# cp ${NODE_FOLDER}/jquery-ui-timepicker-addon/dist/*.min.* ${VENDOR_FOLDER}/jquery-ui-timepicker-addon
+# # pdfjs
+# mkdir ${VENDOR_FOLDER}/pdfjs
+# cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.min.js ${VENDOR_FOLDER}/pdfjs
+# cp ${NODE_FOLDER}/pdfjs-dist/build/pdf.worker.min.js ${VENDOR_FOLDER}/pdfjs
+# cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.css ${VENDOR_FOLDER}/pdfjs/pdf_viewer.css
+# cp ${NODE_FOLDER}/pdfjs-dist/web/pdf_viewer.js ${VENDOR_FOLDER}/pdfjs/pdf_viewer.js
+# cp -R ${NODE_FOLDER}/pdfjs-dist/cmaps ${VENDOR_FOLDER}/pdfjs
+# # plotly
+# mkdir ${VENDOR_FOLDER}/plotly
+# cp ${NODE_FOLDER}/plotly.js-dist/plotly.js ${VENDOR_FOLDER}/plotly
 
-# pdf-annotate.js
-cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
-# twig.js
-mkdir ${VENDOR_FOLDER}/twigjs
-cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
+# mkdir ${VENDOR_FOLDER}/mermaid
+# cp ${NODE_FOLDER}/mermaid/dist/*.min.* ${VENDOR_FOLDER}/mermaid
 
-# set the permissions of all files
-# $PHP_USER can read & execute all directories and read all files
-#chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
-#find ${SUBMITTY_INSTALL_DIR}/site ! -name \*.html -exec chmod 440 {} \;
+# # pdf-annotate.js
+# cp -R "${NODE_FOLDER}/@submitty/pdf-annotate.js/dist" ${VENDOR_FOLDER}/pdf-annotate.js
+# # twig.js
+# mkdir ${VENDOR_FOLDER}/twigjs
+# cp ${NODE_FOLDER}/twig/twig.min.js ${VENDOR_FOLDER}/twigjs/
 
-# "other" can cd into all subdirectories
-#find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
+# # set the permissions of all files
+# # $PHP_USER can read & execute all directories and read all files
+# #chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
+# #find ${SUBMITTY_INSTALL_DIR}/site ! -name \*.html -exec chmod 440 {} \;
 
-# Set proper read/execute for "other" on files with certain extensions
-# so apache can properly handle them
-echo "Set permissions"
-chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
-find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod 551 {} \;
-find ${SUBMITTY_INSTALL_DIR}/site -type f -not -path \*/public/\* -exec chmod 440 {} \;
+# # "other" can cd into all subdirectories
+# #find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod ogu+x {} \;
 
-set_permissions () {
-    local fullpath=$1
-    filename=$(basename -- "$fullpath")
-    extension="${filename##*.}"
-    # filename="${filename%.*}"
-    case "${extension}" in
-        css|otf|jpg|png|ico|txt|twig|map)
-            chmod 444 ${fullpath}
-            ;;
-        bcmap|ttf|eot|svg|woff|woff2|js|cgi)
-            chmod 445 ${fullpath}
-            ;;
-        html)
-            if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
-                chmod 440 ${fullpath}
-            fi
-            ;;
-        *)
-            chmod 440 ${fullpath}
-            ;;
-    esac
-}
+# # Set proper read/execute for "other" on files with certain extensions
+# # so apache can properly handle them
+# echo "Set permissions"
+# chown -R ${PHP_USER}:${PHP_USER} ${SUBMITTY_INSTALL_DIR}/site
+# find ${SUBMITTY_INSTALL_DIR}/site -type d -exec chmod 551 {} \;
+# find ${SUBMITTY_INSTALL_DIR}/site -type f -not -path \*/public/\* -exec chmod 440 {} \;
 
-find ${SUBMITTY_INSTALL_DIR}/site/public -type f | while read file; do set_permissions "$file"; done
+# set_permissions () {
+#     local fullpath=$1
+#     filename=$(basename -- "$fullpath")
+#     extension="${filename##*.}"
+#     # filename="${filename%.*}"
+#     case "${extension}" in
+#         css|otf|jpg|png|ico|txt|twig|map)
+#             chmod 444 ${fullpath}
+#             ;;
+#         bcmap|ttf|eot|svg|woff|woff2|js|cgi)
+#             chmod 445 ${fullpath}
+#             ;;
+#         html)
+#             if [ ${fullpath} != ${SUBMITTY_INSTALL_DIR}/site/public/index.html ]; then
+#                 chmod 440 ${fullpath}
+#             fi
+#             ;;
+#         *)
+#             chmod 440 ${fullpath}
+#             ;;
+#     esac
+# }
 
-# Set cgi-bin permissions
-chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
-chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
-chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
+# find ${SUBMITTY_INSTALL_DIR}/site/public -type f | while read file; do set_permissions "$file"; done
 
-# cache needs to be writable
-find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
+# # Set cgi-bin permissions
+# chown -R ${CGI_USER}:${CGI_USER} ${SUBMITTY_INSTALL_DIR}/site/cgi-bin
+# chmod 540 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/*
+# chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
+
+# # cache needs to be writable
+# find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
 
 # reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
 # as expected (Travis for example will fail here otherwise).
@@ -187,3 +199,5 @@ fi
 set -e
 
 rm -f ${SUBMITTY_INSTALL_DIR}/site/public/index.html
+
+echo "TASK TOOK $(($SECONDS - start)) SECONDS"
