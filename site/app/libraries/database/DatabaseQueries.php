@@ -24,7 +24,8 @@ use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
-use app\models\OfficeHoursQueue;
+use app\models\OfficeHoursQueueStudent;
+use app\models\OfficeHoursQueueInstructor;
 use Exception;
 
 
@@ -4062,6 +4063,11 @@ AND gc_id IN (
         return $not_fully_graded;
     }
 
+    public function getNumInQueue(){
+      $this->course_db->query("SELECT * FROM queue where status = 0");
+      return count($this->course_db->rows());
+    }
+
     public function addUserToQueue($user_id, $name){
       $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows() == 0)){
@@ -4070,25 +4076,39 @@ AND gc_id IN (
     }
 
     public function getQueueByUser($user_id){
-      $this->course_db->query("SELECT * FROM queue where status = 0");
-      $num_in_queue = count($this->course_db->rows());
+      $num_in_queue = $this->getNumInQueue();
       $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows()) == 0){
-        return new OfficeHoursQueue($this->core, $this->core->getUser(), "name not set", false, $num_in_queue, -1);
+        $name = $this->core->getUser()->getPreferredFirstName() . " " . $this->core->getUser()->getPreferredLastName();
+        return new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, "1970-01-01 12:00:00.000");
       }
       $row = $this->course_db->rows()[0];
       $this->course_db->query("SELECT * FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
       $position_in_queue = count($this->course_db->rows());
-      $oh_queue = new OfficeHoursQueue($this->core, $this->core->getUser(), $row['name'], $row['status'] == 0, $num_in_queue, $position_in_queue);
+      $oh_queue = new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in']);
       return $oh_queue;
     }
 
     public function removeUserFromQueue($user_id){
         //$this->course_db->query("DELETE FROM queue");
-        $this->course_db->query("UPDATE queue SET status = 3 where user_id = ? and status = 0", array($user_id));
+        $this->course_db->query("UPDATE queue SET status = 3 where user_id = ? and (status = 0 or status = 1)", array($user_id));
     }
 
     public function getNextInQueue(){
       return $this->course_db->query("SELECT * FROM queue where status = 0 order by time_in limit 1");
+    }
+
+    public function getInstructorQueue(){
+      $this->course_db->query("SELECT * FROM queue where status = 0 or status = 1 order by time_in DESC");
+      $rows = $this->course_db->rows();
+
+      $arr = array();
+      $index = 1;
+      foreach($rows as $row){
+        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in']);
+        array_append($arr, $oh_queue_student);
+        $index = $index + 1;
+      }
+      $oh_queue_nstr = new OfficeHoursQueueInstructor($this->core, $arr);
     }
 }

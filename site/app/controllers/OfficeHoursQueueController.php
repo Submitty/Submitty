@@ -9,7 +9,7 @@ use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
 use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\OfficeHoursQueue;
+use app\models\OfficeHoursQueueStudent;
 use app\site\libraries\database\DatabaseQueries;
 
 use Exception;
@@ -30,15 +30,28 @@ class OfficeHourQueueController extends AbstractController {
      * @return Response
      */
      public function showQueue(){
-       $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
-       return Response::WebOnlyResponse(
+       if(!$this->core->getUser()->accessGrading()){
+         $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
+         return Response::WebOnlyResponse(
            new WebResponse(
-               'OfficeHoursQueue',
-               'showQueue',
-               $oh_queue,
-               $this->core->getConfig()->getCourse()
-           )
-       );
+             'OfficeHoursQueue',
+             'showQueueStudent',
+             $oh_queue,
+             $this->core->getConfig()->getCourse()
+             )
+           );
+        }
+        else{
+          $oh_queue = $this->core->getQueries()->getInstructorQueue();
+          return Response::WebOnlyResponse(
+            new WebResponse(
+              'OfficeHoursQueue',
+              'showQueueInstructor',
+              $oh_queue,
+              $this->core->getConfig()->getCourse()
+              )
+            );
+        }
      }
      /**
       * @param
@@ -48,7 +61,10 @@ class OfficeHourQueueController extends AbstractController {
       public function addPerson(){
         if(isset($_POST['name'])){
           //Add the user to the database
-          $this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name']);
+          $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
+          if(!$oh_queue->isInQueue()){
+            $this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name']);
+          }
         }
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
