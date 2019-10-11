@@ -23,10 +23,10 @@ DECLARE
     preferred_name_change_details TEXT;
 BEGIN
     -- Check for changes in users.user_preferred_firstname and users.user_preferred_lastname.
-    IF OLD.user_preferred_firstname <> NEW.user_preferred_firstname THEN
+    IF coalesce(OLD.user_preferred_firstname, '') <> coalesce(NEW.user_preferred_firstname, '') THEN
         preferred_name_change_details := format('PREFERRED_FIRSTNAME OLD: "%s" NEW: "%s" ', OLD.user_preferred_firstname, NEW.user_preferred_firstname);
     END IF;
-    IF OLD.user_preferred_lastname <> NEW.user_preferred_lastname THEN
+    IF coalesce(OLD.user_preferred_lastname, '') <> coalesce(NEW.user_preferred_lastname, '') THEN
         preferred_name_change_details := format('%sPREFERRED_LASTNAME OLD: "%s" NEW: "%s"', preferred_name_change_details, OLD.user_preferred_lastname, NEW.user_preferred_lastname);
     END IF;
     -- If any preferred_name data has changed, preferred_name_change_details will not be NULL.
