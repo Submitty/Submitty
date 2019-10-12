@@ -53,7 +53,8 @@ class ConfigurationController extends AbstractController {
             'submitty_admin_user'            => $this->core->getConfig()->getSubmittyAdminUser(),
             'submitty_admin_user_verified'   => $this->core->getConfig()->isSubmittyAdminUserVerified(),
             'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
-            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
+            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
+            'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
         );
 
         return new Response(
@@ -109,7 +110,7 @@ class ConfigurationController extends AbstractController {
             $entry = intval($entry);
         }
         else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-                                      'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
+                                      'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'queue_enabled'))) {
             $entry = $entry === "true" ? true : false;
         }
         else if($name === 'upload_message') {

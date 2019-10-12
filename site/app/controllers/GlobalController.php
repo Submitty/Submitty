@@ -97,13 +97,15 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
-            $sidebar_buttons[] = new Button($this->core, [
-              "href" => $this->core->buildCourseUrl(['OfficeHoursQueue']),
-              "title" => "Office Hours",
-              "class" => "nav-row",
-              "id" => "nav-sidebar-submitty",
-              "icon" => "fa-star"
-            ]);
+            if ($this->core->getConfig()->isQueueEnabled()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                  "href" => $this->core->buildCourseUrl(['OfficeHoursQueue']),
+                  "title" => "Office Hours",
+                  "class" => "nav-row",
+                  "id" => "nav-sidebar-queue",
+                  "icon" => "fa-user-plus"
+                ]);
+            }
 
             $course_path = $this->core->getConfig()->getCoursePath();
             $course_materials_path = $course_path . "/uploads/course_materials";
