@@ -93,29 +93,17 @@ function dropWithMultipleZips(e){
 
 // show progressbar when uploading files 
 function progress(e){
-    let loading_bar = $("#loading_bar");
-    let loading_bar_element = $("#loading_bar_element");
-    let loading_bar_percentage = $("#loading_bar_percentage");
+    var progressBar = document.getElementById("loading-bar");
 
-    if(!(loading_bar_element && loading_bar && loading_bar_percentage)){
+    if(!progressBar){
         return false;
     }
 
-    if(loading_bar.css("display", "none")){
-        $(loading_bar).fadeIn(10);
-    }
-
     if(e.lengthComputable){
-        let maximum = e.total;
-        let current_state = e.loaded;
-        let perc = (current_state * 100)/maximum;
-
-        loading_bar_element.css("width", perc.toFixed(2) + "%");
-        loading_bar_percentage.html(perc.toFixed(0) + " %");
-
-        if(perc >= 100){   
-            loading_bar.fadeOut(200);
-        }
+        progressBar.max = e.total;
+        progressBar.value = e.loaded;
+        let perc = (e.loaded * 100)/e.total;
+        $("#loading-bar-percentage").html(perc.toFixed(2) + " %");
     }  
 }
 
@@ -1061,13 +1049,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
     $.ajax({
         url: submit_url,
         data: formData,
-        xhr: function() {
-            var myXhr = $.ajaxSettings.xhr();
-            if(myXhr.upload){
-                myXhr.upload.addEventListener('progress',progress, false);
-            }
-            return myXhr;
-        },
         processData: false,
         contentType: false,
         type: 'POST',
