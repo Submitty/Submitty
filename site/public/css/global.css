@@ -142,6 +142,7 @@ footer .footer-separator {
 .loading-bar-wrapper{
     padding-left: 3px;
     margin-bottom: 5px;
+    display: none;
 }
 
 #loading-bar-percentage{

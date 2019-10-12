@@ -817,6 +817,8 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
     formData.append('git_repo_id', git_repo_id);
     formData.append('student_page', student_page)
 
+    let filesize = 0;
+
     if (!vcs_checkout) {
         // Check if new submission
         if (!isValidSubmission() && empty_inputs) {
@@ -843,13 +845,20 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+
+                filesize += file_array[i][j].size;
+                formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
             }
         }
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
+
+    //check if filesize greater than 1,25 MB, then turn on the progressbar
+    if(filesize > 10000000){
+        $(".loading-bar-wrapper").fadeIn(100);
+    }
 
     var short_answer_object    = gatherInputAnswersByType("short_answer");
     var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
