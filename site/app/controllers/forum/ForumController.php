@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class ForumController extends AbstractController{
-	/**
+    /**
      * ForumHomeController constructor.
      *
      * @param Core $core
@@ -51,20 +51,20 @@ class ForumController extends AbstractController{
     /**
      * @Route("/{_semester}/{_course}/forum/threads/status", methods={"POST"})
      */
-	public function changeThreadStatus($status, $thread_id=null) {
+    public function changeThreadStatus($status, $thread_id=null) {
         if (is_null($thread_id)) {
             $thread_id = $_POST['thread_id'];
         }
-		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
-			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
-			    return $this->core->getOutput()->renderJsonSuccess();
-			} else {
-			    return $this->core->getOutput()->renderJsonFail('The thread resolve state could not be updated. Please try again.');
-			}
-		} else {
-		    return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
-		}
-	}
+        if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
+            if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                return $this->core->getOutput()->renderJsonSuccess();
+            } else {
+                return $this->core->getOutput()->renderJsonFail('The thread resolve state could not be updated. Please try again.');
+            }
+        } else {
+            return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
+        }
+    }
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){

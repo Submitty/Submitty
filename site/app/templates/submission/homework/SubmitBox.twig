@@ -404,7 +404,7 @@
         <div id="upload-boxes">
             {# Submit boxes #}
             {% for part in part_names %}
-                {# uploadIndex and input_fileIndex required for drag-and-drop.js #}
+                {# uploadIndex and input-file + Index required for drag-and-drop.js #}
                 <div tabindex="0"
                      id="upload{{ loop.index }}"
                      class="upload-box"
@@ -419,7 +419,7 @@
                             Drag your file(s) here or click to open file browser
                         {% endif %}
                     </h2>
-                    <input type="file" name="files" id="input_file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
+                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                 </div>
             {% endfor %}
         </div>

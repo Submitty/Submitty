@@ -2,7 +2,7 @@ import os
 from unittest import skipIf
 
 from .base_testcase import BaseTestCase
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -116,8 +116,15 @@ class TestSubmission(BaseTestCase):
         self.accept_alerts(1)
 
         # wait until the page reloads to change the active version, completing the test
+        select = Select(self.driver.find_element_by_id('submission-version-select'))
+        select_idx = -1
+        for i in range(len(select.options)):
+            if select.options[i].text.endswith('GRADE THIS VERSION'):
+                select_idx = i
+        self.assertGreater(select_idx, -1)
+        select.select_by_visible_text(select.options[select_idx].text)
+
         version_xpath = "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version)
-        ActionChains(self.driver).move_to_element(self.driver.find_element_by_xpath(version_xpath)).perform()
         WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, version_xpath)))
 
     # for test cases that require switching versions, make submissions to ensure they will
@@ -169,11 +176,6 @@ class TestSubmission(BaseTestCase):
 
     # test changing the submission version
     def test_change_submission_version(self):
-        ###
-        ### HACK TRAVIS
-        return
-        ###
-
         self.setup_test_start()
 
         # ensure that there are multiple versions so that switching is possible
@@ -184,12 +186,6 @@ class TestSubmission(BaseTestCase):
 
     # test cancelling the submission version
     def test_cancel_submission_version(self):
-
-        ###
-        ### HACK TRAVIS
-        return
-        ###
-
         self.setup_test_start()
 
         # ensure that there are multiple versions so that switching is possible
