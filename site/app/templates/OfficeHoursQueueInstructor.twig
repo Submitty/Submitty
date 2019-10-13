@@ -2,30 +2,75 @@
 
 <div class="content">
   <h1> This is a page for office hours instructors </h1> <br/>
-  <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
-  {% for entry in entries %}
-    <h1>
-      {{entry.getPositionInQueue() }}
-      &nbsp; &nbsp;
-      {{ entry.getName() }}
-      &nbsp; &nbsp;
-      {{ entry.getTimeIn() }}
-      &nbsp; &nbsp;
-      </h1>
+  {% if num_in_queue == 1 %}
+    <h3> There is currently {{num_in_queue}} person in the queue</h3> <br/>
+  {% else %}
+    <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
+  {% endif %}
+
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Time</th>
+        <th scope="col">Name</th>
+        <th scope="col">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in entries %}
+    <tr>
+      <th scope="row">{{entry.getPositionInQueue() }}</th>
+      <td>{{ entry.getTimeIn() }}</td>
+      <td>{{ entry.getName() }}</td>
       {% if entry.getStatus() == 0 %}
+      <td>
         <form method="post" id="start_help" action="{{start_help_url}}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-          <input type="hidden" name="user_id" value="{{entry.getUserId()}}"/>
-          <input type="submit" value="Help">
+          <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
+          <input type="submit" value="Help" class="btn btn-primary">
         </form>
-      {% endif %}
-      {% if entry.getStatus() == 1 %}
+      </td>
+      {% elseif entry.getStatus() == 1 %}
+        <td>
         <form method="post" id="start_help" action="{{finish_help_url}}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-          <input type="hidden" name="user_id" value="{{entry.getUserId()}}"/>
-          <input type="submit" value="Finish Helping">
+          <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
+          <input type="submit" value="Finish Helping" class="btn btn-primary">
         </form>
+      </td>
       {% endif %}
-     <br/>
-  {% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+
+  <br><br>
+  <h1>Previously Helped Students</h1>
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Name</th>
+        <th scope="col">Time Entered</th>
+        <th scope="col">Time Helped</th>
+        <th scope="col">Time Out</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in entries_helped %}
+    <tr>
+      <th scope="row">{{entry.getPositionInQueue() }}</th>
+      <td>{{ entry.getName() }}</td>
+      <td>{{ entry.getTimeIn() }}</td>
+      {% if entry.getStatus() == 2 %}
+        <td>{{ entry.getTimeHelped() }}</td>
+      {% else %}
+        <td>Left Queue</td>
+      {% endif %}
+      <td>{{ entry.getTimeOut() }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
 </div>

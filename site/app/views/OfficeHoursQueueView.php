@@ -23,6 +23,7 @@ class OfficeHoursQueueView extends AbstractView {
       $this->core->getOutput()->renderTwigOutput("OfficeHoursQueueInstructor.twig",[
         'csrf_token' => $this->core->getCsrfToken(),
         'entries' => $oh_queue->getEntries(),
+        'entries_helped' => $oh_queue->getEntriesHelped(),
         'num_in_queue' => count($oh_queue->getEntries()),
         'remove_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/remove"]),
         'start_help_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/startHelp"]),

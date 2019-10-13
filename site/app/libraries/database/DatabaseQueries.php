@@ -4079,13 +4079,13 @@ AND gc_id IN (
       $num_in_queue = $this->getNumInQueue();
       $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows()) == 0){
-        $name = $this->core->getUser()->getPreferredFirstName() . " " . $this->core->getUser()->getPreferredLastName();
+        $name = $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
         return new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, "1970-01-01 12:00:00.000");
       }
       $row = $this->course_db->rows()[0];
       $this->course_db->query("SELECT * FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
       $position_in_queue = count($this->course_db->rows());
-      $oh_queue = new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in']);
+      $oh_queue = new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_in'], $row['time_helped'], $row['time_out']);
       return $oh_queue;
     }
 
@@ -4103,21 +4103,34 @@ AND gc_id IN (
     }
 
     public function getNextInQueue(){
-      return $this->course_db->query("SELECT * FROM queue where status = 0 order by time_in limit 1");
+      return $this->course_db->query("SELECT * FROM queue where status = 0 order by time_in ASC limit 1");
     }
 
     public function getInstructorQueue(){
-      $this->course_db->query("SELECT * FROM queue where status = 0 or status = 1 order by time_in DESC");
+      $this->course_db->query("SELECT * FROM queue where (status = 0 or status = 1) order by time_in ASC");
       $rows = $this->course_db->rows();
 
-      $arr = array();
+      $needs_help = array();
       $index = 1;
       foreach($rows as $row){
-        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in']);
-        array_push($arr, $oh_queue_student);
+        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out']);
+        array_push($needs_help, $oh_queue_student);
         $index = $index + 1;
       }
-      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $arr);
+
+      $this->course_db->query("SELECT * FROM queue where (status = 2 or status = 3) and time_in > CURRENT_DATE order by time_out DESC");
+      $rows = $this->course_db->rows();
+
+      $already_helped = array();
+      $index = 1;
+      foreach($rows as $row){
+        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out']);
+        array_push($already_helped, $oh_queue_student);
+        $index = $index + 1;
+      }
+
+
+      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped);
       return $oh_queue_instr;
     }
 }

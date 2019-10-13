@@ -11,6 +11,7 @@ use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueStudent;
 use app\site\libraries\database\DatabaseQueries;
+use app\libraries\routers\AccessControl;
 
 use Exception;
 
@@ -55,16 +56,18 @@ class OfficeHourQueueController extends AbstractController {
      }
      /**
       * @param
-      * @Route("/{_semester}/{_course}/OfficeHoursQueue/add")
+      * @Route("/{_semester}/{_course}/OfficeHoursQueue/add", methods={"POST"})
       * @return Response
       */
       public function addPerson(){
-        if(isset($_POST['name'])){
+        if($_POST['name'] !== ""){
           //Add the user to the database
           $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
           if(!$oh_queue->isInQueue()){
             $this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name']);
           }
+        }else{
+          // eliben should send error message because name was not set
         }
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
@@ -73,7 +76,8 @@ class OfficeHourQueueController extends AbstractController {
 
       /**
        * @param
-       * @Route("/{_semester}/{_course}/OfficeHoursQueue/startHelp")
+       * @Route("/{_semester}/{_course}/OfficeHoursQueue/startHelp", methods={"POST"})
+       * @AccessControl(role="LIMITED_ACCESS_GRADER")
        * @return Response
        */
       public function startHelpPerson(){
@@ -86,7 +90,8 @@ class OfficeHourQueueController extends AbstractController {
 
       /**
        * @param
-       * @Route("/{_semester}/{_course}/OfficeHoursQueue/finishHelp")
+       * @Route("/{_semester}/{_course}/OfficeHoursQueue/finishHelp", methods={"POST"})
+      * @AccessControl(role="LIMITED_ACCESS_GRADER")
        * @return Response
        */
       public function finishHelpPerson(){
@@ -99,7 +104,7 @@ class OfficeHourQueueController extends AbstractController {
 
       /**
        * @param
-       * @Route("/{_semester}/{_course}/OfficeHoursQueue/remove")
+       * @Route("/{_semester}/{_course}/OfficeHoursQueue/remove", methods={"POST"})
        * @return Response
        */
        public function removePerson(){

@@ -2,20 +2,24 @@
 
 <div class="content">
   <h1> This is a page for office hours </h1> <br/>
-  <h3> There are currently {{oh_queue.getNumInQueue()}} people in the queue</h3> <br/>
+  {% if oh_queue.getNumInQueue() == 1 %}
+    <h3> There is currently {{oh_queue.getNumInQueue()}} person in the queue</h3> <br/>
+  {% else %}
+    <h3> There are currently {{oh_queue.getNumInQueue()}} people in the queue</h3> <br/>
+  {% endif %}
   {% if not oh_queue.isInQueue() %}
     <form method="post" id="add_to_queue" action="{{add_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <input type="text" name="name" value = "{{oh_queue.getName()}}">
-      <input type="submit" value="Join">
+      <input type="text" name="name" placeholder="Name" value = "{{oh_queue.getName()}}">
+      <input type="submit" value="Join" class="btn btn-primary">
     </form>
   {% else %}
     {% if oh_queue.getStatus() == 0 %}
       <h3> You are number {{oh_queue.getPositionInQueue()}} in the queue as {{oh_queue.getName()}} </h3> <br/>
-      <h3> You entered at {{oh_queue.getTimeIn()}} </h3>
+      <h3> You joined the queue at {{oh_queue.getTimeIn()}} </h3>
       <form method="post" id="remove_from_queue" action="{{remove_url}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <input type="submit" value="Remove me from the queue">
+        <input type="submit" value="Remove me from the queue" class="btn btn-primary">
       </form>
     {% else %}
       <h3> You are currently being helped </h3>
