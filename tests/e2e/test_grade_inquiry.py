@@ -6,7 +6,7 @@ class TestGradeInquiry(BaseTestCase):
     def set_grade_inquiries_for_course(self, allowed):
         # ensure that grade inquiries are enabled for the course
         self.driver.find_element_by_id("nav-sidebar-course-settings").click()
-        regrade_enabled_checkbox = self.driver.find_element_by_xpath("//input[@id='regrade-enabled']")
+        regrade_enabled_checkbox = self.driver.find_element_by_id("regrade-enabled")
 
         if not regrade_enabled_checkbox.is_selected() and allowed:
             regrade_enabled_checkbox.click()
@@ -17,7 +17,7 @@ class TestGradeInquiry(BaseTestCase):
 
     def set_grade_inquiries_for_gradeable(self, gradeable_id, date=None, allowed=True):
         # ensure that grade inquiries are enabled for grades_released_homework gradeable
-        self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//a[@name='edit gradeable configuration_button']").click()
+        self.driver.find_element_by_xpath("//div[@id='"+gradeable_id+"']//*[@name='edit gradeable configuration_button']").click()
         if allowed:
             self.driver.find_element_by_id("yes_regrade_allowed").click()
         else:
@@ -26,10 +26,10 @@ class TestGradeInquiry(BaseTestCase):
         # set deadline
         if date is not None:
             self.driver.find_element_by_xpath("//a[text()='Dates']").click()
-            self.driver.find_element_by_xpath("//input[@name='regrade_request_date']").send_keys(date)
+            self.driver.find_element_by_name("regrade_request_date").send_keys(date)
 
         # navigate back to gradeable page
-        self.driver.find_element_by_xpath("//a[@id='nav-sidebar-submitty']").click()
+        self.driver.find_element_by_id("nav-sidebar-submitty").click()
 
     # TA GRADING INTERFACE TESTS
     def test_normal_submission_grade_inquiry_panel(self):
@@ -48,7 +48,7 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element_by_xpath("//a[contains(@href,'grading/grade?who_id=bauchg')]").click()
 
         # make sure submit button is present
-        buttons = self.driver.find_elements_by_xpath("//button[contains(@class,'gi-submit')]")
+        buttons = self.driver.find_elements_by_xpath("//*[contains(@class,'gi-submit')]")
         assert len(buttons) == 1
         assert buttons[0].text == "Submit Grade Inquiry"
 
@@ -67,9 +67,9 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element_by_xpath("//a[contains(@href,'grading/grade?who_id=lakinh')]").click()
 
         try:
-           self.driver.find_element_by_xpath("//div[@id='regrade_info']//span[text()='No Submission']")
+           self.driver.find_element_by_xpath("//div[@id='regrade_info']//*[text()='No Submission']")
         except NoSuchElementException:
-                assert False
+           assert False
         assert True
         buttons = self.driver.find_elements_by_xpath("//button[contains(@class,'gi-submit')]")
         assert len(buttons) == 0
