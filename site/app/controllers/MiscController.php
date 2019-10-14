@@ -181,6 +181,16 @@ class MiscController extends AbstractController {
             }
         }
 
+        if($dir == 'submissions'){
+            //cannot download scanned images for bulk uploads
+            if (strpos(basename($path), "upload_page_" ) !== false &&
+                FileUtils::getContentType($path) !== "application/pdf"){
+
+                $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
+        }
+
         $filename = pathinfo($path, PATHINFO_BASENAME);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
