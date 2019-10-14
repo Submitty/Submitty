@@ -279,8 +279,14 @@ class MiscController extends AbstractController {
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($paths[$x]) + 1);
 
-                        // Add current file to archive
-                        $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        //Only get PDFs if this is a bulk upload gradeable
+                        if ($gradeable->isScannedExam() 
+                            && FileUtils::getContentType($filePath) === "application/pdf"){
+                            // Add current file to archive
+                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        }
+
+                       
                     }
                 }
             }
