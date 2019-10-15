@@ -500,6 +500,8 @@ class DatabaseQueries {
 
         $this->course_db->commit();
 
+        $this->visitThread($user, $id);
+
         return array("thread_id" => $id, "post_id" => $post_id);
     }
 
