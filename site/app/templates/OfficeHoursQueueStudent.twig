@@ -19,6 +19,7 @@
       <h3> You joined the queue at {{oh_queue.getTimeIn()}} </h3>
       <form method="post" id="remove_from_queue" action="{{remove_url}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+        <input type="hidden" name="user_id" value="{{oh_queue.getUserId()}}" />
         <input type="submit" value="Remove me from the queue" class="btn btn-primary">
       </form>
     {% else %}

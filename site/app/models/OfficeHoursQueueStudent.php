@@ -16,13 +16,14 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $time_in = "time not set";
     private $time_helped = "time not set";
     private $time_out = "time not set";
+    private $removed_by = NULL;
     /**
      * Notifications constructor.
      *
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $user_id, $name, $status, $num_in_queue, $position_in_queue, $time_in, $time_helped, $time_out) {
+    public function __construct(Core $core, $user_id, $name, $status, $num_in_queue, $position_in_queue, $time_in, $time_helped, $time_out, $removed_by) {
         parent::__construct($core);
         $this->name = $name;
         $this->user_id = $user_id;
@@ -32,7 +33,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
         $this->time_in = date("h:i a", strtotime($time_in));
         $this->time_helped = date("h:i a", strtotime($time_helped));
         $this->time_out = date("h:i a", strtotime($time_out));
-
+        $this->removed_by = $removed_by;
     }
 
     public function getName(){
@@ -69,5 +70,9 @@ class OfficeHoursQueueStudent extends AbstractModel {
 
     public function getTimeOut(){
       return $this->time_out;
+    }
+
+    public function getRemovedBy(){
+      return $this->removed_by;
     }
 }

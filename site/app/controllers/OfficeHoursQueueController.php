@@ -96,7 +96,7 @@ class OfficeHourQueueController extends AbstractController {
        */
       public function finishHelpPerson(){
         if($this->core->getUser()->accessGrading())
-          $this->core->getQueries()->finishHelpUser($_POST['user_id']);
+          $this->core->getQueries()->finishHelpUser($_POST['user_id'], $this->core->getUser()->getId());
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
         );
@@ -108,7 +108,7 @@ class OfficeHourQueueController extends AbstractController {
        * @return Response
        */
        public function removePerson(){
-         $this->core->getQueries()->removeUserFromQueue($this->core->getUser()->getId());
+         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $this->core->getUser()->getId());
          return Response::RedirectOnlyResponse(
              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
          );
