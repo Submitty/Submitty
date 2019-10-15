@@ -91,7 +91,7 @@ class OfficeHourQueueController extends AbstractController {
       /**
        * @param
        * @Route("/{_semester}/{_course}/OfficeHoursQueue/finishHelp", methods={"POST"})
-      * @AccessControl(role="LIMITED_ACCESS_GRADER")
+       * @AccessControl(role="LIMITED_ACCESS_GRADER")
        * @return Response
        */
       public function finishHelpPerson(){
