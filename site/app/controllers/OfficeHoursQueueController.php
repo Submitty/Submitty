@@ -67,7 +67,7 @@ class OfficeHourQueueController extends AbstractController {
             $this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name']);
           }
         }else{
-          // eliben should send error message because name was not set
+          //todo should send error message because name was not set
         }
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
@@ -91,7 +91,7 @@ class OfficeHourQueueController extends AbstractController {
       /**
        * @param
        * @Route("/{_semester}/{_course}/OfficeHoursQueue/finishHelp", methods={"POST"})
-      * @AccessControl(role="LIMITED_ACCESS_GRADER")
+       * @AccessControl(role="LIMITED_ACCESS_GRADER")
        * @return Response
        */
       public function finishHelpPerson(){
@@ -108,6 +108,14 @@ class OfficeHourQueueController extends AbstractController {
        * @return Response
        */
        public function removePerson(){
+         if(!$this->core->getUser()->accessGrading()){
+           if($this->core->getUser()->getId() != $_POST['user_id']){
+             return Response::RedirectOnlyResponse(
+                 new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+             );
+           }
+         }
+
          $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $this->core->getUser()->getId());
          return Response::RedirectOnlyResponse(
              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
