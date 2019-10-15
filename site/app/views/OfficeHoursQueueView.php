@@ -8,8 +8,8 @@ use app\Models\OfficeHoursQueueInstructor;
 
 class OfficeHoursQueueView extends AbstractView {
     public function showQueueStudent(OfficeHoursQueueStudent $oh_queue) {
-        /*$this->core->getOutput()->addBreadcrumb("Notifications");
-        $this->core->getOutput()->addInternalCss('notifications.css');*/
+        $this->core->getOutput()->addBreadcrumb("Office Hour Queue");
+        // $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->renderTwigOutput("OfficeHoursQueueStudent.twig",[
           'csrf_token' => $this->core->getCsrfToken(),
           'add_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/add"]),
@@ -19,7 +19,7 @@ class OfficeHoursQueueView extends AbstractView {
     }
 
     public function showQueueInstructor(OfficeHoursQueueInstructor $oh_queue){
-
+      $this->core->getOutput()->addBreadcrumb("Office Hour Queue");
       $this->core->getOutput()->renderTwigOutput("OfficeHoursQueueInstructor.twig",[
         'csrf_token' => $this->core->getCsrfToken(),
         'entries' => $oh_queue->getEntries(),
