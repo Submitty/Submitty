@@ -60,7 +60,8 @@ class OfficeHourQueueController extends AbstractController {
       * @return Response
       */
       public function addPerson(){
-        if($_POST['name'] !== ""){
+        $section_id = $this->core->getQueries()->isValidCode($_POST['code']);
+        if($_POST['name'] !== "" && !is_null($section_id)){
           //Add the user to the database
           $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
           if(!$oh_queue->isInQueue()){

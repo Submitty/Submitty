@@ -4133,4 +4133,13 @@ AND gc_id IN (
       $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped);
       return $oh_queue_instr;
     }
+
+    public function isValidCode($code){
+      $this->course_db->query("select * from queue_settings where code = ? limit 1", array($code));
+      if(count($this->course_db->rows()) != 0){
+        return $this->course_db->rows()[0]['id'];
+      }else{
+        return NULL;
+      }
+    }
 }
