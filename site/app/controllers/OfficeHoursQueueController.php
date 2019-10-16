@@ -13,8 +13,6 @@ use app\models\OfficeHoursQueueStudent;
 use app\site\libraries\database\DatabaseQueries;
 use app\libraries\routers\AccessControl;
 
-use Exception;
-
 /**
  * Class OfficeHourQueueController
  *
@@ -149,5 +147,24 @@ class OfficeHourQueueController extends AbstractController {
              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
          );
        }
+
+       /**
+        * @param
+        * @Route("/{_semester}/{_course}/OfficeHoursQueue/code", methods={"POST"})
+        * @AccessControl(role="LIMITED_ACCESS_GRADER")
+        * @return Response
+        */
+        public function generateNewCode(){
+          if(!$this->core->getUser()->accessGrading()){
+            return Response::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+            );
+          }
+          $this->core->getQueries()->openQueue();
+          return Response::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+          );
+        }
+
 
 }

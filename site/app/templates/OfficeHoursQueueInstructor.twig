@@ -13,7 +13,7 @@
 </script>
 
 <div class="content">
-  <h1> This is a page for office hours instructors </h1> <br/>
+  <h1> Office Hours Queue Instructor View </h1> <br/>
   {% if num_in_queue == 1 %}
     <h3> There is currently {{num_in_queue}} person in the queue</h3> <br/>
   {% else %}
@@ -26,7 +26,18 @@
     <input type="checkbox" name="queue_open" id="queue-open" onChange="confirmQueueToggle()" value="true" {{ queue_open ? 'checked': '' }} />
   </form>
 
+  <br/>
+
   <h3> Current code: {{ code }} </h3>
+
+  <br/>
+
+  <form method="post" id="get_new_code" action="{{new_code_url}}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="submit" value="Generate New Code" class="btn btn-primary">
+  </form>
+
+  <br/> <br/>
 
   <table class="table table-striped" style="width:100%;">
     <thead>
