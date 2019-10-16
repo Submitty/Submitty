@@ -104,7 +104,7 @@ class GlobalController extends AbstractController {
                   "title" => "Office Hours",
                   "class" => "nav-row",
                   "id" => "nav-sidebar-queue",
-                  "icon" => "fa-user-plus"
+                  "icon" => "fa-door-open"
                 ]);
               }else{
                 $sidebar_buttons[] = new Button($this->core, [
@@ -112,7 +112,7 @@ class GlobalController extends AbstractController {
                   "title" => "Office Hours",
                   "class" => "nav-row",
                   "id" => "nav-sidebar-queue",
-                  "icon" => "fa-user-plus"
+                  "icon" => "fa-door-closed"
                 ]);
               }
             }
