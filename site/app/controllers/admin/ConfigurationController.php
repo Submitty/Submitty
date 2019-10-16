@@ -56,6 +56,7 @@ class ConfigurationController extends AbstractController {
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
             'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
         );
+        $categoriesCreated = empty($this->core->getQueries()->getCategories());
 
         return new Response(
             JsonResponse::getSuccessResponse($fields),
@@ -64,6 +65,7 @@ class ConfigurationController extends AbstractController {
                 'viewConfig',
                 $fields,
                 $this->getGradeableSeatingOptions(),
+                $categoriesCreated,
                 $this->core->getConfig()->isEmailEnabled(),
                 $this->core->getCsrfToken()
             )

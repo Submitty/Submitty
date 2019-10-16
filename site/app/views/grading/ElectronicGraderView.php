@@ -241,7 +241,9 @@ class ElectronicGraderView extends AbstractView {
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
-            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
+            "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
         ]);
     }
 
