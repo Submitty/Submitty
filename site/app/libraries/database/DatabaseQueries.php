@@ -4068,6 +4068,7 @@ AND gc_id IN (
     }
 
     public function addUserToQueue($user_id, $name){
+      $name = substr($name, 0, 20);
       $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows() == 0)){
         $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($user_id, $name));
@@ -4090,7 +4091,7 @@ AND gc_id IN (
 
     public function removeUserFromQueue($user_id, $remover){
         //$this->course_db->query("DELETE FROM queue");
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where user_id = ? and (status = 0 or status = 1)", array($remover, $user_id));
+        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where user_id = ? and status = 0", array($remover, $user_id));
     }
 
     public function startHelpUser($user_id){

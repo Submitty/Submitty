@@ -10,7 +10,7 @@
   {% if not oh_queue.isInQueue() %}
     <form method="post" id="add_to_queue" action="{{add_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <input type="text" name="name" placeholder="Name" value = "{{oh_queue.getName()}}">
+      <input type="text" name="name" maxlength="20" placeholder="Name" value = "{{oh_queue.getName()}}">
       <input type="text" name="code" placeholder="Code">
       <input type="submit" value="Join" class="btn btn-primary">
     </form>
