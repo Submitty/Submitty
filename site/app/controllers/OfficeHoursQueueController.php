@@ -7,17 +7,15 @@ use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;
-use app\models\Notification;
 use Symfony\Component\Routing\Annotation\Route;
 use app\models\OfficeHoursQueueStudent;
-use app\site\libraries\database\DatabaseQueries;
 use app\libraries\routers\AccessControl;
 
 /**
- * Class OfficeHourQueueController
+ * Class OfficeHoursQueueController
  *
  */
-class OfficeHourQueueController extends AbstractController {
+class OfficeHoursQueueController extends AbstractController {
 
     public function __construct(Core $core) {
         parent::__construct($core);
