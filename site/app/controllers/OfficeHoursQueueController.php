@@ -13,8 +13,6 @@ use app\models\OfficeHoursQueueStudent;
 use app\site\libraries\database\DatabaseQueries;
 use app\libraries\routers\AccessControl;
 
-use Exception;
-
 /**
  * Class OfficeHourQueueController
  *

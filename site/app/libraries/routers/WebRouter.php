@@ -17,8 +17,6 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
-use Exception;
-
 
 class WebRouter {
     /** @var Core  */

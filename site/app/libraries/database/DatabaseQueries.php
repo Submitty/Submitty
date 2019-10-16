@@ -26,7 +26,6 @@ use app\models\Course;
 use app\models\SimpleStat;
 use app\models\OfficeHoursQueueStudent;
 use app\models\OfficeHoursQueueInstructor;
-use Exception;
 
 
 /**
