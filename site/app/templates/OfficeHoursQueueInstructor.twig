@@ -1,5 +1,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
+
+<script>
+  function confirmQueueToggle(){
+    var result = confirm('Do you really want to ' + ({{ queue_open }} ? 'close': 'open') + ' the queue?');
+    if(result)
+      return true;
+    else{
+      document.getElementById('queue-open').checked = !document.getElementById('queue-open').checked;
+      return false;
+    }
+  }
+
+</script>
+
 <div class="content">
   <h1> This is a page for office hours instructors </h1> <br/>
   {% if num_in_queue == 1 %}
@@ -8,7 +22,7 @@
     <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
   {% endif %}
 
-  <form method="post" id="start_help" action="{{toggle_open_url}}">
+  <form method="post" id="start_help" action="{{toggle_open_url}}" onsubmit=confirmQueueToggle()>
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="checkbox" name="queue_open" id="queue-open" onChange="this.form.submit()" value="true" {{ queue_open ? 'checked': '' }} />
   </form>
