@@ -118,7 +118,7 @@ class OfficeHourQueueController extends AbstractController {
              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
            );
          }
-          if($_POST['queue_open'] == "true"){
+          if($_POST['queue_open'] == "Open Queue"){
             $this->core->getQueries()->openQueue();
           } else{
             $this->core->getQueries()->closeQueue();

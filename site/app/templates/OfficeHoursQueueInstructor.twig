@@ -20,10 +20,17 @@
     <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
   {% endif %}
 
-  <form method="post" id="open_close" action="{{toggle_open_url}}">
+  {% if queue_open == 1 %}
+    <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to close the queue? This will kick everyone out of the queue.');">
+  {% else %}
+    <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to open the queue?');">
+  {% endif %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <label for="queue_open" style="float: left;"> <h3> {{ queue_open == 1 ? 'Close': 'Open'}} Queue </h3> </label>
-    <input type="checkbox" name="queue_open" id="queue-open" onChange="confirmQueueToggle()" value="true" {{ queue_open ? 'checked': '' }} />
+    {% if queue_open == 1 %}
+      <input type="submit" name="queue_close" value="Close Queue" class="btn btn-primary">
+    {% else %}
+      <input type="submit" name="queue_open" value="Open Queue" class="btn btn-primary">
+    {% endif %}
   </form>
 
   <br/>
@@ -32,7 +39,7 @@
 
   <br/>
 
-  <form method="post" id="get_new_code" action="{{new_code_url}}">
+  <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="submit" value="Generate New Code" class="btn btn-primary">
   </form>
