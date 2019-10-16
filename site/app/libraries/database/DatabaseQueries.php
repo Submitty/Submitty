@@ -4145,4 +4145,10 @@ AND gc_id IN (
         return NULL;
       }
     }
+
+    public function idQueueOpen(){
+      $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
+      $queue_open = $this->course_db->rows()[0]['open'];
+      return $queue_open;
+    }
 }
