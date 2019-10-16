@@ -3,8 +3,8 @@
 namespace app\views;
 
 use app\models\User;
-use app\Models\OfficeHoursQueueStudent;
-use app\Models\OfficeHoursQueueInstructor;
+use app\models\OfficeHoursQueueStudent;
+use app\models\OfficeHoursQueueInstructor;
 
 class OfficeHoursQueueView extends AbstractView {
     public function showQueueStudent($oh_queue) {

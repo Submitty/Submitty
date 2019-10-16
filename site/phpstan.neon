@@ -5,6 +5,8 @@ parameters:
         - %rootDir%/../../../app/controllers/forum/ForumController2.php
         - %rootDir%/../../../app/libraries/database/ForumQueries.php
         - %rootDir%/../../../app/models/forum/Thread.php
+    autoload_directories:
+        - %rootDir%/../../../app/controllers/OfficeHoursQueueController.php
 
 services:
     - class: tests\phpstan\ModelClassExtension
