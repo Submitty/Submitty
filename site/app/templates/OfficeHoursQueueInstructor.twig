@@ -8,7 +8,7 @@
     <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
   {% endif %}
 
-  <form method="post" id="start_help" action="{{finish_help_url}}">
+  <form method="post" id="start_help" action="{{toggle_open_url}}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="checkbox" name="queue_open" id="queue-open" onChange="this.form.submit()" value="true" {{ queue_open ? 'checked': '' }} />
   </form>

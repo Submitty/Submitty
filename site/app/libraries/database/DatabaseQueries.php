@@ -4147,13 +4147,13 @@ AND gc_id IN (
     }
 
     public function openQueue(){
-      $this_->course_db->query("UPDATE queue_settings SET open = TRUE");
+      $this->course_db->query("UPDATE queue_settings SET open = TRUE");
       //$this_->course_db->query("UPDATE queue_settings SET open = TRUE where id = ?", array($queue_id));
     }
 
-    public function closeQueue($queue_id){
+    public function closeQueue(){
       $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
-      $this_->course_db->query("UPDATE queue_settings SET open = FALSE");
+      $this->course_db->query("UPDATE queue_settings SET open = FALSE");
       //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
     }
 }

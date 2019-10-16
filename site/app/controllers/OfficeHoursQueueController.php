@@ -108,40 +108,25 @@ class OfficeHourQueueController extends AbstractController {
         );
       }
 
-
-      public function closeQueue(){
-        if(!$this->core->getUser()->accessGrading()){
-          return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
-          );
-        }
-
-        $this->core->getQueries()->closeQueue();
-        return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
-        );
-      }
-
-      public function openQueue(){
-        if(!$this->core->getUser()->accessGrading()){
-          return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
-          );
-        }
-
-        $this->core->getQueries()->openQueue();
-        return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
-        );
-      }
-
       /**
        * @param
        * @Route("/{_semester}/{_course}/OfficeHoursQueue/toggle", methods={"POST"})
        * @return Response
        */
        public function toggleQueue(){
-          if($_POST[''])
+         if(!$this->core->getUser()->accessGrading()){
+           return Response::RedirectOnlyResponse(
+             new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+           );
+         }
+          if($_POST['queue_open'] == "true"){
+            $this->core->getQueries()->openQueue();
+          } else{
+            $this->core->getQueries()->closeQueue();
+          }
+          return Response::RedirectOnlyResponse(
+              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
+          );
        }
 
       /**

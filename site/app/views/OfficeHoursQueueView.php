@@ -26,6 +26,7 @@ class OfficeHoursQueueView extends AbstractView {
         'entries_helped' => $oh_queue->getEntriesHelped(),
         'num_in_queue' => count($oh_queue->getEntries()),
         'queue_open' => $oh_queue->isQueueOpen(),
+        'toggle_open_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/toggle"]),
         'remove_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/remove"]),
         'start_help_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/startHelp"]),
         'finish_help_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/finishHelp"])
