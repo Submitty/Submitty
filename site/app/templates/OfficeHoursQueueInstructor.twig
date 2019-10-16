@@ -5,11 +5,8 @@
     var result = confirm('Do you really want to {{ queue_open == 1 ? 'close': 'open'}} the queue?');
     if(result){
       document.getElementById('open_close').submit();
-      return;
-    }
-    else{
+    }else{
       document.getElementById('queue-open').checked = !document.getElementById('queue-open').checked;
-      return;
     }
   }
 
