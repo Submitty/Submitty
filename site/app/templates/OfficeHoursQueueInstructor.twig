@@ -22,8 +22,11 @@
 
   <form method="post" id="open_close" action="{{toggle_open_url}}">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <label for="queue_open" style="float: left;"> <h3> {{ queue_open == 1 ? 'Close': 'Open'}} Queue </h3> </label>
     <input type="checkbox" name="queue_open" id="queue-open" onChange="confirmQueueToggle()" value="true" {{ queue_open ? 'checked': '' }} />
   </form>
+
+  <h3> Current code: {{ code }} </h3>
 
   <table class="table table-striped" style="width:100%;">
     <thead>
