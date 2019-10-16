@@ -3,7 +3,7 @@
 
 <script>
   function confirmQueueToggle(){
-    var result = confirm('Do you really want to ' + ({{ queue_open }} ? 'close': 'open') + ' the queue?');
+    var result = confirm('Do you really want to {{ queue_open == 1 ? 'close': 'open'}} the queue?');
     if(result)
       return true;
     else{
