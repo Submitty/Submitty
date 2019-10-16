@@ -53,7 +53,7 @@
       </td>
       {% elseif entry.getStatus() == 1 %}
         <td>
-          <form method="post" id="start_help" action="{{finish_help_url}}">
+          <form method="post" id="finish_help" action="{{finish_help_url}}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
             <input type="submit" value="Finish Helping" class="btn btn-primary">
@@ -61,7 +61,7 @@
         </td>
       {% endif %}
       <td>
-        <form method="post" id="start_help" action="{{remove_url}}">
+        <form method="post" id="remove" action="{{remove_url}}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
           <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
           <input type="submit" value="Remove" class="btn btn-primary">
