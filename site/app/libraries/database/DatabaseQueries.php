@@ -4156,7 +4156,7 @@ AND gc_id IN (
       $this->course_db->query("UPDATE queue_settings SET open = FALSE");
       //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
     }
-    public function idQueueOpen(){
+    public function isQueueOpen(){
       $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
       $queue_open = $this->course_db->rows()[0]['open'];
       return $queue_open;

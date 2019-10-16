@@ -66,7 +66,7 @@ class OfficeHourQueueController extends AbstractController {
       */
       public function addPerson(){
         $section_id = $this->core->getQueries()->isValidCode($_POST['code']);
-        if($_POST['name'] !== "" && !is_null($section_id)){
+        if($_POST['name'] !== "" && !is_null($section_id) && $this->core->getQueries()->isQueueOpen()){
           //Add the user to the database
           $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
           if(!$oh_queue->isInQueue()){
@@ -111,6 +111,7 @@ class OfficeHourQueueController extends AbstractController {
       /**
        * @param
        * @Route("/{_semester}/{_course}/OfficeHoursQueue/toggle", methods={"POST"})
+       * @AccessControl(role="LIMITED_ACCESS_GRADER")
        * @return Response
        */
        public function toggleQueue(){

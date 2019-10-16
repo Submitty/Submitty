@@ -98,7 +98,7 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getConfig()->isQueueEnabled()) {
-              if ($this->core->getQueries()->idQueueOpen()) {
+              if ($this->core->getQueries()->isQueueOpen()) {
                 $sidebar_buttons[] = new Button($this->core, [
                   "href" => $this->core->buildCourseUrl(['OfficeHoursQueue']),
                   "title" => "Office Hours",
