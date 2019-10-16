@@ -18,7 +18,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $time_out = "time not set";
     private $removed_by = NULL;
     /**
-     * Notifications constructor.
+     * OfficeHoursQueueStudent constructor.
      *
      * @param Core  $core
      * @param array $details

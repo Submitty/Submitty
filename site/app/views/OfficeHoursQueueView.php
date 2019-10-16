@@ -9,7 +9,6 @@ use app\models\OfficeHoursQueueInstructor;
 class OfficeHoursQueueView extends AbstractView {
     public function showQueueStudent($oh_queue) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
-        // $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->renderTwigOutput("OfficeHoursQueueStudent.twig",[
           'csrf_token' => $this->core->getCsrfToken(),
           'add_url' => $this->core->buildCourseUrl(["OfficeHoursQueue/add"]),

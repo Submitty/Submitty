@@ -14,7 +14,7 @@ class OfficeHoursQueueInstructor extends AbstractModel {
     private $queue_open = false;
     private $code = '';
     /**
-     * Notifications constructor.
+     * OfficeHoursQueueInstructor constructor.
      *
      * @param Core  $core
      * @param array $details
