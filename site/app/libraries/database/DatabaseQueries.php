@@ -4130,7 +4130,10 @@ AND gc_id IN (
       }
 
 
-      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped);
+      $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
+      $queue_open = $this->course_db->rows()[0]['open'];
+
+      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $queue_open);
       return $oh_queue_instr;
     }
 
