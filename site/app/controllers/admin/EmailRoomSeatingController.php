@@ -108,7 +108,7 @@ Please email your instructor with any questions or concerns.';
             }
         }
 
-		$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+        $message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
         
         // At this point, the remaining variables in the are placeholders that 
         // have not received a match. We replace all of these with the string
