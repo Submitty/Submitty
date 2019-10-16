@@ -7,7 +7,7 @@ use app\Models\OfficeHoursQueueStudent;
 use app\Models\OfficeHoursQueueInstructor;
 
 class OfficeHoursQueueView extends AbstractView {
-    public function showQueueStudent(OfficeHoursQueueStudent $oh_queue) {
+    public function showQueueStudent($oh_queue) {
         $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
         // $this->core->getOutput()->addInternalCss('notifications.css');
         $this->core->getOutput()->renderTwigOutput("OfficeHoursQueueStudent.twig",[
@@ -18,7 +18,7 @@ class OfficeHoursQueueView extends AbstractView {
         ]);
     }
 
-    public function showQueueInstructor(OfficeHoursQueueInstructor $oh_queue){
+    public function showQueueInstructor($oh_queue){
       $this->core->getOutput()->addBreadcrumb("Office Hours Queue");
       $this->core->getOutput()->renderTwigOutput("OfficeHoursQueueInstructor.twig",[
         'csrf_token' => $this->core->getCsrfToken(),

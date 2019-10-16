@@ -4085,7 +4085,7 @@ AND gc_id IN (
       $row = $this->course_db->rows()[0];
       $this->course_db->query("SELECT * FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
       $position_in_queue = count($this->course_db->rows());
-      $oh_queue = new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+      $oh_queue = new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
       return $oh_queue;
     }
 
