@@ -22,5 +22,4 @@ def up(config, database, semester, course):
 
 
 def down(config, database, semester, course):
-    database.execute("DROP TABLE IF EXISTS queue");
-    database.execute("DROP TABLE IF EXISTS queue_settings");
+    pass
