@@ -114,7 +114,7 @@ Please email your instructor with any questions or concerns.';
         // have not received a match. We replace all of these with the string
         // "SEE INSTRUCTOR"
 
-        preg_match_all('/\\{\\$[a-z_]+\\}/', $message, $remaining);
+        preg_match_all('/\\{\\$[A-Za-z0-9_]+\\}/', $message, $remaining);
         foreach($remaining[0] as $key) {
             $message = str_replace($key, 'SEE INSTRUCTOR', $message);
         }
