@@ -4106,6 +4106,12 @@ AND gc_id IN (
       return $this->course_db->query("SELECT * FROM queue where status = 0 order by time_in ASC limit 1");
     }
 
+    public function isQueueOpen(){
+      $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
+      $queue_open = $this->course_db->rows()[0]['open'];
+      return $queue_open;
+    }
+
     public function getInstructorQueue(){
       $this->course_db->query("SELECT * FROM queue where (status = 0 or status = 1) order by time_in ASC");
       $rows = $this->course_db->rows();
@@ -4129,11 +4135,7 @@ AND gc_id IN (
         $index = $index + 1;
       }
 
-
-      $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
-      $queue_open = $this->course_db->rows()[0]['open'];
-
-      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $queue_open);
+      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $this->isQueueOpen());
       return $oh_queue_instr;
     }
 
@@ -4155,10 +4157,5 @@ AND gc_id IN (
       $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
       $this->course_db->query("UPDATE queue_settings SET open = FALSE");
       //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
-    }
-    public function isQueueOpen(){
-      $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
-      $queue_open = $this->course_db->rows()[0]['open'];
-      return $queue_open;
     }
 }
