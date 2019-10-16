@@ -1,17 +1,5 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-<script>
-  function confirmQueueToggle(){
-    var result = confirm('Do you really want to {{ queue_open == 1 ? 'close': 'open'}} the queue?');
-    if(result){
-      document.getElementById('open_close').submit();
-    }else{
-      document.getElementById('queue-open').checked = !document.getElementById('queue-open').checked;
-    }
-  }
-
-</script>
-
 <div class="content">
   <h1> Office Hours Queue Instructor View </h1> <br/>
   {% if num_in_queue == 1 %}
