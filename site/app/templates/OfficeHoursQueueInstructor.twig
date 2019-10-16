@@ -13,6 +13,7 @@
       <tr>
         <th scope="col">#</th>
         <th scope="col">Time</th>
+        <th scope="col">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Status</th>
         <th scope="col">Remove</th>
@@ -23,6 +24,7 @@
     <tr>
       <th scope="row">{{entry.getPositionInQueue() }}</th>
       <td>{{ entry.getTimeIn() }}</td>
+      <td>{{ entry.getUserId() }}</td>
       <td>{{ entry.getName() }}</td>
       {% if entry.getStatus() == 0 %}
       <td>
