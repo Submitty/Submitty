@@ -4112,6 +4112,12 @@ AND gc_id IN (
       return $queue_open;
     }
 
+    public function getQueueCode(){
+      $this->course_db->query("SELECT code FROM queue_settings");
+      $rows = $this->course_db->rows();
+      return $rows[0]['code'];
+    }
+
     public function getInstructorQueue(){
       $this->course_db->query("SELECT * FROM queue where (status = 0 or status = 1) order by time_in ASC");
       $rows = $this->course_db->rows();
@@ -4135,7 +4141,7 @@ AND gc_id IN (
         $index = $index + 1;
       }
 
-      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $this->isQueueOpen());
+      $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $this->isQueueOpen(), $this->getQueueCode());
       return $oh_queue_instr;
     }
 
@@ -4149,8 +4155,14 @@ AND gc_id IN (
     }
 
     public function openQueue(){
-      $this->course_db->query("UPDATE queue_settings SET open = TRUE");
-      //$this_->course_db->query("UPDATE queue_settings SET open = TRUE where id = ?", array($queue_id));
+      $characters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+      $charactersLength = strlen($characters);
+      $randomString = '';
+      for ($i = 0; $i < 6; $i++) {
+          $randomString .= $characters[rand(0, $charactersLength - 1)];
+      }
+
+      $this->course_db->query("UPDATE queue_settings SET open = TRUE, code = ?", array($randomString));
     }
 
     public function closeQueue(){
