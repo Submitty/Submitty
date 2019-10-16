@@ -31,6 +31,11 @@ class OfficeHourQueueController extends AbstractController {
      * @return Response
      */
      public function showQueue(){
+       if(!$this->core->getConfig()->isQueueEnabled()){
+         return Response::RedirectOnlyResponse(
+             new RedirectResponse($this->core->buildCourseUrl(['home']))
+         );
+       }
        if(!$this->core->getUser()->accessGrading()){
          $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
          return Response::WebOnlyResponse(
