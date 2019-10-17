@@ -81,8 +81,7 @@ class AdminGradeableController extends AbstractController {
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken(),
-            'queue_enabled' => $this->core->getConfig()->isForumEnabled(),
+            'csrf_token' => $this->core->getCsrfToken()
         ]);
     }
 
