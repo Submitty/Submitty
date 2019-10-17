@@ -515,10 +515,12 @@ HTML;
         }
 
         else if($new_or_edit == "edit") {
+          
             $title = '';
             if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
                 $title = $incomingTitle;
-            }
+        }
+          
             $return .= <<<HTML
                     $title
 HTML;

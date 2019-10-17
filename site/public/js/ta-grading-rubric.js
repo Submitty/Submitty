@@ -1565,9 +1565,11 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
 
     // Create an array of links for each submitter
     let submitterHtmlElements = [];
+    let [base_url, search_params] = location.href.split('?');
+    search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
-        let href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, '&who_id=' + id);
-        submitterHtmlElements.push('<a href="' + href + '">' + id + '</a>');
+        search_params.set('who_id', id);
+        submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
     });
     popup.find('.student-names').html(submitterHtmlElements.join(', '));
 
@@ -1773,7 +1775,7 @@ function onGetMarkStats(me) {
         .then(function (stats) {
             let component_title = getComponentFromDOM(component_id).title;
             let mark_title = getMarkFromDOM(mark_id).title;
-            
+
             openMarkStatsPopup(component_title, mark_title, stats);
         })
         .catch(function (err) {
@@ -2459,12 +2461,12 @@ function scrollToPage(page_num){
             let page_margin_top = 0;
             let page_margin_bot = 0;
             if (page1.length) {
-                //get css attr, remove 'px' : 
+                //get css attr, remove 'px' :
                 page_height = parseInt(page1.css("height").slice(0, -2));
                 page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
                 page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
             }
-            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
+            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once
             let scrollY = (page_num-1)*(page_height+page_margin_bot)+page_margin_top;
             if($("#file_view").is(":visible")){
                 $('#file_content').animate({scrollTop: scrollY}, 500);
