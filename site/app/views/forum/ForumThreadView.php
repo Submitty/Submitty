@@ -789,18 +789,18 @@ class ForumThreadView extends AbstractView {
         }
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
-            $classes[] = " first_post";
+            $classes[] = "first_post";
         }
         if (in_array($post_id, $unviewed_posts)) {
-            $classes[] = " new_post";
+            $classes[] = "new_post";
         } else {
-            $classes[] = " viewed_post";
+            $classes[] = "viewed_post";
         }
         if ($this->core->getQueries()->isStaffPost($post["author_user_id"])) {
-            $classes[] = " important";
+            $classes[] = "important";
         }
         if ($post["deleted"]) {
-            $classes[] = " deleted";
+            $classes[] = "deleted";
             $deleted = true;
         } else {
             $deleted = false;
