@@ -46,9 +46,10 @@ def main(args):
 
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
-           
+
             img_grey = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
-            ret2, thresh = cv2.threshold(img_grey,0,255,cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+            ret2, thresh = cv2.threshold(img_grey, 0, 255,
+                                         cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
             # decode img - only look for QR codes
             val = pyzbar.decode(thresh, symbols=[ZBarSymbol.QRCODE])
