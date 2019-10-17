@@ -4072,7 +4072,9 @@ AND gc_id IN (
       $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows() == 0)){
         $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($user_id, $name));
+        return true;
       }
+      return false;
     }
 
     public function getQueueByUser($user_id){

@@ -66,10 +66,28 @@ class OfficeHoursQueueController extends AbstractController {
           //Add the user to the database
           $oh_queue = $this->core->getQueries()->getQueueByUser($this->core->getUser()->getId());
           if(!$oh_queue->isInQueue()){
-            $this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name']);
+            if($this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name'])){
+              $this->core->addSuccessMessage("Added to queue");
+            }
+            else{
+              $this->core->addErrorMessage("Unable to add to queue");
+            }
+
+          }
+          else{
+            $this->core->addErrorMessage("You are already in the queue");
           }
         }else{
-          //todo should send error message because name was not set
+          if($_POST['name'] == ""){
+            $this->core->addErrorMessage("Invalid Name");
+          }
+          else if(is_null($section_id)){
+            $this->core->addErrorMessage("Invalid Code");
+          }
+          else if(!$this->core->getQueries()->isQueueOpen()){
+            $this->core->addErrorMessage("Queue is closed");
+          }
+
         }
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
@@ -134,12 +152,13 @@ class OfficeHoursQueueController extends AbstractController {
        public function removePerson(){
          if(!$this->core->getUser()->accessGrading()){
            if($this->core->getUser()->getId() != $_POST['user_id']){
+             $this->core->addErrorMessage("Permission denied to remove that person");
              return Response::RedirectOnlyResponse(
                  new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
              );
            }
+           $this->core->addSuccessMessage("Removed from queue");
          }
-
          $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $this->core->getUser()->getId());
          return Response::RedirectOnlyResponse(
              new RedirectResponse($this->core->buildCourseUrl(['OfficeHoursQueue']))
