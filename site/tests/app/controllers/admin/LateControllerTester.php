@@ -33,7 +33,7 @@ class LateControllerTester extends BaseUnitTest
     }
 
     /** @test */
-    public function it_tests_queries_being_made_in_view_late_days()
+    public function testQueriesMadeInLateDaysView()
     {
         $response = $this->controller->viewLateDays();
 
