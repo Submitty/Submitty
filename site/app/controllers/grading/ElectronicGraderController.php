@@ -501,10 +501,7 @@ class ElectronicGraderController extends AbstractController {
         $show_export_teams_button = $show_edit_teams && (count($all_teams) == count($empty_teams));
         $past_grade_start_date = $gradeable->getDates()['grade_start_date'] < $this->core->getDateTimeNow();
 
-        $team_gradeable_view_history = $gradeable->isTeamAssignment() ? $this->core->getQueries()->getAllTeamViewedTimesForGradeable($gradeable) : array();
-        $posts = $this->core->getQueries()->getPostsForThread($this->core->getUser()->getId(), $threadId, false, 'time', $submitter_id);
-
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction, $team_gradeable_view_history, $posts);
+        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'detailsPage', $gradeable, $graded_gradeables, $teamless_users, $graders, $empty_teams, $show_all_sections_button, $show_import_teams_button, $show_export_teams_button, $show_edit_teams, $past_grade_start_date, $view_all, $sort, $direction);
 
         if ($show_edit_teams) {
             $all_reg_sections = $this->core->getQueries()->getRegistrationSections();
@@ -519,8 +516,7 @@ class ElectronicGraderController extends AbstractController {
             foreach ($all_rot_sections as $i => $section) {
                 $all_rot_sections[$i] = $section[$key];
             }
-            $students = $this->core->getQueries()->getAllUsers();
-            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_reg_sections, $all_rot_sections, $students);
+            $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'adminTeamForm', $gradeable, $all_reg_sections, $all_rot_sections);
             $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'importTeamForm', $gradeable);
 
             $this->core->getOutput()->renderOutput(array('grading','ElectronicGrader'), 'randomizeButtonWarning', $gradeable);
