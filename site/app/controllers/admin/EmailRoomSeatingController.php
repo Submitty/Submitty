@@ -109,15 +109,6 @@ Please email your instructor with any questions or concerns.';
         }
 
         $message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
-        
-        // At this point, the remaining variables in the are placeholders that 
-        // have not received a match. We replace all of these with the string
-        // "SEE INSTRUCTOR"
-
-        preg_match_all('/\\{\\$[A-Za-z0-9_]+\\}/', $message, $remaining);
-        foreach($remaining[0] as $key) {
-            $message = str_replace($key, 'SEE INSTRUCTOR', $message);
-        }
 
         return $message;
     }
