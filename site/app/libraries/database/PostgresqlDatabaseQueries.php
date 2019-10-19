@@ -356,7 +356,7 @@ SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_
     WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
   )AS parts_of_comp
 )AS comp
-INNER JOIN (
+LEFT JOIN (
 	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
 	FROM regrade_requests AS rr
 	WHERE rr.g_id=? AND rr.status=-1
