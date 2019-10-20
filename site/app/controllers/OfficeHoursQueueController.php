@@ -107,14 +107,14 @@ class OfficeHoursQueueController extends AbstractController {
        * @return Response
        */
       public function startHelpPerson(){
-        if(!isset($_POST['user_id'])){
+        if(!isset($_POST['entry_id'])){
           $this->core->addErrorMessage("Missing entry ID");
           return Response::RedirectOnlyResponse(
               new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
           );
         }
         if($this->core->getUser()->accessGrading())
-          $this->core->getQueries()->startHelpUser($_POST['user_id']);
+          $this->core->getQueries()->startHelpUser($_POST['entry_id']);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -127,14 +127,14 @@ class OfficeHoursQueueController extends AbstractController {
        * @return Response
        */
       public function finishHelpPerson(){
-        if(!isset($_POST['user_id'])){
+        if(!isset($_POST['entry_id'])){
           $this->core->addErrorMessage("Missing entry ID");
           return Response::RedirectOnlyResponse(
               new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
           );
         }
         if($this->core->getUser()->accessGrading())
-          $this->core->getQueries()->finishHelpUser($_POST['user_id'], $this->core->getUser()->getId());
+          $this->core->getQueries()->finishHelpUser($_POST['entry_id'], $this->core->getUser()->getId());
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -174,14 +174,14 @@ class OfficeHoursQueueController extends AbstractController {
        * @return Response
        */
        public function removePerson(){
-         if(!isset($_POST['user_id'])){
+         if(!isset($_POST['entry_id'])){
            $this->core->addErrorMessage("Missing entry ID");
            return Response::RedirectOnlyResponse(
                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
            );
          }
          if(!$this->core->getUser()->accessGrading()){
-           if($this->core->getUser()->getId() != $_POST['user_id']){
+           if($this->core->getUser()->getId() != $this->core->getQueries()->getUserIdFromQueueSlot($_POST['entry_id'])){
              $this->core->addErrorMessage("Permission denied to remove that person");
              return Response::RedirectOnlyResponse(
                  new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -189,7 +189,7 @@ class OfficeHoursQueueController extends AbstractController {
            }
            $this->core->addSuccessMessage("Removed from queue");
          }
-         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $this->core->getUser()->getId());
+         $this->core->getQueries()->removeUserFromQueue($_POST['entry_id'], $this->core->getUser()->getId());
          return Response::RedirectOnlyResponse(
              new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
          );

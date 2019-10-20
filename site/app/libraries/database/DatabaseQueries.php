@@ -4071,7 +4071,7 @@ AND gc_id IN (
       $name = substr($name, 0, 20);
       $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows() == 0)){
-        $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($user_id, $name));
+        $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($this->core->getUser()->getId(), $name));
         return true;
       }
       return false;
@@ -4082,30 +4082,26 @@ AND gc_id IN (
       $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
       if(count($this->course_db->rows()) == 0){
         $name = $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
-        return new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, NULL,NULL,NULL,NULL);
+        return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, NULL,NULL,NULL,NULL);
       }
       $row = $this->course_db->rows()[0];
       $this->course_db->query("SELECT * FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
       $position_in_queue = count($this->course_db->rows());
-      $oh_queue = new OfficeHoursQueueStudent($this->core, $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+      $oh_queue = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
       return $oh_queue;
     }
 
-    public function removeUserFromQueue($user_id, $remover){
+    public function removeUserFromQueue($entry_id, $remover){
         //$this->course_db->query("DELETE FROM queue");
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where user_id = ? and status = 0", array($remover, $user_id));
+        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = 0", array($remover, $entry_id));
     }
 
-    public function startHelpUser($user_id){
-        $this->course_db->query("UPDATE queue SET status = 1, time_helped = current_timestamp where user_id = ? and (status = 0)", array($user_id));
+    public function startHelpUser($entry_id){
+        $this->course_db->query("UPDATE queue SET status = 1, time_helped = current_timestamp where entry_id = ? and (status = 0)", array($entry_id));
     }
 
-    public function finishHelpUser($user_id, $helper){
-      $this->course_db->query("UPDATE queue SET status = 2, time_out = current_timestamp, removed_by = ? where user_id = ? and (status = 1)", array($helper, $user_id));
-    }
-
-    public function getNextInQueue(){
-      return $this->course_db->query("SELECT * FROM queue where status = 0 order by time_in ASC limit 1");
+    public function finishHelpUser($entry_id, $helper){
+      $this->course_db->query("UPDATE queue SET status = 2, time_out = current_timestamp, removed_by = ? where entry_id = ? and (status = 1)", array($helper, $entry_id));
     }
 
     public function isQueueOpen(){
@@ -4127,7 +4123,7 @@ AND gc_id IN (
       $needs_help = array();
       $index = 1;
       foreach($rows as $row){
-        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
         array_push($needs_help, $oh_queue_student);
         $index = $index + 1;
       }
@@ -4138,7 +4134,7 @@ AND gc_id IN (
       $already_helped = array();
       $index = 1;
       foreach($rows as $row){
-        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+        $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
         array_push($already_helped, $oh_queue_student);
         $index = $index + 1;
       }
@@ -4158,6 +4154,10 @@ AND gc_id IN (
     }
 
     public function openQueue(){
+      $this->course_db->query("SELECT * FROM queue_settings");
+      if(count($this->course_db->rows()) == 0){
+        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (FALSE, '')");
+      }
       $characters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
       $charactersLength = strlen($characters);
       $randomString = '';
@@ -4172,5 +4172,14 @@ AND gc_id IN (
       $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
       $this->course_db->query("UPDATE queue_settings SET open = FALSE");
       //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
+    }
+
+    public function getUserIdFromQueueSlot($entry_id){
+      $this->course_db->query("SELECT * FROM queue where entry_id = ? limit 1", array($entry_id));
+      $rows = $this->course_db->rows();
+      if(count($rows) == 0){
+        return NULL;
+      }
+      return $rows[0]['user_id'];
     }
 }

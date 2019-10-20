@@ -3,9 +3,8 @@ import json
 from pathlib import Path
 
 def up(config, database, semester, course):
-    database.execute("CREATE TABLE IF NOT EXISTS queue(entry_id serial PRIMARY KEY, user_id VARCHAR(20) NOT NULL, name VARCHAR (20) NOT NULL, time_in TIMESTAMP NOT NULL, time_helped TIMESTAMP, time_out TIMESTAMP, removed_by VARCHAR (20), status SMALLINT NOT NULL)");
+    database.execute("CREATE TABLE IF NOT EXISTS queue(entry_id serial PRIMARY KEY, user_id VARCHAR(20) NOT NULL  REFERENCES users(user_id), name VARCHAR (20) NOT NULL, time_in TIMESTAMP NOT NULL, time_helped TIMESTAMP, time_out TIMESTAMP, removed_by VARCHAR (20)  REFERENCES users(user_id), status SMALLINT NOT NULL)");
     database.execute("CREATE TABLE IF NOT EXISTS queue_settings(id serial PRIMARY KEY, open boolean NOT NULL, code VARCHAR (20) NOT NULL)");
-    database.execute("INSERT INTO queue_settings (open,code) VALUES (FALSE, '')");
 
     course_dir = Path(config.submitty['submitty_data_dir'], 'courses', semester, course)
     # add boolean to course config

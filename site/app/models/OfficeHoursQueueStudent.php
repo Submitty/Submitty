@@ -17,15 +17,17 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $time_helped = "time not set";
     private $time_out = "time not set";
     private $removed_by = NULL;
+    private $entry_id = 0;
     /**
      * OfficeHoursQueueStudent constructor.
      *
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $user_id, $name, $status, $num_in_queue, $position_in_queue, $time_in, $time_helped, $time_out, $removed_by) {
+    public function __construct(Core $core, $entry_id, $user_id, $name, $status, $num_in_queue, $position_in_queue, $time_in, $time_helped, $time_out, $removed_by) {
         parent::__construct($core);
         $this->name = $name;
+        $this->entry_id = $entry_id;
         $this->user_id = $user_id;
         $this->status = $status;
         $this->num_in_queue = $num_in_queue;
@@ -74,5 +76,9 @@ class OfficeHoursQueueStudent extends AbstractModel {
 
     public function getRemovedBy(){
       return $this->removed_by;
+    }
+
+    public function getEntryId(){
+      return $this->entry_id;
     }
 }

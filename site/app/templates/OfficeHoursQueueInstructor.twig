@@ -15,7 +15,7 @@
   {% endif %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     {% if queue_open == 1 %}
-      <input type="submit" name="queue_close" value="Close Queue" class="btn btn-primary">
+      <input type="submit" name="queue_open" value="Close Queue" class="btn btn-primary">
     {% else %}
       <input type="submit" name="queue_open" value="Open Queue" class="btn btn-primary">
     {% endif %}
@@ -56,7 +56,7 @@
       <td>
         <form method="post" id="start_help" action="{{start_help_url}}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-          <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
+          <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
           <input type="submit" value="Help" class="btn btn-primary">
         </form>
       </td>
@@ -64,7 +64,7 @@
         <td>
           <form method="post" id="finish_help" action="{{finish_help_url}}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-            <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
+            <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
             <input type="submit" value="Finish Helping" class="btn btn-primary">
           </form>
         </td>
@@ -72,7 +72,7 @@
       <td>
         <form method="post" id="remove" action="{{remove_url}}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-          <input type="hidden" name="user_id" value="{{entry.getUserId()}}" />
+          <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
           <input type="submit" value="Remove" class="btn btn-primary">
         </form>
       </td>
