@@ -1,4 +1,5 @@
 $(document).ready(function() {
+  
     $("input,textarea,select").on("change", function() {
         var elem = this;
         let formData = new FormData();
@@ -45,13 +46,10 @@ $(document).ready(function() {
             }
         });
     });
-
+  
     function updateForumMessage() {
-        if ($("#forum-enabled").is(":checked")) {
-            $("#forum-enabled-message").show();
-        } else {
-            $("#forum-enabled-message").hide();
-        }
+        $("#forum-enabled-message").toggle();
+        $("#forum-category-warning").toggle();
     }
 
     $(document).on("change", "#forum-enabled", updateForumMessage);
@@ -74,7 +72,6 @@ $(document).ready(function() {
         }
     }
 
-    updateForumMessage();
     updateEmailSeatingOption();
 
     $(document).on("change", "#room-seating-gradeable-id", updateEmailSeatingOption);

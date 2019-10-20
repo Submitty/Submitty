@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "34031933a3531fde0ec3650d095a151d",
+    "content-hash": "4d81a1afba04f56be17732e03be9b364",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -545,16 +545,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v4.3.4",
+            "version": "v4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "07d49c0f823e0bc367c6d84e35b61419188a5ece"
+                "reference": "0acb26407a9e1a64a275142f0ae5e36436342720"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/07d49c0f823e0bc367c6d84e35b61419188a5ece",
-                "reference": "07d49c0f823e0bc367c6d84e35b61419188a5ece",
+                "url": "https://api.github.com/repos/symfony/config/zipball/0acb26407a9e1a64a275142f0ae5e36436342720",
+                "reference": "0acb26407a9e1a64a275142f0ae5e36436342720",
                 "shasum": ""
             },
             "require": {
@@ -605,11 +605,11 @@
             ],
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
-            "time": "2019-08-26T08:26:39+00:00"
+            "time": "2019-09-19T15:51:53+00:00"
         },
         {
             "name": "symfony/filesystem",
-            "version": "v4.3.4",
+            "version": "v4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/filesystem.git",
@@ -659,16 +659,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.3.4",
+            "version": "v4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "d804bea118ff340a12e22a79f9c7e7eb56b35adc"
+                "reference": "76590ced16d4674780863471bae10452b79210a5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/d804bea118ff340a12e22a79f9c7e7eb56b35adc",
-                "reference": "d804bea118ff340a12e22a79f9c7e7eb56b35adc",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/76590ced16d4674780863471bae10452b79210a5",
+                "reference": "76590ced16d4674780863471bae10452b79210a5",
                 "shasum": ""
             },
             "require": {
@@ -710,20 +710,20 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-08-26T08:55:16+00:00"
+            "time": "2019-10-04T19:48:13+00:00"
         },
         {
             "name": "symfony/mime",
-            "version": "v4.3.4",
+            "version": "v4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/mime.git",
-                "reference": "987a05df1c6ac259b34008b932551353f4f408df"
+                "reference": "32f71570547b91879fdbd9cf50317d556ae86916"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/mime/zipball/987a05df1c6ac259b34008b932551353f4f408df",
-                "reference": "987a05df1c6ac259b34008b932551353f4f408df",
+                "url": "https://api.github.com/repos/symfony/mime/zipball/32f71570547b91879fdbd9cf50317d556ae86916",
+                "reference": "32f71570547b91879fdbd9cf50317d556ae86916",
                 "shasum": ""
             },
             "require": {
@@ -769,7 +769,7 @@
                 "mime",
                 "mime-type"
             ],
-            "time": "2019-08-22T08:16:11+00:00"
+            "time": "2019-09-19T17:00:15+00:00"
         },
         {
             "name": "symfony/polyfill-ctype",
@@ -1007,16 +1007,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.3.4",
+            "version": "v4.3.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "ff1049f6232dc5b6023b1ff1c6de56f82bcd264f"
+                "reference": "3b174ef04fe66696524efad1e5f7a6c663d822ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/ff1049f6232dc5b6023b1ff1c6de56f82bcd264f",
-                "reference": "ff1049f6232dc5b6023b1ff1c6de56f82bcd264f",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/3b174ef04fe66696524efad1e5f7a6c663d822ea",
+                "reference": "3b174ef04fe66696524efad1e5f7a6c663d822ea",
                 "shasum": ""
             },
             "require": {
@@ -1079,7 +1079,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-08-26T08:26:39+00:00"
+            "time": "2019-10-04T20:57:10+00:00"
         },
         {
             "name": "twig/twig",
