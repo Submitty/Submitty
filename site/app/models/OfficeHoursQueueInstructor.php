@@ -13,12 +13,13 @@ class OfficeHoursQueueInstructor extends AbstractModel {
     private $entries_helped = array();
     private $queue_open = false;
     private $code = '';
+    
     /**
-     * OfficeHoursQueueInstructor constructor.
-     *
-     * @param Core  $core
-     * @param array $details
-     */
+    * OfficeHoursQueueInstructor constructor.
+    *
+    * @param Core  $core
+    * @param array $details
+    */
     public function __construct(Core $core, array $entries, array $entries_helped, $queue_open, $code) {
         parent::__construct($core);
         $this->entries = $entries;
@@ -28,18 +29,18 @@ class OfficeHoursQueueInstructor extends AbstractModel {
     }
 
     public function getEntries(){
-      return $this->entries;
+        return $this->entries;
     }
 
     public function getEntriesHelped(){
-      return $this->entries_helped;
+        return $this->entries_helped;
     }
 
     public function isQueueOpen(){
-      return $this->queue_open;
+        return $this->queue_open;
     }
 
     public function getCode(){
-      return $this->code;
+        return $this->code;
     }
 }

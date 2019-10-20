@@ -19,11 +19,11 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $removed_by = NULL;
     private $entry_id = 0;
     /**
-     * OfficeHoursQueueStudent constructor.
-     *
-     * @param Core  $core
-     * @param array $details
-     */
+    * OfficeHoursQueueStudent constructor.
+    *
+    * @param Core  $core
+    * @param array $details
+    */
     public function __construct(Core $core, $entry_id, $user_id, $name, $status, $num_in_queue, $position_in_queue, $time_in, $time_helped, $time_out, $removed_by) {
         parent::__construct($core);
         $this->name = $name;
@@ -39,46 +39,46 @@ class OfficeHoursQueueStudent extends AbstractModel {
     }
 
     public function getName(){
-      return $this->name;
+        return $this->name;
     }
 
     public function getUserId(){
-      return $this->user_id;
+        return $this->user_id;
     }
 
     public function getPositionInQueue(){
-      return $this->position_in_queue;
+        return $this->position_in_queue;
     }
 
     public function isInQueue(){
-      return $this->status == 0 or $this->status == 1;
+        return $this->status == 0 or $this->status == 1;
     }
 
     public function getStatus(){
-      return $this->status;
+        return $this->status;
     }
 
     public function getNumInQueue(){
-      return $this->num_in_queue;
+        return $this->num_in_queue;
     }
 
     public function getTimeIn(){
-      return $this->time_in;
+        return $this->time_in;
     }
 
     public function getTimeHelped(){
-      return $this->time_helped;
+        return $this->time_helped;
     }
 
     public function getTimeOut(){
-      return $this->time_out;
+        return $this->time_out;
     }
 
     public function getRemovedBy(){
-      return $this->removed_by;
+         return $this->removed_by;
     }
 
     public function getEntryId(){
-      return $this->entry_id;
+        return $this->entry_id;
     }
 }
