@@ -55,6 +55,7 @@ class ConfigurationController extends AbstractController {
             'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
             'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
         );
+        $categoriesCreated = empty($this->core->getQueries()->getCategories());
 
         return new Response(
             JsonResponse::getSuccessResponse($fields),
@@ -63,6 +64,7 @@ class ConfigurationController extends AbstractController {
                 'viewConfig',
                 $fields,
                 $this->getGradeableSeatingOptions(),
+                $categoriesCreated,
                 $this->core->getConfig()->isEmailEnabled(),
                 $this->core->getCsrfToken()
             )

@@ -344,6 +344,8 @@ class ForumThreadView extends AbstractView {
                 "display_thread_count" => empty($displayThreadContent) ? 0 : count($displayThreadContent["thread_content"]),
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
+                "accessGrading" => $this->core->getUser()->accessGrading(),
+                "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
                 "display_option" => $display_option,
@@ -975,10 +977,6 @@ class ForumThreadView extends AbstractView {
 
         $categories = $this->core->getQueries()->getCategories();
 
-        $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-        array_unshift($categories, $dummy_category);
-
-
         $buttons = array(
             array(
                 "required_rank" => 4,
@@ -1031,9 +1029,6 @@ class ForumThreadView extends AbstractView {
 
         if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
-
-            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-            array_unshift($categories, $dummy_category);
         }
 
         $buttons = array(

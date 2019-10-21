@@ -838,7 +838,11 @@ class ForumController extends AbstractController{
      * @Route("/{_semester}/{_course}/forum/threads/new", methods={"GET"})
      */
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+        if(empty($this->core->getQueries()->getCategories())){
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
+            return;
+        }
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
     /**
