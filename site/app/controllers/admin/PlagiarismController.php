@@ -435,7 +435,7 @@ class PlagiarismController extends AbstractController {
         $title = "";
         if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
             $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
-         }
+        }
 
         $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config, $title);
     }
