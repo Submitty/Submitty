@@ -1,8 +1,8 @@
 <?php namespace tests\app\controllers\admin;
 
-use app\controllers\admin\GradeOverrideController;
 use app\libraries\Core;
 use tests\BaseUnitTest;
+use app\controllers\admin\GradeOverrideController;
 
 class GradeOverrideControllerTester extends BaseUnitTest
 {
