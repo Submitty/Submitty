@@ -2,7 +2,6 @@
 
 use app\controllers\admin\GradeOverrideController;
 use app\libraries\Core;
-use app\libraries\response\WebResponse;
 use tests\BaseUnitTest;
 
 class GradeOverrideControllerTester extends BaseUnitTest
