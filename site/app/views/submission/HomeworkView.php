@@ -243,11 +243,11 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param int $late_days_use
-     * @param $students
-     * @param $ggs
+     * @param User $students
+     * @param \IteratorIterator $ggs
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, $students, $ggs): string {
+    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, User $students, \IteratorIterator $ggs): string {
         $student_page = $gradeable->isStudentPdfUpload();
         $students_full = [];
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
