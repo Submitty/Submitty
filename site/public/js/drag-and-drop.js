@@ -856,7 +856,7 @@ function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versi
 
 
     //check if filesize greater than 1,25 MB, then turn on the progressbar
-    if(filesize > 10000000){
+    if(filesize > 1250000){
         $(".loading-bar-wrapper").fadeIn(100);
     }
 
