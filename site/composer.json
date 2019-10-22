@@ -33,6 +33,6 @@
     "submitty/php-codesniffer": "2.1.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
     "php-mock/php-mock-phpunit": "2.5.0",
-    "phpstan/phpstan": "0.11.17"
+    "phpstan/phpstan": "0.11.18"
   }
 }
