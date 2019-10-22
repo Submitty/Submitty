@@ -40,21 +40,20 @@ class OfficeHoursQueueController extends AbstractController {
                     'showQueueStudent',
                     $oh_queue,
                     $this->core->getConfig()->getCourse()
-                    )
-                );
-            }
-            else{
-                $oh_queue = $this->core->getQueries()->getInstructorQueue();
-                return Response::WebOnlyResponse(
-                    new WebResponse(
-                        'OfficeHoursQueue',
-                        'showQueueInstructor',
-                        $oh_queue,
-                        $this->core->getConfig()->getCourse()
-                        )
-                    );
-                }
-            }
+                )
+            );
+        }else{
+        $oh_queue = $this->core->getQueries()->getInstructorQueue();
+            return Response::WebOnlyResponse(
+                new WebResponse(
+                    'OfficeHoursQueue',
+                    'showQueueInstructor',
+                    $oh_queue,
+                    $this->core->getConfig()->getCourse()
+                )
+            );
+        }
+    }
     /**
     * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/add", methods={"POST"})
@@ -74,23 +73,19 @@ class OfficeHoursQueueController extends AbstractController {
             if(!$oh_queue->isInQueue()){
                 if($this->core->getQueries()->addUserToQueue($this->core->getUser()->getId(), $_POST['name'])){
                     $this->core->addSuccessMessage("Added to queue");
-                }
-                else{
+                }else{
                     $this->core->addErrorMessage("Unable to add to queue");
                 }
 
-            }
-            else{
+            }else{
                 $this->core->addErrorMessage("You are already in the queue");
             }
         }else{
             if($_POST['name'] == ""){
                 $this->core->addErrorMessage("Invalid Name");
-            }
-            else if(is_null($section_id)){
+            }else if(is_null($section_id)){
                 $this->core->addErrorMessage("Invalid Code");
-            }
-            else if(!$this->core->getQueries()->isQueueOpen()){
+            }else if(!$this->core->getQueries()->isQueueOpen()){
                 $this->core->addErrorMessage("Queue is closed");
             }
 
@@ -113,7 +108,6 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        if($this->core->getUser()->accessGrading())
         $this->core->getQueries()->startHelpUser($_POST['entry_id']);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -133,7 +127,6 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        if($this->core->getUser()->accessGrading())
         $this->core->getQueries()->finishHelpUser($_POST['entry_id'], $this->core->getUser()->getId());
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -149,11 +142,6 @@ class OfficeHoursQueueController extends AbstractController {
     public function toggleQueue(){
         if(!isset($_POST['queue_open'])){
             $this->core->addErrorMessage("Missing queue status");
-            return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-        if(!$this->core->getUser()->accessGrading()){
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
@@ -180,15 +168,13 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        if(!$this->core->getUser()->accessGrading()){
-            if($this->core->getUser()->getId() != $this->core->getQueries()->getUserIdFromQueueSlot($_POST['entry_id'])){
-                $this->core->addErrorMessage("Permission denied to remove that person");
-                return Response::RedirectOnlyResponse(
-                    new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-                );
-            }
-            $this->core->addSuccessMessage("Removed from queue");
+        if(!$this->core->getUser()->accessGrading() && $this->core->getUser()->getId() != $this->core->getQueries()->getUserIdFromQueueSlot($_POST['entry_id'])){
+            $this->core->addErrorMessage("Permission denied to remove that person");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
         }
+        $this->core->addSuccessMessage("Removed from queue");
         $this->core->getQueries()->removeUserFromQueue($_POST['entry_id'], $this->core->getUser()->getId());
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -212,6 +198,5 @@ class OfficeHoursQueueController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
     }
-
 
 }

@@ -4085,8 +4085,8 @@ AND gc_id IN (
             return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, NULL,NULL,NULL,NULL);
         }
         $row = $this->course_db->rows()[0];
-        $this->course_db->query("SELECT * FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
-        $position_in_queue = count($this->course_db->rows());
+        $this->course_db->query("SELECT COUNT(*) FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
+        $position_in_queue = $this->course_db->rows()[0]['count'];
         $oh_queue = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
         return $oh_queue;
     }
