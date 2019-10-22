@@ -23,8 +23,9 @@
 
   <br/>
 
+  {% if queue_open == 1 %}
   <h3> Current code: {{ code }} </h3>
-
+  {% endif %}
   <br/>
 
   <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
