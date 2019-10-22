@@ -136,6 +136,7 @@ class SubmissionController extends AbstractController {
                 foreach ($students as $student) {
                     $student_ids[] = $student->getId();
                 }
+
                 $ggs = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids);
 
                 $all_directories = $gradeable->getSplitPdfFiles();

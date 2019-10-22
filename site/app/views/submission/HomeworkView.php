@@ -57,7 +57,7 @@ class HomeworkView extends AbstractView {
 
         // showing submission if user is full grader or student can submit
         if ($this->core->getUser()->accessFullGrading()) {
-            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
+            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $students, $ggs);
         } else if ($gradeable->isStudentSubmit()) {
             if ($gradeable->canStudentSubmit()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $students, $ggs);
