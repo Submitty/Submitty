@@ -220,14 +220,14 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         },
         function() {
             elems.each(function(idx, elem) {
-                elem = $(elem);
+                elem = $(elems);
                 elem.animate({"border-right-width": "0px"}, 400); // animate the box
                 elem.attr("data-score", elem.data("score"));      // update the score
             });
         },
         function() {
             elems.each(function(idx, elem) {
-                elem = $(elem);
+                elem = $(elems);
                 elem.stop(true, true);
                 elem.css("border-right", "60px solid #DA4F49");
             });
