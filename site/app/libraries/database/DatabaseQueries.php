@@ -24,6 +24,8 @@ use app\models\SimpleGradeOverriddenUser;
 use app\models\Team;
 use app\models\Course;
 use app\models\SimpleStat;
+use app\models\OfficeHoursQueueStudent;
+use app\models\OfficeHoursQueueInstructor;
 
 
 /**
@@ -4061,5 +4063,129 @@ AND gc_id IN (
         $not_fully_graded = array_column($not_fully_graded, $id_string);
 
         return $not_fully_graded;
+    }
+
+    public function getNumInQueue(){
+        $this->course_db->query("SELECT * FROM queue where status = 0");
+        return count($this->course_db->rows());
+    }
+
+    public function addUserToQueue($user_id, $name){
+        $name = substr($name, 0, 20);
+        $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
+        if(count($this->course_db->rows() == 0)){
+            $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($this->core->getUser()->getId(), $name));
+            return true;
+        }
+        return false;
+    }
+
+    public function getQueueByUser($user_id){
+        $num_in_queue = $this->getNumInQueue();
+        $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
+        if(count($this->course_db->rows()) == 0){
+            $name = $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
+            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, NULL,NULL,NULL,NULL);
+        }
+        $row = $this->course_db->rows()[0];
+        $this->course_db->query("SELECT COUNT(*) FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
+        $position_in_queue = $this->course_db->rows()[0]['count'];
+        $oh_queue = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+        return $oh_queue;
+    }
+
+    public function removeUserFromQueue($entry_id, $remover){
+        //$this->course_db->query("DELETE FROM queue");
+        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = 0", array($remover, $entry_id));
+    }
+
+    public function startHelpUser($entry_id){
+        $this->course_db->query("UPDATE queue SET status = 1, time_helped = current_timestamp where entry_id = ? and (status = 0)", array($entry_id));
+    }
+
+    public function finishHelpUser($entry_id, $helper){
+        $this->course_db->query("UPDATE queue SET status = 2, time_out = current_timestamp, removed_by = ? where entry_id = ? and (status = 1)", array($helper, $entry_id));
+    }
+
+    public function isQueueOpen(){
+        $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
+        $queue_open = $this->course_db->rows()[0]['open'];
+        return $queue_open;
+    }
+
+    public function getQueueCode(){
+        $this->course_db->query("SELECT code FROM queue_settings");
+        $rows = $this->course_db->rows();
+        return $rows[0]['code'];
+    }
+
+    public function getInstructorQueue(){
+        $this->course_db->query("SELECT * FROM queue where (status = 0 or status = 1) order by time_in ASC");
+        $rows = $this->course_db->rows();
+
+        $needs_help = array();
+        $index = 1;
+        foreach($rows as $row){
+            $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+            array_push($needs_help, $oh_queue_student);
+            $index = $index + 1;
+        }
+
+        $this->course_db->query("SELECT * FROM queue where (status = 2 or status = 3) and time_in > CURRENT_DATE order by time_out DESC");
+        $rows = $this->course_db->rows();
+
+        $already_helped = array();
+        $index = 1;
+        foreach($rows as $row){
+            $oh_queue_student = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $row['user_id'], $row['name'], $row['status'], $this->getNumInQueue(), $index, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
+            array_push($already_helped, $oh_queue_student);
+            $index = $index + 1;
+        }
+
+        $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $this->isQueueOpen(), $this->getQueueCode());
+        return $oh_queue_instr;
+    }
+
+    public function isValidCode($code){
+        $code = strtoupper($code);
+        $this->course_db->query("select * from queue_settings where code = ? limit 1", array($code));
+        if(count($this->course_db->rows()) != 0){
+            return $this->course_db->rows()[0]['id'];
+        }else{
+            return NULL;
+        }
+    }
+
+    public function openQueue(){
+        $characters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+        for ($i = 0; $i < 6; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+
+        $this->course_db->query("UPDATE queue_settings SET open = TRUE, code = ?", array($randomString));
+    }
+
+    public function closeQueue(){
+        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
+        $this->course_db->query("UPDATE queue_settings SET open = FALSE");
+        //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
+    }
+
+    public function getUserIdFromQueueSlot($entry_id){
+        $this->course_db->query("SELECT * FROM queue where entry_id = ? limit 1", array($entry_id));
+        $rows = $this->course_db->rows();
+        if(count($rows) == 0){
+            return NULL;
+        }
+        return $rows[0]['user_id'];
+    }
+
+    public function genQueueSettings(){
+        $this->course_db->query("SELECT * FROM queue_settings");
+        if(count($this->course_db->rows()) == 0){
+            $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (FALSE, '')");
+        }
     }
 }
