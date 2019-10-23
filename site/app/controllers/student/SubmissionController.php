@@ -10,6 +10,7 @@ use app\libraries\Logger;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
@@ -137,7 +138,15 @@ class SubmissionController extends AbstractController {
                     $student_ids[] = $student->getId();
                 }
 
-                $ggs = $this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids);
+                $students_full = [];
+                if ($this->core->getUser()->accessGrading()) {
+                    $students_version = array();
+                    foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                        /** @var GradedGradeable $gg */
+                        $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
+                    }
+                    $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
+                }
 
                 $all_directories = $gradeable->getSplitPdfFiles();
                 $files = [];
@@ -247,7 +256,7 @@ class SubmissionController extends AbstractController {
                 }
 
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $students, $ggs, $is_valid, $count_array, $files, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $students_full, $is_valid, $count_array, $files, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);

@@ -24,15 +24,14 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable|null $graded_gradeable
      * @param int $display_version
      * @param bool $can_inquiry
-     * @param User $students
-     * @param \Iterator $ggs
+     * @param array $students_full
      * @param bool $is_valid
      * @param array $count_array
      * @param array $files
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, User $students, \Iterator $ggs, bool $is_valid, array $count_array, array $files, bool $show_hidden_testcases = false) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, array $students_full, bool $is_valid, array $count_array, array $files, bool $show_hidden_testcases = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -57,10 +56,10 @@ class HomeworkView extends AbstractView {
 
         // showing submission if user is full grader or student can submit
         if ($this->core->getUser()->accessFullGrading()) {
-            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $students, $ggs);
+            $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $students_full);
         } else if ($gradeable->isStudentSubmit()) {
             if ($gradeable->canStudentSubmit()) {
-                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $students, $ggs);
+                $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use, $students_full);
             } else {
                 $return .= $this->renderSubmitNotAllowedBox();
             }
@@ -243,13 +242,11 @@ class HomeworkView extends AbstractView {
      * @param GradedGradeable|null $graded_gradeable
      * @param AutoGradedVersion|null $version_instance
      * @param int $late_days_use
-     * @param User $students
-     * @param \Iterator $ggs
+     * @param array $students_full
      * @return string
      */
-    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, User $students, \Iterator $ggs): string {
+    private function renderSubmitBox(Gradeable $gradeable, $graded_gradeable, $version_instance, int $late_days_use, array $students_full): string {
         $student_page = $gradeable->isStudentPdfUpload();
-        $students_full = [];
         $inputs = $gradeable->getAutogradingConfig()->getInputs();
         $notebook = $gradeable->getAutogradingConfig()->getNotebook();
         $would_be_days_late = $gradeable->getWouldBeDaysLate();
@@ -261,15 +258,6 @@ class HomeworkView extends AbstractView {
         $days_to_be_charged = $would_be_days_late-$active_days_late;
         $old_files = [];
         $display_version = 0;
-
-        if ($this->core->getUser()->accessGrading()) {
-            $students_version = array();
-            foreach ($ggs as $gg) {
-                /** @var GradedGradeable $gg */
-                $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
-            }
-            $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
-        }
 
         $github_user_id = '';
         $github_repo_id = '';
