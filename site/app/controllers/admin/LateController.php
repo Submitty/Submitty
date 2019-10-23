@@ -21,13 +21,12 @@ class LateController extends AbstractController {
      * @return Response
      */
     public function viewLateDays() {
-        $students = $this->core->getQueries()->getAllUsers();
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'LateDay'],
                 'displayLateDays',
                 $this->core->getQueries()->getUsersWithLateDays(),
-                $students
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }
