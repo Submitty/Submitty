@@ -132,14 +132,14 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
 
                 // Query for values here before moving to the view
-                $students = $this->core->getQueries()->getAllUsers();
-                $student_ids = array();
-                foreach ($students as $student) {
-                    $student_ids[] = $student->getId();
-                }
-
                 $students_full = [];
                 if ($this->core->getUser()->accessGrading()) {
+                    $students = $this->core->getQueries()->getAllUsers();
+                    $student_ids = array();
+                    foreach ($students as $student) {
+                        $student_ids[] = $student->getId();
+                    }
+
                     $students_version = array();
                     foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
                         /** @var GradedGradeable $gg */
