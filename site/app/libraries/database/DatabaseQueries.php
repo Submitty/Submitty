@@ -360,6 +360,7 @@ class DatabaseQueries {
         try {
             $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, $type, $hasAttachment, $markdown));
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
+            $this->visitThread($user, $thread_id);
         } catch (DatabaseException $dbException){
             if($this->course_db->inTransaction()){
                 $this->course_db->rollback();
@@ -498,6 +499,8 @@ class DatabaseQueries {
         $post_id = $this->createPost($user, $content, $id, $anon, 0, true, $hasAttachment, $markdown);
 
         $this->course_db->commit();
+
+        $this->visitThread($user, $id);
 
         return array("thread_id" => $id, "post_id" => $post_id);
     }
