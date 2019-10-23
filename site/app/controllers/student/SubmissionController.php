@@ -218,6 +218,8 @@ class SubmissionController extends AbstractController {
                     }
                 }
 
+                $is_valid = true;
+
                 for ($i = 0; $i < count($files); $i++) {
                     if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
                         continue;
@@ -226,7 +228,6 @@ class SubmissionController extends AbstractController {
                     }
 
                     $page_count = 0;
-                    $is_valid = true;
                     $id = '';
 
                     //decoded.json may be read before the assoicated data is written, check if key exists first
