@@ -13,7 +13,8 @@ class OfficeHoursQueueView extends AbstractView {
         'csrf_token' => $this->core->getCsrfToken(),
         'add_url' => $this->core->buildCourseUrl(["office_hours_queue/add"]),
         'remove_url' => $this->core->buildCourseUrl(["office_hours_queue/remove"]),
-        'oh_queue' => $oh_queue
+        'oh_queue' => $oh_queue,
+        'queue_open' => $this->core->getQueries()->isQueueOpen()
         ]);
     }
 

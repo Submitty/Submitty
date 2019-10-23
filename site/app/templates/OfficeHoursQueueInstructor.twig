@@ -1,11 +1,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
 <div class="content">
-  <h1> Office Hours Queue Instructor View </h1> <br/>
-  {% if num_in_queue == 1 %}
-    <h3> There is currently {{num_in_queue}} person in the queue</h3> <br/>
-  {% else %}
-    <h3> There are currently {{num_in_queue}} people in the queue</h3> <br/>
+  <h1> Office Hours Queue -- Teaching Staff View </h1> <br/>
+
+  {% if queue_open == 1 %}
+    {% if num_in_queue == 1 %}
+      <p>There is currently {{num_in_queue}} person in the queue</p>
+    {% else %}
+      <p>There are currently {{num_in_queue}} people in the queue</p>
+    {% endif %}
   {% endif %}
 
   {% if queue_open == 1 %}
@@ -24,14 +27,13 @@
   <br/>
 
   {% if queue_open == 1 %}
-  <h3> Current code: {{ code }} </h3>
-  {% endif %}
-  <br/>
+  <p>Current code: {{ code }}</p>
 
   <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="submit" value="Generate New Code" class="btn btn-primary">
   </form>
+  {% endif %}
 
   <br/> <br/>
 
