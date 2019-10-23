@@ -112,8 +112,11 @@ class ConfigurationController extends AbstractController {
             $entry = intval($entry);
         }
         else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-                                      'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'queue_enabled'))) {
+                                      'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
             $entry = $entry === "true" ? true : false;
+        }else if($name === 'queue_enabled'){
+            $entry = $entry === "true" ? true : false;
+            $this->core->getQueries()->genQueueSettings();
         }
         else if($name === 'upload_message') {
             $entry = nl2br($entry);

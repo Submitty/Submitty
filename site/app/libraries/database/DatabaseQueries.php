@@ -4154,10 +4154,6 @@ AND gc_id IN (
     }
 
     public function openQueue(){
-        $this->course_db->query("SELECT * FROM queue_settings");
-        if(count($this->course_db->rows()) == 0){
-            $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (FALSE, '')");
-        }
         $characters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
@@ -4181,5 +4177,12 @@ AND gc_id IN (
             return NULL;
         }
         return $rows[0]['user_id'];
+    }
+
+    public function genQueueSettings(){
+        $this->course_db->query("SELECT * FROM queue_settings");
+        if(count($this->course_db->rows()) == 0){
+            $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (FALSE, '')");
+        }
     }
 }
