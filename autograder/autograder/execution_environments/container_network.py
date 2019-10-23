@@ -4,6 +4,7 @@ import subprocess
 import traceback
 import time
 from pwd import getpwnam
+from timeit import default_timer as timer
 import shutil
 import docker
 
@@ -17,7 +18,7 @@ class Container():
   create, start, and cleanup after themselves. Note that a network of containers
   can be made up of 1 or more containers.
   """
-  def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one, is_test_environment, log_function):
+  def __init__(self, container_info, untrusted_user, testcase_directory, more_than_one, is_test_environment, log_function, log_meta):
     self.name = container_info['container_name']
 
     # If there are multiple containers, each gets its own directory under testcase_directory, otherwise,
@@ -38,6 +39,7 @@ class Container():
     # This will be populated later
     self.return_code = None
     self.log_function = log_function
+    self.log_meta = log_meta
     self.container = None
     # A socket for communication with the container.
     self.socket = None
@@ -54,7 +56,7 @@ class Container():
 
   def create(self, execution_script, arguments, more_than_one):
     """ Create (but don't start) this container. """
-
+    self.container_lifetime = timer()
     client = docker.from_env()
 
     mount = {
@@ -84,12 +86,14 @@ class Container():
       raise
 
     dockerlaunch_done = dateutils.get_current_time()
-    self.log_function(f'docker container {self.container.short_id} created')
+    self.log_meta(self.full_name, self.container.short_id, 'CREATE', timer() - self.container_lifetime)
     client.close()
 
   def start(self, logfile):
+    self.container_lifetime = timer()
     self.container.start()
     self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
+    self.log_meta(self.full_name, self.container.short_id, 'START', timer() - self.container_lifetime)
 
   def set_ip_address(self, network_name, ip_address):
     self.ip_address_map[network_name] = ip_address
@@ -112,6 +116,7 @@ class Container():
     self.container.client.api.close()
     self.container.client.close()
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
+    self.log_meta(self.full_name, self.container.short_id, 'DESTROY', timer() - self.container_lifetime)
 
 
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
@@ -143,7 +148,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         container_spec['udp_port_range'] = (current_udp_port, current_udp_port + container_spec.get('number_of_ports', 1) - 1)
         current_udp_port += container_spec.get('number_of_ports', 1)
         current_tcp_port += container_spec.get('number_of_ports', 1)
-        containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), greater_than_one, self.is_test_environment, self.log_message))
+        containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), greater_than_one, self.is_test_environment, self.log_message, self.log_container_meta))
     else:
       container_spec = {
         'container_name'  : f'temporary_container',
@@ -154,7 +159,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         'tcp_port_range' : (9000, 9000),
         'udp_port_range' : (1500, 1500)
       }
-      containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), False, self.is_test_environment, self.log_message))
+      containers.append(Container(container_spec, untrusted_user, os.path.join(self.tmp_work, testcase_directory), False, self.is_test_environment, self.log_message, self.log_container_meta))
     self.containers = containers
 
     # Solution containers are a network of containers which run instructor code.
@@ -170,7 +175,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       solution_container_spec['udp_port_range'] = (current_udp_port, current_udp_port + solution_container_spec.get('number_of_ports', 1) - 1)
       current_udp_port += solution_container_spec.get('number_of_ports', 1)
       current_tcp_port += solution_container_spec.get('number_of_ports', 1)
-      solution_containers.append(Container(solution_container_spec, untrusted_user, self.random_output_directory, greater_than_one_solution_container, self.is_test_environment, self.log_message))
+      solution_containers.append(Container(solution_container_spec, untrusted_user, self.random_output_directory, greater_than_one_solution_container, self.is_test_environment, self.log_message, self.log_container_meta))
     self.solution_containers = solution_containers
 
     # Check for dispatcher actions (standard input)
@@ -604,7 +609,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         'outgoing_connections' : []
     }
     # Create a container to generate random input inside of.
-    container = Container( container_spec, untrusted_user, self.random_input_directory, False, self.is_test_environment, self.log_message)
+    container = Container( container_spec, untrusted_user, self.random_input_directory, False, self.is_test_environment, self.log_message, self.log_container_meta)
     execution_script = os.path.join(container.directory, executable)
     
     try:

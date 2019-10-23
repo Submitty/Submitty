@@ -6,7 +6,9 @@ import stat
 import time
 import traceback
 import socket
+import fcntl
 from pwd import getpwnam
+from datetime import datetime
 import glob
 
 from submitty_utils import dateutils
@@ -324,3 +326,20 @@ class SecureExecutionEnvironment():
                                       is_batch = self.is_batch,
                                       which_untrusted = self.untrusted_user,
                                       trace = trace)
+
+  """ A useful wrapper for the atuograding_utils.log_message function. """
+  def log_container_meta(self, name, container, event, time=0):
+    now = dateutils.get_current_time()
+    datefile = datetime.strftime(now, "%Y%m%d")+".txt"
+    easy_to_read_date = dateutils.write_submitty_date(now, True)
+    time_unit = "sec"
+    with open(os.path.join(self.tmp_logs,'meta_log.txt'), 'a') as myfile:
+      try:
+        # fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
+        print("%s | %s | %s | %s | %.3lf | %3s"
+          % (easy_to_read_date, name, container,
+            event, time, time_unit),
+          file=myfile)
+        # fcntl.flock(myfile, fcntl.LOCK_UN)
+      except:
+        print("Could not gain a lock on the log file.")
