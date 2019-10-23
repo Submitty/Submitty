@@ -792,7 +792,9 @@ class ForumThreadView extends AbstractView {
             $classes[] = " first_post";
         }
         if (in_array($post_id, $unviewed_posts)) {
-            $classes[] = " new_post";
+            if($current_user != $post["author_user_id"]) {
+                $classes[] = " new_post";
+            }
         } else {
             $classes[] = " viewed_post";
         }
