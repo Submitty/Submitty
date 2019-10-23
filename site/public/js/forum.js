@@ -703,7 +703,7 @@ function addNewCategory(csrf_token){
             var category_id = json['data']['new_id'];
             var category_color_code = "#000080";
             var category_desc = escapeSpecialChars(newCategory);
-            newelement = $($('#ui-category-list li')[0]).clone(true);
+            newelement = $($('#ui-category-template li')[0]).clone(true);
             newelement.attr('id',"categorylistitem-"+category_id);
             newelement.css('color',category_color_code);
             newelement.find(".categorylistitem-desc span").text(category_desc);

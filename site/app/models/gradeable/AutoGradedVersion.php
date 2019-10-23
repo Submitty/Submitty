@@ -147,7 +147,7 @@ class AutoGradedVersion extends AbstractModel {
                 foreach ($submitted_files as $file => $details) {
                     $dir_name = "part{$i}/";
                     if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
-                        $this->files[$dir][$i][substr($file, strlen($dir_name), null)] = $details;
+                        $this->files[$dir][$i][substr($file, strlen($dir_name))] = $details;
                     }
                 }
             }
@@ -287,8 +287,10 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return array('submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [], 
-            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []);
+        return array(
+            'submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [],
+            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []
+        );
     }
 
     /**

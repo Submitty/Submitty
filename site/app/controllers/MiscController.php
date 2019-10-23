@@ -143,21 +143,19 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
 
-        if (!$this->core->isTesting()) {
-            $mime_type = mime_content_type($path);
-            if ($mime_type === 'text/plain') {
-                if (substr($path, '-3') === '.js') {
-                    $mime_type = 'application/javascript';
-                }
-                elseif (substr($path, '-4') === '.css') {
-                    $mime_type = 'text/css';
-                }
-                else if (substr($path, '-5') === '.html') {
-                    $mime_type = 'text/html';
-                }
+        $mime_type = mime_content_type($path);
+        if ($mime_type === 'text/plain') {
+            if (substr($path, '-3') === '.js') {
+                $mime_type = 'application/javascript';
             }
-            header('Content-type: ' . $mime_type);
+            elseif (substr($path, '-4') === '.css') {
+                $mime_type = 'text/css';
+            }
+            else if (substr($path, '-5') === '.html') {
+                $mime_type = 'text/html';
+            }
         }
+        header('Content-type: ' . $mime_type);
         readfile($path);
         return true;
     }
@@ -179,6 +177,16 @@ class MiscController extends AbstractController {
             // If the user attempting to access the file is not at least a grader then ensure the file has been released
             if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path)) {
                 $this->core->getOutput()->showError("You may not access this file until it is released.");
+                return false;
+            }
+        }
+
+        if($dir == 'submissions'){
+            //cannot download scanned images for bulk uploads
+            if (strpos(basename($path), "upload_page_" ) !== false &&
+                FileUtils::getContentType($path) !== "application/pdf"){
+
+                $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
         }
@@ -281,8 +289,14 @@ class MiscController extends AbstractController {
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($paths[$x]) + 1);
 
-                        // Add current file to archive
-                        $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        //Only get PDFs if this is a bulk upload gradeable
+                        if ($gradeable->isScannedExam() 
+                            && FileUtils::getContentType($filePath) === "application/pdf"){
+                            // Add current file to archive
+                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        }
+
+                       
                     }
                 }
             }

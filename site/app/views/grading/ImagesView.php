@@ -37,7 +37,7 @@ class ImagesView extends AbstractView {
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
-                $mime_subtype = explode('/', FileUtils::getMimeType($expected_image), 2)[1];
+                $mime_subtype = explode('/', mime_content_type($expected_image), 2)[1];
                 if (FileUtils::isValidImage($expected_image)) {
                     $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {

@@ -30,7 +30,7 @@
         <ul id='ui-category-list' style="padding-left: 1em;">
             {# TODO: scrollbar #}
             {% for category in categories %}
-                <li id="categorylistitem-{{ category.category_id }}" {% if loop.index != 1 %} class="category-sortable"{% endif %} style="color: {{ category.color }}; {% if loop.index == 1 %}display: none;{% endif %}">
+                <li id="categorylistitem-{{ category.category_id }}" class="category-sortable" style="color: {{ category.color }};">
                     <i class="fas fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
                     <span class="categorylistitem-desc">
                             <span style="word-wrap: break-word;">{{ category.category_desc }}</span>
@@ -56,6 +56,30 @@
 
         </div>
     </div>
+    {# Template Category used to display new categoreis on the client side #}
+    <ul id='ui-category-template' style="padding-left: 1em; display: none;">
+        <li id="categorylistitem-0" class="category-sortable" style="color: #000000; display: none;">
+            <i class="fas fa-bars handle" aria-hidden="true" title="Drag to reorder"></i>
+            <span class="categorylistitem-desc">
+                <span style="word-wrap: break-word;">Template</span>
+                <a class="post_button" title="Edit Category Description"><i class="fas fa-edit" aria-hidden="true"></i></a>
+                </span>
+            <span class="categorylistitem-editdesc" style="display: none;">
+                <input type="text" placeholder="New Description of Category" style="padding: 0;" maxlength="50" onkeyup="checkInputMaxLength($(this))">
+                <a class="post_button" title="Save Changes"><i class="fas fa-check" aria-hidden="true"></i></a>
+                <a class="post_button" title="Cancel Changes"><i class="fas fa-times" aria-hidden="true"></i></a>
+                </span>
+            <div style="float: right;width: auto;">
+                <select class='category-color-picker' style="color: white;font-size: 14px;height: 18px;padding: 0px;">
+                    {% for color_name, color_code in category_colors %}
+                        <option value="{{ color_code }}" style="color: white;background-color: {{ color_code }};" {% if color_code == category.color %}selected="selected"{% endif %}>{{ color_name }}</option>
+                    {% endfor %}
+                </select>
+                &nbsp;
+                <a class="post_button" title="Delete Category"><i class="fas fa-trash" aria-hidden="true"></i></a>
+            </div>
+        </li>
+    </ul>
 </div>
 
 <script type="text/javascript">
