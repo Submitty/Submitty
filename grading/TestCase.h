@@ -117,6 +117,10 @@ public:
 
   bool ShowExecuteLogfile(const std::string &execute_logfile) const;
 
+  bool has_timestamped_stdout() const {
+    return _json.value("timestamped_stdout",false);
+  }
+
 private:
 
   // -------------------------------

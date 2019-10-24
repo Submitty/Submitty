@@ -1027,7 +1027,8 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   command = command + " 1>" + output_file_name;
   int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
-                    assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+                    assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT",
+                    tc.has_timestamped_stdout());
   std::remove(input_file_name.c_str());
 
   std::ifstream ifs(output_file_name);

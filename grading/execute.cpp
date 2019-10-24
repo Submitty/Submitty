@@ -14,6 +14,8 @@
 #include <cassert>
 #include <map>
 #include <set>
+#include <chrono>
+#include <iomanip>
 
 // for system call filtering
 #include <seccomp.h>
@@ -816,7 +818,9 @@ void OutputSignalErrorMessageToExecuteLogfile(int what_signal, std::ofstream &lo
 
 
 // This function only returns on failure to exec
-int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config, std::string program_name, const nlohmann::json &test_case_limits, const nlohmann::json &assignment_limits) {
+int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nlohmann::json &whole_config,
+                      std::string program_name, const nlohmann::json &test_case_limits, 
+                      const nlohmann::json &assignment_limits, const bool timestamped_stdout) {
 
   /*************************************************
   * 
@@ -876,7 +880,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stdinfd, stdinfd);
   }
 
-  bool timestamp_output = true;
   int my_pipe[2];
   int stdoutfd = fileno(stdout);
   int pid = -1;
@@ -885,7 +888,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
   if (my_stdout != "") {
     // If we aren't timestamping, STDOUT goes straight to a file.
-    if(!timestamp_output){
+    if(!timestamped_stdout){
       int new_stdoutfd = open(my_stdout.c_str(), O_WRONLY|O_CREAT|O_APPEND, everyone_read);
       close(stdoutfd);
       dup2(new_stdoutfd, stdoutfd);
@@ -896,7 +899,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
       pid = fork();
       // If we are the child
       if(pid == 0){
-        std::cout <<"CHILD CHILD CHILD" << std::endl;
         close(my_pipe[WRITE_END]);
         std::cout << my_stdout << std::endl;
         timestamp_stdout( my_stdout, my_pipe[READ_END]);      
@@ -937,33 +939,32 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // First we determine if the program we will run is a 64 or 32 bit
   // executable (the system calls are different on 64 vs. 32 bit)
   Elf64_Ehdr elf_hdr;
-  std::cout << "reading " <<  my_program << std::endl;
+  logfile << "reading " <<  my_program << std::endl;
   int fd = open(my_program.c_str(), O_RDONLY);
   if (fd == -1) {
     //perror("can't open");
     logfile << "ERROR: cannot open program '" << my_program << '"' << std::endl;
-    std::cout << "ERROR: cannot open program '" << my_program << '"' << std::endl;
     exit(1);
   }
   int res = read(fd, &elf_hdr, sizeof(elf_hdr));
   if (res < sizeof(elf_hdr)) {
-    perror("can't read ");
-    std::cerr << "ERROR: cannot read program" << std::endl;
+    // perror("can't read ");
+    logfile << "ERROR: cannot read program" << std::endl;
     exit(1);
   }
   int prog_is_32bit;
   if (elf_hdr.e_machine == EM_386) {
-    std::cout << "this is a 32 bit program" << std::endl;
+    logfile << "this is a 32 bit program" << std::endl;
     prog_is_32bit = 1;
   }
   else {
-    std::cout << "this is a 64 bit program" << std::endl;
+    logfile << "this is a 64 bit program" << std::endl;
     prog_is_32bit = 0;
   }
   // END SECCOMP
 
   //if (SECCOMP_ENABLED != 0) {
-  std::cout << "seccomp filter enabled" << std::endl;
+  logfile << "seccomp filter enabled" << std::endl;
   //} else {
   //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
   // }
@@ -980,13 +981,13 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // since we get a "collect2 ld not found" error from g++ otherwise
   char* my_path = getenv("PATH");
   if (my_path != NULL) {
-    std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
+    logfile << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
   setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
 
   my_path = getenv("PATH");
 
-  std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+  logfile << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
   // symbol) are not interpreted as ascii
@@ -1015,7 +1016,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
-  std::cout << "going to install syscall filter for " << my_program << std::endl;
+  logfile << "going to install syscall filter for " << my_program << std::endl;
   //}
   
 
@@ -1033,12 +1034,13 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   *
   **************************************************/
 
-  if(timestamp_output){
-    std::cout << "Pid was " << pid << std::endl;
+  if(timestamped_stdout){
     close(my_pipe[READ_END]);
     close(stdoutfd);
     dup2(my_pipe[WRITE_END], stdoutfd);
   }
+
+  logfile << std::endl;
 
 
   // TO AVOID CREATING EXTRA LAYERS OF PROCESSES, USE EXEC RATHER THAN SYSTEM OR THE SHELL
@@ -1146,6 +1148,20 @@ void cin_reader(std::mutex* lock, std::queue<std::string>* input_queue, bool* CH
   std::cout << "exiting thread function" << std::endl;
 }
 
+// From https://gist.github.com/bschlinker/844a88c09dcf7a61f6a8df1e52af7730
+std::string getTimestamp() {
+  // get a precise timestamp as a string
+  const auto now = std::chrono::system_clock::now();
+  const auto nowAsTimeT = std::chrono::system_clock::to_time_t(now);
+  const auto nowMs = std::chrono::duration_cast<std::chrono::milliseconds>(
+      now.time_since_epoch()) % 1000;
+  std::stringstream nowSs;
+  nowSs
+      << std::put_time(std::localtime(&nowAsTimeT), "%m/%d/%y %T")
+      << '.' << std::setfill('0') << std::setw(3) << nowMs.count() << " ";
+  return nowSs.str();
+}
+
 //Thread function for timestamping stdout
 void timestamp_stdout(std::string filename, int pipe){
   std::cout << "This should be readable." << std::endl;
@@ -1171,14 +1187,14 @@ void timestamp_stdout(std::string filename, int pipe){
       else
       {
         stdout_file << s << std::endl;
-        timestamped_stdout << "THIS WILL BE A TIME SOME DAY!!!    " << s  << std::endl;
+        timestamped_stdout << getTimestamp() << s  << std::endl;
         s.clear();
       }
     }
     //Make sure we're not leaving anything in the buffer
     if(s.length() > 0){
       stdout_file << s << std::endl;
-      timestamped_stdout << "THIS WILL BE A TIME SOME DAY!!!    " << s  << std::endl;
+      timestamped_stdout << getTimestamp() << s  << std::endl;
     }
     fclose (stream);
   }
@@ -1205,7 +1221,8 @@ int execute(const std::string &cmd,
       const nlohmann::json &assignment_limits,
       const nlohmann::json &whole_config,
       const bool windowed,
-      const std::string display_variable2) {
+      const std::string display_variable2,
+      const bool timestamped_stdout) {
 
   
   std::string display_variable = display_variable2;
@@ -1281,7 +1298,7 @@ int execute(const std::string &cmd,
       dup2(dispatcherpipe[0], 0); //copy read end of the pipe onto stdin.
       close(dispatcherpipe[0]); // close read end of the pipe
     }
-    int child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits);
+    int child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits, timestamped_stdout);
 
     // send the system status code back to the parent process
     //std::cout << "    child_result = " << child_result << std::endl;
@@ -1360,7 +1377,7 @@ int execute(const std::string &cmd,
                   close(dispatcherpipe[0]); // close read end of the pipe
                 }
                 int child_result;
-                child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits);
+                child_result = exec_this_command(cmd,logfile,whole_config, program_name,test_case_limits,assignment_limits,timestamped_stdout);
 
                 // send the system status code back to the parent process
                 //std::cout << "    child_result = " << child_result << std::endl;
