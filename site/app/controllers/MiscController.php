@@ -103,7 +103,7 @@ class MiscController extends AbstractController {
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
-        $mime_type = FileUtils::getMimeType($corrected_name);
+        $mime_type = mime_content_type($corrected_name);
         $file_type = FileUtils::getContentType($file_name);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -144,7 +144,7 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useFooter(false);
 
         if (!$this->core->isTesting()) {
-            $mime_type = FileUtils::getMimeType($path);
+            $mime_type = mime_content_type($path);
             if ($mime_type === 'text/plain') {
                 if (substr($path, '-3') === '.js') {
                     $mime_type = 'application/javascript';

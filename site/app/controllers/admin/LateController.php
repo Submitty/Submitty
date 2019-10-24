@@ -25,7 +25,8 @@ class LateController extends AbstractController {
             new WebResponse(
                 ['admin', 'LateDay'],
                 'displayLateDays',
-                $this->core->getQueries()->getUsersWithLateDays()
+                $this->core->getQueries()->getUsersWithLateDays(),
+                $this->core->getQueries()->getAllUsers()
             )
         );
     }

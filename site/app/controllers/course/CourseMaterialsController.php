@@ -161,7 +161,7 @@ class CourseMaterialsController extends AbstractController {
         if(is_string($data)){
             $data = [$data];
         }
-    
+
         foreach ($data as $filename){
             if (!isset($filename) ||
                 !isset($checked)) {
@@ -187,7 +187,7 @@ class CourseMaterialsController extends AbstractController {
                 return "Failed to write to file {$fp}";
             }
         }
-        
+
 
     }
 
@@ -212,7 +212,7 @@ class CourseMaterialsController extends AbstractController {
         if(is_string($data)){
             $data = [$data];
         }
-    
+
         foreach ($data as $filename){
             if (!isset($filename)) {
                 $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
@@ -232,7 +232,7 @@ class CourseMaterialsController extends AbstractController {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to update.", false);
             }
         }
-    
+
         return $this->core->getOutput()->renderResultMessage("Time successfully set.", true);
     }
 
@@ -288,11 +288,11 @@ class CourseMaterialsController extends AbstractController {
             return $this->core->getOutput()->renderResultMessage("ERROR: No files were submitted.", false);
         }
 
-        $status = FileUtils::validateUploadedFiles($_FILES["files1"]);  
+        $status = FileUtils::validateUploadedFiles($_FILES["files1"]);
         if(array_key_exists("failed", $status)){
             return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
-        
+
         $file_size = 0;
         foreach ($status as $stat) {
             $file_size += $stat['size'];
@@ -315,21 +315,21 @@ class CourseMaterialsController extends AbstractController {
         // create nested path
         if (!empty($requested_path)) {
             $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
-            if (!FileUtils::createDir($upload_nested_path, null, true)) {
+            if (!FileUtils::createDir($upload_nested_path, true)) {
                 return $this->core->getOutput()->renderResultMessage("ERROR: Failed to make image path.", false);
             }
             $upload_path = $upload_nested_path;
         }
 
-        $count_item = count($status);   
+        $count_item = count($status);
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
                 if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-                    
+
                     $is_zip_file = false;
 
-                    if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                    if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                         if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                             return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
                         }
@@ -339,7 +339,7 @@ class CourseMaterialsController extends AbstractController {
                     //it is convenient for bulk uploads
                     if ($expand_zip == 'on' && $is_zip_file === true) {
                         //get the file names inside the zip to write to the JSON file
-                        
+
                         $zip = new \ZipArchive();
 -                       $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
 

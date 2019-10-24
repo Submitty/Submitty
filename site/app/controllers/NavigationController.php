@@ -65,23 +65,31 @@ class NavigationController extends AbstractController {
         // Get a single array of the visible gradeables
         $visible_gradeables = [];
         $submit_everyone = [];
+        $gradables_teams = [];
         foreach($sections_to_lists as $gradeables) {
             foreach($gradeables as $gradeable) {
                 $visible_gradeables[] = $gradeable;
                 $submit_everyone[$gradeable->getId()] =
                     $this->core->getAccess()->canI('gradeable.submit.everyone', ['gradeable' => $gradeable]);
+                $gradables_teams[$gradeable->getId()] = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
             }
         }
 
         // Get the user data for each gradeable
         $graded_gradeables = [];
+        $teams_viewed_times = [];
         if (count($visible_gradeables) !== 0) {
             foreach ($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
                 $graded_gradeables[$gg->getGradeableId()] = $gg;
+                $teams_viewed_times[$gg->getGradeableId()] = $this->core->getQueries()->getTeamViewedTime($gg->getSubmitter()->getId(), $this->core->getUser()->getId());
             }
         }
 
-        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone);
+        $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
+
+
+
+        $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone, $gradeable_ids_and_titles, $teams_viewed_times, $gradables_teams);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
         $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
     }
