@@ -63,7 +63,7 @@ class CourseTester extends BaseUnitTest {
     public function testLoadDisplayName() {
         $temp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config_path = FileUtils::joinPaths($temp_dir, 'courses', 's18', 'csci1000', 'config');
-        FileUtils::createDir($config_path, null, true);
+        FileUtils::createDir($config_path, true);
         $config = [
             'course_details' => [
                 'course_name' => 'Test Course',
@@ -98,7 +98,7 @@ class CourseTester extends BaseUnitTest {
     public function testMissingSection() {
         $temp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config_path = FileUtils::joinPaths($temp_dir, 'courses', 's18', 'csci1000', 'config');
-        FileUtils::createDir($config_path, null, true);
+        FileUtils::createDir($config_path, true);
         $config = [];
         FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
         $details = ['semester' => 's18', 'course' => 'csci1000'];
@@ -115,7 +115,7 @@ class CourseTester extends BaseUnitTest {
     public function testMissingSetting() {
         $temp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config_path = FileUtils::joinPaths($temp_dir, 'courses', 's18', 'csci1000', 'config');
-        FileUtils::createDir($config_path, null, true);
+        FileUtils::createDir($config_path, true);
         $config = ['course_details' => []];
         FileUtils::writeJsonFile(FileUtils::joinPaths($config_path, 'config.json'), $config);
         $details = ['semester' => 's18', 'course' => 'csci1000'];

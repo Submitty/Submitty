@@ -104,9 +104,9 @@ window.onbeforeunload = function() {
         let zoom_flag = true;
         let zoom_level = window.RENDER_OPTIONS.scale;
         if(option == 'in'){
-            zoom_level += 1;
+            zoom_level += 0.1;
         } else if(option == 'out'){
-            zoom_level -= 1;
+            zoom_level -= 0.1;
         } else {
             if(custom_val != null){
                 zoom_level = custom_val/100;

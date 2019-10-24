@@ -4,7 +4,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\models\user;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 
@@ -68,7 +68,7 @@ class ImagesController extends AbstractController {
         if(array_key_exists("failed", $status)){
             return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
-        
+
         foreach ($status as $stat) {
             if($stat['success'] === false){
                 return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
@@ -86,7 +86,7 @@ class ImagesController extends AbstractController {
         if (isset($uploaded_files[1])) {
             $uploaded_files[1]["is_zip"] = array();
             for ($j = 0; $j < $count_item; $j++) {
-                if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
+                if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                         return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
                     }
@@ -94,8 +94,11 @@ class ImagesController extends AbstractController {
                     $file_size += FileUtils::getZipSize($uploaded_files[1]["tmp_name"][$j]);
                 }
                 else {
-                    if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
+                    if (FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
                         return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+                    }
+                    elseif (!FileUtils::isValidImage($uploaded_files[1]["tmp_name"][$j])) {
+                        return $this->core->getOutput()->renderResultMessage("Error: ".$uploaded_files[1]['name'][$j]." is not a valid image file.", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = false;
                     $file_size += $uploaded_files[1]["size"][$j];
@@ -125,7 +128,7 @@ class ImagesController extends AbstractController {
                         $upload_img_path_tmp = FileUtils::joinPaths($upload_img_path, "tmp");
                         $zip->extractTo($upload_img_path_tmp);
 
-                        FileUtils::recursiveCopy($upload_img_path_tmp, $upload_img_path);
+                        FileUtils::recursiveFlattenImageCopy($upload_img_path_tmp, $upload_img_path);
 
                         //delete tmp folder
                         FileUtils::recursiveRmdir($upload_img_path_tmp);
@@ -141,7 +144,7 @@ class ImagesController extends AbstractController {
                     }
                 }
                 else {
-                    if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                    if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
                             return $this->core->getOutput()->renderResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);

@@ -78,7 +78,7 @@ class AutogradingConfigController extends AbstractController {
         $target_dir = $try_dir;
         FileUtils::createDir($target_dir);
 
-        if (FileUtils::getMimeType($upload["tmp_name"]) == "application/zip") {
+        if (mime_content_type($upload["tmp_name"]) == "application/zip") {
             $zip = new \ZipArchive();
             $res = $zip->open($upload['tmp_name']);
             if ($res === true) {

@@ -32,13 +32,13 @@ def install_worker(user, host):
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
             ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user, timeout=5)
+            ssh.connect(hostname = host, username = user, timeout=60)
         except Exception as e:
             print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
             return False
         try:
             command = "sudo {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "INSTALL_SUBMITTY.sh"))
-            (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
+            (stdin, stdout, stderr) = ssh.exec_command(command, timeout=60)
             status = int(stdout.channel.recv_exit_status())
             if status == 0:
                 success = True

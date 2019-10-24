@@ -6,12 +6,10 @@ use tests\BaseUnitTest;
 use app\controllers\course\CourseMaterialsController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\Core;
-use app\libraries\Access;
-use \DateTime;
 use \ZipArchive;
 
-class CourseMaterialsTester extends BaseUnitTest{
+class CourseMaterialsControllerTester extends BaseUnitTest {
+    use \phpmock\phpunit\PHPMock;
 
     private $core;
     private $config;
@@ -26,7 +24,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->core = $this->createMockCore($this->config);
         $_POST['release_time'] = $this->core->getDateTimeNow()->format("Y-m-d H:i:s");
 
-        FileUtils::createDir($this->core->getConfig()->getCoursePath() . "/uploads/course_materials" , null, true);
+        FileUtils::createDir($this->core->getConfig()->getCoursePath() . "/uploads/course_materials", true);
         $this->json_path = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $this->upload_path = $this->core->getConfig()->getCoursePath() . "/uploads/course_materials";
     }
@@ -39,7 +37,7 @@ class CourseMaterialsTester extends BaseUnitTest{
 
     private function buildFakeFile($filename, $part = 1) {
         $_FILES["files{$part}"]['name'][] = $filename;
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($this->upload_path . "/" . $filename);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($this->upload_path . "/" . $filename);
         $_FILES["files{$part}"]['size'][] = filesize($this->upload_path . "/" . $filename);
 
         $tmpname = $this->upload_path . "/" . Utils::generateRandomString() . $filename;
@@ -73,7 +71,7 @@ class CourseMaterialsTester extends BaseUnitTest{
         }
 
         $_FILES["files{$part}"]['name'][] = $name;
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($filename_full);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($filename_full);
         $_FILES["files{$part}"]['size'][] = filesize($this->config['course_path'] . "/" .   $name);
 
         $tmpname = $this->config['course_path'] . "/" . Utils::generateRandomString() . $name;
@@ -85,7 +83,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         return $files;
     }
 
-    public function testCourseMaterialsUpload(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCourseMaterialsUpload() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $name = "foo.txt";
@@ -119,7 +124,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->assertEquals($expected_files, $files);
     }
 
-    public function testZipCourseUpload(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testZipCourseUpload() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -152,7 +164,13 @@ class CourseMaterialsTester extends BaseUnitTest{
 
     }
 
-    public function testModifyCourseMaterials(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testModifyCourseMaterials() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -214,7 +232,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
 
-    public function testDeleteCourseMaterial(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDeleteCourseMaterial() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -240,7 +265,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->assertEquals(0, count($files));
     }
 
-    public function testModifyCourseMaterialsPermission(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testModifyCourseMaterialsPermission() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();

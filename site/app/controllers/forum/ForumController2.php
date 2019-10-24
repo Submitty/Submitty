@@ -19,7 +19,7 @@ use app\libraries\DateUtils;
  */
 class ForumController2 extends AbstractController {
 
-	/**
+    /**
      * ForumHomeController constructor.
      *
      * @param Core $core
@@ -111,7 +111,7 @@ class ForumController2 extends AbstractController {
     private function returnUserContentToPage($error, $isThread, $thread_id){
             //Notify User
             $this->core->addErrorMessage($error);
-            if($isThread){
+            if ($isThread) {
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
             } else {
                 $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
@@ -119,21 +119,21 @@ class ForumController2 extends AbstractController {
             return array(-1, $url);
     }
 
-	private function changeThreadStatus($status) {
-		$thread_id = $_POST['thread_id'];
-		$result = array();
-		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
-			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
-				$result['success'] = 'Thread resolve state has been changed.';
-			} else {
-				$result['error'] = 'The thread resolve state could not be updated. Please try again.';
-			}
-		} else {
+    private function changeThreadStatus($status) {
+        $thread_id = $_POST['thread_id'];
+        $result = array();
+        if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
+            if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                $result['success'] = 'Thread resolve state has been changed.';
+            } else {
+                $result['error'] = 'The thread resolve state could not be updated. Please try again.';
+            }
+        } else {
             $result["error"] = "You do not have permissions to do that.";
-		}
+        }
         $this->core->getOutput()->renderJson($result);
-		return $this->core->getOutput()->getOutput();
-	}
+        return $this->core->getOutput()->getOutput();
+    }
 
     private function isCategoryDeletionGood($category_id){
         // Check if not the last category which exists
@@ -716,13 +716,13 @@ class ForumController2 extends AbstractController {
     //Modified functions below...
 
     public function publishThread(){
-        
+
         //Get post data
         $title = trim($_POST['title']);
         $thread_post_content = $_POST['thread_post_content'];
         $anon = !empty($_POST['Anon']) ? true : false;
         $thread_status = $_POST['thread_status'];
-        
+
 
         //Default to false
         $announcement = !empty($_POST['Announcement']) && $this->core->getUser()->accessGrading() && $_POST['Announcement'] == 'true' ? true : false;
@@ -733,11 +733,11 @@ class ForumController2 extends AbstractController {
             $categories_ids[] = (int)$category_id;
         }
 
-        $result = $this->core->getForum()->publish( [   'title'              => $title, 
+        $result = $this->core->getForum()->publish( [   'title'              => $title,
                                                         'content'            => $thread_post_content,
-                                                        'anon'               => $anon,  
+                                                        'anon'               => $anon,
                                                         'status'             => $thread_status,
-                                                        'announcement'       => $announcement, 
+                                                        'announcement'       => $announcement,
                                                         'email_announcement' => $email_announcement,
                                                         'categories'         => $categories_ids,
                                                         'parent_id'          => -1,
@@ -760,7 +760,7 @@ class ForumController2 extends AbstractController {
 
 
         return $this->core->getForum()->publish( [ 'content'   => $post_content,
-                                                   'anon'      => $anon,  
+                                                   'anon'      => $anon,
                                                    'thread_id' => $thread_id,
                                                    'parent_id' => $parent_id ], false );
     }
@@ -769,7 +769,7 @@ class ForumController2 extends AbstractController {
     //Ajax endpoint
     public function pinThread($type){
         $thread_id = $_POST["thread_id"];
-        
+
         $result = $this->core->getForum()->pinThread($thread_id, $type);
 
         if($result) {

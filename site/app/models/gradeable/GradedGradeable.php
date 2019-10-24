@@ -147,7 +147,7 @@ class GradedGradeable extends AbstractModel {
                     $carry = $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE || $carry;
                 }
                 else {
-                    $carry = $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && is_null($grade_inquiry->getGcId()) || $carry;;
+                    $carry = $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && is_null($grade_inquiry->getGcId()) || $carry;
                 }
 
                 return $carry;
@@ -156,7 +156,7 @@ class GradedGradeable extends AbstractModel {
 
     /**
      * Gets the grade inquiry assigned to the gradeable's component supplied
-     * @param $gc_id Gradeable Component id
+     * @param $gc_id int Gradeable Component id
      */
     public function getGradeInquiryByGcId($gc_id) {
         foreach ($this->regrade_requests as $grade_inquiry) {

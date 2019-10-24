@@ -12,6 +12,7 @@ use app\libraries\Core;
  * @method float getAverageScore()
  * @method float getStandardDeviation()
  * @method int getCount()
+ * @method int getActiveGradeInquiryCount()
  * @method bool getIsPeer()
 
  */
@@ -30,6 +31,8 @@ class SimpleStat extends AbstractModel {
     protected $standard_deviation = 0;
     /** @property @var int number of people graded(completely graded)*/
     protected $count = 0;
+    /** @property @var number of active grade inquiries for given grading component*/
+    protected $active_grade_inquiry_count = 0;
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = null;
 
@@ -44,6 +47,7 @@ class SimpleStat extends AbstractModel {
             $this->order = $details['gc_order'];
             $this->is_peer = $details['gc_is_peer'];
             $this->count = $details['count'];
+            $this->active_grade_inquiry_count = $details['active_grade_inquiry_count'];
         }
         else {
             $this->component = false;
