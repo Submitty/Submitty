@@ -14,34 +14,8 @@ class TeamView extends AbstractView {
     * @param \app\models\Team[] $teams
     * @return string
     */
-    public function showTeamPage(Gradeable $gradeable, $team, $teams, $lock, $users_seeking_team) {
+    public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock) {
         $gradeable_id = $gradeable->getId();
-        $user_id = $this->core->getUser()->getId();
-        $members = [];
-        $seekers = [];
-        $invites_received = [];
-        $seeking_partner = false;
-
-        if ($team !== null) {
-            //List team members
-            foreach ($team->getMembers() as $teammate) {
-                $members[] = $this->core->getQueries()->getUserById($teammate);
-            }
-        } else {
-            //Invites
-            foreach($teams as $t) {
-                if ($t->sentInvite($user_id)) {
-                    $invites_received[] = $t;
-                }
-            }
-
-            //Are you seeking a team?
-            $seeking_partner = in_array($user_id, $users_seeking_team);
-        }
-
-        foreach ($users_seeking_team as $user_seeking_team) {
-            $seekers[] = $this->core->getQueries()->getUserById($user_seeking_team);
-        }
 
         return $this->core->getOutput()->renderTwigTemplate("submission/Team.twig", [
             "gradeable" => $gradeable,

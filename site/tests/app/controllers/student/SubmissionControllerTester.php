@@ -57,7 +57,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->config['course']
         );
 
-        $this->assertTrue(FileUtils::createDir($this->config['course_path'], null, true));
+        $this->assertTrue(FileUtils::createDir($this->config['course_path'], true));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions")));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue")));
 
@@ -251,13 +251,13 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param int    $part
      */
     private function addUploadFile($filename, $content="", $part=1) {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), 0777, true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), true, 0777);
         $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part, $filename);
         if (file_put_contents($filepath, $content) === false) {
             throw new IOException("Could not write file to {$filepath}");
         }
         $_FILES["files{$part}"]['name'][] = $filename;
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($filepath);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($filepath);
         $_FILES["files{$part}"]['size'][] = filesize($filepath);
         $_FILES["files{$part}"]['tmp_name'][] = $filepath;
         $_FILES["files{$part}"]['error'][] = null;
@@ -275,14 +275,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     private function addUploadZip($zip_name, $files, $part=1) {
         $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
-        FileUtils::createDir($root_path, 0777, true);
+        FileUtils::createDir($root_path, true, 0777);
         $zip_path =  FileUtils::joinPaths($part_path, $zip_name.'.zip');
         $zip = new ZipArchive();
         $zip->open($zip_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
         $this->createZip($files, $zip, $root_path);
         $zip->close();
         $_FILES["files{$part}"]['name'][] = $zip_name.'.zip';
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($zip_path);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($zip_path);
         $_FILES["files{$part}"]['size'][] = filesize($zip_path);
         $_FILES["files{$part}"]['tmp_name'][] = $zip_path;
         $_FILES["files{$part}"]['error'][] = null;
@@ -964,7 +964,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testFailureToCreateStudentFolder() {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -977,7 +977,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testFailureToCreateVersionFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"));
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -992,8 +992,8 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @numParts 2
      */
     public function testFailureToCreatePartFolder() {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1186,8 +1186,8 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorOnCopyingFile() {
         $this->addUploadFile('test1.txt');
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1203,7 +1203,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         FileUtils::createDir($dst_dir);
         file_put_contents($dst_file, "a");
         $_FILES["files1"]['name'][] = "test1.txt";
-        $_FILES["files1"]['type'][] = FileUtils::getMimeType($dst_file);
+        $_FILES["files1"]['type'][] = mime_content_type($dst_file);
         $_FILES["files1"]['size'][] = filesize($dst_file);
         $_FILES["files1"]['tmp_name'][] = $dst_file;
         $_FILES["files1"]['error'][] = null;
@@ -1244,8 +1244,8 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorCreateVcsFile() {
         $_POST['git_repo_id'] = "some_repo_id";
         $_POST['vcs_checkout'] = "true";
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1259,7 +1259,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
-        $this->assertTrue(FileUtils::createDir($dir, 0444));
+        $this->assertTrue(FileUtils::createDir($dir, false, 0444));
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1271,7 +1271,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testErrorBrokenHistoryFile() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         file_put_contents(FileUtils::joinPaths($tmp, "user_assignment_settings.json"), "]invalid_json[");
         $this->addUploadFile('test1.txt');
 
@@ -1297,7 +1297,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
-        $this->assertTrue(FileUtils::createDir($dir, 0444));
+        $this->assertTrue(FileUtils::createDir($dir, false, 0444));
 
         $this->addUploadFile('test1.txt');
 
@@ -1329,7 +1329,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorWriteSettingsFile() {
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($dir, null, true);
+        FileUtils::createDir($dir, true);
         $settings = FileUtils::joinPaths($dir, "user_assignment_settings.json");
         file_put_contents($settings, '{"active_version": 0, "history": []}');
         chmod($settings, 0444);
@@ -1346,7 +1346,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorWriteTimestampFile() {
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
-        FileUtils::createDir($dir, null, true);
+        FileUtils::createDir($dir, true);
         $timestamp = FileUtils::joinPaths($dir, ".submit.timestamp");
         file_put_contents($timestamp, "Failed to save timestamp file for this submission.");
         chmod($timestamp, 0444);
@@ -1449,7 +1449,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testUpdateCannotWriteSettingsFile() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         $json = json_encode(array('active_version' => 1, 'history' => array('version' => 0, 'time' => '')));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
@@ -1464,7 +1464,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testUpdateCancelSubmission() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
@@ -1488,7 +1488,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testUpdateSubmission() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
@@ -1523,7 +1523,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testCheckRefreshFailed2() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
 
         $controller = new SubmissionController($this->core);
@@ -1539,7 +1539,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testCheckRefreshSuccess() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
         $this->core->getQueries()->method('getGradeableVersionHasAutogradingResults')->willReturn(true);
 
