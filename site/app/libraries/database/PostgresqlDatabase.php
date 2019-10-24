@@ -75,44 +75,44 @@ class PostgresqlDatabase extends AbstractDatabase {
             $quot = "";
             for ($i = $start; $i < strlen($text); $i++) {
                 $ch = $text[$i];
-                if (!$in_array && !$in_string && $ch == "{") {
+                if (!$in_array && !$in_string && $ch === "{") {
                     $in_array = true;
                 }
-                else if (!$in_string && $ch == "{") {
+                else if (!$in_string && $ch === "{") {
                     $return[] = $this->fromDatabaseToPHPArray($text, $parse_bools, $i, $i);
                 }
-                else if (!$in_string && $ch == "}") {
+                else if (!$in_string && $ch === "}") {
                     $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
                     $end = $i;
                     return $return;
                 }
-                else if (($ch == '"' || $ch == "'") && !$in_string) {
+                else if (($ch === '"' || $ch === "'") && !$in_string) {
                     $in_string = true;
                     $quot = $ch;
                 }
                 else if ($in_string && $ch == "\\" && strlen($text) > $i) {
                     if ($text[$i+1] === "\\") {
                         $element .= "\\";
-                        $i ++;
+                        $i++;
                     } else if ($text[$i+1] === "\"") {
                         $element .= "\"";
-                        $i ++;
+                        $i++;
                     } else {
                         $element .= $text[$i];
                     }
                 }
-                else if (!$in_string && $ch == "\\") {
+                else if (!$in_string && $ch === "\\") {
                     //Insert literal \
                     $element .= $text[$i];
                 }
-                else if ($in_string && $ch == $quot) {
+                else if ($in_string && $ch === $quot) {
                     $in_string = false;
                     $have_string = true;
                 }
-                else if (!$in_string && $ch == " ") {
+                else if (!$in_string && $ch === " ") {
                     continue;
                 }
-                else if (!$in_string && $ch == ",") {
+                else if (!$in_string && $ch === ",") {
                     $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
                     $have_string = false;
                     $element = "";

@@ -181,6 +181,16 @@ class MiscController extends AbstractController {
             }
         }
 
+        if($dir == 'submissions'){
+            //cannot download scanned images for bulk uploads
+            if (strpos(basename($path), "upload_page_" ) !== false &&
+                FileUtils::getContentType($path) !== "application/pdf"){
+
+                $this->core->getOutput()->showError("You do not have access to this file");
+                return false;
+            }
+        }
+
         $filename = pathinfo($path, PATHINFO_BASENAME);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
@@ -279,8 +289,14 @@ class MiscController extends AbstractController {
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($paths[$x]) + 1);
 
-                        // Add current file to archive
-                        $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        //Only get PDFs if this is a bulk upload gradeable
+                        if ($gradeable->isScannedExam() 
+                            && FileUtils::getContentType($filePath) === "application/pdf"){
+                            // Add current file to archive
+                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        }
+
+                       
                     }
                 }
             }

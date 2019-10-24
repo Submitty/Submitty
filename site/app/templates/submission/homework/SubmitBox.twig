@@ -15,6 +15,10 @@
         {% if has_due_date %}
             <h2>Due: {{ formatted_due_date }}</h2>
         {% endif %}
+        <div class="loading-bar-wrapper">
+            <label for="loading-bar">Upload progress: <span id="loading-bar-percentage"></span></label>
+            <progress id="loading-bar" value="0" ></progress>
+        </div>
     </header>
 
     {% if show_no_late_submission_warning %}

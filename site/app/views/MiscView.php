@@ -31,5 +31,5 @@ class MiscView extends AbstractView {
             "code_css" => $code_css,
             "code_js" => $code_js
         ]);
-	}
+    }
 }

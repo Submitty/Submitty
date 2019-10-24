@@ -91,17 +91,12 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                                 $('#file_content').animate({scrollTop: initialPage[0].offsetTop}, 500);
                             }
                         }
-                        document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
-                            //Makes sure the panel don't move when writing on it.
-                            $("#submission_browser").draggable('disable');
+                        document.getElementById('pageContainer'+page_id).addEventListener('pointerdown', function(){
                             let selected = $(".tool-selected");
                             if(selected.length != 0 && $(selected[0]).attr('value') != 'cursor'){
                                 $("#save_status").text("Changes not saved");
                                 $("#save_status").css("color", "red");
                             }
-                        });
-                        document.getElementById('pageContainer'+page_id).addEventListener('mouseup', function(){
-                            $("#submission_browser").draggable('enable');
                         });
                     });
                 }

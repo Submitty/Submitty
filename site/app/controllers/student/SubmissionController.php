@@ -15,8 +15,6 @@ use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
 use Symfony\Component\Routing\Annotation\Route;
 
-
-
 class SubmissionController extends AbstractController {
 
     private $upload_details = array('version' => -1, 'version_path' => null, 'user_path' => null,
@@ -199,7 +197,7 @@ class SubmissionController extends AbstractController {
             foreach ($user_ids as $user) {
                 $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
                 if($tmp === NULL){
-                    $null_team_count ++;
+                    $null_team_count++;
                 }else{
                     $teams[] = $tmp->getId();
                 }
@@ -285,9 +283,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {

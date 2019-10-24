@@ -408,8 +408,17 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
+
+        // for bulk uploads only show PDFs
+        if ($gradeable->isScannedExam() ){
+            $files = $uploaded_pdfs;
+        }else{
+            $files = array_merge($files['submissions'], $files['checkout']);
+        }
+
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'files'=> array_merge($files['submissions'], $files['checkout']),
+            'files'=> $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
