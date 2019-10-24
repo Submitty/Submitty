@@ -4157,6 +4157,18 @@ AND gc_id IN (
     }
 
     public function openQueue(){
+        $this->course_db->query("UPDATE queue_settings SET open = TRUE");
+    }
+
+    public function closeQueue(){
+        $this->course_db->query("UPDATE queue_settings SET open = FALSE");
+    }
+
+    public function emptyQueue(){
+        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
+    }
+
+    public function genNewQueueCode(){
         $characters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
@@ -4164,13 +4176,7 @@ AND gc_id IN (
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
 
-        $this->course_db->query("UPDATE queue_settings SET open = TRUE, code = ?", array($randomString));
-    }
-
-    public function closeQueue(){
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
-        $this->course_db->query("UPDATE queue_settings SET open = FALSE");
-        //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
+        $this->course_db->query("UPDATE queue_settings SET code = ?", array($randomString));
     }
 
     public function getUserIdFromQueueSlot($entry_id){

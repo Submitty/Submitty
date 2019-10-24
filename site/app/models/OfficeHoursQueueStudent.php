@@ -16,6 +16,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $time_in = "time not set";
     private $time_helped = "time not set";
     private $time_out = "time not set";
+    private $time_helped_with_seconds = "time not set";
     private $removed_by = NULL;
     private $entry_id = 0;
 
@@ -36,6 +37,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
         $this->time_in = date("h:i a", strtotime($time_in));
         $this->time_helped = date("h:i a", strtotime($time_helped));
         $this->time_out = date("h:i a", strtotime($time_out));
+        $this->time_helped_with_seconds = date("c", strtotime($time_helped));
         $this->removed_by = $removed_by;
     }
 
@@ -69,6 +71,10 @@ class OfficeHoursQueueStudent extends AbstractModel {
 
     public function getTimeHelped(){
         return $this->time_helped;
+    }
+
+    public function getTimeHelpedWithSeconds(){
+        return $this->time_helped_with_seconds;
     }
 
     public function getTimeOut(){
