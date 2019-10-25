@@ -31,6 +31,7 @@ class Container():
     self.is_server = container_info['server']
     self.outgoing_connections = container_info['outgoing_connections']
     self.container_rlimits = container_info['container_rlimits']
+    self.container_grading_time = 0
     # If we are in production, we need to run as an untrusted user inside of our docker container.
     self.container_user_argument = str(getpwnam(untrusted_user).pw_uid)
     self.full_name = f'{untrusted_user}_{self.name}'
@@ -56,7 +57,9 @@ class Container():
 
   def create(self, execution_script, arguments, more_than_one):
     """ Create (but don't start) this container. """
-    self.container_lifetime = timer()
+    container_create_time = timer()
+    self.log_meta(self.full_name, '', 'CREATE BEGIN', 0)
+
     client = docker.from_env()
 
     mount = {
@@ -86,14 +89,18 @@ class Container():
       raise
 
     dockerlaunch_done = dateutils.get_current_time()
-    self.log_meta(self.full_name, self.container.short_id, 'CREATE', timer() - self.container_lifetime)
+    self.log_meta(self.full_name, self.container.short_id, 'CREATE END', timer() - container_create_time)
     client.close()
 
   def start(self, logfile):
-    self.container_lifetime = timer()
+    container_start_time = timer()
+    self.log_meta(self.full_name, self.container.short_id, 'START BEGIN', 0)
+
     self.container.start()
     self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
-    self.log_meta(self.full_name, self.container.short_id, 'START', timer() - self.container_lifetime)
+
+    self.container_grading_time = timer()
+    self.log_meta(self.full_name, self.container.short_id, 'START END', timer() - container_start_time)
 
   def set_ip_address(self, network_name, ip_address):
     self.ip_address_map[network_name] = ip_address
@@ -116,7 +123,7 @@ class Container():
     self.container.client.api.close()
     self.container.client.close()
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
-    self.log_meta(self.full_name, self.container.short_id, 'DESTROY', timer() - self.container_lifetime)
+    self.log_meta(self.full_name, self.container.short_id, 'DESTROY', timer() - self.container_grading_time)
 
 
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):

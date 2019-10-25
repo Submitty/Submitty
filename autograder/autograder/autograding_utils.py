@@ -120,7 +120,23 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
             print("Could not gain a lock on the log file.")
 
 
+def log_container_meta(log_path, name="", container="", event="", time=0):
+    """ Given a log file, create or append container meta data to a log file. """
 
+    now = dateutils.get_current_time()
+    datefile = datetime.strftime(now, "%Y%m%d")+".txt"
+    easy_to_read_date = dateutils.write_submitty_date(now, True)
+    time_unit = "sec"
+    with open(log_path, 'a') as myfile:
+        try:
+            fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print("%s | %s | %s | %s | %.3lf | %3s"
+                  % (easy_to_read_date, name, container,
+                     event, time, time_unit),
+                  file=myfile)
+            fcntl.flock(myfile, fcntl.LOCK_UN)
+        except:
+            print("Could not gain a lock on the log file.")
 # ==================================================================================
 #
 #  VALIDATION FUNCTIONS
