@@ -370,9 +370,6 @@ class HomeworkView extends AbstractView {
 
         $DATE_FORMAT = "m/d/Y @ h:i A";
 
-        $max_file_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_post_size = Utils::returnBytes(ini_get('post_max_size'));  
-
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/SubmitBox.twig', [
             'base_url' => $this->core->getConfig()->getBaseUrl(),
             'gradeable_id' => $gradeable->getId(),
@@ -411,8 +408,8 @@ class HomeworkView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
             'days_to_be_charged' => $days_to_be_charged,
-            'max_file_size' => $max_file_size,
-            'max_post_size' => $max_post_size
+            'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'max_post_size' => Utils::returnBytes(ini_get('post_max_size'))
         ]);
     }
 

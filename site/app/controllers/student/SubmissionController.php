@@ -244,9 +244,7 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
         }
 
-        if(isset($_POST['use_qr_codes'])){
-            $is_qr = $_POST['use_qr_codes'] === "true";
-        }
+        $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";

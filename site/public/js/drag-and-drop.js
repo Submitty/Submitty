@@ -672,16 +672,19 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             if (file_array[i][j].name.indexOf("'") != -1 ||
                 file_array[i][j].name.indexOf("\"") != -1) {
                 alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
             else if (file_array[i][j].name.indexOf("\\") != -1 ||
                 file_array[i][j].name.indexOf("/") != -1) {
                 alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
             else if (file_array[i][j].name.indexOf("<") != -1 ||
                 file_array[i][j].name.indexOf(">") != -1) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
 
@@ -690,12 +693,14 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             if (total_size >= max_file_size){
                 alert("ERROR! Uploaded file(s) exceed max file size.\n" + 
                       "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
+                $("#submit").prop("disabled", false);
                 return;
             }
 
              if (total_size >= max_post_size){
                 alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" + 
                       "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
+                $("#submit").prop("disabled", false);
                 return;
             }
 
@@ -731,7 +736,7 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(e);
+                console.log(data);
             }
         },
         error: function() {
