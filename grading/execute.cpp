@@ -843,6 +843,42 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   parse_command_line(cmd, my_program, my_args, my_stdin, my_stdout, my_stderr, logfile, whole_config);
 
 
+
+  // SECCOMP:  Used to restrict allowable system calls.
+  // First we determine if the program we will run is a 64 or 32 bit
+  // executable (the system calls are different on 64 vs. 32 bit)
+  Elf64_Ehdr elf_hdr;
+  // std::cout << "reading " <<  my_program << std::endl;
+  int fd = open(my_program.c_str(), O_RDONLY);
+  if (fd == -1) {
+    //perror("can't open");
+    // std::cout << "ERROR: cannot open program '" << my_program << '"' << std::endl;
+    exit(1);
+  }
+  int res = read(fd, &elf_hdr, sizeof(elf_hdr));
+  if (res < sizeof(elf_hdr)) {
+    // perror("can't read ");
+    // std::cout << "ERROR: cannot read program" << std::endl;
+    exit(1);
+  }
+  int prog_is_32bit;
+  if (elf_hdr.e_machine == EM_386) {
+    // std::cout << "this is a 32 bit program" << std::endl;
+    prog_is_32bit = 1;
+  }
+  else {
+    // std::cout << "this is a 64 bit program" << std::endl;
+    prog_is_32bit = 0;
+  }
+  // END SECCOMP
+
+  //if (SECCOMP_ENABLED != 0) {
+  // std::cout << "seccomp filter enabled" << std::endl;
+  //} else {
+  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
+  // }
+
+
   char** temp_args = new char* [my_args.size()+2];   //memory leak here
   temp_args[0] = (char*) my_program.c_str();
   for (int i = 0; i < my_args.size(); i++) {
@@ -900,7 +936,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
       // If we are the child
       if(pid == 0){
         close(my_pipe[WRITE_END]);
-        std::cout << my_stdout << std::endl;
         timestamp_stdout( my_stdout, my_pipe[READ_END]);      
       }
     }
@@ -929,45 +964,9 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   int pgrp = setpgid(getpid(), 0);
   assert(pgrp == 0);
 
-  /*************************************************
-  * 
-  * APPLY SECCOMP
-  *
-  **************************************************/
+  
 
-  // SECCOMP:  Used to restrict allowable system calls.
-  // First we determine if the program we will run is a 64 or 32 bit
-  // executable (the system calls are different on 64 vs. 32 bit)
-  Elf64_Ehdr elf_hdr;
-  logfile << "reading " <<  my_program << std::endl;
-  int fd = open(my_program.c_str(), O_RDONLY);
-  if (fd == -1) {
-    //perror("can't open");
-    logfile << "ERROR: cannot open program '" << my_program << '"' << std::endl;
-    exit(1);
-  }
-  int res = read(fd, &elf_hdr, sizeof(elf_hdr));
-  if (res < sizeof(elf_hdr)) {
-    // perror("can't read ");
-    logfile << "ERROR: cannot read program" << std::endl;
-    exit(1);
-  }
-  int prog_is_32bit;
-  if (elf_hdr.e_machine == EM_386) {
-    logfile << "this is a 32 bit program" << std::endl;
-    prog_is_32bit = 1;
-  }
-  else {
-    logfile << "this is a 64 bit program" << std::endl;
-    prog_is_32bit = 0;
-  }
-  // END SECCOMP
-
-  //if (SECCOMP_ENABLED != 0) {
-  logfile << "seccomp filter enabled" << std::endl;
-  //} else {
-  //std::cout << "********** SECCOMP FILTER DISABLED *********** " << std::endl;
-  // }
+  
 
 
   /*************************************************
@@ -981,13 +980,13 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   // since we get a "collect2 ld not found" error from g++ otherwise
   char* my_path = getenv("PATH");
   if (my_path != NULL) {
-    logfile << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
+    // std::cout << "WARNING: PATH NOT EMPTY, PATH= " << (my_path ? my_path : "<empty>") << std::endl;
   }
   setenv("PATH", "/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin:/bin", 1);
 
   my_path = getenv("PATH");
 
-  logfile << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
+  // std::cout << "PATH post= " << (my_path ? my_path : "<empty>") << std::endl;
 
   // set the locale so that special characters (e.g., the copyright
   // symbol) are not interpreted as ascii
@@ -1016,13 +1015,18 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
   
   // print this out here (before losing our output)
   //  if (SECCOMP_ENABLED != 0) {
-  logfile << "going to install syscall filter for " << my_program << std::endl;
+  // std::cout << "going to install syscall filter for " << my_program << std::endl;
   //}
-  
+
+  /*************************************************
+  * 
+  * APPLY SECCOMP
+  *
+  **************************************************/
 
   // SECCOMP: install the filter (system calls restrictions)
   if (install_syscall_filter(prog_is_32bit, my_program,logfile, whole_config)) {
-    std::cout << "seccomp filter install failed" << std::endl;
+    logfile << "seccomp filter install failed" << std::endl;
     return 1;
   }
   // END SECCOMP
@@ -1040,7 +1044,6 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(my_pipe[WRITE_END], stdoutfd);
   }
 
-  logfile << std::endl;
 
 
   // TO AVOID CREATING EXTRA LAYERS OF PROCESSES, USE EXEC RATHER THAN SYSTEM OR THE SHELL
@@ -1051,7 +1054,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
   umask(prior_umask);  // reset to the prior umask
   //Stop the timestamp process if it exists.
-  if(pid != -1){
+  if(pid != -1 && timestamped_stdout){
     close(my_pipe[WRITE_END]);
     close(stdoutfd);
   }
@@ -1164,7 +1167,6 @@ std::string getTimestamp() {
 
 //Thread function for timestamping stdout
 void timestamp_stdout(std::string filename, int pipe){
-  std::cout << "This should be readable." << std::endl;
 
   std::ofstream stdout_file;
   std::ofstream timestamped_stdout;

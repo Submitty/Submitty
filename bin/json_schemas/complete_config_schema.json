@@ -2,8 +2,11 @@
   "description" : "The config.json schema for Submitty",
   "additionalProperties" : false,
   "type": "object",
-  "required" : ["autograding", "autograding_method", "container_options", "testcases"],
+  "required" : ["autograding", "autograding_method", "container_options", "testcases", "timestamped_stdout"],
   "properties" : {
+      "timestamped_stdout" : {
+        "type" : "boolean"
+      },
       "early_submission_incentive" : {
         "properties" : {
           "message" : {
@@ -378,8 +381,11 @@
   "definitions" : {
     "submission_limit" : {
       "description" : "A check on the maximum number of submissions a student can make. This is a stripped down testcase.",
-      "required" : ["max_submissions", "penalty", "points", "title", "type"],
+      "required" : ["max_submissions", "penalty", "points", "title", "type", "timestamped_stdout"],
       "properties" : {
+        "timestamped_stdout" : {
+          "type" : "boolean"
+        },
         "max_submissions" : {
           "description" : "The maximum number of submissions a student can make without penalty.",
           "type" : "integer",
@@ -404,8 +410,11 @@
     "filecheck": {
       "description" : "A file existence check",
       "additionalProperties" : false,
-      "required" : ["type", "title", "actual_file", "points"],
+      "required" : ["type", "title", "actual_file", "points", "timestamped_stdout"],
       "properties" : {
+        "timestamped_stdout" : {
+          "type" : "boolean"
+        },
         "actual_file" : {
           "description" : "The file whose existence is being checked.",
           "type" : "string"
@@ -430,8 +439,11 @@
       "additionalProperties" : false,
       "required" : ["containers", "solution_containers", "dispatcher_actions", "points",
                     "pre_commands", "single_port_per_container", 
-                    "use_router", "title", "validation"],
+                    "use_router", "title", "validation", "timestamped_stdout"],
       "properties" : {
+        "timestamped_stdout" : {
+          "type" : "boolean"
+        },
         "hidden" : {
           "type" : "boolean"
         },
