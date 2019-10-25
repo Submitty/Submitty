@@ -57,6 +57,7 @@ use app\libraries\Utils;
  * @method array getCourseJson()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
+ * @method bool isQueueEnabled()
  */
 
 class Config extends AbstractModel {
@@ -208,6 +209,8 @@ class Config extends AbstractModel {
     protected $auto_rainbow_grades;
     /** @property @var string */
     protected $secret_session;
+    /** @property @var bool */
+    protected $queue_enabled;
 
     /**
      * Config constructor.
@@ -377,7 +380,7 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message',
-            'auto_rainbow_grades'
+            'auto_rainbow_grades', 'queue_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -399,7 +402,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled");
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
