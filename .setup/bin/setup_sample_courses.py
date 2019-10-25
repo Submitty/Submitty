@@ -34,6 +34,7 @@ import sys
 import configparser
 import csv
 import pdb
+from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
@@ -225,17 +226,35 @@ def get_random_text_from_file(filename):
             line = aline
     return line.strip()
 
+
 def generate_random_user_id(length=15):
-    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(length))
+
 
 def generate_random_ta_comment():
     return get_random_text_from_file('TAComment.txt')
 
+
 def generate_random_ta_note():
     return get_random_text_from_file('TANote.txt')
 
+
 def generate_random_student_note():
     return get_random_text_from_file('StudentNote.txt')
+
+
+def generate_random_marks(default_value, max_value):
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.yml')) as f:
+        marks_yml = yaml.safe_load(f)
+    if default_value == max_value and default_value > 0:
+        key = 'count_down'
+    else:
+        key = 'count_up'
+    marks = []
+    mark_list = random.choice(marks_yml[key])
+    for i in range(len(mark_list)):
+        marks.append(Mark(mark_list[i], i))
+    return marks
 
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
@@ -289,7 +308,7 @@ def generate_random_users(total, real_users):
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
-            #create a binary string for the numeric ID 
+            #create a binary string for the numeric ID
             numeric_id = '{0:09b}'.format(i)
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
@@ -991,6 +1010,16 @@ class Course(object):
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
 
+        if self.code == 'sample':
+            student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
+            zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
+            with TemporaryDirectory() as tmpdir:
+                with ZipFile(zip_path) as open_file:
+                    open_file.extractall(tmpdir)
+                inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
+                for f in os.listdir(inner_folder):
+                    shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
+
     def check_rotating(self, users):
         for gradeable in self.gradeables:
             for grading_rotating in gradeable.grading_rotating:
@@ -1620,10 +1649,6 @@ class Component(object):
         self.page = 0
         self.order = order
         self.marks = []
-        if 'marks' in component:
-            for i in range(len(component['marks'])):
-                mark = component['marks'][i]
-                self.marks.append(Mark(mark, i))
 
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
@@ -1644,6 +1669,13 @@ class Component(object):
             self.default = float(component['gc_default'])
             self.max_value = float(component['gc_max_value'])
             self.upper_clamp = float(component['gc_upper_clamp'])
+
+        if 'marks' in component:
+            for i in range(len(component['marks'])):
+                mark = component['marks'][i]
+                self.marks.append(Mark(mark, i))
+        else:
+            self.marks = generate_random_marks(self.default, self.max_value)
 
         self.key = None
 

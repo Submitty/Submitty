@@ -30,7 +30,10 @@
             <label for="forum-enabled">
                 <div class="option-title">Enable Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a>
+                {% if categories_empty %}
+                    <h4 id="forum-category-warning" class="red-message" {{ fields['forum_enabled'] ? '': 'hidden' }} >Categories must be created in order to use the Discussion Forum. Click the link below to add categories.</h4>
+                    <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
+                {% endif %}
             </label>
         </div>
 
