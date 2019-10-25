@@ -4131,7 +4131,7 @@ AND gc_id IN (
             $index = $index + 1;
         }
 
-        $this->course_db->query("SELECT * FROM queue where (status = 2 or status = 3) and time_in > CURRENT_DATE order by time_out DESC");
+        $this->course_db->query("SELECT * FROM queue where (status = 2 or status = 3) and time_in > CURRENT_DATE order by time_out DESC, time_in DESC");
         $rows = $this->course_db->rows();
 
         $already_helped = array();
