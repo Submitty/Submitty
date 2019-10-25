@@ -138,3 +138,13 @@ footer .footer-separator {
         transform: translateX(-50%);
     }
 }
+
+.loading-bar-wrapper{
+    padding-left: 3px;
+    margin-bottom: 5px;
+    display: none;
+}
+
+#loading-bar-percentage{
+    margin-left: 10px;
+}
