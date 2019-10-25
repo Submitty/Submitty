@@ -94,10 +94,10 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (... $args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function(string $path, string $title): string {
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
             $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
             list($mime_type, $mime_subtype) = explode('/', mime_content_type($path), 2);
             if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {

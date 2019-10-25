@@ -90,7 +90,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
         // Serialize the components for numeric/checkpoint rubrics
-        $gradeable_components_enc = array_map(function(Component $c) {
+        $gradeable_components_enc = array_map(function (Component $c) {
             return $c->toArray();
         }, $gradeable->getComponents());
 
@@ -160,7 +160,7 @@ class AdminGradeableController extends AbstractController {
             }
             $repo_id_number++;
         }
-        usort($all_repository_config_paths, function($a,$b) {
+        usort($all_repository_config_paths, function ($a,$b) {
             return $a[0] > $b[0];
         });
 

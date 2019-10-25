@@ -273,7 +273,7 @@ class LateController extends AbstractController {
         foreach($rows as $row) {
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
-            $fields = array_map(function($k) {
+            $fields = array_map(function ($k) {
                 return trim($k);
             }, $fields);
 

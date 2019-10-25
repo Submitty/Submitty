@@ -187,9 +187,21 @@ class DatabaseQueries {
     /**
      * Helper function for generating sql query according to the given requirements
      */
-    public function buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user,
-                                        &$query_select, &$query_join, &$query_where, &$query_order, &$query_parameters,
-                                        $want_categories, $want_order) {
+    public function buildLoadThreadQuery(
+        $categories_ids,
+        $thread_status,
+        $unread_threads,
+        $show_deleted,
+        $show_merged_thread,
+        $current_user,
+        &$query_select,
+        &$query_join,
+        &$query_where,
+        &$query_order,
+        &$query_parameters,
+        $want_categories,
+        $want_order
+    ) {
         $query_raw_select = array();
         $query_raw_join   = array();
         $query_raw_where  = array("true");
@@ -744,7 +756,7 @@ class DatabaseQueries {
             $this->course_db->query("SELECT * FROM late_days");
         }
         // Parse the date-times
-        return array_map(function ($arr)  {
+        return array_map(function ($arr) {
             $arr['since_timestamp'] = DateUtils::parseDateTime($arr['since_timestamp'], $this->core->getConfig()->getTimezone());
             return $arr;
         }, $this->course_db->rows());
@@ -1431,7 +1443,7 @@ SELECT user_id
 FROM users
 WHERE rotating_section IS NULL AND registration_section IS NOT NULL
 ORDER BY user_id ASC");
-        return array_map(function($elem) {
+        return array_map(function ($elem) {
             return $elem['user_id'];
         }, $this->course_db->rows());
     }
@@ -1442,7 +1454,7 @@ SELECT user_id
 FROM users
 WHERE registration_section IS NOT NULL
 ORDER BY user_id ASC");
-        return array_map(function($elem) {
+        return array_map(function ($elem) {
             return $elem['user_id'];
         }, $this->course_db->rows());
     }
@@ -3176,7 +3188,7 @@ AND gc_id IN (
      */
     public function getSubmittersById(array $ids) {
         //Get Submitter for each id in ids
-        return array_map(function($id) {
+        return array_map(function ($id) {
             return $this->getSubmitterById($id);
         }, $ids);
     }
@@ -3555,7 +3567,7 @@ AND gc_id IN (
 
         // sort components by order
         $components = $gradeable->getComponents();
-        usort($components, function(Component $a, Component $b) {
+        usort($components, function (Component $a, Component $b) {
             return $a->getOrder() - $b->getOrder();
         });
 

@@ -559,7 +559,7 @@ class Gradeable extends AbstractModel {
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
         //  into the second parameter.
-        $coerce_dates = function(array $date_properties, array $black_list, array $date_values, $compare) {
+        $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
@@ -595,7 +595,7 @@ class Gradeable extends AbstractModel {
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
                 }),
-            function(\DateTime $val, \DateTime $cmp) {
+            function (\DateTime $val, \DateTime $cmp) {
                 return $val > $cmp;
             }
         );
@@ -792,7 +792,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Sets the gradeable type
-     * @param GradeableType $type Must be a valid GradeableType
+     * @param int $type Must be a valid GradeableType
      */
     private function setTypeInternal($type) {
         // Call this to make an exception if the type is invalid
@@ -908,8 +908,18 @@ class Gradeable extends AbstractModel {
      * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
      * @return Component the created component
      */
-    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
-                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+    public function addComponent(
+        string $title,
+        string $ta_comment,
+        string $student_comment,
+        float $lower_clamp,
+        float $default,
+        float $max_value,
+        float $upper_clamp,
+        bool $text,
+        bool $peer,
+        int $pdf_page
+    ) {
         $component = new Component($this->core, $this, [
             'title' => $title,
             'ta_comment' => $ta_comment,

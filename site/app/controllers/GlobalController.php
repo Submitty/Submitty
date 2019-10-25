@@ -13,7 +13,7 @@ class GlobalController extends AbstractController {
 
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-        $wrapper_urls = array_map(function($file) {
+        $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
@@ -98,23 +98,24 @@ class GlobalController extends AbstractController {
             }
 
             if ($this->core->getConfig()->isQueueEnabled()) {
-              if ($this->core->getQueries()->isQueueOpen()) {
-                $sidebar_buttons[] = new Button($this->core, [
-                  "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                  "title" => "Office Hours",
-                  "class" => "nav-row",
-                  "id" => "nav-sidebar-queue",
-                  "icon" => "fa-door-open"
-                ]);
-              }else{
-                $sidebar_buttons[] = new Button($this->core, [
-                  "href" => $this->core->buildCourseUrl(['office_hours_queue']),
-                  "title" => "Office Hours",
-                  "class" => "nav-row",
-                  "id" => "nav-sidebar-queue",
-                  "icon" => "fa-door-closed"
-                ]);
-              }
+                if ($this->core->getQueries()->isQueueOpen()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildCourseUrl(['office_hours_queue']),
+                        "title" => "Office Hours",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-queue",
+                        "icon" => "fa-door-open"
+                    ]);
+                }
+                else {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildCourseUrl(['office_hours_queue']),
+                        "title" => "Office Hours",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-queue",
+                        "icon" => "fa-door-closed"
+                    ]);
+                }
             }
 
             $course_path = $this->core->getConfig()->getCoursePath();
@@ -347,7 +348,7 @@ class GlobalController extends AbstractController {
 
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-        $wrapper_urls = array_map(function($file) {
+        $wrapper_urls = array_map(function ($file) {
             return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
@@ -410,10 +411,10 @@ class GlobalController extends AbstractController {
         $query_a = array_filter(explode("&", $query_a));
         $query_b = array_filter(explode("&", $query_b));
 
-        $query_a = array_filter($query_a, function($param) use($ignored_params) {
+        $query_a = array_filter($query_a, function ($param) use ($ignored_params) {
             return !in_array(explode("=", $param)[0], $ignored_params);
         });
-        $query_b = array_filter($query_b, function($param) use($ignored_params) {
+        $query_b = array_filter($query_b, function ($param) use ($ignored_params) {
             return !in_array(explode("=", $param)[0], $ignored_params);
         });
 

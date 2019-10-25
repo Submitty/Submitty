@@ -133,7 +133,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $cookie
             ->expects($this->once())
             ->willReturnCallback(
-                function($name, $value, $expires, $path, $domain, $secure) {
+                function ($name, $value, $expires, $path, $domain, $secure) {
                     $this->assertEquals('test', $name);
                     $this->assertEquals('data', $value);
                     $this->assertEquals(100, $expires);
@@ -151,7 +151,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $cookie
             ->expects($this->once())
             ->willReturnCallback(
-                function($name, $value, $expires, $path, $domain, $secure) {
+                function ($name, $value, $expires, $path, $domain, $secure) {
                     $this->assertEquals('test', $name);
                     $this->assertEquals('{"a":true}', $value);
                     $this->assertEquals(100, $expires);
@@ -171,7 +171,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             $cookie
                 ->expects($this->once())
                 ->willReturnCallback(
-                    function($name, $value, $expires, $path, $domain, $secure) {
+                    function ($name, $value, $expires, $path, $domain, $secure) {
                         $this->assertEquals('test', $name);
                         $this->assertEquals('{"a":true}', $value);
                         $this->assertEquals(100, $expires);
@@ -195,7 +195,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             $cookie
                 ->expects($this->once())
                 ->willReturnCallback(
-                    function($name, $value, $expires, $path, $domain, $secure) {
+                    function ($name, $value, $expires, $path, $domain, $secure) {
                         $this->assertEquals('test', $name);
                         $this->assertEquals('{"a":true}', $value);
                         $this->assertEquals(100, $expires);
@@ -332,7 +332,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             $array1[] = $obj;
             $array2[] = $obj;
         }
-        $inferior_func = function($a, $b) {
+        $inferior_func = function ($a, $b) {
             return $a === $b ? -1 : 1;
         };
         $this->assertCount(5, array_udiff($array1, $array2, $inferior_func));

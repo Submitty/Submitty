@@ -159,7 +159,7 @@ abstract class AbstractModel {
      * @return string
      */
     private function convertName($name, $prefix_length=3) {
-        $regex_func = function($matches) {
+        $regex_func = function ($matches) {
             return "_".strtolower($matches[0]);
         };
         $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, $prefix_length))));
