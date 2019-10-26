@@ -14,9 +14,9 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $name = "";
     private $num_in_queue = 0;
     private $time_in = "time not set";
-    private $time_helped = "time not set";
-    private $time_out = "time not set";
+    private $time_out_iso = "time not set";
     private $time_helped_iso = "time not set";
+    private $time_in_iso = "time not set";
     private $removed_by = NULL;
     private $entry_id = 0;
 
@@ -36,14 +36,9 @@ class OfficeHoursQueueStudent extends AbstractModel {
         $this->position_in_queue = $position_in_queue;
         $this->time_in = date("h:i a", strtotime($time_in));
         $this->time_in_iso = date("c", strtotime($time_in));
-        $this->time_helped = date("c", strtotime($time_helped));
-        $this->time_out = date("c", strtotime($time_out));
+        $this->time_out_iso = date("c", strtotime($time_out));
         $this->time_helped_iso = date("c", strtotime($time_helped));
         $this->removed_by = $removed_by;
-
-        // $this->time_in_ = date("h:i a", strtotime($time_in));
-        // $this->time_helped = date("h:i a", strtotime($time_helped));
-        // $this->time_out
     }
 
     public function getName(){
@@ -74,20 +69,13 @@ class OfficeHoursQueueStudent extends AbstractModel {
         return $this->time_in;
     }
 
-    public function getTimeHelped(){
-        return $this->time_helped;
-    }
-
     public function getTimeHelpedWithSeconds(){
         return $this->time_helped_iso;
     }
 
-    public function getTimeOut(){
-        return $this->time_out;
-    }
 
     public function getTimeBeingHelped(){
-        $diff = strtotime($this->time_out)-strtotime($this->time_helped);
+        $diff = strtotime($this->time_out_iso)-strtotime($this->time_helped_iso);
         $h = $diff / 3600 % 24;
         $m = $diff / 60 % 60;
         $s = $diff % 60;
@@ -96,9 +84,9 @@ class OfficeHoursQueueStudent extends AbstractModel {
 
     public function getTimeWaitingInQueue(){
         if($this->status  == 2){
-            $diff = strtotime($this->time_helped)-strtotime($this->time_in_iso);
+            $diff = strtotime($this->time_helped_iso)-strtotime($this->time_in_iso);
         }else{
-            $diff = strtotime($this->time_out)-strtotime($this->time_in_iso);
+            $diff = strtotime($this->time_out_iso)-strtotime($this->time_in_iso);
         }
         $h = $diff / 3600 % 24;
         $m = $diff / 60 % 60;
