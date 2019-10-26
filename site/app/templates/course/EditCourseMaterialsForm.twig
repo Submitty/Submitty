@@ -2,7 +2,7 @@
 {% block popup_id %}edit-course-materials-form{% endblock %}
 {% block title %}Edit Course Materials{% endblock %}
 {% block body %}
-    <div id="material-edit-form" class="flex-col flex-col-space">
+    <div id="material-edit-form" class="flex-col flex-col-space" data-fileName = "">
         <label id="upload_sections">
             <p class="black-message">
                 Do you want to restrict this course material to some sections?
@@ -15,19 +15,39 @@
                 <input name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
                 Yes
             </label>
-            <script type="text/javascript">
-                function toggleRegistrationSections(){
-                    $("#show_Some_Section_Selection").toggle();
-                } 
-            </script>
-            <div id = "show_Some_Section_Selection" style="display: none">
+            <div id = "show_Some_Section_Selection" style="display: block">
             {% for section in reg_sections %}
+                {% set checked = "on" %}
+                {% if section in file_sections[document.getElementById("input-provide-full-path").value]%}
+                    {% set checked = "off" %}
+                {% endif %}
                 <tr>
                     <td>Section {{ section['sections_registration_id'] }}</td>
                     <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
                 </tr>
             {% endfor %}
             </div>
+            <script type="text/javascript">
+                function toggleRegistrationSections(){
+                    $("#show_Some_Section_Selection").toggle();
+                }
+                function setRegistrationSection(sectionId){
+                    console.log("CHECK");
+                    var file_sections = '{{ file_sections|json_encode }}';
+                    var requestedPath = document.getElementById('material-edit-form').getAttribute("data-fileName");
+                    console.log(requestedPath);
+                    
+                    var this_file_sections = file_sections[requestedPath];
+                    var hide_from_students = '{{ hide_from_students|json_encode }}';
+                    if(hide_from_students[requestedPath] == "on"){
+                        $("#hide-materials-checkbox").attr('checked',"on");
+                    }
+                    for(let index = 0; index < this_file_sections.length; ++index){
+                        $("#section-" + this_file_sections[index]).attr('checked',"on");
+                    }
+                }
+                setRegistrationSection(); 
+            </script>
         </label>
         <label id="upload_dt">
             <p>
@@ -74,7 +94,7 @@
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section-' +element['sections_registration_id']
+                    var currentSection = "#section-" +element['sections_registration_id'];
                     if  ($(currentSection).is(':checked'))  {
                         sections.push(element['sections_registration_id']);
                     }
