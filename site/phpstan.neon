@@ -1,5 +1,8 @@
+includes:
+    - %rootDir%/../../../phpstan-baseline.neon
+
 parameters:
-    level: 0
+    level: 3
     excludes_analyse:
         # these should be unignored once put into production
         - %rootDir%/../../../app/controllers/forum/ForumController2.php
