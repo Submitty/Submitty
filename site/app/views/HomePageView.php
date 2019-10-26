@@ -39,7 +39,7 @@ class HomePageView extends AbstractView {
             }
 
             //Filter any ranks with no courses
-            $ranks = array_filter($ranks, function($rank) {
+            $ranks = array_filter($ranks, function ($rank) {
                 return count($rank["courses"]) > 0;
             });
             $statuses[] = $ranks;

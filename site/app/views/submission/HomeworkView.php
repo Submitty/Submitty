@@ -337,11 +337,11 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        $component_names = array_map(function(Component $component) {
+        $component_names = array_map(function (Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $input_data = array_map(function(AbstractGradeableInput $inp) {
+        $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
 
@@ -573,7 +573,7 @@ class HomeworkView extends AbstractView {
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
         $display_version = 0;
 
-        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
                 'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0

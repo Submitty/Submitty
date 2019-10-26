@@ -42,7 +42,7 @@ class PlagiarismController extends AbstractController {
             }
 
             fclose($file);
-            uksort($return, function($semester_a, $semester_b) {
+            uksort($return, function ($semester_a, $semester_b) {
                 $year_a = (int) substr($semester_a, 1);
                 $year_b = (int) substr($semester_b, 1);
                 if($year_a > $year_b) {

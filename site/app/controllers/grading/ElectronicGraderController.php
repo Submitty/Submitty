@@ -447,7 +447,7 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = [];
         foreach ($section_submitters as $section) {
-            $student_ids = array_merge($student_ids, array_map(function(Submitter $submitter) {
+            $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
                 return $submitter->getId();
             }, $section));
         }

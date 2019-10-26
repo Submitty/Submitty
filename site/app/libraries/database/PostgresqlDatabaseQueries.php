@@ -862,7 +862,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     // Map any keys with special requirements to the proper statements and preserve specified order
                     return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
                 }, $sort_keys),
-                function($a) {
+                function ($a) {
                     return $a !== '';
                 }));
         }
@@ -1529,7 +1529,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
              $selector
              $order";
 
-        $gradeable_constructor = function($row) {
+        $gradeable_constructor = function ($row) {
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
                 throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
             }

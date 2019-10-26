@@ -619,7 +619,7 @@ class UsersController extends AbstractController {
         // Data is confidential, and therefore must be deleted immediately after
         // this process ends, regardless if process completes successfully or not.
         register_shutdown_function(
-            function() use (&$csv_file, &$xlsx_file) {
+            function () use (&$csv_file, &$xlsx_file) {
                 foreach (array($csv_file, $xlsx_file) as $file) {
                     if (isset($file) && file_exists($file)) {
                         unlink($file);
@@ -711,14 +711,14 @@ class UsersController extends AbstractController {
         // Remove all empty-data rows.  This should preserve original row number
         // ordering, so error messaging refers to appropriately labeled row(s)
         // in the spreadsheet / csv upload.
-        $user_data = array_filter($user_data, function($row) {
-            return !empty(array_filter($row, function($val) {
+        $user_data = array_filter($user_data, function ($row) {
+            return !empty(array_filter($row, function ($val) {
                 return !empty($val);
             }));
         });
 
         //Apply trim() to all data values.
-        array_walk_recursive($user_data, function(&$val) {
+        array_walk_recursive($user_data, function (&$val) {
             $val = trim($val);
         });
 
@@ -735,31 +735,30 @@ class UsersController extends AbstractController {
         // A few places have different behaviors depending on $list_type.
         // These closure functions will help control those few times when
         // $list_type dictates behavior.
-
         /**
          * Closure to validate $vals[4] depending on $list_type
          *
          * @return boolean true on successful validation, false otherwise.
          */
-        $row4_validation_function = function() use ($list_type, &$vals) {
+        $row4_validation_function = function () use ($list_type, &$vals) {
             //$row[4] is different based on classlist vs graderlist
             switch($list_type) {
-            case "classlist":
-                //student
-                if (isset($vals[4]) && strtolower($vals[4]) === "null") {
-                    $vals[4] = null;
-                }
-                //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-                return User::validateUserData('registration_section', $vals[4]);
-            case "graderlist":
-                //grader
-                if (isset($vals[4]) && is_numeric($vals[4])) {
-                    $vals[4] = intval($vals[4]); //change float read from xlsx to int
-                }
-                //grader-level check is a digit between 1 - 4.
-                return User::validateUserData('user_group', $vals[4]);
-            default:
-                throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
+                case "classlist":
+                    //student
+                    if (isset($vals[4]) && strtolower($vals[4]) === "null") {
+                        $vals[4] = null;
+                    }
+                    //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
+                    return User::validateUserData('registration_section', $vals[4]);
+                case "graderlist":
+                    //grader
+                    if (isset($vals[4]) && is_numeric($vals[4])) {
+                        $vals[4] = intval($vals[4]); //change float read from xlsx to int
+                    }
+                    //grader-level check is a digit between 1 - 4.
+                    return User::validateUserData('user_group', $vals[4]);
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
             }
         };
 
@@ -768,34 +767,34 @@ class UsersController extends AbstractController {
          *
          * @return string
          */
-        $get_user_registration_or_group_function = function($user) use ($list_type) {
+        $get_user_registration_or_group_function = function ($user) use ($list_type) {
             switch($list_type) {
-            case "classlist":
-                return $user->getRegistrationSection();
-            case "graderlist":
-                return (string)$user->getGroup();
-            default:
-                throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
+                case "classlist":
+                    return $user->getRegistrationSection();
+                case "graderlist":
+                    return (string)$user->getGroup();
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
             }
         };
 
         /**
          * Closure to set a user's registration_section or group_id based on $list_type)
          */
-        $set_user_registration_or_group_function = function(&$user) use ($list_type, &$row) {
+        $set_user_registration_or_group_function = function (&$user) use ($list_type, &$row) {
             switch($list_type) {
-            case "classlist":
-                // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
-                // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
-                $this->core->getQueries()->insertNewRegistrationSection($row[4]);
-                $user->setRegistrationSection($row[4]);
-                $user->setGroup(4);
-                break;
-            case "graderlist":
-                $user->setGroup($row[4]);
-                break;
-            default:
-                throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
+                case "classlist":
+                    // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+                    // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
+                    $this->core->getQueries()->insertNewRegistrationSection($row[4]);
+                    $user->setRegistrationSection($row[4]);
+                    $user->setGroup(4);
+                    break;
+                case "graderlist":
+                    $user->setGroup($row[4]);
+                    break;
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
             }
         };
 
@@ -804,23 +803,23 @@ class UsersController extends AbstractController {
          *
          * @param string $action "insert" or "update"
          */
-        $insert_or_update_user_function = function($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
+        $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
             try {
                 switch($action) {
-                case 'insert':
-                    //User must first exist in Submitty before being enrolled to a course.
-                    //$uploaded_data[0] = authentication ID.
-                    if (is_null($this->core->getQueries()->getSubmittyUser($uploaded_data[0]))) {
-                        $this->core->getQueries()->insertSubmittyUser($user);
-                    }
-                    $this->core->getQueries()->insertCourseUser($user, $semester, $course);
-                    break;
-                case 'update':
-                    $this->core->getQueries()->updateUser($user, $semester, $course);
-                    break;
-                default:
-                    throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
-                    break;
+                    case 'insert':
+                        //User must first exist in Submitty before being enrolled to a course.
+                        //$uploaded_data[0] = authentication ID.
+                        if (is_null($this->core->getQueries()->getSubmittyUser($uploaded_data[0]))) {
+                            $this->core->getQueries()->insertSubmittyUser($user);
+                        }
+                        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        break;
+                    case 'update':
+                        $this->core->getQueries()->updateUser($user, $semester, $course);
+                        break;
+                    default:
+                        throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
+                        break;
                 }
             }
             catch (DatabaseException $e) {
@@ -834,14 +833,14 @@ class UsersController extends AbstractController {
          *
          * @return string
          */
-        $set_return_url_action_function = function() use ($list_type) {
+        $set_return_url_action_function = function () use ($list_type) {
             switch($list_type) {
-            case "classlist":
-                return "users";
-            case "graderlist":
-                return "graders";
-            default:
-                throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
+                case "classlist":
+                    return "users";
+                case "graderlist":
+                    return "graders";
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
             }
         };
 
@@ -862,36 +861,36 @@ class UsersController extends AbstractController {
         foreach($uploaded_data as $row_num => $vals) {
             // Blacklist validation.  Validation fails if any test resolves as false.
             switch(false) {
-            // Bounds check to ensure minimum required number of rows is present.
-            case count($vals) >= 5:
-            // Username must contain only lowercase alpha, numbers, underscores, hyphens
-            case User::validateUserData('user_id', $vals[0]):
-            // First and Last name must be alpha characters, white-space, or certain punctuation.
-            case User::validateUserData('user_legal_firstname', $vals[1]):
-            case User::validateUserData('user_legal_lastname', $vals[2]):
-            // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            case User::validateUserData('user_email', $vals[3]):
-            // $row[4] validation varies by $list_type
-            // "classlist" validates registration_section, and "graderlist" validates user_group
-            case $row4_validation_function():
-            // Database password cannot be blank, no check on format.
-            // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
-            case !$use_database || User::validateUserData('user_password', $row[5]):
-            // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-            // Automatically validate if not set (this field is optional).
-            case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-            case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
-                // Validation failed somewhere.  Record which row failed.
-                // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
-                $bad_rows[] = ($row_num+1);
-                break;
+                // Bounds check to ensure minimum required number of rows is present.
+                case count($vals) >= 5:
+                    // Username must contain only lowercase alpha, numbers, underscores, hyphens
+                case User::validateUserData('user_id', $vals[0]):
+                    // First and Last name must be alpha characters, white-space, or certain punctuation.
+                case User::validateUserData('user_legal_firstname', $vals[1]):
+                case User::validateUserData('user_legal_lastname', $vals[2]):
+                    // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+                case User::validateUserData('user_email', $vals[3]):
+                    // $row[4] validation varies by $list_type
+                    // "classlist" validates registration_section, and "graderlist" validates user_group
+                case $row4_validation_function():
+                    // Database password cannot be blank, no check on format.
+                    // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
+                case !$use_database || User::validateUserData('user_password', $row[5]):
+                    // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+                    // Automatically validate if not set (this field is optional).
+                case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
+                case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                    // Validation failed somewhere.  Record which row failed.
+                    // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
+                    $bad_rows[] = ($row_num+1);
+                    break;
             }
         }
 
         // $bad_rows will contain rows with errors.  No errors to report when empty.
         if (!empty($bad_rows)) {
             $msg = "Error(s) on row(s) ";
-            array_walk($bad_rows, function($row_num) use (&$msg) {
+            array_walk($bad_rows, function ($row_num) use (&$msg) {
                 $msg .= " {$row_num}";
             });
             $this->core->addErrorMessage($msg);
