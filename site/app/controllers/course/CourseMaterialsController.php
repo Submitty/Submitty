@@ -8,6 +8,7 @@ use app\libraries\Utils;
 use app\libraries\ErrorMessages;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\CourseMaterial;
 
 class CourseMaterialsController extends AbstractController {
     /**
@@ -115,6 +116,12 @@ class CourseMaterialsController extends AbstractController {
             $file_data = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
             $json = FileUtils::readJsonFile($file_data);
             foreach ($json as $path => $file) {
+                if(!CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser()))
+                {
+                    $this->core->getOutput()->showError("Your section may not access this file.");
+                    return false;
+                }
+
                 // check if the file is in the requested folder
                 if (!Utils::startsWith(realpath($path), $root_path)) {
                     continue;
