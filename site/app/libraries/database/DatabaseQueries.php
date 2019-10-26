@@ -4072,6 +4072,8 @@ AND gc_id IN (
 
     public function addUserToQueue($user_id, $name){
         $name = substr($name, 0, 20);
+        //status 0 means user is in the queue
+        //status 1 means user is currently being helped
         $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
         if(count($this->course_db->rows() == 0)){
             $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($this->core->getUser()->getId(), $name));
@@ -4095,8 +4097,14 @@ AND gc_id IN (
     }
 
     public function removeUserFromQueue($entry_id, $remover){
-        //$this->course_db->query("DELETE FROM queue");
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = 0", array($remover, $entry_id));
+        //status 4 means the user was removed by themselves
+        $status_code = 4;
+        if($remover == $this->getUserIdFromQueueSlot($entry_id)){
+            //status 3 means the user was removed by an instructor/TA/mentor
+            $status_code = 3;
+        }
+
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = 0", array($status_code, $remover, $entry_id));
     }
 
     public function startHelpUser($entry_id){
@@ -4131,7 +4139,7 @@ AND gc_id IN (
             $index = $index + 1;
         }
 
-        $this->course_db->query("SELECT * FROM queue where (status = 2 or status = 3) and time_in > CURRENT_DATE order by time_out DESC, time_in DESC");
+        $this->course_db->query("SELECT * FROM queue where (status != 0 and status != 1) and time_in > CURRENT_DATE order by time_out DESC, time_in DESC");
         $rows = $this->course_db->rows();
 
         $already_helped = array();
@@ -4164,8 +4172,9 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue_settings SET open = FALSE");
     }
 
-    public function emptyQueue(){
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
+    public function emptyQueue($remover){
+        //status 5 means student was removed from the queue by the bulk empty queue command
+        $this->course_db->query("UPDATE queue SET status = 5, removed_by = ?, time_out = current_timestamp where (status = 0 or status = 1)", array($remover));
     }
 
     public function genNewQueueCode(){

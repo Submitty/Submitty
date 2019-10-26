@@ -163,7 +163,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @return Response
     */
     public function emptyQueue(){
-        $this->core->getQueries()->emptyQueue();
+        $this->core->getQueries()->emptyQueue($this->core->getUser()->getId());
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );

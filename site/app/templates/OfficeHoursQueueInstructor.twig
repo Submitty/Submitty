@@ -13,7 +13,7 @@
   {% endif %}
 
   <div class="row">
-      <div style="margin-right:2rem; margin-bottom:2rem">
+      <div style="margin-right:2rem; margin-bottom:1rem">
           {% if queue_open == 1 %}
             <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to close the queue? This will limit students from joining but will not kick anyone out');">
           {% else %}
@@ -28,14 +28,14 @@
           </form>
       </div>
     {% if queue_open == 1 %}
-        <div style="margin-right:2rem; margin-bottom:2rem">
+        <div style="margin-right:2rem; margin-bottom:1rem">
           <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <input type="submit" value="Generate New Code" class="btn btn-default">
           </form>
         </div>
     {% endif %}
-    <div style="margin-right:2rem; margin-bottom:2rem">
+    <div style="margin-right:2rem; margin-bottom:1rem">
         <form method="post" id="empty_queue" action="{{empty_queue_url}}" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
           <input type="submit" name="empty_queue" value="Empty Queue" class="btn btn-danger">
@@ -116,6 +116,7 @@
         <th scope="col">Time Helped</th>
         <th scope="col">Time Out</th>
         <th scope="col">Removed By</th>
+        <th scope="col">Status</th>
       </tr>
     </thead>
     <tbody>
@@ -132,6 +133,7 @@
       {% endif %}
       <td>{{ entry.getTimeOut() }}</td>
       <td>{{ entry.getRemovedBy() }}</td>
+      <td>{{ entry.getStatus() }} </td>
     </tr>
     {% endfor %}
   </tbody>
