@@ -214,6 +214,7 @@ class CourseMaterialsController extends AbstractController {
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
         $data=$_POST['fn'];
+        $hide_from_students = null;
 
         if(!isset($newdatatime)) {
             $this->core->redirect($this->core->buildCourseUrl(['course_materials']));
