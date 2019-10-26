@@ -326,6 +326,6 @@ class SecureExecutionEnvironment():
                                       trace = trace)
 
   """ A useful wrapper for the atuograding_utils.log_message function. """
-  def log_container_meta(self, name, container, event, time):
+  def log_container_meta(self, event, name='', container='', time=0):
     log_path = os.path.join(self.tmp_logs,'meta_log.txt')
-    autograding_utils.log_container_meta(log_path, name, container, event, time)
+    autograding_utils.log_container_meta(log_path, event, name, container, time)

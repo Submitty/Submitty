@@ -58,7 +58,7 @@ class Container():
   def create(self, execution_script, arguments, more_than_one):
     """ Create (but don't start) this container. """
     container_create_time = timer()
-    self.log_meta(self.full_name, '', 'CREATE BEGIN', 0)
+    self.log_meta('CREATE BEGIN', self.full_name)
 
     client = docker.from_env()
 
@@ -89,18 +89,18 @@ class Container():
       raise
 
     dockerlaunch_done = dateutils.get_current_time()
-    self.log_meta(self.full_name, self.container.short_id, 'CREATE END', timer() - container_create_time)
+    self.log_meta('CREATE END', self.full_name, self.container.short_id, timer() - container_create_time)
     client.close()
 
   def start(self, logfile):
     container_start_time = timer()
-    self.log_meta(self.full_name, self.container.short_id, 'START BEGIN', 0)
+    self.log_meta('START BEGIN', self.full_name, self.container.short_id)
 
     self.container.start()
     self.socket = self.container.attach_socket(params={'stdin': 1, 'stream': 1})
 
     self.container_grading_time = timer()
-    self.log_meta(self.full_name, self.container.short_id, 'START END', timer() - container_start_time)
+    self.log_meta('START END', self.full_name, self.container.short_id, timer() - container_start_time)
 
   def set_ip_address(self, network_name, ip_address):
     self.ip_address_map[network_name] = ip_address
@@ -123,7 +123,7 @@ class Container():
     self.container.client.api.close()
     self.container.client.close()
     self.log_function(f'{dateutils.get_current_time()} docker container {self.container.short_id} destroyed')
-    self.log_meta(self.full_name, self.container.short_id, 'DESTROY', timer() - self.container_grading_time)
+    self.log_meta('DESTROY', self.full_name, self.container.short_id, timer() - self.container_grading_time)
 
 
 class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):

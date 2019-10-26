@@ -106,7 +106,7 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
     write_to_log(autograding_log_file, parts)
 
 
-def log_container_meta(log_path, name="", container="", event="", time=0):
+def log_container_meta(log_path, event="", name="", container="", time=0):
     """ Given a log file, create or append container meta data to a log file. """
 
     now = dateutils.get_current_time()
