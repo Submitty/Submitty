@@ -32,6 +32,6 @@ class OfficeHoursQueueView extends AbstractView {
         'remove_url' => $this->core->buildCourseUrl(["office_hours_queue/remove"]),
         'start_help_url' => $this->core->buildCourseUrl(["office_hours_queue/startHelp"]),
         'finish_help_url' => $this->core->buildCourseUrl(["office_hours_queue/finishHelp"])
-    ]);
+        ]);
     }
 }
