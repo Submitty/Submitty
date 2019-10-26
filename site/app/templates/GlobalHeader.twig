@@ -22,6 +22,7 @@
             var duck = document.getElementById("duckdiv");
             var banner = document.getElementById("submitty-banner");
             banner.style.display = "block";
+            document.getElementById('submitty-mascot').onclick = null;
             var pos = 5;
             var id = setInterval(frame, 5);
             function frame() {
@@ -48,6 +49,7 @@
             function reset(){
                 if (duck.style.right === '0px'){
                     clearInterval(id);
+                    document.getElementById('submitty-mascot').onclick = function(){ducky();}
                 }else{
                     pos ++;
                     duck.style.right = pos + 'px';
@@ -119,6 +121,7 @@
                          style="position:absolute;right: 5px;" 
                          {% if enable_banner %}
                          onclick="ducky();" 
+                         tabindex="0"
                          {% endif %}
                     />
                     <img id="submitty-banner" 

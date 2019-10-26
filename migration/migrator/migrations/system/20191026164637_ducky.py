@@ -16,7 +16,7 @@ def up(config):
     with open(tgt, 'r') as infile:
         data = json.load(infile)
 
-    data['enable_banner'] = False
+    data['duck_special_effects'] = False
 
     with open(tgt, 'w') as outfile:
         json.dump(data, outfile, indent=4)
