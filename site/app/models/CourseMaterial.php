@@ -48,7 +48,7 @@ class CourseMaterial extends AbstractModel
             $current_time > $release_time ? $retVal = true : $retVal = false;
 
             return $retVal;
-        }http://submitty.org/
+        }
     }
     
      /**
