@@ -4108,19 +4108,20 @@ AND gc_id IN (
         }
 
         $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
-        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = ?", array($status_code, $remover, $entry_id,$in_queue_sc));
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and (status = ? or status = ?)", array($status_code, $remover, $entry_id,$in_queue_sc,$being_helped_sc));
     }
 
     public function startHelpUser($entry_id){
-        $start_helping_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
         $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
-        $this->course_db->query("UPDATE queue SET status = ?, time_helped = current_timestamp where entry_id = ? and status = ?", array($start_helping_sc,$entry_id,$in_queue_sc));
+        $this->course_db->query("UPDATE queue SET status = ?, time_helped = current_timestamp where entry_id = ? and status = ?", array($being_helped_sc,$entry_id,$in_queue_sc));
     }
 
     public function finishHelpUser($entry_id, $helper){
         $successfully_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_SUCCESSFULLY_HELPED;
-        $start_helping_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
-        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = ?", array($successfully_helped_sc, $helper, $entry_id, $start_helping_sc));
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = ?", array($successfully_helped_sc, $helper, $entry_id, $being_helped_sc));
     }
 
     public function isQueueOpen(){
