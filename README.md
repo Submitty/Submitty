@@ -24,7 +24,7 @@ The Submitty project is hosted on [GitHub](https://github.com/Submitty).
 * Customizable automated grading with immediate feedback to students
 * Advanced grading tools: static analysis, JUnit, code coverage, memory debuggers, etc.
 * Student upload by drag-and-drop, zip upload, or version control
-* Correct mistakes through multiple submissions, flexible ``late day’’ policy, hidden tests
+* Correct mistakes through multiple submissions, flexible "late day" policy, hidden tests
 * Interface for complementary instructor/TA manual grading, overall grade summaries
 * Instructors have full access to logs for debugging, launch batch regrading
 * Scales to multiple courses with thousands of students
