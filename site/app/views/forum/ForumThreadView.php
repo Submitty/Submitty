@@ -145,7 +145,7 @@ class ForumThreadView extends AbstractView {
             $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
         }
 
-        $currentThreadArr = array_filter($threadsHead, function($ar) use($currentThread) {
+        $currentThreadArr = array_filter($threadsHead, function ($ar) use ($currentThread) {
             return ($ar['id'] == $currentThread);
         });
 
@@ -344,6 +344,8 @@ class ForumThreadView extends AbstractView {
                 "display_thread_count" => empty($displayThreadContent) ? 0 : count($displayThreadContent["thread_content"]),
                 "currentThread" => $currentThread,
                 "currentCourse" => $currentCourse,
+                "accessGrading" => $this->core->getUser()->accessGrading(),
+                "manage_categories_url" => $this->core->buildCourseUrl(['forum', 'categories']),
                 "generate_post_content" => $generatePostContent,
                 "thread_resolve_state" => $thread_resolve_state,
                 "display_option" => $display_option,
@@ -418,7 +420,7 @@ class ForumThreadView extends AbstractView {
                     $place = array_search($post["parent_id"], $order_array);
                     $tmp_array = array($post["id"]);
                     $parent_reply_level = $reply_level_array[$place];
-                    while($place && $place+1 < sizeof($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
+                    while($place && $place+1 < count($reply_level_array) && $reply_level_array[$place+1] > $parent_reply_level){
                         $place++;
                     }
                     array_splice($order_array, $place+1, 0, $tmp_array);
@@ -787,18 +789,20 @@ class ForumThreadView extends AbstractView {
         }
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
-            $classes[] = " first_post";
+            $classes[] = "first_post";
         }
         if (in_array($post_id, $unviewed_posts)) {
-            $classes[] = " new_post";
+            if($current_user != $post["author_user_id"]) {
+                $classes[] = "new_post";
+            }
         } else {
-            $classes[] = " viewed_post";
+            $classes[] = "viewed_post";
         }
         if ($this->core->getQueries()->isStaffPost($post["author_user_id"])) {
-            $classes[] = " important";
+            $classes[] = "important";
         }
         if ($post["deleted"]) {
-            $classes[] = " deleted";
+            $classes[] = "deleted";
             $deleted = true;
         } else {
             $deleted = false;
@@ -975,10 +979,6 @@ class ForumThreadView extends AbstractView {
 
         $categories = $this->core->getQueries()->getCategories();
 
-        $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-        array_unshift($categories, $dummy_category);
-
-
         $buttons = array(
             array(
                 "required_rank" => 4,
@@ -1031,9 +1031,6 @@ class ForumThreadView extends AbstractView {
 
         if($this->core->getUser()->accessGrading()){
             $categories = $this->core->getQueries()->getCategories();
-
-            $dummy_category = array('color' => '#000000', 'category_desc' => 'dummy', 'category_id' => "dummy");
-            array_unshift($categories, $dummy_category);
         }
 
         $buttons = array(

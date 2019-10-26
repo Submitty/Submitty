@@ -21,23 +21,24 @@ class CourseMaterialsController extends AbstractController {
         );
     }
 
-    public function deleteHelper($file,&$json){
-            if ((array_key_exists('name',$file))){
-                $filename = $file['path'];
-                unset($json[$filename]);
-                return;
+    public function deleteHelper($file, &$json) {
+        if ((array_key_exists('name',$file))) {
+            $filename = $file['path'];
+            unset($json[$filename]);
+            return;
+        }
+        else {
+            if(array_key_exists('files',$file)) {
+                $this->deleteHelper($file['files'],$json);
             }
-            else{
-                if(array_key_exists('files',$file)){
-                    $this->deleteHelper($file['files'],$json);
-                }
-                else{
-                    foreach ($file as $f){
-                        $this->deleteHelper($f,$json);
-                    }
+            else {
+                foreach ($file as $f) {
+                    $this->deleteHelper($f,$json);
                 }
             }
+        }
     }
+
     /**
      * @Route("/{_semester}/{_course}/course_materials/delete")
      */
@@ -387,7 +388,7 @@ class CourseMaterialsController extends AbstractController {
                         for ($i = 0; $i < $zip->numFiles; $i++) {
                             $entries[] = $zip->getNameIndex($i);
                         }
-                        $entries = array_filter($entries, function($entry) use ($disallowed_folders, $disallowed_files) {
+                        $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                             $name = strtolower($entry);
                             foreach ($disallowed_folders as $folder) {
                                 if (Utils::startsWith($folder, $name)) {
@@ -403,7 +404,7 @@ class CourseMaterialsController extends AbstractController {
                             }
                             return true;
                         });
-                        $zfiles = array_filter($entries, function($entry) {
+                        $zfiles = array_filter($entries, function ($entry) {
                             return substr($entry, -1) !== '/';
                         });
 

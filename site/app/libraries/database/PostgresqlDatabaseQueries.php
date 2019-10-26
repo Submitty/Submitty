@@ -322,7 +322,7 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         }
         $return = array();
         $this->course_db->query("
-SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
+SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
   SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
@@ -356,10 +356,15 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
     WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
   )AS parts_of_comp
 )AS comp
-GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
+LEFT JOIN (
+	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
+	FROM regrade_requests AS rr
+	WHERE rr.g_id=? AND rr.status=-1
+	GROUP BY rr.gc_id
+) AS rr ON rr.gc_id=comp.gc_id
+GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
 ORDER BY gc_order
-        ", array($g_id, $g_id, $g_id));
-
+        ", array($g_id, $g_id, $g_id, $g_id));
         foreach ($this->course_db->rows() as $row) {
             $return[] = new SimpleStat($this->core, $row);
         }
@@ -857,7 +862,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                     // Map any keys with special requirements to the proper statements and preserve specified order
                     return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
                 }, $sort_keys),
-                function($a) {
+                function ($a) {
                     return $a !== '';
                 }));
         }
@@ -1524,7 +1529,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
              $selector
              $order";
 
-        $gradeable_constructor = function($row) {
+        $gradeable_constructor = function ($row) {
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
                 throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
             }

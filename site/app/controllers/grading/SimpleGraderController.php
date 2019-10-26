@@ -151,7 +151,7 @@ class SimpleGraderController extends AbstractController {
         foreach ($sections as $section) {
             $students = array_merge($students, $section->getUsers());
         }
-        $student_ids = array_map(function(User $user) {
+        $student_ids = array_map(function (User $user) {
             return $user->getId();
         }, $students);
 

@@ -2,6 +2,7 @@
 <ruleset name="SubmittyStandard">
     <description>Non-Complete Standard for the Submitty Project</description>
     <arg name="extensions" value="php" />
+    <arg value="p" />
 
     <file>../app</file>
     <file>../public/index.php</file>
@@ -29,9 +30,7 @@
         <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
-        <exclude name="Generic.NamingConventions.ConstructorName.OldStyle" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
-        <exclude name="Generic.PHP.ForbiddenFunctions.FoundWithAlternative" />
         <exclude name="Generic.PHP.LowerCaseConstant.Found" />
         <exclude name="Generic.PHP.LowerCaseKeyword.Found" />
         <exclude name="Generic.PHP.LowerCaseType.ReturnTypeFound" />
@@ -50,8 +49,6 @@
         <exclude name="PSR2.ControlStructures.SwitchDeclaration.BodyOnNextLineCASE" />
         <exclude name="PSR2.ControlStructures.SwitchDeclaration.BreakNotNewLine" />
         <exclude name="PSR2.ControlStructures.SwitchDeclaration.BodyOnNextLineDEFAULT" />
-        <exclude name="PSR2.Files.EndFileNewline.NoneFound" />
-        <exclude name="PSR2.Files.EndFileNewline.TooMany" />
         <exclude name="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket" />
         <exclude name="PSR2.Methods.FunctionCallSignature.Indent" />
         <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
@@ -103,15 +100,6 @@
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeComma" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeArg" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeHint" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterUse" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.CloseBracketLine" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnNewLine" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceBeforeBrace" />
         <exclude name="Squiz.Operators.ValidLogicalOperators.NotAllowed" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />

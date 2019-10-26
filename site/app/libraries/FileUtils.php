@@ -28,7 +28,7 @@ class FileUtils {
      * @return array
      */
     public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
-        $skip_files = array_map(function($str) {
+        $skip_files = array_map(function ($str) {
             return strtolower($str);
         }, $skip_files);
 
@@ -144,7 +144,7 @@ class FileUtils {
      * off the string.
      */
     public static function getAllFilesTrimSearchPath(string $search_path, int $path_length): array {
-        $files = array_map(function($entry) use ($path_length) {
+        $files = array_map(function ($entry) use ($path_length) {
             return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
         }, array_values(FileUtils::getAllFiles($search_path, [], true)));
         return $files;

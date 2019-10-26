@@ -128,7 +128,7 @@ class GradeableList extends AbstractModel {
             // We have to use @ since on calling Mocked PHPUnit classes within this
             // causes a warning to be raised as the mocked object tracks some debug
             // information which changes the internal object in PHP < 7.0. Annoying!
-            @uasort($this->$list, function(Gradeable $a, Gradeable $b) use ($function) {
+            @uasort($this->$list, function (Gradeable $a, Gradeable $b) use ($function) {
                 if ($a->$function() == $b->$function()) {
                     if ($a->getId() < $b->getId()) {
                         return -1;
