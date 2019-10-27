@@ -12,17 +12,18 @@ use app\libraries\Utils;
 
 class CourseMaterialsView extends AbstractView {
     /**
-     * @param User[] $students
-     * @return string
+     * @param User $user
      */
-    public function listCourseMaterials($user_group) {
+    public function listCourseMaterials($user) {
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
         $this->core->getOutput()->addBreadcrumb("Course Materials");
-        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp) {
+        $user_group = $user->getGroup();
+        $user_section = $user->getRegistrationSection();
+        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp, &$file_sections, &$hide_from_students) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
@@ -45,7 +46,13 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
+                        if ( isset( $json[$expected_file_path]['sections'] ) ){
+                            $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
+                        }
                         $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
+                        if ( isset( $json[$expected_file_path]['hide_from_students'] ) ){
+                            $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
+                        }
 
                         if ($isShareToOther == '1' && $release_date > $now_date_time)
                             $isShareToOther = '0';
@@ -57,7 +64,13 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
                         $release_date = $json['release_time'];
+                        if ( isset( $json[$expected_file_path]['hide_from_students'] ) ){
+                            $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
+                        }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
+                        if ( isset( $json[$expected_file_path]['sections'] ) ){
+                            $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
+                        }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
                     }
 
@@ -71,6 +84,7 @@ class CourseMaterialsView extends AbstractView {
                     $date = $now_date_time->format("Y-m-d H:i:sO");
                     $date=substr_replace($date,"9999",0,4);
                     $ex_file_path['release_datetime'] = $date;
+                    $ex_file_path['hide_from_students'] = "on";
                     $releaseData = $ex_file_path['release_datetime'];
                     $no_json[$expected_file_path] = $ex_file_path;
 
@@ -122,7 +136,8 @@ class CourseMaterialsView extends AbstractView {
         $file_shares = array();
         $file_release_dates = array();
         $in_dir = array();
-
+        $file_sections = array();
+        $hide_from_students = array();
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
@@ -134,8 +149,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-
-        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp);
+        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp, $file_sections, $hide_from_students);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
@@ -147,7 +161,7 @@ class CourseMaterialsView extends AbstractView {
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
-
+        $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $server_time = DateUtils::getServerTimeJson($this->core);
 
         return $this->core->getOutput()->renderTwigTemplate("course/CourseMaterials.twig", [
@@ -165,7 +179,11 @@ class CourseMaterialsView extends AbstractView {
             "delete_folder_url" => $this->core->buildCourseUrl(["course_materials", "delete_folder"]),
             "max_size_string" => $max_size_string,
             'server_time' => $server_time,
-            "display_file_url" => $this->core->buildCourseUrl(['display_file'])
+            "display_file_url" => $this->core->buildCourseUrl(['display_file']),
+            "user_section" => $user_section,
+            "reg_sections" => $reg_sections,
+            "file_sections" => $file_sections,
+            "hide_from_students" => $hide_from_students
         ]);
     }
 }

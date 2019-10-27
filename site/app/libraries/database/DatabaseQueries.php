@@ -2711,6 +2711,8 @@ AND gc_id IN (
                 return false;
             }
 
+            $child_thread_title = "Merged Thread Title: ".$child_thread_title."\n";
+
             if($child_root_post <= $parent_root_post) {
                 $message = "Child thread must be newer than parent thread";
                 $this->course_db->rollback();
