@@ -124,7 +124,7 @@ class AccessTester extends BaseUnitTest {
 
         $team1 = $this->createMockModel(Team::class);
         $team1->method("getId")->willReturn("team1");
-        $team1->method("hasMember")->willReturnCallback(function($test) {
+        $team1->method("hasMember")->willReturnCallback(function ($test) {
             return in_array($test, ["user1", "user2"]);
         });
 
@@ -154,7 +154,7 @@ class AccessTester extends BaseUnitTest {
 
         $team1 = $this->createMockModel(Team::class);
         $team1->method("getId")->willReturn("team1");
-        $team1->method("hasMember")->willReturnCallback(function($test) {
+        $team1->method("hasMember")->willReturnCallback(function ($test) {
             return in_array($test, ["user1", "user2"]);
         });
 

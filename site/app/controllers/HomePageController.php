@@ -58,11 +58,11 @@ class HomePageController extends AbstractController {
             $newLastName = trim($_POST['user_lastname_change']);
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
-				$user->setPreferredFirstName($newFirstName);
-				$user->setPreferredLastName($newLastName);
-				//User updated flag tells auto feed to not clobber some of the user's data.
-				$user->setUserUpdated(true);
-				$this->core->getQueries()->updateUser($user);
+                $user->setPreferredFirstName($newFirstName);
+                $user->setPreferredLastName($newLastName);
+                //User updated flag tells auto feed to not clobber some of the user's data.
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
             }
             else {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");
@@ -96,14 +96,14 @@ class HomePageController extends AbstractController {
         // Filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
 
-        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user_id, $as_instructor) {
+        $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id, $as_instructor) {
             return $as_instructor ?
                 $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
                 :
                 $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
         });
 
-        $archived_courses = array_filter($archived_courses, function(Course $course) use($user_id, $as_instructor) {
+        $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id, $as_instructor) {
             return $as_instructor ?
                 $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
                 :
@@ -113,13 +113,13 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
                 "unarchived_courses" => array_map(
-                    function(Course $course) {
+                    function (Course $course) {
                         return $course->getCourseInfo();
                     },
                     $unarchived_courses
                 ),
                 "archived_courses" => array_map(
-                    function(Course $course) {
+                    function (Course $course) {
                         return $course->getCourseInfo();
                     },
                     $archived_courses

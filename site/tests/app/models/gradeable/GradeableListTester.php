@@ -398,8 +398,17 @@ class GradeableListTester extends BaseUnitTest {
      * @return Gradeable
      */
     private function mockGradeable(
-        Core $core, $id, $type, $ta_view_start_date, $submission_open_date, $submission_due_date, $grade_start_date,
-        $grade_released_date, $ta_grading = true, $student_submit = true, $has_due_date = true
+        Core $core,
+        $id,
+        $type,
+        $ta_view_start_date,
+        $submission_open_date,
+        $submission_due_date,
+        $grade_start_date,
+        $grade_released_date,
+        $ta_grading = true,
+        $student_submit = true,
+        $has_due_date = true
     ) {
         $timezone = new \DateTimeZone('America/New_York');
         $details = [

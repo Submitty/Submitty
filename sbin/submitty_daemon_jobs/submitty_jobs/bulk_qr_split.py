@@ -35,7 +35,7 @@ def main(args):
         os.chdir(split_path)
         pdfPages = PdfFileReader(filename)
         pdf_writer = PdfFileWriter()
-        i = cover_index = id_index = 0
+        i = id_index = 0
         page_count = 1
         prev_file = data = "BLANK"
         output = {"filename": filename, "is_qr": True}
@@ -49,11 +49,21 @@ def main(args):
 
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
+<<<<<<< HEAD
             mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
             contrast = 255 - cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
 
             # decode img - only look for QR codes
             val = pyzbar.decode(contrast, symbols=[ZBarSymbol.QRCODE])
+=======
+
+            img_grey = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+            ret2, thresh = cv2.threshold(img_grey, 0, 255,
+                                         cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
+            # decode img - only look for QR codes
+            val = pyzbar.decode(thresh, symbols=[ZBarSymbol.QRCODE])
+>>>>>>> bdc9aaed74d45f394d31fb79030d19de8e64c912
             if val != []:
                 # found a new qr code, split here
                 # convert byte literal to string
@@ -74,6 +84,7 @@ def main(args):
                     if qr_suffix != '' and suf == qr_suffix:
                         data = data[:-len(qr_suffix)]
 
+<<<<<<< HEAD
                 # if we're looking for a student's ID, use that as the value instead
                 if use_ocr:
                     data = scanner.getDigits(contrast, val)
@@ -83,6 +94,14 @@ def main(args):
                 cover_index = i
                 cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
                 output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+=======
+                # since QR splitting doesn't know the max page assume length of 3
+                prepended_index = str(i).zfill(3)
+
+                cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
+                                                          prepended_index)
+                output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
+>>>>>>> bdc9aaed74d45f394d31fb79030d19de8e64c912
 
                 output[output_filename] = {}
                 output[output_filename]['id'] = data
@@ -118,14 +137,16 @@ def main(args):
                 prev_file = output_filename
 
                 # save page as image, start indexing at 1
-                page.save(prev_file[:-4] + '_' + str(page_count).zfill(2) + '.jpg',
+                page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
                           "JPEG", quality=100)
 
             else:
                 # the first pdf page doesn't have a qr code
                 if i == 0:
-                    output_filename = '{}_{}.pdf'.format(filename[:-4], i)
-                    cover_filename = '{}_{}_cover.pdf'.format(filename[:-4], i)
+                    prepended_index = str(i).zfill(3)
+                    output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
+                    cover_filename = '{}_{}_cover.pdf'.format(filename[:-4],
+                                                              prepended_index)
                     output[output_filename] = {}
                     # set the value as blank so a human can check what happened
                     output[output_filename]['id'] = "BLANK"
@@ -144,7 +165,7 @@ def main(args):
                 page_count += 1
                 pdf_writer.addPage(pdfPages.getPage(i))
                 # save page as image, start indexing at 1
-                page.save(prev_file[:-4] + '_' + str(page_count).zfill(2) + '.jpg',
+                page.save(prev_file[:-4] + '_' + str(page_count).zfill(3) + '.jpg',
                           "JPEG", quality=100)
 
             i += 1
@@ -152,7 +173,8 @@ def main(args):
         buff += "Finished splitting into {} files\n".format(id_index)
 
         # save whatever is left
-        output_filename = '{}_{}.pdf'.format(filename[:-4], cover_index)
+        prepended_index = str(i).zfill(3)
+        output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
         output[output_filename]['id'] = data
         output[output_filename]['page_count'] = page_count
         logger.write_to_json(json_file, output)

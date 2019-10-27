@@ -17,27 +17,28 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
             'listCourseMaterials',
-            $user_group = $this->core->getUser()->getGroup()
+            $this->core->getUser()->getGroup()
         );
     }
 
-    public function deleteHelper($file,&$json){
-            if ((array_key_exists('name',$file))){
-                $filename = $file['path'];
-                unset($json[$filename]);
-                return;
+    public function deleteHelper($file, &$json) {
+        if ((array_key_exists('name',$file))) {
+            $filename = $file['path'];
+            unset($json[$filename]);
+            return;
+        }
+        else {
+            if(array_key_exists('files',$file)) {
+                $this->deleteHelper($file['files'],$json);
             }
-            else{
-                if(array_key_exists('files',$file)){
-                    $this->deleteHelper($file['files'],$json);
-                }
-                else{
-                    foreach ($file as $f){
-                        $this->deleteHelper($f,$json);
-                    }
+            else {
+                foreach ($file as $f) {
+                    $this->deleteHelper($f,$json);
                 }
             }
+        }
     }
+
     /**
      * @Route("/{_semester}/{_course}/course_materials/delete")
      */
@@ -205,7 +206,7 @@ class CourseMaterialsController extends AbstractController {
         $new_data_time = htmlspecialchars($newdatatime);
         //Check if the datetime is correct
         if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === FALSE){
-          return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
+            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
         //only one will not iterate correctly
@@ -267,7 +268,7 @@ class CourseMaterialsController extends AbstractController {
 
         //Check if the datetime is correct
         if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === FALSE){
-          return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
+            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
 
@@ -324,7 +325,7 @@ class CourseMaterialsController extends AbstractController {
         $count_item = count($status);
         if (isset($uploaded_files[1])) {
             for ($j = 0; $j < $count_item; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
 
                     $is_zip_file = false;
@@ -341,7 +342,7 @@ class CourseMaterialsController extends AbstractController {
                         //get the file names inside the zip to write to the JSON file
 
                         $zip = new \ZipArchive();
--                       $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
 
                         if(!$res){
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to open zip archive", false);
@@ -353,7 +354,7 @@ class CourseMaterialsController extends AbstractController {
                         for ($i = 0; $i < $zip->numFiles; $i++) {
                             $entries[] = $zip->getNameIndex($i);
                         }
-                        $entries = array_filter($entries, function($entry) use ($disallowed_folders, $disallowed_files) {
+                        $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                             $name = strtolower($entry);
                             foreach ($disallowed_folders as $folder) {
                                 if (Utils::startsWith($folder, $name)) {
@@ -369,7 +370,7 @@ class CourseMaterialsController extends AbstractController {
                             }
                             return true;
                         });
-                        $zfiles = array_filter($entries, function($entry) {
+                        $zfiles = array_filter($entries, function ($entry) {
                             return substr($entry, -1) !== '/';
                         });
 

@@ -168,11 +168,11 @@ class GradeInquiryController extends AbstractController {
         // toggle status
         $status = $grade_inquiry->getStatus();
         if ($status == -1) {
-          $status = 0;
-          $type = 'resolve';
+            $status = 0;
+            $type = 'resolve';
         } else {
-          $status = -1;
-          $type = 'reopen';
+            $status = -1;
+            $type = 'reopen';
         }
 
         try {
@@ -269,7 +269,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade'] . '?' . http_build_query(['who_id' => $submitter->getId()]))]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?'.http_build_query(['who_id' => $submitter->getId()])])]);
             if (empty($graders)) {
                 $graders = $this->core->getQueries()->getAllGraders();
             }

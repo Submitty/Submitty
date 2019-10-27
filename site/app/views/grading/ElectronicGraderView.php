@@ -46,7 +46,8 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings) {
+        bool $show_warnings
+    ) {
 
         $peer = false;
         if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -241,7 +242,9 @@ class ElectronicGraderView extends AbstractView {
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
-            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
+            "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
         ]);
     }
 
@@ -580,8 +583,9 @@ HTML;
         }
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function($a,$b)
-            { return ($a['title'] == 'NULL' or $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);   });
+        usort($sections, function ($a,$b) {
+            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
+        });
 
 
         $empty_team_info = [];
@@ -602,23 +606,23 @@ HTML;
             $hover_over_string = "";
             ksort($team_gradeable_view_history[$team_id]);
             ksort($team);
-                foreach ($team as $user => $value) {
-                    if ($value != null) {
-                        $not_viewed_yet = false;
-                        $date_object = new \DateTime($value);
-                        $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
-                    }
-                    else {
-                        $hover_over_string.= "Not viewed by ".$user."\n";
-                    }
-                }
-
-                if ($not_viewed_yet) {
-                    $team_gradeable_view_history[$team_id]['hover_string'] = '';
+            foreach ($team as $user => $value) {
+                if ($value != null) {
+                    $not_viewed_yet = false;
+                    $date_object = new \DateTime($value);
+                    $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
                 }
                 else {
-                    $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+                    $hover_over_string.= "Not viewed by ".$user."\n";
                 }
+            }
+
+            if ($not_viewed_yet) {
+                $team_gradeable_view_history[$team_id]['hover_string'] = '';
+            }
+            else {
+                $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+            }
         }
 
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
@@ -925,7 +929,7 @@ HTML;
         }
 
         // TODO: this is duplicated in Homework View
-        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
                 'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0

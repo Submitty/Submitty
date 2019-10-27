@@ -6,12 +6,10 @@ use tests\BaseUnitTest;
 use app\controllers\course\CourseMaterialsController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use app\libraries\Core;
-use app\libraries\Access;
-use \DateTime;
 use \ZipArchive;
 
-class CourseMaterialsTester extends BaseUnitTest{
+class CourseMaterialsControllerTester extends BaseUnitTest {
+    use \phpmock\phpunit\PHPMock;
 
     private $core;
     private $config;
@@ -85,7 +83,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         return $files;
     }
 
-    public function testCourseMaterialsUpload(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testCourseMaterialsUpload() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $name = "foo.txt";
@@ -119,7 +124,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->assertEquals($expected_files, $files);
     }
 
-    public function testZipCourseUpload(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testZipCourseUpload() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -152,7 +164,13 @@ class CourseMaterialsTester extends BaseUnitTest{
 
     }
 
-    public function testModifyCourseMaterials(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testModifyCourseMaterials() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -189,7 +207,7 @@ class CourseMaterialsTester extends BaseUnitTest{
              $this->upload_path . "/" . $name => [
                 'checked' => '1',
                 'release_datetime' => $new_date
-            ]
+             ]
         ];
 
         $this->assertEquals($expected_json, $json);
@@ -214,7 +232,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
 
-    public function testDeleteCourseMaterial(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testDeleteCourseMaterial() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -240,7 +265,14 @@ class CourseMaterialsTester extends BaseUnitTest{
         $this->assertEquals(0, count($files));
     }
 
-    public function testModifyCourseMaterialsPermission(){
+    /**
+     * @runInSeparateProcess
+     */
+    public function testModifyCourseMaterialsPermission() {
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -260,6 +292,33 @@ class CourseMaterialsTester extends BaseUnitTest{
             $this->upload_path . '/' . $name => [
                 'checked' => 0,
                 'release_datetime' => $_POST['release_time']
+            ]
+        ];
+
+        $this->assertEquals($expected_json, $json);
+    }
+
+    public function testRequestedPathUpload() {
+         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
+        $controller = new CourseMaterialsController($this->core);
+        $_FILES = array();
+        $_POST['requested_path'] = 'foo/foo2';
+
+        $name = "foo.txt";
+        file_put_contents($this->upload_path . "/" .  $name, 'a');
+        $this->buildFakeFile($name);
+
+        $ret = $controller->ajaxUploadCourseMaterialsFiles();
+        $json = FileUtils::readJsonFile($this->json_path);
+
+        $filename_full = FileUtils::joinPaths( $this->upload_path, "foo/foo2", $name );
+        $expected_json = [
+            $filename_full => [
+                "checked" => 1,
+                "release_datetime" => $_POST['release_time']
             ]
         ];
 

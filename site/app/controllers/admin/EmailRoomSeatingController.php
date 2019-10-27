@@ -20,8 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class EmailRoomSeatingController extends AbstractController {
     const DEFAULT_EMAIL_SUBJECT = 'Seating Assignment for {$gradeable_id}';
-    const DEFAULT_EMAIL_BODY =
-'Hello,
+    const DEFAULT_EMAIL_BODY = 'Hello,
 
 Listed below is your seating assignment for the upcoming exam {$gradeable_id} on {$exam_date} at {$exam_time}.
 
@@ -103,12 +102,11 @@ Please email your instructor with any questions or concerns.';
         ];
 
         foreach($replaces as $key => $variable) {
-        	if(isset($data[$key])) {
-        		$message = str_replace('{$' . $variable . '}', $data[$key], $message);
-        	}
+            $message = str_replace('{$' . $variable . '}', $data[$key] ?? 'SEE INSTRUCTOR', $message);
         }
 
-		$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+        $message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+
         return $message;
     }
 

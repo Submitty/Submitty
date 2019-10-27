@@ -549,7 +549,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     for container in self.containers:
       self._setup_single_directory_for_compilation(container.directory)
       # Run any necessary pre_commands
-    self._run_pre_commands(self.directory)
+      self._run_pre_commands(container.directory)
 
 
   def setup_for_execution_testcase(self, testcase_dependencies):
@@ -557,6 +557,7 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     os.chdir(self.tmp_work)
     for container in self.containers:
       self._setup_single_directory_for_execution(container.directory, testcase_dependencies)
+      self._run_pre_commands(container.directory)
 
       # Copy in the submitty_router if necessary.
       if container.import_router:
@@ -564,13 +565,13 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         self.log_message(f"COPYING:\n\t{router_path}\n\t{container.directory}")
         shutil.copy(router_path, container.directory)
         autograding_utils.add_all_permissions(container.directory)
-    self._run_pre_commands(self.directory)
 
   def setup_for_random_output(self, testcase_dependencies):
     """ For every container, set up its directory for random output generation. """
     os.chdir(self.tmp_work)
     for container in self.solution_containers:
       self._setup_single_directory_for_random_output(container.directory, testcase_dependencies)
+      self._run_pre_commands(container.directory)
 
       if container.import_router:
         router_path = os.path.join(self.tmp_autograding, "bin", "submitty_router.py")
@@ -578,7 +579,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
         shutil.copy(router_path, container.directory)
         autograding_utils.add_all_permissions(container.directory)
     
-    self._run_pre_commands(self.random_output_directory)
 
 
   def setup_for_archival(self, overall_log):
