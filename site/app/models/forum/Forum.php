@@ -21,7 +21,7 @@ class Forum extends AbstractModel {
         //$this->forum_db = $forum_db;
     }
 
-    public function publish(Array $data, bool $isThread) : bool {
+    public function publish(array $data, bool $isThread) : bool {
 
         $pushFunction = null;
 
@@ -117,7 +117,7 @@ class Forum extends AbstractModel {
     }
 
     // Validation of form data
-    private function validateThreadData(Array $data, bool $createObject) : Array {
+    private function validateThreadData(array $data, bool $createObject) : array {
 
         //Validate the post data prior to thread data
         $goodPost = $this->validatePostData($data, false, true);
@@ -134,7 +134,7 @@ class Forum extends AbstractModel {
 
     }
 
-    private function validatePostData(Array $data, bool $createObject, bool $isThread) : Array {
+    private function validatePostData(array $data, bool $createObject, bool $isThread) : array {
 
         if( empty($data['content']) || empty($data['anon']) ||
             empty($data['thread_id']) || empty($data['parent_id']) ||

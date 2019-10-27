@@ -122,7 +122,7 @@ class RainbowCustomizationJSON extends AbstractModel
         $file_contents = file_get_contents($course_path);
 
         // Validate file read
-        if($file_contents === False)
+        if($file_contents === false)
         {
             throw new FileReadException('An error occurred trying to read the contents of customization file.');
         }
@@ -130,7 +130,7 @@ class RainbowCustomizationJSON extends AbstractModel
         $json = json_decode($file_contents);
 
         // Validate decode
-        if($json === NULL)
+        if($json === null)
         {
             throw new MalformedDataException('Unable to decode JSON string');
         }
