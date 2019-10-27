@@ -37,15 +37,15 @@ function addConfetti(){
 	let gravity_const = 0.25;
 
 	let date_box = document.getElementById("submission_timestamp");
-	if(date_box)
-		due_date = date_box.innerHTML.match(/\d+/g);
+	if(typeof(date_box) != 'undefined' && date_box != null)
+		submission_date = date_box.innerHTML.match(/\d+/g);
 
 	let d = new Date();
 	let month = d.getMonth();
 
 	//if we parsed the submission due date, use that instead
-	if(due_date.length >= 1){
-		month = parseInt(due_date[0], 10) - 1;
+	if(submission_date.length >= 1){
+		month = parseInt(submission_date[0], 10) - 1;
 	}
 	
 	function randomColor () {
