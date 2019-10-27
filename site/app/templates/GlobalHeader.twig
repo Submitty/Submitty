@@ -113,23 +113,29 @@
                     </div>
                 </div>
 
-                <div id="duckdiv" style="position:relative;top:-40px;">
+                <div id="duckdiv" 
+                    {% if enable_banner %}
+                    style="position:relative;top:-40px;"
+                    {% endif %}
+                    >
                     <img id="submitty-mascot" 
                          src="{{ base_url }}/img/submitty-mascot.png" 
                          alt="Submitty's duck mascot!" 
                          height = "80" 
-                         style="position:absolute;right: 5px;" 
                          {% if enable_banner %}
+                         style="position:absolute;right: 5px;" 
                          onclick="ducky();" 
                          tabindex="0"
                          {% endif %}
                     />
+                    {% if enable_banner %}
                     <img id="submitty-banner" 
                          src="{{ base_url }}/img/submitty-banner.png"
                          alt="Happy Submitty Week!" 
                          height="80" 
                          style="position:absolute;right: -415px;display:none;" 
                     />
+                    {% endif %}
                 </div>
 
                 <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
