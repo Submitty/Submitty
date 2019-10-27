@@ -22,7 +22,10 @@ class PlagiarismController extends AbstractController {
         );
 
         if (file_exists($filename)) {
-            $file = fopen($filename, "r") or exit("Unable to open file!");
+            $file = fopen($filename, "r");
+            if (!$file) {
+                exit("Unable to open file!");
+            }
 
             while(!feof($file)) {
                 $line = fgets($file);

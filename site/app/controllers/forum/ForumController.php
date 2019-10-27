@@ -261,7 +261,7 @@ class ForumController extends AbstractController{
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
 
-        if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
+        if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin() ){
             $lock_thread_date = $_POST['lock_thread_date'];
         } else {
             $lock_thread_date = null;
@@ -374,7 +374,7 @@ class ForumController extends AbstractController{
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        } else if($this->core->getQueries()->isThreadLocked($thread_id) and !$this->core->getUser()->accessAdmin() ) {
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         } else {
@@ -458,10 +458,10 @@ class ForumController extends AbstractController{
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin() ){
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         else if($modify_type == 0) { //delete post or thread
@@ -617,7 +617,7 @@ class ForumController extends AbstractController{
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if( !empty($_POST['lock_thread_date']) and $this->core->getUser()->accessAdmin()){
+            if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
                 $lock_thread_date = $_POST['lock_thread_date'];
             }
             else{

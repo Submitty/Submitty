@@ -280,8 +280,7 @@ class RainbowCustomizationJSON extends AbstractModel
         foreach($this as $key => $value)
         {
             // Dont include $core or $modified
-            if($key != 'core' AND $key != 'modified')
-            {
+            if ($key != 'core' && $key != 'modified') {
                 $json->$key = $value;
             }
         }

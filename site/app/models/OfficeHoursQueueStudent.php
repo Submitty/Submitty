@@ -52,7 +52,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
     }
 
     public function isInQueue(){
-        return $this->status == 0 or $this->status == 1;
+        return $this->status == 0 || $this->status == 1;
     }
 
     public function getStatus(){

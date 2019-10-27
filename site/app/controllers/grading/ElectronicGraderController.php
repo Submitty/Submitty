@@ -672,7 +672,7 @@ class ElectronicGraderController extends AbstractController {
         $teams = $this->core->getQueries()->getTeamsWithMembersFromGradeableID($gradeable_id);
 
         //Does nothing if there are no sections or no teams
-        if ($section_count <= 0 or empty($teams)) {
+        if ($section_count <= 0 || empty($teams)) {
             $this->core->redirect($return_url);
             return;
         }

@@ -1223,7 +1223,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorOnBrokenZip() {
         $this->addUploadZip('broken', array('test1.txt'));
         $path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part1', 'broken.zip');
-        $fh = fopen($path, 'r+') or die("can't open file");
+        $fh = fopen($path, 'r+');
+        if (!$fh) {
+            $this->fail('cannot open the file');
+        }
         $stat = fstat($fh);
         ftruncate($fh, $stat['size']-1);
         fclose($fh);
