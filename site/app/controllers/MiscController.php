@@ -93,7 +93,7 @@ class MiscController extends AbstractController {
             if($dir == 'course_materials')
             {
                 // If the user attempting to access the file is not at least a grader then ensure the file has been released
-                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                if(!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path))
                 {
                     $this->core->getOutput()->showError("You may not access this file until it is released.");
                     return false;
@@ -173,18 +173,18 @@ class MiscController extends AbstractController {
         }
 
         // If attempting to obtain course materials
-        if($dir == 'course_materials') {
+        if ($dir == 'course_materials') {
             // If the user attempting to access the file is not at least a grader then ensure the file has been released
-            if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path)) {
+            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
                 $this->core->getOutput()->showError("You may not access this file until it is released.");
                 return false;
             }
         }
 
-        if($dir == 'submissions'){
+        if ($dir == 'submissions') {
             //cannot download scanned images for bulk uploads
             if (strpos(basename($path), "upload_page_" ) !== false &&
-                FileUtils::getContentType($path) !== "application/pdf"){
+                FileUtils::getContentType($path) !== "application/pdf") {
 
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
@@ -290,13 +290,13 @@ class MiscController extends AbstractController {
                         $relativePath = substr($filePath, strlen($paths[$x]) + 1);
 
                         //Only get PDFs if this is a bulk upload gradeable
-                        if ($gradeable->isScannedExam() 
+                        if ($gradeable->isScannedExam()
                             && FileUtils::getContentType($filePath) === "application/pdf"){
                             // Add current file to archive
                             $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
                         }
 
-                       
+
                     }
                 }
             }
