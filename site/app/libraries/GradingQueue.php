@@ -108,8 +108,8 @@ class GradingQueue {
         // Then, check its position in the queue
         $queue_status = array_search($queue_file, $this->queue_files, true);
         if($queue_status === false) {
-          // Also check for the vcs queue file, which will soon be converted into a regular queue file
-          $queue_status = array_search($vcs_queue_file, $this->queue_files, true);
+            // Also check for the vcs queue file, which will soon be converted into a regular queue file
+            $queue_status = array_search($vcs_queue_file, $this->queue_files, true);
         }
 
         if($queue_status !== false) {

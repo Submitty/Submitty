@@ -207,7 +207,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
              $this->upload_path . "/" . $name => [
                 'checked' => '1',
                 'release_datetime' => $new_date
-            ]
+             ]
         ];
 
         $this->assertEquals($expected_json, $json);
@@ -292,6 +292,33 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . '/' . $name => [
                 'checked' => 0,
                 'release_datetime' => $_POST['release_time']
+            ]
+        ];
+
+        $this->assertEquals($expected_json, $json);
+    }
+
+    public function testRequestedPathUpload() {
+         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
+        $controller = new CourseMaterialsController($this->core);
+        $_FILES = array();
+        $_POST['requested_path'] = 'foo/foo2';
+
+        $name = "foo.txt";
+        file_put_contents($this->upload_path . "/" .  $name, 'a');
+        $this->buildFakeFile($name);
+
+        $ret = $controller->ajaxUploadCourseMaterialsFiles();
+        $json = FileUtils::readJsonFile($this->json_path);
+
+        $filename_full = FileUtils::joinPaths( $this->upload_path, "foo/foo2", $name );
+        $expected_json = [
+            $filename_full => [
+                "checked" => 1,
+                "release_datetime" => $_POST['release_time']
             ]
         ];
 

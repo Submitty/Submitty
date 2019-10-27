@@ -93,7 +93,13 @@
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
                 <div id="nav-links">
-                    <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home"><i class="fas fa-home"></i></a>
+                    <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home">
+                        <img id="submitty-mascot-home-btn"
+                         src="{{ base_url }}/img/submitty-mascot.png"
+                         alt="Submitty's duck mascot!"
+                         height = "50px"
+                         />
+                     </a>
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}

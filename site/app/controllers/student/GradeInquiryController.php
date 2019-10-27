@@ -168,11 +168,11 @@ class GradeInquiryController extends AbstractController {
         // toggle status
         $status = $grade_inquiry->getStatus();
         if ($status == -1) {
-          $status = 0;
-          $type = 'resolve';
+            $status = 0;
+            $type = 'resolve';
         } else {
-          $status = -1;
-          $type = 'reopen';
+            $status = -1;
+            $type = 'reopen';
         }
 
         try {
