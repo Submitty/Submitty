@@ -43,7 +43,7 @@ class OfficeHoursQueueController extends AbstractController {
                 )
             );
         }else{
-        $oh_queue = $this->core->getQueries()->getInstructorQueue();
+            $oh_queue = $this->core->getQueries()->getInstructorQueue();
             return Response::WebOnlyResponse(
                 new WebResponse(
                     'OfficeHoursQueue',

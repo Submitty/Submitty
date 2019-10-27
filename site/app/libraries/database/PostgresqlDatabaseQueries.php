@@ -107,10 +107,10 @@ GROUP BY user_id", array($user_id));
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         $orderBy="";
         if($section_key == "registration_section") {
-          $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
+            $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
         }
         else {
-          $orderBy = "u.{$section_key}, u.user_id";
+            $orderBy = "u.{$section_key}, u.user_id";
         }
 
         $this->course_db->query("

@@ -35,8 +35,6 @@
         <exclude name="Generic.PHP.LowerCaseKeyword.Found" />
         <exclude name="Generic.PHP.LowerCaseType.ReturnTypeFound" />
         <exclude name="Generic.PHP.LowerCaseType.ParamTypeFound" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
@@ -100,7 +98,6 @@
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeComma" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeArg" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeHint" />
-        <exclude name="Squiz.Operators.ValidLogicalOperators.NotAllowed" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />

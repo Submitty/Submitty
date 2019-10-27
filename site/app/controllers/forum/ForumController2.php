@@ -109,14 +109,14 @@ class ForumController2 extends AbstractController {
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
-            //Notify User
-            $this->core->addErrorMessage($error);
-            if ($isThread) {
-                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
-            } else {
-                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
-            }
-            return array(-1, $url);
+        //Notify User
+        $this->core->addErrorMessage($error);
+        if ($isThread) {
+            $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+        } else {
+            $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
+        }
+        return array(-1, $url);
     }
 
     private function changeThreadStatus($status) {
@@ -534,9 +534,9 @@ class ForumController2 extends AbstractController {
         $posts = null;
         $option = 'tree';
         if(!empty($_REQUEST['option'])) {
-           $option = $_REQUEST['option'];
+            $option = $_REQUEST['option'];
         } else if(!empty($_COOKIE['forum_display_option'])) {
-           $option = $_COOKIE['forum_display_option'];
+            $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if(!empty($_REQUEST["thread_id"])){

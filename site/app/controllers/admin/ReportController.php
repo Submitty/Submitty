@@ -303,7 +303,7 @@ class ReportController extends AbstractController {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-            
+
             if (!$gg->hasOverriddenGrades()){
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
@@ -374,7 +374,7 @@ class ReportController extends AbstractController {
 
         if ($gg->hasOverriddenGrades()){
             $entry['status'] = 'Overridden';
-            $entry['comment'] = $gg->getOverriddenComment(); 
+            $entry['comment'] = $gg->getOverriddenComment();
         }
         else {
             // Add information special to electronic file submissions
@@ -567,7 +567,7 @@ class ReportController extends AbstractController {
         $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
 
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($jobs_file) AND $max_wait_time)
+        while(file_exists($jobs_file) && $max_wait_time)
         {
             sleep(1);
             $max_wait_time--;
@@ -577,7 +577,7 @@ class ReportController extends AbstractController {
         // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
         // We must also wait for that file to be removed
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($processing_jobs_file) AND $max_wait_time)
+        while(file_exists($processing_jobs_file) && $max_wait_time)
         {
             sleep(1);
             $max_wait_time--;
@@ -604,7 +604,7 @@ class ReportController extends AbstractController {
 
         // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
         // implying that it finished
-        if($max_wait_time AND $failure_detected == false)
+        if ($max_wait_time && $failure_detected == false)
         {
             $this->core->getOutput()->renderJsonSuccess($debug_contents);
         }

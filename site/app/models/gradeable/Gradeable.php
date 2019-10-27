@@ -1715,7 +1715,7 @@ class Gradeable extends AbstractModel {
      */
     public function hasSubmission(Submitter $submitter) {
         if ($submitter->isTeam() && !$this->isTeamAssignment()) {
-           return false;
+            return false;
         }
         if (!$submitter->isTeam() && $this->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $submitter->getId());

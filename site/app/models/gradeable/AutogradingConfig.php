@@ -82,7 +82,7 @@ class AutogradingConfig extends AbstractModel {
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
-        
+
         // Was there actually a config file to read from
         if ($details === null || $details === []) {
             throw new \InvalidArgumentException('Provided details were blank or null');
@@ -164,11 +164,11 @@ class AutogradingConfig extends AbstractModel {
                     $notebook_cell['markdown_data'] = $markdown;
 
                     // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
-                    if ($i < count($details['notebook']) - 1) 
+                    if ($i < count($details['notebook']) - 1)
                     {
                         $next_cell = &$details['notebook'][$i + 1];
                         if (isset($next_cell['type']) &&
-                            ($next_cell['type'] == 'short_answer' OR $next_cell['type'] == 'multiple_choice')) 
+                            ($next_cell['type'] == 'short_answer' || $next_cell['type'] == 'multiple_choice'))
                         {
                             $next_cell['label'] = $markdown;
                             // Do not add current cell to notebook, since it is embedded in the label
@@ -184,7 +184,7 @@ class AutogradingConfig extends AbstractModel {
 
                 // If cell is a type of input add it to the $actual_inputs array
                 if(isset($notebook_cell['type']) &&
-                   ($notebook_cell['type'] == 'short_answer' OR $notebook_cell['type'] == 'multiple_choice'))
+                   ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice'))
                 {
                     array_push($actual_input, $notebook_cell);
                 }

@@ -215,7 +215,7 @@ class GradingOrder extends AbstractModel {
         $this->initUsersNotFullyGraded($component_id);
 
         return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
-            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+            return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
         });
     }
 
@@ -236,7 +236,7 @@ class GradingOrder extends AbstractModel {
         $this->initUsersNotFullyGraded($component_id);
 
         return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
-            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+            return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
         });
     }
 
@@ -464,17 +464,17 @@ class GradingOrder extends AbstractModel {
      */
     public static function getGradingOrderMessage($sort, $direction) {
 
-        if($sort == 'first' AND $direction == 'ASC') {
+        if($sort == 'first' && $direction == 'ASC') {
             $msg = 'First Name Ascending';
-        } else if ($sort == 'first' AND $direction == 'DESC') {
+        } else if ($sort == 'first' && $direction == 'DESC') {
             $msg = 'First Name Descending';
-        } else if ($sort == 'last' AND $direction == 'ASC') {
+        } else if ($sort == 'last' && $direction == 'ASC') {
             $msg = 'Last Name Ascending';
-        } else if ($sort == 'last' AND $direction == 'DESC') {
+        } else if ($sort == 'last' && $direction == 'DESC') {
             $msg = 'Last Name Descending';
-        } else if ($sort == 'id' AND $direction == 'ASC') {
+        } else if ($sort == 'id' && $direction == 'ASC') {
             $msg = 'ID Ascending';
-        } else if ($sort == 'id' AND $direction == 'DESC') {
+        } else if ($sort == 'id' && $direction == 'DESC') {
             $msg = 'ID Descending';
         } else if ($sort == 'random') {
             $msg = 'Randomized';
