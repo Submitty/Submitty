@@ -320,8 +320,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $filename_full = FileUtils::joinPaths( $this->upload_path, "foo/foo2", $name );
         $expected_json = [
             $filename_full => [
-                "checked" => 1,
-                "release_datetime" => $_POST['release_time']
+                "checked" => '1',
+                "release_datetime" => $_POST['release_time'],
+                "hide_from_students" => null
             ]
         ];
 
