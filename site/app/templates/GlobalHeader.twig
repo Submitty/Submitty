@@ -120,19 +120,21 @@
                 </div>
                 <div id="duckdiv" 
                     {% if enable_banner %}
-                        style="position:relative;top:-40px;"
+                        style="position:relative;top:-30px; right:12px;"
                 >
                     {% else %}
                 >
                         <a target="_blank" aria-label="Learn more about Moorthy" 
-                        href="http://submitty.org/developer/rcos_moorthy" >
+                        href="http://submitty.org/developer/rcos_moorthy" 
+                        style="padding-right:15px;" 
+                        >
                     {% endif %}
                     <img id="moorthy-duck" 
-                         src="{{ base_url }}/img/moorthy-duck.png" 
+                         src="{{ base_url }}/img/moorthy_duck.png" 
                          alt="Duck Moorthy!" 
-                         height = "80" 
+                         height = "50" 
                          {% if enable_banner %}
-                            style="position:absolute;right: 5px;" 
+                            style="position:absolute; right: 10px;" 
                             onclick="ducky();" 
                             tabindex="0"
                          {% endif %}
@@ -146,7 +148,7 @@
                          src="{{ base_url }}/img/submitty-banner.png"
                          alt="Happy Submitty Week!" 
                          height="80" 
-                         style="position:absolute;right: -415px;display:none;" 
+                         style="position:absolute;right: -420px; top:-5px;display:none;" 
                     />
                     {% endif %}
                 </div>
