@@ -145,7 +145,7 @@ class ForumThreadView extends AbstractView {
             $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
         }
 
-        $currentThreadArr = array_filter($threadsHead, function($ar) use($currentThread) {
+        $currentThreadArr = array_filter($threadsHead, function ($ar) use ($currentThread) {
             return ($ar['id'] == $currentThread);
         });
 
@@ -789,20 +789,20 @@ class ForumThreadView extends AbstractView {
         }
         $classes = ["post_box"];
         if ($first && $display_option != 'alpha') {
-            $classes[] = " first_post";
+            $classes[] = "first_post";
         }
         if (in_array($post_id, $unviewed_posts)) {
             if($current_user != $post["author_user_id"]) {
-                $classes[] = " new_post";
+                $classes[] = "new_post";
             }
         } else {
-            $classes[] = " viewed_post";
+            $classes[] = "viewed_post";
         }
         if ($this->core->getQueries()->isStaffPost($post["author_user_id"])) {
-            $classes[] = " important";
+            $classes[] = "important";
         }
         if ($post["deleted"]) {
-            $classes[] = " deleted";
+            $classes[] = "deleted";
             $deleted = true;
         } else {
             $deleted = false;
@@ -1129,11 +1129,11 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-    $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
-        "forumBarData" => $forumBarData,
-        "userData" => $userData,
-        "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
-    ]);
+        $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
+            "forumBarData" => $forumBarData,
+            "userData" => $userData,
+            "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
+        ]);
 
         return $return;
 

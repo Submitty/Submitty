@@ -239,7 +239,12 @@ class SubmissionController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
     */
     public function ajaxBulkUpload($gradeable_id) {
-        $is_qr = $_POST['use_qr_codes'] === "true";
+        if (empty($_POST)) {
+            $max_size =  Utils::returnBytes(ini_get('post_max_size'));
+            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+        }
+
+        $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
@@ -262,42 +267,29 @@ class SubmissionController extends AbstractController {
             $uploaded_file = $_FILES["files1"];
         }
 
-        $errors = array();
-        $count = 0;
-        if (isset($uploaded_file)) {
-            $count = count($uploaded_file["name"]);
-            for ($j = 0; $j < $count; $j++) {
-                if (!isset($uploaded_file["tmp_name"][$j]) || $uploaded_file["tmp_name"][$j] === "") {
-                    $error_message = $uploaded_file["name"][$j]." failed to upload. ";
-                    if (isset($uploaded_file["error"][$j])) {
-                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_file["error"][$j]). ".";
-                    }
-                    $errors[] = $error_message;
-                }
-            }
+        $status = FileUtils::validateUploadedFiles($uploaded_file);
+        $count = count($uploaded_file["name"]);
+
+        if(array_key_exists("failed", $status)){
+            return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
 
-        if (count($errors) > 0) {
-            $error_text = implode("\n", $errors);
-            return $this->uploadResult("Upload Failed: ".$error_text, false);
+        $file_size = 0;
+        foreach ($status as $stat) {
+            if($stat['success'] === false){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
+            }
+
+            if($stat['type'] !== 'application/pdf'){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['name'] . " is not a PDF", false);
+            }
+
+            $file_size += $stat['size'];
         }
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
         if ($max_size < 10000000) {
             $max_size = 10000000;
-        }
-        // Error checking of file name
-        $file_size = 0;
-        if (isset($uploaded_file)) {
-            for ($j = 0; $j < $count; $j++) {
-                if(FileUtils::isValidFileName($uploaded_file["name"][$j]) === false) {
-                    return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_file["name"][$j].".", false);
-                }
-                if(substr($uploaded_file["name"][$j],-3) != "pdf") {
-                    return $this->uploadResult($uploaded_file["name"][$j]." is not a PDF!", false);
-                }
-                $file_size += $uploaded_file["size"][$j];
-            }
         }
 
         if ($file_size > $max_size) {
