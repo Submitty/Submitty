@@ -55,7 +55,7 @@ class ForumThreadView extends AbstractView {
 
             $thread_link = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
 
-            $thread_list[$count-1] = Array("thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => Array());
+            $thread_list[$count-1] = array("thread_title" => $thread_title, "thread_link" => $thread_link, "posts" => array());
 
             foreach($data as $post) {
                 $author = $post['author'];
@@ -80,7 +80,7 @@ class ForumThreadView extends AbstractView {
 
                 $posted_on = date_format(DateUtils::parseDateTime($post['timestamp_post'], $this->core->getConfig()->getTimezone()), "n/j g:i A");
 
-                $thread_list[$count-1]["posts"][] = Array(
+                $thread_list[$count-1]["posts"][] = array(
                     "post_link" => $post_link,
                     "count" => $count,
                     "post_content" => $post_content,
@@ -235,7 +235,7 @@ class ForumThreadView extends AbstractView {
             }
         }
 
-        $filterFormData = Array(
+        $filterFormData = array(
             "categories" => $categories,
             "current_thread" => $currentThread,
             "current_category_ids" => $currentCategoriesIds,

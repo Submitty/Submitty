@@ -53,7 +53,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);
         $files = array();
-        if ($zip->open($filename_full, ZipArchive::CREATE) === TRUE){
+        if ($zip->open($filename_full, ZipArchive::CREATE) === true){
             $lev = "";
             for($i = 0; $i < $depth; $i++){
                 for($j = 0; $j < $num_files; $j++){

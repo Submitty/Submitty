@@ -205,7 +205,7 @@ class CourseMaterialsController extends AbstractController {
 
         $new_data_time = htmlspecialchars($newdatatime);
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === FALSE){
+        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === false){
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
@@ -267,7 +267,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === FALSE){
+        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === false){
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
