@@ -16,6 +16,49 @@
     {% for js_ref in js %}
     <script type='text/javascript' src='{{ js_ref }}'></script>
     {% endfor %}
+
+    <script type="text/javascript">
+        function ducky() {
+            var duck = document.getElementById("duckdiv");
+            var banner = document.getElementById("submitty-banner");
+            banner.style.display = "block";
+            document.getElementById('moorthy-duck').onclick = null;
+            var pos = 5;
+            var id = setInterval(frame, 5);
+            function frame() {
+                if (screen.width - pos <= -350) {
+                    clearInterval(id);
+                    banner.style.display = "none";
+                    duck.style.right = -280 + 'px';
+
+                    resetDriver();
+                } else {
+                  pos++;
+                  duck.style.right = pos + 'px';
+                }
+            }
+        } 
+
+        function resetDriver(){
+            var duck = document.getElementById("duckdiv");
+            var pos = -280;
+
+            var id = setInterval(reset, 5);
+
+            // all done! bring the ducky home
+            function reset(){
+                if (duck.style.right === '0px'){
+                    clearInterval(id);
+                    document.getElementById('moorthy-duck').onclick = function(){ducky();}
+                }else{
+                    pos ++;
+                    duck.style.right = pos + 'px';
+                }
+            }
+        }
+
+    </script>
+
 </head>
 <script>var onAjaxInit;</script>
 <body data-base-url="{{ base_url }}" data-course-url="{{ course_url }}" data-csrf-token="{{ csrf_token }}" onload="if (onAjaxInit) { onAjaxInit(); }">
@@ -50,7 +93,13 @@
             <div id="menu-overlay"></div>
             <nav class="flex-row shadow">
                 <div id="nav-links">
-                    <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home"><i class="fas fa-home"></i></a>
+                    <a id="home-button" class="black-btn" href="{{ base_url }}" aria-label="Go to Submitty Home">
+                        <img id="submitty-mascot-home-btn"
+                         src="{{ base_url }}/img/submitty-mascot.png"
+                         alt="Submitty's duck mascot!"
+                         height = "50px"
+                         />
+                     </a>
                     <div id="breadcrumbs">
                         {% for b in breadcrumbs %}
                             {% if loop.index0 > 0 %}
@@ -69,6 +118,41 @@
                         {% endfor %}
                     </div>
                 </div>
+                <div id="duckdiv" 
+                    {% if enable_banner %}
+                        style="position:relative;top:-30px; right:12px;"
+                >
+                    {% else %}
+                >
+                        <a target="_blank" aria-label="Learn more about Moorthy" 
+                        href="http://submitty.org/developer/rcos_moorthy" 
+                        style="padding-right:15px;" 
+                        >
+                    {% endif %}
+                    <img id="moorthy-duck" 
+                         src="{{ base_url }}/img/moorthy_duck.png" 
+                         alt="Duck Moorthy!" 
+                         height = "50" 
+                         {% if enable_banner %}
+                            style="position:absolute; right: 10px;" 
+                            onclick="ducky();" 
+                            tabindex="0"
+                         {% endif %}
+                    />
+                    {% if not enable_banner %}
+                    </a>
+                    {% endif %}
+
+                    {% if enable_banner %}
+                    <img id="submitty-banner" 
+                         src="{{ base_url }}/img/submitty-banner.png"
+                         alt="Happy Submitty Week!" 
+                         height="80" 
+                         style="position:absolute;right: -420px; top:-5px;display:none;" 
+                    />
+                    {% endif %}
+                </div>
+
                 <a class="flex-col" id="logo-box" href="http://submitty.org" target="_blank" aria-label="Visit submitty dot org">
                     <img id="logo-submitty" src="{{ base_url }}/img/submitty_logo.png" alt="Submitty Logo">
                 </a>
