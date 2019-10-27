@@ -343,7 +343,19 @@ class GlobalController extends AbstractController {
             }
         }
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js);
+        $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
+        $month = $now['mon'];
+        $day = $now['mday'];
+
+        $duck_img = 'moorthy_duck.png';
+        if($month === 10 && ($day >= 27 && $day <= 31)  ){
+            //halloween
+            $duck_img = 'moorthy_halloween.png';
+        }
+        //else if(...){}
+        //more Holidays go here!
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js, $duck_img);
     }
 
     public function footer() {
