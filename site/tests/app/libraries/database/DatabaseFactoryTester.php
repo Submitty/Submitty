@@ -5,7 +5,6 @@ namespace tests\app\libraries\database;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\database\PostgresqlDatabase;
-use app\libraries\database\PostgresqlDatabaseQueries;
 use app\libraries\database\SqliteDatabase;
 use tests\BaseUnitTest;
 
