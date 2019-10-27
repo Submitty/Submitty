@@ -93,7 +93,7 @@ class MiscController extends AbstractController {
             if($dir == 'course_materials')
             {
                 // If the user attempting to access the file is not at least a grader then ensure the file has been released
-                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                if(!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path))
                 {
                     $this->core->getOutput()->showError("You may not access this file until it is released.");
                     return false;
