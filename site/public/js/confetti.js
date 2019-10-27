@@ -37,7 +37,7 @@ function addConfetti(){
 	let gravity_const = 0.25;
 
 	let date_box = document.getElementById("submission_timestamp");
-	if(date_box)
+	if(typeof(date_box) != 'undefined' && date_box != null)
 		due_date = date_box.innerHTML.match(/\d+/g);
 
 	let d = new Date();
