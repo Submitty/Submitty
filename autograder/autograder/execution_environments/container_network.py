@@ -98,11 +98,16 @@ class Container():
     return self.ip_address_map[network_name]
 
 
-  def cleanup_container(self):
+  def cleanup_container(self, logfile):
     """ Remove this container. """
     if not self.is_server:
       status = self.container.wait()
       self.return_code = status['StatusCode']
+
+    logs = self.container.logs(stdout=True, stderr=False).decode('utf-8')
+    print(f'Log entry for {self.name}:\n',file=logfile)
+    print (logs, file=logfile)
+    print('\n',file=logfile)
 
     self.socket._response.close()
     self.socket.close()
@@ -676,11 +681,11 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
       # Clean up all containers. (Cleanup waits until they are finished)
       # Note: All containers should eventually terminate, as their executable will kill them for time.
       for container in self.get_standard_containers(containers):
-        container.cleanup_container()
+        container.cleanup_container(logfile)
       for container in self.get_server_containers(containers):
-        container.cleanup_container()
+        container.cleanup_container(logfile)
       if router is not None:
-        router.cleanup_container()
+        router.cleanup_container(logfile)
     except Exception as e:
       self.log_message('ERROR cleaning up docker containers. See stack trace output for more details.')
       self.log_stack_trace(traceback.format_exc())
