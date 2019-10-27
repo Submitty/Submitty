@@ -18,7 +18,7 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
             'listCourseMaterials',
-            $user = $this->core->getUser()
+            $this->core->getUser()
         );
     }
 
@@ -298,12 +298,12 @@ class CourseMaterialsController extends AbstractController {
         if(isset($_POST['sections'])){
             $sections = $_POST['sections'];
         }
-        
+
         $hide_from_students = null;
         if(isset($_POST['hide_from_students'])){
             $hide_from_students = $_POST['hide_from_students'];
         }
-        
+
         if(empty($sections) && !is_null($sections)){
             $sections = [];
         }
@@ -432,7 +432,6 @@ class CourseMaterialsController extends AbstractController {
                                     'hide_from_students' => $hide_from_students
                                 ];
                             }
-                            
                             else{
                                 $json[$path] = [
                                     'checked' => '1',
