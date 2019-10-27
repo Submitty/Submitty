@@ -47,7 +47,7 @@ class ElectronicGraderView extends AbstractView {
         string $section_type,
         int $regrade_requests,
         bool $show_warnings
-) {
+    ) {
 
         $peer = false;
         if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {

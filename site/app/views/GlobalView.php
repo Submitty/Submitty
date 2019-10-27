@@ -52,7 +52,7 @@ class GlobalView extends AbstractView {
             "csrf_token" => $this->core->getCsrfToken(),
             "enable_banner" => $config_data['duck_special_effects']
         ]);
-     }
+    }
 
     public function footer($runtime, $wrapper_urls, $footer_links) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [

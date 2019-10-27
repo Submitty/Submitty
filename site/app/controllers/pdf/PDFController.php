@@ -100,7 +100,7 @@ class PDFController extends AbstractController {
         }
 
         if (strpos($annotation_info['file_name'], '..') !== false) {
-          return false;
+            return false;
         }
 
         $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';

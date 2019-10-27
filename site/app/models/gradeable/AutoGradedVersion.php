@@ -178,9 +178,9 @@ class AutoGradedVersion extends AbstractModel {
 
                     foreach ($autochecks as $autocheck)
                     {
-                      foreach ($autocheck->getMessages() as $msg)
+                        foreach ($autocheck->getMessages() as $msg)
                         {
-                        array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
+                            array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
                         }
                     }
                 }
@@ -238,12 +238,12 @@ class AutoGradedVersion extends AbstractModel {
             if ($result_details != null &&
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
-              $graded_testcase = new AutoGradedTestcase
+                $graded_testcase = new AutoGradedTestcase
                 ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
-              $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
-              if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
-                $this->early_incentive_points += $graded_testcase->getPoints();
-              }
+                $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+                if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+                    $this->early_incentive_points += $graded_testcase->getPoints();
+                }
             }
         }
     }
