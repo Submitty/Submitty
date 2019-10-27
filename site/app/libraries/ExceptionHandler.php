@@ -87,7 +87,7 @@ class ExceptionHandler {
         $line = 1;
         $line_code = "";
         $fh = fopen($file, 'r');
-        while (($buffer = fgets($fh)) !== FALSE) {
+        while (($buffer = fgets($fh)) !== false) {
             if ($line == $exception_line) {
                 $line_code = $buffer;
                 break;

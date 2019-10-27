@@ -35,8 +35,8 @@ class MiscController extends AbstractController {
      * @return Response
      */
     public function encodePDF($gradeable_id){
-        $id = $_POST['user_id'] ?? NULL;
-        $file_name = $_POST['filename'] ?? NULL;
+        $id = $_POST['user_id'] ?? null;
+        $file_name = $_POST['filename'] ?? null;
         $file_name = html_entity_decode($file_name);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $submitter = $this->core->getQueries()->getSubmitterById($id);
@@ -98,8 +98,8 @@ class MiscController extends AbstractController {
                     $this->core->getOutput()->showError("You may not access this file until it is released.");
                     return false;
                 }
-                
-                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser()))
+
+                if(!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser()))
                 {
                     $this->core->getOutput()->showError("Your section may not access this file.");
                     return false;
@@ -459,7 +459,7 @@ class MiscController extends AbstractController {
         $job_path = "/var/local/submitty/daemon_job_queue/";
         $result = [];
         $found = false;
-        $job_data = NULL;
+        $job_data = null;
         $complete_count = 0;
         try{
             foreach(scandir($job_path) as $job){
