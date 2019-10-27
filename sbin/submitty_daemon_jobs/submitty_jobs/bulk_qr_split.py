@@ -43,12 +43,16 @@ def main(args):
             page = convert_from_bytes(
                 open(filename, 'rb').read(),
                 first_page=page_number+1, last_page=page_number+2)[0]
+
             # increase contrast of image for better QR decoding
             cv_img = numpy.array(page)
-            mask = cv2.inRange(cv_img, (0, 0, 0), (200, 200, 200))
-            inverted = 255 - cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
+
+            img_grey = cv2.cvtColor(cv_img, cv2.COLOR_BGR2GRAY)
+            ret2, thresh = cv2.threshold(img_grey, 0, 255,
+                                         cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+
             # decode img - only look for QR codes
-            val = pyzbar.decode(inverted, symbols=[ZBarSymbol.QRCODE])
+            val = pyzbar.decode(thresh, symbols=[ZBarSymbol.QRCODE])
             if val != []:
                 # found a new qr code, split here
                 # convert byte literal to string
