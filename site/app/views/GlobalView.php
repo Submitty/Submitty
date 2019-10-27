@@ -48,7 +48,7 @@ class GlobalView extends AbstractView {
             "system_message" => $this->core->getConfig()->getSystemMessage(),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
-     }
+    }
 
     public function footer($runtime, $wrapper_urls, $footer_links) {
         return $this->core->getOutput()->renderTwigTemplate("GlobalFooter.twig", [

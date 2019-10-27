@@ -206,7 +206,7 @@ class CourseMaterialsController extends AbstractController {
         $new_data_time = htmlspecialchars($newdatatime);
         //Check if the datetime is correct
         if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === FALSE){
-          return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
+            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
         //only one will not iterate correctly
@@ -268,7 +268,7 @@ class CourseMaterialsController extends AbstractController {
 
         //Check if the datetime is correct
         if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === FALSE){
-          return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
+            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
 
@@ -342,7 +342,7 @@ class CourseMaterialsController extends AbstractController {
                         //get the file names inside the zip to write to the JSON file
 
                         $zip = new \ZipArchive();
--                       $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
 
                         if(!$res){
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to open zip archive", false);

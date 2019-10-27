@@ -207,7 +207,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
              $this->upload_path . "/" . $name => [
                 'checked' => '1',
                 'release_datetime' => $new_date
-            ]
+             ]
         ];
 
         $this->assertEquals($expected_json, $json);
