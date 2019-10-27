@@ -50,7 +50,7 @@ class GlobalView extends AbstractView {
             "wrapper_urls" => $wrapper_urls,
             "system_message" => $this->core->getConfig()->getSystemMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
-            "enable_banner" => $config_data['enable_banner']
+            "enable_banner" => $config_data['duck_special_effects']
         ]);
      }
 
