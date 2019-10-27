@@ -52,6 +52,9 @@
             {% endif %}
         </div>
     </div>
+{% else %}
+    {# Keep the Submission date to let Confetti parse the date #}
+    <span hidden id="submission_timestamp"> submission timestamp: {{ submission_time|date('m/d/Y h:i:s A') }}</span> <br />
 {% endif %}
 {# /Submitted files #}
 
