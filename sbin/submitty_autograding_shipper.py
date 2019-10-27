@@ -17,6 +17,7 @@ import tempfile
 import socket
 import traceback
 import subprocess
+import random
 
 from autograder import autograding_utils
 from autograder import packer_unpacker
@@ -619,7 +620,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     time_get_job_begin = dateutils.get_current_time()
 
     # overall_lock.acquire()
-    folder = os.join(INTERACTIVE_QUEUE, my_name)
+    folder = os.path.join(INTERACTIVE_QUEUE, my_name)
 
 
     # ----------------------------------------------------------------
@@ -746,7 +747,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     """
 
     which_machine   = full_address
-    my_capabilities = my_data[my_name]['capabilities']
+    my_capabilities = my_data['capabilities']
     my_folder = os.path.join(INTERACTIVE_QUEUE, my_name)
 
     # ignore keyboard interrupts in the shipper processes
@@ -832,14 +833,17 @@ def launch_shippers(worker_status_map):
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
-        worker_folder = os.path.join(INTERACTIVE_QUEUE, name)
-         
-        if not os.path.exists(worker_folder):
-            os.mkdir(worker_folder)
-
-        # Clear out in-progress files, as these will be re-done.
-        for grading in Path(worker_folder).glob('GRADING_*'):
-            os.remove(grading)
+        thread_count = machine["num_autograding_workers"]
+        
+        # Cleanup previous in-progress submissions
+        worker_folder_base = os.path.join(INTERACTIVE_QUEUE, name)
+        worker_folders = [f'{worker_folder_base}_{i}' for i in range(thread_count)]
+        for folder in worker_folders:
+            if not os.path.exists(folder):
+                os.mkdir(folder)
+            # Clear out in-progress files, as these will be re-done.
+            for grading in Path(folder).glob('GRADING_*'):
+                os.remove(grading)
 
         if worker_status_map[name] == False:
             print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
@@ -872,25 +876,37 @@ def launch_shippers(worker_status_map):
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: autograding_workers.json entry for {0} contains an error: {1} For more details, see trace entry.".format(name,e))
             continue
         # launch the shipper threads
-        for i in range(0,num_workers_on_machine):
+        for i in range(thread_count):
+            thread_name = f'{name}_{i}'
             u = "untrusted" + str(i).zfill(2)
-            p = multiprocessing.Process(target=shipper_process,args=(name,single_machine_data,full_address, u,overall_lock))
+            p = multiprocessing.Process(target=shipper_process,args=(thread_name,single_machine_data[name],full_address, u,overall_lock))
             p.start()
-            processes.append(p)
+            processes.append((thread_name, p))
         total_num_workers += num_workers_on_machine
 
     # main monitoring loop
     try:
         while True:
             alive = 0
-            for i in range(0,total_num_workers):
-                if processes[i].is_alive:
+            for name, p in processes:
+                if p.is_alive:
                     alive = alive+1
                 else:
-                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+str(i)+" is not alive")
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+name+" is not alive")
             if alive != total_num_workers:
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
             #print ("shippers= ",total_num_workers,"  alive=",alive)
+
+            # Place any jobs placed in here into random worker directories
+            jobs = filter(os.path.isfile, 
+                map(lambda f: os.path.join(INTERACTIVE_QUEUE, f), 
+                    os.listdir(INTERACTIVE_QUEUE)))
+            for job in jobs:
+                dest, _ = random.choice(processes)
+                autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, 
+                    message=f"Pushing job {os.path.basename(job)} to {dest}.")
+                shutil.move(job, os.path.join(INTERACTIVE_QUEUE, dest))
+
             time.sleep(1)
 
     except KeyboardInterrupt:
