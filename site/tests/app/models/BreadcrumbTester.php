@@ -1,9 +1,10 @@
 <?php
 
-namespace app\models;
+namespace tests\app\models;
 
 
 use app\libraries\Core;
+use app\models\Breadcrumb;
 
 class BreadcrumbTester extends \PHPUnit\Framework\TestCase {
     public function testDefaults() {

@@ -26,6 +26,8 @@ use tests\utils\NullOutput;
  * @runTestsInSeparateProcesses
  */
 class SubmissionControllerTester extends BaseUnitTest {
+    use \phpmock\phpunit\PHPMock;
+
     private static $annotations = [];
 
     /**
@@ -57,13 +59,12 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->config['course']
         );
 
-        $this->assertTrue(FileUtils::createDir($this->config['course_path'], null, true));
+        $this->assertTrue(FileUtils::createDir($this->config['course_path'], true));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions")));
         $this->assertTrue(FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue")));
 
         $this->core = new Core();
         $this->core->setOutput(new NullOutput($this->core));
-        $this->core->setTesting(true);
 
         $this->core->setUser(new User($this->core, [
             'user_id' => 'testUser',
@@ -251,13 +252,13 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param int    $part
      */
     private function addUploadFile($filename, $content="", $part=1) {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), 0777, true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), true, 0777);
         $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part, $filename);
         if (file_put_contents($filepath, $content) === false) {
             throw new IOException("Could not write file to {$filepath}");
         }
         $_FILES["files{$part}"]['name'][] = $filename;
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($filepath);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($filepath);
         $_FILES["files{$part}"]['size'][] = filesize($filepath);
         $_FILES["files{$part}"]['tmp_name'][] = $filepath;
         $_FILES["files{$part}"]['error'][] = null;
@@ -275,14 +276,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     private function addUploadZip($zip_name, $files, $part=1) {
         $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
-        FileUtils::createDir($root_path, 0777, true);
+        FileUtils::createDir($root_path, true, 0777);
         $zip_path =  FileUtils::joinPaths($part_path, $zip_name.'.zip');
         $zip = new ZipArchive();
         $zip->open($zip_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
         $this->createZip($files, $zip, $root_path);
         $zip->close();
         $_FILES["files{$part}"]['name'][] = $zip_name.'.zip';
-        $_FILES["files{$part}"]['type'][] = FileUtils::getMimeType($zip_path);
+        $_FILES["files{$part}"]['type'][] = mime_content_type($zip_path);
         $_FILES["files{$part}"]['size'][] = filesize($zip_path);
         $_FILES["files{$part}"]['tmp_name'][] = $zip_path;
         $_FILES["files{$part}"]['error'][] = null;
@@ -337,8 +338,13 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * Basic upload, only one part and one file, simple sanity check.
+     * @runInSeparateProcess
      */
     public function testUploadOneBucket() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt', 'a');
 
         $controller = new SubmissionController($this->core);
@@ -385,8 +391,13 @@ class SubmissionControllerTester extends BaseUnitTest {
      * Test what happens if we have two parts
      *
      * @numParts 2
+     * @runInSeparateProcess
      */
     public function testUploadTwoBuckets() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt', 'a');
         $this->addUploadFile('test2.txt', 'b');
         $this->addUploadFile('test2.txt', 'c', 2);
@@ -446,8 +457,13 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * Test what happens if we're uploading a zip that contains a directory.
+     * @runInSeparateProcess
      */
     public function testZipWithDirectory() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $zip = array(
             'testDir' => array(
                 'test1.txt' => ''
@@ -503,8 +519,13 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Upload a second version of a gradeable with no previous files and different files per upload. Test
      * that both versions exist and neither bled over to the other.
+     * @runInSeparateProcess
      */
     public function testSecondVersionNoPrevious() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt');
 
         $controller = new SubmissionController($this->core);
@@ -570,8 +591,13 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * @numParts 2
+     * @runInSeparateProcess
      */
     public function testSecondVersionPreviousTwoParts() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile("test1.txt", "", 1);
         $this->addUploadFile("test1.txt", "", 2);
 
@@ -603,8 +629,13 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Upload a second version of a gradeable that includes previous files, but there's no overlap in file names
      * so we should have one file in version 1 and two files in version 2
+     * @runInSeparateProcess
      */
     public function testSecondVersionPreviousNoOverlap() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt');
 
         $controller = new SubmissionController($this->core);
@@ -650,8 +681,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Upload a second version that has previous files that has the same filename as the file that's being uploaded.
      * This should only include the version that was uploaded (and not use the previous).
+     *
+     * @runInSeparateProcess
      */
     public function testSecondVersionPreviousOverlap() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt', 'old_file');
 
         $controller = new SubmissionController($this->core);
@@ -702,8 +739,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * This tests what happens when we upload a second version of the gradeable that is a zip that contains a file
      * that overlaps the file from the first version.
+     *
+     * @runInSeparateProcess
      */
     public function testSecondVersionPreviousOverlapZip() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt', 'old_file');
 
         $controller = new SubmissionController($this->core);
@@ -754,8 +797,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     /**
      * Test uploading a zip that contains a file and a zip. We only unzip one level so we the inner zip should
      * be left alone.
+     *
+     * @runInSeparateProcess
      */
     public function testZipInsideZip() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $zip = array(
             'test1.txt' => 'a',
             'basic_zip.zip'
@@ -792,8 +841,14 @@ class SubmissionControllerTester extends BaseUnitTest {
      * This tests what happens if we upload a zip that contains "test.txt" and "test2.txt" and try
      * uploading "test.txt" to the server, in that order. The free "test.txt" file should overwrite the one
      * in the zip (the one not in a zip contains a single 'a' while the two files in the zip are blank).
+     *
+     * @runInSeparateProcess
      */
     public function testSameFilenameInZip() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadZip('zippedfiles', array('test.txt' => 'zip_file', 'test2.txt' => 'zip_file2'));
         $this->addUploadFile('test.txt', 'non_zip_file');
 
@@ -810,8 +865,14 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * This tests the same thing as testSameFilenameInZip(), however we submit "test.txt" before "zippedfiles.zip"
+     *
+     * @runInSeparateProcess
      */
     public function testSameFilenameInZipReversed() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test.txt', 'non_zip_file');
         $this->addUploadZip('zippedfiles', array('test.txt' => 'zip_file', 'test2.txt' => 'zip_file2'));
 
@@ -834,7 +895,14 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testFilenameWithSpaces() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile("filename with spaces.txt");
 
         $controller = new SubmissionController($this->core);
@@ -853,7 +921,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals(array('.submit.timestamp', 'filename with spaces.txt'), $files);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testZipContaingFilesWithSpaces() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $zip = array(
             'folder with spaces' => array('filename with spaces2.txt'),
             'filename with spaces.txt'
@@ -964,7 +1039,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testFailureToCreateStudentFolder() {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -977,7 +1052,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testFailureToCreateVersionFolder() {
         FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test"));
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -992,8 +1067,8 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @numParts 2
      */
     public function testFailureToCreatePartFolder() {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1053,7 +1128,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorMissingPreviousFile() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->once())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt');
 
         $controller = new SubmissionController($this->core);
@@ -1141,7 +1223,10 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorOnBrokenZip() {
         $this->addUploadZip('broken', array('test1.txt'));
         $path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part1', 'broken.zip');
-        $fh = fopen($path, 'r+') or die("can't open file");
+        $fh = fopen($path, 'r+');
+        if (!$fh) {
+            $this->fail('cannot open the file');
+        }
         $stat = fstat($fh);
         ftruncate($fh, $stat['size']-1);
         fclose($fh);
@@ -1154,8 +1239,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorOnCopyingPrevious() {
         $this->addUploadFile('test1.txt');
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->once())
+            ->willReturn(true);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1184,10 +1275,17 @@ class SubmissionControllerTester extends BaseUnitTest {
         chmod($prev, 0777);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorOnCopyingFile() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt');
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1197,13 +1295,20 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorCleanupTempFiles() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $dst_dir = FileUtils::joinPaths($this->config['tmp_path'], "files");
         $dst_file = FileUtils::joinPaths($dst_dir, "test.txt");
         FileUtils::createDir($dst_dir);
         file_put_contents($dst_file, "a");
         $_FILES["files1"]['name'][] = "test1.txt";
-        $_FILES["files1"]['type'][] = FileUtils::getMimeType($dst_file);
+        $_FILES["files1"]['type'][] = mime_content_type($dst_file);
         $_FILES["files1"]['size'][] = filesize($dst_file);
         $_FILES["files1"]['tmp_name'][] = $dst_file;
         $_FILES["files1"]['error'][] = null;
@@ -1224,7 +1329,6 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testErrorFakeFiles() {
         $this->addUploadFile('test1.txt');
-        $this->core->setTesting(false);
 
         $database_queries = $this->createMock(DatabaseQueries::class);
         $gradeable = $this->createMockGradeable();
@@ -1244,8 +1348,8 @@ class SubmissionControllerTester extends BaseUnitTest {
     public function testErrorCreateVcsFile() {
         $_POST['git_repo_id'] = "some_repo_id";
         $_POST['vcs_checkout'] = "true";
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), null, true);
-        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), 0444);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser"), true);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1"), false, 0444);
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1256,10 +1360,14 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testErrorCreateQueueFile() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
+
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
-        $this->assertTrue(FileUtils::createDir($dir, 0444));
+        $this->assertTrue(FileUtils::createDir($dir, false, 0444));
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1269,9 +1377,15 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertFalse($return['status'] == 'success');
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorBrokenHistoryFile() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         file_put_contents(FileUtils::joinPaths($tmp, "user_assignment_settings.json"), "]invalid_json[");
         $this->addUploadFile('test1.txt');
 
@@ -1285,8 +1399,13 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     /**
      * We're testing that rolling back the history works on failure to upload the second version of the file
+     *
+     * @runInSeparateProcess
      */
     public function testErrorHistorySecondVersion() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->exactly(2))
+            ->willReturn(true);
         $this->addUploadFile('test1.txt');
 
         $controller = new SubmissionController($this->core);
@@ -1297,7 +1416,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $dir = FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue");
         $this->assertTrue(FileUtils::recursiveRmdir($dir));
-        $this->assertTrue(FileUtils::createDir($dir, 0444));
+        $this->assertTrue(FileUtils::createDir($dir, false, 0444));
 
         $this->addUploadFile('test1.txt');
 
@@ -1326,10 +1445,16 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorWriteSettingsFile() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($dir, null, true);
+        FileUtils::createDir($dir, true);
         $settings = FileUtils::joinPaths($dir, "user_assignment_settings.json");
         file_put_contents($settings, '{"active_version": 0, "history": []}');
         chmod($settings, 0444);
@@ -1343,10 +1468,16 @@ class SubmissionControllerTester extends BaseUnitTest {
         chmod($settings, 0777);
     }
 
+    /**
+     * @runInSeparateProcess
+     */
     public function testErrorWriteTimestampFile() {
+        $this->getFunctionMock('app\controllers\student', 'is_uploaded_file')
+            ->expects($this->any())
+            ->willReturn(true);
         $this->addUploadFile('test1.txt');
         $dir = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
-        FileUtils::createDir($dir, null, true);
+        FileUtils::createDir($dir, true);
         $timestamp = FileUtils::joinPaths($dir, ".submit.timestamp");
         file_put_contents($timestamp, "Failed to save timestamp file for this submission.");
         chmod($timestamp, 0444);
@@ -1449,7 +1580,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testUpdateCannotWriteSettingsFile() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         $json = json_encode(array('active_version' => 1, 'history' => array('version' => 0, 'time' => '')));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
@@ -1464,7 +1595,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
     public function testUpdateCancelSubmission() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
@@ -1488,7 +1619,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testUpdateSubmission() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         $json = json_encode(array('active_version' => 1, 'history' => array(array('version' => 0, 'time' => ''))));
         $settings = FileUtils::joinPaths($tmp, "user_assignment_settings.json");
         file_put_contents($settings, $json);
@@ -1523,7 +1654,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testCheckRefreshFailed2() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
 
         $controller = new SubmissionController($this->core);
@@ -1539,7 +1670,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      */
     public function testCheckRefreshSuccess() {
         $tmp = FileUtils::joinPaths($this->config['course_path'], "results", "test", "testUser", "1");
-        FileUtils::createDir($tmp, null, true);
+        FileUtils::createDir($tmp, true);
         touch(FileUtils::joinPaths($tmp, "results.json"));
         $this->core->getQueries()->method('getGradeableVersionHasAutogradingResults')->willReturn(true);
 

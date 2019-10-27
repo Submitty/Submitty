@@ -20,7 +20,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class ForumController extends AbstractController{
-	/**
+    /**
      * ForumHomeController constructor.
      *
      * @param Core $core
@@ -38,33 +38,35 @@ class ForumController extends AbstractController{
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
-            //Notify User
-            $this->core->addErrorMessage($error);
-            if($isThread){
-                $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
-            } else {
-                $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
-            }
-            return array(-1, $url);
+        //Notify User
+        $this->core->addErrorMessage($error);
+
+        if($isThread){
+            $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+        }
+        else {
+            $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+        }
+        return array(-1, $url);
     }
 
     /**
      * @Route("/{_semester}/{_course}/forum/threads/status", methods={"POST"})
      */
-	public function changeThreadStatus($status, $thread_id=null) {
+    public function changeThreadStatus($status, $thread_id=null) {
         if (is_null($thread_id)) {
             $thread_id = $_POST['thread_id'];
         }
-		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
-			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
-			    return $this->core->getOutput()->renderJsonSuccess();
-			} else {
-			    return $this->core->getOutput()->renderJsonFail('The thread resolve state could not be updated. Please try again.');
-			}
-		} else {
-		    return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
-		}
-	}
+        if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
+            if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                return $this->core->getOutput()->renderJsonSuccess();
+            } else {
+                return $this->core->getOutput()->renderJsonFail('The thread resolve state could not be updated. Please try again.');
+            }
+        } else {
+            return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
+        }
+    }
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
@@ -259,7 +261,7 @@ class ForumController extends AbstractController{
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
 
-        if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
+        if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin() ){
             $lock_thread_date = $_POST['lock_thread_date'];
         } else {
             $lock_thread_date = null;
@@ -372,7 +374,7 @@ class ForumController extends AbstractController{
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        } else if($this->core->getQueries()->isThreadLocked($thread_id) and !$this->core->getUser()->accessAdmin() ) {
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         } else {
@@ -456,10 +458,10 @@ class ForumController extends AbstractController{
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin() ){
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         else if($modify_type == 0) { //delete post or thread
@@ -615,7 +617,7 @@ class ForumController extends AbstractController{
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if( !empty($_POST['lock_thread_date']) and $this->core->getUser()->accessAdmin()){
+            if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
                 $lock_thread_date = $_POST['lock_thread_date'];
             }
             else{
@@ -765,7 +767,7 @@ class ForumController extends AbstractController{
         $posts = null;
         $option = 'tree';
         if(!empty($_COOKIE['forum_display_option'])) {
-           $option = $_COOKIE['forum_display_option'];
+            $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if(!empty($thread_id)){
@@ -838,7 +840,11 @@ class ForumController extends AbstractController{
      * @Route("/{_semester}/{_course}/forum/threads/new", methods={"GET"})
      */
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+        if(empty($this->core->getQueries()->getCategories())){
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
+            return;
+        }
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
     /**

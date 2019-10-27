@@ -15,8 +15,6 @@ use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
 use Symfony\Component\Routing\Annotation\Route;
 
-
-
 class SubmissionController extends AbstractController {
 
     private $upload_details = array('version' => -1, 'version_path' => null, 'user_path' => null,
@@ -119,7 +117,7 @@ class SubmissionController extends AbstractController {
 
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
                 $show_hidden = false;
-                if ($graded_gradeable != NULL) {
+                if ($graded_gradeable != null) {
                     $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
                     $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 }
@@ -198,8 +196,8 @@ class SubmissionController extends AbstractController {
             $teams = [];
             foreach ($user_ids as $user) {
                 $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
-                if($tmp === NULL){
-                    $null_team_count ++;
+                if($tmp === null){
+                    $null_team_count++;
                 }else{
                     $teams[] = $tmp->getId();
                 }
@@ -241,7 +239,12 @@ class SubmissionController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
     */
     public function ajaxBulkUpload($gradeable_id) {
-        $is_qr = $_POST['use_qr_codes'] === "true";
+        if (empty($_POST)) {
+            $max_size =  Utils::returnBytes(ini_get('post_max_size'));
+            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
+        }
+
+        $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
 
         if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
@@ -264,42 +267,29 @@ class SubmissionController extends AbstractController {
             $uploaded_file = $_FILES["files1"];
         }
 
-        $errors = array();
-        $count = 0;
-        if (isset($uploaded_file)) {
-            $count = count($uploaded_file["name"]);
-            for ($j = 0; $j < $count; $j++) {
-                if (!isset($uploaded_file["tmp_name"][$j]) || $uploaded_file["tmp_name"][$j] === "") {
-                    $error_message = $uploaded_file["name"][$j]." failed to upload. ";
-                    if (isset($uploaded_file["error"][$j])) {
-                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_file["error"][$j]). ".";
-                    }
-                    $errors[] = $error_message;
-                }
-            }
+        $status = FileUtils::validateUploadedFiles($uploaded_file);
+        $count = count($uploaded_file["name"]);
+
+        if(array_key_exists("failed", $status)){
+            return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
 
-        if (count($errors) > 0) {
-            $error_text = implode("\n", $errors);
-            return $this->uploadResult("Upload Failed: ".$error_text, false);
+        $file_size = 0;
+        foreach ($status as $stat) {
+            if($stat['success'] === false){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
+            }
+
+            if($stat['type'] !== 'application/pdf'){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['name'] . " is not a PDF", false);
+            }
+
+            $file_size += $stat['size'];
         }
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
-        // Error checking of file name
-        $file_size = 0;
-        if (isset($uploaded_file)) {
-            for ($j = 0; $j < $count; $j++) {
-                if(FileUtils::isValidFileName($uploaded_file["name"][$j]) === false) {
-                    return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_file["name"][$j].".", false);
-                }
-                if(substr($uploaded_file["name"][$j],-3) != "pdf") {
-                    return $this->uploadResult($uploaded_file["name"][$j]." is not a PDF!", false);
-                }
-                $file_size += $uploaded_file["size"][$j];
-            }
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
         }
 
         if ($file_size > $max_size) {
@@ -325,7 +315,7 @@ class SubmissionController extends AbstractController {
         // delete the temporary file
         if (isset($uploaded_file)) {
             for ($j = 0; $j < $count; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
                     if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
@@ -909,7 +899,7 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 else if ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1013,13 +1003,13 @@ class SubmissionController extends AbstractController {
 
             // Determine the size of the uploaded files as well as whether or not they're a zip or not.
             // We save that information for later so we know which files need unpacking or not and can save
-            // a check to getMimeType()
+            // a check for its mime type
             $file_size = 0;
             for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
                     $uploaded_files[$i]["is_zip"] = array();
                     for ($j = 0; $j < $count[$i]; $j++) {
-                        if (FileUtils::getMimeType($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
+                        if (mime_content_type($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
                             if(FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
                             }
@@ -1077,7 +1067,7 @@ class SubmissionController extends AbstractController {
                             }
                         }
                         else {
-                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
@@ -1232,14 +1222,15 @@ class SubmissionController extends AbstractController {
         // Create the vcs file first!  (avoid race condition, we must
         // check out the files before trying to grade them)
         if ($vcs_queue_file !== "") {
-          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
-          }
-        } else {
-          // Then create the file that will trigger autograding
-          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
-          }
+            if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+            }
+        }
+        else {
+            // Then create the file that will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
         }
 
         Logger::logAccess(

@@ -5,10 +5,10 @@ namespace app\libraries\database;
 use app\exceptions\DatabaseException;
 use app\exceptions\ValidationException;
 use app\libraries\CascadingIterator;
-use \app\libraries\GradeableType;
-use app\models\Gradeable;
+use app\libraries\GradeableType;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Component;
+use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedComponent;
 use app\models\gradeable\GradedComponentContainer;
 use app\models\gradeable\GradedGradeable;
@@ -49,10 +49,10 @@ class PostgresqlDatabaseQueries extends DatabaseQueries{
                  ns.self_notification,
                  ns.merge_threads_email, ns.all_new_threads_email,
                  ns.all_new_posts_email, ns.all_modifications_forum_email,
-                 ns.reply_in_post_thread_email, ns.team_invite_email, 
+                 ns.reply_in_post_thread_email, ns.team_invite_email,
                  ns.team_member_submission_email, ns.team_joined_email,
                  ns.self_notification_email,sr.grading_registration_sections
-     
+
             FROM users u
             LEFT JOIN notification_settings as ns ON u.user_id = ns.user_id
             LEFT JOIN (
@@ -107,10 +107,10 @@ GROUP BY user_id", array($user_id));
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         $orderBy="";
         if($section_key == "registration_section") {
-          $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
+            $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
         }
         else {
-          $orderBy = "u.{$section_key}, u.user_id";
+            $orderBy = "u.{$section_key}, u.user_id";
         }
 
         $this->course_db->query("
@@ -310,18 +310,19 @@ WHERE semester=? AND course=? AND user_id=?", $params);
         $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
-public function getAverageComponentScores($g_id, $section_key, $is_team) {
+
+    public function getAverageComponentScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
-        if($is_team){
+        if($is_team) {
             $u_or_t="t";
             $users_or_teams="gradeable_teams";
             $user_or_team_id="team_id";
         }
         $return = array();
         $this->course_db->query("
-SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*) FROM(
+SELECT comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score),2) AS avg_comp_score, round(stddev_pop(comp_score),2) AS std_dev, COUNT(*), rr.active_grade_inquiry_count FROM(
   SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order,
   CASE WHEN (gc_default + sum_points + gcd_score) > gc_upper_clamp THEN gc_upper_clamp
   WHEN (gc_default + sum_points + gcd_score) < gc_lower_clamp THEN gc_lower_clamp
@@ -355,14 +356,21 @@ SELECT gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, round(AVG(comp_score
     WHERE g_id=? AND {$u_or_t}.{$section_key} IS NOT NULL
   )AS parts_of_comp
 )AS comp
-GROUP BY gc_id, gc_title, gc_max_value, gc_is_peer, gc_order
+LEFT JOIN (
+	SELECT COUNT(*) AS active_grade_inquiry_count, rr.gc_id
+	FROM regrade_requests AS rr
+	WHERE rr.g_id=? AND rr.status=-1
+	GROUP BY rr.gc_id
+) AS rr ON rr.gc_id=comp.gc_id
+GROUP BY comp.gc_id, gc_title, gc_max_value, gc_is_peer, gc_order, rr.active_grade_inquiry_count
 ORDER BY gc_order
-        ", array($g_id, $g_id, $g_id));
+        ", array($g_id, $g_id, $g_id, $g_id));
         foreach ($this->course_db->rows() as $row) {
             $return[] = new SimpleStat($this->core, $row);
         }
         return $return;
     }
+
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
@@ -391,11 +399,11 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
 
-public function getAverageForGradeable($g_id, $section_key, $is_team) {
+    public function getAverageForGradeable($g_id, $section_key, $is_team) {
         $u_or_t="u";
         $users_or_teams="users";
         $user_or_team_id="user_id";
-        if($is_team){
+        if ($is_team) {
             $u_or_t="t";
             $users_or_teams="gradeable_teams";
             $user_or_team_id="team_id";
@@ -439,6 +447,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         return ($this->course_db->getRowCount() > 0) ? new SimpleStat($this->core, $this->course_db->rows()[0]) : null;
     }
+
     public function getGradeablesRotatingGraderHistory($gradeable_id) {
         $params = [$gradeable_id];
         $this->course_db->query("
@@ -541,7 +550,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      */
     public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
         //Update query and values list.
-		$query = "
+        $query = "
             INSERT INTO late_days (user_id, since_timestamp, allowed_late_days)
             VALUES(?,?,?)
             ON CONFLICT (user_id, since_timestamp) DO UPDATE
@@ -550,16 +559,16 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         $vals = array($user_id, $timestamp, $days, $days, $user_id, $timestamp);
 
         switch ($csv_option) {
-        case 'csv_option_preserve_higher':
-        	//Does NOT overwrite a higher (or same) value of allowed late days.
-        	$query .= "AND late_days.allowed_late_days<?";
-        	$vals[] = $days;
-        	break;
-        case 'csv_option_overwrite_all':
-        default:
-        	//Default behavior: overwrite all late days for user and timestamp.
-        	//No adjustment to SQL query.
-    	}
+            case 'csv_option_preserve_higher':
+                //Does NOT overwrite a higher (or same) value of allowed late days.
+                $query .= "AND late_days.allowed_late_days<?";
+                $vals[] = $days;
+                break;
+            case 'csv_option_overwrite_all':
+            default:
+                //Default behavior: overwrite all late days for user and timestamp.
+                //No adjustment to SQL query.
+        }
 
         $this->course_db->query($query, $vals);
     }
@@ -821,12 +830,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     ];
 
     /**
-     * Generates the ORDER BY clause with the provided sorting keys
+     * Generates the ORDER BY clause with the provided sorting keys.
+     *
+     * For every element in $sort_keys, checks if the first word is in $key_map,
+     * and if so, replaces it with the list of clauses in $key_map, and then joins that
+     * list together using the second word (if it exists, assuming it is an order direction)
+     * or blank otherwise. If the first word is not, return the clause as is. Finally,
+     * join the resulting set of clauses together as appropriate for valid ORDER BY.
+     *
      * @param string[]|null $sort_keys
      * @param array $key_map A map from sort keys to arrays of expressions to sort by instead
      *          (see self::graded_gradeable_key_map for example)
      * @return string
      */
+
     private static function generateOrderByClause($sort_keys, array $key_map) {
         if ($sort_keys !== null) {
             if (!is_array($sort_keys)) {
@@ -839,19 +856,28 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             if (empty($key_map)) {
                 return 'ORDER BY ' . implode(',', $sort_keys);
             }
-            return 'ORDER BY ' . implode(',', array_filter(array_map(function ($key_ext) use ($key_map) {
+            return 'ORDER BY ' . implode(',', array_filter(
+                array_map(function ($key_ext) use ($key_map) {
                     $split_key = explode(' ', $key_ext);
                     $key = $split_key[0];
-                    $order = '';
-                    if (count($split_key) > 1) {
-                        $order = $split_key[1];
+                    if (isset($key_map[$key])) {
+                        // Map any keys with special requirements to the proper statements and preserve specified order
+                        $order = '';
+                        if (count($split_key) > 1) {
+                            $order = $split_key[1];
+                        }
+                        if (count($key_map[$key]) === 0) {
+                            return '';
+                        }
+                        return implode(" $order,", $key_map[$key]) . " $order";
                     }
-                    if (isset($key_map[$key]) && count($key_map[$key]) === 0) {
-                        return '';
+                    else {
+                        return $key_ext;
                     }
-                    // Map any keys with special requirements to the proper statements and preserve specified order
-                    return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
-                }, $sort_keys), function($a) { return $a !== ''; }));
+                }, $sort_keys),
+                function ($a) {
+                    return $a !== '';
+                }));
         }
         return '';
     }
@@ -1214,7 +1240,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
-            /** @var \app\models\gradeable\Gradeable $gradeable */
+            /** @var Gradeable $gradeable */
             $gradeable = $gradeables_by_id[$row['g_id']];
 
             // Get the submitter
@@ -1516,7 +1542,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
              $selector
              $order";
 
-        $gradeable_constructor = function($row) {
+        $gradeable_constructor = function ($row) {
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
                 throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
             }
@@ -1610,7 +1636,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $gradeable_constructor);
     }
 
-    public function getActiveVersions(Gradeable\Gradeable $gradeable, array $submitter_ids) {
+    public function getActiveVersions(Gradeable $gradeable, array $submitter_ids) {
         if (count($submitter_ids) === 0) {
             return [];
         }

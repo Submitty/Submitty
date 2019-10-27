@@ -16,8 +16,8 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class NotificationController extends AbstractController {
 
-	const NOTIFICATION_SELECTIONS = [
-	    'merge_threads',
+    const NOTIFICATION_SELECTIONS = [
+        'merge_threads',
         'all_new_threads',
         'all_new_posts',
         'all_modifications_forum',
@@ -28,7 +28,7 @@ class NotificationController extends AbstractController {
         'self_notification'
     ];
 
-	const EMAIL_SELECTIONS = [
+    const EMAIL_SELECTIONS = [
         'merge_threads_email',
         'all_new_threads_email',
         'all_new_posts_email',
@@ -40,9 +40,9 @@ class NotificationController extends AbstractController {
         'self_notification_email'
     ];
 
-	protected $selections;
+    protected $selections;
 
-	public function __construct(Core $core) {
+    public function __construct(Core $core) {
         parent::__construct($core);
         $this->selections = self::NOTIFICATION_SELECTIONS;
         if ($this->core->getConfig()->isEmailEnabled()) {

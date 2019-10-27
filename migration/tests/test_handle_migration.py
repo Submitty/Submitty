@@ -281,6 +281,48 @@ Submitty Database Migration Warning:  Database does not exist for semester=f19 c
         self.assertFalse(database_3.open)
 
     @patch('migrator.main.migrate_environment')
+    def test_migration_choose_courses(self, mock_method):
+        args = Namespace()
+        self.setup_test('course')
+        database_1 = self.create_database('course')
+        args.environments = ['course']
+        args.choose_course = ['f19', 'csci1100']
+        args.config = SimpleNamespace()
+        args.config.database = dict()
+        args.config.submitty = dict()
+        args.config.submitty['submitty_data_dir'] = Path(self.dir)
+        Path(self.dir, 'courses', 'f18', 'csci1100').mkdir(parents=True)
+        Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
+        Path(self.dir, 'courses', 'f19', 'csci1200').mkdir(parents=True)
+        with patch.object(migrator.db, 'Database') as mock_class:
+            mock_class.side_effect = [database_1]
+            main.handle_migration(args)
+        self.assertTrue(mock_class.called)
+        self.assertEqual(1, mock_class.call_count)
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1100'}, 'course'),
+            mock_class.call_args_list[0][0]
+        )
+        self.assertTrue(mock_method.called)
+        self.assertEqual(1, mock_method.call_count)
+
+        mock_args = mock_method.call_args_list[0][0]
+        expected_args = deepcopy(args)
+        self.assertEqual(database_1, mock_args[0])
+        self.assertEqual('course', mock_args[1])
+        self.assertEqual(expected_args.config.database, dict())
+        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('course', expected_args)
+        expected_args.config.database = {'dbname': 'submitty_f19_csci1100'}
+        expected_args.semester = 'f19'
+        expected_args.course = 'csci1100'
+        self.assertEqual(expected_args, mock_args[2])
+        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.course, 'csci1100')
+        self.assertFalse(database_1.open)
+
+
+    @patch('migrator.main.migrate_environment')
     def test_migration_multiple_courses_missing_migration(self, mock_method):
         args = Namespace()
         self.setup_test('course')
@@ -297,7 +339,7 @@ Submitty Database Migration Warning:  Database does not exist for semester=f19 c
         Path(self.dir, 'courses', 'f18', 'csci1100').mkdir(parents=True)
         Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
         Path(self.dir, 'courses', 'f19', 'csci1200').mkdir(parents=True)
-        
+
         missing_migration = Path(self.dir, 'test.txt')
         missing_migration.touch()
         mock_method.side_effect = lambda *args: args[-1].add(missing_migration)

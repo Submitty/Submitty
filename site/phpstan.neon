@@ -1,0 +1,12 @@
+parameters:
+    level: 0
+    excludes_analyse:
+        # these should be unignored once put into production
+        - %rootDir%/../../../app/controllers/forum/ForumController2.php
+        - %rootDir%/../../../app/libraries/database/ForumQueries.php
+        - %rootDir%/../../../app/models/forum/Thread.php
+
+services:
+    - class: tests\phpstan\ModelClassExtension
+      tags:
+        - phpstan.broker.methodsClassReflectionExtension

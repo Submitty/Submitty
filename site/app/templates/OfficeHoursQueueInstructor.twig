@@ -1,0 +1,119 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+<div class="content">
+  <h1> Office Hours Queue -- Teaching Staff View </h1> <br/>
+
+  {% if queue_open == 1 %}
+    {% if num_in_queue == 1 %}
+      <p>There is currently {{num_in_queue}} person in the queue</p>
+    {% else %}
+      <p>There are currently {{num_in_queue}} people in the queue</p>
+    {% endif %}
+  {% endif %}
+
+  {% if queue_open == 1 %}
+    <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to close the queue? This will kick everyone out of the queue.');">
+  {% else %}
+    <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to open the queue?');">
+  {% endif %}
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    {% if queue_open == 1 %}
+      <input type="submit" name="queue_open" value="Close Queue" class="btn btn-primary">
+    {% else %}
+      <input type="submit" name="queue_open" value="Open Queue" class="btn btn-primary">
+    {% endif %}
+  </form>
+
+  <br/>
+
+  {% if queue_open == 1 %}
+  <p>Current code: {{ code }}</p>
+
+  <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <input type="submit" value="Generate New Code" class="btn btn-primary">
+  </form>
+  {% endif %}
+
+  <br/> <br/>
+
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Time</th>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Status</th>
+        <th scope="col">Remove</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in entries %}
+    <tr>
+      <th scope="row">{{entry.getPositionInQueue() }}</th>
+      <td>{{ entry.getTimeIn() }}</td>
+      <td>{{ entry.getUserId() }}</td>
+      <td>{{ entry.getName() }}</td>
+      {% if entry.getStatus() == 0 %}
+      <td>
+        <form method="post" id="start_help" action="{{start_help_url}}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
+          <input type="submit" value="Help" class="btn btn-primary">
+        </form>
+      </td>
+      {% elseif entry.getStatus() == 1 %}
+        <td>
+          <form method="post" id="finish_help" action="{{finish_help_url}}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
+            <input type="submit" value="Finish Helping" class="btn btn-primary">
+          </form>
+        </td>
+      {% endif %}
+      <td>
+        <form method="post" id="remove" action="{{remove_url}}" onsubmit="return confirm('Are you sure you want to remove {{ entry.getName() }} from the queue?');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
+          <input type="submit" value="Remove" class="btn btn-primary">
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+
+  <br><br>
+  <h1>Previously Helped Students</h1>
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Time Entered</th>
+        <th scope="col">Time Helped</th>
+        <th scope="col">Time Out</th>
+        <th scope="col">Removed By</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for entry in entries_helped %}
+    <tr>
+      <th scope="row">{{entry.getPositionInQueue() }}</th>
+      <td>{{ entry.getUserId() }} </td>
+      <td>{{ entry.getName() }}</td>
+      <td>{{ entry.getTimeIn() }}</td>
+      {% if entry.getStatus() == 2 %}
+        <td>{{ entry.getTimeHelped() }}</td>
+      {% else %}
+        <td>Left Queue</td>
+      {% endif %}
+      <td>{{ entry.getTimeOut() }}</td>
+      <td>{{ entry.getRemovedBy() }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+  </table>
+</div>

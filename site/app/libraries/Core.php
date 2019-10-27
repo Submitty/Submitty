@@ -158,7 +158,11 @@ class Core {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
-        $this->session_manager = new SessionManager($this);
+        $this->setSessionManager(new SessionManager($this));
+    }
+
+    public function setSessionManager(SessionManager $manager) {
+        $this->session_manager = $manager;
     }
 
     /**

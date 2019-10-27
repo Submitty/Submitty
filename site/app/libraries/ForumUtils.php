@@ -67,4 +67,11 @@ class ForumUtils {
         return true;
     }
 
+    public static function getDisplayName($anonymous, $real_name) {
+        if($anonymous) {
+            return "Anonymous";
+        }
+        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
+    }
+
 }

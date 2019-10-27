@@ -90,7 +90,7 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       ssh = paramiko.SSHClient()
       ssh.get_host_keys()
       ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(hostname = host, username = user, timeout=10)
+      ssh.connect(hostname = host, username = user, timeout=60)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
@@ -105,6 +105,7 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       return status
 
 def disable_machine(target):
+  return
   if WORKERS == None:
     print('Cannot disable as autograding_workers.json does not exist.')
     return

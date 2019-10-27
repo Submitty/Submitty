@@ -27,29 +27,41 @@
 <div class="full_height content forum_content forum_show_threads">
 
     {% if thread_exists == false %}
+        {# discussion forum with no categories #}
+        {% if categories | length  == 0 %}
+            {% if accessGrading == true %}
+                <h4 class="text-center red-message">
+                    No categories have been created yet. Please create categories to use the Discussion Forum
+                </h4>
+                <a class= "text-center" id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a>
 
-        {%  include "forum/ForumBar.twig" with {
-            "current_thread" : button_params.current_thread,
-            "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
-            "show_more" : button_params.show_more,
-            "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
-            "show_threads" : button_params.show_threads,
-            "thread_exists" : button_params.thread_exists,
-            "categories" : filterFormData.categories,
-            "current_thread" : filterFormData.current_thread,
-            "current_category_ids" : filterFormData.current_category_ids,
-            "current_course" : filterFormData.current_course,
-            "cookie_selected_categories" : filterFormData.cookie_selected_categories,
-            "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
-            "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
-            "display_option" : filterFormData.display_option,
-            "thread_exists" : filterFormData.thread_exists,
-            "attachment_all_button" : generate_post_content.attachment_all_button,
-            "total_attachments" : generate_post_content.total_attachments,
-            "show_filter": true
-        } %}
-
-        <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
+            {% else %}
+                <h4 class="text-center red-message">No categories have been created yet. Please contact your instructor.</h4>
+            
+            {% endif %} 
+        {% else %} 
+            {%  include "forum/ForumBar.twig" with {
+                "current_thread" : button_params.current_thread,
+                "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
+                "show_more" : button_params.show_more,
+                "forum_bar_buttons_left" : button_params.forum_bar_buttons_left,
+                "show_threads" : button_params.show_threads,
+                "thread_exists" : button_params.thread_exists,
+                "categories" : filterFormData.categories,
+                "current_thread" : filterFormData.current_thread,
+                "current_category_ids" : filterFormData.current_category_ids,
+                "current_course" : filterFormData.current_course,
+                "cookie_selected_categories" : filterFormData.cookie_selected_categories,
+                "cookie_selected_thread_status" : filterFormData.cookie_selected_thread_status,
+                "cookie_selected_unread_value" : filterFormData.cookie_selected_unread_value,
+                "display_option" : filterFormData.display_option,
+                "thread_exists" : filterFormData.thread_exists,
+                "attachment_all_button" : generate_post_content.attachment_all_button,
+                "total_attachments" : generate_post_content.total_attachments,
+                "show_filter": true
+            } %}   
+            <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
+        {% endif %} 
 
     {% else %}
 

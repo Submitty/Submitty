@@ -56,7 +56,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
             $core->method('getDateTimeNow')->willReturn(new \DateTime('2001-01-01', $config->getTimezone()));
         }else{
-            $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
+            $core->method('getDateTimeNow')->willReturnCallback(function () use ($config) {
                 return new \DateTime('now', $config->getTimezone());
             });
         }
@@ -74,12 +74,6 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
         else {
             $core->method('checkCsrfToken')->willReturn(true);
-        }
-        if (isset($config_values['testing'])) {
-            $core->method('isTesting')->willReturn($config_values['testing'] === true);
-        }
-        else {
-            $core->method('isTesting')->willReturn(true);
         }
 
         $mock_access = $this->createMock(Access::class);

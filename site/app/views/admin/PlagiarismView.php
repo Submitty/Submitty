@@ -24,9 +24,9 @@ HTML;
         foreach ($gradeables_with_plagiarism_result as $gradeable) {
             $title = $gradeable['g_title'];
             $id = $gradeable['g_id'];
-        
+
             $delete_form_action = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'delete']);
-            
+
             if(file_exists($course_path."/lichen/ranking/".$id.".txt")) {
                 $timestamp = date("F d Y H:i:s.",filemtime($course_path."/lichen/ranking/".$id.".txt"));
                 $students = array_diff(scandir($course_path."/lichen/concatenated/".$id), array('.', '..'));
@@ -34,7 +34,7 @@ HTML;
                 foreach($students as $student) {
                     $submissions += count(array_diff(scandir($course_path."/lichen/concatenated/".$id."/".$student), array('.', '..')));
                 }
-                $students = count($students);    
+                $students = count($students);
             }
             else {
                 $timestamp = "N/A";
@@ -93,7 +93,7 @@ HTML;
                 $ranking_file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$id.".txt";
                 if(file_get_contents($ranking_file_path) == "") {
                     $matches_and_topmatch= "0 students matched, N/A top match";
-                    
+
                     $return .= <<<HTML
         <tr>
             <td>$title
@@ -106,14 +106,14 @@ HTML;
                     $rankings = preg_split('/ +/', $content);
                     $rankings = array_chunk($rankings,3);
                     $matches_and_topmatch = count($rankings)." students matched, ".$rankings[0][0]." top match";
-                    
+
                     $return .= <<<HTML
         <tr>
             <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id])}">$title</a>
             </td>
 HTML;
                 }
-                
+
                 $return .= <<<HTML
             <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
             </td>
@@ -135,13 +135,13 @@ HTML;
             </td>
         </tr>
 HTML;
-            }            
+            }
         }
 
         $return .= <<<HTML
     </table></center>
     </div>
-</div>    
+</div>
 HTML;
 
         $return .= <<<HTML
@@ -159,7 +159,7 @@ HTML;
 HTML;
         }
 
-        return $return;   
+        return $return;
     }
 
     public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
@@ -184,7 +184,7 @@ HTML;
                     if (markers.length === 0) { return; }
                     var lineData = markers[0].find();
                     var clickedMark = markers[0];
-                    
+
                     if(markers[0].css.toLowerCase().indexOf("#ffff00") != -1) { //Can be used to determine click
 
                         // var redSegments = document.getElementsByClassName("red_plag");
@@ -217,7 +217,7 @@ HTML;
                         //     console.log(redClickedMark);
                         // }
 
-                        
+
 
 
                         // redSegments.forEach(e => {
@@ -247,7 +247,7 @@ HTML;
 
                         //console.log(redSegments);
 
-                        
+
                         // redSegments.forEach(e => {
                         //     console.log(e);
                         // });
@@ -294,8 +294,8 @@ HTML;
                                 //var top = editor1.charCoords(marker_linedata.from.line).top;
 
                                 editor1.scrollIntoView(marker_linedata.to);
-                                // 
-                                
+                                //
+
                             }
                         });
                         //getMatchesForClickedMatch("{$gradeable_id}", event, lineData.from, lineData.to, "code_box_2", "orange", markers[0].attributes, "", "");
@@ -313,28 +313,28 @@ HTML;
         <span style="line-height: 2">Gradeable: <b>$gradeable_title</b> <a style="float:right;" class="btn btn-primary" title="View Key" onclick="$('#Plagiarism-Highlighting-Key').css('display', 'block');">View Key</a></span>
         <hr style="margin-top: 10px;margin-bottom: 10px;" />
         <form id="users_with_plagiarism">
-            User 1 (sorted by %match): 
+            User 1 (sorted by %match):
             <select name="user_id_1">
                 <option value="">None</option>
 HTML;
         foreach ($rankings as $ranking) {
             $return .= <<<HTML
-                <option value="{$ranking[1]}">$ranking[3] $ranking[4] &lt;$ranking[1]&gt; ($ranking[0])</option>    
+                <option value="{$ranking[1]}">$ranking[3] $ranking[4] &lt;$ranking[1]&gt; ($ranking[0])</option>
 HTML;
         }
 
         $return .= <<<HTML
             </select>
-            Version: 
+            Version:
             <select name="version_user_1">
                 <option value="">None</option>
-            </select> 
+            </select>
             <span style="float:right;"> User 2:
                 <select name="user_id_2">
                     <option value="">None</option>
                 </select>
                 <a name="toggle" class="btn btn-primary" onclick="toggleUsersPlagiarism('{$gradeable_id}');">Toggle</a>
-            </span>   
+            </span>
         </form><br />
         <div style="position:relative; height:100%; overflow-y:hidden;" class="row">
         <div style="max-height: 100%; width:100%;" class="sub">
@@ -407,7 +407,7 @@ HTML;
                             <input class="btn btn-danger" type="submit" value="Delete" />
                         </div>
                     </div>
-                </div>    
+                </div>
             </div>
         </form>
     </div>
@@ -415,7 +415,7 @@ HTML;
         $(".popup-window").draggable();
     </script>
 HTML;
-        return $return;       
+        return $return;
     }
 
     public function plagiarismPopUpToShowMatches() {
@@ -423,7 +423,7 @@ HTML;
     <ul id="popup_to_show_matches_id" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;top:0px;left:0px;width:auto;" >
     </ul>
 HTML;
-        return $return;       
+        return $return;
     }
 
     public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles = null, $prior_term_gradeables, $saved_config = null) {
@@ -434,9 +434,9 @@ HTML;
         $course = $this->core->getConfig()->getCourse();
 
         #default values for the form
-        $gradeable_id="";   
+        $gradeable_id="";
         $all_version="checked";
-        $active_version=""; 
+        $active_version="";
         $all_files="checked";
         $regex_matching_files="";
         $regex="";
@@ -495,7 +495,7 @@ HTML;
             <input type="hidden" name="prior_term_gradeables_number" value="{$prior_term_gradeables_number}" />
             <input type="hidden" name="ignore_submission_number" value="{$ignore_submission_number}" /><br />
             <div style="width:100%;">
-                <div style="width:20%;float:left">Select Gradeable:</div> 
+                <div style="width:20%;float:left">Select Gradeable:</div>
                 <div style="width:70%;float:right">
 HTML;
         if($new_or_edit == "new") {
@@ -517,19 +517,19 @@ HTML;
         else if($new_or_edit == "edit") {
             $title = '';
             if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
-               $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
+                $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
             }
             $return .= <<<HTML
                     $title
 HTML;
-        }                    
-         
+        }
+
         $return .= <<<HTML
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
                 <div style="width:20%;float:left">Instructor Provided Code:</div>
-                <div style="width:70%;float:right"> 
+                <div style="width:70%;float:right">
                     <input type="radio" id="no_code_provided_id" value="no_code_provided" name="provided_code_option" {$no_provided_code} >
                     <label for="no_code_provided_id">No</label>
                     <input type="radio" id="code_provided_id" value="code_provided" name="provided_code_option" {$provided_code}>
@@ -546,7 +546,7 @@ HTML;
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
-                <div style="width:20%;float:left">Version:</div> 
+                <div style="width:20%;float:left">Version:</div>
                 <div style="width:70%;float:right">
 HTML;
 
@@ -561,8 +561,8 @@ HTML;
                 <div style="width:20%;float:left">Files to be Compared:</div>
                 <div style="width:70%;float:right">
 HTML;
-        
-        
+
+
         $return .= <<<HTML
                     <input type="radio" id="all_files_id" value="all_files" name="file_option" {$all_files}>
                     <label for="all_files_id">All Files</label>
@@ -572,7 +572,7 @@ HTML;
                 </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
-                <div style="width:20%;float:left">Language:</div> 
+                <div style="width:20%;float:left">Language:</div>
                 <div style="width:70%;float:right">
                     <select name="language">
                         <option value="python" {$language['python']}>Python</option>
@@ -580,17 +580,17 @@ HTML;
                         <option value="java" {$language['java']}>Java</option>
                         <option value="plaintext" {$language['plaintext']}>Plain Text</option>
                     </select>
-                </div>    
+                </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
                                                                              <div style="width:20%;float:left">Threshold/Maximum number of students<br>(more than this number of students with matching code will be considered common code):</div>
                 <div style="width:70%;float:right">
                     <input type="text" name="threshold"/ value="{$threshold}" />
-                </div>    
+                </div>
             </div><br /><br /><br /><br /><br />
             <div style="width:100%;">
-                <div style="width:20%;float:left">Sequence Length:</div> 
-                <div style="width:70%;float:right">    
+                <div style="width:20%;float:left">Sequence Length:</div>
+                <div style="width:70%;float:right">
                     <input type="text" name="sequence_length" value="{$sequence_length}"/>
                 </div>
             </div><br /><br /><br /><br /><br />
@@ -598,70 +598,70 @@ HTML;
                 <div style="width:20%;float:left">Prior Terms Gradeables:</div>
                 <div style="width:70%;float:right;overflow:auto;" name= "prev_gradeable_div">
 HTML;
-            $count=0;
-            if($new_or_edit == "edit") {
-                foreach ($saved_config['prev_term_gradeables'] as $saved_prev_term_gradeable_path) {
-                    $saved_prev_sem = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[3]);
-                    $saved_prev_course = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[2]);
-                    $saved_prev_gradeable = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[0]);
+        $count=0;
+        if($new_or_edit == "edit") {
+            foreach ($saved_config['prev_term_gradeables'] as $saved_prev_term_gradeable_path) {
+                $saved_prev_sem = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[3]);
+                $saved_prev_course = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[2]);
+                $saved_prev_gradeable = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[0]);
 
-                    $return .= <<<HTML
+                $return .= <<<HTML
                     <select name="prev_sem_{$count}">
                         <option value="">None</option>
 HTML;
-                    foreach($prior_term_gradeables as $sem => $sem_courses) {
-                        if( $sem == $saved_prev_sem) {
-                            $return .= <<<HTML
+                foreach($prior_term_gradeables as $sem => $sem_courses) {
+                    if( $sem == $saved_prev_sem) {
+                        $return .= <<<HTML
                         <option value="{$sem}" selected>$sem</option>
 HTML;
-                            continue;
-                        }
-                        $return .= <<<HTML
-                        <option value="{$sem}">$sem</option>
-HTML;
+                        continue;
                     }
                     $return .= <<<HTML
+                        <option value="{$sem}">$sem</option>
+HTML;
+                }
+                $return .= <<<HTML
                     </select>
                     <select name="prev_course_{$count}">
                         <option value="">None</option>
 HTML;
 
-                    foreach($prior_term_gradeables[$saved_prev_sem] as $sem_course => $course_gradeables) {
-                        if( $sem_course == $saved_prev_course) {
-                            $return .= <<<HTML
+                foreach($prior_term_gradeables[$saved_prev_sem] as $sem_course => $course_gradeables) {
+                    if( $sem_course == $saved_prev_course) {
+                        $return .= <<<HTML
                         <option value="{$sem_course}" selected>$sem_course</option>
 HTML;
-                            continue;
-                        }
-                        $return .= <<<HTML
+                        continue;
+                    }
+                    $return .= <<<HTML
                         <option value="{$sem_course}">$sem_course</option>
 HTML;
-                    }
+                }
 
-                    $return .= <<<HTML
+                $return .= <<<HTML
                     </select>
                     <select name="prev_gradeable_{$count}">
                         <option value="">None</option>
 HTML;
-                    foreach($prior_term_gradeables[$saved_prev_sem][$saved_prev_course] as $course_gradeable) {
-                        if( $course_gradeable == $saved_prev_gradeable) {
-                            $return .= <<<HTML
+                foreach($prior_term_gradeables[$saved_prev_sem][$saved_prev_course] as $course_gradeable) {
+                    if( $course_gradeable == $saved_prev_gradeable) {
+                        $return .= <<<HTML
                         <option value="{$course_gradeable}" selected>$course_gradeable</option>
 HTML;
-                            continue;
-                        }
-                        $return .= <<<HTML
+                        continue;
+                    }
+                    $return .= <<<HTML
                         <option value="{$course_gradeable}">$course_gradeable</option>
 HTML;
-                    }    
+                }
 
-                    $return .= <<<HTML
+                $return .= <<<HTML
                     </select>
                     <br />
 HTML;
-                    $count++;
-                }
+                $count++;
             }
+        }
 
             $return .= <<<HTML
                     <select name="prev_sem_{$count}">
@@ -671,11 +671,11 @@ HTML;
             $return .= <<<HTML
                         <option value="{$sem}">$sem</option>
 HTML;
-        }         
+        }
         $return .= <<<HTML
                     </select>
                     <select name="prev_course_{$count}">
-                        <option value="">None</option>           
+                        <option value="">None</option>
                     </select>
                     <select name="prev_gradeable_{$count}">
                         <option value="">None</option>
@@ -686,7 +686,7 @@ HTML;
                         <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
                     </span>
                 </div>
-            </div><br /><br /><br /><br /><br /> 
+            </div><br /><br /><br /><br /><br />
             <div style="width:100%;overflow:auto;">
                 <div style="width:20%;float:left">Are there any submissions that should be ignored?</div>
                 <div name="ignore_submission_div" style="width:70%;float:right;overflow:auto;">
@@ -697,14 +697,14 @@ HTML;
 HTML;
 
         $count=0;
-            if($new_or_edit == "edit") {
-                foreach ($saved_config['ignore_submissions'] as $saved_ignore_submission) {
-                    $return .= <<<HTML
+        if($new_or_edit == "edit") {
+            foreach ($saved_config['ignore_submissions'] as $saved_ignore_submission) {
+                $return .= <<<HTML
                     <input type="text" name="ignore_submission_{$count}" value="{$saved_ignore_submission}"/><br />
 HTML;
-                    $count++; 
-                }
-            }        
+                $count++;
+            }
+        }
 
 
         $return .= <<<HTML
@@ -713,15 +713,15 @@ HTML;
                 <div style="width:70%;float:right">
                     <span name="add_more_ignore">
                         <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
-                    </span>     
-                </div>    
+                    </span>
+                </div>
             </div><br /><br />
             <div style="float: right; width: auto; margin-top: 5px;">
                 <a href="{$this->core->buildCourseUrl(['plagiarism'])}" class="btn btn-danger">Cancel</a>
                 <input class="btn btn-primary" type="submit" value="Save Configuration" />
             </div><br /><br /><br />
         </form>
-    </div>    
+    </div>
 </div>
 <script>
     var form = $("#save-configuration-form");
@@ -741,6 +741,6 @@ HTML;
 </script>
 HTML;
 
-    return $return;
+        return $return;
     }
 }

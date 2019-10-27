@@ -18,7 +18,6 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
 
-
 class WebRouter {
     /** @var Core  */
     protected $core;
@@ -49,7 +48,6 @@ class WebRouter {
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
-
         $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         $this->parameters = $matcher->matchRequest($this->request);
     }
@@ -138,6 +136,7 @@ class WebRouter {
                 );
             }
             else {
+
                 return Response::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );

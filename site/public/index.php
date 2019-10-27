@@ -53,7 +53,7 @@ function exception_handler($throwable) {
             $message = htmlentities($message, ENT_QUOTES);
         }
     }
-    
+
     $core->getOutput()->showException($message);
 }
 set_exception_handler("exception_handler");
@@ -61,7 +61,7 @@ set_exception_handler("exception_handler");
 function error_handler() {
     $error = error_get_last();
     if ($error['type'] === E_ERROR) {
-        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file 
+        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file
         " . $error['file'] . " on line " . $error['line']));
     }
 }
@@ -116,6 +116,9 @@ if (empty($_COOKIE['submitty_token'])) {
 
 $is_api = explode('/', $request->getPathInfo())[1] === 'api';
 if ($is_api) {
+    if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
+        $_POST = json_decode(file_get_contents('php://input'), true);
+    }
     $response = WebRouter::getApiResponse($request, $core);
 }
 else {

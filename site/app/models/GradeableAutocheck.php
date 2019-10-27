@@ -66,7 +66,7 @@ class GradeableAutocheck extends AbstractModel {
         if(isset($details["display_as_sequence_diagram"])){
             $this->display_as_sequence_diagram = $details["display_as_sequence_diagram"];
         }else{
-            $this->display_as_sequence_diagram = FALSE;
+            $this->display_as_sequence_diagram = false;
         }
 
         $actual_file = $expected_file = $difference_file = $image_difference ="";
@@ -105,6 +105,12 @@ class GradeableAutocheck extends AbstractModel {
                     $expected_file = $results_path. "/" . $details["expected_file"];
                 } else {
                     $this->core->addErrorMessage("Expected file not found.");
+                }
+            // Try to find the file in the details directory. Do not print an error,
+            // as the file is likely student generated.
+            } else {
+                if(file_exists($results_path . "/details/" . $details["expected_file"])){
+                    $expected_file = $results_path . "/details/" . $details["expected_file"];
                 }
             }
         }

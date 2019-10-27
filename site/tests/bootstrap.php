@@ -2,7 +2,7 @@
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
 
-define("__TEST_DATA__", __DIR__ . "/data");
+require_once(__DIR__.'/constants.php');
 
 $loader = require(__DIR__.'/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);

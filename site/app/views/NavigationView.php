@@ -82,22 +82,22 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         $display_custom_message = $this->core->getConfig()->displayCustomMessage();
         $message_file_details = null;
-		//Course settings have enabled displaying custom (banner) message
+        //Course settings have enabled displaying custom (banner) message
         if($display_custom_message) {
             $message_file_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "reports", "summary_html", $this->core->getUser()->getId() . ".json");
             $display_custom_message = is_file($message_file_path);
-			//If statement seems redundant, but will help in case we ever decouple the is_file check from $display_custom_message
+            //If statement seems redundant, but will help in case we ever decouple the is_file check from $display_custom_message
             if ($display_custom_message && is_file($message_file_path)) {
-				$message_json = json_decode(file_get_contents($message_file_path));
-				if(property_exists($message_json, 'special_message')){
-					$message_file_details = $message_json->special_message;
+                $message_json = json_decode(file_get_contents($message_file_path));
+                if(property_exists($message_json, 'special_message')){
+                    $message_file_details = $message_json->special_message;
 
-					//If any fields are missing, treat this as though we just didn't have a message for this user.
-					if(!property_exists($message_file_details,'title') || !property_exists($message_file_details,'description') || !property_exists($message_file_details,'filename') ){
-						$display_custom_message = false;
-						$messsage_file_details = null;
-					}
-				}
+                    //If any fields are missing, treat this as though we just didn't have a message for this user.
+                    if(!property_exists($message_file_details,'title') || !property_exists($message_file_details,'description') || !property_exists($message_file_details,'filename') ){
+                        $display_custom_message = false;
+                        $messsage_file_details = null;
+                    }
+                }
             }
         }
 
@@ -105,7 +105,7 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
-	$seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
+        $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
         if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
             $display_room_seating = false;
         }
@@ -679,7 +679,7 @@ class NavigationView extends AbstractView {
     private function getDeleteButton(Gradeable $gradeable) {
         $button = new Button($this->core, [
             "title" => "Delete Gradeable",
-            "href" => "javascript:newDeleteGradeableForm('" . 
+            "href" => "javascript:newDeleteGradeableForm('" .
                 $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
                 . "', '{$gradeable->getTitle()}');",
             "class" => "fas fa-trash fa-fw black-btn",

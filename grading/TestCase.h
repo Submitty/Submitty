@@ -98,7 +98,7 @@ public:
 
   // -------------------------------
   // GRADING & GRADERS
-  TestResultsFixedSize do_the_grading (int j, nlohmann::json complete_config) const;
+  TestResultsFixedSize do_the_grading (int j, nlohmann::json complete_config, const std::string& username) const;
 
   int numFileGraders() const {
     const nlohmann::json::const_iterator itr = _json.find("validation");
@@ -121,7 +121,7 @@ private:
 
   // -------------------------------
   // PRIVATE HELPER FUNCTIONS
-  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json complete_config) const;
+  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json complete_config, const std::string& username) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
   // -------------------------------

@@ -129,7 +129,7 @@ class ElectronicGraderController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/verify", methods={"POST"})
      * @AccessControl(permission="grading.electronic.verify_grader")
      */
-     public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
+    public function ajaxVerifyComponent($gradeable_id, $verify_all = false) {
         $anon_id = $_POST['anon_id'] ?? '';
 
         $grader = $this->core->getUser();
@@ -447,7 +447,9 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = [];
         foreach ($section_submitters as $section) {
-            $student_ids = array_merge($student_ids, array_map(function(Submitter $submitter) { return $submitter->getId(); }, $section));
+            $student_ids = array_merge($student_ids, array_map(function (Submitter $submitter) {
+                return $submitter->getId();
+            }, $section));
         }
 
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");
@@ -670,7 +672,7 @@ class ElectronicGraderController extends AbstractController {
         $teams = $this->core->getQueries()->getTeamsWithMembersFromGradeableID($gradeable_id);
 
         //Does nothing if there are no sections or no teams
-        if ($section_count <= 0 or empty($teams)) {
+        if ($section_count <= 0 || empty($teams)) {
             $this->core->redirect($return_url);
             return;
         }

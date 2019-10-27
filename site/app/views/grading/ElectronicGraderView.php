@@ -9,6 +9,7 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\AutoGradedVersion;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\LateDayInfo;
+use app\models\gradeable\RegradeRequest;
 use app\models\SimpleStat;
 use app\models\Team;
 use app\models\User;
@@ -45,7 +46,8 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings) {
+        bool $show_warnings
+    ) {
 
         $peer = false;
         if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -202,8 +204,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
-                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) && $no_rotating_sections
+                && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -240,7 +242,9 @@ class ElectronicGraderView extends AbstractView {
             "bulk_stats_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'bulk_stats']),
             "details_url" => $details_url,
             "details_view_all_url" => $details_url . '?' . http_build_query(['view' => 'all']),
-            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade'])
+            "grade_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'grade']),
+            "regrade_allowed" => $this->core->getConfig()->isRegradeEnabled(),
+            "grade_inquiry_per_component_allowed" => $gradeable->isGradeInquiryPerComponentAllowed(),
         ]);
     }
 
@@ -489,9 +493,12 @@ HTML;
             $info["graded_groups"] = [];
             foreach ($gradeable->getComponents() as $component) {
                 $graded_component = $row->getOrCreateTaGradedGradeable()->getGradedComponent($component);
+                $grade_inquiry = $graded_component !== null ? $row->getGradeInquiryByGcId($graded_component->getComponentId()) : null;
                 if ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
+                } else if ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                    $info["graded_groups"][] = "grade-inquiry";
                 } else if(!$graded_component->getVerifier()){
                     //no verifier exists, show the grader group
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
@@ -576,8 +583,9 @@ HTML;
         }
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function($a,$b)
-            { return ($a['title'] == 'NULL' or $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);   });
+        usort($sections, function ($a,$b) {
+            return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
+        });
 
 
         $empty_team_info = [];
@@ -598,23 +606,23 @@ HTML;
             $hover_over_string = "";
             ksort($team_gradeable_view_history[$team_id]);
             ksort($team);
-                foreach ($team as $user => $value) {
-                    if ($value != null) {
-                        $not_viewed_yet = false;
-                        $date_object = new \DateTime($value);
-                        $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
-                    }
-                    else {
-                        $hover_over_string.= "Not viewed by ".$user."\n";
-                    }
-                }
-
-                if ($not_viewed_yet) {
-                    $team_gradeable_view_history[$team_id]['hover_string'] = '';
+            foreach ($team as $user => $value) {
+                if ($value != null) {
+                    $not_viewed_yet = false;
+                    $date_object = new \DateTime($value);
+                    $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
                 }
                 else {
-                    $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+                    $hover_over_string.= "Not viewed by ".$user."\n";
                 }
+            }
+
+            if ($not_viewed_yet) {
+                $team_gradeable_view_history[$team_id]['hover_string'] = '';
+            }
+            else {
+                $team_gradeable_view_history[$team_id]['hover_string'] = $hover_over_string;
+            }
         }
 
         $details_base_url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
@@ -835,7 +843,7 @@ HTML;
      * @return string
      */
     public function renderSubmissionPanel(GradedGradeable $graded_gradeable, int $display_version) {
-        function add_files(&$files, $new_files, $start_dir_name) {
+        $add_files = function (&$files, $new_files, $start_dir_name) {
             $files[$start_dir_name] = array();
             if($new_files) {
                 foreach ($new_files as $file) {
@@ -851,7 +859,7 @@ HTML;
                     $working_dir[$file['name']] = $file['path'];
                 }
             }
-        }
+        };
         $submissions = array();
         $results = array();
         $results_public = array();
@@ -867,10 +875,10 @@ HTML;
             $meta_files = $display_version_instance->getMetaFiles();
             $files = $display_version_instance->getFiles();
 
-            add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
-            add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
-            add_files($results, $display_version_instance->getResultsFiles(), 'results');
-            add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
+            $add_files($submissions, array_merge($meta_files['submissions'], $files['submissions']), 'submissions');
+            $add_files($checkout, array_merge($meta_files['checkout'], $files['checkout']), 'checkout');
+            $add_files($results, $display_version_instance->getResultsFiles(), 'results');
+            $add_files($results_public, $display_version_instance->getResultsPublicFiles(), 'results_public');
         }
 
         // For PDFAnnotationBar.twig
@@ -921,7 +929,7 @@ HTML;
         }
 
         // TODO: this is duplicated in Homework View
-        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
                 'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
