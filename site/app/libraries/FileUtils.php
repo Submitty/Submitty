@@ -490,7 +490,7 @@ class FileUtils {
      */
     public static function validateUploadedFiles($files) {
         if (empty($files)) {
-           return array("failed" => "No files sent to validate");
+            return array("failed" => "No files sent to validate");
         }
 
         $ret = array();

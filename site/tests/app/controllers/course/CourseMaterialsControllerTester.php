@@ -204,7 +204,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         //check the date has been updated to the new time
         $expected_json = [
-             $this->upload_path . "/" . $name => [
+            $this->upload_path . "/" . $name => [
                 'checked' => '1',
                 'release_datetime' => $new_date,
                 'hide_from_students' => null

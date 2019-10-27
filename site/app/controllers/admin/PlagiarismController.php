@@ -76,7 +76,7 @@ class PlagiarismController extends AbstractController {
         if(!file_exists($nightly_rerun_info_file)) {
             $nightly_rerun_info = array();
             foreach($gradeables_with_plagiarism_result as $gradeable_id_title) {
-               $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
+                $nightly_rerun_info[$gradeable_id_title['g_id']] = false;
             }
             if (file_put_contents($nightly_rerun_info_file, json_encode($nightly_rerun_info, JSON_PRETTY_PRINT)) === false) {
                 die("Failed to create nightly rerun info file");
@@ -85,12 +85,12 @@ class PlagiarismController extends AbstractController {
         else {
             $nightly_rerun_info = json_decode(file_get_contents($nightly_rerun_info_file), true);
             foreach ($nightly_rerun_info as $gradeable_id => $nightly_rerun_status) {
-                $flag=0;
+                $flag = 0;
                 foreach ($gradeables_with_plagiarism_result as $gradeable_id_title) {
-                   if ($gradeable_id_title['g_id'] == $gradeable_id) {
+                    if ($gradeable_id_title['g_id'] == $gradeable_id) {
                         $flag = 1;
                         break;
-                   }
+                    }
                 }
                 if ($flag == 0) {
                     #implies plagiarism result for this gradeable are deleted
@@ -134,7 +134,7 @@ class PlagiarismController extends AbstractController {
             $this->core->addSuccessMessage("There are no matches(plagiarism) for the gradeable with current configuration");
             $this->core->redirect($return_url);
         }
-        $content =file_get_contents($file_path);
+        $content = file_get_contents($file_path);
         $content = trim(str_replace(array("\r", "\n"), '', $content));
         $rankings = preg_split('/ +/', $content);
         $rankings = array_chunk($rankings,3);
@@ -608,7 +608,7 @@ class PlagiarismController extends AbstractController {
                     }
 
                     if($codebox == "2" && $user_id_2 !="" && $orange_color) {
-                         foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
+                        foreach($match['others'][$user_2_index_in_others]['matchingpositions'] as $user_2_matchingposition) {
                             $start_pos_2 =$tokens_user_2[$user_2_matchingposition["start"]-1]["char"]-1;
                             $start_line_2 = $tokens_user_2[$user_2_matchingposition["start"]-1]["line"]-1;
                             $end_pos_2 =$tokens_user_2[$user_2_matchingposition["end"]-1]["char"]-1; //!!!!

@@ -45,6 +45,7 @@ class CourseMaterialsView extends AbstractView {
                     {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
+
                         if ( isset( $json[$expected_file_path]['sections'] ) ){
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
                         }
@@ -53,7 +54,7 @@ class CourseMaterialsView extends AbstractView {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
 
-                       if ($isShareToOther == '1' && $release_date > $now_date_time)
+                        if ($isShareToOther == '1' && $release_date > $now_date_time)
                             $isShareToOther = '0';
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
@@ -127,7 +128,7 @@ class CourseMaterialsView extends AbstractView {
             }
             $can_write =is_writable($fp);
             if(!$can_write){
-               $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
+                $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
             }
         };
 
