@@ -77,6 +77,29 @@
 {% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
+    {{dump(this_file_section)}}
+    {{dump(this_hide_from_students)}}
+    <script>
+        function editCourseMaterialsInitialization(){
+            console.log("CHECK");
+            var hidden_secs = "{{this_hide_from_students}}";
+            console.log(hidden_secs);
+            var file_secs = {{(this_file_section|json_encode(constant('JSON_PRETTY_PRINT'))|raw)}};
+            console.log(file_secs)
+            if(hidden_secs == "on"){
+                $("#hide-materials-checkbox").attr('checked',"on");
+            }
+            else{
+                $("#hide-materials-checkbox").attr('checked',"off");
+            }
+            if(file_secs != null){
+                for(let index = 0; index < file_secs[path].length; ++index){
+                    $("#section-" + file_secs[path][index]).attr('checked',"on");
+                }
+            }
+            newEditCourseMaterialsForm("{{ path | url_encode }}", "{{ dir }}");
+        }
+    </script>
     {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
     <div>
         <div class="file-viewer">
@@ -90,7 +113,7 @@
             <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
-               <a onclick='newEditCourseMaterialsForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+               <a onclick='editCourseMaterialsInitialization()'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>

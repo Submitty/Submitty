@@ -224,20 +224,16 @@ function newUploadCourseMaterialsForm() {
 function newEditCourseMaterialsForm(path, file_name) {
 
     //let url = buildCourseUrl(["course_materials", "edit"]) + "?path=" + path;
-    console.log(file_name);
     //$('.popup-form').css('display', 'none');
     var form = $("#edit-course-materials-form");
     form.css("display", "block");
     $('[id="material-edit-form"]',form).attr('data-fileName', file_name);
     var requestedPath = document.getElementById('material-edit-form').getAttribute("data-fileName");
-    console.log(requestedPath);
     //$('[name="edit-course-material-message"]', form).html('');
     //$('[name="edit-course-material-message"]', form).append('<b>'+file_name+'</b>');
     //$('[name="edit-confirmation"]', form).attr('action', url);
     //form.css("display", "block");
-
 }
-
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){
 

@@ -17,10 +17,6 @@
             </label>
             <div id = "show_Some_Section_Selection" style="display: block">
             {% for section in reg_sections %}
-                {% set checked = "on" %}
-                {% if section in file_sections[document.getElementById("input-provide-full-path").value]%}
-                    {% set checked = "off" %}
-                {% endif %}
                 <tr>
                     <td>Section {{ section['sections_registration_id'] }}</td>
                     <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
@@ -30,23 +26,7 @@
             <script type="text/javascript">
                 function toggleRegistrationSections(){
                     $("#show_Some_Section_Selection").toggle();
-                }
-                function setRegistrationSection(sectionId){
-                    console.log("CHECK");
-                    var file_sections = '{{ file_sections|json_encode }}';
-                    var requestedPath = document.getElementById('material-edit-form').getAttribute("data-fileName");
-                    console.log(requestedPath);
-                    
-                    var this_file_sections = file_sections[requestedPath];
-                    var hide_from_students = '{{ hide_from_students|json_encode }}';
-                    if(hide_from_students[requestedPath] == "on"){
-                        $("#hide-materials-checkbox").attr('checked',"on");
-                    }
-                    for(let index = 0; index < this_file_sections.length; ++index){
-                        $("#section-" + this_file_sections[index]).attr('checked',"on");
-                    }
-                }
-                setRegistrationSection(); 
+                } 
             </script>
         </label>
         <label id="upload_dt">
@@ -60,7 +40,7 @@
             Unzip zip files (Note: If checked, will replace all folders/files)
         </label>
         <label>
-            <input id="hide-materials-checkbox" type="checkbox" value="off"/>
+            <input id="hide-materials-checkbox" type="checkbox"/>
             Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
@@ -91,7 +71,7 @@
                 if  ($('#hide-materials-checkbox').is(':checked'))  {
                     hideFromStudents = 'on';
                 }
-                var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
+                var reg_sectionArray = {{ reg_sections|json_encode|raw }};
                 
                 reg_sectionArray.forEach(function(element){
                     var currentSection = "#section-" +element['sections_registration_id'];
