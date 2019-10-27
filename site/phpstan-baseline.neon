@@ -38,16 +38,6 @@ parameters:
 			path: app/controllers/AbstractController.php
 
 		-
-			message: "#^Cannot access an offset on Ds\\\\Set\\.$#"
-			count: 1
-			path: app/controllers/GlobalController.php
-
-		-
-			message: "#^Cannot assign new offset to Ds\\\\Set\\.$#"
-			count: 1
-			path: app/controllers/GlobalController.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$as_instructor\\)\\: Unexpected token \"\\$as_instructor\", expected TOKEN_IDENTIFIER at offset 41$#"
 			count: 1
 			path: app/controllers/HomePageController.php
