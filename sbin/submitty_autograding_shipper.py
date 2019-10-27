@@ -618,8 +618,8 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
     time_get_job_begin = dateutils.get_current_time()
 
-    overall_lock.acquire()
-    folder= INTERACTIVE_QUEUE
+    # overall_lock.acquire()
+    folder = os.join(INTERACTIVE_QUEUE, my_name)
 
 
     # ----------------------------------------------------------------
@@ -722,7 +722,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         with open(os.path.join(grading_file), "w") as queue_file:
             json.dump({"untrusted": which_untrusted}, queue_file)
 
-    overall_lock.release()
+    # overall_lock.release()
 
     time_get_job_end = dateutils.get_current_time()
 
@@ -747,6 +747,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
 
     which_machine   = full_address
     my_capabilities = my_data[my_name]['capabilities']
+    my_folder = os.path.join(INTERACTIVE_QUEUE, my_name)
 
     # ignore keyboard interrupts in the shipper processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -757,7 +758,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
             my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
             if not my_job == "":
                 counter=0
-                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(INTERACTIVE_QUEUE,my_job))
+                grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(my_folder, my_job))
                 continue
             else:
                 if counter == 0 or counter >= 10:
@@ -785,10 +786,10 @@ def launch_shippers(worker_status_map):
 
     # Clean up old files from previous shipping/autograding (any
     # partially completed work will be re-done)
-    for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*"):
-        file_path = str(file_path)
-        autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove old queue file: " + file_path)
-        os.remove(file_path)
+    # for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*"):
+    #     file_path = str(file_path)
+    #     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove old queue file: " + file_path)
+    #     os.remove(file_path)
 
     for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
         file_path = str(file_path)
@@ -831,6 +832,15 @@ def launch_shippers(worker_status_map):
     total_num_workers = 0
     processes = list()
     for name, machine in autograding_workers.items():
+        worker_folder = os.path.join(INTERACTIVE_QUEUE, name)
+         
+        if not os.path.exists(worker_folder):
+            os.mkdir(worker_folder)
+
+        # Clear out in-progress files, as these will be re-done.
+        for grading in Path(worker_folder).glob('GRADING_*'):
+            os.remove(grading)
+
         if worker_status_map[name] == False:
             print("{0} could not be reached, so we are not spinning up shipper threads.".format(name))
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="{0} could not be reached, so we are not spinning up shipper threads.".format(name))
