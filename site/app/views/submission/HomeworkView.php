@@ -407,7 +407,9 @@ class HomeworkView extends AbstractView {
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
-            'days_to_be_charged' => $days_to_be_charged
+            'days_to_be_charged' => $days_to_be_charged,
+            'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'max_post_size' => Utils::returnBytes(ini_get('post_max_size'))
         ]);
     }
 
@@ -527,8 +529,6 @@ class HomeworkView extends AbstractView {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
-        $ch = curl_init();
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
