@@ -195,7 +195,7 @@ class RainbowCustomization extends AbstractModel{
         // Add data into retArray
         foreach ($displayBenchmarks as $displayBenchmark)
         {
-            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = True : $isUsed = False;
+            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = true : $isUsed = false;
 
             // Add benchmark to return array
             $retArray[] = ['id' => $displayBenchmark, 'isUsed' => $isUsed];

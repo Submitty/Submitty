@@ -590,7 +590,11 @@
             }
             // bulk upload
             if ($("#radio-bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix, qr_suffix );
+                handleBulk("{{ gradeable_id }}", 
+                            {{ max_post_size }}, 
+                            {{ max_file_size }},
+                            num_pages, use_qr, qr_prefix, qr_suffix 
+                          );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){

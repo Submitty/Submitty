@@ -113,6 +113,12 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
+@media (max-width: 541px) {
+    #moorthy-duck{
+        display: none;
+    }
+}
+
 @media (min-width: 541px) {
     #home-button, #logout-button {
         display: none;

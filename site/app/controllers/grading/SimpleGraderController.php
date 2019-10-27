@@ -33,10 +33,10 @@ class SimpleGraderController extends AbstractController {
             $sort_by = "u.user_id";
         }
         else if($sort === "first"){
-            $sort_by = "coalesce(u.user_preferred_firstname, u.user_firstname)";
+            $sort_by = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
         else {
-            $sort_by = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            $sort_by = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
         }
 
         //Figure out what section we are supposed to print
@@ -121,10 +121,10 @@ class SimpleGraderController extends AbstractController {
             $sort_key = "u.user_id";
         }
         elseif ($sort === "first") {
-            $sort_key = "coalesce(u.user_preferred_firstname, u.user_firstname)";
+            $sort_key = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
         else {
-            $sort_key = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            $sort_key = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
         }
 
         if ($gradeable->isGradeByRegistration()) {
