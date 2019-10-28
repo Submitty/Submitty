@@ -35,8 +35,12 @@ with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
 DAEMON_UID = OPEN_JSON['daemon_uid']
 
 INTERACTIVE_QUEUE = os.path.join(SUBMITTY_DATA_DIR, "to_be_graded_queue")
+IN_PROGRESS_PATH = os.path.join(SUBMITTY_DATA_DIR, "grading")
 
 JOB_ID = '~SHIP~'
+
+def worker_folder(worker_name):
+    return os.path.join(IN_PROGRESS_PATH, worker_name)
 
 
 # ==================================================================================
@@ -620,7 +624,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
     time_get_job_begin = dateutils.get_current_time()
 
     # overall_lock.acquire()
-    folder = os.path.join(INTERACTIVE_QUEUE, my_name)
+    folder = worker_folder(my_name)
 
 
     # ----------------------------------------------------------------
@@ -748,7 +752,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
 
     which_machine   = full_address
     my_capabilities = my_data['capabilities']
-    my_folder = os.path.join(INTERACTIVE_QUEUE, my_name)
+    my_folder = worker_folder(my_name)
 
     # ignore keyboard interrupts in the shipper processes
     signal.signal(signal.SIGINT, signal.SIG_IGN)
@@ -763,7 +767,8 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
                 continue
             else:
                 if counter == 0 or counter >= 10:
-                    print ("{0} {1}: no available job".format(my_name, which_untrusted))
+                    autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
+                        message="{0} {1}: no available job".format(my_name, which_untrusted))
                     counter=0
                 counter+=1
                 time.sleep(1)
@@ -771,7 +776,6 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
             my_message = "ERROR in get_job {0} {1} {2}. For more details, see traces entry".format(which_machine,which_untrusted,str(e))
-            print (my_message)
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
 
@@ -836,8 +840,7 @@ def launch_shippers(worker_status_map):
         thread_count = machine["num_autograding_workers"]
         
         # Cleanup previous in-progress submissions
-        worker_folder_base = os.path.join(INTERACTIVE_QUEUE, name)
-        worker_folders = [f'{worker_folder_base}_{i}' for i in range(thread_count)]
+        worker_folders = [worker_folder(f'{name}_{i}') for i in range(thread_count)]
         for folder in worker_folders:
             if not os.path.exists(folder):
                 os.mkdir(folder)
@@ -897,15 +900,25 @@ def launch_shippers(worker_status_map):
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
             #print ("shippers= ",total_num_workers,"  alive=",alive)
 
-            # Place any jobs placed in here into random worker directories
+            # Find which workers are currently idle, as well as any autograding
+            # jobs which need to be scheduled.
+            workers = [name for (name, p) in processes if p.is_alive]
+            idle_workers = list(filter(
+                lambda n: len(os.listdir(worker_folder(n))) == 0,
+                workers))
             jobs = filter(os.path.isfile, 
                 map(lambda f: os.path.join(INTERACTIVE_QUEUE, f), 
                     os.listdir(INTERACTIVE_QUEUE)))
+            
+            # Distribute available jobs randomly among workers currently idle.
             for job in jobs:
-                dest, _ = random.choice(processes)
+                if len(idle_workers) == 0:
+                    break
+                dest = random.choice(idle_workers)
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, 
                     message=f"Pushing job {os.path.basename(job)} to {dest}.")
-                shutil.move(job, os.path.join(INTERACTIVE_QUEUE, dest))
+                shutil.move(job, worker_folder(dest))
+                idle_workers.remove(dest)
 
             time.sleep(1)
 
