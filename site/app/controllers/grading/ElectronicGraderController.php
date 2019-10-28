@@ -827,7 +827,7 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id='', $from=null, $to=null, $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=null, $component_id="-1") {
+    public function showGrading($gradeable_id, $who_id='', $from="", $to=null, $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=null, $component_id="-1") {
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
