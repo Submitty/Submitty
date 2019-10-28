@@ -222,10 +222,6 @@ class TestForum(BaseTestCase):
             assert not self.thread_exists(title)
 
     def test_forum_merge_thread(self):
-
-        # FIXME / HACK TEST IS FAILING
-        return
-
         self.init_and_enable_discussion()
         title1 = "E2E Test 1 E2E"
         title2 = "E2E Test 2 E2E"
@@ -256,6 +252,7 @@ class TestForum(BaseTestCase):
 
         # Merging success
         self.merge_threads(title2, title1, press_cancel=False)
+        content2 = f"Merged Thread Title: {title2}\n\n{content2}"
 
         self.find_posts(content1, must_exists=True, move_to_thread=title1, check_attachment=content1_attachment)
         self.find_posts(reply1, must_exists=True)
