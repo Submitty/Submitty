@@ -120,7 +120,7 @@ class NotificationFactory {
         $email_recipients = [$current_user_id];
         $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
         foreach ($recipients as $recipient) {
-            $user_settings_row = array_values(array_filter($users_settings, function($v) use ($recipient) {
+            $user_settings_row = array_values(array_filter($users_settings, function ($v) use ($recipient) {
                 return $v['user_id'] === $recipient;
             }));
             if (!empty($user_settings_row)) {

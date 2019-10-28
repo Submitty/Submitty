@@ -318,7 +318,7 @@ class Component extends AbstractModel {
         $deleted_marks = array_udiff($this->marks, $marks, Utils::getCompareByReference());
         if (in_array(true, array_map(function (Mark $mark) {
                 return $mark->anyReceivers();
-            }, $deleted_marks))) {
+        }, $deleted_marks))) {
             throw new \InvalidArgumentException('Call to setMarks implied deletion of marks with receivers');
         }
 

@@ -642,7 +642,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
  * @param use_qr_codes
  * @param qr_prefix
  */
-function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
+function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -666,23 +666,44 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
     formData.append('csrf_token', csrfToken);
 
+    var total_size = 0;
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
             if (file_array[i][j].name.indexOf("'") != -1 ||
                 file_array[i][j].name.indexOf("\"") != -1) {
                 alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
             else if (file_array[i][j].name.indexOf("\\") != -1 ||
                 file_array[i][j].name.indexOf("/") != -1) {
                 alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
             else if (file_array[i][j].name.indexOf("<") != -1 ||
                 file_array[i][j].name.indexOf(">") != -1) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
+
+            total_size += file_array[i][j].size;
+
+            if (total_size >= max_file_size){
+                alert("ERROR! Uploaded file(s) exceed max file size.\n" + 
+                      "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+
+             if (total_size >= max_post_size){
+                alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" + 
+                      "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+
             formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
@@ -994,15 +1015,19 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path,cmTime) {
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path,cmTime, sections) {
     var submit_url = buildCourseUrl(['course_materials', 'upload']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
+    formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
     formData.append('release_time',cmTime);
+    if(sections !== null){
+        formData.append('sections', sections);
+    }
     var target_path = cmPath; // this one has slash at the end.
     if (requested_path && requested_path.trim().length) {
         target_path = cmPath + requested_path;

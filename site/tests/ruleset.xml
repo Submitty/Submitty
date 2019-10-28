@@ -2,6 +2,7 @@
 <ruleset name="SubmittyStandard">
     <description>Non-Complete Standard for the Submitty Project</description>
     <arg name="extensions" value="php" />
+    <arg value="p" />
 
     <file>../app</file>
     <file>../public/index.php</file>
@@ -30,12 +31,6 @@
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
-        <exclude name="Generic.PHP.LowerCaseConstant.Found" />
-        <exclude name="Generic.PHP.LowerCaseKeyword.Found" />
-        <exclude name="Generic.PHP.LowerCaseType.ReturnTypeFound" />
-        <exclude name="Generic.PHP.LowerCaseType.ParamTypeFound" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent.Incorrect" />
-        <exclude name="Generic.WhiteSpace.ScopeIndent.IncorrectExact" />
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
@@ -99,16 +94,6 @@
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeComma" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeArg" />
         <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeHint" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterFunction" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceAfterUse" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.OneParamPerLine" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.ContentAfterBrace" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.CloseBracketLine" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.BraceOnNewLine" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.Indent" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.FirstParamSpacing" />
-        <exclude name="Squiz.Functions.MultiLineFunctionDeclaration.SpaceBeforeBrace" />
-        <exclude name="Squiz.Operators.ValidLogicalOperators.NotAllowed" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />

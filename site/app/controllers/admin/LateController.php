@@ -201,7 +201,7 @@ class LateController extends AbstractController {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
-            if($team != NULL && $team->getSize() > 1){
+            if($team != null && $team->getSize() > 1){
                 if($option == 0){
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
@@ -273,7 +273,7 @@ class LateController extends AbstractController {
         foreach($rows as $row) {
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
-            $fields = array_map(function($k) {
+            $fields = array_map(function ($k) {
                 return trim($k);
             }, $fields);
 

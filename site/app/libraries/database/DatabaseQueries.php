@@ -187,9 +187,21 @@ class DatabaseQueries {
     /**
      * Helper function for generating sql query according to the given requirements
      */
-    public function buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user,
-                                        &$query_select, &$query_join, &$query_where, &$query_order, &$query_parameters,
-                                        $want_categories, $want_order) {
+    public function buildLoadThreadQuery(
+        $categories_ids,
+        $thread_status,
+        $unread_threads,
+        $show_deleted,
+        $show_merged_thread,
+        $current_user,
+        &$query_select,
+        &$query_join,
+        &$query_where,
+        &$query_order,
+        &$query_parameters,
+        $want_categories,
+        $want_order
+    ) {
         $query_raw_select = array();
         $query_raw_join   = array();
         $query_raw_where  = array("true");
@@ -360,7 +372,7 @@ class DatabaseQueries {
         }
 
         try {
-            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, $type, $hasAttachment, $markdown));
+            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, null, $type, $hasAttachment, $markdown));
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
             $this->visitThread($user, $thread_id);
         } catch (DatabaseException $dbException){
@@ -483,11 +495,11 @@ class DatabaseQueries {
         $this->course_db->beginTransaction();
 
         try {
-        //insert data
-        $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date));
+            //insert data
+            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date));
 
-        //retrieve generated thread_id
-        $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
+            //retrieve generated thread_id
+            $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
         } catch(DatabaseException $dbException) {
             $this->course_db->rollback();
         }
@@ -744,7 +756,7 @@ class DatabaseQueries {
             $this->course_db->query("SELECT * FROM late_days");
         }
         // Parse the date-times
-        return array_map(function ($arr)  {
+        return array_map(function ($arr) {
             $arr['since_timestamp'] = DateUtils::parseDateTime($arr['since_timestamp'], $this->core->getConfig()->getTimezone());
             return $arr;
         }, $this->course_db->rows());
@@ -757,7 +769,11 @@ class DatabaseQueries {
     public function getUsersByRegistrationSections($sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
-            $orderBy = str_replace("registration_section","SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",$orderBy);
+            $orderBy = str_replace(
+                "registration_section",
+                "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')",
+                $orderBy
+            );
             $values = $this->createParamaterList(count($sections));
             $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN {$values} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
@@ -1025,8 +1041,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
 ) as individual;
           ", array($g_id));
         if(count($this->course_db->rows()) == 0){
-          echo("why");
-          return;
+            return;
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
@@ -1125,8 +1140,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 )AS individual
           ", array($g_id, $count));
         if(count($this->course_db->rows()) == 0){
-          echo("why");
-          return;
+            return;
         }
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
@@ -1212,24 +1226,24 @@ WHERE g_id = ?", array($g_id));
 
     //gets ids of students with non null registration section and null rotating section
     public function getRegisteredUsersWithNoRotatingSection(){
-       $this->course_db->query("
+        $this->course_db->query("
 SELECT user_id
 FROM users AS u
 WHERE registration_section IS NOT NULL
 AND rotating_section IS NULL;");
 
-       return $this->course_db->rows();
+        return $this->course_db->rows();
     }
 
     //gets ids of students with non null rotating section and null registration section
     public function getUnregisteredStudentsWithRotatingSection(){
-    $this->course_db->query("
+        $this->course_db->query("
 SELECT user_id
 FROM users AS u
 WHERE registration_section IS NULL
 AND rotating_section IS NOT NULL;");
 
-       return $this->course_db->rows();
+        return $this->course_db->rows();
     }
 
     public function getGradersForRegistrationSections($sections) {
@@ -1431,7 +1445,7 @@ SELECT user_id
 FROM users
 WHERE rotating_section IS NULL AND registration_section IS NOT NULL
 ORDER BY user_id ASC");
-        return array_map(function($elem) {
+        return array_map(function ($elem) {
             return $elem['user_id'];
         }, $this->course_db->rows());
     }
@@ -1442,7 +1456,7 @@ SELECT user_id
 FROM users
 WHERE registration_section IS NOT NULL
 ORDER BY user_id ASC");
-        return array_map(function($elem) {
+        return array_map(function ($elem) {
             return $elem['user_id'];
         }, $this->course_db->rows());
     }
@@ -2203,7 +2217,7 @@ ORDER BY gt.{$section_key}", $params);
      * @return array
      */
     public function getUsersWithLateDays() {
-      throw new NotImplementedException();
+        throw new NotImplementedException();
     }
 
     /**
@@ -2576,18 +2590,18 @@ AND gc_id IN (
     }
 
     public function viewedThread($user, $thread_id){
-      $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))" , array($thread_id, $user, $thread_id));
-      return count($this->course_db->rows()) > 0;
+        $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))" , array($thread_id, $user, $thread_id));
+        return count($this->course_db->rows()) > 0;
     }
 
     public function getDisplayUserInfoFromUserId($user_id){
-      $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email FROM users WHERE user_id = ?", array($user_id));
-      $name_rows = $this->course_db->rows()[0];
-      $ar = array();
-      $ar["first_name"] = (empty($name_rows["user_preferred_firstname"])) ? $name_rows["user_firstname"]      : $name_rows["user_preferred_firstname"];
-      $ar["last_name"]  = (empty($name_rows["user_preferred_lastname"]))  ? " " . $name_rows["user_lastname"] : " " . $name_rows["user_preferred_lastname"];
-      $ar["user_email"] = $name_rows["user_email"];
-      return $ar;
+        $this->course_db->query("SELECT user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email FROM users WHERE user_id = ?", array($user_id));
+        $name_rows = $this->course_db->rows()[0];
+        $ar = array();
+        $ar["first_name"] = (empty($name_rows["user_preferred_firstname"])) ? $name_rows["user_firstname"]      : $name_rows["user_preferred_firstname"];
+        $ar["last_name"]  = (empty($name_rows["user_preferred_lastname"]))  ? " " . $name_rows["user_lastname"] : " " . $name_rows["user_preferred_lastname"];
+        $ar["user_email"] = $name_rows["user_email"];
+        return $ar;
     }
 
     public function filterCategoryDesc($category_desc) {
@@ -2636,7 +2650,7 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = NULL){
+    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = null){
         $query_delete = $show_deleted?"true":"deleted = false";
         $query_filter_on_user = '';
         $param_list = array();
@@ -2696,6 +2710,8 @@ AND gc_id IN (
                 $this->course_db->rollback();
                 return false;
             }
+
+            $child_thread_title = "Merged Thread Title: ".$child_thread_title."\n";
 
             if($child_root_post <= $parent_root_post) {
                 $message = "Child thread must be newer than parent thread";
@@ -3176,7 +3192,7 @@ AND gc_id IN (
      */
     public function getSubmittersById(array $ids) {
         //Get Submitter for each id in ids
-        return array_map(function($id) {
+        return array_map(function ($id) {
             return $this->getSubmitterById($id);
         }, $ids);
     }
@@ -3555,7 +3571,7 @@ AND gc_id IN (
 
         // sort components by order
         $components = $gradeable->getComponents();
-        usort($components, function(Component $a, Component $b) {
+        usort($components, function (Component $a, Component $b) {
             return $a->getOrder() - $b->getOrder();
         });
 
@@ -3982,10 +3998,10 @@ AND gc_id IN (
     * Gets a list of emails with user ids for all active particpants in a course
     */
     public function getEmailListWithIds() {
-      $parameters = array();
-      $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
+        $parameters = array();
+        $this->course_db->query('SELECT user_id, user_email, user_group, registration_section FROM users WHERE user_group != 4 OR registration_section IS NOT null', $parameters);
 
-      return $this->course_db->rows();
+        return $this->course_db->rows();
     }
 
     /**
@@ -4085,7 +4101,7 @@ AND gc_id IN (
         $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
         if(count($this->course_db->rows()) == 0){
             $name = $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
-            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, NULL,NULL,NULL,NULL);
+            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, null,null,null,null);
         }
         $row = $this->course_db->rows()[0];
         $this->course_db->query("SELECT COUNT(*) FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
@@ -4152,7 +4168,7 @@ AND gc_id IN (
         if(count($this->course_db->rows()) != 0){
             return $this->course_db->rows()[0]['id'];
         }else{
-            return NULL;
+            return null;
         }
     }
 
@@ -4177,7 +4193,7 @@ AND gc_id IN (
         $this->course_db->query("SELECT * FROM queue where entry_id = ? limit 1", array($entry_id));
         $rows = $this->course_db->rows();
         if(count($rows) == 0){
-            return NULL;
+            return null;
         }
         return $rows[0]['user_id'];
     }

@@ -107,10 +107,10 @@ GROUP BY user_id", array($user_id));
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         $orderBy="";
         if($section_key == "registration_section") {
-          $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
+            $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
         }
         else {
-          $orderBy = "u.{$section_key}, u.user_id";
+            $orderBy = "u.{$section_key}, u.user_id";
         }
 
         $this->course_db->query("
@@ -830,12 +830,20 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     ];
 
     /**
-     * Generates the ORDER BY clause with the provided sorting keys
+     * Generates the ORDER BY clause with the provided sorting keys.
+     *
+     * For every element in $sort_keys, checks if the first word is in $key_map,
+     * and if so, replaces it with the list of clauses in $key_map, and then joins that
+     * list together using the second word (if it exists, assuming it is an order direction)
+     * or blank otherwise. If the first word is not, return the clause as is. Finally,
+     * join the resulting set of clauses together as appropriate for valid ORDER BY.
+     *
      * @param string[]|null $sort_keys
      * @param array $key_map A map from sort keys to arrays of expressions to sort by instead
      *          (see self::graded_gradeable_key_map for example)
      * @return string
      */
+
     private static function generateOrderByClause($sort_keys, array $key_map) {
         if ($sort_keys !== null) {
             if (!is_array($sort_keys)) {
@@ -852,17 +860,22 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                 array_map(function ($key_ext) use ($key_map) {
                     $split_key = explode(' ', $key_ext);
                     $key = $split_key[0];
-                    $order = '';
-                    if (count($split_key) > 1) {
-                        $order = $split_key[1];
+                    if (isset($key_map[$key])) {
+                        // Map any keys with special requirements to the proper statements and preserve specified order
+                        $order = '';
+                        if (count($split_key) > 1) {
+                            $order = $split_key[1];
+                        }
+                        if (count($key_map[$key]) === 0) {
+                            return '';
+                        }
+                        return implode(" $order,", $key_map[$key]) . " $order";
                     }
-                    if (isset($key_map[$key]) && count($key_map[$key]) === 0) {
-                        return '';
+                    else {
+                        return $key_ext;
                     }
-                    // Map any keys with special requirements to the proper statements and preserve specified order
-                    return implode(" $order,", $key_map[$key] ?? [$key]) . " $order";
                 }, $sort_keys),
-                function($a) {
+                function ($a) {
                     return $a !== '';
                 }));
         }
@@ -1529,7 +1542,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
              $selector
              $order";
 
-        $gradeable_constructor = function($row) {
+        $gradeable_constructor = function ($row) {
             if (!isset($row['eg_g_id']) && $row['type'] === GradeableType::ELECTRONIC_FILE) {
                 throw new DatabaseException("Electronic gradeable didn't have an entry in the electronic_gradeable table!");
             }

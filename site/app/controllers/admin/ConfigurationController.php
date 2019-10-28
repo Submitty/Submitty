@@ -188,7 +188,7 @@ class ConfigurationController extends AbstractController {
 
         $seating_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating');
 
-        $gradeable_seating_options = array_filter($gradeable_seating_options, function($seating_option) use($seating_dir) {
+        $gradeable_seating_options = array_filter($gradeable_seating_options, function ($seating_option) use ($seating_dir) {
             return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
         });
 

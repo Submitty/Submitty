@@ -282,7 +282,7 @@ abstract class AbstractDatabase {
      * @return array
      */
     public function row() {
-        if($this->results != NULL && count($this->results) > 0) {
+        if($this->results != null && count($this->results) > 0) {
             return array_shift($this->results);
         }
         else {
