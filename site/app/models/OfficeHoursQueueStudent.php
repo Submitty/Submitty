@@ -17,7 +17,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $time_out_iso = "time not set";
     private $time_helped_iso = "time not set";
     private $time_in_iso = "time not set";
-    private $removed_by = NULL;
+    private $removed_by = null;
     private $entry_id = 0;
 
     /**
