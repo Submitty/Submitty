@@ -31,10 +31,6 @@
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
-        <exclude name="Generic.PHP.LowerCaseConstant.Found" />
-        <exclude name="Generic.PHP.LowerCaseKeyword.Found" />
-        <exclude name="Generic.PHP.LowerCaseType.ReturnTypeFound" />
-        <exclude name="Generic.PHP.LowerCaseType.ParamTypeFound" />
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 

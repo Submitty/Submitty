@@ -372,7 +372,7 @@ class DatabaseQueries {
         }
 
         try {
-            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, NULL, $type, $hasAttachment, $markdown));
+            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, null, $type, $hasAttachment, $markdown));
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
             $this->visitThread($user, $thread_id);
         } catch (DatabaseException $dbException){
@@ -2650,7 +2650,7 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = NULL){
+    public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = null){
         $query_delete = $show_deleted?"true":"deleted = false";
         $query_filter_on_user = '';
         $param_list = array();
@@ -4101,7 +4101,7 @@ AND gc_id IN (
         $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
         if(count($this->course_db->rows()) == 0){
             $name = $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
-            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, NULL,NULL,NULL,NULL);
+            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, null,null,null,null);
         }
         $row = $this->course_db->rows()[0];
         $this->course_db->query("SELECT COUNT(*) FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
@@ -4168,7 +4168,7 @@ AND gc_id IN (
         if(count($this->course_db->rows()) != 0){
             return $this->course_db->rows()[0]['id'];
         }else{
-            return NULL;
+            return null;
         }
     }
 
@@ -4193,7 +4193,7 @@ AND gc_id IN (
         $this->course_db->query("SELECT * FROM queue where entry_id = ? limit 1", array($entry_id));
         $rows = $this->course_db->rows();
         if(count($rows) == 0){
-            return NULL;
+            return null;
         }
         return $rows[0]['user_id'];
     }

@@ -389,6 +389,6 @@ class User extends AbstractModel {
      */
     public function onTeam($gradeable_id) {
         $team = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $this->id);
-        return $team !== NULL;
+        return $team !== null;
     }
 }

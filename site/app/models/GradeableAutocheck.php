@@ -66,7 +66,7 @@ class GradeableAutocheck extends AbstractModel {
         if(isset($details["display_as_sequence_diagram"])){
             $this->display_as_sequence_diagram = $details["display_as_sequence_diagram"];
         }else{
-            $this->display_as_sequence_diagram = FALSE;
+            $this->display_as_sequence_diagram = false;
         }
 
         $actual_file = $expected_file = $difference_file = $image_difference ="";
