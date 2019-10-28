@@ -4082,14 +4082,18 @@ AND gc_id IN (
     }
 
     public function getNumInQueue(){
-        $this->course_db->query("SELECT * FROM queue where status = 0");
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $this->course_db->query("SELECT * FROM queue where status = ?", array($in_queue_sc));
         return count($this->course_db->rows());
     }
 
     public function addUserToQueue($user_id, $name){
         $name = substr($name, 0, 20);
-        $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = 0 or status = 1) order by time_in DESC limit 1", array($user_id));
-        if(count($this->course_db->rows() == 0)){
+
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $this->course_db->query("SELECT * FROM queue where user_id = ? and (status = ? or status = ?) order by time_in DESC limit 1", array($user_id,$in_queue_sc,$being_helped_sc));
+        if(count($this->course_db->rows() == 0)){//checks that user is not already in the queue
             $this->course_db->query("INSERT INTO queue (user_id, name, time_in, time_helped, time_out, removed_by, status) VALUES(?, ?, current_timestamp, NULL, NULL, NULL, 0)", array($this->core->getUser()->getId(), $name));
             return true;
         }
@@ -4104,23 +4108,36 @@ AND gc_id IN (
             return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, null,null,null,null);
         }
         $row = $this->course_db->rows()[0];
-        $this->course_db->query("SELECT COUNT(*) FROM queue where status = 0 and entry_id <= ?", array($row['entry_id']));
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $this->course_db->query("SELECT COUNT(*) FROM queue where status = ? and entry_id <= ?", array($in_queue_sc,$row['entry_id']));
         $position_in_queue = $this->course_db->rows()[0]['count'];
         $oh_queue = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
         return $oh_queue;
     }
 
     public function removeUserFromQueue($entry_id, $remover){
-        //$this->course_db->query("DELETE FROM queue");
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = 0", array($remover, $entry_id));
+        //default to user was removed by an instructor/TA/mentor
+        $status_code = OfficeHoursQueueInstructor::STATUS_CODE_REMOVED_BY_INSTRUCTOR;
+        if($remover == $this->getUserIdFromQueueSlot($entry_id)){
+            //switch to status code for when a user was removed by themselves
+            $status_code = OfficeHoursQueueInstructor::STATUS_CODE_REMOVED_THEMSELVES;
+        }
+
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and (status = ? or status = ?)", array($status_code, $remover, $entry_id,$in_queue_sc,$being_helped_sc));
     }
 
     public function startHelpUser($entry_id){
-        $this->course_db->query("UPDATE queue SET status = 1, time_helped = current_timestamp where entry_id = ? and (status = 0)", array($entry_id));
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $this->course_db->query("UPDATE queue SET status = ?, time_helped = current_timestamp where entry_id = ? and status = ?", array($being_helped_sc,$entry_id,$in_queue_sc));
     }
 
     public function finishHelpUser($entry_id, $helper){
-        $this->course_db->query("UPDATE queue SET status = 2, time_out = current_timestamp, removed_by = ? where entry_id = ? and (status = 1)", array($helper, $entry_id));
+        $successfully_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_SUCCESSFULLY_HELPED;
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? where entry_id = ? and status = ?", array($successfully_helped_sc, $helper, $entry_id, $being_helped_sc));
     }
 
     public function isQueueOpen(){
@@ -4136,7 +4153,10 @@ AND gc_id IN (
     }
 
     public function getInstructorQueue(){
-        $this->course_db->query("SELECT * FROM queue where (status = 0 or status = 1) order by time_in ASC");
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+
+        $this->course_db->query("SELECT * FROM queue where (status = ? or status = ?) order by time_in ASC", array($in_queue_sc,$being_helped_sc));
         $rows = $this->course_db->rows();
 
         $needs_help = array();
@@ -4147,7 +4167,7 @@ AND gc_id IN (
             $index = $index + 1;
         }
 
-        $this->course_db->query("SELECT * FROM queue where (status = 2 or status = 3) and time_in > CURRENT_DATE order by time_out DESC");
+        $this->course_db->query("SELECT * FROM queue where (status != ? and status != ?) and time_in > CURRENT_DATE order by time_out DESC, time_in DESC", array($in_queue_sc,$being_helped_sc));
         $rows = $this->course_db->rows();
 
         $already_helped = array();
@@ -4173,6 +4193,21 @@ AND gc_id IN (
     }
 
     public function openQueue(){
+        $this->course_db->query("UPDATE queue_settings SET open = TRUE");
+    }
+
+    public function closeQueue(){
+        $this->course_db->query("UPDATE queue_settings SET open = FALSE");
+    }
+
+    public function emptyQueue($remover){
+        $new_sc = OfficeHoursQueueInstructor::STATUS_CODE_BULK_REMOVED;
+        $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
+        $being_helped_sc = OfficeHoursQueueInstructor::STATUS_CODE_BEING_HELPED;
+        $this->course_db->query("UPDATE queue SET status = ?, removed_by = ?, time_out = current_timestamp where (status = ? or status = ?)", array($new_sc, $remover, $in_queue_sc, $being_helped_sc));
+    }
+
+    public function genNewQueueCode(){
         $characters = 'ABCDEFGHJKMNPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
@@ -4180,13 +4215,7 @@ AND gc_id IN (
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
 
-        $this->course_db->query("UPDATE queue_settings SET open = TRUE, code = ?", array($randomString));
-    }
-
-    public function closeQueue(){
-        $this->course_db->query("UPDATE queue SET status = 3, time_out = current_timestamp where (status = 0 or status = 1)");
-        $this->course_db->query("UPDATE queue_settings SET open = FALSE");
-        //$this_->course_db->query("UPDATE queue_settings SET open = FALSE where id = ?", array($queue_id));
+        $this->course_db->query("UPDATE queue_settings SET code = ?", array($randomString));
     }
 
     public function getUserIdFromQueueSlot($entry_id){

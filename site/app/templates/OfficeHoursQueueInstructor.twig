@@ -5,34 +5,46 @@
 
   {% if queue_open == 1 %}
     {% if num_in_queue == 1 %}
-      <p>There is currently {{num_in_queue}} person in the queue</p>
+      <p>There is currently <b>{{num_in_queue}}</b> person in the queue</p>
     {% else %}
-      <p>There are currently {{num_in_queue}} people in the queue</p>
+      <p>There are currently <b>{{num_in_queue}}</b> people in the queue</p>
     {% endif %}
+    <br>
   {% endif %}
 
-  {% if queue_open == 1 %}
-    <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to close the queue? This will kick everyone out of the queue.');">
-  {% else %}
-    <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to open the queue?');">
-  {% endif %}
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+  <div class="row">
+      <div style="margin-right:2rem; margin-bottom:1rem">
+          {% if queue_open == 1 %}
+            <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to close the queue? This will limit students from joining but will not kick anyone out');">
+          {% else %}
+            <form method="post" id="open_close" action="{{toggle_open_url}}" onsubmit="return confirm('Are you sure you want to open the queue?');">
+          {% endif %}
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            {% if queue_open == 1 %}
+              <input type="submit" name="queue_open" value="Close Queue" class="btn btn-primary">
+            {% else %}
+              <input type="submit" name="queue_open" value="Open Queue" class="btn btn-primary">
+            {% endif %}
+          </form>
+      </div>
     {% if queue_open == 1 %}
-      <input type="submit" name="queue_open" value="Close Queue" class="btn btn-primary">
-    {% else %}
-      <input type="submit" name="queue_open" value="Open Queue" class="btn btn-primary">
+        <div style="margin-right:2rem; margin-bottom:1rem">
+          <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+            <input type="submit" value="Generate New Code" class="btn btn-default">
+          </form>
+        </div>
     {% endif %}
-  </form>
-
-  <br/>
+    <div style="margin-right:2rem; margin-bottom:1rem">
+        <form method="post" id="empty_queue" action="{{empty_queue_url}}" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+          <input type="submit" name="empty_queue" value="Empty Queue" class="btn btn-danger">
+        </form>
+    </div>
+  </div>
 
   {% if queue_open == 1 %}
-  <p>Current code: {{ code }}</p>
-
-  <form method="post" id="get_new_code" action="{{new_code_url}}" onsubmit="return confirm('Are you sure you want to generate a new code?');">
-    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-    <input type="submit" value="Generate New Code" class="btn btn-primary">
-  </form>
+  <p>Current code: <b>{{ code }}</b></p>
   {% endif %}
 
   <br/> <br/>
@@ -41,20 +53,19 @@
     <thead>
       <tr>
         <th scope="col">#</th>
-        <th scope="col">Time</th>
-        <th scope="col">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Status</th>
+        <th scope="col">Time</th>
         <th scope="col">Remove</th>
+        <th scope="col">ID</th>
       </tr>
     </thead>
     <tbody>
     {% for entry in entries %}
     <tr>
       <th scope="row">{{entry.getPositionInQueue() }}</th>
-      <td>{{ entry.getTimeIn() }}</td>
-      <td>{{ entry.getUserId() }}</td>
       <td>{{ entry.getName() }}</td>
+
       {% if entry.getStatus() == 0 %}
       <td>
         <form method="post" id="start_help" action="{{start_help_url}}">
@@ -72,13 +83,23 @@
           </form>
         </td>
       {% endif %}
+
+      {% if entry.getStatus() == 1 %}
+      <td class="help_timer" help_time="{{entry.getTimeHelpedWithSeconds()}}"></td>
+
+
+      {% else %}
+      <td>{{ entry.getTimeIn() }}</td>
+        {% endif %}
+
       <td>
         <form method="post" id="remove" action="{{remove_url}}" onsubmit="return confirm('Are you sure you want to remove {{ entry.getName() }} from the queue?');">
           <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
           <input type="hidden" name="entry_id" value="{{entry.getEntryId()}}" />
-          <input type="submit" value="Remove" class="btn btn-primary">
+          <input type="submit" value="Remove" class="btn btn-default">
         </form>
       </td>
+      <td>{{ entry.getUserId() }}</td>
     </tr>
     {% endfor %}
   </tbody>
@@ -93,27 +114,60 @@
         <th scope="col">ID</th>
         <th scope="col">Name</th>
         <th scope="col">Time Entered</th>
+        <th scope="col">Time In Queue</th>
         <th scope="col">Time Helped</th>
-        <th scope="col">Time Out</th>
         <th scope="col">Removed By</th>
       </tr>
     </thead>
     <tbody>
     {% for entry in entries_helped %}
     <tr>
-      <th scope="row">{{entry.getPositionInQueue() }}</th>
-      <td>{{ entry.getUserId() }} </td>
-      <td>{{ entry.getName() }}</td>
-      <td>{{ entry.getTimeIn() }}</td>
-      {% if entry.getStatus() == 2 %}
-        <td>{{ entry.getTimeHelped() }}</td>
-      {% else %}
-        <td>Left Queue</td>
-      {% endif %}
-      <td>{{ entry.getTimeOut() }}</td>
-      <td>{{ entry.getRemovedBy() }}</td>
+        <th scope="row">{{entry.getPositionInQueue() }}</th>
+        <td>{{ entry.getUserId() }} </td>
+        <td>{{ entry.getName() }}</td>
+        <td>{{ entry.getTimeIn() }}</td>
+
+        <td>{{ entry.getTimeWaitingInQueue() }}</td>
+
+        {% if entry.getStatus() == 2 %}
+            <td>{{ entry.getTimeBeingHelped() }}</td>
+        {% elseif entry.getStatus() == 3 %}
+            <td>Removed</td>
+        {% elseif entry.getStatus() == 4 %}
+            <td>Left Queue</td>
+        {% elseif entry.getStatus() == 5 %}
+            <td>Queue Emptyed</td>
+        {% else %}
+            <td>No longer in queue</td>
+        {% endif %}
+
+        <td>{{ entry.getRemovedBy() }}</td>
     </tr>
     {% endfor %}
   </tbody>
   </table>
 </div>
+
+<script>
+    //get all the timers on the page
+    times = []
+    $(".help_timer").each(function() {
+        times.push([$(this), new Date($(this).attr("help_time"))]);
+    });
+
+    //update the timers every second
+    updateTimes();
+    setInterval(updateTimes, 1000);
+    function updateTimes(){
+        for(var i=0;i<times.length;i++){
+            timer = (new Date() - times[i][1])/1000
+            var min = Math.floor(timer/60)
+            var sec = Math.floor(timer%60).toString().padStart(2, '0')
+            var timeString = min + ":"+ sec;
+            if(min >= 100){
+                timeString = "∞";
+            }
+            times[i][0].html(timeString);
+        }
+    }
+</script>

@@ -14,18 +14,22 @@
   {% if not oh_queue.isInQueue() %}
     <form method="post" id="add_to_queue" action="{{add_url}}">
       <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-      <input type="text" name="name" maxlength="20" placeholder="Name" value = "{{oh_queue.getName()}}">
-      <input type="text" name="code" placeholder="Code">
-      <input type="submit" value="Join" class="btn btn-primary">
+      <label for="name_box">Your Name:</label>
+      <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value = "{{oh_queue.getName()}}" style="margin:.5rem">
+      <br>
+      <label for="code_box">Code:</label>
+      <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem">
+      <br>
+      <input type="submit" value="Join" class="btn btn-primary" style="margin:.5rem">
     </form>
   {% else %}
     {% if oh_queue.getStatus() == 0 %}
       You are number {{oh_queue.getPositionInQueue()}} in the queue as {{oh_queue.getName()}} <br/>
       You joined the queue at {{oh_queue.getTimeIn()}}
-      <form method="post" id="remove_from_queue" action="{{remove_url}}">
+      <form method="post" id="remove_from_queue" action="{{remove_url}}" onsubmit="return confirm('Are you sure you want to remove yourself from the queue?');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <input type="hidden" name="entry_id" value="{{oh_queue.getEntryId()}}" />
-        <input type="submit" value="Remove me from the queue" class="btn btn-primary">
+        <input type="submit" value="Remove me from the queue" class="btn btn-danger">
       </form>
     {% else %}
       You are currently being helped
