@@ -191,7 +191,7 @@ class DiffViewer {
                     $this->actual_file_name = $actual_file;
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
-                    $this->actual = file_get_contents($actual_file, NULL, NULL, 0, $size_limit);
+                    $this->actual = file_get_contents($actual_file, null, null, 0, $size_limit);
                     $this->has_actual = trim($this->actual) !== "" ? true: false;
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
@@ -216,7 +216,7 @@ class DiffViewer {
                 else{
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
-                    $this->expected = file_get_contents($expected_file, NULL, NULL, 0, $size_limit);
+                    $this->expected = file_get_contents($expected_file, null, null, 0, $size_limit);
                     $this->has_expected = trim($this->expected) !== "" ? true : false;
                     $this->expected = explode("\n", $this->expected);
                     $this->display_expected = true;

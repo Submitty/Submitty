@@ -16,7 +16,7 @@ class OfficeHoursQueueStudent extends AbstractModel {
     private $time_in = "time not set";
     private $time_helped = "time not set";
     private $time_out = "time not set";
-    private $removed_by = NULL;
+    private $removed_by = null;
     private $entry_id = 0;
 
     /**
