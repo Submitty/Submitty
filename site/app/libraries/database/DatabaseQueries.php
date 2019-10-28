@@ -1102,9 +1102,9 @@ SELECT COUNT(*) from gradeable_component where g_id=?
             $user_or_team_id="team_id";
         }
         $this->course_db->query("
-SELECT COUNT(*) from gradeable_component where g_id=?
+SELECT COUNT(*) as cnt from gradeable_component where g_id=?
           ", array($g_id));
-        $count = $this->course_db->rows()[0][0];
+        $count = $this->course_db->row()['cnt'];
         $this->course_db->query("
 SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop(g_score),2) AS std_dev, round(AVG(max),2) AS max, COUNT(*) FROM(
   SELECT * FROM(
