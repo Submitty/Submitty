@@ -22,7 +22,7 @@ use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\SimpleStat;
 
-class PostgresqlDatabaseQueries extends DatabaseQueries{
+class PostgresqlDatabaseQueries extends DatabaseQueries {
 
     //given a user_id check the users table for a valid entry, returns a user object if found, null otherwise
     //if is_numeric is true, the numeric_id key will be used to lookup the user

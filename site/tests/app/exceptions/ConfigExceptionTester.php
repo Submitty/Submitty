@@ -4,7 +4,7 @@ namespace tests\app\exceptions;
 
 use app\exceptions\ConfigException;
 
-class ConfigExceptionTester extends \PHPUnit\Framework\TestCase  {
+class ConfigExceptionTester extends \PHPUnit\Framework\TestCase {
     public function testConfigException() {
         try {
             throw new ConfigException("exception");

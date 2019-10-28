@@ -7,8 +7,8 @@ namespace app\models;
 use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 
-class CourseMaterial extends AbstractModel
-{
+class CourseMaterial extends AbstractModel {
+
     /**
      * Determine if a course materials file has been released
      *

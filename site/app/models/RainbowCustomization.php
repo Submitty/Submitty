@@ -15,7 +15,7 @@ use app\libraries\GradeableType;
  * This class is a RainbowGrades Customization.  It may contain the data found in customization.json but it also
  * contains additional data that is used by the web user interface to aid in generation/customization.
  */
-class RainbowCustomization extends AbstractModel{
+class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $customization_data = [];

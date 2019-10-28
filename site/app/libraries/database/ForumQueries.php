@@ -5,7 +5,8 @@ namespace app\libraries\database;
 use app\models\forum\Thread;
 use app\models\forum\Post;
 
-class ForumQueries { //extends DatabaseQueries {
+class ForumQueries {
+ //extends DatabaseQueries {
 
 
     public function createPost(Post &$p, bool $isFirst){

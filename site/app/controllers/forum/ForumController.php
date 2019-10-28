@@ -19,7 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
  */
-class ForumController extends AbstractController{
+class ForumController extends AbstractController {
     /**
      * ForumHomeController constructor.
      *
