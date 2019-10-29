@@ -8,6 +8,7 @@ import paramiko
 import subprocess
 import docker
 import traceback
+import argparse
 
 CONFIG_PATH = path.join(path.dirname(path.realpath(__file__)), '..', '..','config')
 SUBMITTY_CONFIG_PATH = path.join(CONFIG_PATH, 'submitty.json')
@@ -122,11 +123,22 @@ def run_systemctl_command(machine, command):
     exit_code = process.wait()
     return exit_code
 
+def parse_arguments():
+    #parse arguments
+    parser = argparse.ArgumentParser(description='This script facilitates automatically updating worker machines and managing their docker image dependencies',)
+    parser.add_argument("--docker_images", action="store_true", default=False, help="When specified, only update docker images." )
+    return parser.parse_args()
+
 if __name__ == "__main__":
 
     # verify the DAEMON_USER is running this script
     if not int(os.getuid()) == int(DAEMON_UID):
         raise SystemExit("ERROR: the update_and_install_workers.py script must be run by the DAEMON_USER")
+
+    args = parse_arguments()
+
+    if args.docker_images == True:
+        print("Mode Set: only updating docker images.")
 
     with open(SUBMITTY_CONFIG_PATH, 'r') as infile:
         submitty_config = json.load(infile)
@@ -149,8 +161,8 @@ if __name__ == "__main__":
             print(f"Skipping update of {worker} because it is disabled.")
             continue
         
-        # We don't have to update the code for the primary machine. 
-        if not primary:
+        # We don't have to update the code for the primary machine or docker_images is specified. 
+        if not primary and not args.docker_images:
             copy_code_to_worker(worker. user, host, submitty_repository)               
 
             print("beginning installation...")
