@@ -891,7 +891,7 @@ class UsersController extends AbstractController {
                     // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                     // Automatically validate if not set (this field is optional).
                 case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
                     // Validation failed somewhere.  Record which row failed.
                     // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
                     $bad_rows[] = ($row_num + 1);

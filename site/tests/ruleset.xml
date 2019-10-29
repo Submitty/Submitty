@@ -94,9 +94,6 @@
         <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.LanguageConstructSpacing.IncorrectSingle" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceAfter" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceBefore" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.NoSpaceBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
         <exclude name="Squiz.WhiteSpace.SemicolonSpacing.Incorrect" />

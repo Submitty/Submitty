@@ -741,7 +741,7 @@ class ForumController extends AbstractController {
         $thread_status = array();
         $new_posts = array();
         $unread_threads = false;
-        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1 ) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
