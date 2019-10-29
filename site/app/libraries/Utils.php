@@ -143,7 +143,7 @@ class Utils {
      * @return bool
      */
     public static function endsWith(string $haystack, string $needle): bool {
-        return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
+        return substr($haystack, (-1 * strlen($needle)), strlen($needle)) === $needle;
     }
 
     /**
@@ -178,7 +178,7 @@ class Utils {
     public static function isImage(string $filename): bool {
         return (substr($filename, -4) == ".png") ||
             (substr($filename, -4) == ".jpg") ||
-            (substr($filename, -5) == ".jpeg")||
+            (substr($filename, -5) == ".jpeg") ||
             (substr($filename, -4) == ".gif");
     }
 
@@ -311,7 +311,7 @@ class Utils {
     */
     public static function formatBytes(string $format, int $bytes): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
-        return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
+        return ($bytes / pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
 
 }

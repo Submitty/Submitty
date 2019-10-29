@@ -545,10 +545,10 @@ class NavigationView extends AbstractView {
     private function getGradeButton(Gradeable $gradeable, int $list_section) {
         //Location, location never changes
         if($this->core->getUser()->accessAdmin()){
-            $view="all";
+            $view = "all";
         }
         else{
-            $view=null;
+            $view = null;
         }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
@@ -744,7 +744,7 @@ class NavigationView extends AbstractView {
 
             $button = new Button($this->core, [
                 "subtitle" => "CLOSE SUBMISSIONS NOW",
-                "onclick" => "displayCloseSubmissionsWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
+                "onclick" => "displayCloseSubmissionsWarning(\"" . $url . "\",\"" . $gradeable->getTitle() . "\");",
                 "class" => "btn btn-default btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);

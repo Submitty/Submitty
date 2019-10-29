@@ -212,12 +212,12 @@ class DatabaseQueries {
         if(count($categories_ids) == 0) {
             $query_multiple_qmarks = "NULL";
         } else {
-            $query_multiple_qmarks = "?".str_repeat(",?", count($categories_ids)-1);
+            $query_multiple_qmarks = "?" . str_repeat(",?", count($categories_ids) - 1);
         }
         if(count($thread_status) == 0) {
             $query_status = "true";
         } else {
-            $query_status = "status in (?".str_repeat(",?", count($thread_status)-1).")";
+            $query_status = "status in (?" . str_repeat(",?", count($thread_status) - 1) . ")";
         }
         $query_favorite = "case when sf.user_id is NULL then false else true end";
 
@@ -321,7 +321,7 @@ class DatabaseQueries {
             $this->course_db->query($query, $query_parameters);
             $results = $this->course_db->rows();
             $row_count = $results[0]['count'];
-            $blockNumber = 1 + floor(($row_count-1)/$blockSize);
+            $blockNumber = 1 + floor(($row_count - 1) / $blockSize);
         } else if($blockNumber == 0) {
             // Load first block as default
             $blockNumber = 1;
@@ -335,11 +335,11 @@ class DatabaseQueries {
                 $results = $this->course_db->rows();
                 if(count($results) > 0) {
                     $row_number = $results[0]['row_number'];
-                    $blockNumber = 1 + floor(($row_number-1)/$blockSize);
+                    $blockNumber = 1 + floor(($row_number - 1) / $blockSize);
                 }
             }
         }
-        $query_offset = ($blockNumber-1) * $blockSize;
+        $query_offset = ($blockNumber - 1) * $blockSize;
         $this->buildLoadThreadQuery($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $query_select, $query_join, $query_where, $query_order, $query_parameters, true, true);
         $query = "SELECT {$query_select} FROM threads t {$query_join} WHERE {$query_where} ORDER BY {$query_order} LIMIT ? OFFSET ?";
         $query_parameters[] = $blockSize;
@@ -398,7 +398,7 @@ class DatabaseQueries {
     }
 
     public function updateNotificationSettings($results) {
-        $values = implode(', ', array_fill(0, count($results)+1, '?'));
+        $values = implode(', ', array_fill(0, count($results) + 1, '?'));
         $keys = implode(', ', array_keys($results));
         $updates = '';
 
@@ -558,7 +558,7 @@ class DatabaseQueries {
     }
 
     private function findChildren($post_id, $thread_id, &$children, $get_deleted = false){
-        $query_delete = $get_deleted?"true":"deleted = false";
+        $query_delete = $get_deleted ? "true" : "deleted = false";
         $this->course_db->query("SELECT id from posts where {$query_delete} and parent_id=?", array($post_id));
         $row = $this->course_db->rows();
         for($i = 0; $i < count($row); $i++){
@@ -595,12 +595,12 @@ class DatabaseQueries {
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
         $parent_id = $this->course_db->rows()[0]["parent_id"];
         $children = array($post_id);
-        $get_deleted = ($newStatus?false:true);
+        $get_deleted = ($newStatus ? false : true);
         $this->findChildren($post_id, $thread_id, $children, $get_deleted);
 
         if(!$newStatus) {
             // On undelete, parent post must have deleted = false
-            if($parent_id!=-1) {
+            if($parent_id != -1) {
                 if($this->getPost($parent_id)['deleted']) {
                     return null;
                 }
@@ -624,7 +624,7 @@ class DatabaseQueries {
 
     public function editPost($original_creator, $user, $post_id, $content, $anon, $markdown){
         try {
-            $markdown = $markdown?1:0;
+            $markdown = $markdown ? 1 : 0;
             // Before making any edit to $post_id, forum_posts_history will not have any corresponding entry
             // forum_posts_history will store all history state of the post(if edited at any point of time)
             $this->course_db->beginTransaction();
@@ -844,7 +844,7 @@ FROM users
 INNER JOIN electronic_gradeable_version
 ON
 users.user_id = electronic_gradeable_version.user_id
-AND users.". $section_key . " IS NOT NULL
+AND users." . $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
 AND electronic_gradeable_version.g_id=?
 {$where}
@@ -923,13 +923,13 @@ ORDER BY {$orderby}", $params);
     }
 
     public function getGradedComponentsCountByGradingSections($g_id, $sections, $section_key, $is_team) {
-         $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+         $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $return = array();
         $params = array($g_id);
@@ -961,13 +961,13 @@ ORDER BY {$u_or_t}.{$section_key}", $params);
     }
 
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $return = array();
         $this->course_db->query("
@@ -1014,13 +1014,13 @@ ORDER BY gc_order
         return $return;
     }
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
@@ -1046,13 +1046,13 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     public function getScoresForGradeable($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $this->course_db->query("
 SELECT COUNT(*) from gradeable_component where g_id=?
@@ -1093,13 +1093,13 @@ SELECT COUNT(*) from gradeable_component where g_id=?
         return new SimpleStat($this->core, $this->course_db->rows()[0]);
     }
     public function getAverageForGradeable($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $this->course_db->query("
 SELECT COUNT(*) from gradeable_component where g_id=?
@@ -1154,7 +1154,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query= "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
             $params = array_merge($sections, $params);
         }
 
@@ -1186,7 +1186,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
 
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query= "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
+            $sections_query = "{$grade_type}_section IN " . $this->createParamaterList(count($sections));
             $params = array_merge($sections, $params);
         }
 
@@ -1880,7 +1880,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
-        if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5-strlen($team_id_prefix)) . $team_id_prefix;
+        if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5 - strlen($team_id_prefix)) . $team_id_prefix;
         $team_id = "{$team_id_prefix}_{$user_id}";
 
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
@@ -2100,7 +2100,7 @@ FROM gradeable_teams
 INNER JOIN electronic_gradeable_version
 ON
 gradeable_teams.team_id = electronic_gradeable_version.team_id
-AND gradeable_teams.". $section_key . " IS NOT NULL
+AND gradeable_teams." . $section_key . " IS NOT NULL
 AND electronic_gradeable_version.active_version>0
 AND electronic_gradeable_version.g_id=?
 {$where}
@@ -2118,10 +2118,10 @@ ORDER BY {$section_key}", $params);
         $params = array($g_id);
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query= "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
+            $sections_query = "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
-        $orderBy="";
+        $orderBy = "";
         if($section_key == "registration_section") {
             $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
         }
@@ -2155,10 +2155,10 @@ ORDER BY {$orderBy}", $params);
         $params = array($g_id);
         $sections_query = "";
         if (count($sections) > 0) {
-            $sections_query= "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
+            $sections_query = "{$section_key} IN " . $this->createParamaterList(count($sections)) . " AND";
             $params = array_merge($sections, $params);
         }
-        $orderBy="";
+        $orderBy = "";
         if($section_key == "registration_section") {
             $orderBy = "SUBSTRING(registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(registration_section, '[0-9]+')::INT, -1), SUBSTRING(registration_section, '[^0-9]*$')";
         }
@@ -2583,7 +2583,7 @@ AND gc_id IN (
     }
 
     public function existsAnnouncements($show_deleted = false){
-        $query_delete = $show_deleted?"true":"deleted = false";
+        $query_delete = $show_deleted ? "true" : "deleted = false";
         $this->course_db->query("SELECT MAX(id) FROM threads where {$query_delete} AND  merged_thread_id = -1 AND pinned = true");
         $result = $this->course_db->rows();
         return empty($result[0]["max"]) ? -1 : $result[0]["max"];
@@ -2651,7 +2651,7 @@ AND gc_id IN (
     }
 
     public function getPostsForThread($current_user, $thread_id, $show_deleted = false, $option = "tree", $filterOnUser = null){
-        $query_delete = $show_deleted?"true":"deleted = false";
+        $query_delete = $show_deleted ? "true" : "deleted = false";
         $query_filter_on_user = '';
         $param_list = array();
         if (!empty($filterOnUser)) {
@@ -2711,7 +2711,7 @@ AND gc_id IN (
                 return false;
             }
 
-            $child_thread_title = "Merged Thread Title: ".$child_thread_title."\n";
+            $child_thread_title = "Merged Thread Title: " . $child_thread_title . "\n";
 
             if($child_root_post <= $parent_root_post) {
                 $message = "Child thread must be newer than parent thread";
@@ -2851,7 +2851,7 @@ AND gc_id IN (
     public function getUsersNotificationSettings(array $user_ids) {
         $params = $user_ids;
         $user_id_query = $this->createParamaterList(count($user_ids));
-        $query = "SELECT * FROM notification_settings WHERE user_id in ".$user_id_query;
+        $query = "SELECT * FROM notification_settings WHERE user_id in " . $user_id_query;
         $this->course_db->query($query,$params);
         return $this->course_db->rows();
     }
@@ -2926,7 +2926,7 @@ AND gc_id IN (
         $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
         $this->course_db->query("
             INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
-            VALUES ".$value_param_string, $flattened_notifications);
+            VALUES " . $value_param_string, $flattened_notifications);
 
     }
 
@@ -2941,7 +2941,7 @@ AND gc_id IN (
         $value_param_string = implode(', ', array_fill(0, $email_count, $row_string));
         $this->submitty_db->query("
             INSERT INTO emails(subject, body, created, user_id)
-            VALUES ".$value_param_string, $flattened_emails);
+            VALUES " . $value_param_string, $flattened_emails);
     }
 
     /**
@@ -3073,7 +3073,7 @@ AND gc_id IN (
     }
     public function getNumberGradeInquiries($gradeable_id, $is_grade_inquiry_per_component_allowed = true) {
         $grade_inquiry_all_only_query = !$is_grade_inquiry_per_component_allowed ? ' AND gc_id IS NULL' : '';
-        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1".$grade_inquiry_all_only_query, array($gradeable_id));
+        $this->course_db->query("SELECT COUNT(*) AS cnt FROM regrade_requests WHERE g_id = ? AND status = -1" . $grade_inquiry_all_only_query, array($gradeable_id));
         return ($this->course_db->row()['cnt']);
     }
     public function getRegradeDiscussions(array $grade_inquiries) {

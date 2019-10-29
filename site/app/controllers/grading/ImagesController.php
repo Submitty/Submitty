@@ -88,17 +88,17 @@ class ImagesController extends AbstractController {
             for ($j = 0; $j < $count_item; $j++) {
                 if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                     if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = true;
                     $file_size += FileUtils::getZipSize($uploaded_files[1]["tmp_name"][$j]);
                 }
                 else {
                     if (FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     elseif (!FileUtils::isValidImage($uploaded_files[1]["tmp_name"][$j])) {
-                        return $this->core->getOutput()->renderResultMessage("Error: ".$uploaded_files[1]['name'][$j]." is not a valid image file.", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: " . $uploaded_files[1]['name'][$j] . " is not a valid image file.", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = false;
                     $file_size += $uploaded_files[1]["size"][$j];
@@ -108,7 +108,7 @@ class ImagesController extends AbstractController {
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         if ($file_size > $max_size) {
-            return $this->core->getOutput()->renderResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+            return $this->core->getOutput()->renderResultMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.", false);
         }
 
         // creating uploads/student_images directory
@@ -140,7 +140,7 @@ class ImagesController extends AbstractController {
                         // so we have that string hardcoded, otherwise we can just get the status string as
                         // normal.
                         $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                        return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: ".$error_message.".", false);
+                        return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: " . $error_message . ".", false);
                     }
                 }
                 else {

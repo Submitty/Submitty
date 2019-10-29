@@ -100,7 +100,7 @@ class UsersView extends AbstractView {
         foreach ($students as $student) {
             $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
             if (array_key_exists($registration, $reg_sections_count)) {
-                $reg_sections_count[$registration] = $reg_sections_count[$registration]+1;
+                $reg_sections_count[$registration] = $reg_sections_count[$registration] + 1;
             }
             else {
                 $reg_sections_count[$registration] = 1;

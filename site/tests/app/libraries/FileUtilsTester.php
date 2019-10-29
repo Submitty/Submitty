@@ -496,9 +496,9 @@ STRING;
         $this->assertEquals($stat[0],
             ['name' => 'bad.txt',
              'type' => 'text/plain',
-             'error'=> 'The file was only partially uploaded',
+             'error' => 'The file was only partially uploaded',
              'size' => 100,
-             'success'=> false
+             'success' => false
              ]
         );
 
@@ -509,9 +509,9 @@ STRING;
         $this->assertEquals($stat[1],
             ['name' => 'bad2.txt',
              'type' => 'text/plain',
-             'error'=> 'No file was uploaded.',
+             'error' => 'No file was uploaded.',
              'size' => 100,
-             'success'=> false
+             'success' => false
              ]
         );
 
@@ -526,18 +526,18 @@ STRING;
         $this->assertEquals($stat[1],
             ['name' => 'bad2.txt',
              'type' => 'text/plain',
-             'error'=> 'No file was uploaded.',
+             'error' => 'No file was uploaded.',
              'size' => 100,
-             'success'=> false
+             'success' => false
              ]
         );
 
         $this->assertEquals($stat[2],
             ['name' => 'bad3.txt',
              'type' => 'text/plain',
-             'error'=> 'Unknown error code.',
+             'error' => 'Unknown error code.',
              'size' => 100,
-             'success'=> false
+             'success' => false
              ]
         );
 
@@ -548,9 +548,9 @@ STRING;
         $this->assertEquals($stat[6],
             ['name' => '\?<>.txt',
              'type' => 'text/plain',
-             'error'=> 'Invalid filename',
+             'error' => 'Invalid filename',
              'size' => 100,
-             'success'=> false
+             'success' => false
              ]
         );
     }
@@ -564,9 +564,9 @@ STRING;
         $this->assertEquals($stat[0],
             ['name' => 'big.txt',
              'type' => 'text/plain',
-             'error'=> 'File "big.txt" too large got (2.0000953674316MB)',
-             'size' => 100+ Utils::returnBytes(ini_get('upload_max_filesize')),
-             'success'=> false
+             'error' => 'File "big.txt" too large got (2.0000953674316MB)',
+             'size' => 100 + Utils::returnBytes(ini_get('upload_max_filesize')),
+             'success' => false
              ]
         );
 
@@ -577,9 +577,9 @@ STRING;
         $this->assertEquals($stat[1],
             ['name' => 'just_big_enough.txt',
              'type' => 'text/plain',
-             'error'=> 'No error.',
+             'error' => 'No error.',
              'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
-             'success'=> true
+             'success' => true
              ]
         );
     }
@@ -597,7 +597,7 @@ STRING;
     private function getAllFilesSetup(): void {
         FileUtils::createDir($this->path);
         foreach (['a', 'b'] as $name) {
-            file_put_contents(FileUtils::joinPaths($this->path, $name.'.txt'), $name);
+            file_put_contents(FileUtils::joinPaths($this->path, $name . '.txt'), $name);
         }
         foreach (['c', 'd'] as $name) {
             FileUtils::createDir(FileUtils::joinPaths($this->path, $name));

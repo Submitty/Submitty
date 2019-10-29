@@ -42,7 +42,7 @@ class PDFController extends AbstractController {
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
                         $grader_id = $pdf_info[1];
-                        if($pdf_id.'.pdf' === $filename){
+                        if($pdf_id . '.pdf' === $filename){
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
                     }
@@ -103,7 +103,7 @@ class PDFController extends AbstractController {
             return false;
         }
 
-        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
+        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.json';
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
@@ -142,7 +142,7 @@ class PDFController extends AbstractController {
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
                         $grader_id = $pdf_info[1];
-                        if($pdf_id.'.pdf' === $filename){
+                        if($pdf_id . '.pdf' === $filename){
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
                     }

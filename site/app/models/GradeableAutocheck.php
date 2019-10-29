@@ -69,7 +69,7 @@ class GradeableAutocheck extends AbstractModel {
             $this->display_as_sequence_diagram = false;
         }
 
-        $actual_file = $expected_file = $difference_file = $image_difference ="";
+        $actual_file = $expected_file = $difference_file = $image_difference = "";
 
         if(isset($details["actual_file"])) {
             $this->public = (isset($details["results_public"]) && $details["results_public"]);
@@ -91,7 +91,7 @@ class GradeableAutocheck extends AbstractModel {
                 }
             } else if(substr($details["expected_file"],0,13) == "random_output"){
                 if(file_exists($results_path . "/" . $details["expected_file"])){ 
-                    $expected_file = $results_path. "/" . $details["expected_file"];
+                    $expected_file = $results_path . "/" . $details["expected_file"];
                 } else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }

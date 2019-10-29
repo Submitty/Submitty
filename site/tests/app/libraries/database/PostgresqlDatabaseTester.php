@@ -35,7 +35,7 @@ class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {
             array('{"M5"}', array('M5')),
             array('{"aa", null, "null", null}', array('aa', null, "null", null)),
             array('{"aaa\"bbb\nccc"}', array('aaa"bbb\nccc')),
-            array('{"yes?{}", "", "blah/yes(more).'."\n".'", "\"aaaa. \""}', array("yes?{}", "", "blah/yes(more).\n", '"aaaa. "')),
+            array('{"yes?{}", "", "blah/yes(more).' . "\n" . '", "\"aaaa. \""}', array("yes?{}", "", "blah/yes(more).\n", '"aaaa. "')),
             array('{"\\\\"}', array("\\")),
             array('{"a,b,c\\\\"}', array("a,b,c\\")),
             array('{"a,b,c\'"}', array("a,b,c'")),

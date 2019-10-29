@@ -165,7 +165,7 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFilePermission($checked) {
-        $data=$_POST['fn'];
+        $data = $_POST['fn'];
         if(is_string($data)){
             $data = [$data];
         }
@@ -213,7 +213,7 @@ class CourseMaterialsController extends AbstractController {
      * @AccessControl(role="INSTRUCTOR")
      */
     public function modifyCourseMaterialsFileTimeStamp($filenames, $newdatatime) {
-        $data=$_POST['fn'];
+        $data = $_POST['fn'];
         $hide_from_students = null;
 
         if(!isset($newdatatime)) {
@@ -289,7 +289,7 @@ class CourseMaterialsController extends AbstractController {
             $requested_path = $_POST['requested_path'];
         }
 
-        $release_time ="";
+        $release_time = "";
         if(isset($_POST['release_time'])){
             $release_time = $_POST['release_time'];
         }
@@ -346,7 +346,7 @@ class CourseMaterialsController extends AbstractController {
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         if ($file_size > $max_size) {
-            return $this->core->getOutput()->renderResultMessage("ERROR: File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+            return $this->core->getOutput()->renderResultMessage("ERROR: File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.", false);
         }
 
         // creating uploads/course_materials directory
@@ -374,7 +374,7 @@ class CourseMaterialsController extends AbstractController {
 
                     if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
                         if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                            return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
+                            return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                         }
                         $is_zip_file = true;
                     }

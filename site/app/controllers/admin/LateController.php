@@ -194,7 +194,7 @@ class LateController extends AbstractController {
                 }
             }
             if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
-                $this->core->addNoticeMessage("User already has " . $late_days ." extensions; no changes made");
+                $this->core->addNoticeMessage("User already has " . $late_days . " extensions; no changes made");
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
