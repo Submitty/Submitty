@@ -290,14 +290,14 @@ class MiscController extends AbstractController {
                     if (!$file->isDir()) {
                         // Get real and relative path for current file
                         $file_path = $file->getRealPath();
-                        $relative_path = substr($filePath, strlen($paths[$x]) + 1);
+                        $relative_path = substr($file_path, strlen($paths[$x]) + 1);
                         if ($gradeable->isScannedExam()) {
-                            if (mime_content_type($filePath) === 'application/pdf') {
-                                $zip->addFile($filePath, $folder_names[$x] . '/' . $relativePath);
+                            if (mime_content_type($file_path) === 'application/pdf') {
+                                $zip->addFile($file_path, $folder_names[$x] . '/' . $relative_path);
                             }
                         }
                         else {
-                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                            $zip->addFile($file_path, $folder_names[$x] . "/" . $relative_path);
                         }
                     }
                 }
