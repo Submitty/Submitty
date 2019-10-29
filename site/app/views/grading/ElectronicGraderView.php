@@ -47,7 +47,7 @@ class ElectronicGraderView extends AbstractView {
         string $section_type,
         int $regrade_requests,
         bool $show_warnings
-) {
+    ) {
 
         $peer = false;
         if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -204,8 +204,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
-                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) && $no_rotating_sections
+                && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,

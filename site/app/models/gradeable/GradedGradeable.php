@@ -376,7 +376,7 @@ class GradedGradeable extends AbstractModel {
         $file_contents = file_get_contents($complete_file_path);
 
         // If file_contents is False an error has occured
-        if($file_contents === False)
+        if($file_contents === false)
         {
             throw new IOException("An error occurred retrieving submission contents.");
         }

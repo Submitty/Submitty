@@ -371,12 +371,12 @@ class AutoGradingView extends AbstractView {
 
         $uploaded_pdfs = [];
         foreach($uploaded_files['submissions'] as $file){
-          if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
+            if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
                 $uploaded_pdfs[] = $file;
             }
         }
         foreach($uploaded_files['checkout'] as $file){
-          if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
+            if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
                 $uploaded_pdfs[] = $file;
             }
         }

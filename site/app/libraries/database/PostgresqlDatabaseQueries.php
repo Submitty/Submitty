@@ -22,7 +22,7 @@ use app\models\SimpleLateUser;
 use app\models\Team;
 use app\models\SimpleStat;
 
-class PostgresqlDatabaseQueries extends DatabaseQueries{
+class PostgresqlDatabaseQueries extends DatabaseQueries {
 
     //given a user_id check the users table for a valid entry, returns a user object if found, null otherwise
     //if is_numeric is true, the numeric_id key will be used to lookup the user
@@ -107,10 +107,10 @@ GROUP BY user_id", array($user_id));
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         $orderBy="";
         if($section_key == "registration_section") {
-          $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
+            $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
         }
         else {
-          $orderBy = "u.{$section_key}, u.user_id";
+            $orderBy = "u.{$section_key}, u.user_id";
         }
 
         $this->course_db->query("
