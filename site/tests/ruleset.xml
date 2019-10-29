@@ -35,11 +35,7 @@
         <exclude name="PSR2.Classes.PropertyDeclaration.StaticBeforeVisibility" />
         <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
-        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BreakIndent" />
         <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed" />
-        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BodyOnNextLineCASE" />
-        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BreakNotNewLine" />
-        <exclude name="PSR2.ControlStructures.SwitchDeclaration.BodyOnNextLineDEFAULT" />
         <exclude name="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket" />
         <exclude name="PSR2.Methods.FunctionCallSignature.Indent" />
         <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
