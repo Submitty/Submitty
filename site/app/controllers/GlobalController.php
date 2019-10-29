@@ -344,8 +344,8 @@ class GlobalController extends AbstractController {
         }
 
         $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
-        $month = $now['mon'];
-        $day = $now['mday'];
+        $month = $now['mon'];   //integer between 1-12 represents current month
+        $day = $now['mday'];    //integer between 1-31 represents current calender day
 
         $duck_img = 'moorthy_duck.png';
         if($month === 10 && ($day >= 27 && $day <= 31)  ){
