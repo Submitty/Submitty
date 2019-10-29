@@ -399,16 +399,19 @@ DATABASE_JSON = os.path.join(CONFIG_INSTALL_DIR, 'database.json')
 SUBMITTY_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty.json')
 SUBMITTY_USERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'submitty_users.json')
 WORKERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_workers.json')
+CONTAINERS_JSON = os.path.join(CONFIG_INSTALL_DIR, 'autograding_containers.json')
 SECRETS_PHP_JSON = os.path.join(CONFIG_INSTALL_DIR, 'secrets_submitty_php.json')
 
-#If the workers.json exists, rescue it from the destruction of config (move it to a temp directory).
-tmp_autograding_workers_file = ""
+#Rescue the autograding_workers and _containers files if they exist.
+rescued = list()
+tmp_folder = tempfile.mkdtemp() 
 if not args.worker:
-    if os.path.isfile(WORKERS_JSON):
-        #make a tmp folder and copy autograding workers to it
-        tmp_folder = tempfile.mkdtemp()
-        tmp_autograding_workers_file = os.path.join(tmp_folder, "autograding_workers.json")
-        shutil.move(WORKERS_JSON, tmp_autograding_workers_file)
+    for full_file_name, file_name in [(WORKERS_JSON, 'autograding_workers.json'), (CONTAINERS_JSON, 'autograding_containers.json')]:
+        if os.path.isfile(full_file_name):
+            #make a tmp folder and copy autograding workers to it
+            tmp_file = os.path.join(tmp_folder, file_name)
+            shutil.move(full_file_name, tmp_file)
+            rescued.append((full_file_name, tmp_file))
 
 if os.path.isdir(CONFIG_INSTALL_DIR):
     shutil.rmtree(CONFIG_INSTALL_DIR)
@@ -416,15 +419,16 @@ os.makedirs(CONFIG_INSTALL_DIR, exist_ok=True)
 shutil.chown(CONFIG_INSTALL_DIR, 'root', COURSE_BUILDERS_GROUP)
 os.chmod(CONFIG_INSTALL_DIR, 0o755)
 
-#If the workers.json exists, finish rescuing it (copy it back).
-if not tmp_autograding_workers_file == "":
+# Finish rescuing files.
+for full_file_name, tmp_file_name in rescued:
     #copy autograding workers back
-    shutil.move(tmp_autograding_workers_file, WORKERS_JSON)
-    #remove the tmp folder
-    os.removedirs(tmp_folder)
+    shutil.move(tmp_file_name, full_file_name)
     #make sure the permissions are correct.
-    shutil.chown(WORKERS_JSON, 'root',DAEMON_GID)
-    os.chmod(WORKERS_JSON, 0o460)
+    shutil.chown(full_file_name, 'root',DAEMON_GID)
+    os.chmod(full_file_name, 0o460)
+
+#remove the tmp folder
+os.removedirs(tmp_folder)
 
 ##############################################################################
 # WRITE CONFIG FILES IN ${SUBMITTY_INSTALL_DIR}/conf
@@ -443,8 +447,25 @@ if not args.worker:
 
         with open(WORKERS_JSON, 'w') as workers_file:
             json.dump(worker_dict, workers_file, indent=4)
-    shutil.chown(WORKERS_JSON, 'root',DAEMON_GID)
-    os.chmod(WORKERS_JSON, 0o460)
+
+    if not os.path.isfile(CONTAINERS_JSON):
+        container_dict = {
+            "default": [
+                          "submitty/clang:6.0",
+                          "submitty/autograding-default:latest",
+                          "submitty/java:8",
+                          "submitty/java:11",
+                          "submitty/python:3.6"
+                       ]
+        }
+
+        with open(CONTAINERS_JSON, 'w') as container_file:
+            json.dump(container_dict, container_file, indent=4)
+    
+    for file in [WORKERS_JSON, CONTAINERS_JSON]:
+      shutil.chown(file, 'root',DAEMON_GID)
+      os.chmod(file, 0o460)
+
 
 ##############################################################################
 # Write database json
