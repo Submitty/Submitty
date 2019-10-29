@@ -289,12 +289,16 @@ class Utils {
     * @param string $size_str
     * @return int
     */
-    public static function returnBytes($size_str){
-        switch (substr ($size_str, -1)){
-            case 'M': case 'm': return (int) $size_str * 1048576;
-            case 'K': case 'k': return (int) $size_str * 1024;
-            case 'G': case 'g': return (int) $size_str * 1073741824;
-            default: return (int) $size_str;
+    public static function returnBytes(string $size_str): int {
+        switch (strtolower(substr($size_str, -1))) {
+            case 'm':
+                return (int) $size_str * 1048576;
+            case 'k':
+                return (int) $size_str * 1024;
+            case 'g':
+                return (int) $size_str * 1073741824;
+            default:
+                return (int) $size_str;
         }
     }
 
@@ -305,7 +309,7 @@ class Utils {
     * @param int $bytes
     * @return string
     */
-    public static function formatBytes($format, $bytes){
+    public static function formatBytes(string $format, int $bytes): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
         return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
