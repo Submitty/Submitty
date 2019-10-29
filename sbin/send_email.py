@@ -11,33 +11,91 @@ import smtplib
 import json
 import os
 import datetime
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, Table, bindparam
+import sys
+import psutil
+
+
+# ======================================================================
+#
+# Let's make sure we're the only copy of this script running on the
+# server.  Multiple copies might happen if sending emails is slow or
+# hangs and takes longer than 1 minute and the cron job fires again.
+#
+
+# We could just match the program name, but this is problematic if
+# happens to match the filename submitted by a student.
+# my_program_name = sys.argv[0].split('/')[-1]
+
+# So instead let's match the full path used in the cron script
+my_program_name = sys.argv[0]
+
+my_pid = os.getpid()
+
+# loop over all active processes on the server
+for p in psutil.pids():
+    try:
+        cmdline = psutil.Process(p).cmdline()
+        if (len(cmdline) < 2):
+            continue
+        # if anything on the command line matches the name of the program
+        if cmdline[0].find("python") != -1 and cmdline[1].find(my_program_name) != -1:
+            if p != my_pid:
+                print("ERROR!  Another copy of '" + my_program_name +
+                      "' is already running on the server.  Exiting.")
+                sys.exit(1)
+    except psutil.NoSuchProcess:
+        # Whoops, the process ended before we could look at it.
+        # But that's ok!
+        pass
+
+# ======================================================================
 
 try:
     CONFIG_PATH = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), '..', 'config')
 
+    with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
+        SUBMITTY_CONFIG = json.load(open_file)
+
     with open(os.path.join(CONFIG_PATH, 'database.json')) as open_file:
-        CONFIG = json.load(open_file)
+        DATABASE_CONFIG = json.load(open_file)
 
-    EMAIL_USER = CONFIG.get('email_user', None)
-    EMAIL_PASSWORD = CONFIG.get('email_password', None)
-    EMAIL_SENDER = CONFIG['email_sender']
-    EMAIL_HOSTNAME = CONFIG['email_server_hostname']
-    EMAIL_PORT = int(CONFIG['email_server_port'])
-    EMAIL_LOG_PATH = CONFIG["email_logs_path"]
-
-    DB_HOST = CONFIG['database_host']
-    DB_USER = CONFIG['database_user']
-    DB_PASSWORD = CONFIG['database_password']
-
-    TODAY = datetime.datetime.now()
-    LOG_FILE = open(os.path.join(
-        EMAIL_LOG_PATH, "{}{}{}.txt".format(TODAY.year, TODAY.month, TODAY.day)), 'a')
 except Exception as config_fail_error:
-    print("[{}] Error: Email/Database Configuration Failed {}".format(
+    print("[{}] ERROR: CORE SUBMITTY CONFIGURATION ERROR {}".format(
         str(datetime.datetime.now()), str(config_fail_error)))
-    exit(-1)
+    sys.exit(1)
+
+
+DATA_DIR_PATH = SUBMITTY_CONFIG['submitty_data_dir']
+EMAIL_LOG_PATH = os.path.join(DATA_DIR_PATH, "logs", "emails")
+TODAY = datetime.datetime.now()
+LOG_FILE = open(os.path.join(
+    EMAIL_LOG_PATH, "{:04d}{:02d}{:02d}.txt".format(TODAY.year, TODAY.month,
+                                                    TODAY.day)), 'a')
+
+
+try:
+    with open(os.path.join(CONFIG_PATH, 'email.json')) as open_file:
+        EMAIL_CONFIG = json.load(open_file)
+    EMAIL_ENABLED = EMAIL_CONFIG.get('email_enabled', False)
+    EMAIL_USER = EMAIL_CONFIG.get('email_user', '')
+    EMAIL_PASSWORD = EMAIL_CONFIG.get('email_password', '')
+    EMAIL_SENDER = EMAIL_CONFIG['email_sender']
+    EMAIL_HOSTNAME = EMAIL_CONFIG['email_server_hostname']
+    EMAIL_PORT = int(EMAIL_CONFIG['email_server_port'])
+    EMAIL_REPLY_TO = EMAIL_CONFIG['email_reply_to']
+
+    DB_HOST = DATABASE_CONFIG['database_host']
+    DB_USER = DATABASE_CONFIG['database_user']
+    DB_PASSWORD = DATABASE_CONFIG['database_password']
+
+except Exception as config_fail_error:
+    e = "[{}] ERROR: Email/Database Configuration Failed {}".format(
+        str(datetime.datetime.now()), str(config_fail_error))
+    LOG_FILE.write(e+"\n")
+    print(e)
+    sys.exit(1)
 
 
 def setup_db():
@@ -53,8 +111,8 @@ def setup_db():
 
     engine = create_engine(conn_string)
     db = engine.connect()
-    MetaData(bind=db)
-    return db
+    metadata = MetaData(bind=db)
+    return db, metadata
 
 
 def construct_mail_client():
@@ -67,7 +125,7 @@ def construct_mail_client():
         pass
     client.ehlo()
 
-    if EMAIL_USER is not None:
+    if EMAIL_USER != '' and EMAIL_PASSWORD != '':
         client.login(EMAIL_USER, EMAIL_PASSWORD)
 
     return client
@@ -76,15 +134,20 @@ def construct_mail_client():
 def get_email_queue(db):
     """Get an active queue of emails waiting to be sent."""
     result = db.execute(
-        "SELECT * FROM emails WHERE sent IS NULL ORDER BY id LIMIT 100;")
+        "SELECT emails.id, emails.user_id, users.user_email, emails.subject," +
+        " emails.body FROM emails INNER JOIN users ON" +
+        " emails.user_id = users.user_id WHERE" +
+        " emails.sent is NULL AND emails.error = ''" +
+        " ORDER BY id LIMIT 100;")
 
     queued_emails = []
     for row in result:
         queued_emails.append({
             'id': row[0],
-            'send_to': row[1],
-            'subject': row[2],
-            'body': row[3]
+            'user_id': row[1],
+            'send_to': row[2],
+            'subject': row[3],
+            'body': row[4]
             })
 
     return queued_emails
@@ -96,12 +159,22 @@ def mark_sent(email_id, db):
     db.execute(query_string)
 
 
+def store_error(email_id, db, metadata, myerror):
+    """Store an error string for the specified email."""
+    emails_table = Table('emails', metadata, autoload=True)
+    # use bindparam to correctly handle a myerror string with single quote character
+    query = emails_table.update().where(
+        emails_table.c.id == email_id).values(error=bindparam('b_myerror'))
+    db.execute(query, b_myerror=myerror)
+
+
 def construct_mail_string(send_to, subject, body):
     """Format an email string."""
     headers = [
         ('Content-Type', 'text/plain; charset=utf-8'),
         ('TO', send_to),
         ('From', EMAIL_SENDER),
+        ('reply-to', EMAIL_REPLY_TO),
         ('Subject', subject)
     ]
 
@@ -115,21 +188,45 @@ def construct_mail_string(send_to, subject, body):
 
 def send_email():
     """Send queued emails."""
-    db = setup_db()
+    db, metadata = setup_db()
     queued_emails = get_email_queue(db)
     mail_client = construct_mail_client()
-
-    if len(queued_emails) == 0:
+    if not EMAIL_ENABLED or len(queued_emails) == 0:
         return
 
+    success_count = 0
+
     for email_data in queued_emails:
+        if email_data["send_to"] == "":
+            store_error(email_data["id"], db, metadata, "WARNING: empty email address")
+            e = "[{}] WARNING: empty email address for recipient {}".format(
+                str(datetime.datetime.now()), email_data["user_id"])
+            LOG_FILE.write(e+"\n")
+            continue
+
         email = construct_mail_string(
             email_data["send_to"], email_data["subject"], email_data["body"])
-        mail_client.sendmail(EMAIL_SENDER, email_data["send_to"], email.encode('utf8'))
-        mark_sent(email_data["id"], db)
 
-    LOG_FILE.write("[{}] Sucessfully Emailed {} Users\n".format(
-        str(datetime.datetime.now()), len(queued_emails)))
+        try:
+            mail_client.sendmail(EMAIL_SENDER,
+                                 email_data["send_to"], email.encode('utf8'))
+            mark_sent(email_data["id"], db)
+            success_count += 1
+
+        except Exception as email_send_error:
+            store_error(email_data["id"], db, metadata, "ERROR: sending email "
+                        + str(email_send_error))
+            e = "[{}] ERROR: sending email to recipient {}, email {}: {}".format(
+                str(datetime.datetime.now()),
+                email_data["user_id"],
+                email_data["send_to"],
+                str(email_send_error))
+            LOG_FILE.write(e+"\n")
+            print(e)
+
+    e = "[{}] Sucessfully Emailed {} Users".format(
+        str(datetime.datetime.now()), success_count)
+    LOG_FILE.write(e+"\n")
 
 
 def main():
@@ -137,8 +234,10 @@ def main():
     try:
         send_email()
     except Exception as email_send_error:
-        LOG_FILE.write("[{}] Error Sending Email: {}\n".format(
-            str(datetime.datetime.now()), str(email_send_error)))
+        e = "[{}] Error Sending Email: {}".format(
+            str(datetime.datetime.now()), str(email_send_error))
+        LOG_FILE.write(e+"\n")
+        print(e)
 
 
 if __name__ == "__main__":

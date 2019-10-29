@@ -15,6 +15,9 @@ class ImagesView extends AbstractView {
      */
     public function listStudentImages($students, $grader_sections, $instructor_permission) {
         $this->core->getOutput()->addBreadcrumb("Student Photos");
+        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
+
         //Assemble students into sections if they are in grader_sections based on the registration section.
         $sections = [];
         foreach ($students as $student) {
@@ -24,11 +27,7 @@ class ImagesView extends AbstractView {
             }
         }
 
-
-        //$images_data_array to contain base64_encoded image urls
-        $images_data_array = array();
-        //$images_names_array to contain the names of the images (rcs ids)
-        $images_names_array = array();
+        $image_data = [];
         $error_image_data = '_NONE_';
 
         //Get the expected images path and png files to loop through
@@ -36,34 +35,38 @@ class ImagesView extends AbstractView {
 
         $dir = new \DirectoryIterator($expected_images_path);
         foreach ($dir as $fileinfo) {
-            if (!$fileinfo->isDot() && $fileinfo->getExtension() === "png") {
-
+            if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
-                $content_type = FileUtils::getContentType($expected_image);
-                if (substr($content_type, 0, 5) === "image") {
-                    // Read image path, convert to base64 encoding
-                    $expected_img_data = base64_encode(file_get_contents($expected_image));
-
-                    $img_name = $fileinfo->getBasename('.png');
+                $mime_subtype = explode('/', mime_content_type($expected_image), 2)[1];
+                if (FileUtils::isValidImage($expected_image)) {
+                    $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {
-                        $error_image_data = $expected_img_data;
+                        $error_image_data = [
+                            'subtype' => $mime_subtype,
+                            'path' => $expected_image
+                        ];
                     }
                     else {
-                        array_push($images_data_array, $expected_img_data);
-                        array_push($images_names_array, $img_name);
+                        $image_data[$img_name] = [
+                            'subtype' => $mime_subtype,
+                            'path' => $expected_image
+                        ];
                     }
                 }
             }
         }
 
-        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
 
+        $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [
             "sections" => $sections,
-            "imageNameArray" => $images_names_array,
-            "imageDataArray" => $images_data_array,
+            "imageData" => $image_data,
             "errorImageData" => $error_image_data,
-            "hasInstructorPermission" => $instructor_permission
+            "hasInstructorPermission" => $instructor_permission,
+            "csrf_token" => $this->core->getCsrfToken(),
+            "max_size_string" => $max_size_string
         ]);
     }
 }

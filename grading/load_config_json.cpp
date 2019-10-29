@@ -42,7 +42,7 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
 
   if (whole_config["autograding"].find("submission_to_validation") == whole_config["autograding"].end()) {
     whole_config["autograding"]["submission_to_validation"].push_back("**/README.txt");
-    whole_config["autograding"]["submission_to_validation"].push_back("textbox_*.txt");
+    whole_config["autograding"]["submission_to_validation"].push_back("input_*.txt");
     whole_config["autograding"]["submission_to_validation"].push_back("**/*.pdf");
   }
 
@@ -50,9 +50,9 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
     whole_config["autograding"]["work_to_details"].push_back("test*/*.txt");
     whole_config["autograding"]["work_to_details"].push_back("test*/*_diff.json");
     whole_config["autograding"]["work_to_details"].push_back("**/README.txt");
-    whole_config["autograding"]["work_to_details"].push_back("textbox_*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("input_*.txt");
     //todo check up on how this works.
-    whole_config["autograding"]["work_to_details"].push_back("test*/textbox_*.txt");
+    whole_config["autograding"]["work_to_details"].push_back("test*/input_*.txt");
   }
 
   if (whole_config["autograding"].find("use_checkout_subdirectory") == whole_config["autograding"].end()) {
@@ -60,6 +60,42 @@ void AddAutogradingConfiguration(nlohmann::json &whole_config) {
   }
 }
 
+
+// This function ensures that any file explicitly tagged as an
+// executable in a compilation step is validated and copied
+// to each testcase directory.
+void PreserveCompiledFiles(nlohmann::json &whole_config) {
+
+  // Loop over all of the test cases
+  nlohmann::json::iterator tc = whole_config.find("testcases");
+  assert (tc != whole_config.end());
+  int which_testcase = 0;
+  for (nlohmann::json::iterator my_testcase = tc->begin();
+       my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+    std::string testcase_type = my_testcase->value("type","Execution");
+    //Skip non compilation tests
+    if(testcase_type != "Compilation"){
+      continue;
+    }
+
+    std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
+    // Add all executables to compilation_to_runner and compilation_to_validation
+    for(std::vector<std::string>::iterator exe = executable_names.begin(); exe != executable_names.end(); exe++){
+      std::stringstream ss;
+      ss << "test" << std::setfill('0') << std::setw(2) << which_testcase+1 << "/" << *exe;
+      std::string executable_name = ss.str();
+
+      if(whole_config["autograding"]["compilation_to_runner"].find("executable_name") == whole_config["autograding"]["compilation_to_runner"].end()){
+        whole_config["autograding"]["compilation_to_runner"].push_back(executable_name);
+      }
+
+      if(whole_config["autograding"]["compilation_to_validation"].find("executable_name") == whole_config["autograding"]["compilation_to_validation"].end()){
+         whole_config["autograding"]["compilation_to_validation"].push_back(executable_name);
+      }
+    }
+  }
+}
 
 // This function will automatically archive all non-executable files
 // that are validated.  This ensures that the web viewers will have
@@ -72,6 +108,8 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
   int which_testcase = 0;
   for (nlohmann::json::iterator my_testcase = tc->begin();
        my_testcase != tc->end(); my_testcase++,which_testcase++) {
+
+
     nlohmann::json::iterator validators = my_testcase->find("validation");
     if (validators == my_testcase->end()) { /* no autochecks */ continue; }
     std::vector<std::string> executable_names = stringOrArrayOfStrings(*my_testcase,"executable_name");
@@ -105,7 +143,6 @@ void ArchiveValidatedFiles(nlohmann::json &whole_config) {
   }
 }
 
-
 void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   //check if docker is globally enabled.
@@ -123,7 +160,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   //Fill in the defaults.
   if(!whole_config["container_options"]["container_image"].is_string()){
-    whole_config["container_options"]["container_image"] = "ubuntu:custom";
+    whole_config["container_options"]["container_image"] = "submitty/autograding-default:latest";
   }
 
   if (!whole_config["container_options"]["use_router"].is_boolean()){
@@ -134,9 +171,13 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
     whole_config["container_options"]["single_port_per_container"] = false; // connection
   }
 
+  if (!whole_config["container_options"]["number_of_ports"].is_number_integer()){
+    whole_config["container_options"]["number_of_ports"] = 1; // connection
+  }
+
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
-  
+
   int testcase_num = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++)
   {
@@ -153,100 +194,125 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
     assert(!(this_testcase["single_port_per_container"] && this_testcase["use_router"]));
 
-    nlohmann::json commands = nlohmann::json::array();
-    // if "command" exists in whole_config, we must wrap it in a container.
-    bool found_commands = false;
-    if(this_testcase.find("command") != this_testcase.end()){
-      found_commands = true;
-      if (this_testcase["command"].is_array()){
-        commands = this_testcase["command"];
-      }
-      else{
-        commands.push_back(this_testcase["command"]);
-      }
+    
+    // if "command" or "solution_commands" exists in whole_config, we must wrap it in a container.
+    for(std::pair<std::string, std::string> option : std::vector<std::pair<std::string, std::string>>{ 
+                                                       std::pair<std::string, std::string>{"command", "containers"}, 
+                                                       std::pair<std::string, std::string>{"solution_commands", "solution_containers"}
+                                                     }){
+      nlohmann::json commands = nlohmann::json::array();
+      std::string command_type = option.first;
+      std::string container_type = option.second;
+      bool found_commands = false;
+      if(this_testcase.find(command_type) != this_testcase.end()){
+        found_commands = true;
+        if (this_testcase[command_type].is_array()){
+          commands = this_testcase[command_type];
+        }
+        else{
+          commands.push_back(this_testcase[command_type]);
+        }
 
-      this_testcase.erase("command");
-    }
-
-    assert (this_testcase["containers"].is_null() || !found_commands);
-
-    if(!this_testcase["containers"].is_null()){
-      assert(this_testcase["containers"].is_array());
-    }else{
-      this_testcase["containers"] = nlohmann::json::array();
-      //commands may have to be a json::array();
-      this_testcase["containers"][0] = nlohmann::json::object();
-      this_testcase["containers"][0]["commands"] = commands;
-    }
-
-    //get the testcase type
-    std::string testcase_type = this_testcase.value("type","Execution");
-    if (testcase_type == "Compilation"){
-      assert(this_testcase["containers"].size() == 1);
-    }
-
-    if(this_testcase["containers"].size() > 1){
-      assert(whole_config["autograding_method"] == "docker");
-    }
-
-    bool found_router = false;
-    bool found_non_server = false;
-
-    for (int container_num = 0; container_num < this_testcase["containers"].size(); container_num++){
-      if(this_testcase["containers"][container_num]["commands"].is_string()){
-        std::string this_command = this_testcase["containers"][container_num].value("commands", "");
-        this_testcase["containers"][container_num].erase("commands");
-        this_testcase["containers"][container_num]["commands"] = nlohmann::json::array();
-        this_testcase["containers"][container_num]["commands"].push_back(this_command);
+        this_testcase.erase(command_type);
       }
 
-      if(!this_testcase["containers"][container_num]["commands"].is_array()){
-        this_testcase["containers"][container_num]["commands"] = nlohmann::json::array();
-      }
+      assert (this_testcase[container_type].is_null() || !found_commands);
 
-      if(this_testcase["containers"][container_num]["container_name"].is_null()){
-        this_testcase["containers"][container_num]["container_name"] = "container" + std::to_string(container_num); 
-      }
-
-      if (this_testcase["containers"][container_num]["container_name"] == "router"){
-        found_router = true;
-      }
-
-      if(!this_testcase["containers"][container_num]["server"].is_boolean()){
-        this_testcase["containers"][container_num]["server"] = false;
-      }
-
-      if(this_testcase["containers"][container_num]["server"] == true){
-        assert(!this_testcase["containers"][container_num]["commands"].size() > 0);
+      if(!this_testcase[container_type].is_null()){
+        assert(this_testcase[container_type].is_array());
       }else{
-        found_non_server = true;
+        this_testcase[container_type] = nlohmann::json::array();
+        //commands may have to be a json::array();
+        this_testcase[container_type][0] = nlohmann::json::object();
+        this_testcase[container_type][0]["commands"] = commands;
       }
 
-      std::string container_name = this_testcase["containers"][container_num]["container_name"];
-
-      assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
-
-      if(this_testcase["containers"][container_num]["outgoing_connections"].is_null()){
-        this_testcase["containers"][container_num]["outgoing_connections"] = nlohmann::json::array();
+      //get the testcase type
+      std::string testcase_type = this_testcase.value("type","Execution");
+      if (testcase_type == "Compilation"){
+        assert(this_testcase[container_type].size() == 1);
       }
 
-      if(this_testcase["containers"][container_num]["container_image"].is_null()){
-        //TODO: store the default system image somewhere and fill it in here.
-        this_testcase["containers"][container_num]["container_image"] = whole_config["container_options"]["container_image"];
-      }    
-    }
+      if(this_testcase[container_type].size() > 1){
+        assert(whole_config["autograding_method"] == "docker");
+      }
 
-    if(this_testcase["use_router"] && !found_router){
-      nlohmann::json insert_router = nlohmann::json::object();
-      insert_router["outgoing_connections"] = nlohmann::json::array();
-      insert_router["commands"] = nlohmann::json::array();
-      insert_router["commands"].push_back("python3 submitty_router.py");
-      insert_router["container_name"] = "router";
-      insert_router["import_default_router"] = true;
-      insert_router["container_image"] = "ubuntu:custom";
-      this_testcase["containers"].push_back(insert_router);
+      int router_container = -1;
+      bool found_non_server = false;
+
+      for (int container_num = 0; container_num < this_testcase[container_type].size(); container_num++){
+        if(this_testcase[container_type][container_num]["commands"].is_string()){
+          std::string this_command = this_testcase[container_type][container_num].value("commands", "");
+          this_testcase[container_type][container_num].erase("commands");
+          this_testcase[container_type][container_num]["commands"] = nlohmann::json::array();
+          this_testcase[container_type][container_num]["commands"].push_back(this_command);
+        }
+
+        if(!this_testcase[container_type][container_num]["commands"].is_array()){
+          this_testcase[container_type][container_num]["commands"] = nlohmann::json::array();
+        }
+
+        if(this_testcase[container_type][container_num]["container_name"].is_null()){
+          this_testcase[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
+        }
+
+        if (!this_testcase[container_type][container_num]["number_of_ports"].is_number_integer()){
+          this_testcase[container_type][container_num]["number_of_ports"] = whole_config["container_options"]["number_of_ports"];
+        }
+
+        if (this_testcase[container_type][container_num]["container_name"] == "router"){
+          assert(router_container == -1);
+          router_container = container_num;
+        }
+
+        if(!this_testcase[container_type][container_num]["server"].is_boolean()){
+          this_testcase[container_type][container_num]["server"] = false;
+        }
+
+        if(this_testcase[container_type][container_num]["server"] == true){
+          assert(this_testcase[container_type][container_num]["commands"].size() == 0);
+        }else{
+          found_non_server = true;
+        }
+
+        std::string container_name = this_testcase[container_type][container_num]["container_name"];
+
+        assert(std::find_if(container_name.begin(), container_name.end(), isspace) == container_name.end());
+
+        if(this_testcase[container_type][container_num]["outgoing_connections"].is_null()){
+          this_testcase[container_type][container_num]["outgoing_connections"] = nlohmann::json::array();
+        }
+
+        if(this_testcase[container_type][container_num]["container_image"].is_null()){
+          //TODO: store the default system image somewhere and fill it in here.
+          this_testcase[container_type][container_num]["container_image"] = whole_config["container_options"]["container_image"];
+        }
+      }
+
+      if(this_testcase[container_type].size() <= 2 && this_testcase["use_router"]){
+        // If there are only two containers specified, make sure that neither is the router.
+        // The router MUST go between at least two containers.
+        assert(router_container == -1);
+      }
+
+      // If we are using the router, and it isn't specified, and this testcase is a valid candidate for a router (2 or more containers specified).
+      if(this_testcase["use_router"] && router_container == -1 && this_testcase[container_type].size() > 1){
+        nlohmann::json insert_router = nlohmann::json::object();
+        insert_router["outgoing_connections"] = nlohmann::json::array();
+        insert_router["commands"] = nlohmann::json::array();
+        insert_router["commands"].push_back("python3 submitty_router.py");
+        insert_router["container_name"] = "router";
+        insert_router["import_default_router"] = true;
+        insert_router["container_image"] = "submitty/autograding-default:latest";
+        insert_router["server"] = false;
+        this_testcase[container_type].push_back(insert_router);
+      }
+      //We now always add the default router in case of instructor overriding
+      else if(this_testcase["use_router"] && router_container != -1){
+        this_testcase[container_type][router_container]["import_default_router"] = true;
+      }
+      assert(found_non_server == true);
     }
-    assert(found_non_server == true);
     whole_config["testcases"][testcase_num] = this_testcase;
     assert(!whole_config["testcases"][testcase_num]["title"].is_null());
     assert(!whole_config["testcases"][testcase_num]["containers"].is_null());
@@ -464,7 +530,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       //Type requires a key_combination to press and can have an optional "delay_in_seconds" and "presses"
       else if(action_name == "key"){
         float delay_time_in_seconds = action.value("delay_in_seconds",0.1);
-        
+
         if(delay_time_in_seconds <= 0){
           std::cout << "ERROR: In the key command, delay must be greater than zero." << std::endl;
         }
@@ -472,7 +538,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         action["delay_in_seconds"] = delay_time_in_seconds;
 
         validate_integer(action, "presses", true, 1, 1);
-        
+
         if(action["key_combination"].is_null()){
           std::cout << "ERROR: key combination to be pressed must be specified in the key command." << std::endl;
         }
@@ -483,7 +549,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       //Click and drag can have an optional start_x and start_y, and must have an end_x and end_y
       // which are greater than 0.
       else if(action_name == "click and drag"){
-        
+
         validate_mouse_button(action);
 
         validate_integer(action, "start_x", false, 0, 0);
@@ -499,7 +565,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
       }
       //Click and drag delta can have an optional mouse button, and must have and end_x and end_y.
       else if(action_name == "click and drag delta"){
-       
+
         validate_mouse_button(action);
 
         validate_integer(action, "end_x",   true,  0, 0);
@@ -538,7 +604,7 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
         float gif_duration = float(action.value("seconds",1.0));
         assert(gif_duration > 0);
         action["seconds"] = gif_duration;
-        
+
         if(action["name"].is_null()){
           action["name"] = "gif_" + std::to_string(number_of_gifs);
         }
@@ -602,7 +668,7 @@ void formatPreActions(nlohmann::json &whole_config) {
 
     for (int i = 0; i < pre_commands.size(); i++){
       nlohmann::json pre_command = pre_commands[i];
-      
+
       //right now we only support copy.
       assert(pre_command["command"] == "cp");
 
@@ -616,7 +682,7 @@ void formatPreActions(nlohmann::json &whole_config) {
       assert(pre_command["testcase"].is_string());
 
       std::string testcase = pre_command["testcase"];
-      
+
       //remove trailing slash
       if(testcase.length() == 7){
         testcase = testcase.substr(0,6);
@@ -629,7 +695,7 @@ void formatPreActions(nlohmann::json &whole_config) {
 
       std::string number = testcase.substr(4,6);
       int remainder = std::stoi( number );
-      
+
       //we must be referencing a previous testcase. (+1 because we start at 0)
       assert(remainder > 0);
       assert(remainder < which_testcase+1);
@@ -656,7 +722,7 @@ void formatPreActions(nlohmann::json &whole_config) {
          this_testcase["pattern"] = "";
       }else{
         std::string pattern = pre_command["pattern"];
-        //The pattern must not container .. or $ 
+        //The pattern must not container .. or $
         assert(pattern.find("..") == std::string::npos);
         assert(pattern.find("$") == std::string::npos);
         assert(pattern.find("~") == std::string::npos);
@@ -669,7 +735,7 @@ void formatPreActions(nlohmann::json &whole_config) {
 
       std::string destination = pre_command["destination"];
 
-      //The destination must not container .. or $ 
+      //The destination must not container .. or $
       assert(destination.find("..") == std::string::npos);
       assert(destination.find("$") == std::string::npos);
       assert(destination.find("~") == std::string::npos);
@@ -700,16 +766,22 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
     for (int which_autocheck = 0; which_autocheck < validators->size(); which_autocheck++) {
       nlohmann::json& autocheck = (*validators)[which_autocheck];
       std::string method = autocheck.value("method","");
+      std::string comparison = autocheck.value("comparison","");
+
+      // if autocheck if old byLinebyWord format... make it byLinebyChar
+      if (comparison == "byLinebyWord") {
+          autocheck["comparison"] = "byLinebyChar";
+      }
 
       // if autocheck is old myersdiff format...  rewrite it!
       if (method == "myersDiffbyLinebyChar") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
         autocheck["comparison"] = "byLinebyChar";
-      } else if (method == "myersDiffbyLinebyWord") {
+    } else if (method == "myersDiffbyLinebyWord") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
-        autocheck["comparison"] = "byLinebyWord";
+        autocheck["comparison"] = "byLinebyChar";
       } else if (method == "myersDiffbyLine") {
         autocheck["method"] = "diff";
         assert (autocheck.find("comparison") == autocheck.end());
@@ -734,7 +806,7 @@ void RewriteDeprecatedMyersDiff(nlohmann::json &whole_config) {
 void InflateTestcases(nlohmann::json &whole_config){
   nlohmann::json::iterator tc = whole_config.find("testcases");
   assert (tc != whole_config.end());
-  
+
   int testcase_num = 0;
   for (typename nlohmann::json::iterator itr = tc->begin(); itr != tc->end(); itr++,testcase_num++){
       nlohmann::json this_testcase = whole_config["testcases"][testcase_num];
@@ -839,7 +911,8 @@ nlohmann::json LoadAndProcessConfigJSON(const std::string &rcsid) {
   InflateTestcases(answer);
 
   ArchiveValidatedFiles(answer);
-  
+  PreserveCompiledFiles(answer);
+
   return answer;
 }
 
@@ -850,7 +923,7 @@ void AddDefaultGraphicsChecks(nlohmann::json &json_graders, const nlohmann::json
   if(testcase.find("actions") == testcase.end()){
     return;
   }
-  
+
   std::vector<nlohmann::json> actions = mapOrArrayOfMaps(testcase, "actions");
 
   for (int action_num = 0; action_num < actions.size(); action_num++){
@@ -919,10 +992,10 @@ void AddDefaultGraders(const std::vector<nlohmann::json> &containers,
       if (commands.size() > 1){
         suffix = "_"+std::to_string(j)+".txt";
       }
-    
+
       AddDefaultGrader(containers[i]["commands"][j],files_covered,json_graders,prefix+"STDOUT"+suffix,whole_config);
       AddDefaultGrader(containers[i]["commands"][j],files_covered,json_graders,prefix+"STDERR"+suffix,whole_config);
-    } 
+    }
   }
 }
 
@@ -988,7 +1061,7 @@ void FileCheck_Helper(nlohmann::json &single_testcase) {
   f_itr = single_testcase.find("actual_file");
   v_itr = single_testcase.find("validation");
   m_itr = single_testcase.find("max_submissions");
-  
+
   if (f_itr != single_testcase.end()) {
     // need to rewrite to use a validation
     assert (m_itr == single_testcase.end());
@@ -1219,7 +1292,7 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     assert (replacement == "hashed_username");
     int mod_value = j2.value("mod",-1);
     assert (mod_value > 0);
-    
+
     int A = 54059; /* a prime */
     int B = 76963; /* another prime */
     int FIRSTH = 37; /* also prime */
@@ -1227,8 +1300,8 @@ void CustomizeAutoGrading(const std::string& username, nlohmann::json& j) {
     for (int i = 0; i < username.size(); i++) {
       sum = (sum * A) ^ (username[i] * B);
     }
-    int assigned = (sum % mod_value)+1; 
-  
+    int assigned = (sum % mod_value)+1;
+
     std::string repl = std::to_string(assigned);
 
     nlohmann::json::iterator association = j2.find("association");

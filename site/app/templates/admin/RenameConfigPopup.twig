@@ -7,9 +7,10 @@
     </ol>
     <input name="new_config_name" id="new_config_name" value="" type="text">
     <input name="curr_config_name" type="hidden" value="" id="curr_config_name">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
 {% endblock %}
 {% block form %}
-    <form method="POST" enctype="multipart/form-data" action="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'rename_config'}) }}">
+    <form method="POST" enctype="multipart/form-data" action="{{ rename_url }}">
         {{ parent() }}
     </form>
 {% endblock %}

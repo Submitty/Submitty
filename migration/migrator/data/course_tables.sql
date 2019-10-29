@@ -124,6 +124,7 @@ CREATE TABLE electronic_gradeable (
     eg_config_path character varying(1024) NOT NULL,
     eg_is_repository boolean NOT NULL,
     eg_subdirectory character varying(1024) NOT NULL,
+    eg_vcs_host_type integer DEFAULT(0) NOT NULL,
     eg_team_assignment boolean NOT NULL,
     --eg_inherit_teams_from character varying(255) NOT NULL,
     eg_max_team_size integer NOT NULL,
@@ -142,13 +143,15 @@ CREATE TABLE electronic_gradeable (
     eg_peer_grade_set integer DEFAULT (0) NOT NULL,
     eg_precision numeric NOT NULL,
     eg_regrade_allowed boolean DEFAULT true NOT NULL,
+    eg_grade_inquiry_per_component_allowed boolean DEFAULT false NOT NULL,
     eg_regrade_request_date timestamp(6) with time zone NOT NULL,
     eg_thread_ids json DEFAULT '{}' NOT NULL,
     eg_has_discussion boolean DEFAULT FALSE NOT NULL,
     CONSTRAINT eg_submission_date CHECK ((eg_submission_open_date <= eg_submission_due_date)),
     CONSTRAINT eg_team_lock_date_max CHECK ((eg_team_lock_date <= '9999-03-01 00:00:00.000000')),
     CONSTRAINT eg_submission_due_date_max CHECK ((eg_submission_due_date <= '9999-03-01 00:00:00.000000')),
-    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000'))
+    CONSTRAINT eg_regrade_request_date_max CHECK ((eg_regrade_request_date <= '9999-03-01 00:00:00.000000')),
+    CONSTRAINT eg_regrade_allowed_true CHECK (eg_regrade_allowed is true or eg_grade_inquiry_per_component_allowed is false)
 );
 
 
@@ -196,7 +199,7 @@ CREATE TABLE gradeable (
     g_instructions_url character varying NOT NULL,
     g_overall_ta_instructions character varying NOT NULL,
     g_gradeable_type integer NOT NULL,
-    g_grade_by_registration boolean NOT NULL,
+    g_grader_assignment_method integer NOT NULL,
     g_ta_view_start_date timestamp(6) with time zone NOT NULL,
     g_grade_start_date timestamp(6) with time zone NOT NULL,
     g_grade_due_date timestamp(6) with time zone NOT NULL,
@@ -451,6 +454,7 @@ CREATE TABLE sessions (
 CREATE TABLE users (
     user_id character varying NOT NULL,
     anon_id character varying,
+    user_numeric_id character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
@@ -464,6 +468,10 @@ CREATE TABLE users (
     manual_registration boolean DEFAULT false,
     last_updated timestamp(6) with time zone,
     CONSTRAINT users_user_group_check CHECK ((user_group >= 1) AND (user_group <= 4))
+);
+
+CREATE INDEX users_user_numeric_id_idx ON users using btree (
+    user_numeric_id ASC NULLS LAST
 );
 
 
@@ -486,7 +494,8 @@ CREATE TABLE gradeable_teams (
 CREATE TABLE teams (
     team_id character varying(255) NOT NULL,
     user_id character varying(255) NOT NULL,
-    state integer NOT NULL
+    state integer NOT NULL,
+	last_viewed_time timestamp(6) with time zone DEFAULT NULL
 );
 
 
@@ -496,10 +505,11 @@ CREATE TABLE teams (
 CREATE TABLE regrade_requests (
     id serial NOT NULL PRIMARY KEY,
     g_id VARCHAR(255) NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255),
     team_id VARCHAR(255),
-    status INTEGER DEFAULT 0 NOT NULL
+    status INTEGER DEFAULT 0 NOT NULL,
+    gc_id INTEGER
 );
 
 
@@ -509,7 +519,21 @@ CREATE TABLE notification_settings (
 	all_new_threads BOOLEAN DEFAULT FALSE NOT NULL,
 	all_new_posts BOOLEAN DEFAULT FALSE NOT NULL,
 	all_modifications_forum BOOLEAN DEFAULT FALSE NOT NULL,
-	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL
+	reply_in_post_thread BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission BOOLEAN DEFAULT TRUE NOT NULL,
+    self_notification BOOLEAN DEFAULT FALSE NOT NULL,
+	merge_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_threads_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_new_posts_email BOOLEAN DEFAULT FALSE NOT NULL,
+	all_modifications_forum_email BOOLEAN DEFAULT FALSE NOT NULL,
+	reply_in_post_thread_email BOOLEAN DEFAULT FALSE NOT NULL,
+	team_invite_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_joined_email BOOLEAN DEFAULT TRUE NOT NULL,
+	team_member_submission_email BOOLEAN DEFAULT TRUE NOT NULL,
+	self_notification_email BOOLEAN DEFAULT FALSE NOT NULL
+
 );
 
 --
@@ -518,16 +542,27 @@ CREATE TABLE notification_settings (
 CREATE TABLE regrade_discussion (
     id serial NOT NULL PRIMARY KEY,
     regrade_id INTEGER NOT NULL,
-    timestamp TIMESTAMP NOT NULL,
+    timestamp TIMESTAMP WITH TIME ZONE NOT NULL,
     user_id VARCHAR(255) NOT NULL,
     content TEXT,
-    deleted BOOLEAN DEFAULT FALSE NOT NULL
+    deleted BOOLEAN DEFAULT FALSE NOT NULL,
+    gc_id integer
+);
+
+--
+-- Name: grade_override; Type: TABLE; Schema:
+--
+CREATE TABLE grade_override (
+    user_id character varying(255) NOT NULL,
+    g_id character varying(255) NOT NULL,
+    marks float NOT NULL,
+    comment character varying
 );
 
 --
 -- Name: notifications_component_enum; Type: ENUM; Schema: public; Owner: -
 --
-CREATE TYPE notifications_component AS ENUM ('forum');
+CREATE TYPE notifications_component AS ENUM ('forum', 'student', 'grading', 'team');
 
 --
 -- Name: notifications; Type: TABLE; Schema: public; Owner: -
@@ -550,18 +585,19 @@ CREATE TABLE notifications (
 -- Name: posts; Type: Table; Schema: public; Owner: -
 --
 CREATE TABLE "posts" (
-	"id" serial NOT NULL,
-	"thread_id" int NOT NULL,
-	"parent_id" int DEFAULT '-1',
-	"author_user_id" character varying NOT NULL,
-	"content" TEXT NOT NULL,
-	"timestamp" timestamp with time zone NOT NULL,
-	"anonymous" BOOLEAN NOT NULL,
-	"deleted" BOOLEAN NOT NULL DEFAULT 'false',
-	"endorsed_by" varchar,
-	"type" int NOT NULL,
-  "has_attachment" BOOLEAN NOT NULL,
-	CONSTRAINT posts_pk PRIMARY KEY ("id")
+        "id" serial NOT NULL,
+        "thread_id" int NOT NULL,
+        "parent_id" int DEFAULT '-1',
+        "author_user_id" character varying NOT NULL,
+        "content" TEXT NOT NULL,
+        "timestamp" timestamp with time zone NOT NULL,
+        "anonymous" BOOLEAN NOT NULL,
+        "deleted" BOOLEAN NOT NULL DEFAULT 'false',
+        "endorsed_by" varchar,
+        "type" int NOT NULL,
+        "has_attachment" BOOLEAN NOT NULL,
+        "render_markdown" BOOLEAN NOT NULL DEFAULT 'false',
+        CONSTRAINT posts_pk PRIMARY KEY ("id")
 );
 
 CREATE TABLE "threads" (
@@ -574,6 +610,7 @@ CREATE TABLE "threads" (
 	"merged_post_id" int DEFAULT '-1',
 	"is_visible" BOOLEAN NOT NULL,
 	"status" int DEFAULT 0 NOT NULL,
+	"lock_thread_date" timestamp with time zone,
 	CONSTRAINT threads_pk PRIMARY KEY ("id")
 );
 
@@ -802,6 +839,12 @@ ALTER TABLE ONLY gradeable_teams
 ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (team_id, user_id);
 
+--
+-- Name: grade_override_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_pkey PRIMARY KEY (user_id, g_id);
 
 --
 -- Name: electronic_gradeable_data_gid; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -1097,6 +1140,22 @@ ALTER TABLE ONLY teams
     ADD CONSTRAINT teams_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 --
+-- Name: grade_override_g_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_g_id_fkey FOREIGN KEY (g_id) REFERENCES gradeable(g_id) ON DELETE CASCADE;
+
+
+--
+-- Name: grade_override_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY grade_override
+    ADD CONSTRAINT grade_override_user_id_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
+--
 -- Name: regrade_discussion; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -1142,6 +1201,7 @@ ALTER TABLE "viewed_responses" ADD CONSTRAINT "viewed_responses_fk1" FOREIGN KEY
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk0" FOREIGN KEY ("g_id") REFERENCES "gradeable"("g_id");
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
 ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk2" FOREIGN KEY ("team_id") REFERENCES "gradeable_teams"("team_id");
+ALTER TABLE "regrade_requests" ADD CONSTRAINT "regrade_requests_fk3" FOREIGN KEY ("gc_id") REFERENCES "gradeable_component"("gc_id");
 
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk0" FOREIGN KEY ("regrade_id") REFERENCES "regrade_requests"("id");
 ALTER TABLE "regrade_discussion" ADD CONSTRAINT "regrade_discussion_fk1" FOREIGN KEY ("user_id") REFERENCES "users"("user_id");
@@ -1155,15 +1215,30 @@ ALTER TABLE ONLY thread_categories
 ALTER TABLE ONLY student_favorites
     ADD CONSTRAINT user_and_thread_unique UNIQUE (user_id, thread_id);
 
-ALTER TABLE ONLY regrade_requests
-    ADD CONSTRAINT gradeable_user_unique UNIQUE(g_id, user_id);
+CREATE UNIQUE INDEX gradeable_user_unique ON regrade_requests(user_id, g_id) WHERE gc_id IS NULL;
+CREATE UNIQUE INDEX gradeable_team_unique ON regrade_requests(team_id, g_id) WHERE gc_id IS NULL;
 
-ALTER TABLE ONLY regrade_requests
-    ADD CONSTRAINT gradeable_team_unique UNIQUE(g_id, team_id);
+ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_user_gc_id UNIQUE (user_id, g_id, gc_id);
+ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (team_id, g_id, gc_id);
+
+CREATE TABLE IF NOT EXISTS queue(
+  entry_id serial PRIMARY KEY,
+  user_id VARCHAR(20) NOT NULL REFERENCES users(user_id),
+  name VARCHAR (20) NOT NULL,
+  time_in TIMESTAMP NOT NULL,
+  time_helped TIMESTAMP,
+  time_out TIMESTAMP,
+  removed_by VARCHAR (20) REFERENCES users(user_id),
+  status SMALLINT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS queue_settings(
+  id serial PRIMARY KEY,
+  open boolean NOT NULL,
+  code VARCHAR (20) NOT NULL
+);
 
 -- End Forum Key relationships
 
 --
 -- PostgreSQL database dump complete
 --
-

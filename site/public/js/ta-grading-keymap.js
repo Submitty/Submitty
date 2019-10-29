@@ -37,7 +37,7 @@ window.onkeydown = function(e) {
 
     for (var i = 0; i < keymap.length; i++) {
         if (keymap[i].code === codeName) {
-            keymap[i].fn(e);
+            keymap[i].fn(e, keymap[i].options);
         }
     }
 };

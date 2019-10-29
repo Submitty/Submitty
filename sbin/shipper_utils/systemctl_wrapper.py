@@ -73,6 +73,10 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
     print("There is no machine with the key {0}".format(target))
     sys.exit(EXIT_CODES['bad_arguments'])
 
+  if WORKERS[target]['enabled'] == False:
+    print("Skipping {0} of {1} because worker machine {2} is disabled".format(mode, daemon, target))
+    return EXIT_CODES['inactive']
+
   user = WORKERS[target]['username']
   host = WORKERS[target]['address']
 
@@ -86,12 +90,12 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       ssh = paramiko.SSHClient()
       ssh.get_host_keys()
       ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-      ssh.connect(hostname = host, username = user)
+      ssh.connect(hostname = host, username = user, timeout=60)
   except Exception as e:
       print("ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
       return EXIT_CODES['failure']
   try:
-      (stdin, stdout, stderr) = ssh.exec_command(command)
+      (stdin, stdout, stderr) = ssh.exec_command(command, timeout=5)
       status = int(stdout.channel.recv_exit_status())
   except Exception as e:
       print("ERROR: Command did not properly execute: ".format(host, str(e)))
@@ -101,6 +105,7 @@ def perform_systemctl_command_on_worker(daemon, mode, target):
       return status
 
 def disable_machine(target):
+  return
   if WORKERS == None:
     print('Cannot disable as autograding_workers.json does not exist.')
     return

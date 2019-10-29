@@ -47,10 +47,17 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
     subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    
+    os.mkdir(os.path.join(test.testcase_path ,"data" ,"test_output"))
     subprocess.call(["cp"] +
                      glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output","*")) +
-                     [os.path.join(test.testcase_path, "data")])
+                     [os.path.join(test.testcase_path, "data", "test_output")])
 
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def solution(test):

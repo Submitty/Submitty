@@ -142,14 +142,11 @@ function replace_fillin_variables {
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_INSTALL_DIR__|$SUBMITTY_INSTALL_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMITTY_DATA_DIR__|$SUBMITTY_DATA_DIR|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__SUBMISSION_URL__|$SUBMISSION_URL|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__PHP_USER__|$PHP_USER|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__DAEMON_USER__|$DAEMON_USER|g" $1
 
     sed -i -e "s|__CREATE_COURSE__FILLIN__SEMESTER__|$semester|g" $1
     sed -i -e "s|__CREATE_COURSE__FILLIN__COURSE__|$course|g" $1
 
-    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_DATABASE_NAME__|$DATABASE_NAME|g" $1
-    sed -i -e "s|__CREATE_COURSE__FILLIN__TAGRADING_COURSE_FILES_LOCATION__|$course_dir|g" $1
+    sed -i -e "s|__CREATE_COURSE__FILLIN__DATABASE_NAME__|$DATABASE_NAME|g" $1
 
     # FIXME: Add some error checking to make sure these values were filled in correctly
 }
@@ -209,6 +206,7 @@ create_and_set  u=rwx,g=rwxs,o=  $instructor  $ta_www_group   $course_dir/config
 #               drwxr-s---       instructor   ta_www_group    custom_validation_code/
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/bin
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/provided_code
+create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/instructor_solution
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_input
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/test_output
 create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custom_validation_code
@@ -223,7 +221,7 @@ create_and_set  u=rwx,g=rwxs,o=   $instructor  $ta_www_group   $course_dir/custo
 #               drwxr-s---       $DAEMON_USER     ta_www_group    checkout/
 #               drwxr-s---       $DAEMON_USER     ta_www_group    uploads/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/bulk_pdf/
-#               drwxr-s---       $CGI_USER        ta_www_group    uploads/split_pdf/
+#               drwxrws---       $DAEMON_USER     ta_www_group    uploads/split_pdf/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/
 #               drwxr-s---       $PHP_USER        ta_www_group    uploads/student_images/tmp
 #               drwxrws---       $PHP_USER        ta_www_group    uploads/seating
@@ -243,8 +241,9 @@ create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/up
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/student_images/tmp
 create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/uploads/course_materials
-create_and_set  u=rwx,g=rxs,o=   $CGI_USER        $ta_www_group   $course_dir/uploads/split_pdf
+create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/uploads/split_pdf
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/uploads/seating
+create_and_set  u=rwx,g=rxs,o=   $PHP_USER        $ta_www_group   $course_dir/rainbow_grades
 create_and_set  u=rwx,g=rwxs,o=  $DAEMON_USER     $ta_www_group   $course_dir/lichen
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/config
 create_and_set  u=rwx,g=rwxs,o=  $PHP_USER        $ta_www_group   $course_dir/lichen/provided_code
@@ -301,7 +300,7 @@ echo -e "\nSUCCESS!\n\n"
 ########################################################################################################################
 
 echo -e "SUCCESS!  new course   $course $semester   CREATED HERE:   $course_dir"
-echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/index.php?semester=${semester}&course=${course}"
+echo -e "SUCCESS!  course page url  ${SUBMISSION_URL}/${semester}/${course}"
 
 ########################################################################################################################
 ########################################################################################################################

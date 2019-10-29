@@ -636,7 +636,7 @@ gradeables:
   g_title: Grading Lab (Rotating Sections)
   g_type: 1
   g_bucket: lab
-  g_grade_by_registration: False
+  g_grader_assignment_method: 0
 
 - g_id: grades_released_lab
   components:
@@ -745,7 +745,7 @@ gradeables:
   g_title: Grading Test (Rotating Sections)
   g_type: 2
   g_bucket: test
-  g_grade_by_registration: False
+  g_grader_assignment_method: 0
 
 - g_id: grades_released_test
   components:

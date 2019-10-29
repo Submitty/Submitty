@@ -4,234 +4,305 @@
 #}
 {% if action == 'new' or action == 'template' %}
     <div>
-        <label for="gradeable_template">From Template:</label>
-        <select name="gradeable_template" id="gradeable_template" style='width: 400px;'>
-            <option>--None--</option>
-
-            {% for template in template_list %}
+    {# temporarily remove the template feature because it is stale / needs refactoring.
+        <div class="option row">
+            <div class="option-desc col-md-6">
+                <label for="gradeable_template">
+                    <div class="option-title">Template</div>
+                    <div class="option-alt">Select from one of the templates</div>
+                </label>
+            </div>
+            <div class="option-input col-md-6">
+                <select name="gradeable_template" id="gradeable_template" style='margin-right:30px'>
+                <option>--None--</option>
+                {% for template in template_list %}
                 <option {{ action != 'new' and gradeable.getId() == template.g_id ? 'selected' : '' }}
                     value="{{ template.g_id }}">{{ template.g_title }}</option>
-            {% endfor %}
-        </select>
+                {% endfor %}
+                </select>
+            </div>
+        </div>
+    #}
     </div>
+
 {% endif %}
 
 {#
     Primary Form
 #}
 <!-- Gradeable Title (read/write in all modes) -->
-<label for="g_title">What is the title of this gradeable?:</label>
-    <input style='width: 350px' type='text' name='title' id='g_title' class="required auto_save"
-        value="{{ action != 'new' ? gradeable.getTitle() : '' }}" placeholder="(Required)" required/>
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="g_title">
+                <div class="option-title">Title</div>
+                <div class="option-alt">What is the title of this gradable? <p style="color:red">(Required)</p></div>
+            </label>
+        </div>
 
-<br />
+        <div class="option-input col-md-6">
+            <textarea onkeyup="textAreaAdjust(this)" name='title' id='g_title' class="required auto_save" style="overflow:hidden" placeholder="(Required)" required>{{action != 'new' ? gradeable.getTitle() : '' }}</textarea>
+        </div>
+    </div>
+
 
 <!-- Instruction URL (read/write in all modes) -->
-<label for="instructions_url">What is the URL to the assignment instructions? (shown to student)</label>
-    <input style='width: 350px' type='text' name='instructions_url' id='instructions_url' class="auto_save"
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="instructions_url">
+            <div class="option-title">Assignment URL</div>
+            <div class="option-alt">What is the URL to the assignment instructions? (shown to student)</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='instructions_url' id='instructions_url' class="auto_save"
         value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
+    </div>
+</div>
 
-<br />
 
 <!-- Gradeable ID (readonly in edit mode, required) -->
-<label for="g_id">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>):</label>
-<input style='width: 350px' type='text' name='id' id="g_id" class="required"
-       value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="g_id">
+            <div class="option-title">Unique ID</div>
+            <div class="option-alt">What is the unique id of this gradeable? (e.g., <kbd>hw01</kbd>, <kbd>lab_12</kbd>, or <kbd>midterm</kbd>)</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='id' id="g_id" class="required"
+        value="{{ action != 'new' ? gradeable.getId() : '' }}" placeholder="(Required)"
         {{ action == 'edit' ? 'readonly' : 'required' }} />
+    </div>
+</div>
 
-<br />
-<fieldset>
-    <legend>
-{% if action == 'new' or action == 'template' %}
-    <!-- Gradeable Type radio buttons (readonly in edit mode) -->
-   <a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="helpicon"></i></a>
+<div class="option">
+    <div class="option-desc col-md-12">
+        {% if action == 'new' or action == 'template' %}
+            <!-- Gradeable Type radio buttons (readonly in edit mode) -->
+            {# (VPAT) fieldset/legend required for gradeable type container radio group #}
+            <fieldset><legend><div class="option-title">Gradeable Type</div></legend>
+            <div class="option-alt"><a target=_blank href="http://submitty.org/instructor/create_edit_gradeable#types-of-gradeables">What is the type of the gradeable <i style="font-style:normal;" class="fa-question-circle"></i></a></div>
             <span id="required_type" >(Required)</span>
         {% else %}
-            Gradeable type: <span id="gradeable-type-string">{{ type_string }}</span>
+            <b style='font-size:18px'>Gradeable type</b>: <span id="gradeable-type-string">{{ type_string }}</span>
             <br />
         {% endif %}
-    </legend>
-    <div>
         <div id="gradeable_type_container" {{ action == 'edit' ? 'hidden' : '' }}>
             <div>
                 <input type='radio' id="radio_checkpoints" name="type" value="Checkpoints"
-                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> {{ gradeable_type_strings['checkpoint'] }}
+                    {{ action != 'new' and gradeable.getType() == 1 ? 'checked' : '' }}> <label for="radio_checkpoints"> {{ gradeable_type_strings['checkpoint'] }} </label>
             </div>
 
             <div>
                 <input type='radio' id="radio_numeric" name="type" value="Numeric"
-                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> {{ gradeable_type_strings['numeric'] }}
+                    {{ action != 'new' and gradeable.getType() == 2 ? 'checked' : '' }}> <label for="radio_numeric"> {{ gradeable_type_strings['numeric'] }} </label>
             </div>
 
-            <div hidden>
+            <div aria-hidden="true" hidden>
                 <input type='radio' id="radio_electronic_file" name="type" value="Electronic File"
                         {{ action != 'new' and gradeable.getType() == 0 ? 'checked' : '' }}> Electronic File (multiple types)
             </div>
 
             {# Real input fields to back the exposed configurations options #}
-            <input name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}" hidden>
-            <input name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}" hidden>
+            <div aria-hidden="true" hidden>
+                <input id="scanned_exam" name="scanned_exam" value="{{ action != 'new' and gradeable.isScannedExam() ? 'true' : 'false' }}">
+                <input id="vcs" name="vcs" value="{{ action != 'new' and gradeable.isVcs() ? 'true' : 'false' }}">
+            </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_student_upload" name="electronic_gradeable_presets" value="normal"
-                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw'] }}
+                        {{ action != 'new' and not gradeable.isScannedExam() and not gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_student_upload"> {{ gradeable_type_strings['electronic_hw'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_vcs_upload" name="electronic_gradeable_presets" value="vcs"
-                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> {{ gradeable_type_strings['electronic_hw_vcs'] }}
+                        {{ action != 'new' and not gradeable.isScannedExam() and gradeable.isVcs() ? 'checked' : ''}}> <label for="radio_ef_vcs_upload"> {{ gradeable_type_strings['electronic_hw_vcs'] }} </label>
             </div>
 
             <div>
                 <input class="ignore" type="radio" id="radio_ef_scanned_exam" name="electronic_gradeable_presets" value="scanned_exam"
-                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> {{ gradeable_type_strings['electronic_exam'] }}
+                        {{ action != 'new' and gradeable.isScannedExam() ? 'checked' : '' }}> <label for="radio_ef_scanned_exam"> {{ gradeable_type_strings['electronic_exam'] }} </label>
+            </div>
+        </div>
+        {% if action == 'new' or action == 'template' %}
+            {# (VPAT) Closes fieldset that was opened for the gradeable type container radio group #}
+            </fieldset>
+        {% endif %}
+
+      <!-- This is only relevant to Electronic Files -->
+        <div class="gradeable_type_options electronic_file" id="electronic_file">
+            <fieldset>
+                <legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend>
+                <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
+                        {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
+                <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
+                        {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
+            </fieldset>
+
+            {% if regrade_enabled %}
+                <fieldset id="regrade_request_enable_container">
+                    <legend>Should grade inquiries be enabled for this assignment?</legend>
+                    <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
+                            {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> <label for="yes_regrade_allowed">Yes</label>
+                    <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
+                            {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> <label for= "no_regrade_allowed">No</label>
+                </fieldset>
+
+                <fieldset class="grade_inquiry_per_component_allowed" id="gi_component_enable_container">
+                    <legend>Should grade inquiries be associated with a specific component of the rubric?</legend>
+                    <input type="radio" id="yes_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="true" class="bool_val auto_save"
+                            {{ gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for="yes_grade_inquiry_per_component_allowed">Yes</label>
+                    <input type="radio" id="no_grade_inquiry_per_component_allowed" name="grade_inquiry_per_component_allowed" value="false" class="bool_val auto_save"
+                            {{ not gradeable.isGradeInquiryPerComponentAllowed() ? 'checked' : '' }} /> <label for= "no_grade_inquiry_per_component_allowed">No</label>
+                </fieldset>
+            {% endif %}
+
+            {% if forum_enabled %}
+                <div>
+                    <fieldset id="discussion_grading_enable_container">
+                        <legend>Is there a discussion component for this assignment?</legend>
+                        <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
+                                {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> <label for="yes_discussion">Yes</label>
+                        <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
+                                {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> <label for="no_discussion">No</label>
+                    </fieldset>
+                    <div class="discussion_id_wrapper">
+                        <label for="discussion_thread_id">What thread id(s) should be included? (separate by commas)</label>
+                            <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
+                                   value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div id="team-settings-container">
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) fieldset/legend needed for team assignment radio group #}
+                    <fieldset><legend>Is this a team assignment?</legend>
+                {% else %}
+                    Team Settings:
+                    {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
+                {% endif %}
+                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                    <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
+                            {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+
+                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                            {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                </div>
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) Closes fieldset for team assignment radio group #}
+                    </fieldset>
+                {% endif %}
+            </div>
+
+            <!-- Team settings (read only in edit mode) -->
+            <div class="team_assignment team_yes" id="team_yes">
+
+                <label for="team_size_max">What is the maximum team size?</label>
+                    <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
+                           value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
+
+                {#Use teams from a previous gradeable:
+                <!-- Inherit teams from another gradeable? -->
+                <br />
+                    <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
+                {% if action == 'new' %}
+                    <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
+                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
+                        <option value=''>--None--</option>
+                        {% for parent in inherit_teams_list %}
+                            <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
+                                value="{{ parent.g_id }}">{{ parent.g_title }}</option>
+                        {% endfor %}
+                    </select>
+                {% else %}
+                    <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
+                        value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
+                {% endif %}
+                #}
+            </div>
+
+            <div id="repository">
+                <fieldset>
+                    <legend>VCS Repository Details (select one)</legend>
+                    <div>
+                        <input type='radio' id="vcs_radio_submitty_hosted" name="vcs_radio_buttons" value="submitty-hosted"
+                            {{ action == 'new' or (action != 'new' and gradeable.getVcsHostType() == 0) ? 'checked' : '' }}
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted">Submitty hosted – single gradeable repository</label>
+
+                        <div id="vcs_submitty_url_content" name="vcs_content" style="margin-left: 5%">
+                            <kbd id="vcs_url">{{ vcs_base_url }}&#123;&#36;gradeable_id&#125;&#47;</kbd>
+                            <kbd class="team_no">&#123;&#36;user_id&#125;</kbd>
+                            <kbd class="team_yes">&#123;&#36;team_id&#125;</kbd>
+                        </div>
+                    </div>
+                    <div class="team_no">
+                        <input type='radio' id="vcs_radio_submitty_hosted_set_url" name="vcs_radio_buttons" value="submitty-hosted-url"
+                            {{ action != 'new' and gradeable.getVcsHostType() == 1 ? 'checked' : '' }}
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_submitty_hosted_set_url">Submitty hosted – choose repository name (can be used for multiple gradeables)</label>
+
+                        <div id="vcs_submitty_set_url_content" name="vcs_content" style="margin-left: 5%">
+                            {% if action == 'new' or action == 'template' %}
+                                <kbd id="vcs_url">{{ vcs_base_url }}</kbd>
+                                <input style='width: 30%' type='text' name="vcs_url" id="vcs_submitty_url" class="required auto_save" placeholder="(Required)"
+                                    aria-label="repository name" value="" required />
+                                <kbd id="vcs_url2">&#47;&#123;&#36;user_id&#125;</kbd>
+                            {% else %}
+                                <kbd id="vcs_url">{{ gradeable.getVcsSubdirectory() }}</kbd>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <input type='radio' id="vcs_radio_public_github" name="vcs_radio_buttons" value="public-github"
+                        {{ action != 'new' and gradeable.getVcsHostType() == 2 ? 'checked' : '' }}
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_public_github">Github hosted - public repository, students will provide URL</label> </br>
+
+                    <input type='radio' id="vcs_radio_private_github" name="vcs_radio_buttons" value="private-github"
+                        {{ action != 'new' and gradeable.getVcsHostType() == 3 ? 'checked' : '' }}
+                        {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_private_github">Github hosted - private repository, students will provide URL (NOTE: INCOMPLETE -- DO NOT USE)</label>
+                </fieldset>
             </div>
         </div>
     </div>
+</div>
 
-  <!-- This is only relevant to Electronic Files -->
-    <fieldset class="gradeable_type_options electronic_file" id="electronic_file">
-        <div><legend>Will any or all of this assignment be manually graded (e.g., by the TAs or the instructor)?</legend></div>
-        <div>
-            <input type="radio" id="yes_ta_grade" name="ta_grading" value="true" class="bool_val auto_save date-related"
-                    {{ action != 'new' and gradeable.getTaGrading() ? 'checked' : '' }} /> <label for="yes_ta_grade">Yes</label>
-            <input type="radio" id="no_ta_grade" name="ta_grading" value="false" class="bool_val auto_save date-related"
-                    {{ not (action != 'new' and gradeable.getTaGrading()) ? 'checked' : '' }} /> <label for="no_ta_grade">No</label>
-        </div>
-        {% if regrade_enabled %}
-            <div id="regrade_request_enable_container">
-                Will grade inquiries be enabled for this assignment?
-                <br />
-                <input type="radio" id="yes_regrade_allowed" name="regrade_allowed" value="true" class="bool_val auto_save date-related"
-                        {{ action != 'new' and gradeable.isRegradeAllowed() ? 'checked' : '' }} /> Yes
-                <input type="radio" id="no_regrade_allowed" name="regrade_allowed" value="false" class="bool_val auto_save date-related"
-                        {{ not (action != 'new' and gradeable.isRegradeAllowed()) ? 'checked' : '' }} /> No
-            </div>
-        {% endif %}
-
-        {% if forum_enabled %}
-
-            <div id="discussion_grading_enable_container">
-                Is there a discussion component for this assignment?
-                <br />
-                <input type="radio" id="yes_discussion" name="discussion_based" value="true" class="bool_val auto_save date-related"
-                        {{ action != 'new' and gradeable.isDiscussionBased() ? 'checked' : '' }} /> Yes
-                <input type="radio" id="no_discussion" name="discussion_based" value="false" class="bool_val auto_save date-related"
-                        {{ not (action != 'new' and gradeable.isDiscussionBased()) ? 'checked' : '' }} /> No
-          
-                <div class="discussion_id_wrapper">
-                    <label for="discussion_thread_id">What thread id(s) should be included?</label>
-                        <input style="width: 70px" name="discussion_thread_id" id="discussion_thread_id" class="int_val auto_save" type="text"
-                               value="{{ action != 'new' ? gradeable.getStringThreadIds() : '' }}"/>
-                </div>
-
-            </div>
-
-        {% endif %}
-
-        <div id="team-settings-container">
-            {% if action == 'new' or action == 'template' %}
-                Is this a team assignment?
-            {% else %}
-                Team Settings:
-                {{ gradeable.isTeamAssignment() ? '' : ' This is an individual assignment' }}
-            {% endif %}
-            <div style="{{ action == 'edit' ? 'display:none' : '' }}">
-                <input type="radio" id = "team_yes_radio" name="team_assignment" value="true"
-                        {{ action != 'new' and gradeable.isTeamAssignment() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
-
-                <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
-                        {{ not (action != 'new' and gradeable.isTeamAssignment()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
-            </div>
-        </div>
-
-        <!-- Team settings (read only in edit mode) -->
-        <div class="team_assignment team_yes" id="team_yes">
-
-            <label for="team_size_max">What is the maximum team size?</label>
-                <input style="width: 50px" name="team_size_max" id="team_size_max" class="int_val auto_save" type="text"
-                       value="{{ action != 'new' ? gradeable.getTeamSizeMax() : '3' }}"/>
-
-            {#Use teams from a previous gradeable:
-            <!-- Inherit teams from another gradeable? -->
-            <br />
-                <!--Use a combo box if we can edit the value, otherwise show a text box (readonly)-->
-            {% if action == 'new' %}
-                <select id='gradeable_teams' name="eg_inherit_teams_from" style='width: 170px;'
-                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}'>
-                    <option value=''>--None--</option>
-                    {% for parent in inherit_teams_list %}
-                        <option {{ admin_gradeable.getEgInheritTeamsFrom() == parent.g_id ? 'selected' : '' }}
-                            value="{{ parent.g_id }}">{{ parent.g_title }}</option>
-                    {% endfor %}
-                </select>
-            {% else %}
-                <input id='gradeable_teams_read' name='gradeable_teams_read' style='width=170px'
-                    value='{{ admin_gradeable.getEgInheritTeamsFrom() }}' readonly/>
-            {% endif %}
-            #}
-        </div>
-
-        <div id="repository">
-            <h3>Path for the Version Control System (VCS) repository:</h3>
-
-            VCS base URL (from Course Settings): <kbd>{{ vcs_base_url }}</kbd><br /><br />
-
-            <b>Specify the remainder of the VCS URL</b>, for example one of the following:<br />
-            <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;user_id&#125;</kbd><br />
-            <kbd>&#123;&#36;gradeable_id&#125;/&#123;&#36;team_id&#125;</kbd><br />
-            <kbd>final_project/&#123;&#36;user_id&#125;</kbd><br />
-            <br />
-
-            <b>Or specify the complete url/path</b>, for example:<br />
-            <kbd>https://github.com/test-course/&#123;&#36;gradeable_id&#125;/&#123;&#36;repo_id&#125;</kbd>
-            <br /><br />
-
-            <b>Or if the entire URL will be provided by the student</b>, then leave this input blank.
-            <br /><br />
-
-            <em>Note: The following string variables will be replaced:</em><br />
-            <ul style="list-style-position: inside;">
-               <li><kbd>&#123;&#36;vcs_type&#125;</kbd></li>
-               <li><kbd>&#123;&#36;gradeable_id&#125;</kbd></li>
-               <li><kbd>&#123;&#36;user_id&#125;</kbd> OR <kbd>&#123;&#36;team_id&#125;</kbd> OR <kbd>&#123;&#36;repo_id&#125;</kbd> (use only one)</li>
-            </ul>
-            <br />
-
-            <input style='width: 83%' type='text' id="subdirectory" name='vcs_subdirectory' class="auto_save"
-                   value="{{ action != 'new' ? gradeable.getVcsSubdirectory() : '' }}" placeholder="(Optional)"/><br />
-            <br />
-
-            FULL VCS URL: <kbd id="vcs_url"></kbd>
-        </div>
-    </fieldset>
-</fieldset>
 <!-- Gradeable bucket (read/write in all modes) -->
-<label for="syllabus_bucket">
-<a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="helpicon"></i></a>
-</label>
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="syllabus_bucket">
+            <div class="option-title">Syllabus Category</div>
+            <div class="option-alt"><a target=_blank href="https://submitty.org/instructor/rainbow_grades/gradeables">What syllabus category does this item belong to? <i style="font-style:normal;" class="fa-question-circle"></i></a></div>
+        </label>
+    </div>
 
-<select name="syllabus_bucket" id="syllabus_bucket" class="auto_save" style="width: 170px;">
-    {% for bucket in syllabus_buckets %}
+    <div class="option-input col-md-6">
+        <select name="syllabus_bucket" id="syllabus_bucket" class="auto_save">
+        {% for bucket in syllabus_buckets %}
         <option value="{{ bucket }}" {{ action != 'new' and gradeable.getSyllabusBucket() == bucket ? 'selected' : '' }}>
             {{ bucket | title }}
         </option>
-    {% endfor %}
-</select>
+        {% endfor %}
+        </select>
+    </div>
+</div>
 
-<br />
 {% if action == 'new' or action == 'template' %}
-   <br />
-   <em>Note: After pressing the "Create New Gradeable" button you may not change: <br />
-   <ul style="margin-left:10px">
-   <li style="margin-left:15px"> the unique id,</li>
-   <li style="margin-left:15px"> gradeable type (electronic file upload, checkpoints, or text), </li>
-   <li style="margin-left:15px"> whether the students will submit as individuals or team, and </li>
-   <li style="margin-left:15px"> whether the students will submit by directly uploading files or by version control. </li>
-   </ul>
-   All other settings for this gradeable may be edited.</em>
-   <br /><br />
-   <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+<div class="option row">
+    <div class="option-desc col-md-12">
+        <em>Note: After pressing the "Create New Gradeable" button you may not change:</em>
+        <ul style="margin-left:10px">
+            <li style="margin-left:15px"><em>The unique id</em></li>
+            <li style="margin-left:15px"><em>Gradeable type (electronic file upload, checkpoints, or text)</em></li>
+            <li style="margin-left:15px"><em>Whether the students will submit as individuals or team</em></li>
+            <li style="margin-left:15px"><em>Whether the students will submit by directly uploading files or by version control</em></li>
+        </ul>
+        <em>All other settings for this gradeable may be edited.</em>
+    </div>
+</div>
+<div class="row">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+    <button class="btn btn-primary" type="submit" style="margin-left:10px;">Create New Gradeable</button>
+</div>
 {% endif %}
 
 
@@ -240,6 +311,15 @@
 </div>
 
 <script type="text/javascript">
+
+
+    /* Increasing Height of textarea*/
+    function textAreaAdjust(o) {
+        o.style.height = "1px"
+        o.style.height = (15+o.scrollHeight)+"px";
+    }
+
+
     function updateDateDisplay() {
         let elecDateBoxes = $('.electronic_file_dates input');
         elecDateBoxes.prop('disabled', true);
@@ -304,15 +384,24 @@
         if($('#team_yes_radio').is(':checked')) {
             // $('.team_yes').show();
             disableElementChildren('.team_yes', false);
+            disableElementChildren('.team_no', true);
+
+            // If Set-URL is checked but then teams are disabled
+            //  set This-Gradeable as checked instead
+            if($('#vcs_radio_submitty_hosted_set_url').is(':checked')) {
+                $('#vcs_radio_submitty_hosted').prop('checked', true);
+                onVCSTypeChange();
+            }
         }
         else {
             // $('.team_yes').hide();
             disableElementChildren('.team_yes', true);
+            disableElementChildren('.team_no', false);
         }
     }
 
     function onDiscussionChange() {
-    	if($('#yes_discussion').is(':checked')) {
+        if($('#yes_discussion').is(':checked')) {
             disableElementChildren('.discussion_id_wrapper', false);
         }
         else {
@@ -325,27 +414,45 @@
             // $('.manual_grading').show();
             disableElementChildren('.manual_grading', false);
             disableElementChildren('.no_manual_grading', true);
+            $('#regrade_request_enable_container').show();
+            $('#discussion_grading_enable_container').show();
         }
         else {
             // $('.manual_grading').hide();
             disableElementChildren('.manual_grading', true);
             disableElementChildren('.no_manual_grading', false);
+            $('#regrade_request_enable_container').hide();
+            $('#discussion_grading_enable_container').hide();
         }
         updateDateDisplay();
     }
 
-    function onVcsSubdirChange() {
-        setVcsUrl($('#subdirectory').val());
+    function onVCSTypeChange() {
+        disableElementChildren('[name=vcs_content]', true);
+
+        if($('#vcs_radio_submitty_hosted').is(':checked')) {
+            disableElementChildren('#vcs_submitty_url_content', false);
+        }
+
+        if($('#vcs_radio_submitty_hosted_set_url').is(':checked')) {
+            disableElementChildren('#vcs_submitty_set_url_content', false);
+            $('#vcs_submitty_url').prop('required', true);
+        } else {
+            $('#vcs_submitty_url').prop('required', false);
+        }
     }
 
     function onIsRegradeAllowedChange() {
         if ($('#yes_regrade_allowed').is(':checked')) {
             //   $('.regrade_request_date').hide();
             disableElementChildren('.regrade_request_date', false);
+            disableElementChildren('.grade_inquiry_per_component_allowed', false);
         }
         else {
             //   $('.regrade_request_date').show();
             disableElementChildren('.regrade_request_date', true);
+            $('#no_grade_inquiry_per_component_allowed').prop('checked',true);
+            disableElementChildren('.grade_inquiry_per_component_allowed', true);
         }
         updateDateDisplay();
     }
@@ -359,23 +466,6 @@
         }
         updateDateDisplay();
     }
-
-    var vcs_base_url = "{{ vcs_base_url }}";
-    function setVcsUrl(subdirectory) {
-        if (subdirectory.indexOf('://') > -1 || subdirectory[0] == '/') {
-            $('#vcs_url').text(subdirectory);
-        }
-        else {
-            $('#vcs_url').text(vcs_base_url.replace(/[\/]+$/g, '') + '/' + subdirectory);
-        }
-    }
-
-    $(function () {
-        $('#subdirectory').on('change paste keyup', function() {
-            setVcsUrl(this.value);
-        });
-        setVcsUrl($('#subdirectory').val());
-    });
 
     $(function () {
         $("#alert-message").dialog({
@@ -401,16 +491,9 @@
         // Event handler for the gradeable template selection change
         $('[name="gradeable_template"]').change(
         function() {
-            // TODO: what if this.value === ''?
-            let arrayUrlParts = [];
-            arrayUrlParts["component"]   = ["admin"];
-            arrayUrlParts["page"]        = ["admin_gradeable"];
-            arrayUrlParts["action"]      = ["upload_new_template"];
-            arrayUrlParts["template_id"] = [this.value];
-
             // Redirect user to the same page, but in the process,
             //  fetch the data from the template gradeable
-            window.location.href = buildUrl(arrayUrlParts);
+            window.location.href = buildCourseUrl(['gradeable']) + `?template_id=${this.value}`;
         });
 
         //
@@ -424,6 +507,10 @@
         // Hide team settings if team's are not the selected option
         onTeamAssignmentChange();
         $('[name="team_assignment"]').change(onTeamAssignmentChange);
+
+        // Hide VCS settings depending on different radio buttons
+        onVCSTypeChange();
+        $('[name="vcs_radio_buttons"]').change(onVCSTypeChange);
 
         onDiscussionChange();
         $('[name="discussion_based"]').change(onDiscussionChange);
@@ -452,11 +539,6 @@
             vcs.change();
             scannedExam.change();
         });
-
-        // Upload the vcs url in real time
-        onVcsSubdirChange();
-        $('#subdirectory').keypress(onVcsSubdirChange);
-        $('#subdirectory').keyup(onVcsSubdirChange);
 
         //Hide Grade Inquiry Date if Grade Inquiries are not enabled
         onIsRegradeAllowedChange();
@@ -497,38 +579,6 @@
         if(!check1 && !check2 && !check3) {
             alert("A type of gradeable must be selected");
             return false;
-        }
-
-        var subdirectory = $('#subdirectory').val();
-        var vcs_url = $('#vcs_url').text();
-
-        if ($('repository_radio').is(':checked')) {
-            var subdirectory_parts = subdirectory.split("{");
-            // if this is a vcs path extension, make sure it starts with '/'
-            console.log(vcs_url);
-            if (vcs_url.indexOf('://') === -1 && vcs_url[0] !== "/") {
-                alert("VCS path needs to either be a URL or start with a /");
-                return false;
-            }
-            // check that path is made up of valid variables
-            var allowed_variables = ["\$gradeable_id", "\$user_id", "\$team_id", "\$repo_id"];
-            var used_id = false;
-            for (var x = 1; x < subdirectory_parts.length; x++) {
-                var subdirectory_part = subdirectory_parts[x].substring(0, subdirectory_parts[x].lastIndexOf("}"));
-                if (allowed_variables.indexOf(subdirectory_part) === -1) {
-                    alert("For the VCS path, '" + subdirectory_part + "' is not a valid variable name.")
-                    return false;
-                }
-                if (!used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
-                    used_id = true;
-                    continue;
-                }
-                if (used_id && ((subdirectory_part === "\$user_id") || (subdirectory_part === "\$team_id") || (subdirectory_part === "\$repo_id"))) {
-                    alert("You can only use one of \$user_id, \$team_id and \$repo_id in VCS path");
-                    return false;
-                }
-            }
-
         }
 
         return true;

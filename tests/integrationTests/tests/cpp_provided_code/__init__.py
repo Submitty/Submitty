@@ -32,6 +32,13 @@ def cleanup(test):
     if os.path.isdir(os.path.join(test.testcase_path, "data")):
         shutil.rmtree(os.path.join(test.testcase_path, "data"))
     os.mkdir(os.path.join(test.testcase_path, "data"))
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def solution(test):
@@ -45,7 +52,7 @@ def solution(test):
     test.run_compile()
     test.run_run()
     shutil.copy(os.path.join(test.testcase_path,"assignment_config","test_output","output.txt"),
-                os.path.join(test.testcase_path, "data"))
+                os.path.join(test.testcase_path, "data", "test_output"))
     test.run_validator()
     test.diff("grade.txt", "grade.txt_solution", "-b")
     test.json_diff("results.json", "results.json_solution")

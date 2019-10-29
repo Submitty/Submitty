@@ -1,12 +1,12 @@
 {% import _self as self %}
 
 <div class="content">
-    <h1>Upload Gradeable Config</h1>
+    <h1>Upload Autograding Config</h1>
     <br><br>
     <p>
         Following the assignment configuration specifications:<br>
-        <a href="http://submitty.org/instructor/Assignment-Configuration">
-            http://submitty.org/instructor/Assignment-Configuration</a><br>
+        <a href="http://submitty.org/instructor/assignment_configuration">
+            http://submitty.org/instructor/assignment_configuration</a><br>
         and examples:<br>
         <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
         <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
@@ -14,15 +14,15 @@
 
     <br><br>
     <p>
-        Prepare your assignment configuration as a single <code>config.json</code> file.<br>
+        Prepare your autograding configuration as a single <code>config.json</code> file.<br>
         Or as a zip of the <code>config.json</code>, and the directories <code>provided_code</code>,
-        <code>test_input</code>, <code>test_output</code>, and/or <code>custom_validation_code</code>.
+        <code>test_input</code>, <code>instructor_solution</code>, <code>test_output</code>, and/or <code>custom_validation_code</code>.
     </p>
 
     <br><br>
 
-    <form action="{{ core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'process_upload_config'}) }}" method="POST" enctype="multipart/form-data">
-        <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <form action="{{ upload_url }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         Upload Config: <input type="file" name="config_upload" /><br />
         <input type="submit" value="Upload" />
     </form>
@@ -34,16 +34,15 @@
     <br>
     <b>located in {{ target_dir }}</b>
     <br>&nbsp;<br>
-    <link>
     <script>
         function openRenamePopup(file_path){
-            var url = buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'check_being_used', 'config': file_path});
+            let url = buildCourseUrl(['autograding_config', 'usage']) + '?config_path=' + encodeURIComponent(file_path);
             $('#alert_in_use').html('');
             $('#gradeables_using_config').empty();
             $.ajax({
                 url : url,
                 success(data){
-                    var gradeable_ids = JSON.parse(data);
+                    var gradeable_ids = JSON.parse(data)['data'];
                     if(gradeable_ids.length > 0){
                         $('#alert_in_use').html("Note: Currently these gradeables are using this config, rename at your own risk");
                         for(var i = 0; i < gradeable_ids.length; i++){
@@ -51,18 +50,26 @@
                         }
                     }
                 }
-            })
+            });
             $('#rename_config_popup').css('display', 'block');
             $('#curr_config_name').val(file_path);
         }
+
+        function openDeletePopup(file_path) {
+            let message = $('[name="delete-config-message"]');
+            message.html('');
+            message.append('<b>'+file_path+'</b>');
+            $('[name="config_path"]').val(file_path);
+            $('#delete_config_popup').css("display", "block");
+        }
     </script>
     <ul>
-        {{ self.display_files(self, all_files, 1, false, inuse_config) }}
+        {{ self.display_files(self, all_files, 1, false, inuse_config, display_url) }}
     </ul>
 </div>
 {% endif %}
 
-{% macro display_files(self, files, indent, seen_root, inuse_config) %}
+{% macro display_files(self, files, indent, seen_root, inuse_config, display_url) %}
     {% set margin_left = 15 %}
     {% set neg_margin_left = -15 * indent %}
     {% for name, file in files %}
@@ -72,19 +79,18 @@
                 {% if indent == 1 %}
                     <a class="fas fa-pencil-alt" onclick="openRenamePopup('{{ file.path }}')"></a>
                     {% if file.path not in inuse_config %}
-                        <a class="fas fa-trash" href="{{core.buildUrl({'component': 'admin', 'page': 'gradeable', 'action': 'delete_config', 'config': file.path})}}"></a>
+                        <a class="fas fa-trash" onclick="openDeletePopup('{{ file.path }}')"></a>
                     {% endif %}
                 {% endif %}
                 <span id='{{ id }}-span' class='fa icon-folder-closed'></span><a onclick='openDiv("{{ id }}");'>{{ seen_root ? name : file.path }}</a>
                 <div id='{{ id }}' style='margin-left: {{ margin_left }}px; display: none'>
-                    {{ self.display_files(self, file.files, indent + 1, true) }}
+                    {{ self.display_files(self, file.files, indent + 1, true, inuse_config, display_url) }}
                 </div>
             </div>
         {% else %}
-            {% set url = core.buildUrl({'component': 'misc', 'page': 'display_file', 'dir': 'config_upload', 'path': file.path}) %}
             <div>
-                <div class="file-viewer"><a onclick='openFrame("{{ url }}", "{{ id }}", "{{ file.name }}")'>
-                    <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ url }}")'>(Popout)</a>
+                <div class="file-viewer"><a onclick='openFrame("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}", "{{ id }}", "{{ file.name }}")'>
+                    <span class='icon-plus'></span>{{ file.name }}</a> <a onclick='openUrl("{{ display_url }}?dir=config_upload&path={{ file.path | url_encode }}")'>(Popout)</a>
                 </div>
                 <div id="file_viewer_{{ id }}" style='margin-left: {{ neg_margin_left }}px'></div>
             </div>
@@ -93,3 +99,4 @@
 {% endmacro %}
 
 {% include('admin/RenameConfigPopup.twig')%}
+{% include('admin/DeleteConfigPopup.twig')%}

@@ -1,7 +1,7 @@
 <?php
 
 namespace app\libraries;
-use app\libraries\Utils;
+use app\exceptions\FileReadException;
 
 /**
  * Class FileUtils
@@ -9,6 +9,10 @@ use app\libraries\Utils;
  * Contains various useful functions for interacting with files and directories.
  */
 class FileUtils {
+    const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
+    const IGNORE_FILES = ['.ds_store'];
+    const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+
     /**
      * Return all files from a given directory.  All subdirectories
      * are an array pointing to their files (and additional
@@ -23,51 +27,46 @@ class FileUtils {
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles($dir, $skip_files=array(), $flatten=false) {
-
-        $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
+    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
+        $skip_files = array_map(function ($str) {
+            return strtolower($str);
+        }, $skip_files);
 
         // we ignore these files and folders as they're "junk" folders that are
         // not really useful in the context of our application that potentially
         // would just add a ton of additional files we wouldn't want or use
-        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
-        $disallowed_files = array('.ds_store');
+        $disallowed_folders = FileUtils::IGNORE_FOLDERS;
+        $disallowed_files = array_merge(FileUtils::IGNORE_FILES, $skip_files);
 
         // Return an array of all discovered files
-        $return = array();
+        $return = [];
 
         if (is_dir($dir)) {
-            if ($handle = opendir($dir)) {
-                // loop over items in this directory
-                while (false !== ($entry = readdir($handle))) {
-                    // the full path
-                    $path = "{$dir}/{$entry}";
-                    // recurse into subdirectories
-                    if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
-                        $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
-                        if ($flatten) {
-                            foreach ($temp as $file => $details) {
-                                if (isset($details['relative_name'])) {
-                                    $details['relative_name'] = $entry."/".$details['relative_name'];
-                                }
-                                else {
-                                    $details['relative_name'] = $entry."/".$details['name'];
-                                }
-                                $return[$entry."/".$file] = $details;
-                            }
-                        }
-                        else {
-                            $return[$entry] = array('files' => $temp, 'path' => $path);
+            foreach (new \FilesystemIterator($dir) as $file) {
+                /** @var \SplFileInfo $file */
+                $entry = $file->getFilename();
+                $path = FileUtils::joinPaths($dir, $entry);
+                // recurse into subdirectories
+                if (is_dir($path) && !in_array(strtolower($entry), $disallowed_folders)) {
+                    $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
+                    if ($flatten) {
+                        foreach ($temp as $file => $details) {
+                            $details['relative_name'] = $entry."/".$details['relative_name'];
+                            $return[$entry."/".$file] = $details;
                         }
                     }
-                    else if (is_file($path) && !in_array(strtolower($entry), $skip_files) &&
-                        !in_array(strtolower($entry), $disallowed_files)) {
-                        // add file to array
-                        $return[$entry] = array('name' => $entry,
-                                                'path' => $path,
-                                                'size' => filesize($path),
-                                                'relative_name' => $entry);
+                    else {
+                        $return[$entry] = ['files' => $temp, 'path' => $path];
                     }
+                }
+                else if (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
+                    // add file to array
+                    $return[$entry] = [
+                        'name' => $entry,
+                        'path' => $path,
+                        'size' => $file->getSize(),
+                        'relative_name' => $entry
+                    ];
                 }
             }
             ksort($return);
@@ -83,12 +82,12 @@ class FileUtils {
      * @param string $dir
      * @return bool
      */
-    public static function recursiveRmdir($dir) {
+    public static function recursiveRmdir(string $dir): bool {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
                 if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") {
+                    if (is_dir($dir . "/" . $object)) {
                         if (!FileUtils::recursiveRmdir($dir . "/" . $object)) {
                             return false;
                         }
@@ -100,83 +99,54 @@ class FileUtils {
                     }
                 }
             }
-            reset($objects);
             rmdir($dir);
         }
         return true;
     }
 
     /**
-     * Copies all files from given dir ($src) and its subdirs into one destination folder, $dst
+     * Copies all image files from a source folder ($src) and each of its
+     * subfolders to a flattened destination folder ($dst), making all
+     * filenames lowercase, ignoring subfolders that match our IGNORE_FOLDERS
+     *
+     * Ex:
+     *  src/
+     *   image.jpg
+     *   sub/
+     *     image_2.jpg
+     *  dest/
+     *   image.jpg
+     *   image_2.jpg
      *
      * @param string $src
      * @param string $dst
-     * @param boolean $forceLowerCase, optional, default to true
      */
-    public static function recursiveCopy($src, $dst, $forceLowerCase = true) {
-        $iter = new \RecursiveDirectoryIterator($src);
-        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
-            if ($iter->isDot()) {
-                $iter->next();
-                continue;
-            }
-            else if ($iter->isFile()) {
-                $extension = strtolower(pathinfo($iter->getFilename(), PATHINFO_EXTENSION));
-                if ($extension === 'png') { // just get all png file only
-                    $newFilename = $iter->getFilename();
-                    if ($forceLowerCase) {
-                        $newFilename = strtolower($newFilename);
-                    }
-                    copy($src . '/' . $iter->getFilename(),$dst . '/' . $newFilename);
+    public static function recursiveFlattenImageCopy(string $src, string $dst): void {
+        foreach (new \FilesystemIterator($src) as $iter) {
+            /** @var \SplFileInfo $iter */
+            if ($iter->isFile()) {
+                if (FileUtils::isValidImage($iter->getPathname())) {
+                    copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
             else if ($iter->isDir()) {
-                if (in_array($iter->getFilename(), array('__MACOSX'))) {
-                    $iter->next();
+                if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
-                FileUtils::recursiveCopy($src . '/' . $iter->getFilename(), $dst);
+                FileUtils::recursiveFlattenImageCopy($iter->getPathname(), $dst);
             }
-            $iter->next();
         }
     }
 
     /**
-     * //todo
-     *
-     * @param string $searchPath
+     * Given a directory, gets the path of all files in that directory and its
+     * subdirectories (recursively), trimming the first $path_length characters
+     * off the string.
      */
-    public static function getAllFilesTrimSearchPath($searchPath, $pathLength) {
-        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
-        $disallowed_files = array('.ds_store');
-
-        $iter = new \RecursiveDirectoryIterator($searchPath);
-        $files = array();
-        while ($iter->getPathname() !== "" && $iter->getFilename() !== "") {
-            if ($iter->isDot()) {
-                $iter->next();
-                continue;
-            }
-            else if ($iter->isFile()) {
-                if (in_array(strtolower($iter->getFilename()), $disallowed_files)) {
-                    $iter->next();
-                    continue;
-                }
-                $filename = $iter->getPathname();
-                array_push($files, substr($filename, $pathLength, strlen($filename)-$pathLength));
-            }
-            else if ($iter->isDir()) {
-                if (in_array(strtolower($iter->getFilename()), $disallowed_folders)) {
-                    $iter->next();
-                    continue;
-                }
-                $newFiles = FileUtils::getAllFilesTrimSearchPath($searchPath . '/' . $iter->getFilename(), $pathLength);
-                if (!empty($newFiles))
-                    array_push($files, ...$newFiles);
-
-            }
-            $iter->next();
-        }
+    public static function getAllFilesTrimSearchPath(string $search_path, int $path_length): array {
+        $files = array_map(function ($entry) use ($path_length) {
+            return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
+        }, array_values(FileUtils::getAllFiles($search_path, [], true)));
         return $files;
     }
 
@@ -216,7 +186,7 @@ class FileUtils {
      *
      * @return bool
      */
-    public static function createDir($dir, $mode = null, $recursive = false) {
+    public static function createDir($dir, $recursive = false, $mode = null) {
         $return = true;
         if (!is_dir($dir)) {
             if (file_exists($dir)) {
@@ -303,8 +273,8 @@ class FileUtils {
         return $json;
     }
 
-    public static function encodeJson($string) {
-        return json_encode($string, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    public static function encodeJson($data) {
+        return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
     public static function writeJsonFile($filename, $data) {
@@ -312,22 +282,7 @@ class FileUtils {
         if ($data === false) {
             return false;
         }
-        return file_put_contents($filename, $data);
-    }
-
-    /**
-     * Given a file, returns its mimetype based on the file's so-called maagic bytes.
-     *
-     * @param string $filename
-     *
-     * @return string
-     */
-    public static function getMimeType($filename) {
-        $finfo = finfo_open(FILEINFO_MIME);
-        $mimetype = finfo_file($finfo, $filename);
-        finfo_close($finfo);
-        $mimetype = explode(";", $mimetype);
-        return trim($mimetype[0]);
+        return file_put_contents($filename, $data) !== false;
     }
 
     /**
@@ -393,6 +348,15 @@ class FileUtils {
     }
 
     /**
+     * Given an image path, validates that the mime type of the file is "image"
+     * and its subtype is one of our allowed subtypes
+     */
+    public static function isValidImage(string $image_path): bool {
+        [$mime_type, $mime_subtype] = explode('/', mime_content_type($image_path), 2);
+        return $mime_type === 'image' && in_array($mime_subtype, FileUtils::ALLOWED_IMAGE_TYPES);
+    }
+
+    /**
      * Given some number of arguments, joins them together separating them with the DIRECTORY_SEPARATOR constant. This
      * works in the same way as os.path.join does in Python, making sure that we do not end up with any doubles of
      * a separator and that we can start the path with a separator if we specify the first argument as starting with
@@ -421,7 +385,7 @@ class FileUtils {
      * acts as a pseudo content-type for that file in any text based file that is recognized can use
      * that content-type to tell CodeMirror how to highlight the file. As such, any unrecognized file
      * extension will get the content type "text/x-sh" even though just "text" would probably be more
-     * appropriate. This is a weaker check for binary files than FileUtils::getMimeType which does
+     * appropriate. This is a weaker check for binary files than mime_content_type which does
      * some basic analysis of the actual file to determine the information as opposed to just the filename.
      *
      * @param $filename
@@ -484,48 +448,87 @@ class FileUtils {
     }
 
     /**
-     * This function returns a array consisting of all semesters, and within each semester, there will be courses for that semester, and
-     * within each course , there will be list of all gradeable ids for that course
-     * @return array $return
+     * Search over a file to see if it contains specified words
+     *
+     * @param string $file Path to file to search through
+     * @param array $words An array of words to look for
+     * @throws FileReadException Unable to either locate or read the file
+     * @return bool true if any words in the $words array were found in the file, false otherwise
      */
-    public static function getGradeablesFromPriorTerm(){
-        $return = array();
+    public static function areWordsInFile(string $file, array $words) {
+        // Get file contents
+        $file_contents = @file_get_contents($file);
 
-        $filename = "/var/local/submitty/courses/gradeables_from_prior_terms.txt";
-        if (file_exists($filename)) {
-
-          $file = fopen($filename, "r") or exit("Unable to open file!");
-
-          while(!feof($file)){
-            $line = fgets($file);
-            $line= trim($line," ");
-            $line= explode("/",$line);
-            $sem = $line[5];
-            $course = $line[6];
-            $gradeables= array();
-            while(!feof($file)){
-                $line = fgets($file);
-                if(trim(trim($line," "),"\n") == "") {
-                    break;
-                }
-                array_push($gradeables, trim(trim($line," "),"\n"));
-            }
-            $return[$sem][$course] = $gradeables;
-
-          }
-          fclose($file);
-          uksort($return, function($semester_a, $semester_b) {
-              $year_a = (int)substr($semester_a, 1);
-              $year_b = (int)substr($semester_b, 1);
-              if($year_a > $year_b)
-                return 0;
-              else if ($year_a < $year_b)
-                return 1;
-              else {
-                return ($semester_a[0] == 'f')? 0 : 1 ;
-              }
-            });
+        // Check for failure
+        if($file_contents == false) {
+            throw new FileReadException('Unable to either locate or read the file contents');
         }
-        return $return;
+
+        $words_detected = false;
+
+        // Foreach word in the words array check to see if it exist in the file
+        foreach ($words as $word) {
+            $word_was_found = strpos($file_contents, $word);
+
+            if($word_was_found) {
+                $words_detected = true;
+                break;
+            }
+        }
+
+        return $words_detected;
+    }
+
+    /**
+     * Given an array of uploaded files, makes sure they are properlly uploaded
+     *
+     * @param array $files - should be in the same format as the $_FILES[] variable
+     * @return array representing the status of each file
+     * e.g. array('name' => 'foo.txt','type' => 'application/octet-stream', 'error' =>
+     *            'success','size' => 100, 'success' => true)
+     * if $files is null returns failed => no files sent to validate
+     */
+    public static function validateUploadedFiles($files) {
+        if (empty($files)) {
+            return array("failed" => "No files sent to validate");
+        }
+
+        $ret = array();
+        $num_files = count($files['name']);
+        $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
+
+        for ($i = 0; $i < $num_files; $i++) {
+            //extract the values from each file
+            $name = $files['name'][$i];
+            $type = mime_content_type($files['tmp_name'][$i]);
+            $size = $files['size'][$i];
+            $err_msg = "";
+
+            //did anything go wrong?
+            $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
+
+            //manually check against set size limit
+            //incase the max POST size is greater than max file size
+            if($size > $max_size){
+                $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
+            }
+
+            //check filename
+            if (!FileUtils::isValidFileName($name)) {
+                $err_msg = "Invalid filename";
+            }
+
+            $success = $err_msg === "No error.";
+
+            $ret[] = [
+                'name' => $name,
+                'type'=> $type,
+                'error'=> $err_msg,
+                'size' => $size,
+                'success' => $success
+            ];
+        }
+
+        return $ret;
     }
 }

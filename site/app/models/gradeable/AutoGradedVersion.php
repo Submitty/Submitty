@@ -147,12 +147,47 @@ class AutoGradedVersion extends AbstractModel {
                 foreach ($submitted_files as $file => $details) {
                     $dir_name = "part{$i}/";
                     if (substr($file, 0, strlen($dir_name)) === "part{$i}/") {
-                        $this->files[$dir][$i][substr($file, strlen($dir_name), null)] = $details;
+                        $this->files[$dir][$i][substr($file, strlen($dir_name))] = $details;
                     }
                 }
             }
 
         }
+    }
+
+    public function getTestcaseMessages()
+    {
+        $this->loadTestcases();
+
+        $output = array();
+
+        // If results were found then append message arrays to output array
+        // where key is the testcase_label
+        if(!is_null($this->graded_testcases))
+        {
+            foreach ($this->graded_testcases as $graded_testcase)
+            {
+                $testcase_label = $graded_testcase->getTestcase()->getTestcaseLabel();
+
+                // If a testcase_label exists then get the auto grading messages
+                if($testcase_label != "")
+                {
+                    $output[$testcase_label] = array();
+
+                    $autochecks = $graded_testcase->getAutochecks();
+
+                    foreach ($autochecks as $autocheck)
+                    {
+                        foreach ($autocheck->getMessages() as $msg)
+                        {
+                            array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
+                        }
+                    }
+                }
+            }
+        }
+
+        return $output;
     }
 
     /**
@@ -203,12 +238,12 @@ class AutoGradedVersion extends AbstractModel {
             if ($result_details != null &&
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
-              $graded_testcase = new AutoGradedTestcase
+                $graded_testcase = new AutoGradedTestcase
                 ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
-              $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
-              if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
-                $this->early_incentive_points += $graded_testcase->getPoints();
-              }
+                $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+                if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+                    $this->early_incentive_points += $graded_testcase->getPoints();
+                }
             }
         }
     }
@@ -252,8 +287,10 @@ class AutoGradedVersion extends AbstractModel {
         if($this->files === null) {
             $this->loadSubmissionFiles();
         }
-        return array('submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [], 
-            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []);
+        return array(
+            'submissions' => (array_key_exists($part, $this->files['submissions'])) ? $this->files['submissions'][$part] : [],
+            'checkout' => ($this->graded_gradeable->getGradeable()->isVcs()) ? $this->files['checkout'][$part] : []
+        );
     }
 
     /**

@@ -2,7 +2,7 @@
 {% block popup_id %}admin-team-form{% endblock %}
 {% block title_tag %}<h1 id="admin-team-title"></h1>{% endblock %}
 {% block body %}
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="new_team" />
     <input type="hidden" name="new_team_user_id" />
     <input type="hidden" name="edit_team_team_id" />
@@ -35,11 +35,11 @@
     <div id="admin-team-history-right"></div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'grading', 'page': 'electronic', 'action': 'submit_team_form', 'gradeable_id': gradeable_id }) }}">
+    <form method="post" action="{{ team_submit_url }}">
         {{ parent() }}
     </form>
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <input class="btn btn-primary" type="submit" value="Submit" id="admin-team-form-submit" />
 {% endblock %}

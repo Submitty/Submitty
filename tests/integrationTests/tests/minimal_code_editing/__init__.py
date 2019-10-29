@@ -44,7 +44,11 @@ def cleanup(test):
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
 
 
-
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def add_delete_lines(test):
@@ -53,9 +57,10 @@ def add_delete_lines(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","add_delete_lines_grade.txt","-b")
     test.json_diff("results.json","add_delete_lines_results.json")
@@ -69,9 +74,10 @@ def curly_brace_placement(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","curly_brace_placement_grade.txt","-b")
     test.json_diff("results.json","curly_brace_placement_results.json")
@@ -85,9 +91,10 @@ def edits_neighboring_lines(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","edits_neighboring_lines_grade.txt","-b")
     test.json_diff("results.json","edits_neighboring_lines_results.json")
@@ -101,9 +108,10 @@ def extra_spaces(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","extra_spaces_grade.txt","-b")
     test.json_diff("results.json","extra_spaces_results.json")
@@ -117,9 +125,10 @@ def fancy_hello_world(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","fancy_hello_world_grade.txt","-b")
     test.json_diff("results.json","fancy_hello_world_results.json")
@@ -133,9 +142,10 @@ def four_space_indent(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","four_space_indent_grade.txt","-b")
     test.json_diff("results.json","four_space_indent_results.json")
@@ -149,9 +159,10 @@ def noise(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","noise_grade.txt","-b")
     test.json_diff("results.json","noise_results.json")
@@ -165,9 +176,10 @@ def tabs(test):
                      os.path.join(test.testcase_path, "data")])
     test.run_compile()
     test.run_run()
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
     subprocess.call(["cp",
                      os.path.join(SAMPLE_SUBMISSIONS, "fancy_hello_world.cpp"),
-                     os.path.join(test.testcase_path, "data")])
+                     os.path.join(test.testcase_path, "data", "test_output")])
     test.run_validator()
     test.diff("grade.txt","tabs_grade.txt","-b")
     test.json_diff("results.json","tabs_results.json")

@@ -25,6 +25,8 @@ if __name__ == "__main__":
     #run the command 'git rev-parse HEAD' from the submitty repository directory
     current_commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repository_dir)
     current_commit_hash = current_commit_hash.decode('ascii').strip()
+    current_short_commit_hash = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=repository_dir)
+    current_short_commit_hash = current_short_commit_hash.decode('ascii').strip()
     print("Commit {0} is currently installed on this system.".format(current_commit_hash))
   except:
     print("ERROR: could not determine commit hash.")
@@ -43,6 +45,7 @@ if __name__ == "__main__":
   #remove newline at the end of the hash and tag and convert them from bytes to ascii.
 
   output_dict["installed_commit"] = current_commit_hash
+  output_dict["short_installed_commit"] = current_short_commit_hash
   output_dict["most_recent_git_tag"] = current_git_tag
 
   try:

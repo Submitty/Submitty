@@ -30,9 +30,6 @@ def initialize(test):
     subprocess.call(["cp",
                      os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "config.json"),
                      os.path.join(test.testcase_path, "assignment_config")])
-    subprocess.call(["cp"] +
-                    glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*.txt")) +
-                    [os.path.join(test.testcase_path, "data")])
 
 
 ############################################################################
@@ -46,7 +43,17 @@ def cleanup(test):
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
 
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output"))
+    subprocess.call(["cp"] +
+                    glob.glob(os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "*.txt")) +
+                    [os.path.join(test.testcase_path, "data", "test_output")])
 
+
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def correct(test):

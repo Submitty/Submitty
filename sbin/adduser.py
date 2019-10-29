@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
 """
-Use this script to create new users and add them to courses. Any user added to a course
-will be an instructor.
+Use this script to create new users.
 """
 
 import argparse
@@ -48,11 +47,10 @@ def get_input(question, default="", blank=False):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description='Utility that given a user will create him into the'
-                                                 'database and add them to the course if specified')
+    parser = argparse.ArgumentParser(description='Utility that given a user will create them'
+                                                 'into the database')
 
     parser.add_argument('user_id', help='user_id of the user to create')
-    parser.add_argument('--course', metavar='arg', action='append', nargs=3, help='[SEMESTER] [COURSE] [REGISTRATION_SECTION]')
 
     return parser.parse_args()
 
@@ -84,7 +82,7 @@ def main():
     firstname = get_input('User firstname', defaults['user_firstname'])
     preferred = get_input('User preferred name', defaults['user_preferred_firstname'], True)
     lastname = get_input('User lastname', defaults['user_lastname'])
-    email = get_input('User email', defaults['user_email'])
+    email = get_input('User email', defaults['user_email'], True)
 
     update = {
         'user_firstname': firstname,
@@ -111,34 +109,6 @@ def main():
         update['user_id'] = user_id
         query = users_table.insert()
         connection.execute(query, **update)
-
-    if 'course' in args and args.course is not None and len(args.course) > 0:
-        courses_table = Table('courses', metadata, autoload=True)
-        for course in args.course:
-            if not course[2].isdigit():
-                course[2] = None
-            select = courses_table.select().where(and_(courses_table.c.semester == bindparam('semester'),
-                                                       courses_table.c.course == bindparam('course')))
-            row = connection.execute(select, semester=course[0], course=course[1]).fetchone()
-            # course does not exist, so just skip this argument
-            if row is None:
-                continue
-
-            courses_u_table = Table('courses_users', metadata, autoload=True)
-            select = courses_u_table.select().where(and_(and_(courses_u_table.c.semester == bindparam('semester'),
-                                                              courses_u_table.c.course == bindparam('course')),
-                                                         courses_u_table.c.user_id == bindparam('user_id')))
-            row = connection.execute(select, semester=course[0], course=course[1], user_id=user_id).fetchone()
-            # does this user have a row in courses_users for this semester and course?
-            if row is None:
-                query = courses_u_table.insert()
-                connection.execute(query, user_id=user_id, semester=course[0], course=course[1], user_group=1,
-                                   registration_section=course[2])
-            else:
-                query = courses_u_table.update(values={
-                    courses_u_table.c.registration_section: bindparam('registration_section')
-                }).where(courses_u_table.c.user_id == bindparam('user_id'))
-                connection.execute(query, registration_section=course[2])
 
 
 if __name__ == '__main__':

@@ -1,10 +1,12 @@
 """Basic migration script to handle the database."""
 
 from collections import OrderedDict
+from copy import deepcopy
 from datetime import datetime
 import os
 from pathlib import Path
 import re
+from typing import Set
 
 from sqlalchemy.exc import OperationalError
 
@@ -62,12 +64,12 @@ def status(args):
     :param args: arguments for status
     :type args: argparse.Namespace
     """
-    args.config.database['dbname'] = 'submitty'
-
     for environment in get_environments(args.environments):
         if environment in ['master', 'system']:
+            loop_args = deepcopy(args)
+            loop_args.config.database['dbname'] = 'submitty'
             try:
-                database = db.Database(args.config.database, environment)
+                database = db.Database(loop_args.config.database, environment)
                 exists = database.engine.dialect.has_table(
                     database.engine,
                     database.migration_table.__tablename__
@@ -76,7 +78,7 @@ def status(args):
                     print('Could not find migration table for {}'.format(environment))
                     database.close()
                     continue
-                print_status(database, environment, args)
+                print_status(database, environment, loop_args)
                 database.close()
             except OperationalError:
                 print(
@@ -87,20 +89,22 @@ def status(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in os.listdir(str(course_dir)):
-                for course in os.listdir(os.path.join(str(course_dir), semester)):
-                    cond1 = args.choose_course is not None
-                    cond2 = [semester, course] != args.choose_course
+            for semester in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+                for course in courses:
+                    loop_args = deepcopy(args)
+                    cond1 = loop_args.choose_course is not None
+                    cond2 = [semester, course] != loop_args.choose_course
                     if cond1 and cond2:
                         continue
-                    args.semester = semester
-                    args.course = course
-                    args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                    loop_args.semester = semester
+                    loop_args.course = course
+                    loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
                         semester,
                         course
                     )
                     try:
-                        database = db.Database(args.config.database, environment)
+                        database = db.Database(loop_args.config.database, environment)
                         exists = database.engine.dialect.has_table(
                             database.engine,
                             database.migration_table.__tablename__
@@ -114,7 +118,7 @@ def status(args):
                             )
                             database.close()
                             continue
-                        print_status(database, environment, args)
+                        print_status(database, environment, loop_args)
                         database.close()
                     except OperationalError:
                         print('Could not get the status for the migrations '
@@ -195,18 +199,22 @@ def handle_migration(args):
     :param args: arguments parsed from argparse
     :type args: argparse.Namespace
     """
-    args.config.database['dbname'] = 'submitty'
-
+    all_missing_migrations: Set[Path] = set()
     for environment in get_environments(args.environments):
-        args.course = None
-        args.semester = None
         if environment in ['master', 'system']:
+            loop_args = deepcopy(args)
+            loop_args.config.database['dbname'] = 'submitty'
             try:
-                database = db.Database(args.config.database, environment)
+                database = db.Database(loop_args.config.database, environment)
             except OperationalError:
                 print('Database does not exist for {}'.format(environment))
                 continue
-            migrate_environment(database, environment, args)
+            migrate_environment(
+                database,
+                environment,
+                args,
+                all_missing_migrations
+            )
             database.close()
 
         if environment == 'course':
@@ -214,29 +222,39 @@ def handle_migration(args):
             if not course_dir.exists():
                 print("Could not find courses directory: {}".format(course_dir))
                 continue
-            for semester in os.listdir(str(course_dir)):
-                for course in os.listdir(os.path.join(str(course_dir), semester)):
-                    cond1 = args.choose_course is not None
-                    cond2 = [semester, course] != args.choose_course
+            for semester in sorted(os.listdir(str(course_dir))):
+                courses = sorted(os.listdir(os.path.join(str(course_dir), semester)))
+                for course in courses:
+                    loop_args = deepcopy(args)
+                    cond1 = loop_args.choose_course is not None
+                    cond2 = [semester, course] != loop_args.choose_course
                     if cond1 and cond2:
                         continue
-                    args.semester = semester
-                    args.course = course
-                    args.config.database['dbname'] = 'submitty_{}_{}'.format(
+                    loop_args.semester = semester
+                    loop_args.course = course
+                    loop_args.config.database['dbname'] = 'submitty_{}_{}'.format(
                         semester,
                         course
                     )
                     try:
-                        database = db.Database(args.config.database, environment)
-                        migrate_environment(database, environment, args)
+                        database = db.Database(loop_args.config.database, environment)
+                        migrate_environment(
+                            database,
+                            environment,
+                            loop_args,
+                            all_missing_migrations
+                        )
                         database.close()
                     except OperationalError:
                         print("Submitty Database Migration Warning:  "
                               "Database does not exist for "
                               "semester={} course={}".format(semester, course))
+    for missing_migration in all_missing_migrations:
+        if missing_migration.exists():
+            missing_migration.unlink()
 
 
-def migrate_environment(database, environment, args):
+def migrate_environment(database, environment, args, all_missing_migrations):
     """
     Determine list of migrations/rollback steps that need to be run for environment.
 
@@ -301,7 +319,8 @@ def migrate_environment(database, environment, args):
                 database,
                 missing_migrations[key],
                 environment,
-                args
+                args,
+                all_missing_migrations
             )
             changes = True
         print()
@@ -336,17 +355,23 @@ def migrate_environment(database, environment, args):
         print()
 
 
-def remove_migration(database, migration, environment, args):
+def remove_migration(
+    database,
+    migration,
+    environment,
+    args,
+    all_missing_migrations: set
+):
     """Remove migrations that exist on the system, but not within the migrator tool."""
     print("  {}".format(migration.id))
     file_path = Path(
         args.config.submitty['submitty_install_dir'], 'migrations',
         environment, migration.id + '.py'
     )
-    if file_path.exists():
+    all_missing_migrations.add(file_path)
+    if file_path.exists() and migration.status == 1:
         module = load_module(migration.id, file_path)
         call_func(getattr(module, 'down', noop), database, environment, args)
-        file_path.unlink()
     database.session.delete(migration)
     database.session.commit()
 

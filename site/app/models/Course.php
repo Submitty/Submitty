@@ -71,4 +71,13 @@ class Course extends AbstractModel {
         return strtoupper($this->title);
     }
 
+    public function getCourseInfo() {
+        return [
+            "semester" => $this->semester,
+            "title" => $this->title,
+            "display_name" => $this->display_name,
+            "display_semester" => $this->getLongSemester()
+        ];
+    }
+
 }

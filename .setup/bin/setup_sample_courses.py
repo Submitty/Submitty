@@ -34,6 +34,7 @@ import sys
 import configparser
 import csv
 import pdb
+from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
 
@@ -140,12 +141,14 @@ def main():
         user = users[user_id]
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
+                              user_numeric_id = user.numeric_id,
                               user_password=get_php_db_password(user.password),
                               user_firstname=user.firstname,
                               user_preferred_firstname=user.preferred_firstname,
                               user_lastname=user.lastname,
                               user_preferred_lastname=user.preferred_lastname,
                               user_email=user.email,
+                              user_access_level=user.access_level,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
     #Sort alphabetically extra students. Shouldn't affect randomness....
@@ -154,6 +157,7 @@ def main():
     for user in extra_students:
         submitty_conn.execute(user_table.insert(),
                               user_id=user.id,
+                              user_numeric_id = user.numeric_id,
                               user_password=get_php_db_password(user.password),
                               user_firstname=user.firstname,
                               user_preferred_firstname=user.preferred_firstname,
@@ -167,13 +171,6 @@ def main():
     semester = 'Fall'
     if today.month < 7:
         semester = 'Spring'
-
-    list_of_courses_file = "/usr/local/submitty/site/app/views/current_courses.php"
-    with open(list_of_courses_file, "w") as courses_file:
-        courses_file.write("")
-        for course_id in courses.keys():
-            courses_file.write('<a href="'+args.submission_url+'/index.php?semester='+get_current_semester()+'&course='+course_id+'">'+course_id+', '+semester+' '+str(today.year)+'</a>')
-            courses_file.write('<br />')
 
     for course_id in sorted(courses.keys()):
         course = courses[course_id]
@@ -220,17 +217,44 @@ def main():
     # queue up all of the newly created submissions to grade!
     os.system("/usr/local/submitty/bin/regrade.py --no_input /var/local/submitty/courses/")
 
-def generate_random_user_id(length=15):
-    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase +string.digits) for _ in range(length))
-
-def generate_random_ta_comment():
+def get_random_text_from_file(filename):
     line = ""
-    with open(os.path.join(SETUP_DATA_PATH, 'random', 'TAComment.txt')) as comment:
+    with open(os.path.join(SETUP_DATA_PATH, 'random', filename)) as comment:
         line = next(comment)
         for num, aline in enumerate(comment):
             if random.randrange(num + 2): continue
             line = aline
     return line.strip()
+
+
+def generate_random_user_id(length=15):
+    return ''.join(random.choice(string.ascii_lowercase + string.ascii_uppercase + string.digits) for _ in range(length))
+
+
+def generate_random_ta_comment():
+    return get_random_text_from_file('TAComment.txt')
+
+
+def generate_random_ta_note():
+    return get_random_text_from_file('TANote.txt')
+
+
+def generate_random_student_note():
+    return get_random_text_from_file('StudentNote.txt')
+
+
+def generate_random_marks(default_value, max_value):
+    with open(os.path.join(SETUP_DATA_PATH, 'random', 'marks.yml')) as f:
+        marks_yml = yaml.safe_load(f)
+    if default_value == max_value and default_value > 0:
+        key = 'count_down'
+    else:
+        key = 'count_up'
+    marks = []
+    mark_list = random.choice(marks_yml[key])
+    for i in range(len(mark_list)):
+        marks.append(Mark(mark_list[i], i))
+    return marks
 
 def generate_versions_to_submit(num=3, original_value=3):
     if num == 1:
@@ -284,6 +308,8 @@ def generate_random_users(total, real_users):
             user_id = last_name.replace("'", "")[:5] + first_name[0]
             user_id = user_id.lower()
             anon_id = generate_random_user_id(15)
+            #create a binary string for the numeric ID
+            numeric_id = '{0:09b}'.format(i)
             while user_id in user_ids or user_id in real_users:
                 if user_id[-1].isdigit():
                     user_id = user_id[:-1] + str(int(user_id[-1]) + 1)
@@ -292,6 +318,7 @@ def generate_random_users(total, real_users):
             if anon_id in anon_ids:
                 anon_id = generate_random_user_id()
             new_user = User({"user_id": user_id,
+                             "user_numeric_id" : numeric_id,
                              "anon_id": anon_id,
                              "user_firstname": first_name,
                              "user_lastname": last_name,
@@ -369,7 +396,7 @@ def create_group(group):
     :param group: name of the group to create
     """
     if not group_exists(group):
-        os.system("addgroup {}".format(group))
+        os.system("groupadd {}".format(group))
 
     if group == "sudo":
         return
@@ -382,7 +409,7 @@ def add_to_group(group, user_id):
     :param user_id:
     """
     create_group(group)
-    os.system("adduser {} {}".format(user_id, group))
+    os.system("usermod -a -G {} {}".format(group, user_id))
 
 
 def get_php_db_password(password):
@@ -445,9 +472,8 @@ def parse_args():
 def create_user(user_id):
     if not user_exists(id):
         print("Creating user {}...".format(user_id))
-        os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
-                  "--no-create-home --disabled-password --shell "
-                  "/usr/sbin/nologin".format(user_id))
+        os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                  "-M --shell /bin/false {}".format(user_id))
         print("Setting password for user {}...".format(user_id))
         os.system("echo {}:{} | chpasswd".format(user_id, user_id))
 
@@ -491,6 +517,7 @@ class User(object):
 
     Attributes:
         id
+        numeric_id
         anon_id
         password
         firstname
@@ -499,6 +526,7 @@ class User(object):
         group
         preferred_firstname
         preferred_lastname
+        access_level
         registration_section
         rotating_section
         unix_groups
@@ -506,6 +534,7 @@ class User(object):
     """
     def __init__(self, user):
         self.id = user['user_id']
+        self.numeric_id = user['user_numeric_id']
         self.anon_id = user['anon_id']
         self.password = self.id
         self.firstname = user['user_firstname']
@@ -514,6 +543,7 @@ class User(object):
         self.group = 4
         self.preferred_firstname = None
         self.preferred_lastname = None
+        self.access_level = 3
         self.registration_section = None
         self.rotating_section = None
         self.grading_registration_section = None
@@ -530,7 +560,12 @@ class User(object):
             self.email = user['user_email']
         if 'user_group' in user:
             self.group = user['user_group']
-        assert 0 <= self.group <= 4
+        if self.group < 1 or 4 < self.group:
+            raise SystemExit("ASSERT: user {}, user_group is not between 1 - 4. Check YML file.".format(self.id))
+        if 'user_access_level' in user:
+            self.access_level = user['user_access_level']
+        if self.access_level < 1 or 3 < self.access_level:
+            raise SystemExit("ASSERT: user {}, user_access_level is not between 1 - 3. Check YML file.".format(self.id))
         if 'registration_section' in user:
             self.registration_section = int(user['registration_section'])
         if 'rotating_section' in user:
@@ -572,16 +607,14 @@ class User(object):
     def _create_ssh(self):
         if not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("adduser {} --gecos 'First Last,RoomNumber,WorkPhone,HomePhone' "
-                      "--disabled-password".format(self.id))
+            os.system("useradd -m -c 'First Last,RoomNumber,WorkPhone,HomePhone' {}".format(self.id))
             self.set_password()
 
     def _create_non_ssh(self):
         if not DB_ONLY and not user_exists(self.id):
             print("Creating user {}...".format(self.id))
-            os.system("/usr/sbin/adduser {} --quiet --home /tmp --gecos \'AUTH ONLY account\' "
-                      "--no-create-home --disabled-password --shell "
-                      "/usr/sbin/nologin".format(self.id))
+            os.system("useradd --home /tmp -c \'AUTH ONLY account\' "
+                      "-M --shell /bin/false {}".format(self.id))
             self.set_password()
 
     def set_password(self):
@@ -843,7 +876,14 @@ class Course(object):
                                 os.system("chown -R submitty_php:{}_tas_www {}".format(self.code, gradeable_path))
                             if not os.path.exists(submission_path):
                                 os.makedirs(submission_path)
-                            active_version = random.choice(range(1, versions_to_submit+1))
+                            # Reduce the propability to get a canceled submission (active_version = 0)
+                            # This is done my making other possibilities three times more likely
+                            version_population = []
+                            for version in range(1, versions_to_submit+1):
+                                version_population.append((version, 3))
+                            version_population = [(0,1)] + version_population
+                            version_population = [ver for ver, freq in version_population for i in range(freq)]
+                            active_version = random.choice(version_population)
                             if team_id is not None:
                                 json_history = {"active_version": active_version, "history": [], "team_history": []}
                             else:
@@ -969,6 +1009,16 @@ class Course(object):
         self.conn.close()
         submitty_conn.close()
         os.environ['PGPASSWORD'] = ""
+
+        if self.code == 'sample':
+            student_image_folder = os.path.join(SUBMITTY_DATA_DIR, 'courses', self.semester, self.code, 'uploads', 'student_images')
+            zip_path = os.path.join(SUBMITTY_REPOSITORY, 'sample_files', 'user_photos', 'CSCI-1300-01.zip')
+            with TemporaryDirectory() as tmpdir:
+                with ZipFile(zip_path) as open_file:
+                    open_file.extractall(tmpdir)
+                inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
+                for f in os.listdir(inner_folder):
+                    shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
 
     def check_rotating(self, users):
         for gradeable in self.gradeables:
@@ -1182,10 +1232,6 @@ class Course(object):
                 print_grades = True if g_type != 0 or (gradeable.submission_open_date < NOW) else False
                 release_grades = (gradeable.grade_released_date < NOW)
 
-                # Another spot where if INSTALL_SUBMITTY_HELPER.sh is used we could use fill-in paths
-                # gradeable_config_dir = os.path.join("__INSTALL__FILLIN__SUBMITTY_DATA_DIR__", "courses",
-                #                                    get_current_semester(), "sample", "config", "complete_config")
-
                 gradeable_config_dir = os.path.join(SUBMITTY_DATA_DIR, "courses", get_current_semester(), "sample",
                                                     "config", "complete_config")
 
@@ -1294,6 +1340,7 @@ class Gradeable(object):
         self.overall_ta_instructions = ""
         self.peer_grading = False
         self.grade_by_registration = True
+        self.grader_assignment_method = 1
         self.is_repository = False
         self.subdirectory = ""
         self.use_ta_grading = True
@@ -1374,8 +1421,9 @@ class Gradeable(object):
         else:
             self.title = self.id.replace("_", " ").title()
 
-        if 'g_grade_by_registration' in gradeable:
-            self.grade_by_registration = gradeable['g_grade_by_registration'] is True
+        if 'g_grader_assignment_method' in gradeable:
+            self.grade_by_registration = gradeable['g_grader_assignment_method'] is 1
+            self.grader_assignment_method = gradeable['g_grader_assignment_method']
 
         if 'grading_rotating' in gradeable:
             self.grading_rotating = gradeable['grading_rotating']
@@ -1449,18 +1497,17 @@ class Gradeable(object):
         self.components = []
         for i in range(len(gradeable['components'])):
             component = gradeable['components'][i]
-            if self.type < 2:
-                component['gc_is_text'] = False
-            elif self.type > 0:
-                component['gc_ta_comment'] = ""
-                component['gc_student_comment'] = ""
+            if self.type >= 0:
+                component['gc_ta_comment'] = generate_random_ta_note()
+                component['gc_student_comment'] = generate_random_student_note()
                 component['gc_page'] = 0
-
             if self.type == 1:
                 component['gc_lower_clamp'] = 0
                 component['gc_default'] = 0
                 component['gc_max_value'] = 1
                 component['gc_upper_clamp'] = 1
+            if self.type != 2:
+                component['gc_is_text'] = False
             i-=1;
             self.components.append(Component(component, i+1))
 
@@ -1469,7 +1516,7 @@ class Gradeable(object):
                      g_instructions_url=self.instructions_url,
                      g_overall_ta_instructions=self.overall_ta_instructions,
                      g_gradeable_type=self.type,
-                     g_grade_by_registration=self.grade_by_registration,
+                     g_grader_assignment_method=self.grader_assignment_method,
                      g_ta_view_start_date=self.ta_view_date,
                      g_grade_start_date=self.grade_start_date,
                      g_grade_due_date=self.grade_due_date,
@@ -1602,10 +1649,6 @@ class Component(object):
         self.page = 0
         self.order = order
         self.marks = []
-        if 'marks' in component:
-            for i in range(len(component['marks'])):
-                mark = component['marks'][i]
-                self.marks.append(Mark(mark, i))
 
         if 'gc_ta_comment' in component:
             self.ta_comment = component['gc_ta_comment']
@@ -1626,6 +1669,13 @@ class Component(object):
             self.default = float(component['gc_default'])
             self.max_value = float(component['gc_max_value'])
             self.upper_clamp = float(component['gc_upper_clamp'])
+
+        if 'marks' in component:
+            for i in range(len(component['marks'])):
+                mark = component['marks'][i]
+                self.marks.append(Mark(mark, i))
+        else:
+            self.marks = generate_random_marks(self.default, self.max_value)
 
         self.key = None
 

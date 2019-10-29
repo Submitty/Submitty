@@ -3,11 +3,13 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
+use app\exceptions\FileReadException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Output;
+use app\libraries\routers\AccessControl;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
@@ -16,30 +18,140 @@ use app\models\gradeable\LateDays;
 use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
+use Symfony\Component\Routing\Annotation\Route;
+use app\models\GradeSummary;
+use app\models\RainbowCustomization;
+use app\exceptions\ValidationException;
 
 /**
  * Class ReportController
  * @package app\controllers\admin
- *
+ * @AccessControl(role="INSTRUCTOR")
  */
 class ReportController extends AbstractController {
-    public function run() {
-        switch ($_REQUEST['action']) {
-            case 'csv':
-                $this->generateCSVReport();
-                break;
-            case 'summary':
-                $this->generateGradeSummaries();
-                break;
-            case 'reportpage':
-            default:
-                $this->showReportPage();
-                break;
+
+    const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
+                                            // wait for the job to complete before timing out and returning failure
+
+    /**
+     * @Route("/{_semester}/{_course}/reports")
+     */
+    public function showReportPage() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $grade_summaries_last_run = $this->getGradeSummariesLastRun();
+
+        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates', $grade_summaries_last_run);
+    }
+
+    /**
+     * Generates grade summary files for every user
+     *
+     * @Route("/{_semester}/{_course}/reports/summaries")
+     * @Route("/api/{_semester}/{_course}/reports/summaries", methods={"POST"})
+     */
+    public function generateGradeSummaries() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
+
+        // Check that the directory is writable, fail if not
+        if(!is_writable($base_path)) {
+            $this->core->addErrorMessage('Unable to write to the grade summaries directory');
+            $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        }
+
+        $g_sort_keys = [
+            'type',
+            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'user_id',
+        ];
+
+        // Generate the reports
+        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
+            $this->saveUserToFile($base_path, $a, $b, $c);
+            return null;
+        });
+        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
+        $this->core->redirect($this->core->buildCourseUrl(['reports']));
+        return $this->core->getOutput()->renderJsonSuccess();
+    }
+
+
+    public function getGradeSummariesLastRun() {
+
+        // Build path to the grade summaries folder
+        $summaries_dir = $this->core->getConfig()->getCoursePath() . '/reports/all_grades';
+
+        // Get contents of directory
+        $files = scandir($summaries_dir);
+
+        // Get file count
+        // Subtract 2 to account for '.' and '..'
+        $file_count = count($files) - 2;
+
+        // If folder is empty return never
+        if($file_count == 0)
+        {
+            return 'Never';
+        }
+        // Else folder has contents return the time stamp off the first file
+        else
+        {
+            // Get file modification time of first student json
+            $time_stamp = filemtime($summaries_dir . '/' . $files[2]);
+
+            // Format it
+            $time_stamp = date("F d Y - g:i:s A", $time_stamp);
+            $time_stamp = $time_stamp . ' - ' . $this->core->getConfig()->getTimezone()->getName();
+
+            return $time_stamp;
         }
     }
 
-    public function showReportPage() {
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
+    /**
+     * Generates and offers download of CSV grade report
+     *
+     * @Route("/{_semester}/{_course}/reports/csv")
+     */
+    public function generateCSVReport() {
+        if (!$this->core->getUser()->accessAdmin()) {
+            $this->core->getOutput()->showError("This account cannot access admin pages");
+        }
+
+        $g_sort_keys = [
+            'syllabus_bucket',
+            'g_id',
+        ];
+        $gg_sort_keys = [
+            'registration_section',
+            'user_id',
+        ];
+
+        // Generate the reports
+        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
+            return $this->generateCSVRow($a, $b, $c);
+        });
+
+        // Concatenate the CSV
+        $csv = '';
+        if (count($rows) > 0) {
+            // Header row
+            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
+            // Content rows
+            foreach ($rows as $row) {
+                $csv .= implode(',', $row) . PHP_EOL;
+            }
+        }
+        //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
+        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
 
     /**
@@ -172,36 +284,6 @@ class ReportController extends AbstractController {
         return $results;
     }
 
-    /** Generates and offers download of CSV grade report */
-    public function generateCSVReport() {
-        $g_sort_keys = [
-            'syllabus_bucket',
-            'g_id',
-        ];
-        $gg_sort_keys = [
-            'registration_section',
-            'user_id',
-        ];
-
-        // Generate the reports
-        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
-            return $this->generateCSVRow($a, $b, $c);
-        });
-
-        // Concatenate the CSV
-        $csv = '';
-        if (count($rows) > 0) {
-            // Header row
-            $csv = implode(',', array_keys(reset($rows))) . PHP_EOL;
-            // Content rows
-            foreach ($rows as $row) {
-                $csv .= implode(',', $row) . PHP_EOL;
-            }
-        }
-        //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
-        $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
-    }
-
     /**
      * Generates a CSV row for a user
      * @param User $user The user the grades are for
@@ -222,39 +304,20 @@ class ReportController extends AbstractController {
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
 
-            // Check if the score should be a zero
-            if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
-                if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
-                    // Version conflict or incomplete grading, so zero score
-                    $row[$gg->getGradeableId()] = 0;
-                } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
-                    // BAD submission, so zero score
-                    $row[$gg->getGradeableId()] = 0;
+            if (!$gg->hasOverriddenGrades()){
+                // Check if the score should be a zero
+                if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
+                    if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
+                        // Version conflict or incomplete grading, so zero score
+                        $row[$gg->getGradeableId()] = 0;
+                    } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                        // BAD submission, so zero score
+                        $row[$gg->getGradeableId()] = 0;
+                    }
                 }
             }
         }
         return $row;
-    }
-
-    /** Generates grade summary files for every user */
-    public function generateGradeSummaries() {
-        $base_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'all_grades');
-        $g_sort_keys = [
-            'type',
-            'CASE WHEN submission_due_date IS NOT NULL THEN submission_due_date ELSE g.g_grade_released_date END',
-            'g_id',
-        ];
-        $gg_sort_keys = [
-            'user_id',
-        ];
-
-        // Generate the reports
-        $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) use ($base_path) {
-            $this->saveUserToFile($base_path, $a, $b, $c);
-            return null;
-        });
-        $this->core->addSuccessMessage("Successfully Generated Grade Summaries");
-        $this->core->getOutput()->renderOutput(array('admin', 'Report'), 'showReportUpdates');
     }
 
     /**
@@ -278,7 +341,7 @@ class ReportController extends AbstractController {
 
         foreach ($ggs as $gg) {
             $bucket = ucwords($gg->getGradeable()->getSyllabusBucket());
-            $user_data[$bucket][] = $this->generateGradeSummary($gg, $late_days);
+            $user_data[$bucket][] = $this->generateGradeSummary($gg, $user, $late_days);
         }
         file_put_contents(FileUtils::joinPaths($base_path, $user->getId() . '_summary.json'), FileUtils::encodeJson($user_data));
     }
@@ -289,7 +352,7 @@ class ReportController extends AbstractController {
      * @param LateDays $ld
      * @return array
      */
-    public function generateGradeSummary(GradedGradeable $gg, LateDays $ld) {
+    public function generateGradeSummary(GradedGradeable $gg,User $user, LateDays $ld) {
         $g = $gg->getGradeable();
 
         $entry = [
@@ -307,100 +370,106 @@ class ReportController extends AbstractController {
 
         $entry['score'] = $gg->getTotalScore();
 
-        // Add information special to electronic file submissions
-        if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
-            // Add information based on late day status
-            $ldi = $ld->getLateDayInfoByGradeable($g);
-            if ($ldi !== null) {
-                // Zero score if BAD status
-                if ($ldi->getStatus() === LateDayInfo::STATUS_BAD) {
-                    $entry['score'] = 0;
-                }
+        $ldi = $ld->getLateDayInfoByGradeable($g);
 
-                // The report needs this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
-                $entry['status'] = $this->getLateStatusMessage($ldi);
-
-                // Only include late day info if the submission was late
-                $late_days_charged = $ldi->getLateDaysCharged();
-                if ($late_days_charged > 0) {
-                    $entry['days_after_deadline'] = $ldi->getDaysLate();
-                    $entry['extensions'] = $ldi->getLateDayException();
-                    $entry['days_charged'] = $late_days_charged;
-                }
-            }
-
-            // Add score breakdown
-            $ta_gg = $gg->getOrCreateTaGradedGradeable();
-            $entry['overall_comment'] = $ta_gg->getOverallComment();
-
-            // Only split up scores if electronic gradeables
-            $entry['autograding_score'] = $gg->getAutoGradingScore();
-            $entry['tagrading_score'] = $gg->getTaGradingScore();
-
-            // If the grading isn't complete or there are conflicts in which version is graded,
-            //  let the user know that
-            if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
-                $entry['score'] = 0;
-                $entry['autograding_score'] = 0;
-                $entry['tagrading_score'] = 0;
-                if (!$gg->getSubmitter()->isTeam() && $gg->getGradeable()->isTeamAssignment()) {
-                    // This is sort of a hack.  Submitters for team assignments should always be teams,
-                    //  but to keep the rest of the report generation sane, they can be users if the
-                    //  user is not on a team
-                    $entry['note'] = 'User is not on a team';
-                } else if (!$ta_gg->isComplete()) {
-                    $entry['note'] = 'This has not been graded yet.';
-                } else {
-                    $entry['note'] = 'Score is set to 0 because there are version conflicts.';
-                }
-            }
+        if ($gg->hasOverriddenGrades()){
+            $entry['status'] = 'Overridden';
+            $entry['comment'] = $gg->getOverriddenComment();
         }
-
-        // Component/marks
-        $entry['components'] = [];
-        foreach ($g->getComponents() as $component) {
-            $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
-
-            // We need to convert to the old model single-grader format for rainbow grades
-            $gc = null;
-            foreach ($gcc->getGradedComponents() as $gc_) {
-                $gc = $gc_;
-                // Get the only graded component and short circuit
-                break;
-            }
-            //
-            // For each $gc in $gcc
-            //
-
-            $inner = [
-                'title' => $component->getTitle()
-            ];
-            if ($component->isText()) {
-                $inner['comment'] = $gc !== null ? $gc->getComment() : '';
-            } else {
-                $inner['score'] = $gc !== null ? $gc->getTotalScore() : 0.0;
-                $inner['default_score'] = $component->getDefault();
-                $inner['upper_clamp'] = $component->getUpperClamp();
-                $inner['lower_clamp'] = $component->getLowerClamp();
-            }
-
+        else {
+            // Add information special to electronic file submissions
             if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
-                $marks = [];
-                if ($gc !== null) {
-                    $marks = array_map(function (Mark $m) {
-                        return ['points' => $m->getPoints(), 'note' => $m->getTitle()];
-                    }, $gc->getMarks());
+                if ($ldi !== null) {
+                    // Zero score if BAD status
+                    if ($ldi->getStatus() === LateDayInfo::STATUS_BAD) {
+                        $entry['score'] = 0;
+                    }
 
-                    if ($gc->hasCustomMark()) {
-                        $marks[] = ['points' => $gc->getScore(), 'note' => $gc->getComment()];
+                    // The report needs this to be different from the 'pretty' version returned from $ldi->getStatusMessage()
+                    $entry['status'] = $this->getLateStatusMessage($ldi);
+
+                    // Only include late day info if the submission was late
+                    $late_days_charged = $ldi->getLateDaysCharged();
+                    if ($late_days_charged > 0) {
+                        $entry['days_after_deadline'] = $ldi->getDaysLate();
+                        $entry['extensions'] = $ldi->getLateDayException();
+                        $entry['days_charged'] = $late_days_charged;
                     }
                 }
 
-                $inner['marks'] = $marks;
-            }
-            $entry['components'][] = $inner;
+                // Add score breakdown
+                $ta_gg = $gg->getOrCreateTaGradedGradeable();
+                $entry['overall_comment'] = $ta_gg->getOverallComment();
 
-            // end for
+                // Only split up scores if electronic gradeables
+                $entry['autograding_score'] = $gg->getAutoGradingScore();
+                $entry['tagrading_score'] = $gg->getTaGradingScore();
+
+                // If the grading isn't complete or there are conflicts in which version is graded,
+                //  let the user know that
+                if ($g->isTaGrading() && ($ta_gg->hasVersionConflict() || !$ta_gg->isComplete())) {
+                    $entry['score'] = 0;
+                    $entry['autograding_score'] = 0;
+                    $entry['tagrading_score'] = 0;
+                    if (!$gg->getSubmitter()->isTeam() && $gg->getGradeable()->isTeamAssignment()) {
+                        // This is sort of a hack.  Submitters for team assignments should always be teams,
+                        //  but to keep the rest of the report generation sane, they can be users if the
+                        //  user is not on a team
+                        $entry['note'] = 'User is not on a team';
+                    } else if (!$ta_gg->isComplete()) {
+                        $entry['note'] = 'This has not been graded yet.';
+                    } else {
+                        $entry['note'] = 'Score is set to 0 because there are version conflicts.';
+                    }
+                }
+            }
+
+            // Component/marks
+            $entry['components'] = [];
+            foreach ($g->getComponents() as $component) {
+                $gcc = $gg->getOrCreateTaGradedGradeable()->getGradedComponentContainer($component);
+
+                // We need to convert to the old model single-grader format for rainbow grades
+                $gc = null;
+                foreach ($gcc->getGradedComponents() as $gc_) {
+                    $gc = $gc_;
+                    // Get the only graded component and short circuit
+                    break;
+                }
+                //
+                // For each $gc in $gcc
+                //
+
+                $inner = [
+                    'title' => $component->getTitle()
+                ];
+                if ($component->isText()) {
+                    $inner['comment'] = $gc !== null ? $gc->getComment() : '';
+                } else {
+                    $inner['score'] = $gc !== null ? $gc->getTotalScore() : 0.0;
+                    $inner['default_score'] = $component->getDefault();
+                    $inner['upper_clamp'] = $component->getUpperClamp();
+                    $inner['lower_clamp'] = $component->getLowerClamp();
+                }
+
+                if ($g->getType() === GradeableType::ELECTRONIC_FILE) {
+                    $marks = [];
+                    if ($gc !== null) {
+                        $marks = array_map(function (Mark $m) {
+                            return ['points' => $m->getPoints(), 'note' => $m->getTitle()];
+                        }, $gc->getMarks());
+
+                        if ($gc->hasCustomMark()) {
+                            $marks[] = ['points' => $gc->getScore(), 'note' => $gc->getComment()];
+                        }
+                    }
+
+                    $inner['marks'] = $marks;
+                }
+                $entry['components'][] = $inner;
+
+                // end for
+            }
         }
         return $entry;
     }
@@ -428,5 +497,121 @@ class ReportController extends AbstractController {
                 return 'ERROR';
         }
     }
-}
 
+    /**
+     * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
+     */
+    public function generateCustomization(){
+        //Build a new model, pull in defaults for the course
+        $customization = new RainbowCustomization($this->core);
+        $customization->buildCustomization();
+
+        if(isset($_POST["json_string"])){
+
+            //Handle user input (the form) being submitted
+            try {
+
+                $customization->processForm();
+
+                // Finally, send the requester back the information
+                $this->core->getOutput()->renderJsonSuccess("Successfully wrote customization.json file");
+            } catch (ValidationException $e) {
+                //Use this to handle any invalid/inconsistent input exceptions thrown during processForm()
+                $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
+            } catch (\Exception $e) {
+                //Catches any other exceptions, should be "unexpected" issues
+                $this->core->getOutput()->renderJsonError($e->getMessage());
+            }
+        }
+        else{
+
+            $this->core->getOutput()->addInternalJs('rainbow-customization.js');
+            $this->core->getOutput()->addInternalCss('rainbow-customization.css');
+
+            $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
+
+            // Print the form
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+                "customization_data" => $customization->getCustomizationData(),
+                "available_buckets" => $customization->getAvailableBuckets(),
+                "used_buckets" => $customization->getUsedBuckets(),
+                'display_benchmarks' => $customization->getDisplayBenchmarks(),
+                'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
+                'bucket_percentages' => $customization->getBucketPercentages(),
+                'messages' => $customization->getMessages(),
+                'limited_functionality_mode' => !$this->core->getConfig()->isSubmittyAdminUserInCourse()
+            ]);
+
+        }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/reports/rainbow_grades_status")
+     */
+    public function autoRainbowGradesStatus() {
+        // Create path to the file we expect to find in the jobs queue
+        $jobs_file = '/var/local/submitty/daemon_job_queue/auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Create path to 'processing' file in jobs queue
+        $processing_jobs_file = '/var/local/submitty/daemon_job_queue/PROCESSING_auto_rainbow_' .
+            $this->core->getConfig()->getSemester() .
+            '_' .
+            $this->core->getConfig()->getCourse() .
+            '.json';
+
+        // Get the max time to wait before timing out
+        $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
+
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($jobs_file) && $max_wait_time)
+        {
+            sleep(1);
+            $max_wait_time--;
+            clearstatcache();
+        }
+
+        // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
+        // We must also wait for that file to be removed
+        // Check the jobs queue every second to see if the job has finished yet
+        while(file_exists($processing_jobs_file) && $max_wait_time)
+        {
+            sleep(1);
+            $max_wait_time--;
+            clearstatcache();
+        }
+
+        // Check the course auto_debug_output.txt to ensure no exceptions were thrown
+        $debug_output_path = '/var/local/submitty/courses/'.
+            $this->core->getConfig()->getSemester() . '/' .
+            $this->core->getConfig()->getCourse() .
+            '/rainbow_grades/auto_debug_output.txt';
+
+        // Look over the output file to see if any part of the process failed
+        try
+        {
+            $failure_detected = FileUtils::areWordsInFile($debug_output_path, ['Exception', 'Aborted', 'failed']);
+        }
+        catch (\Exception $e)
+        {
+            $failure_detected = true;
+        }
+
+        $debug_contents = file_get_contents($debug_output_path);
+
+        // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
+        // implying that it finished
+        if ($max_wait_time && $failure_detected == false)
+        {
+            $this->core->getOutput()->renderJsonSuccess($debug_contents);
+        }
+        // Else we timed out or something else went wrong
+        else
+        {
+            $this->core->getOutput()->renderJsonFail($debug_contents);
+        }
+    }
+}

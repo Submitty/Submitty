@@ -6,11 +6,15 @@ use app\libraries\Core;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\Output;
 use app\libraries\Utils;
+use app\libraries\Access;
 use app\models\Config;
 use app\models\User;
 use ReflectionException;
 
+
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
+    protected static $mock_builders = [];
+
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -19,10 +23,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @param array $config_values
      * @param array $user_config
      * @param array $queries
+     * @param array $access
      *
      * @return Core
      */
-    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array()) {
+    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -48,11 +53,21 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
-        $core->method('getDateTimeNow')->willReturnCallback(function() use($config) {
-            return new \DateTime('now', $config->getTimezone());
-        });
+        if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
+            $core->method('getDateTimeNow')->willReturn(new \DateTime('2001-01-01', $config->getTimezone()));
+        }else{
+            $core->method('getDateTimeNow')->willReturnCallback(function () use ($config) {
+                return new \DateTime('now', $config->getTimezone());
+            });
+        }
 
         $core->method('getConfig')->willReturn($config);
+
+        if (isset($config_values['logged_in'])) {
+            $core->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
+            $core->method('isApiLoggedIn')->willReturn($config_values['logged_in']);
+            $core->method('removeCurrentSession')->willReturn($config_values['logged_in']);
+        }
 
         if (isset($config_values['csrf_token'])) {
             $core->method('checkCsrfToken')->willReturn($config_values['csrf_token'] === true);
@@ -60,12 +75,17 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         else {
             $core->method('checkCsrfToken')->willReturn(true);
         }
-        if (isset($config_values['testing'])) {
-            $core->method('isTesting')->willReturn($config_values['testing'] === true);
-        }
-        else {
-            $core->method('isTesting')->willReturn(true);
-        }
+
+        $mock_access = $this->createMock(Access::class);
+        $mock_access->expects($this->any())->method('canI')->willReturnCallback(
+            function ($permission) use ($access) {
+                if (in_array($permission, $access)) {
+                    return true;
+                }
+                return false;
+            }
+        );
+        $core->method('getAccess')->willReturn($mock_access);
 
         $mock_queries = $this->createMock(DatabaseQueries::class);
         foreach ($queries as $method => $value) {
@@ -73,32 +93,41 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         }
         $core->method('getQueries')->willReturn($mock_queries);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $user = $this->createMockModel(User::class);
-        $user->method('getId')->willReturn("testUser");
-        if (isset($user_config['access_grading'])) {
-            $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
-        }
-        else {
-            $user->method('accessGrading')->willReturn(false);
-        }
-        if (isset($user_config['access_full_grading'])) {
-            $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
-        }
-        else {
-            $user->method('accessFullGrading')->willReturn(false);
-        }
-        if (isset($user_config['access_admin'])) {
-            $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
-        }
-        else {
-            $user->method('accessAdmin')->willReturn(false);
-        }
+        if (!isset($user_config['no_user'])) {
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $user = $this->createMockModel(User::class);
+            $user->method('getId')->willReturn("testUser");
+            if (isset($user_config['access_grading'])) {
+                $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
+            } else {
+                $user->method('accessGrading')->willReturn(false);
+            }
+            if (isset($user_config['access_full_grading'])) {
+                $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
+            } else {
+                $user->method('accessFullGrading')->willReturn(false);
+            }
+            if (isset($user_config['access_admin'])) {
+                $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
+            } else {
+                $user->method('accessAdmin')->willReturn(false);
+            }
 
-        $core->method('getUser')->willReturn($user);
+            if (isset($user_config['access_faculty'])) {
+                $user->method('accessFaculty')->willReturn($user_config['access_faculty'] == true);
+            } else {
+                $user->method('accessFaculty')->willReturn(false);
+            }
+
+            $core->method('getUser')->willReturn($user);
+        }
 
         /** @noinspection PhpParamsInspection */
-        $output = new Output($core);
+        $output = $this->getMockBuilder(Output::class)
+            ->setConstructorArgs([$core])
+            ->setMethods(['addBreadcrumb'])
+            ->getMock();
+        $output->method('addBreadcrumb')->willReturn(true);
         $output->disableRender();
 
         $core->method('getOutput')->willReturn($output);
@@ -122,30 +151,33 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    public function createMockModel($class) {
-        $builder = $this->getMockBuilder($class)
-            ->disableOriginalConstructor()
-            ->disableOriginalClone()
-            ->disableArgumentCloning()
-            ->disallowMockingUnknownTypes();
+    public function createMockModel(string $class) {
+        if (!isset(static::$mock_builders[$class])) {
+            $builder = $this->getMockBuilder($class)
+                ->disableOriginalConstructor()
+                ->disableOriginalClone()
+                ->disableArgumentCloning()
+                ->disallowMockingUnknownTypes();
 
-        /** @noinspection PhpUnhandledExceptionInspection */
-        $reflection = new \ReflectionClass($class);
-        $methods = array();
-        $matches = array();
-        preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
-        foreach ($matches[1] as $match) {
-            if (strlen($match) > 0) {
-                $methods[] = $match;
+            /** @noinspection PhpUnhandledExceptionInspection */
+            $reflection = new \ReflectionClass($class);
+            $methods = array();
+            $matches = array();
+            preg_match_all("/@method.* (.*)\(.*\)/", $reflection->getDocComment(), $matches);
+            foreach ($matches[1] as $match) {
+                if (strlen($match) > 0) {
+                    $methods[] = $match;
+                }
             }
-        }
-        foreach ($reflection->getMethods() as $method) {
-            if (!Utils::startsWith($method->getName(), "__")) {
-                $methods[] = $method->getName();
+            foreach ($reflection->getMethods() as $method) {
+                if (!Utils::startsWith($method->getName(), "__")) {
+                    $methods[] = $method->getName();
+                }
             }
+            $builder->setMethods(array_unique($methods));
+            static::$mock_builders[$class] = $builder;
         }
-        $builder->setMethods(array_unique($methods));
-        return $builder->getMock();
+        return static::$mock_builders[$class]->getMock();
     }
 
     /**

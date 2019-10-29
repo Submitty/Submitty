@@ -1,6 +1,12 @@
-<div id="student-search" style="float: right;">
-	<label for="student-search-input">Search for a student: </label>
-	<input type="text" class="ui-autocomplete-input" autocomplete="off" id="student-search-input">
+<div id="student-search">
+	<label style="display:block;" for="student-search-input">Search for a student: </label>
+	<input 
+		type="text"
+		class="ui-autocomplete-input" 
+		autocomplete="off" 
+		placeholder="Student search"
+		id="student-search-input" 
+	>
 </div>
 <script>
 	var student_full = {{ student_full|raw }};

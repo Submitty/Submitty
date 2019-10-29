@@ -1,0 +1,67 @@
+.component-tabs {
+    margin-top: 10px;
+    display: flex;
+    border-bottom: 1px solid grey;
+    width: 100%;
+}
+
+a.component-tab {
+    padding: 6px 12px;
+    background-color: var(--default-white);
+    text-decoration: none;
+    color: var(--text-black);
+    border-radius: 6px 6px 0 0;
+}
+
+a.component-tab:hover {
+    border: 1px solid gray;
+    border-bottom: none;
+}
+
+a.component-tab.btn-selected {
+    background-color: var(--submitty-logo-blue);
+    color: var(--default-white);
+    font-weight: bold;
+}
+
+.component-tab-icon {
+    padding: 3px 5px;
+    /* disable hover for icon to prevent icon turning to blue link color */
+    pointer-events: none;
+}
+
+.component-tab-icon.fa-exclamation {
+    background-color: var(--error-alert-dark-red);
+    color: white;
+}
+
+.component-tab-icon.fa-check {
+    background-color: var(--standard-dark-green);
+    color: white;
+}
+
+.grade-inquiry-header-div {
+    display: flex;
+    margin-top: 10px;
+}
+
+.grade-inquiry-status {
+    margin-left: 5px;
+}
+
+.grade_inquiry {
+    display: none;
+}
+
+.post_box {
+    padding: 20px;
+}
+
+.reply-text-form {
+    margin-top: 10px;
+}
+
+.no-post-warning {
+    margin: 0 auto;
+    text-align: center;
+}

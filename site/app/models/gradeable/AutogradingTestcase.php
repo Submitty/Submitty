@@ -35,6 +35,8 @@ class AutogradingTestcase extends AbstractModel {
     protected $hidden = false;
     /** @property @var bool If the user should see the message from a GradedAutogradingTestCase */
     protected $view_testcase_message = true;
+    /** @property @var string */
+    protected $testcase_label = '';
 
     /**
      * GradeableTestcase constructor.
@@ -53,6 +55,12 @@ class AutogradingTestcase extends AbstractModel {
         $this->extra_credit = ($testcase['extra_credit'] ?? false) === true;
         $this->hidden = ($testcase['hidden'] ?? false) === true;
         $this->view_testcase_message = ($testcase['view_testcase_message'] ?? true) === true;
+        $this->testcase_label = $testcase['testcase_label'] ?? '';
+    }
+
+    public function getTestcaseLabel()
+    {
+        return $this->testcase_label;
     }
 
     /**

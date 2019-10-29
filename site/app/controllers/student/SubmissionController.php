@@ -3,16 +3,17 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
-use app\libraries\DateUtils;
 use app\libraries\ErrorMessages;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
 use app\libraries\Logger;
+use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
-use app\controllers\grading\ElectronicGraderController;
-
-
+use app\models\gradeable\SubmissionTextBox;
+use app\models\gradeable\SubmissionCodeBox;
+use app\models\gradeable\SubmissionMultipleChoice;
+use Symfony\Component\Routing\Annotation\Route;
 
 class SubmissionController extends AbstractController {
 
@@ -52,218 +53,12 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    public function run() {
-        switch($_REQUEST['action']) {
-            case 'upload':
-                return $this->ajaxUploadSubmission();
-                break;
-            case 'update':
-                return $this->updateSubmissionVersion();
-                break;
-            case 'check_refresh':
-                return $this->checkRefresh();
-                break;
-            case 'bulk':
-                return $this->ajaxBulkUpload();
-                break;
-            case 'upload_split':
-                return $this->ajaxUploadSplitItem();
-                break;
-            case 'upload_images_files':
-                return $this->ajaxUploadImagesFiles();
-                break;
-            case 'upload_course_materials_files':
-                return $this->ajaxUploadCourseMaterialsFiles();
-                break;
-            case 'delete_split':
-                return $this->ajaxDeleteSplitItem();
-                break;
-            case 'verify':
-                return $this->ajaxValidGradeable();
-                break;
-            case 'request_regrade':
-                return $this->requestRegrade();
-                break;
-            case 'make_request_post':
-                return $this->makeRequestPost();
-                break;
-            case 'delete_request':
-                return $this->deleteRequest();
-                break;
-            case 'change_request_status':
-                return $this->changeRequestStatus();
-                break;
-            case 'stat_page':
-                return $this->showStats();
-                break;
-            case 'display':
-            default:
-                return $this->showHomeworkPage();
-                break;
-        }
-    }
-    private function requestRegrade() {
-        $content = $_POST['replyTextArea'] ?? '';
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        if(!$gradeable->isRegradeAllowed()) {
-            $this->core->getOutput()->renderJsonFail('Grade inquiries are not enabled for this gradeable');
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to request regrade');
-            return;
-        }
-
-        try {
-            $this->core->getQueries()->insertNewRegradeRequest($graded_gradeable, $user, $content);
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function makeRequestPost() {
-        $content = str_replace("\r", "", $_POST['replyTextArea']);
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-        $status = $_REQUEST['status'] ?? -1;
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
-            return;
-        }
-
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to make grade inquiry post');
-            return;
-        }
-
-        try {
-            $this->core->getQueries()->insertNewRegradePost($graded_gradeable->getRegradeRequest()->getId(), $user->getId(), $content);
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function deleteRequest() {
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
-            return;
-        }
-
-        // TODO: add to access control method
-        if (!$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to delete grade inquiry');
-            return;
-        }
-
-        try {
-            $this->core->getQueries()->deleteRegradeRequest($graded_gradeable->getRegradeRequest());
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function changeRequestStatus() {
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $submitter_id = $_REQUEST['submitter_id'] ?? '';
-        $status = $_REQUEST['status'] ?? null;
-
-        if ($status === null) {
-            $this->core->getOutput()->renderJsonFail('Missing status parameter');
-            return;
-        }
-
-        $user = $this->core->getUser();
-
-        $gradeable = $this->tryGetGradeable($gradeable_id);
-        if ($gradeable === false) {
-            return;
-        }
-
-        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $submitter_id);
-        if ($graded_gradeable === false) {
-            return;
-        }
-
-        if (!$graded_gradeable->hasRegradeRequest()) {
-            $this->core->getOutput()->renderJsonFail('Submitter has not made a grade inquiry');
-            return;
-        }
-
-        // TODO: add to access control method
-        if (!$graded_gradeable->getSubmitter()->hasUser($user) && !$user->accessFullGrading()) {
-            $this->core->getOutput()->renderJsonFail('Insufficient permissions to change grade inquiry status');
-            return;
-        }
-
-        try {
-            $graded_gradeable->getRegradeRequest()->setStatus($status);
-            $this->core->getQueries()->saveRegradeRequest($graded_gradeable->getRegradeRequest());
-            $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
-            $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
-            $this->core->getOutput()->renderJsonError($e->getMessage());
-        }
-    }
-
-    private function showHomeworkPage() {
-        $gradeable_id = (isset($_REQUEST['gradeable_id'])) ? $_REQUEST['gradeable_id'] : null;
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
+     * @return array
+     */
+    public function showHomeworkPage($gradeable_id, $gradeable_version = null) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if($gradeable === null) {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
@@ -277,7 +72,7 @@ class SubmissionController extends AbstractController {
         }
 
         // Attempt to put the version number to be in bounds of the gradeable
-        $version = intval($_REQUEST['gradeable_version'] ?? 0);
+        $version = intval($gradeable_version ?? 0);
         if ($version < 1 || $version > ($graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getHighestVersion() : 0)) {
             $version = $graded_gradeable !== null ? $graded_gradeable->getAutoGradedGradeable()->getActiveVersion() : 0;
         }
@@ -287,7 +82,6 @@ class SubmissionController extends AbstractController {
 
         // ORIGINAL
         //if (!$gradeable->isSubmissionOpen() && !$this->core->getUser()->accessAdmin()) {
-
         // TEMPORARY - ALLOW LIMITED & FULL ACCESS GRADERS TO PRACTICE ALL FUTURE HOMEWORKS
         if (!$this->core->getUser()->accessGrading() && (
                 !$gradeable->isSubmissionOpen()
@@ -298,16 +92,15 @@ class SubmissionController extends AbstractController {
         }
         else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage('Must be on a team to access submission');
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
         }
         else {
-            $loc = array('component' => 'student',
-                         'gradeable_id' => $gradeable->getId());
-            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $this->core->buildUrl($loc));
+            $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+            $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
-                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'unbuiltGradeable', $gradeable);
+                $this->core->getOutput()->renderOutput('Error',
+                                                       'unbuiltGradeable', $gradeable->getTitle());
                 $error = true;
             }
             else {
@@ -317,44 +110,45 @@ class SubmissionController extends AbstractController {
                     && $graded_gradeable->isTaGradingComplete()) {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
+                    if ($graded_gradeable->getSubmitter()->isTeam()) {
+                        $this->core->getQueries()->updateTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId());
+                    }
                 }
 
                 // Only show hidden test cases if the display version is the graded version (and grades are released)
                 $show_hidden = false;
-                if ($graded_gradeable != NULL) {
-                  $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                if ($graded_gradeable != null) {
+                    $show_hidden = $version == $graded_gradeable->getOrCreateTaGradedGradeable()->getGradedVersion(false) && $gradeable->isTaGradeReleased();
+                    $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
                 }
 
                 // If we get here, then we can safely construct the old model w/o checks
+                $this->core->getOutput()->addInternalCss('forum.css');
+                $this->core->getOutput()->addInternalJs('forum.js');
+                $this->core->getOutput()->addInternalCss('grade-inquiry.css');
+                $this->core->getOutput()->addInternalJs('grade-inquiry.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $show_hidden, false);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
     }
 
     /**
-    * Function for verification that a given RCS ID is valid and has a corresponding user and gradeable.
-    * This should be called via AJAX, saving the result to the json_buffer of the Output object.
-    * If failure, also returns message explaining what happened.
-    * If success, also returns highest version of the student gradeable.
+     * Function for verification that a given RCS ID is valid and has a corresponding user and gradeable.
+     * This should be called via AJAX, saving the result to the json_buffer of the Output object.
+     * If failure, also returns message explaining what happened.
+     * If success, also returns highest version of the student gradeable.
+     *
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/verify", methods={"POST"})
     */
-    private function ajaxValidGradeable() {
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            $msg = "Invalid CSRF token. Refresh the page and try again.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
-        }
+    public function ajaxValidGradeable($gradeable_id) {
 
         if (!isset($_POST['user_id'])) {
             $msg = "Did not pass in user_id.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -363,16 +157,19 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Invalid gradeable id '{$gradeable_id}'", false);
         }
 
-        //usernames come in comma delimited. We split on the commas, then filter out blanks.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        //filter out empty, null strings
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
 
         //If no user id's were submitted, give a graceful error.
         if (count($user_ids) === 0) {
             $msg = "No valid user ids were found.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         //For every userid, we have to check that its real.
@@ -380,15 +177,11 @@ class SubmissionController extends AbstractController {
             $user = $this->core->getQueries()->getUserById($id);
             if ($user === null) {
                 $msg = "Invalid user id '{$id}'";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             if (!$user->isLoaded()) {
                 $msg = "Invalid user id '{$id}'";
-                $return = array('success' => false, 'message' => $msg);
-                $this->core->getOutput()->renderJson($return);
-                return $return;
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
         }
 
@@ -397,59 +190,67 @@ class SubmissionController extends AbstractController {
             $graded_gradeables[] = $gg;
         }
 
-        // Below is true if no users are on a team. In this case, we later make the team automatically,
-        //   so this should not return a failure.
-        // if (count($graded_gradeables) === 0) {
-        //     // No user was on a team
-        //     $msg = 'No user on a team';
-        //     $return = array('success' => false, 'message' => $msg);
-        //     $this->core->getOutput()->renderJson($return);
-        //     return $return;
-        // } else 
+        $null_team_count = 0;
+        $inconsistent_teams = false;
+        if($gradeable->isTeamAssignment()){
+            $teams = [];
+            foreach ($user_ids as $user) {
+                $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
+                if($tmp === null){
+                    $null_team_count++;
+                }else{
+                    $teams[] = $tmp->getId();
+                }
+            }
+            $teams = array_unique(array_filter($teams));
+            $inconsistent_teams = count($teams) > 1;
+        }
 
         //If the users are on multiple teams.
-        if (count($graded_gradeables) > 1) {
+        if ($gradeable->isTeamAssignment() && $inconsistent_teams) {
             // Not all users were on the same team
             $msg = "Inconsistent teams. One or more users are on different teams.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
+        }
+        //If a user not assigned to any team is matched with a user already on a team
+        if($gradeable->isTeamAssignment() && $null_team_count != 0 && count($teams) != 0){
+            $msg = "One or more users with no team are being submitted with another user already on a team";
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $highest_version = -1;
+
         if(count($graded_gradeables) > 0){
             $graded_gradeable = $graded_gradeables[0];
             $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
         }
 
         //If there has been a previous submission, we tag it so that we can pop up a warning.
-        $return = array('success' => true, 'highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
-        $this->core->getOutput()->renderJson($return);
-
-        return $return;
+        $return = array('highest_version' => $highest_version, 'previous_submission' => $highest_version > 0);
+        return $this->core->getOutput()->renderJsonSuccess($return);
     }
 
     /**
-    * Function that uploads a bulk PDF to the uploads/bulk_pdf folder. Splits it into PDFs of the page
-    * size entered and places in the uploads/split_pdf folder.
-    * Its error checking has overlap with ajaxUploadSubmission.
+     * Function that uploads a bulk PDF to the uploads/bulk_pdf folder. Splits it into PDFs of the page
+     * size entered and places in the uploads/split_pdf folder.
+     * Its error checking has overlap with ajaxUploadSubmission.
+     *
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk", methods={"POST"})
     */
-    private function ajaxBulkUpload() {
-        // make sure is at least full access grader
-        if (!$this->core->getUser()->accessFullGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
+    public function ajaxBulkUpload($gradeable_id) {
+        if (empty($_POST)) {
+            $max_size =  Utils::returnBytes(ini_get('post_max_size'));
+            return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
         }
 
-        if (!isset($_POST['num_pages'])) {
+        $is_qr = isset($_POST['use_qr_codes']) && $_POST['use_qr_codes'] === "true";
+
+        if (!isset($_POST['num_pages']) && !$is_qr) {
             $msg = "Did not pass in number of pages or files were too large.";
-            $return = array('success' => false, 'message' => $msg);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -466,42 +267,29 @@ class SubmissionController extends AbstractController {
             $uploaded_file = $_FILES["files1"];
         }
 
-        $errors = array();
-        $count = 0;
-        if (isset($uploaded_file)) {
-            $count = count($uploaded_file["name"]);
-            for ($j = 0; $j < $count; $j++) {
-                if (!isset($uploaded_file["tmp_name"][$j]) || $uploaded_file["tmp_name"][$j] === "") {
-                    $error_message = $uploaded_file["name"][$j]." failed to upload. ";
-                    if (isset($uploaded_file["error"][$j])) {
-                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_file["error"][$j]). ".";
-                    }
-                    $errors[] = $error_message;
-                }
-            }
+        $status = FileUtils::validateUploadedFiles($uploaded_file);
+        $count = count($uploaded_file["name"]);
+
+        if(array_key_exists("failed", $status)){
+            return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
 
-        if (count($errors) > 0) {
-            $error_text = implode("\n", $errors);
-            return $this->uploadResult("Upload Failed: ".$error_text, false);
+        $file_size = 0;
+        foreach ($status as $stat) {
+            if($stat['success'] === false){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
+            }
+
+            if($stat['type'] !== 'application/pdf'){
+                return $this->core->getOutput()->renderResultMessage("Error " . $stat['name'] . " is not a PDF", false);
+            }
+
+            $file_size += $stat['size'];
         }
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
-        // Error checking of file name
-        $file_size = 0;
-        if (isset($uploaded_file)) {
-            for ($j = 0; $j < $count; $j++) {
-                if(FileUtils::isValidFileName($uploaded_file["name"][$j]) === false) {
-                    return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_file["name"][$j].".", false);
-                }
-                if(substr($uploaded_file["name"][$j],-3) != "pdf") {
-                    return $this->uploadResult($uploaded_file["name"][$j]." is not a PDF!", false);
-                }
-                $file_size += $uploaded_file["size"][$j];
-            }
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
         }
 
         if ($file_size > $max_size) {
@@ -527,7 +315,7 @@ class SubmissionController extends AbstractController {
         // delete the temporary file
         if (isset($uploaded_file)) {
             for ($j = 0; $j < $count; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
                     if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
@@ -540,7 +328,7 @@ class SubmissionController extends AbstractController {
                 if (!@unlink($uploaded_file["tmp_name"][$j])) {
                     return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file["name"][$j]} from temporary storage.", false);
                 }
-            } 
+            }
         }
 
         // use pdf_check.cgi to check that # of pages is valid and split
@@ -548,7 +336,7 @@ class SubmissionController extends AbstractController {
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        if($_POST['use_qr_codes'] === "true"){
+        if($is_qr){
             $qr_prefix = rawurlencode($_POST['qr_prefix']);
             $qr_suffix = rawurlencode($_POST['qr_suffix']);
 
@@ -556,60 +344,49 @@ class SubmissionController extends AbstractController {
             //create a new job to split but uploads via QR
             for($i = 0; $i < $count; $i++){
                 $qr_upload_data = [
-                    "job"       => "BulkQRSplit",
+                    "job"       => "BulkUpload",
                     "semester"  => $semester,
                     "course"    => $course,
                     "g_id"      => $gradeable_id,
                     "timestamp" => $current_time,
                     "qr_prefix" => $qr_prefix,
                     "qr_suffix" => $qr_suffix,
-                    "filename"  => $uploaded_file["name"][$i]
+                    "filename"  => $uploaded_file["name"][$i],
+                    "is_qr"     => true
                 ];
 
-                $qr_upload_job  = "/var/local/submitty/daemon_job_queue/qr_upload_" . $uploaded_file["name"][$i] . ".json"; 
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
 
                 //add new job to queue
-                if(!file_put_contents($qr_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
                     $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
                     return $this->uploadResult("Failed to write BulkQRSplit job", false);
                 }
             }
-            $return = array('success' => true);
-            $this->core->getOutput()->renderJson($return);
-            return $return;
+        }else{
+            for($i = 0; $i < $count; $i++){
+                $job_data = [
+                    "job"       => "BulkUpload",
+                    "semester"  => $semester,
+                    "course"    => $course,
+                    "g_id"      => $gradeable_id,
+                    "timestamp" => $current_time,
+                    "filename"  => $uploaded_file["name"][$i],
+                    "num"       => $num_pages,
+                    "is_qr"     => false
+                ];
+
+                $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
+
+                //add new job to queue
+                if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT)) ){
+                    $this->core->getOutput()->renderJsonFail("Failed to write Bulk upload job");
+                    return $this->uploadResult("Failed to write Bulk upload job", false);
+                }
+            }
         }
 
-        // Open a cURL connection
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."pdf_check.cgi?&num={$num_pages}&sem={$semester}&course={$course}&g_id={$gradeable_id}&ver={$current_time}");
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $output = curl_exec($ch);
-
-        if ($output === false) {
-            return $this->uploadResult(curl_error($ch),false);
-        }
-
-        $output = json_decode($output, true);
-        curl_close($ch);
-
-        if ($output === null) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult("Error JSON response for pdf split: ".json_last_error_msg(),false);
-        }
-        if (!isset($output['valid'])) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult($output, false);
-            //return $this->uploadResult("Missing response in JSON for pdf split",false);
-        }
-        else if ($output['valid'] !== true) {
-            FileUtils::recursiveRmdir($version_path);
-            return $this->uploadResult($output['message'],false);
-        }
-
-        $return = array('success' => true);
-        $this->core->getOutput()->renderJson($return);
-        return $return;
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**
@@ -618,26 +395,16 @@ class SubmissionController extends AbstractController {
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      * Has overlap with ajaxUploadSubmission
      *
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/upload", methods={"POST"})
      * @return boolean
      */
-    private function ajaxUploadSplitItem() {
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResult("Invalid CSRF token.", false);
-        }
-
-        // make sure is at least full access grader
-        if (!$this->core->getUser()->accessFullGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
-        }
-
+    public function ajaxUploadSplitItem($gradeable_id, $merge = null, $clobber = null) {
         // check for whether the item should be merged with previous submission
         // and whether or not file clobbering should be done
-        $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
-        $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
+        $merge_previous = isset($merge) && $merge === 'true';
+        $clobber = isset($clobber) && $clobber === 'true';
 
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -654,13 +421,19 @@ class SubmissionController extends AbstractController {
 
         $original_user_id = $this->core->getUser()->getId();
 
-        //user ids come in as a comma delimited list. we explode that list, then filter out empty values.
-        $user_ids = explode (",", $_POST['user_id']);
-        $user_ids = array_filter($user_ids);
+        $tmp_ids = $_POST['user_id'];
+        if(is_array($tmp_ids)){
+            $user_ids = array_filter($_POST['user_id']);
+        } else{
+            $user_ids = array($tmp_ids);
+            $user_ids = array_filter($user_ids);
+        }
+
         //This grabs the first user in the list. If this is a team assignment, they will be the team leader.
         $user_id = reset($user_ids);
 
         $path = $_POST['path'];
+
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
         $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
@@ -705,6 +478,7 @@ class SubmissionController extends AbstractController {
                     $gradeable->createTeam($leader_user, $members);
                 } catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
+                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
                 }
 
                 // Once team is created, load in the graded gradeable
@@ -737,11 +511,20 @@ class SubmissionController extends AbstractController {
 
         $path = rawurldecode(htmlspecialchars_decode($path));
 
-        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
-            $gradeable->getId(), $path);
-
+        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $gradeable->getId(), $path);
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
         $uploaded_file_base_name = "upload.pdf";
+
+        //get any and all images associated with this PDF if they exist.
+        //images are order <original>_<split-number>_<page-number>, so grab everuthing with the same suffixes
+        preg_match("/\d*$/", pathinfo($path, PATHINFO_FILENAME), $matches) ;
+        $split_number = count($matches) >= 1 ? reset($matches) : "-1";
+        $image_files = glob(FileUtils::joinPaths(  dirname($uploaded_file)   , "*.*"));
+
+        $regex = "/.*_{$split_number}_\d*\.\w*$/";
+        $image_files = preg_grep($regex, $image_files);
+
+        $image_extension = count($image_files) > 0 ? pathinfo(reset($image_files), PATHINFO_EXTENSION) : "";
 
         if (isset($uploaded_file)) {
             // if we are merging in the previous submission (TODO check folder support)
@@ -757,9 +540,18 @@ class SubmissionController extends AbstractController {
                         $parts[0] .= "_version_".$old_version;
                         $file_base_name = implode(".", $parts);
                     }
+
+                    $image_name = pathinfo($file, PATHINFO_FILENAME);
+                    preg_match("/\d*$/", $image_name, $matches);
+                    $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
+
+                    if(!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0 ){
+                        $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
+                    }
+
                     $move_here = FileUtils::joinPaths($version_path, $file_base_name);
                     if (!@copy($file, $move_here)){
-                        return $this->uploadResult("Failed to merge previous version.", false);
+                        return $this->uploadResult("Failed to merge previous version on file {$file_base_name}", false);
                     }
                 }
             }
@@ -773,6 +565,18 @@ class SubmissionController extends AbstractController {
             if (!@unlink(str_replace(".pdf", "_cover.pdf", $uploaded_file))) {
                 return $this->uploadResult("Failed to delete the uploaded file {$uploaded_file} from temporary storage.", false);
             }
+            //do the same thing for images
+            $i = 1;
+            foreach ($image_files as $image) {
+                // copy over the uploaded image
+                if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension ))) {
+                    return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
+                }
+                if (!@unlink($image)) {
+                    return $this->uploadResult("Failed to delete the uploaded image {$image} from temporary storage.", false);
+                }
+                $i++;
+            }
 
         }
 
@@ -781,7 +585,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        if (count($files) == 0 || (count($files) == 1 && array_key_exists('decoded.json', $files)  )) {
+        if (count($files) == 0) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -815,7 +619,7 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents(FileUtils::joinPaths($version_path, ".submit.timestamp"), $current_time_string_tz."\n")) {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
-        
+
         $upload_time_string_tz = $timestamp . " " . $this->core->getConfig()->getTimezone()->getName();
 
         $bulk_upload_data = [
@@ -827,11 +631,13 @@ class SubmissionController extends AbstractController {
         if (FileUtils::writeJsonFile(FileUtils::joinPaths($version_path, "bulk_upload_data.json"), $bulk_upload_data) === false) {
             return $this->uploadResult("Failed to create bulk upload file for this submission.", false);
         }
-        
+
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
             implode("__", $queue_file));
+
+        $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
         // create json file...
         $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
@@ -844,7 +650,8 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout);
 
         if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
             return $this->uploadResult("Failed to create file for grading queue.", false);
@@ -865,21 +672,11 @@ class SubmissionController extends AbstractController {
      * Function for deleting a split item from the uploads/split_pdf/gradeable_id/timestamp folder. This should be called via AJAX,
      * saving the result to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
+     * @AccessControl(role="FULL_ACCESS_GRADER")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/split_pdf/delete", methods={"POST"})
      * @return boolean
      */
-    private function ajaxDeleteSplitItem() {
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResult("Invalid CSRF token.", false);
-        }
-
-        // make sure is at least full access grader
-        if (!$this->core->getUser()->accessFullGrading()) {
-            $msg = "You do not have access to that page.";
-            $this->core->addErrorMessage($msg);
-            return $this->uploadResult($msg, false);
-        }
-
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
+    public function ajaxDeleteSplitItem($gradeable_id) {
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -911,17 +708,7 @@ class SubmissionController extends AbstractController {
         $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
             $gradeable->getId(), $timestamp);
         $files = FileUtils::getAllFiles($timestamp_path);
-        
-        //check if there are any pdfs left to assign to students, otherwise delete the folder
-        $any_pdfs_left = false;
-        foreach ($files as $file){
-            if(strpos($file['name'], ".pdf") !== false){
-                $any_pdfs_left = true;
-                break;
-            }
-        }
-
-        if (count($files) == 0 || !$any_pdfs_left   ) {
+        if(count($files) === 0){
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
                 return $this->uploadResult("Failed to remove the empty timestamp directory {$timestamp} from the split_pdf directory.", false);
             }
@@ -934,33 +721,30 @@ class SubmissionController extends AbstractController {
      * Function for uploading a submission to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, returning a true or false on whether or not it suceeded or not.
      *
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/upload", methods={"POST"})
      * @return array
      */
-    private function ajaxUploadSubmission() {
+    public function ajaxUploadSubmission($gradeable_id, $merge = null, $clobber = null) {
         if (empty($_POST)) {
             $max_size = ini_get('post_max_size');
             return $this->uploadResult("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false);
         }
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResult("Invalid CSRF token.", false);
-        }
 
         // check for whether the item should be merged with previous submission,
         // and whether or not file clobbering should be done.
-        $merge_previous = isset($_REQUEST['merge']) && $_REQUEST['merge'] === 'true';
-        $clobber = isset($_REQUEST['clobber']) && $_REQUEST['clobber'] === 'true';
+        $merge_previous = isset($merge) && $merge === 'true';
+        $clobber = isset($clobber) && $clobber === 'true';
 
-        $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
-        if ($vcs_checkout && !isset($_POST['repo_id'])) {
+        $vcs_checkout = isset($_POST['vcs_checkout']) ? $_POST['vcs_checkout'] === "true" : false;
+        if ($vcs_checkout && !isset($_POST['git_repo_id'])) {
             return $this->uploadResult("Invalid repo id.", false);
         }
 
-        $student_page = isset($_REQUEST['student_page']) ? $_REQUEST['student_page'] === "true" : false;
+        $student_page = isset($_POST['student_page']) ? $_POST['student_page'] === "true" : false;
         if ($student_page && !isset($_POST['pages'])) {
             return $this->uploadResult("Invalid pages.", false);
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // This checks for an assignment id, and that it's a valid assignment id in that
@@ -977,7 +761,7 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $user_id = $_POST['user_id'];
         // repo_id for VCS use
-        $repo_id = $_POST['repo_id'];
+        $repo_id = ($vcs_checkout ? $_POST['git_repo_id'] : "");
 
         // make sure is full grader if the two ids do not match
         if ($original_user_id !== $user_id && !$this->core->getUser()->accessFullGrading()) {
@@ -1025,7 +809,7 @@ class SubmissionController extends AbstractController {
         $user_path = FileUtils::joinPaths($gradeable_path, $who_id);
         $this->upload_details['user_path'] = $user_path;
         if (!FileUtils::createDir($user_path)) {
-                return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
+            return $this->uploadResult("Failed to make folder for this assignment for the user.", false);
         }
 
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -1091,19 +875,50 @@ class SubmissionController extends AbstractController {
             }
 
             // save the contents of the text boxes to files
-            $empty_textboxes = true;
-            if (isset($_POST['textbox_answers'])) {
-                $textbox_answer_array = json_decode($_POST['textbox_answers']);
-                for ($i = 0; $i < $gradeable->getAutogradingConfig()->getNumTextBoxes(); $i++) {
-                    $textbox_answer_val = $textbox_answer_array[$i];
-                    if ($textbox_answer_val != "") $empty_textboxes = false;
-                    $filename = $gradeable->getAutogradingConfig()->getTextboxes()[$i]->getFileName();
-                    $dst = FileUtils::joinPaths($version_path, $filename);
-                    // FIXME: add error checking
-                    $file = fopen($dst, "w");
-                    fwrite($file, $textbox_answer_val);
-                    fclose($file);
+            $empty_inputs = true;
+            $num_short_answers = 0;
+            $num_codeboxes = 0;
+            $num_multiple_choice = 0;
+
+            $short_answer_objects    = $_POST['short_answer_answers'] ?? "";
+            $codebox_objects         = $_POST['codebox_answers'] ?? "";
+            $multiple_choice_objects = $_POST['multiple_choice_answers'] ?? "";
+            $short_answer_objects    = json_decode($short_answer_objects,true);
+            $codebox_objects         = json_decode($codebox_objects,true);
+            $multiple_choice_objects = json_decode($multiple_choice_objects,true);
+
+            $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
+
+            foreach($this_config_inputs as $this_input) {
+                if ($this_input instanceof SubmissionTextBox) {
+                    $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
+                    $num_short_answers += 1;
                 }
+                else if ($this_input instanceof SubmissionCodeBox) {
+                    $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? array();
+                    $num_codeboxes += 1;
+                }
+                else if ($this_input instanceof SubmissionMultipleChoice) {
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
+                    $num_multiple_choice += 1;
+                }
+                else {
+                    //TODO: How should we handle this case?
+                    continue;
+                }
+
+                $filename = $this_input->getFileName();
+                $dst = FileUtils::joinPaths($version_path, $filename);
+
+                if ( count($answers) > 0)  $empty_inputs = false;
+
+                // FIXME: add error checking
+                $file = fopen($dst, "w");
+
+                foreach ($answers as $answer_val) {
+                    fwrite($file, $answer_val . "\n");
+                }
+                fclose($file);
             }
 
             $previous_files_src = array();
@@ -1120,7 +935,7 @@ class SubmissionController extends AbstractController {
             }
 
 
-            if (empty($uploaded_files) && empty($previous_files_src) && $empty_textboxes) {
+            if (empty($uploaded_files) && empty($previous_files_src) && $empty_inputs) {
                 return $this->uploadResult("No files to be submitted.", false);
             }
 
@@ -1188,13 +1003,13 @@ class SubmissionController extends AbstractController {
 
             // Determine the size of the uploaded files as well as whether or not they're a zip or not.
             // We save that information for later so we know which files need unpacking or not and can save
-            // a check to getMimeType()
+            // a check for its mime type
             $file_size = 0;
             for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
                     $uploaded_files[$i]["is_zip"] = array();
                     for ($j = 0; $j < $count[$i]; $j++) {
-                        if (FileUtils::getMimeType($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
+                        if (mime_content_type($uploaded_files[$i]["tmp_name"][$j]) == "application/zip") {
                             if(FileUtils::checkFileInZipName($uploaded_files[$i]["tmp_name"][$j]) === false) {
                                 return $this->uploadResult("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
                             }
@@ -1252,7 +1067,7 @@ class SubmissionController extends AbstractController {
                             }
                         }
                         else {
-                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
@@ -1273,6 +1088,13 @@ class SubmissionController extends AbstractController {
         else {
             $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
             $vcs_path = $gradeable->getVcsSubdirectory();
+
+            if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
+                $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
+                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
+                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
+                $vcs_full_path = $vcs_base_url.$vcs_path;
+            }
 
             // use entirely student input
             if ($vcs_base_url == "" && $vcs_path == "") {
@@ -1298,6 +1120,17 @@ class SubmissionController extends AbstractController {
             if (!@touch(FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT"))) {
                 return $this->uploadResult("Failed to touch file for vcs submission.", false);
             }
+
+            // Public or private github
+            if ($gradeable->getVcsHostType() == 2 || $gradeable->getVcsHostType() == 3) {
+                $dst = FileUtils::joinPaths($version_path, ".submit.VCS_CHECKOUT");
+                $json = array("git_user_id" => $_POST["git_user_id"],
+                              "git_repo_id" => $_POST["git_repo_id"]);
+                if (!@file_put_contents($dst, FileUtils::encodeJson($json))) {
+                    return $this->uploadResult("Failed to write to VCS_CHECKOUT file.", false);
+                }
+            }
+
         }
 
         // save the contents of the page number inputs to files
@@ -1351,15 +1184,26 @@ class SubmissionController extends AbstractController {
             return $this->uploadResult("Failed to save timestamp file for this submission.", false);
         }
 
-        $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
-            $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
+                                   $gradeable->getId(), $who_id, $new_version);
+        $queue_file_helper = implode("__", $queue_file_helper);
         $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-            implode("__", $queue_file));
+                                           $queue_file_helper);
+        // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
+        $vcs_queue_file = "";
+        if ($vcs_checkout === true) {
+            $vcs_queue_file = FileUtils::joinPaths(
+                $this->core->getConfig()->getSubmittyPath(),
+                "to_be_graded_queue",
+                "VCS__".$queue_file_helper
+            );
+        }
 
         // create json file...
-        $queue_data = array("semester" => $this->core->getConfig()->getSemester(),
+        $queue_data = array(
+            "semester" => $this->core->getConfig()->getSemester(),
             "course" => $this->core->getConfig()->getCourse(),
-            "gradeable" =>  $gradeable->getId(),
+            "gradeable" => $gradeable->getId(),
             "required_capabilities" => $gradeable->getAutogradingConfig()->getRequiredCapabilities(),
             "max_possible_grading_time" => $gradeable->getAutogradingConfig()->getMaxPossibleGradingTime(),
             "queue_time" => $current_time,
@@ -1367,33 +1211,57 @@ class SubmissionController extends AbstractController {
             "team" => $team_id,
             "who" => $who_id,
             "is_team" => $gradeable->isTeamAssignment(),
-            "version" => $new_version);
+            "version" => $new_version,
+            "vcs_checkout" => $vcs_checkout
+        );
 
         if ($gradeable->isTeamAssignment()) {
             $queue_data['team_members'] = $team->getMemberUserIds();
         }
 
-
-        if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
+        // Create the vcs file first!  (avoid race condition, we must
+        // check out the files before trying to grade them)
+        if ($vcs_queue_file !== "") {
+            if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+            }
         }
+        else {
+            // Then create the file that will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
+        }
+
+        Logger::logAccess(
+            $this->core->getUser()->getId(),
+            $_COOKIE['submitty_token'],
+            "{$this->core->getConfig()->getSemester()}:{$this->core->getConfig()->getCourse()}:submission:{$gradeable->getId()}"
+        );
 
         if($gradeable->isTeamAssignment()) {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), null, $team_id, $new_version, $current_time);
+            $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
+
+            // notify other team members that a submission has been made
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id])]);
+            $subject = "Team Member Submission: ".$graded_gradeable->getGradeable()->getTitle();
+            $content = "A team member, $original_user_id, submitted in the gradeable, ".$graded_gradeable->getGradeable()->getTitle();
+            $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
+            $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);
         }
 
-        if ($user_id == $original_user_id) {
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()}");
+        if ($user_id === $original_user_id) {
+            $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()}";
         }
         else {
-            $this->core->addSuccessMessage("Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}");
+            $message = "Successfully uploaded version {$new_version} for {$gradeable->getTitle()} for {$who_id}";
         }
 
-
-        return $this->uploadResult("Successfully uploaded files");
+        return $this->uploadResult($message);
     }
 
     private function uploadResult($message, $success = true) {
@@ -1421,73 +1289,51 @@ class SubmissionController extends AbstractController {
                 }
             }
         }
-        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
-        $this->core->getOutput()->renderJson($return);
-        return $return;
+        return $this->core->getOutput()->renderResultMessage($message, $success);
     }
 
-    private function uploadResultMessage($message, $success = true, $show_msg = true) {
-        $return = array('success' => $success, 'error' => !$success, 'message' => $message);
-        $this->core->getOutput()->renderJson($return);
-
-        if ($show_msg == true) {
-            if ($success) {
-                $this->core->addSuccessMessage($message);
-            }
-            else {
-                $this->core->addErrorMessage($message);
-            }
-        }
-        return $return;
-    }
-
-
-    private function updateSubmissionVersion() {
-        $ta = $_REQUEST['ta'] ?? false;
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/version/{new_version}", methods={"POST"})
+     */
+    public function updateSubmissionVersion($gradeable_id, $new_version, $ta = null, $who = null) {
+        $ta = $ta === "true" ?? false;
         if ($ta !== false) {
             // make sure is full grader
             if (!$this->core->getUser()->accessFullGrading()) {
                 $msg = "You do not have access to that page.";
                 $this->core->addErrorMessage($msg);
-                $this->core->redirect($this->core->getConfig()->getSiteUrl());
-                return array('error' => true, 'message' => $msg);
+                $this->core->redirect($this->core->buildCourseUrl());
+                return $this->core->getOutput()->renderJsonFail($msg);
             }
             $ta = true;
         }
 
-        $gradeable_id = $_REQUEST['gradeable_id'];
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
         if ($gradeable === null) {
             $msg = "Invalid gradeable id.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student')));
-            return array('error' => true, 'message' => $msg);
+            $this->core->redirect($this->core->buildCourseUrl());
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
-        $who = $_REQUEST['who'] ?? $this->core->getUser()->getId();
+        $who = $who ?? $this->core->getUser()->getId();
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $who, $who);
-        $url = $this->core->buildUrl(array('component' => 'student', 'gradeable_id' => $gradeable->getId()));
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $msg = "Invalid CSRF token. Refresh the page and try again.";
-            $this->core->addErrorMessage($msg);
-            $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
-        }
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
 
         // If $graded_gradeable is null, that means its a team assignment and the user is on no team
         if ($gradeable->isTeamAssignment() && $graded_gradeable === null) {
             $msg = 'Must be on a team to access submission.';
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->getConfig()->getSiteUrl());
-            return array('error' => true, 'message' => $msg);
+            $this->core->redirect($this->core->buildCourseUrl());
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
-        $new_version = intval($_REQUEST['new_version']);
+        $new_version = intval($new_version);
         if ($new_version < 0) {
             $msg = "Cannot set the version below 0.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $highest_version = $graded_gradeable->getAutoGradedGradeable()->getHighestVersion();
@@ -1495,14 +1341,14 @@ class SubmissionController extends AbstractController {
             $msg = "Cannot set the version past {$highest_version}.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         if (!$this->core->getUser()->accessGrading() && !$gradeable->isStudentSubmit()) {
             $msg = "Cannot submit for this assignment.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $original_user_id = $this->core->getUser()->getId();
@@ -1515,7 +1361,7 @@ class SubmissionController extends AbstractController {
             $msg = "Failed to open settings file.";
             $this->core->addErrorMessage($msg);
             $this->core->redirect($url);
-            return array('error' => true, 'message' => $msg);
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
         $json["active_version"] = $new_version;
         $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO");
@@ -1526,9 +1372,8 @@ class SubmissionController extends AbstractController {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             $msg = "Could not write to settings file.";
             $this->core->addErrorMessage($msg);
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
-                                                              'gradeable_id' => $gradeable->getId())));
-            return array('error' => true, 'message' => $msg);
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]));
+            return $this->core->getOutput()->renderJsonFail($msg);
         }
 
         $version = ($new_version > 0) ? $new_version : null;
@@ -1551,293 +1396,26 @@ class SubmissionController extends AbstractController {
             $this->core->addSuccessMessage($msg);
         }
         if($ta) {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'grading', 'page' => 'electronic',
-                                                    'action' => 'grade', 'gradeable_id' => $gradeable->getId(),
-                                                    'who_id'=>$who, 'gradeable_version' => $new_version)));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $graded_gradeable->getGradeableId(), 'grading', 'grade']). '?'
+                . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]));
         }
         else {
-            $this->core->redirect($this->core->buildUrl(array('component' => 'student',
-                                                          'gradeable_id' => $gradeable->getId(),
-                                                          'gradeable_version' => $new_version)));
+            $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]));
         }
 
-        return array('error' => false, 'version' => $new_version, 'message' => $msg);
-    }
-
-    private function ajaxUploadImagesFiles() {
-        if(!$this->core->getUser()->accessAdmin()) {
-            return $this->uploadResultMessage("You have no permission to access this page", false);
-        }
-
-        if (empty($_POST)) {
-           $max_size = ini_get('post_max_size');
-           return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
-        }
-
-        if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            return $this->uploadResultMessage("Invalid CSRF token.", false, false);
-        }
-
-        $uploaded_files = array();
-        if (isset($_FILES["files1"])) {
-            $uploaded_files[1] = $_FILES["files1"];
-        }
-        $errors = array();
-        $count_item = 0;
-        if (isset($uploaded_files[1])) {
-            $count_item = count($uploaded_files[1]["name"]);
-            for ($j = 0; $j < $count_item[1]; $j++) {
-                if (!isset($uploaded_files[1]["tmp_name"][$j]) || $uploaded_files[1]["tmp_name"][$j] === "") {
-                    $error_message = $uploaded_files[1]["name"][$j]." failed to upload. ";
-                    if (isset($uploaded_files[1]["error"][$j])) {
-                        $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[1]["error"][$j]). ".";
-                    }
-                    $errors[] = $error_message;
-                }
-            }
-        }
-
-        if (count($errors) > 0) {
-            $error_text = implode("\n", $errors);
-            return $this->uploadResultMessage("Upload Failed: ".$error_text, false);
-        }
-
-        if (empty($uploaded_files)) {
-            return $this->uploadResultMessage("No files to be submitted.", false);
-        }
-
-        $file_size = 0;
-        if (isset($uploaded_files[1])) {
-            $uploaded_files[1]["is_zip"] = array();
-            for ($j = 0; $j < $count_item; $j++) {
-                if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
-                    if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                        return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
-                    }
-                    $uploaded_files[1]["is_zip"][$j] = true;
-                    $file_size += FileUtils::getZipSize($uploaded_files[1]["tmp_name"][$j]);
-                }
-                else {
-                    if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                        return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
-                    }
-                    $uploaded_files[1]["is_zip"][$j] = false;
-                    $file_size += $uploaded_files[1]["size"][$j];
-                }
-            }
-        }
-
-        $max_size = 10485760;
-        if ($file_size > $max_size) {
-            return $this->uploadResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
-        }
-
-        // creating uploads/student_images directory
-
-        $upload_img_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
-        if (!FileUtils::createDir($upload_img_path)) {
-            return $this->uploadResultMessage("Failed to make image path.", false);
-        }
-
-        if (isset($uploaded_files[1])) {
-            for ($j = 0; $j < $count_item; $j++) {
-                if ($uploaded_files[1]["is_zip"][$j] === true) {
-                    $zip = new \ZipArchive();
-                    $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
-                    if ($res === true) {
-                        //make tmp folder to store class section images
-                        $upload_img_path_tmp = FileUtils::joinPaths($upload_img_path, "tmp");
-                        $zip->extractTo($upload_img_path_tmp);
-
-                        FileUtils::recursiveCopy($upload_img_path_tmp, $upload_img_path);
-
-                        //delete tmp folder
-                        FileUtils::recursiveRmdir($upload_img_path_tmp);
-                        $zip->close();
-                    }
-                    else {
-                        // If the zip is an invalid zip (say we remove the last character from the zip file
-                        // then trying to get the status code will throw an exception and not give us a string
-                        // so we have that string hardcoded, otherwise we can just get the status string as
-                        // normal.
-                        $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                        return $this->uploadResultMessage("Could not properly unpack zip file. Error message: ".$error_message.".", false);
-                    }
-                }
-                else {
-                    if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                        $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
-                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                            return $this->uploadResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
-                        }
-                    }
-                    else {
-                        return $this->uploadResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
-                    }
-                }
-                // Is this really an error we should fail on?
-                if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
-                    return $this->uploadResultMessage("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
-                }
-            }
-        }
-
-        $total_count = intval($_POST['file_count']);
-        $uploaded_count = count($uploaded_files[1]['tmp_name']);
-        $remaining_count = $uploaded_count - $total_count;
-        $php_count = ini_get('max_file_uploads');
-        if ($total_count < $uploaded_count) {
-            $message = "Successfully uploaded {$uploaded_count} images. Could not upload remaining {$remaining_count} files.";
-            $message .= " The max number of files you can upload at once is set to {$php_count}.";
-        }
-        else {
-            $message = 'Successfully uploaded!';
-        }
-        return $this->uploadResultMessage($message, true);
-    }
-
-    private function ajaxUploadCourseMaterialsFiles() {
-      if(!$this->core->getUser()->accessAdmin()) {
-         return $this->uploadResultMessage("You have no permission to access this page", false);
-      }
-
-      if (empty($_POST)) {
-         $max_size = ini_get('post_max_size');
-         return $this->uploadResultMessage("Empty POST request. This may mean that the sum size of your files are greater than {$max_size}.", false, false);
-      }
-
-      if (!isset($_POST['csrf_token']) || !$this->core->checkCsrfToken($_POST['csrf_token'])) {
-          return $this->uploadResultMessage("Invalid CSRF token.", false, false);
-      }
-
-      $expand_zip = "";
-      if (isset($_POST['expand_zip'])) {
-          $expand_zip = $_POST['expand_zip'];
-      }
-
-      $requested_path = "";
-      if (isset($_POST['requested_path'])) {
-          $requested_path = $_POST['requested_path'];
-      }
-
-      $n = strpos($requested_path, '..');
-      if ($n !== false) {
-          return $this->uploadResultMessage(".. is not supported in the path.", false, false);
-      }
-
-      $uploaded_files = array();
-      if (isset($_FILES["files1"])) {
-          $uploaded_files[1] = $_FILES["files1"];
-      }
-      $errors = array();
-      if (isset($uploaded_files[1])) {
-          $count_item = count($uploaded_files[1]["name"]);
-          for ($j = 0; $j < $count_item[1]; $j++) {
-              if (!isset($uploaded_files[1]["tmp_name"][$j]) || $uploaded_files[1]["tmp_name"][$j] === "") {
-                  $error_message = $uploaded_files[1]["name"][$j]." failed to upload. ";
-                  if (isset($uploaded_files[1]["error"][$j])) {
-                      $error_message .= "Error message: ". ErrorMessages::uploadErrors($uploaded_files[1]["error"][$j]). ".";
-                  }
-                  $errors[] = $error_message;
-              }
-          }
-      }
-
-      if (count($errors) > 0) {
-          $error_text = implode("\n", $errors);
-          return $this->uploadResultMessage("Upload Failed: ".$error_text, false);
-      }
-
-      if (empty($uploaded_files)) {
-          return $this->uploadResultMessage("No files to be submitted.", false);
-      }
-
-      $file_size = 0;
-      if (isset($uploaded_files[1])) {
-          for ($j = 0; $j < $count_item; $j++) {
-              if(FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                  return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
-              }
-              $file_size += $uploaded_files[1]["size"][$j];
-          }
-      }
-
-      $max_size = 10485760;
-      if ($file_size > $max_size) {
-          return $this->uploadResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
-      }
-
-      // creating uploads/course_materials directory
-      $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-      if (!FileUtils::createDir($upload_path)) {
-          return $this->uploadResultMessage("Failed to make image path.", false);
-      }
-
-      // create nested path
-      if (!empty($requested_path)) {
-          $upload_nested_path = FileUtils::joinPaths($upload_path, $requested_path);
-          if (!FileUtils::createDir($upload_nested_path, null, true)) {
-             return $this->uploadResultMessage("Failed to make image path.", false);
-          }
-          $upload_path = $upload_nested_path;
-      }
-
-      if (isset($uploaded_files[1])) {
-          for ($j = 0; $j < $count_item; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
-                    $dst = FileUtils::joinPaths($upload_path, $uploaded_files[1]["name"][$j]);
-                    //
-                    $is_zip_file = false;
-
-                    if (FileUtils::getMimeType($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
-                        if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                            return $this->uploadResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[$i]["name"][$j].".", false);
-                        }
-                        $is_zip_file = true;
-                    }
-                    //cannot check if there are duplicates inside zip file, will overwrite
-                    //it is convenient for bulk uploads
-                    if ($expand_zip == 'on' && $is_zip_file === true) {
-                        $zip = new \ZipArchive();
-                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
-                        if ($res === true) {
-                            $zip->extractTo($upload_path);
-                            $zip->close();
-                        }
-                    }
-                    else
-                    {
-                        if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
-                           return $this->uploadResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
-                      }
-                    }
-                    //
-                }
-                else {
-                    return $this->uploadResultMessage("The tmp file '{$uploaded_files[1]['name'][$j]}' was not properly uploaded.", false);
-                }
-            // Is this really an error we should fail on?
-              if (!@unlink($uploaded_files[1]["tmp_name"][$j])) {
-                  return $this->uploadResultMessage("Failed to delete the uploaded file {$uploaded_files[1]["name"][$j]} from temporary storage.", false);
-              }
-          }
-      }
-
-
-      return $this->uploadResultMessage("Successfully uploaded!", true);
-
+        return $this->core->getOutput()->renderJsonSuccess(['version' => $new_version, 'message' => $msg]);
     }
 
     /**
      * Check if the results folder exists for a given gradeable and version results.json
      * in the results/ directory. If the file exists, we output a string that the calling
      * JS checks for to initiate a page refresh (so as to go from "in-grading" to done
+     *
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}/check_refresh", requirements={"gradeable_version": "\d+"})
      */
-    public function checkRefresh() {
+    public function checkRefresh($gradeable_id, $gradeable_version) {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        $version = $_REQUEST['gradeable_version'];
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
         $gradeable = $this->tryGetElectronicGradeable($gradeable_id);
 
         // Don't load the graded gradeable, since that may not exist yet
@@ -1855,13 +1433,13 @@ class SubmissionController extends AbstractController {
         }
 
         $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
-            $submitter_id, $version, "results.json");
+            $submitter_id, $gradeable_version, "results.json");
 
         $results_json_exists = file_exists($filepath);
 
         // if the results json exists, check the database to make sure that the autograding results are there.
         $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
-            $gradeable_id, $version, $user_id, $team_id);
+            $gradeable_id, $gradeable_version, $user_id, $team_id);
 
         if ($has_results) {
             $refresh_string = "REFRESH_ME";
@@ -1875,29 +1453,34 @@ class SubmissionController extends AbstractController {
         return array('refresh' => $refresh_bool, 'string' => $refresh_string);
     }
 
-    public function showStats() {
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk_stats")
+     */
+    public function showBulkStats($gradeable_id) {
         $course_path = $this->core->getConfig()->getCoursePath();
-        $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $json_path = $course_path . "/submissions/" . $gradeable_id . "/";
-        $path_reset = $json_path;
+        $base_path = $course_path . "/submissions/" . $gradeable_id . "/";
         $users = array();
-        if(!file_exists($json_path)) {
-            return;   
-        }
-        $user_id_arr = array_slice(scandir($json_path), 2);
-        $user = $user_id_arr[0];
-        $users[$user] = array();
-        for($i = 0; $i < count($user_id_arr); ++$i) {
-            $files = scandir($json_path . $user_id_arr[$i]);
+        $user_id_arr = is_dir($base_path) ? array_slice(scandir($base_path), 2) : [];
+        for($i = 0; $i < count($user_id_arr); $i++) {
+            $user_path = $base_path . $user_id_arr[$i];
+            if(!is_dir($user_path))
+                continue;
+            $files = scandir($user_path);
             $num_files = count($files) - 3;
-            $json_path = $json_path . $user_id_arr[$i] . "/" . $num_files . "/bulk_upload_data.json";
-            $users[$user_id_arr[$i]]["first_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedFirstName();
-            $users[$user_id_arr[$i]]["last_name"] = $this->core->getQueries()->getUserById($user_id_arr[$i])->getDisplayedLastName();
-            $users[$user_id_arr[$i]]['upload_time'] = json_decode(file_get_contents($json_path), true)['upload_timestamp'];
-            $users[$user_id_arr[$i]]['submit_time'] = json_decode(file_get_contents($json_path), true)['submit_timestamp'];
-            $users[$user_id_arr[$i]]['file'] = json_decode(file_get_contents($json_path), true)['filepath'];
-            $json_path = $path_reset;
+            $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
+            if(!file_exists($json_path))
+                continue;
+            $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
+            if($user === null)
+                continue;
+            $file_contents = FileUtils::readJsonFile($json_path);
+            $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
+            $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
+            $users[$user_id_arr[$i]]['upload_time'] = $file_contents['upload_timestamp'];
+            $users[$user_id_arr[$i]]['submit_time'] = $file_contents['submit_timestamp'];
+            $users[$user_id_arr[$i]]['file'] = $file_contents['filepath'];
         }
+
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
 

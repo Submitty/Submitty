@@ -15,19 +15,15 @@ class SqliteDatabaseTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("sqlite:/tmp/test.sq3", $database->getDSN());
     }
 
-    /**
-     * @expectedException \app\exceptions\NotImplementedException
-     */
     public function testFromDatabaseToPHPArray() {
         $database = new SqliteDatabase();
+        $this->expectException(\app\exceptions\NotImplementedException::class);
         $database->fromDatabaseToPHPArray("");
     }
 
-    /**
-     * @expectedException \app\exceptions\NotImplementedException
-     */
     public function testFromPHPToDatabaseArray() {
         $database = new SqliteDatabase();
+        $this->expectException(\app\exceptions\NotImplementedException::class);
         $database->fromPHPToDatabaseArray(array());
     }
 }

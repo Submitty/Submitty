@@ -12,15 +12,19 @@ Name: ________________________________________
 
 {% set width = 50 / checkpoints|length %}
 
+{# This is a data table #}
 <table border="1" width="100%">
-    <tr>
-        <td style="width: 10%">User Id</td>
-        <td style="width: 20%">First Name</td>
-        <td style="width: 20%">Last Name</td>
-        {% for checkpoint in checkpoints %}
-            <td style="width: {{ width }}%">{{ checkpoint }}</td>
-        {% endfor %}
-    </tr>
+    <caption />
+    <thead>
+        <tr>
+            <th style="width: 10%">User Id</th>
+            <th style="width: 20%">First Name</th>
+            <th style="width: 20%">Last Name</th>
+            {% for checkpoint in checkpoints %}
+                <th style="width: {{ width }}%">{{ checkpoint }}</th>
+            {% endfor %}
+        </tr>
+    </thead>
     {% for student in students %}
         <tr style="background-color: {{ loop.index0 % 2 == 0 ? "white" : "lightgrey" }}">
             <td>

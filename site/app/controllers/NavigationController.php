@@ -8,32 +8,24 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Submitter;
 use app\models\gradeable\GradeableList;
-use app\models\Notification;
+use Symfony\Component\Routing\Annotation\Route;
 
 class NavigationController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'no_access':
-                $this->noAccess();
-                break;
-            case 'notifications':
-                $this->notificationsHandler();
-                break;
-            default:
-                $this->navigationPage();
-                break;
-        }
+    /**
+     * @Route("/{_semester}/{_course}/no_access")
+     */
+    public function noAccess() {
+        $this->core->getOutput()->renderOutput('Error', 'noAccessCourse');
     }
 
-    private function noAccess() {
-        $this->core->getOutput()->renderOutput('Navigation', 'noAccessCourse');
-    }
-
-    private function navigationPage() {
+    /**
+     * @Route("/{_semester}/{_course}", requirements={"_semester": "^(?!api)[^\/]+", "_course": "[^\/]+"})
+     */
+    public function navigationPage() {
         $gradeables_list = new GradeableList($this->core);
 
         $future_gradeables_list = $gradeables_list->getFutureGradeables();
@@ -90,7 +82,8 @@ class NavigationController extends AbstractController {
         }
 
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables, $submit_everyone);
-        $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm'); 
+        $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
+        $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
     }
 
     /**
@@ -129,38 +122,5 @@ class NavigationController extends AbstractController {
         }
 
         return true;
-    }
-
-
-    private function notificationsHandler() {
-        $user_id = $this->core->getUser()->getId();
-        if(!empty($_GET['action'])) {
-            if($_GET['action'] == 'open_notification' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                $metadata = $this->core->getQueries()->getNotificationInfoById($user_id, $_GET['nid'])['metadata'];
-                if(!$_GET['seen']) {
-                    $thread_id = Notification::getThreadIdIfExists($metadata);
-                    $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid'], $thread_id);
-                }
-                $this->core->redirect(Notification::getUrl($this->core, $metadata));
-            } else if($_GET['action'] == 'mark_as_seen' && !empty($_GET['nid']) && is_numeric($_GET['nid']) && $_GET['nid'] >= 1) {
-                $this->core->getQueries()->markNotificationAsSeen($user_id, $_GET['nid']);
-                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
-            } else if($_GET['action'] == 'mark_all_as_seen') {
-                $this->core->getQueries()->markNotificationAsSeen($user_id, -1);
-                $this->core->redirect($this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')));
-            }
-        } else {
-            // Show Notifications
-            $show_all = (!empty($_GET['show_all']) && $_GET['show_all'])?true:false;
-            $notifications = $this->core->getQueries()->getUserNotifications($user_id, $show_all);
-            $currentCourse = $this->core->getConfig()->getCourse();
-            $this->core->getOutput()->addBreadcrumb("Notifications");
-            return $this->core->getOutput()->renderTwigOutput("Notifications.twig", [
-                'course' => $currentCourse,
-                'show_all' => $show_all,
-                'notifications' => $notifications,
-                'notification_saves' => $this->core->getUser()->getNotificationSettings()
-            ]);
-        }
     }
 }

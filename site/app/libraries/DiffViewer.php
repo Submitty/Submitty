@@ -34,7 +34,7 @@ class DiffViewer {
      * @var array
      */
     private $actual = array();
-    
+
     /**
      * @var bool
      */
@@ -128,7 +128,7 @@ class DiffViewer {
         $this->add = array();
         $this->link = array();
     }
-    
+
     /**
      * Load the actual file, expected file, and diff json, using them to populate the necessary arrays for
      * display them later back to the user
@@ -191,7 +191,7 @@ class DiffViewer {
                     $this->actual_file_name = $actual_file;
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
-                    $this->actual = file_get_contents($actual_file, NULL, NULL, 0, $size_limit);
+                    $this->actual = file_get_contents($actual_file, null, null, 0, $size_limit);
                     $this->has_actual = trim($this->actual) !== "" ? true: false;
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
@@ -207,7 +207,7 @@ class DiffViewer {
                 $this->expected_file_image = $expected_file;
             }
             else{
-                 if(filesize($expected_file) < $size_limit){
+                if(filesize($expected_file) < $size_limit){
                     $this->expected = file_get_contents($expected_file);
                     $this->has_expected = trim($this->expected) !== "" ? true : false;
                     $this->expected = explode("\n", $this->expected);
@@ -216,7 +216,7 @@ class DiffViewer {
                 else{
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
-                    $this->expected = file_get_contents($expected_file, NULL, NULL, 0, $size_limit);
+                    $this->expected = file_get_contents($expected_file, null, null, 0, $size_limit);
                     $this->has_expected = trim($this->expected) !== "" ? true : false;
                     $this->expected = explode("\n", $this->expected);
                     $this->display_expected = true;
@@ -239,7 +239,7 @@ class DiffViewer {
         else if ($diff_file != "") {
             $diff = FileUtils::readJsonFile($diff_file);
         }
-        
+
         $this->diff = array(self::EXPECTED => array(), self::ACTUAL => array());
         $this->add = array(self::EXPECTED => array(), self::ACTUAL => array());
 
@@ -321,7 +321,7 @@ class DiffViewer {
         $this->buildViewer();
         return $this->has_actual;
     }
-    
+
     /**
      * Was there a given expected file and were we able to successfully read from it
      * @return bool
@@ -331,7 +331,7 @@ class DiffViewer {
         $this->buildViewer();
         return $this->display_expected;
     }
-    
+
     /**
      * Returns boolean indicating whether or not there is any input in the expected.
      * @return bool
@@ -552,7 +552,7 @@ class DiffViewer {
      *
      * Add to this function (Or the one below it) in the future for any other special characters that needs to be replaced.
      *
-     * @return HTML after white spaces replaced with visuals
+     * @return string HTML after white spaces replaced with visuals
      */
     private function replaceEmptyChar($html, $with_escape){
         $return = $html;

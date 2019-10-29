@@ -17,15 +17,26 @@ var label_array = [];
 var use_previous = false;
 var changed = false;        // if files from previous submission changed
 
-var empty_textboxes = true;
+var empty_inputs = true;
 
 var student_ids = [];           // all student ids
 var student_without_ids = [];   // student ids for those w/o submissions
 
+function initializeDragAndDrop() {
+    file_array = [];
+    previous_files = [];
+    label_array = [];
+    use_previous = false;
+    changed = false;
+    empty_inputs = true;
+    student_ids = [];
+    student_without_ids = [];
+}
+
 // initializing file_array and previous_files
-function createArray(num_parts){
-    if(file_array.length == 0){
-        for(var i=0; i<num_parts; i++){
+function createArray(num_parts) {
+    if (file_array.length == 0){
+        for (var i=0; i<num_parts; i++){
             file_array.push([]);
             previous_files.push([]);
             label_array.push([]);
@@ -47,7 +58,7 @@ function setUsePrevious() {
 //========================================================================================
 // open a file browser if clicked on drop zone
 function clicked_on_box(e){
-  document.getElementById("input_file" + get_part_number(e)).click();
+  document.getElementById("input-file" + get_part_number(e)).click();
   e.stopPropagation();
 }
 
@@ -80,6 +91,22 @@ function dropWithMultipleZips(e){
     }
 }
 
+// show progressbar when uploading files 
+function progress(e){
+    var progressBar = document.getElementById("loading-bar");
+
+    if(!progressBar){
+        return false;
+    }
+
+    if(e.lengthComputable){
+        progressBar.max = e.total;
+        progressBar.value = e.loaded;
+        let perc = (e.loaded * 100)/e.total;
+        $("#loading-bar-percentage").html(perc.toFixed(2) + " %");
+    }  
+}
+
 function get_part_number(e){
     if(e.target.id.substring(0, 6) == "upload"){
         return e.target.id.substring(6);
@@ -91,11 +118,11 @@ function get_part_number(e){
 
 // copy files selected from the file browser
 function addFilesFromInput(part, check_duplicate_zip=true){
-    var filestream = document.getElementById("input_file" + part).files;
+    var filestream = document.getElementById("input-file" + part).files;
     for(var i=0; i<filestream.length; i++){
         addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
-    $('#input_file' + part).val("");
+    $('#input-file' + part).val("");
 }
 
 // Check for duplicate file names. This function returns an array.
@@ -104,15 +131,15 @@ function addFilesFromInput(part, check_duplicate_zip=true){
 // 0 - a file with the same name already selected for this version
 // -1 - does not exist files with the same name
 // Second element: index of the file with the same name (if found)
-function fileExists(file, part){
+function fileExists(filename, part){
     for(var i = 0; i < previous_files[part-1].length; i++){
-        if(previous_files[part-1][i] == file.name){
+        if(previous_files[part-1][i] == filename){
             return [1, i];
         }
     }
 
     for(var j = 0; j < file_array[part-1].length; j++){
-        if(file_array[part-1][j].name == file.name){
+        if(file_array[part-1][j].name == filename){
             return [0, j];
         }
     }
@@ -144,7 +171,7 @@ function isFolder(file){
 }
 
 function addFile(file, part, check_duplicate_zip=true){
-    var i = fileExists(file, part);
+    var i = fileExists(file.name, part);
     if( i[0] == -1 ){    // file does not exist
         // empty bucket if file is a zip and bucket is not empty
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
@@ -230,7 +257,7 @@ function setButtonStatus() {
 
     if (labels == 0) {
         $("#startnew").prop("disabled", true);
-        if (empty_textboxes) {
+        if (empty_inputs) {
             $("#submit").prop("disabled", true);
         } else {
             $("#submit").prop("disabled", false);
@@ -276,7 +303,8 @@ function addLabel(filename, filesize, part, previous){
     var tmp = document.createElement('label');
     tmp.setAttribute("class", "mylabel");
     tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i class='fas fa-trash'></i><br />";
+    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i><br />";
+
     // styling
     tmp.children[0].onmouseover = function(e){
         e.stopPropagation();
@@ -292,6 +320,14 @@ function addLabel(filename, filesize, part, previous){
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
+
+    // FOR VPAT if trash can has focus and key is pressed it will delete item
+    tmp.children[0].onkeypress = function(e){
+        e.stopPropagation();
+        this.parentNode.parentNode.removeChild(this.parentNode);
+        deleteSingleFile(filename, part, previous);
+    };
+
     // add to parent div
     var dropzone = document.getElementById("upload" + part);
     // Uncomment if want buttons for emptying single bucket
@@ -301,13 +337,8 @@ function addLabel(filename, filesize, part, previous){
     label_array[part-1].push(filename);
 }
 
-function handle_textbox_keypress() {
-    empty_textboxes = false;
-    setButtonStatus();
-}
-
-function handle_textbox_keypress() {
-    empty_textboxes = false;
+function handle_input_keypress() {
+    empty_inputs = false;
     setButtonStatus();
 }
 
@@ -362,235 +393,246 @@ function isValidSubmission(){
             }
         }
     }
+
+    // If is_notebook is set then always valid submission
+    if(window.hasOwnProperty('is_notebook'))
+    {
+        return true;
+    }
+
     return false;
-}
-
-function checkForPreviousSubmissions(csrf_token, gradeable_id, user_id){
-    var formData = new FormData();
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-
-    return $.ajax({
-        async: false,
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-    });  
 }
 
 /**
  * @param csrf_token
  * @param gradeable_id
  * @param user_id
- * @param is_pdf
- * @param path
- * @param count
- * @param makeSubmission, a callback function
+ * Ajax call to check if user id is valid and has a corresponding user and gradeable.
+ * user_id can be an array of ids to validate multiple at once for teams
  */
-function validateUserId(csrf_token, gradeable_id, user_id, is_pdf, path, count, repo_id, makeSubmission, qr_bulk_upload = false) {
+function validateUserId(csrf_token, gradeable_id, user_id){
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'verify']);
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url : url,
+            data : {
+                'csrf_token' : csrf_token,
+                'user_id' : user_id
+            },
+            type : 'POST',
+            success : function(response){
+                response = JSON.parse(response);
+                if(response['status'] === 'success'){
+                    resolve(response);
+                }else{
+                    reject(response);
+                }
+            },
+            error : function(err){
+                console.log("Error while trying to validate user id" + user_id);
+                reject({'status' : 'failed', 'message' : err});
+            }
+        });
+    });
+}
 
-    var formData = new FormData();
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
+//@param json a dictionary {success : true/false, message : string}
+//@param index used for id
+//function to display pop-up notification after bulk submission/delete
+function displaySubmissionMessage(json){
+    //let the id be the date to prevent closing the wrong message
+    let d = new Date();
+    let t = String(d.getTime());
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'verify', 'gradeable_id': gradeable_id});
-    $.ajax({
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    if(data['previous_submission'] && !qr_bulk_upload) { // if there is a previous submission, give the user merge options
-                        var form = $("#previous-submission-form");
-                        var submitter = form.find(".submit-button");
-                        var closer = form.find(".close-button");
+    let class_str = 'class="inner-message alert ' + (json['status'] === 'success' ? 'alert-success' : 'alert-error') + '"' ;
+    let close_btn = '<a class="fas fa-times message-close" onclick="removeMessagePopup(' + t + ');"></a>';
+    let fa_icon = '<i class="' + (json['status'] === 'success' ? 'fas fa-check-circle' : 'fas fa-times-circle') +'"></i>';
+    let response = (json['status'] === 'success' ? json['data'] : json['message'] )
 
-                        submitter.off('click');
-                        closer.off('click');
+    let message = '<div id="' + t + '"' + class_str + '>' + fa_icon + response + close_btn + '</div>';
+    $('#messages').append(message);
 
-                        submitter.on('click', function() { // on click, make submission based on which radio input was checked
-                            if($("#instructor-submit-option-new").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "0");
-                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                            }
-                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "1");
-                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true);
-                            }
-                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "2");
-                                makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id, true, true);
-                            }
-                            form.css("display", "none");
-                        });
+    if(json['status'] === 'success'){
+        setTimeout(function() {
+            removeMessagePopup(t);
+        }, 5000);
+    }
+}
 
-                        closer.on('click', function() {
-                            if($("#instructor-submit-option-new").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "0");
-                            }
-                            else if($("#instructor-submit-option-merge-1").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "1");
-                            }
-                            else if($("#instructor-submit-option-merge-2").is(":checked")) {
-                                localStorage.setItem("instructor-submit-option", "2");
-                            }
-                            form.css("display", "none");
-                        });
+//@param callback to function when user selects an option
+//function to display the different options when submiting a split item to a student with previous submissions
+function displayPreviousSubmissionOptions(callback){
+    var form = $("#previous-submission-form");
+    var submit_btn = form.find(".submit-button");
+    var closer_btn = form.find(".close-button");
 
-                        $('.popup-form').css('display', 'none');
-                        form.css("display", "block");
+    var option;
+    submit_btn.attr('tabindex', '0');
+    closer_btn.attr('tabindex', '0');
+    // on click, make submission based on which radio input was checked
+    submit_btn.on('click', function() {
+        if($("#instructor-submit-option-new").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "0");
+            option = 1;
+        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "1");
+            option = 2;
+        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "2");
+            option = 3;
+        }
+        form.css("display", "none");
+        callback(option);
+    });
 
-                        // on open, set either the new submission or merge no clobber option to checked based on the whether or not the toggle-merge-default checkbox is checked.
-                        var radio_idx;
-                        if(localStorage.getItem("instructor-submit-option") === null) {
-                            radio_idx = 0;
-                        }
-                        else {
-                            radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
-                        }
-                        form.find('input:radio')[radio_idx].checked = true;
-                        form.find(".btn-success").focus();
-                    }
-                    else { // if no previous submissions, no merging will be necessary
-                        makeSubmission(user_id, data['highest_version'], is_pdf, path, count, repo_id);
-                    }
+    //on close, save the option selected
+    closer_btn.on('click', function() {
+        if($("#instructor-submit-option-new").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "0");
+        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "1");
+        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+            localStorage.setItem("instructor-submit-option", "2");
+        }
+        form.css("display", "none");
+        callback(-1);
+    });
+
+    $('.popup-form').css('display', 'none');
+    form.css("display", "block");
+
+    //check the option from whatever option was saved
+    var radio_idx;
+    if(localStorage.getItem("instructor-submit-option") === null) {
+        radio_idx = 0;
+    }else {
+        radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
+    }
+    form.find('input:radio')[radio_idx].checked = true;
+    //since the modal object isn't rendered on the page manually set what the tab button does
+    $("#instructor-submit-option-new").attr('tabindex', '0');
+    $("#instructor-submit-option-merge-1").attr('tabindex', '0');
+    $("#instructor-submit-option-merge-2").attr('tabindex', '0');
+    submit_btn.focus();
+    var current_btn = 4;
+    if(form.css('display') !== 'none'){
+        document.addEventListener("keydown", e => {
+            if(e.keyCode == 9){
+                //on tab update the focus, cycle through the radio buttons and then
+                //the close/submit buttons and then back to the radio buttons
+                $('input[name=instructor-submit]').css({"outline": "none"});
+                e.preventDefault();
+                if(current_btn === 0){
+                    $("#instructor-submit-option-merge-1").focus();
+                    $("#instructor-submit-option-merge-1").css({"outline" : "2px solid #C1E0FF"});
+                }else if(current_btn === 1){
+                    $("#instructor-submit-option-merge-2").focus();
+                    $("#instructor-submit-option-merge-2").css({"outline" : "2px solid #C1E0FF"});
+                }else if(current_btn === 2){
+                    closer_btn.focus();
+                }else if(current_btn === 3){
+                    submit_btn.focus();
+                }else if(current_btn === 4){
+                    $("#instructor-submit-option-new").focus();
+                    $("#instructor-submit-option-new").css({"outline" : "2px solid #C1E0FF"});
+                }
+                current_btn = (current_btn == 4) ? 0 : current_btn + 1;
+            }else if(e.keyCode === 27){
+                //close the modal box on escape
+                closer_btn.click();
+            }else if(e.keyCode === 13){
+                //on enter update whatever the user is focussing on
+                //uncheck everything and then recheck the desired button to make sure it actually updates
+                if(current_btn === 1){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-merge-1").prop('checked', true);
+                }else if(current_btn === 2){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-merge-2").prop('checked', true);
+                }else if(current_btn === 0){
+                    $('input[name=instructor-submit]').prop('checked', false);
+                    $("#instructor-submit-option-new").prop('checked', true);
+                }else if(current_btn === 3){
+                    //close the modal if the close button is selected
+                    closer_btn.click();
+                }else if(current_btn === 4){
+                    submit_btn.click();
+                }
+            }
+        });
+    }
+}
+
+/**
+ * @param csrf_token
+ * @param gradeable_id
+ * @param user_id
+ * @param path
+ * @param merge_previous
+ * @param clobber
+ * @return promise resolve on success, reject otherwise. Contains fail/success message
+ * Ajax call to submit a split item to a student. Optional params to merge and or clobber previous submissions
+ */
+function submitSplitItem(csrf_token, gradeable_id, user_id, path, merge_previous=false, clobber=false) {
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'upload']) + '?merge=' + merge_previous + '&clobber=' + clobber;
+
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: url,
+            data: {
+                'csrf_token' : csrf_token,
+                'user_id' : user_id,
+                'path' : path
+            },
+            type: 'POST',
+            success: function(response) {
+                response = JSON.parse(response);
+                if (response['status'] === 'success') {
+                    resolve(response);
                 }
                 else {
-                    alert("ERROR! \n\n" + data['message']);
+                    reject(response);
                 }
+            },
+            error: function(err) {
+                console.log("Failed while submiting split item");
+                reject({'status' : 'failed', 'message' : err});
             }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            $("#submit").prop("disabled", false);
-            alert("Something went wrong. Please try again.");
-        }
+        });
     });
 }
 
 /**
 * @param csrf_token
 * @param gradeable_id
-* @param user_id
 * @param path
-* @param count
+* @return promise resolve on success, reject otherwise. Contains fail/success message
 */
-function submitSplitItem(csrf_token, gradeable_id, user_id, path, count, merge_previous=false, clobber=false) {
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_split', 'gradeable_id': gradeable_id, 'merge': merge_previous, 'clobber': clobber});
-    var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+function deleteSplitItem(csrf_token, gradeable_id, path) {
 
-    var formData = new FormData();
+    var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'split_pdf', 'delete']);
 
-    formData.append('csrf_token', csrf_token);
-    formData.append('user_id', user_id);
-    formData.append('path', path);
-
-    $.ajax({
-        url: url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    $("#bulk_submit_" + count).prop("disabled", true);
-                    $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#users_" + count + " :input").prop("disabled", true);
-                    var message ='<div id="submit_' + count +  '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'submit_' + count +'\');"></a><i class="fas fa-check-circle"></i>' + data['message'] + '</div>';
-                    $('#messages').append(message);
-                    setTimeout(function() {
-                        $('#submit_' + count).fadeOut();
-                    }, 5000);
-                    var index = student_without_ids.indexOf(user_id);
-                    if (index > -1) {
-                        student_without_ids.splice(index, 1);
-                    }
-                    return;
+    return new Promise(function (resolve, reject) {
+        $.ajax({
+            url: submit_url,
+            data: {
+                'csrf_token' : csrf_token,
+                'path' : path
+            },
+            type: 'POST',
+            success: function(response) {
+                response = JSON.parse(response);
+                if (response['status'] === 'success') {
+                    resolve(response);
+                }else {
+                    reject(response);
                 }
-                else {
-                    if (data['message'] == "You do not have access to that page.") {
-                        window.location.href = return_url;
-                    }
-                    else {
-                        alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                    }
-                }
+            },
+            error: function(jqXHR, err_msg, exception) {
+                console.error("Failed while deleting split item");
+                reject({'status' : 'failed', 'message' : err_msg});
             }
-            catch (e) {
-                console.log(e);
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were uploading.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            alert("ERROR! Please contact administrator that you could not upload files.");
-        }
-    });
-}
-
-/**
-* @param csrf_token
-* @param gradeable_id
-* @param path
-* @param count
-*/
-function deleteSplitItem(csrf_token, gradeable_id, path, count) {
-
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'delete_split', 'gradeable_id': gradeable_id});
-
-    var formData = new FormData();
-
-    formData.append('csrf_token', csrf_token);
-    formData.append('path', path);
-
-    $.ajax({
-        url: submit_url,
-        data: formData,
-        processData: false,
-        contentType: false,
-        type: 'POST',
-        success: function(data) {
-            try {
-                data = JSON.parse(data);
-                if (data['success']) {
-                    $("#bulk_submit_" + count).prop("disabled", true);
-                    $("#bulk_delete_" + count).prop("disabled", true);
-                    $("#bulk_user_id_" + count).val("");
-                    $("#bulk_user_id_" + count).prop("disabled", true);
-                    var message ='<div id="delete_' + count + '" class="inner-message alert alert-success"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'delete_' + count + '\');"></a><i class="fas fa-check-circle"></i>' + data['message'] + '</div>';
-                    $('#messages').append(message);
-                    setTimeout(function() {
-                        $('#delete_' + count).fadeOut();
-                    }, 5000);
-                    return;
-                }
-                else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + data['message']);
-                }
-            }
-            catch (e) {
-                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
-                    "send it to an administrator, as well as what you were doing and what files you were deleting.");
-                console.log(data);
-            }
-        },
-        error: function() {
-            alert("ERROR! Please contact administrator that you could not delete files.");
-        }
+        });
     });
 }
 
@@ -600,7 +642,7 @@ function deleteSplitItem(csrf_token, gradeable_id, path, count) {
  * @param use_qr_codes
  * @param qr_prefix
  */
-function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
+function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_qr_codes = false, qr_prefix = "", qr_suffix="") {
     $("#submit").prop("disabled", true);
 
     var formData = new FormData();
@@ -622,30 +664,52 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
     //encode qr prefix and suffix incase URLs are used
     formData.append('qr_prefix', encodeURIComponent(qr_prefix));
     formData.append('qr_suffix', encodeURIComponent(qr_suffix));
+    formData.append('csrf_token', csrfToken);
 
+    var total_size = 0;
     for (var i = 0; i < file_array.length; i++) {
         for (var j = 0; j < file_array[i].length; j++) {
             if (file_array[i][j].name.indexOf("'") != -1 ||
                 file_array[i][j].name.indexOf("\"") != -1) {
                 alert("ERROR! You may not use quotes in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
             else if (file_array[i][j].name.indexOf("\\") != -1 ||
                 file_array[i][j].name.indexOf("/") != -1) {
                 alert("ERROR! You may not use a slash in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
             else if (file_array[i][j].name.indexOf("<") != -1 ||
                 file_array[i][j].name.indexOf(">") != -1) {
                 alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
+                $("#submit").prop("disabled", false);
                 return;
             }
+
+            total_size += file_array[i][j].size;
+
+            if (total_size >= max_file_size){
+                alert("ERROR! Uploaded file(s) exceed max file size.\n" + 
+                      "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+
+             if (total_size >= max_post_size){
+                alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" + 
+                      "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
+                $("#submit").prop("disabled", false);
+                return;
+            }
+
             formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
         }
     }
 
-    var url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'bulk', 'gradeable_id': gradeable_id});
-    var return_url = buildUrl({'component': 'student', 'gradeable_id': gradeable_id});
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'bulk']);
+    var return_url = buildCourseUrl(['gradeable', gradeable_id]);
 
     $.ajax({
         url: url,
@@ -657,7 +721,7 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -683,24 +747,65 @@ function handleBulk(gradeable_id, num_pages, use_qr_codes = false, qr_prefix = "
 }
 
 /**
+ * @param type
+ */
+function gatherInputAnswersByType(type){
+    var input_answers = {};
+
+    // If type is codebox only grab 'div' but not buttons with similar ids
+    if(type == "codebox")
+    {
+        var inputs = $("div[id^="+type+"_]");
+    }
+    else
+    {
+        var inputs = $("[id^="+type+"_]");
+    }
+
+    if(type != "codebox"){
+        inputs = inputs.serializeArray();
+    }
+
+    for(var i = 0; i < inputs.length; i++){
+        var this_input_answer = inputs[i];
+        var key = "";
+        var value = "";
+        if(type == "codebox"){
+            key = this_input_answer.id;
+            var editor = this_input_answer.querySelector(".CodeMirror").CodeMirror;
+            value = editor.getValue();
+        }else{
+            key = this_input_answer.name;
+            value = this_input_answer.value;
+        }
+
+        if(!(key in input_answers)){
+            input_answers[key] = Array();
+        }
+        input_answers[key].push(value);
+    }
+
+    return input_answers;
+}
+
+/**
  * @param days_late
  * @param late_days_allowed
  * @param versions_used
  * @param versions_allowed
  * @param csrf_token
  * @param vcs_checkout
- * @param num_textboxes
+ * @param num_inputs
  * @param user_id
  * @param repo_id
  * @param student_page
  * @param num_components
  * @param merge_previous
  */
-function handleSubmission(days_late, late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_textboxes, gradeable_id, user_id, repo_id, student_page, num_components, merge_previous=false, clobber=false) {
+function handleSubmission(days_late, days_to_be_charged,late_days_allowed, versions_used, versions_allowed, csrf_token, vcs_checkout, num_inputs, gradeable_id, user_id, git_user_id, git_repo_id, student_page, num_components, merge_previous=false, clobber=false) {
     $("#submit").prop("disabled", true);
-
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload', 'gradeable_id': gradeable_id, "merge": merge_previous, "clobber": clobber});
-    var return_url = buildUrl({'component': 'student','gradeable_id': gradeable_id});
+    var submit_url = buildCourseUrl(['gradeable', gradeable_id, 'upload']) + "?merge=" + merge_previous + "&clobber=" + clobber;
+    var return_url = buildCourseUrl(['gradeable', gradeable_id]);
 
     var message = "";
     // check versions used
@@ -712,7 +817,7 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     }
     // check due date
     if (days_late > 0 && days_late <= late_days_allowed) {
-        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_late + " late day(s)?";
+        message = "Your submission will be " + days_late + " day(s) late. Are you sure you want to use " +days_to_be_charged + " late day(s)?";
         if (!confirm(message)) {
             return;
         }
@@ -729,12 +834,15 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
     formData.append('csrf_token', csrf_token);
     formData.append('vcs_checkout', vcs_checkout);
     formData.append('user_id', user_id);
-    formData.append('repo_id', repo_id);
+    formData.append('git_user_id', git_user_id);
+    formData.append('git_repo_id', git_repo_id);
     formData.append('student_page', student_page)
+
+    let filesize = 0;
 
     if (!vcs_checkout) {
         // Check if new submission
-        if (!isValidSubmission() && empty_textboxes) {
+        if (!isValidSubmission() && empty_inputs) {
             alert("Not a new submission.");
             window.location.reload();
             return;
@@ -758,25 +866,35 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
                     alert("ERROR! You may not use angle brackets in your filename: " + file_array[i][j].name);
                     return;
                 }
-            formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
+
+                filesize += file_array[i][j].size;
+                formData.append('files' + (i + 1) + '[]', file_array[i][j], file_array[i][j].name);
             }
         }
         // Files from previous submission
         formData.append('previous_files', JSON.stringify(previous_files));
     }
 
-    var textbox_answers = [];
-    for (var i = 0; i < num_textboxes; i++) {
-        textbox_answers[i] = $("#textbox_"+i).val();
+
+    //check if filesize greater than 1,25 MB, then turn on the progressbar
+    if(filesize > 1250000){
+        $(".loading-bar-wrapper").fadeIn(100);
     }
-    formData.append('textbox_answers', JSON.stringify(textbox_answers));
+
+    var short_answer_object    = gatherInputAnswersByType("short_answer");
+    var multiple_choice_object = gatherInputAnswersByType("multiple_choice");
+    var codebox_object         = gatherInputAnswersByType("codebox");
+    formData.append('short_answer_answers'   , JSON.stringify(short_answer_object));
+    formData.append('multiple_choice_answers', JSON.stringify(multiple_choice_object));
+    formData.append('codebox_answers'        , JSON.stringify(codebox_object));
+
 
     if (student_page) {
         var pages = [];
         for (var i = 0; i < num_components; i++) {
             pages[i] = $("#page_"+i).val();
             if (pages[i] == "") {
-                alert("You cannot leave a page textbox empty.");
+                alert("You cannot leave a page input empty.");
                 $("#submit").prop("disabled", false);
                 return;
             }
@@ -793,13 +911,20 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
         url: submit_url,
         data: formData,
         processData: false,
+        xhr: function() {
+            var myXhr = $.ajaxSettings.xhr();
+            if(myXhr.upload){
+                myXhr.upload.addEventListener('progress',progress, false);
+            }
+            return myXhr;
+        },
         contentType: false,
         type: 'POST',
         success: function(data) {
             $("#submit").prop("disabled", false);
             try {
                 data = JSON.parse(data);
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -828,8 +953,8 @@ function handleSubmission(days_late, late_days_allowed, versions_used, versions_
  * @param csrf_token
  */
 function handleDownloadImages(csrf_token) {
-    var image_submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_images_files'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+    var image_submit_url = buildCourseUrl(['student_photos', 'upload']);
+    var return_url = buildCourseUrl(['student_photos']);
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
     formData.append('file_count', file_array.length);
@@ -867,7 +992,7 @@ function handleDownloadImages(csrf_token) {
             try {
                 data = JSON.parse(data);
 
-                if (data['success']) {
+                if (data['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
@@ -877,10 +1002,11 @@ function handleDownloadImages(csrf_token) {
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading.");
+                console.log(data);
             }
         },
         error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'images', 'action': 'view_images_page'});
+            window.location.href = buildCourseUrl(['student_photos']);
         }
     });
 }
@@ -889,15 +1015,19 @@ function handleDownloadImages(csrf_token) {
  * @param csrf_token
  */
 
-function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_path) {
-    var submit_url = buildUrl({'component': 'student', 'page': 'submission', 'action': 'upload_course_materials_files'});
-    var return_url = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path,cmTime, sections) {
+    var submit_url = buildCourseUrl(['course_materials', 'upload']);
+    var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
 
     formData.append('csrf_token', csrf_token);
     formData.append('expand_zip', expand_zip);
+    formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
-
+    formData.append('release_time',cmTime);
+    if(sections !== null){
+        formData.append('sections', sections);
+    }
     var target_path = cmPath; // this one has slash at the end.
     if (requested_path && requested_path.trim().length) {
         target_path = cmPath + requested_path;
@@ -926,8 +1056,7 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
                 return;
             }
 
-            var file = new File([""], target_path + "/" + file_array[i][j].name);
-            var k = fileExists(file, 1);
+            var k = fileExists(target_path + "/" + file_array[i][j].name, 1);
             // Check conflict here
             if ( k[0] == 1 )
             {
@@ -947,11 +1076,9 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             filesToBeAdded = true;
         }
     }
-
     if (filesToBeAdded == false){
         return;
     }
-
 
     $.ajax({
         url: submit_url,
@@ -963,20 +1090,21 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
             try {
                 var jsondata = JSON.parse(data);
 
-                if (jsondata['success']) {
+                if (jsondata['status'] === 'success') {
                     window.location.href = return_url;
                 }
                 else {
-                    alert("ERROR! Please contact administrator with following error:\n\n" + jsondata['message']);
+                    alert(jsondata['message']);
                 }
             }
             catch (e) {
                 alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
                     "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+                console.log(data);
             }
         },
         error: function(data) {
-            window.location.href = buildUrl({'component': 'grading', 'page': 'course_materials', 'action': 'view_course_materials_page'});
+            window.location.href = buildCourseUrl(['course_materials']);
         }
     });
 }

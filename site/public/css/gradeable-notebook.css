@@ -1,0 +1,95 @@
+.notebook h1,
+.notebook h2,
+.notebook h3,
+.notebook h4,
+.notebook h5,
+.notebook h6,
+.notebook h7
+{
+    margin-top: 2rem;
+    margin-bottom: .3rem;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.notebook p
+{
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.notebook ul {
+    padding-left: 3rem;
+}
+
+/* Push recent and clear buttons down a little bit and shrink them slightly */
+.notebook .sa-clear-reset,
+.notebook .codebox-clear-reset,
+.notebook .mc-recent,
+.notebook .mc-clear
+{
+    margin-top: 7px;
+    padding: 3px 6px;
+    font-size: 80%;
+}
+
+/* Set default font for short_answer boxes */
+.notebook textarea,
+.notebook input[type="text"]
+{
+    font-family: monospace;
+}
+
+fieldset.mc {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Display notebook multiple choice descriptions on same line as radio button or checkbox */
+/* Input field is the first child */
+.mc > label > :nth-child(2)
+{
+    display: inline;
+}
+
+/* Clear top margin for items that live inside a single multiple choice description */
+/* Useful for several newline separated headers inside a single markdown item  */
+.mc > label > *
+{
+    margin-top: 0;
+}
+
+/* Style the color of notebook feedback messages */
+.notebook .feedback-msg-failure
+{
+    color: var(--badge-backgroud-red);
+}
+
+.notebook .feedback-msg-warning
+{
+    color: var(--standard-vibrant-orange);
+}
+
+.notebook .feedback-msg-info
+{
+    color: var(--standard-deep-blue);
+}
+
+.notebook .feedback-msg-success
+{
+    color: var(--standard-dark-green);
+}
+
+.short-answer {
+    max-width: 50em;
+}
+
+.sa-box {
+    display: block;
+}
+
+textarea.sa-box {
+    width: 60em; 
+    height: 100%; 
+    min-height: 110px;
+}

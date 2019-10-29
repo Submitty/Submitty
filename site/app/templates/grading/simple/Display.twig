@@ -1,20 +1,6 @@
 {% import _self as self %}
 
 <div class="content">
-    {#
-        Default is viewing your sections
-        Limited grader does not have "View All" option
-        If nothing to grade, Instructor will see all sections
-    #}
-    {% if show_all_sections_button %}
-        <div style="float: right; margin-bottom: 10px">
-            <a class="btn btn-default"
-               href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': sort, 'view': view_all ? null : "all"}) }}">
-                {{ view_all ? "View Your Sections" : "View All" }}
-            </a>
-        </div>
-    {% endif %}
-
     <h1>
         {{ gradeable.getTitle() }}
     </h1>
@@ -23,85 +9,121 @@
             Overall TA Instructions: {{ gradeable.getTaInstructions() }}
         {% endif %}
     </p>
-    <br>
-    <p style="float: left;">
-        {% if action == 'lab' %}
-            No Color - No Credit<br />
-            Dark Blue - Full Credit<br />
-            Light Blue - Half Credit<br />
-            Red - [SAVE ERROR] Refresh Page
-        {% else %}
-            Red - [SAVE ERROR] Refresh Page
-        {% endif %}
-    </p>
-    <button class="btn btn-primary" id="simple-stats-btn" style="float: right;" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
-    <button class="btn btn-primary" id="settings-btn" style="float: right;" onclick='showSettings()'>Settings/Hotkeys</button>
 
+    <div class="column-wrapper" style="margin: 1em 0;">
+        <div id="checkpoint-sticky" class="column-wrapper">
+            {% include "grading/simple/StudentSearch.twig" %}
+            <div>
+                <p class="not-sticky">Undo/Redo Changes</p>
+                <button id="checkpoint-undo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', -1)" disabled><i class="fas fa-undo"></i></button>
+                <button id="checkpoint-redo" class="btn btn-primary" onclick="checkpointRollTo('{{ gradeable.getId() }}', 1)" disabled><i class="fas fa-redo"></i></button>
+            </div>
+        </div>
 
-    {# Search box #}
-    {% include "grading/simple/StudentSearch.twig" %}
+        <div>
+            <button class="btn btn-primary" id="settings-btn" onclick='showSettings()'>Settings/Hotkeys</button>
+            <button class="btn btn-primary" id="simple-stats-btn" onclick='showSimpleGraderStats("{{ action }}")'>View Statistics</button>
+        </div>
+    </div>
 
-    {% if action == 'lab' and core.getUser().accessFullGrading() %}
-        <br> <br>
-        <input type="checkbox" id="show-graders" style="float: right;">
-        <label for="show-graders" style="float: right; margin-top: 3px;">Show Graders</label>
-        <br> <br>
-        <input type="checkbox" id="show-dates" style="float: right;">
-        <label for="show-dates" style="float: right; margin-top: 3px;">Show Dates Graded</label>
-    {% endif %}
+    <div class="column-wrapper" style="margin: 1em 0;">
+        <p>
+            {% if action == 'lab' %}
+                No Color - No Credit<br />
+                Dark Blue - Full Credit<br />
+                Light Blue - Half Credit<br />
+                Red - [SAVE ERROR] Refresh Page
+            {% else %}
+                Red - [SAVE ERROR] Refresh Page
+            {% endif %}
+        </p>
+
+        <div class="row-wrapper">
+            {#
+                Default is viewing your sections
+                Limited grader does not have "View All" option
+                If nothing to grade, Instructor will see all sections
+            #}
+            {% if show_all_sections_button %}
+                <a 
+                    class="btn btn-default"
+                    href="{{ grading_url }}?view=all&sort={{ sort }}"
+                >
+                    {{ view_all ? "View Your Sections" : "View All Sections" }}
+                </a>
+                <br />
+            {% endif %}
+
+            {% if action == 'lab' and core.getUser().accessFullGrading() %}
+                <label for="show-graders" class="column-wrapper">Show Graders
+                    <input type="checkbox" id="show-graders">
+                </label>
+                <label for="show-dates" class="column-wrapper">Show Dates Graded
+                    <input type="checkbox" id="show-dates">
+                </label>
+            {% endif %}
+        </div>
+    </div>
 
     {% if action == 'numeric' and core.getUser().accessAdmin() %}
-        <br> <br> <br>
-        <p style="float: right;">The CSV file should be formatted as such: <br />
-            user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...</p>
-        <input class="csvButtonUpload" type="file" id="csvUpload" style="float: right" accept=".csv, .txt">
-        <label for="csvUpload" style="float: right; padding-right: 10px;">Upload CSV</label>
+        <div class="column-wrapper">
+            <label for="csvUpload">Upload CSV
+                <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
+            </label>
+            <p>
+                The CSV file should be formatted as such: 
+                <br />
+                user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
+            </p>
+        </div>
     {% endif %}
 
-    <table class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
+    {# This is a data table #}
+    <table id="data-table" class="table table-striped table-bordered persist-area" style="table-layout: fixed;">
+        <caption />
         {# Table header #}
-        <thead class="persist-thead">
+        <thead>
             <tr>
-                <td width="20"></td>
-                <td width="70">Section</td>
-                <td width="90" style="text-align: left">
-                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'id', 'view': view}) }}">
+                <th width="20"></th>
+                <th width="70">Section</th>
+                <th width="90" style="text-align: left">
+                    <a href="{{ grading_url }}?view={{ view }}&sort=id">
                         <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fas fa-sort"></i>
                     </a>
-                </td>
-                <td width="110" style="text-align: left">
-                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'first', 'view': view}) }}">
+                </th>
+                <th width="110" style="text-align: left">
+                    <a href="{{ grading_url }}?view={{ view }}&sort=first">
                         <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fas fa-sort"></i>
                     </a>
-                </td>
-                <td width="110" style="text-align: left">
-                    <a href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': action, 'g_id': gradeable.getId(), 'sort': 'last', 'view': view}) }}">
+                </th>
+                <th width="110" style="text-align: left">
+                    <a href="{{ grading_url }}?view={{ view }}&sort=last">
                         <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fas fa-sort"></i>
                     </a>
-                </td>
+                </th>
 
                 {% if action == 'lab' %}
                     {% set colspan = 5 + gradeable.getComponents()|length %}
                     {% for component in gradeable.getComponents() %}
-                        <td width="150">
+                        <th width="150">
                             {{ component.getTitle() }}
-                        </td>
+                        </th>
                     {% endfor %}
                 {% else %}
                     {% set colspan = 5 + components_numeric|length + components_text|length %}
                     {% if components_numeric|length > 0 %}
                         {% set colspan = colspan + 1 %}
                         {% for component in components_numeric %}
-                            <td width="150" style="text-align: center">
+                            <th width="150" style="text-align: center">
                                 {{ component.getTitle() }}({{ component.getMaxValue() }})
-                            </td>
+                            </th>
                         {% endfor %}
-                        <td width="60" style="text-align: center">Total</td>
+                        <th width="60" style="text-align: center">Total</th>
                     {% endif %}
                     {% for component in components_text %}
-                        <td width="200" style="text-align: center">
+                        <th width="200" style="text-align: center">
                             {{ component.getTitle() }}
-                        </td>
+                        </th>
                     {% endfor %}
                 {% endif %}
             </tr>
@@ -110,7 +132,7 @@
         {% if sections|length == 0 %}
             <tbody>
                 <tr class="info">
-                    <td colspan="{{ colspan }}" style="text-align: center">No Grading To Be Done! :)</td>
+                    <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">No Grading To Be Done! :)</td>
                 </tr>
             </tbody>
         {% else %}
@@ -118,8 +140,8 @@
             {% for section_id, section in sections %}
                 {# Section header #}
                 <tbody>
-                    <tr class="info persist-header">
-                        <td colspan="{{ colspan }}" style="text-align: center">
+                    <tr class="info">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
                             {% if gradeable.isGradeByRegistration() %}
                                 Students Enrolled in Registration Section {{ section_id | default('NULL') }}
                             {% else %}
@@ -127,14 +149,14 @@
                             {% endif %}
                             {# Print button #}
                             {% if action == 'lab' %}
-                                <a target=_blank href="{{ core.buildUrl({'component': 'grading', 'page': 'simple', 'action': 'print_lab', 'sort': sort, 'section': section_id, 'sectionType': section_type, 'g_id': gradeable.getId()}) }}">
+                                <a target=_blank href="{{ print_lab_url }}?section={{ section_id }}&section_type={{ section_type }}&sort={{ sort }}">
                                     <i class="fas fa-print"></i>
                                 </a>
                             {% endif %}
                         </td>
                     </tr>
                     <tr class="info">
-                        <td colspan="{{ colspan }}" style="text-align: center">
+                        <td colspan="{{ colspan }}" style="text-align: center; background-color: var(--alert-border-blue)">
                             Graders: {{ section.grader_names|length ? section.grader_names|join(", ") : "Nobody" }}
                         </td>
                     </tr>
@@ -158,7 +180,7 @@
 
 {# Render one student's row in the table #}
 {% macro render_row(self, action, gradeable, section, grade, index, components_numeric) %}
-    <tr data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
+    <tr id="row-{{ index }}" data-gradeable="{{ gradeable.getId() }}" data-user="{{  grade.getSubmitter().getId() }}" data-row="{{ index }}"
         {% if student.accessGrading() %}
             style='background: #7bd0f7;'
         {% endif %}
@@ -190,6 +212,7 @@
             <td
                 class="cell-grade"
                 id="cell-{{ index }}-{{ loop.index0 }}"
+                tabindex="0"
                 data-id="{{ component.getId() }}"
                 data-score="{{ component_grade.getScore() | default('0') }}"
                 {% if component_grade.getGrader() != null %}
@@ -218,18 +241,22 @@
 {% macro render_numeric_cols(self, gradeable, section, grade, index, components_numeric) %}
     {% if components_numeric|length > 0 %}
         {% set total = 0 %}
-        {% for component in grade.getGradeable().getComponents() if not component.isText() %}
+        {% for component in grade.getGradeable().getComponents()|filter((component) => not component.isText()) %}
             {% set ta_grade = grade.getTaGradedGradeable() %}
             {% set component_grade = ta_grade.getGradedComponent(component) %}
             {% set total = total + component_grade.getScore() %}
             <td class="option-small-input">
                 <input
-                    class="option-small-box"
-                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: #bbbbbb;" : "" }}"
+                    class="option-small-box cell-grade"
+                    style="text-align: center; {{ component_grade.getScore() == 0 ? "color: var(--standard-light-medium-gray);" : "" }}
+                        {{ component_grade.getScore() == 0 ? "background-color: var(--alert-background-blue);" : "background-color: var(--default-white);" }}"
                     type="text"
                     id="cell-{{ index }}-{{ loop.index0 }}"
                     data-id="{{ component.getId() }}"
+                    data-origval="{{ component_grade.getScore() | default('0') }}"
                     value="{{ component_grade.getScore() | default('0') }}"
+                    onclick="this.select()"
+                    onchange=" this.style.backgroundColor = 'var(--default-white)';"
                     {% if component_grade.getGrader() != null %}
                         data-grader="{{ component_grade.getGrader().getId() }}"
                     {% endif %}
@@ -242,20 +269,21 @@
         {% endfor %}
 
         <td class="option-small-output">
-            <input class="option-small-box" style="text-align: center" type="text" border="none" id="total-{{ index }}" value="{{ total }}" data-total="true" readonly>
+            <div class="option-small-box cell-total" style="text-align: center" type="text" border="none" id="total-{{ index }}" data-total="true">{{ total }}</div>
         </td>
     {% endif %}
 
     {% set text_start = components_numeric|length %}
-    {% for component in grade.getGradeable().getComponents() if component.isText() %}
+    {% for component in grade.getGradeable().getComponents()|filter((component) => component.isText()) %}
         {% set ta_grade = grade.getTaGradedGradeable() %}
         {% set component_grade = ta_grade.getGradedComponent(component) %}
         <td class="option-small-input">
             <input
-                class="option-small-box"
+                class="option-small-box cell-grade"
                 type="text"
                 id="cell-{{ index }}-{{ text_start + loop.index0 }}"
                 value="{{ component_grade.getComment() }}"
+                onclick="this.select()"
                 data-id="{{ component.getId() }}"
             />
         </td>

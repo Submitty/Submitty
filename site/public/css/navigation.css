@@ -1,0 +1,136 @@
+.course-section-heading {
+    font-size: 22px;
+    font-weight: 600;
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -30px;
+    padding: 9px 30px;
+    background-color: lightgray;
+}
+
+.gradeable-row {
+    margin: 0 -30px;
+    padding: 18px 30px;
+    border-bottom: 1px solid lightgray;
+}
+
+.gradeable-row:nth-last-child(1) {
+    border: none;
+}
+
+.course-main {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    margin-bottom: 9px;
+    padding-bottom: 5px;
+}
+
+.course-main .fas, .course-main .course-title {
+    margin: 0 5px;
+    display: inline-block;
+}
+
+.course-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.btn-nav {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 12px;
+    margin: 3px 0;
+    min-height: 100%;
+    min-width: 100%;
+}
+
+.btn-nav-open {
+    display: none;
+}
+
+@media (min-width: 541px) {   
+    .course-section-heading {
+        border-bottom: 2px solid #000;
+        background: none;
+    }
+
+    .gradeable-row {
+        border: none;
+    }
+
+    .btn-nav {
+        min-width: 95%;
+    }
+}
+
+@media (min-width: 950px) {
+    #gradeables {
+        display: table;
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .course-section-heading {
+        border-bottom: 1px solid var(--standard-light-gray);
+        margin: 0;
+        padding: 0;
+        display: table-row-group;
+    }
+
+    .course-section {
+        display: table-row-group;
+    }
+
+    .gradeable-row {
+        display: table-row;
+        justify-content: space-between;
+    }
+
+    .course-main, .course-button {
+        display: table-cell;
+        vertical-align: middle;
+    }
+    
+    .course-main {
+        padding: 9px;
+        min-width: 220px;
+        /* webkit tables cannot shrink to fit content; it must take a percentage width value */
+        width: 40%;
+        /* this is the logical behavior, that firefox will render (max width overrides width) */
+        max-width: max-content;
+    }
+
+    .course-button {
+        padding: 10px;
+        text-align: center;
+        width: 220px;
+        min-width: min-content;
+        max-width: max-content;
+    }
+
+    .btn-nav {
+        margin: auto;
+    }
+
+    .btn-nav-open {
+        display: flex;
+        max-width: 85px;
+        min-width: 0;
+        min-height: 50px;
+        justify-content: center;
+        padding: 5px !important;
+    }
+
+    .course-main .button-placeholder {
+        display: inline-block;
+        width: 33px;
+    }
+
+    .course-button {
+        max-width: 95%;
+        margin: auto;
+    }
+}

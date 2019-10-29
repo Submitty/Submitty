@@ -99,14 +99,14 @@
                 <span class="radio-input">
                     <input type="radio" class="count-up-selector count-type-selector"
                            name="count-type-{{ component.id }}" {{ component.default == 0 ? 'checked' : '' }}
-                           onclick="onClickCountUp(this)">Grade by Count Up (from zero)
+                           onclick="onClickCountUp(this)" id="grade_by_count_up"> <label for="grade_by_count_up">Grade by Count Up (from zero)</label>
                 </span>
             </div>
             <div class="col">
                 <span class="radio-input">
                     <input type="radio" class="count-down-selector count-type-selector"
                            name="count-type-{{ component.id }}" {{ component.default != 0 ? 'checked' : '' }}
-                           onclick="onClickCountDown(this)">Grade by Count Down (from "Points")
+                           onclick="onClickCountDown(this)" id="grade_by_count_down"> <label for="grade_by_count_down">Grade by Count Down (from "Points")</label>
                 </span>
             </div>
         </div>

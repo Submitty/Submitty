@@ -1,0 +1,97 @@
+.customization_item
+{
+    border: 2px solid var(--viewed_content);
+    padding: 5px;
+    padding-left: 20px;
+    margin-top: 10px;
+    border-radius: 25px;
+}
+
+.customization_item h2
+{
+    margin-top: 3px;
+    margin-bottom: 3px;
+    font-size: 1.2em;
+    font-style: italic;
+}
+
+.customization_item h3
+{
+    font-size: 1.1em;
+}
+
+.collapsible_area
+{
+    margin-bottom: 10px;
+}
+
+#cust_messages_textarea
+{
+    width: 80%;
+    height: 10vh;
+}
+
+#buckets_available_list li{
+    font-weight: bold;
+    list-style-type: none;
+}
+
+#buckets_used_list li{
+    font-style: italic;
+    list-style-type: none;
+}
+
+.bucket_detail_div:nth-child(2n){
+    background-color: mediumorchid;
+}
+
+.bucket_detail_div:nth-child(2n+1){
+    background-color: lightskyblue;
+}
+
+#save_status_container
+{
+    display: inline-block;
+    width: 100%;
+    background-color: lightgrey;
+    border: none;
+}
+
+#status_label
+{
+    font-weight: bold;
+}
+
+#save_status
+{
+    display: inline;
+}
+
+#save_status_buttons
+{
+    display: flex;
+    flex-direction: row;
+    margin-top: 10px;
+}
+
+#save_status_buttons input
+{
+    margin-right: 10px;
+}
+
+#show_log_button
+{
+    display: none;
+}
+
+#save_status_log
+{
+    display: none;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#limited_func_messages p
+{
+    margin: 12px
+}

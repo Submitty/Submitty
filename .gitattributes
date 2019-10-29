@@ -27,7 +27,6 @@
 *.xml eol=lf
 *.yaml eol=lf
 Vagrantfile eol=lf
-setcsvfields eol=lf
 
 # Files marked 'binary' are not modified.
 # NOTE: *.odt, *.ods, *.odp are open file formats used by

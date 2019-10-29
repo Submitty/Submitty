@@ -34,9 +34,6 @@ def initialize(test):
             os.mkdir(os.path.join(test.testcase_path, "data", "part" + i))
         except OSError:
             pass
-        subprocess.call(["cp",
-            os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "p" + i + "_out.txt"),
-            os.path.join(test.testcase_path, "data")])
 
 
 def cleanup(test):
@@ -44,7 +41,18 @@ def cleanup(test):
             glob.glob(os.path.join(test.testcase_path, "data", "part*", "*")))
     subprocess.call(["rm"] + ["-rf"] +
             glob.glob(os.path.join(test.testcase_path, "data", "test*")))
+    
+    os.mkdir(os.path.join(test.testcase_path, 'data', "test_output"))
+    for i in [str(n) for n in range(1, 5)]:
+        subprocess.call(["cp",
+                        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "p" + i + "_out.txt"),
+                        os.path.join(test.testcase_path, "data", "test_output")])
 
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def correct(test):

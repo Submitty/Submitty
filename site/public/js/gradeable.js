@@ -10,19 +10,19 @@ DECIMAL_PRECISION = 2;
  */
 function loadTemplates() {
     let templates = [
-        {id: 'GradingGradeable', href: 'templates/grading/GradingGradeable.twig'},
-        {id: 'EditGradeable', href: 'templates/grading/EditGradeable.twig'},
-        {id: 'Gradeable', href: "templates/grading/Gradeable.twig"},
-        {id: 'GradingComponent', href: "templates/grading/GradingComponent.twig"},
-        {id: 'GradingComponentHeader', href: "templates/grading/GradingComponentHeader.twig"},
-        {id: 'EditComponent', href: 'templates/grading/EditComponent.twig'},
-        {id: 'EditComponentHeader', href: 'templates/grading/EditComponentHeader.twig'},
-        {id: 'Component', href: "templates/grading/Component.twig"},
-        {id: 'Mark', href: "templates/grading/Mark.twig"},
-        {id: 'OverallComment', href: "templates/grading/OverallComment.twig"},
-        {id: 'TotalScoreBox', href: "templates/grading/TotalScoreBox.twig"},
-        {id: 'ConflictMarks', href: "templates/grading/ConflictMarks.twig"},
-        {id: 'RubricTotalBox', href: "templates/grading/RubricTotalBox.twig"},
+        {id: 'GradingGradeable', href: '/templates/grading/GradingGradeable.twig'},
+        {id: 'EditGradeable', href: '/templates/grading/EditGradeable.twig'},
+        {id: 'Gradeable', href: "/templates/grading/Gradeable.twig"},
+        {id: 'GradingComponent', href: "/templates/grading/GradingComponent.twig"},
+        {id: 'GradingComponentHeader', href: "/templates/grading/GradingComponentHeader.twig"},
+        {id: 'EditComponent', href: '/templates/grading/EditComponent.twig'},
+        {id: 'EditComponentHeader', href: '/templates/grading/EditComponentHeader.twig'},
+        {id: 'Component', href: "/templates/grading/Component.twig"},
+        {id: 'Mark', href: "/templates/grading/Mark.twig"},
+        {id: 'OverallComment', href: "/templates/grading/OverallComment.twig"},
+        {id: 'TotalScoreBox', href: "/templates/grading/TotalScoreBox.twig"},
+        {id: 'ConflictMarks', href: "/templates/grading/ConflictMarks.twig"},
+        {id: 'RubricTotalBox', href: "/templates/grading/RubricTotalBox.twig"},
     ];
     let promises = [];
     templates.forEach(function (template) {
@@ -211,7 +211,7 @@ function renderInstructorEditGradeable(gradeable) {
         'gradeable': gradeable,
         'edit_marks_enabled': true,
         'decimal_precision': DECIMAL_PRECISION,
-        'export_components_url': buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'export_components', 'gradeable_id': gradeable.id})
+        'export_components_url': buildCourseUrl(['gradeable', gradeable.id, 'components', 'export'])
     });
 }
 

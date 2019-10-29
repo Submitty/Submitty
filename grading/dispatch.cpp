@@ -952,7 +952,15 @@ TestResults* dispatch::errorIfNotEmpty_doit (const TestCase &tc, const nlohmann:
   if (!openStudentFile(tc,j,student_file_contents,messages)) {
     return new TestResults(0.0,messages);
   }
-  if (j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
+
+  // FIXME: this logic was the right idea, but since we don't
+  // automatically add the error version, the jvm_memory flag is not
+  // being inserted.  I don't want to make the instructor add this
+  // flag manually when they manually insert this validation check.
+  // Checking for this flag is not strictly necessary, but we should
+  // revisit this in the upcoming refactor.
+  
+  if (//j.find("jvm_memory") != j.end() && j["jvm_memory"] == true &&
       JavaToolOptionsCheck(student_file_contents)) {
     return new TestResults(1.0);
   }
@@ -994,7 +1002,7 @@ TestResults* dispatch::errorIfEmpty_doit (const TestCase &tc, const nlohmann::js
 // ==============================================================================
 // ==============================================================================
 
-TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config){
+TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username){
 
   std::string command = j["command"];
   std::vector<nlohmann::json> actions;
@@ -1004,34 +1012,23 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   nlohmann::json assignment_limits = j.value("resource_limits",nlohmann::json());
   bool windowed = false;
   std::string output_file_name = "temporary_custom_validator_output.json";
+  std::string input_file_name = "custom_validator_input.json";
 
-  std::vector<std::string> actual_filenames   = stringOrArrayOfStrings(j,"actual_file");
-  std::vector<std::string> expected_filenames = stringOrArrayOfStrings(j,"expected_file");
+  //Add the testcase prefix to j for use by the validator.
+  nlohmann::json copy_j = j;
+  copy_j["testcase_prefix"] = tc.getPrefix();
+  // Provide the student's username for customized grading.
+  copy_j["username"] = username;
+  //Write out this validator config for use by the custom validator
+  std::ofstream input_file(input_file_name);
+  input_file << copy_j;
+  input_file.close();
 
-  //grab the actual files.
-  std::string actual_file_argument = "";
-  if(actual_filenames.size() > 0){
-    actual_file_argument = "--actual_files";
-    for(int i=0; i< actual_filenames.size(); i++){
-      actual_file_argument += " " + tc.getPrefix() + actual_filenames[i];
-    }
-  }
-
-  //grab the expected files
-  std::string expected_file_argument  = "";
-  if(expected_filenames.size() > 0){
-    expected_file_argument = "--expected_files";
-    for(int i=0; i< expected_filenames.size(); i++){
-      //For the moment, expected files get no prefix, as they are stored
-      // one level above the testcase directory.
-      expected_file_argument += " " + expected_filenames[i];
-    }
-  }
-
-  command = command + " " + actual_file_argument + " " + expected_file_argument + " 1>"+output_file_name;
+  command = command + " 1>" + output_file_name;
   int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
+  std::remove(input_file_name.c_str());
 
   std::ifstream ifs(output_file_name);
 
@@ -1049,6 +1046,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     std::cout << "ERROR: Could not parse the custom validator's output." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Could not parse a custom validator's output.")});
   }
+  std::remove(output_file_name.c_str());
 
   std::string validator_status = "fail";
   if(result["status"].is_string()){
@@ -1056,7 +1054,6 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
       validator_status = "success";
     }
   }else{
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: A custom validator did not return success or failure" << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return success or failure")});
   }
@@ -1068,22 +1065,27 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
     }
     //logs to validator_log
     std::cout << error_message << std::endl;
-    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: Custom validation failed.")});
   }
 
   if(!result["data"].is_object()){
-    std::remove(output_file_name.c_str());
     std::cout << "ERROR: The custom validator did not return a 'data' subdictionary." << std::endl;
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a result.")});
   }
-
+  
   if(!result["data"]["score"].is_number()){
     std::cout << "ERROR: A custom validator must return score as a number between 0 and 1" << std::endl;
-    std::remove(output_file_name.c_str());
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "ERROR: A custom validator did not return a score.")});
   }
   float score = result["data"]["score"];
+
+  // Clamp the score between 0 and 1
+  if(score > 1){
+    score = 1;
+  }
+  else if(score < 0){
+    score = 0;
+  }
 
   std::string message = "";
   if(result["data"]["message"].is_string()){
@@ -1108,10 +1110,6 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   }else if(status_string == "success"){
     status = MESSAGE_SUCCESS;
   }//else it stays information.
-
-  //Remove is safe, as we named and created the file.
-  std::remove(output_file_name.c_str());
-
   return new TestResults(score, {std::make_pair(status, message)});
 }
 
@@ -1120,7 +1118,7 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
 
 TestResults* dispatch::ImageDiff_doit(const TestCase &tc, const nlohmann::json& j, int autocheck_number) {
   std::string actual_file = j.value("actual_file","");
-  std::string expected_file = j.value("expected_file","");
+  std::string expected_file = "test_output/" + j.value("expected_file","");
   std::string acceptable_threshold_str = j.value("acceptable_threshold","");
 
   if(actual_file == "" || expected_file == "" || acceptable_threshold_str == ""){
@@ -1148,6 +1146,17 @@ TestResults* dispatch::ImageDiff_doit(const TestCase &tc, const nlohmann::json& 
   std::ifstream img_file_expected(expected_file);
   if(!img_file_expected.good()){
     return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; expected file does not exist.")});
+  }
+
+  // Before we compare, make certain that the images are the same size.
+  std::string size_command_actual = "identify -ping -format '%w %h' " + actual_file;
+  std::string size_command_expected = "identify -ping -format '%w %h' " + expected_file;
+
+  std::string actual_size_output = output_of_system_command(size_command_actual.c_str());
+  std::string expected_size_output = output_of_system_command(size_command_expected.c_str());
+
+  if(actual_size_output != expected_size_output){
+    return new TestResults(0.0, {std::make_pair(MESSAGE_FAILURE, "Image comparison failed; Images are not of the same size.")});
   }
 
   std::string command = "compare -metric RMSE " + actual_file + " " + expected_file + " NULL: 2>&1";
@@ -1327,11 +1336,6 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
     vectorOfLines text_b = stringToLines( expected_file_contents, j );
     answer = ses(j, &text_a, &text_b, true, extraStudentOutputOk );
     ((Difference*)answer)->type = ByLineByChar;
-  } else if (comparison == std::string("byLinebyWord")) {
-    vectorOfWords text_a = stringToWords( student_file_contents );
-    vectorOfWords text_b = stringToWords( expected_file_contents );
-    answer = ses(j, &text_a, &text_b, true );
-    ((Difference*)answer)->type = ByLineByWord;
   } else if (comparison == std::string("byLine")) {
     if (lineSwapOk) {
       answer = diffLineSwapOk_doit(j,student_file_contents,expected_file_contents);
@@ -1339,7 +1343,7 @@ TestResults* dispatch::diff_doit (const TestCase &tc, const nlohmann::json& j) {
       vectorOfWords text_a = stringToWordsLimitLineLength( student_file_contents );
       vectorOfWords text_b = stringToWordsLimitLineLength( expected_file_contents );
       answer = ses(j, &text_a, &text_b, false );
-      ((Difference*)answer)->type = ByLineByWord;
+      ((Difference*)answer)->type = ByLineByChar;
     } else {
       vectorOfLines text_a = stringToLines( student_file_contents, j );
       vectorOfLines text_b = stringToLines( expected_file_contents, j );

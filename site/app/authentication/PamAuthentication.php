@@ -1,10 +1,9 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace app\authentication;
+
 use app\exceptions\AuthenticationException;
 use app\exceptions\CurlException;
-use app\libraries\Core;
-use app\libraries\FileUtils;
 
 /**
  * Class PamAuthentication
@@ -19,7 +18,7 @@ use app\libraries\FileUtils;
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
         // Check for $this->user_id and $this->>password to be non empty
-        if ( empty($this->user_id)  || empty($this->password) ||
+        if (empty($this->user_id) || empty($this->password) ||
             $this->core->getQueries()->getSubmittyUser($this->user_id) === null) {
             return false;
         }
@@ -39,10 +38,10 @@ class PamAuthentication extends AbstractAuthentication {
             if ($output_after === null) {
                 throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
             }
-            else if (!isset($output_after['authenticated'])) {
+            elseif (!isset($output_after['authenticated'])) {
                 throw new AuthenticationException('Missing response in JSON for PAM');
             }
-            else if ($output_after['authenticated'] !== true) {
+            elseif ($output_after['authenticated'] !== true) {
                 return false;
             }
         }

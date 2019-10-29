@@ -38,7 +38,7 @@ echo "Getting mono..."
 # this package allows us to run windows .net executables on linux
 
 sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
-echo "deb http://download.mono-project.com/repo/ubuntu xenial main" | sudo tee /etc/apt/sources.list.d/mono-official.list
+echo "deb http://download.mono-project.com/repo/ubuntu stable-bionic main" | sudo tee /etc/apt/sources.list.d/mono-official.list
 sudo apt-get -qqy update
 
 sudo apt-get -qqy install mono-devel
@@ -54,8 +54,8 @@ if [ ! -d "${SUBMITTY_INSTALL_DIR}/Dafny" ]; then
     chmod 751 ${SUBMITTY_INSTALL_DIR}/Dafny
     pushd ${SUBMITTY_INSTALL_DIR}/Dafny > /dev/null
 
-    DAFNY_VER=v2.1.0
-    DAFNY_FILE=dafny-2.1.0.10108-x64-ubuntu-14.04.zip
+    DAFNY_VER=v2.3.0
+    DAFNY_FILE=dafny-2.3.0.10506-x64-ubuntu-16.04.zip
 
     wget https://github.com/Microsoft/dafny/releases/download/${DAFNY_VER}/${DAFNY_FILE} -o /dev/null > /dev/null 2>&1
     unzip ${DAFNY_FILE} > /dev/null
@@ -103,6 +103,7 @@ curl https://soot-build.cs.uni-paderborn.de/public/origin/develop/soot/soot-deve
 -o /dev/null > /dev/null 2>&1
 popd > /dev/null
 
+# fix all java_tools permissions
 chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
 chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
@@ -172,6 +173,7 @@ pip3 install numpy
 pip3 install matplotlib
 pip3 install opencv-python
 pip3 install scipy
+pip3 install scikit-image
 
 ##################################################
 #install some pdflatex packages

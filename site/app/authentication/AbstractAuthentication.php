@@ -1,6 +1,7 @@
-<?php
+<?php declare(strict_types = 1);
 
 namespace app\authentication;
+
 use app\libraries\Core;
 
 /**
@@ -36,7 +37,7 @@ abstract class AbstractAuthentication {
         $this->password = $password;
     }
 
-    public function getUserId(){
+    public function getUserId() {
         return $this->user_id;
     }
 }

@@ -1,14 +1,17 @@
 {% import _self as self %}
 
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
 {% if display_custom_message %}
     <div class="content">
+        {# This is a layout table #}
         <table border=1 cellpadding=5 cellspacing=0 style="background-color:#ddffdd; width:auto;">
-        <tr><td>
-        <table border=0 cellpadding=5 cellspacing=0>
-        <h3>{{ message_file_details.title }}</h3>
-        <tr><td><a href="{{ message_file_details.filename }}" download="provided_files.zip">{{ message_file_details.description }}</a></td></tr>
-        </table>
-        </tr></td>
+            <tr><td>
+                <table border=0 cellpadding=5 cellspacing=0>
+                    <h3>{{ message_file_details.title }}</h3>
+                    <tr><td><a href="{{ message_file_details.filename }}" download="provided_files.zip">{{ message_file_details.description }}</a></td></tr>
+                </table>
+            </td></tr>
         </table>
     </div>
 {% endif %}
@@ -19,69 +22,76 @@
     </div>
 {% endif %}
 
-
 <div class="content">
     <h1>Gradeables</h1>
+    {% if sections|length > 0 %}
+        <div id="gradeables">
+        {% for list_section, info in sections %}
+            <div id="{{ info.section_id }}" class="course-section-heading">
+                <div class="course-section-title">
+                    {{ info.title }}
+                    {% if info.subtitle != "" %}
+                        &nbsp;&nbsp;<em>{{ info.subtitle }}</em>
+                    {% endif %}
+                </div>
+                {% for button in 1 .. max_buttons %}
+                    <div class="button-placeholder"></div>
+                {% endfor %}
+            </div>
 
-    <table class="gradeable_list" style="width:100%;">
-        {% if sections|length > 0 %}
-            {% for list_section, info in sections %}
-                <tr class="bar">
-                    <td colspan="10">{# spacing #}</td>
-                </tr>
-                <tr class="colspan nav-title-row" id="{{ info.section_id }}">
-                    <td colspan="4">
-                        {{ info.title }}
-                        {% if info.subtitle != "" %}
-                            &nbsp;&nbsp; <em>{{ info.subtitle }}</em>
+            <div id="{{ info.section_id }}-section" class="course-section">
+                {% for g_info in info.gradeables %}
+                <div id="{{ g_info.id }}" class="gradeable-row">
+                    <div class="course-main">
+                        {% if g_info.edit_buttons or g_info.delete_buttons %}
+                            {% for button in g_info.edit_buttons %}
+                                {{ self.renderButton(button, g_info.has_build_error) }}
+                            {% endfor %}
+                            {% for button in g_info.delete_buttons %}
+                                {{ self.renderButton(button, g_info.has_build_error) }}
+                            {% endfor %}
                         {% endif %}
-                    </td>
-                </tr>
-                <tr class="colspan">
-                    <td colspan="10" class="hr">{# hr #}</td>
-                </tr>
-                <tbody id="{{ info.section_id }}_tbody">
-                    {% for g_info in info.gradeables %}
-                    <tr class="gradeable_row" id="{{ g_info.id }}">
-                        {% for button in g_info.buttons_justedit %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
-                        {% endfor %}
-                        <td>
+                        <div class="course-title">
                             {{ g_info.name }}
                             {% if g_info.url|trim != "" %}
-                                <a class="external" href="{{ g_info.url }}" target="_blank">
-                                    <i style="margin-left: 10px;" class="fas fa-external-link-alt"></i>
+                                <a class="external" href="{{ g_info.url }}" target="_blank" aria-label="Go to instructions for {{ g_info.name }}">
+                                    <i class="fas fa-external-link-alt"></i>
                                 </a>
                             {% endif %}
-                            {% if g_info.can_delete %}
-                                <i class="fas fa-trash fa-fw" style="cursor:pointer;" aria-hidden="true" title="Delete Gradeable" onclick='newDeleteGradeableForm("{{ core.buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'delete_gradeable', 'id': g_info.id}) }}","{{ g_info.name }}");'></i>
-                            {% endif %}
-                        </td>
-                        {% for button in g_info.buttons %}
-                            <td style="padding: 20px;"{{ 'btn-nav-open' in button.getClass() ? ' class="td-open"' : button.getTitle() == 'Edit' and g_info.has_build_error ? ' class="edit-build-error"' : '' }}>{{ self.renderButton(button) }}</td>
-                        {% endfor %}
-                    </tr>
+                        </div>
+                    </div>
+                    {% for button in g_info.buttons %}
+                        <div class="course-button">{{ self.renderButton(button, g_info.has_build_error) }}</div>
                     {% endfor %}
-                </tbody>
-            {% endfor %}
-        {% else %}
-            <div class="container">
-                <p>There are currently no assignments posted.  Please check back later.</p>
+                </div>
+                {% endfor %}
             </div>
-        {% endif %}
-    </table>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="container">
+            <p>There are currently no assignments posted.  Please check back later.</p>
+        </div>
+    {% endif %}
 </div>
 
 {% macro renderButton(button) %}
-    {% if button != null %}
-        <a class="{{ button.getClass() }}"
+    {% if button is null %}
+        <div class="button-placeholder"></div>
+    {% else %}
+        <a class="{{ button.getClass() }}{{ (button.getTitle() == 'Edit' or button.getTitle() == 'Delete') and has_build_error ? 'edit-build-error' : '' }}"
             {% if button.getTitle() != null %}
                 name="{{ button.getTitle()|lower }}_button"
             {% endif %}
             {% if button.isDisabled() %}
                 disabled
             {% else %}
-                href="{{ button.getHref() }}"
+                {# assigns the href unless button has onclick affect #}
+                {% if not button.hasOnclick() %}
+                    href="{{ button.getHref() }}"
+                {% else %}
+                    onclick="{{ button.getOnclick() }}"
+                {% endif %}
             {% endif %}
             {% if button.isTitleOnHover %}
                 title="{{ button.getTitle() }}"
@@ -91,7 +101,7 @@
             {% endif %}
         >
             {% if button.getBadge() > 0 %}
-                <span class="notification_badge">{{  button.getBadge() }} </span>
+                <span class="notification-badge">{{  button.getBadge() }} </span>
             {% endif %}
 
             {% if not button.isTitleOnHover() and button.getTitle() != null %}

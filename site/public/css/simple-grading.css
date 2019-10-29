@@ -1,0 +1,23 @@
+.column-wrapper {
+    display:flex; 
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.row-wrapper {
+    display:flex; 
+    flex-direction:column;
+}
+
+#data-table td:focus, #data-table input:focus {
+    outline: 3px dashed var(--standard-medium-blue);
+}
+
+.sticky-top {
+    position: fixed;
+    top: 0;
+}
+
+.sticky-top label, .sticky-top .not-sticky {
+    display: none !important;
+}

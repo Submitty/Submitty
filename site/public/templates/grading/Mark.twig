@@ -30,12 +30,34 @@ Required Input:
     <span class="col-no-gutters mark-points"
           data-points="{{ mark.points }}">
         {% if edit_marks_enabled %}
-            <input type="number"
-                   onchange="onMarkPointsChange(this)"
-                   onmouseup="onMarkPointsChange(this)"
+            <input id="mark-editor-{{ mark.id }}"
+                   type="number"
+                   onchange="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
+                   onmouseup="onMarkPointsChange(this),changeMarkColor(this,document.getElementById('mark-editor-{{ mark.id }}').getAttribute('overall'))"
                    step="{{ precision }}"
+                   data-overall=""
                    value="{{ mark.points|round(decimal_precision) }}"
                     {{ first_mark ? 'disabled' : '' }}/>
+            <script>
+                {% if first_mark %}
+                    var overall_title = "{{ mark.title  }}";
+                {% endif %}
+                document.getElementById("mark-editor-{{ mark.id }}").setAttribute("overall",overall_title);
+                if(document.getElementById("mark-editor-{{ mark.id }}").getAttribute("overall")=="Full Credit"){
+                    {% if mark.points > 0 %}
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                    {% else %}
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--default-white)";
+                    {% endif %}
+                }
+                else{
+                    {% if mark.points < 0 %}
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--standard-vibrant-yellow)";
+                    {% else %}
+                        document.getElementById("mark-editor-{{ mark.id }}").style.backgroundColor="var(--default-white)";
+                    {% endif %}
+                }
+            </script>
         {% else %}
             {{ mark.points }}
         {% endif %}
@@ -75,3 +97,23 @@ Required Input:
         {% endif %}
     {% endif %}
 </div>
+<script>
+    function changeMarkColor(me,countUp) {
+        if(countUp=="No Credit"){
+            if(me.value<0){
+                me.style.backgroundColor="var(--standard-vibrant-yellow)";
+            }
+            else {
+                me.style.backgroundColor="var(--default-white)";
+            }
+        }
+        else {
+            if(me.value>0){
+                me.style.backgroundColor="var(--standard-vibrant-yellow)";
+            }
+            else{
+                me.style.backgroundColor="var(--default-white)";
+            }
+        }
+    }
+</script>

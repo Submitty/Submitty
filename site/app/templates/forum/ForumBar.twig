@@ -29,73 +29,172 @@
 
 	<div class="row">
 
-	<div style="padding:0px;" class="col-7">
-
+	<div class="col-8">
 
 		{% if thread_exists %}
 
-
-			<form id="search_block" method="post" action="{{ core.buildUrl({'component':'forum', 'page':'search_threads'}) }}">
-			<div class="row" style="position:relative; top:3px;">
-				<div style="padding:0px; margin-right:5px;" class="col-7">
-					<input style="width:100%; height:34px; " type="text" placeholder="Search here..." name="search_content" id="search_content"/>
+			<form id="search_block" method="post" action="{{ search_url }}">
+				<input type='hidden' name="csrf_token" value="{{ csrf_token }}" />
+			<div class="row">
+				<div class="col-6">
+					<input type="text" placeholder="Search here..." name="search_content" id="search_content" onchange="$(this).val($(this).val().trim())" required aria-label="Forum Search Input Box" />
 				</div>
-				<div style="padding:0px;" class="col-4">
+				<div class="col-5">
 					<button type="submit" name="search" title="Submit search" class="btn btn-primary">
 		  				Search
 					</button>
+
 					{% for button in forum_bar_buttons_left %}
 						{% if user_group <= button.required_rank %}
 							{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 							{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-							<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
-								{{ button.display_text|raw }}
-							</a>
+							{% if link | length > 0 %}
+								<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} role="button" >
+									{{ button.display_text|raw }}
+								</a>
+							{% else %}
+								<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" title="{{ button.title }}" {{ onclick }} >
+									{{ button.display_text|raw }}
+								</button>
+							{% endif %}
+
 						{% endif %}
 					{% endfor %}
+
+					<a id="clear_filter_button" class="inline-block text-decoration-none" style="color: var(--actionable-blue);" label="Clear Filters" onclick="clearForumFilter(event);">&times; Clear Filters</a>
+
 				</div>
-			</form>
+
 			</div>
+
+			</form>
+
 		{% endif %}
-		
+
 		</div>
 		
-	<div style="padding:0px;" class="col-5">
+	<div class="col-4">
 
 		{% for button in forum_bar_buttons_right %}
 			{% if user_group <= button.required_rank %}
 				{% set link = (button.link[0]) ? 'href=' ~ button.link[1] %}
 				{% set onclick = (button.onclick[0]) ? 'onclick=' ~ button.onclick[1] %}
-				<a class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
-					{{ button.display_text|raw }}
-				</a>
+				{% if link | length > 0 %}
+					<a role="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" {{ link }} title="{{ button.title }}" {{ onclick }} >
+						{{ button.display_text | raw }}
+					</a>
+				{% else %}
+					<button type="button" class="btn btn-primary {{ button.optional_class }}" style="{{ button.style }}" title="{{ button.title }}" {{ onclick }} >
+						{{ button.display_text | raw }}
+					</button>
+				{% endif %}
 			{% endif %}
 		{% endfor %}
 
 	{% if show_more %}
-	    <div class="dropdown" style="float:right;top:3px;margin-right:5px;">
-	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default" data-target="#" href="#">
+	    <div class="dropdown more-dropdown">
+	        <a title="More options" id="dropdownLabel" role="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle" data-target="#" href="#">
 	            More <span class="caret"></span>
 	        </a>
-			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownMenu">
+			<ul class="dropdown-menu multi-level" role="menu" aria-labelledby="dropdownLabel">
 			{% for more in more_data|slice(1) %}
 				{% if user_group <= more.required_rank %}
 					{% set onclick = (more.onclick[0]) ? 'onclick=' ~ more.onclick[1] %}
 					{% set optional_class = (more.optional_class[0]) ? 'class=' ~ more.optional_class[1] %}
-	          		<li><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
+	          		<li class='dropdown-item'><a id="{{ more.id }}" title="{{ more.title }}" {{ optional_class }} href="{{ more.link }}" {{ onclick }}>{{ more.display_text }}</a></li>
 	          	{% endif %}
 	        {% endfor %}
-	          <li class="divider"></li>
-	              <li id="tree"><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
-	              <li id="time"><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological</a></li>
+	          <li class="dropdown-divider"></li>
+	          <li title="Click to toggle all post attachments" class='dropdown-item'>
+	          	<a href="#" onclick="loadAllInlineImages()">
+   					Attachments <span class="attachment-badge badge">{{ total_attachments }}</span>
+   				</a></li>
+	          <li class="dropdown-divider"></li>
+	              <li title="Sort posts by reply hierarchy" id="tree" class='dropdown-item'><a tabindex="-1" onclick="changeDisplayOptions('tree', {{ current_thread }})" href="#">Hierarchical</a></li>
+	              <li title="Sort posts by ascending chronological order" id="time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('time', {{ current_thread }})">Chronological  <i class="fas fa-angle-up"></i> </a></li>
+				        <li title="Sort posts by descending chronological order" id="reverse-time" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('reverse-time', {{ current_thread }})">Chronological  <i class="fas fa-angle-down"></i> </a></li>
 	              {% if user_group <= core.getUser().accessGrading() %}
-	              	<li id="alpha"><a href="#" onclick="changeDisplayOptions('alpha', {{ current_thread }})">Alphabetical</a></li>
+	              	<li title="Sort posts by author's last name" id="alpha" class='dropdown-item'><a href="#" onclick="changeDisplayOptions('alpha')">Alphabetical</a></li>
 	              {% endif %}
 	        </ul>
 	    </div>
 	{% endif %}
-
 	</div>
+	{% if thread_exists %}
+		<style>
+			{% for category in categories %}
+				{{ "#categoryid_" ~ category.category_id }}.filter-inactive{
+					color: {{ category.color }};
+					border: 1px solid {{ category.color }}
+				}
+
+				{{ "#categoryid_" ~ category.category_id }}.filter-active{
+					color: white;
+					background-color: {{ category.color }}
+				}
+			{% endfor %}
+		</style>
+		<div id="forum_filter_bar">
+			<label id="filter_unread_btn" class="btn btn-default btn-sm inline-block filter-inactive" for="unread">Unread Only</label> <input type="checkbox" id="unread" name="unread" data-ays-ignore="true"/>
+			<div id="thread_category" aria-label="Select thread category" class="inline-block" data-ays-ignore="true">
+				{% for category in categories %}
+					<button class="btn btn-sm filter-inactive" type="button" id="categoryid_{{ category.category_id }}" cat-id="{{ category.category_id }}" btn-selected="false">{{ category.category_desc }}</button>
+				{% endfor %}
+			</div>
+			<div id="thread_status_select" aria-label="Select thread status" class="inline-block" data-ays-ignore="true">
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="0" btn-selected="false">Comment</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="-1" btn-selected="false">Unresolved</button>
+				<button class="btn btn-sm btn-default inline-block filter-inactive" sel-id="1" btn-selected="false">Resolved</button>
+			</div>
+		</div>
+	{% endif %}
 </div>
 </div>
 <hr/>
+{% if thread_exists and show_filter %}
+<script type="text/javascript">
+	function updateThreads(loadFirstPage, success_callback) {
+		{% if thread_exists %}
+		modifyThreadList({{ current_thread }}, '{{ current_category_ids|join("|") }}', '{{ current_course }}', loadFirstPage, success_callback);
+		{% endif %}
+	}
+
+	$( document ).ready(function() {
+		loadFilterHandlers();
+
+		$('#num_filtered').text({{ display_thread_count }});
+
+		{% for category in cookie_selected_categories %}
+		$('#thread_category button[cat-id="{{ category }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+		filters_applied.toggleElement($('#thread_category button[cat-id="{{ category }}"]').text(), function(e) {
+			return e === $('#thread_category button[cat-id="{{ category }}"]').text();
+		});
+		{% endfor %}
+		{% for status in cookie_selected_thread_status %}
+		$('#thread_status_select button[sel-id="{{ status }}"]').attr('btn-selected', "true").removeClass('filter-inactive').addClass('filter-active');
+		filters_applied.toggleElement($('#thread_status_select button[cat-id="{{ status }}"]').text(), function(e) {
+			return e === $('#thread_status_select button[sel-id="{{ status }}"]').text();
+		});
+		{% endfor %}
+
+		var unread_marked = false;
+
+		$('#unread').prop("checked", {{cookie_selected_unread_value}});
+
+		unread_marked = checkUnread();
+
+		if(filters_applied.length > 0 || unread_marked ){
+			$('#forum_filter_bar').css('display', 'inline-block');
+			$('#clear_filter_button').css('display', 'inline-block');
+		}
+
+		$("#tree").prop("checked", true);
+		{% if display_option in ['tree', 'time', 'alpha'] %}
+		$("#{{ display_option }}").attr("checked", true);
+		$("#{{display_option }}_label").addClass('active');
+		{% endif %}
+
+		window.csrfToken = "{{ csrf_token }}" ;
+	});
+</script>
+{% endif %}

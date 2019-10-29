@@ -1,0 +1,88 @@
+a, a:hover, a:link, a:visited {
+    cursor: pointer;
+}
+
+a,
+a:visited,
+a:link,
+a.fa:hover,
+a > i.fa:hover {
+    color: #2627ee;
+}
+a,
+a:visited,
+a:link,
+a.fas:hover,
+a > i.fas:hover {
+    color: #2627ee;
+}
+a,
+a:visited,
+a:link,
+a.far:hover,
+a > i.far:hover {
+    color: #2627ee;
+}
+
+a:hover {
+    color: #131399;
+}
+a:active {
+    color: #991313;
+}
+
+a.btn-success, a.btn-primary, a.btn-danger,
+a.fa.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.fa, a.btn-primary > i.fa, a.btn-danger > i.fa {
+    color: #fff;
+}
+a.btn-success, a.btn-primary, a.btn-danger,
+a.fas.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.fas, a.btn-primary > i.fas, a.btn-danger > i.fas {
+    color: #fff;
+}
+a.btn-success, a.btn-primary, a.btn-danger,
+a.far.btn-success, a.btn-primary, a.btn-danger,
+a.btn-success > i.far, a.btn-primary > i.far, a.btn-danger > i.far {
+    color: #fff;
+}
+
+a.btn-default,
+a.fa.btn-default,
+a.fa,
+a > i.fa {
+    color: #000;
+}
+
+a.btn-default,
+a.fas.btn-default,
+a.fas,
+a > i.fas {
+    color: #000;
+}
+
+a.btn-default,
+a.far.btn-default,
+a.far,
+a > i.far {
+    color: #000;
+}
+
+a.btn {
+    text-decoration: none;
+}
+
+.black-btn, .black-btn > i.fas {
+    color: #000 !important;
+    border-color: #000 !important;
+}
+
+.black-btn:hover, .black-btn > i.fas:hover {
+    color: #405E90 !important;
+    border-color: #405E90 !important;
+}
+
+.black-btn:active, .black-btn > i.fas:active {
+    color: #991313 !important;
+    border-color: #991313 !important;
+}

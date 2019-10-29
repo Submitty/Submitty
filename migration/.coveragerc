@@ -1,4 +1,5 @@
 [run]
+source = migrator
 omit = 
     *_test*.py
-    test/*.py
+    tests/*.py

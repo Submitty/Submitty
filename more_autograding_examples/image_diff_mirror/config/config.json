@@ -1,23 +1,12 @@
 {
     "autograding" : {
         "submission_to_runner" : [ "*.txt", "*.png" ],
-	"work_to_details" : ["*.png"]
+	       "work_to_details" : ["**/*.png"]
     },
     "max_submission_size" : 2000000,
     "testcases" : [    
-        // *************** COMPILATION *****************
-        {
-            "type" : "Compilation",
-            "title" : "Compilation",
-            //Note the multistep compilation which first 
-            //calls cmake and then make. 
-            "command" : ["g++ *.cpp"],
-            "executable_name" : "a.out",
-            "points" : 4
-        },    
         {
             "title" : "Mirror",
-            "command" : "./a.out",
             "points" : 1,
             "validation" :
             [
@@ -32,7 +21,6 @@
         },
         {
             "title" : "Student 1 Professor 1",
-            "command" : "./a.out",
             "points" : 1,
             "validation" :
             [
@@ -51,7 +39,6 @@
         },
         {
             "title" : "Student 2 Professor 2",
-            "command" : "./a.out",
             "points" : 1,
             "validation" :
             [
@@ -70,7 +57,6 @@
         },
         {
             "title" : "Student 1 Professor 2",
-            "command" : "./a.out",
             "points" : 1,
             "validation" :
             [
@@ -89,7 +75,6 @@
         },
         {
             "title" : "Student 2 Professor 1",
-            "command" : "./a.out",
             "points" : 1,
             "validation" :
             [

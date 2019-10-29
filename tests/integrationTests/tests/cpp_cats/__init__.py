@@ -6,7 +6,6 @@ import os
 import glob
 import shutil
 
-
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
@@ -33,9 +32,6 @@ def initialize(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_input", "CatBreeds.txt"),
         os.path.join(test.testcase_path, "data")])
-    subprocess.call(["cp",
-        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "inst_output.txt"),
-        os.path.join(test.testcase_path, "data")])
 
     subprocess.call(["cp"] +
             glob.glob(os.path.join(SAMPLE_SUBMISSIONS, "*.zip")) +
@@ -48,6 +44,17 @@ def cleanup(test):
                     glob.glob(os.path.join(test.testcase_path, "data", "test*")))
     subprocess.call(["rm"] + ["-f"] +
                     glob.glob(os.path.join(test.testcase_path, "data", "results*")))
+    
+    os.mkdir(os.path.join(test.testcase_path, "data", "test_output")) 
+    subprocess.call(["cp",
+        os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "inst_output.txt"),
+        os.path.join(test.testcase_path, "data", "test_output")])
+
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def allCorrect(test):
@@ -63,10 +70,10 @@ def allCorrect(test):
     test.run_run()
     test.run_validator()
 
-    test.diff("test03/output.txt","data/inst_output.txt")
-    test.diff("test04/output.txt","data/inst_output.txt")
-    test.diff("test05/output.txt","data/inst_output.txt")
-    test.diff("test06/output.txt","data/inst_output.txt")
+    test.diff("test03/output.txt","data/test_output/inst_output.txt")
+    test.diff("test04/output.txt","data/test_output/inst_output.txt")
+    test.diff("test05/output.txt","data/test_output/inst_output.txt")
+    test.diff("test06/output.txt","data/test_output/inst_output.txt")
 
     test.empty_file("test02/STDOUT.txt")
     test.empty_file("test02/STDERR.txt")
@@ -204,4 +211,3 @@ def spellingOff(test):
     test.run_validator()
     test.diff("grade.txt","grade.txt_spellingOff","-b")
     test.json_diff("results.json","results.json_spellingOff")
-

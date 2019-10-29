@@ -4,7 +4,6 @@ namespace app\models;
 
 use app\libraries\Core;
 use app\libraries\DateUtils;
-use app\libraries\Utils;
 
 /**
  * Class Notification
@@ -15,8 +14,10 @@ use app\libraries\Utils;
  * @method void     setSeen($isSeen)
  * @method void     setElapsedTime($duration)
  * @method void     setCreatedAt($time)
- * @method void     setNotifyMetadata()
- * @method void     setNotifyContent()
+ * @method void     setNotifyMetadata($metadata)
+ * @method void     setNotifyContent($content)
+ * @method void     setNotifySource($content)
+ * @method void     setNotifyTarget($content)
  * @method void     setType($t)
  *
  * @method bool     isViewOnly()
@@ -73,52 +74,54 @@ class Notification extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core) {
         parent::__construct($core);
+    }
+
+    public static function createNotification(Core $core,array $event) {
+        $instance = new self($core);
+        $instance->setComponent($event['component']);
+        $instance->setNotifyMetadata($event['metadata']);
+        $instance->setNotifyContent($event['subject']);
+        $instance->setNotifySource($event['sender_id']);
+        $instance->setNotifyTarget($event['to_user_id']);
+        return $instance;
+    }
+
+    public static function createViewOnlyNotification($core, $details) {
+        $instance = new self($core);
         if (count($details) == 0) {
-            return;
+            return null;
         }
-        if(!empty($details['view_only'])){
-            $this->setViewOnly(true);
-            $this->setId($details['id']);
-            $this->setSeen($details['seen']);
-            $this->setComponent($details['component']);
-            $this->setElapsedTime($details['elapsed_time']);
-            $this->setCreatedAt($details['created_at']);
-            $this->setNotifyMetadata($details['metadata']);
-            $this->setNotifyContent($details['content']);
-        } else {
-            $this->setViewOnly(false);
-            $this->setNotifyNotToSource(true);
-            $this->setCurrentUser($this->core->getUser()->getId());
-            $this->setComponent($details['component']);
-            switch ($this->getComponent()) {
-                case 'forum':
-                    $this->handleForum($details);
-                    break;
-                default:
-                    // Prevent notification to be pushed in database
-                    $this->setComponent("invalid");
-                    break;
-            }
-        }
+        $instance->setId($details['id']);
+        $instance->setSeen($details['seen']);
+        $instance->setComponent($details['component']);
+        $instance->setElapsedTime($details['elapsed_time']);
+        $instance->setCreatedAt($details['created_at']);
+        $instance->setNotifyMetadata($details['metadata']);
+        $instance->setNotifyContent($details['content']);
+        return $instance;
     }
 
     /**
      * Returns the corresponding url based on metadata
      *
-     * @param  Core     core
-     * @param  string   metadata
-     * @return string   url
+     * @param  Core     $core
+     * @param  string   $metadata_json
+     * @return string   $url
      */
+
+    // added flag for links that go to sites handled by a router
     public static function getUrl($core, $metadata_json) {
-        $metadata = json_decode($metadata_json);
-        if(is_null($metadata)) {
+        $metadata = json_decode($metadata_json, true);
+        if (empty($metadata)) {
             return null;
         }
-        $parts = $metadata[0];
-        $hash = $metadata[1] ?? null;
-        return $core->buildUrl($parts, $hash);
+
+        if (!isset($metadata['url'])) {
+            return $core->buildCourseUrl();
+        }
+        return $metadata['url'];
     }
 
     public static function getThreadIdIfExists($metadata_json) {
@@ -126,101 +129,8 @@ class Notification extends AbstractModel {
         if(is_null($metadata)) {
             return null;
         }
-        $thread_id = array_key_exists('thread_id', $metadata[0]) ? $metadata[0]['thread_id'] : -1;
+        $thread_id = $metadata['thread_id'] ?? -1;
         return $thread_id;
-    }
-
-    /**
-     * Handles notifications related to forum
-     *
-     * @param array $details
-     */
-    private function handleForum($details) {
-        $this->setType($details['type']);
-        switch ($details['type']) {
-            case 'new_announcement':
-                $this->actAsNewAnnouncementNotification($details['thread_id'], $details['thread_title']);
-                break;
-            case 'updated_announcement':
-                $this->actAsUpdatedAnnouncementNotification($details['thread_id'], $details['thread_title']);
-                break;
-            case 'new_thread':
-                $this->actAsNewForumThread($details['thread_id'], $details['thread_title']);
-                break;
-            case 'reply':
-                $this->actAsForumReplyNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to'], $details['child_id'], $details['anonymous']);
-                break;
-            case 'merge_thread':
-                $this->actAsForumMergeThreadNotification($details['parent_thread_id'],  $details['parent_thread_title'], $details['child_thread_title'], $details['child_root_post'], $details['child_thread_author']);
-                break;
-            case 'edited':
-                $this->actAsForumEditedNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to']);
-                break;
-            case 'deleted':
-                $this->actAsForumDeletedNotification($details['thread_id'],  $details['post_content'], $details['reply_to']);
-                break;
-            case 'undeleted':
-                $this->actAsForumUndeletedNotification($details['thread_id'], $details['post_id'], $details['post_content'], $details['reply_to']);
-                break;
-            default:
-                return;
-        }
-    }
-
-    private function actAsNewForumThread($thread_id, $thread_title) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("New Thread: ".$thread_title);
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget(null);
-    }
-
-    private function actAsNewAnnouncementNotification($thread_id, $thread_title) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("New Announcement: ".$thread_title);
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget(null);
-    }
-
-    private function actAsUpdatedAnnouncementNotification($thread_id, $thread_title) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id))));
-        $this->setNotifyContent("Announcement: ".$thread_title);
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget(null);
-    }
-
-    private function actAsForumReplyNotification($thread_id, $post_id, $post_content, $target, $child_id, $anon) {
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id, (string)$child_id)));
-        $this->setNotifyContent("Reply: A post '".$this->textShortner($post_content)."' got new a reply from ".Utils::getDisplayNameForum($anon, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget($target);
-    }
-
-    private function actAsForumMergeThreadNotification($parent_thread_id, $parent_thread_title, $child_thread_title, $child_root_post, $target){
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $parent_thread_id), (string)$child_root_post)));
-        $this->setNotifyContent("Thread Merged: '".$this->textShortner($child_thread_title)."' got merged into '".$this->textShortner($parent_thread_title)."'");
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget($target);
-    }
-
-    private function actAsForumEditedNotification($thread_id, $post_id, $post_content, $target){
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Update: A thread/post '".$this->textShortner($post_content)."' got an edit from ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget($target);
-    }
-
-    private function actAsForumDeletedNotification($thread_id, $post_content, $target){
-        $this->setNotifyMetadata(json_encode(array()));
-        $this->setNotifyContent("Deleted: A thread/post '".$this->textShortner($post_content)."' was deleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget($target);
-    }
-
-    private function actAsForumUndeletedNotification($thread_id, $post_id, $post_content, $target){
-        $this->setNotifyMetadata(json_encode(array(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id), (string)$post_id)));
-        $this->setNotifyContent("Undeleted: A thread/post '".$this->textShortner($post_content)."' has been undeleted by ".Utils::getDisplayNameForum(false, $this->core->getQueries()->getDisplayUserInfoFromUserId($this->getCurrentUser())));
-        $this->setNotifySource($this->getCurrentUser());
-        $this->setNotifyTarget($target);
     }
 
     /**
@@ -229,7 +139,7 @@ class Notification extends AbstractModel {
      * @param string $message
      * @return $trimmed_message
      */
-    private function textShortner($message) {
+    public static function textShortner($message) {
         $max_length = 40;
         $message = str_replace("\n", " ", $message);
         if(strlen($message) > $max_length) {
@@ -239,7 +149,7 @@ class Notification extends AbstractModel {
     }
 
     public function hasEmptyMetadata() {
-        return count(json_decode($this->getNotifyMetadata())) == 0;
+        return empty(json_decode($this->getNotifyMetadata()));
     }
 
     /**

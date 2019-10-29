@@ -83,7 +83,8 @@ bool ShowHelper(const std::string& when, bool success) {
 
 
 double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohmann::json &autocheck_js,
-                         const std::string &hw_id, std::string &testcase_message, nlohmann::json complete_config) {
+                         const std::string &hw_id, std::string &testcase_message, nlohmann::json complete_config,
+                         const std::string& username) {
 
   std::cout << "\nAUTOCHECK #" << which_autocheck+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
@@ -91,7 +92,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
   const nlohmann::json& tcg = my_testcase.getGrader(which_autocheck);
 
   // do the work
-  TestResultsFixedSize result = my_testcase.do_the_grading(which_autocheck, complete_config);
+  TestResultsFixedSize result = my_testcase.do_the_grading(which_autocheck, complete_config, username);
 
   // calculations
   float grade = result.getGrade();
@@ -119,6 +120,9 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
     // JSON FOR THIS FILE DISPLAY
     nlohmann::json autocheck_j;
     autocheck_j["description"] = tcg.value("description",filenames[FN]);
+    if(tcg.find("sequence_diagram") != tcg.end()){
+      autocheck_j["display_as_sequence_diagram"] = tcg.value("sequence_diagram", false);
+    }
     bool actual_file_to_print = false;
     std::string autocheckid = std::to_string(which_autocheck);
     if (filenames.size() > 1) {
@@ -153,7 +157,8 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
         }
         expected = tcg.value("expected_file", "");
         if (expected != "") {
-          fileStatus(expected, expectedFileExists,expectedFileEmpty);
+          std::string expectedWithFolder = getOutputContainingFolderPath(my_testcase, expected) + expected;
+          fileStatus(expectedWithFolder, expectedFileExists,expectedFileEmpty);
           if (!expectedFileExists) {
             BROKEN_CONFIG_ERROR_MESSAGE = "ERROR!  Expected File '" + expected + "' does not exist";
             std::cout << BROKEN_CONFIG_ERROR_MESSAGE << std::endl;
@@ -162,18 +167,17 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
             // PREPARE THE JSON DIFF FILE
             std::stringstream diff_path;
             diff_path << my_testcase.getPrefix() << which_autocheck << "_diff.json";
-            std::ofstream diff_stream(diff_path.str().c_str());
+            std::ofstream diff_stream(diff_path.str().c_str()); 
             result.printJSON(diff_stream);
             std::stringstream expected_path;
             std::string id = hw_id;
-            std::string expected_out_dir = "test_output/" + id + "/";
+            std::string expected_out_dir = getPathForOutputFile(my_testcase, expected, id);
             expected_path << expected_out_dir << expected;
             if (show_expected) {
              autocheck_j["expected_file"] = expected_path.str();
             }
-            if (show_image_diff)
-            {
-              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_difference.png";
+            if (show_image_diff){
+              autocheck_j["image_difference_file"] = my_testcase.getPrefix() + tcg.value("image_difference_file", std::to_string(which_autocheck) + "_difference.png");
             }
             if (show_actual) {
              autocheck_j["difference_file"] = my_testcase.getPrefix() + std::to_string(which_autocheck) + "_diff.json";
@@ -242,6 +246,7 @@ void WriteToResultsJSON(const TestCase &my_testcase,
                         const std::string &title,
                         bool view_testcase,
                         nlohmann::json& autocheck_js,
+                        const std::string &testcase_label,
                         const std::string &testcase_message,
                         int testcase_pts,
                         nlohmann::json &all_testcases) {
@@ -255,6 +260,8 @@ void WriteToResultsJSON(const TestCase &my_testcase,
   if (autocheck_js.size() > 0) {
     tc_j["autochecks"] = autocheck_js;
   }
+
+  if (testcase_label != "") tc_j["testcase_label"] = testcase_label;
 
   if (testcase_message != "") tc_j["testcase_message"] = testcase_message;
   tc_j["points_awarded"] = testcase_pts;
@@ -298,7 +305,8 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
                        int &nonhidden_automated_points_awarded,
                        int &nonhidden_automated_points_possible,
                        nlohmann::json &all_testcases,
-                       std::ofstream& gradefile) {
+                       std::ofstream& gradefile,
+                       const std::string& username) {
     //This input to the testcase constructor does nothing unless we attempt to access the 'commands' object.
     std::string container_name = "";
     TestCase my_testcase(config_json,which_testcase,container_name);
@@ -330,7 +338,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       std::cout << "NUM AUTOCHECKS / FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
       for (int which_autocheck = 0; which_autocheck < my_testcase.numFileGraders(); which_autocheck++) {
-        my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message,config_json);
+        my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message,config_json, username);
       }
       bool fileExists, fileEmpty;
       std::string execute_logfile = my_testcase.getPrefix() + "execute_logfile.txt";
@@ -367,8 +375,18 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
         nonhidden_automated_points_possible += possible_points;
       }
     }
+
     // EXPORT TO results.json and grade.txt
-    WriteToResultsJSON(my_testcase,title,view_testcase,autocheck_js,testcase_message,testcase_pts,all_testcases);
+    WriteToResultsJSON(
+    my_testcase,
+    title,
+    view_testcase,
+    autocheck_js,
+    my_testcase.getTestcaseLabel(),
+    testcase_message,
+    testcase_pts,
+    all_testcases);
+
     WriteToGradefile(which_testcase,my_testcase,gradefile,testcase_pts);
 }
 
@@ -409,7 +427,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
                       nonhidden_automated_points_awarded,
                       nonhidden_automated_points_possible,
                       all_testcases,
-                      gradefile);
+                      gradefile,
+                      rcsid);
   }
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());

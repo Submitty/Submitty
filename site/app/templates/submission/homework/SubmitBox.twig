@@ -2,58 +2,79 @@
 
 {# Display the gradeable_message if one exists at the top of the page #}
 {% if has_gradeable_message %}
-    <div class='content gradeable_message'><p>{{ gradeable_message|raw }}</p></div>
+    <div class='content gradeable_message'>{{ gradeable_message | markdown }}</div>
+{% endif %}
+
+{% if has_overridden_grades %}
+    <div class='content overridden_message'><p>Please see your instructor if you have for questions about your grade for this assignment</p></div>
 {% endif %}
 
 <div class="content">
-    <div class="upperinfo">
-        <h1 class="upperinfo-left">New submission for: {{ gradeable_name }}</h1>
+    <header id="gradeable-info">
+        <h1>New submission for: {{ gradeable_name }}</h1>
         {% if has_due_date %}
-            <h3 class="upperinfo-right">Due: {{ formatted_due_date }}</h3>
+            <h2>Due: {{ formatted_due_date }}</h2>
         {% endif %}
-    </div>
+        <div class="loading-bar-wrapper">
+            <label for="loading-bar">Upload progress: <span id="loading-bar-percentage"></span></label>
+            <progress id="loading-bar" value="0" ></progress>
+        </div>
+    </header>
 
     {% if show_no_late_submission_warning %}
-        <div>
-            <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
-        </div>
+        <i class="red-message">Warning, you are making a late submission for a gradeable without late submissions enabled!</i>
     {% endif %}
 
     {# Admin submission type selector #}
     {% if core.getUser().accessFullGrading() %}
-        <form id="submissionForm" method="post" style="text-align: center; margin: 0 auto; width: 100%; ">
-            <div >
-                <input type='radio' id="radio_normal" name="submission_type" checked="true">
-                <label for="radio_normal">Normal Submission</label>
-                <input type='radio' id="radio_student" name="submission_type">
-                <label for="radio_student">Make Submission for a Student</label>
+        <form id="submission-form" method="post">
+            <fieldset id="submission-mode">
+                <legend> Select submission mode: </legend>
+                <label for="radio-normal">
+                    <input type='radio' id="radio-normal" name="submission_type" checked="true">
+                    Normal Submission
+                </label>
+                <label for="radio-student">
+                    <input type='radio' id="radio-student" name="submission_type">
+                    Make Submission for a Student
+                </label>
                 {% if part_names|length == 1 and not is_vcs %}
-                    <input type='radio' id="radio_bulk" name="submission_type">
-                    <label for="radio_bulk">Bulk Upload</label>
+                    <label for="radio-bulk">
+                        <input type='radio' id="radio-bulk" name="submission_type">
+                        Bulk PDF Upload
+                        <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
+                            <i aria-hidden="true" title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
+                        </a>
+                    </label>
                 {% endif %}
-            </div>
-            <div id="user_id_input" style="display: none">
+            </fieldset>
+            <div id="user-id-input" class="hide">
                 <div class="sub">
-                    Input the user_id of the student you wish to submit for. This <i>permanently</i> affects the student's submissions, so please use with caution.
+                    Note: This <i>permanently</i> affects the student's submissions, so please use with caution.
                 </div>
                 <div class="sub">
-                    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
-                    user_id: <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
+                    <label for="user_id"> user_id: </label>
+		            <input type="text" id= "user_id" value ="" placeholder="{{ user_id }}"/>
                 </div>
             </div>
-            <div class = "sub" id="pdf_submit_button" style="display: none">
+            <div class="sub hide" id="pdf-submit-button">
                 <div class="sub">
-                    Split by QR code?
-                    <input type="checkbox" id="use_qr">
-                    <span id="pages_prompt"># of page(s) per PDF:</span>
-                    <span id="prefix_prompt">QR code prefix/suffix:
-                    <a style="text-decoration:none;" href = "https://submitty.org/instructor/exams#bulk-upload-and-split-with-qr-codes" target="_none">
-                        <i title="Bulk Upload QR Help" class="far fa-question-circle"></i>
+                    <label for="use-qr">Split by QR code?</label>
+                    <input type="checkbox" id="use-qr">
+                    <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
+                    <span id="prefix-prompt">QR code prefix/suffix:
+                    <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
+	                    <i aria-hidden="true" title="Split by QR Code Help" class="far fa-question-circle"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
-                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" />
-                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" />
+                    <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
+                    <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
+                    <div id="expected-num-box">
+                    <label for= "expected_pages_input"> Expected Number of pages per PDF: </label>
+                    <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
+                    </div>
                 </div>
             </div>
         </form>
@@ -63,25 +84,28 @@
                 students_full = {{ students_full|json_encode|raw }};
                 $('#qr_prefix').prop('hidden', true);
                 $('#qr_suffix').prop('hidden', true);
-                $('#prefix_prompt').prop('hidden', true);
-                $('#qr_progress_box').prop('hidden', true);
+                $('#prefix-prompt').prop('hidden', true);
+                $('#bulk_progress_box').prop('hidden', true);
+                $('#expected-num-box').prop('hidden', true);
+
                 //load what upload mode the user selected (if any)
-                if(sessionStorage.getItem('radio_bulk')){
-                    $('#radio_bulk').prop('checked', true);
-                }else if(sessionStorage.getItem('radio_student')){
-                    $('#radio_student').prop('checked',true);
+                if(sessionStorage.getItem('radio-bulk')){
+                    $('#radio-bulk').prop('checked', true);
+                    $('#bulk_progress_box').prop('hidden', false);
+                }else if(sessionStorage.getItem('radio-student')){
+                    $('#radio-student').prop('checked',true);
                 }else{
-                    $('#radio_normal').prop('checked',true);
+                    $('#radio-normal').prop('checked',true);
                 }
                 //load if bulkupload with qr codes selected or not
-                if(sessionStorage.getItem('use_qr')){
+                if(sessionStorage.getItem('use-qr')){
                     $('#qr_prefix').prop('hidden',false)
                     $('#qr_suffix').prop('hidden',false)
-                    $('#prefix_prompt').prop('hidden', false);
-                    $('#pages_prompt').prop('hidden', true);
+                    $('#prefix-prompt').prop('hidden', false);
+                    $('#pages-prompt').prop('hidden', true);
                     $('#num_pages').prop('hidden', true);
-                    $('#use_qr').prop('checked',true);
-                    $('#qr_progress_box').prop('hidden', false);
+                    $('#use-qr').prop('checked',true);
+                    $('#expected-num-box').prop('hidden', false);
                     //populate prefix textarea
                     if(sessionStorage.getItem('qr_prefix')){
                         $('#qr_prefix').val(sessionStorage.getItem('qr_prefix'));
@@ -90,13 +114,16 @@
                         $('#qr_suffix').val(sessionStorage.getItem('qr_suffix'));
                     }
                 }
-                if ($("#radio_student").is(":checked")) {
-                    $('#user_id_input').show();
+                if ($("#radio-student").is(":checked")) {
+                    $('#user-id-input').show();
                 }
-                if ($("#radio_bulk").is(":checked")) {
-                    $('#pdf_submit_button').show();
+                if ($("#radio-bulk").is(":checked")) {
+                    $('#pdf-submit-button').show();
+                    $('#bulk_progress_box').prop('hidden', false);
+                }else{
+                     $('#bulk_progress_box').prop('hidden', true);
                 }
-                if($('#use_qr').is(':checked')){
+                if($('#use-qr').is(':checked')){
                     //save qr_code prefix on textarea change
                     $('#qr_prefix').change(function(){
                         sessionStorage.setItem('qr_prefix', $('#qr_prefix').val());
@@ -105,38 +132,41 @@
                         sessionStorage.setItem('qr_suffix', $('#qr_suffix').val());
                     });
                 }
-                $('#radio_normal').click(function() {
-                    sessionStorage.setItem('radio_normal', true);
-                    sessionStorage.removeItem('radio_student');
-                    sessionStorage.removeItem('radio_bulk');
-                    $('#pdf_submit_button').hide();
-                    $('#user_id_input').hide();
-                    $('#pdf_submit_button').hide();
+                $('#radio-normal').click(function() {
+                    sessionStorage.setItem('radio-normal', true);
+                    sessionStorage.removeItem('radio-student');
+                    sessionStorage.removeItem('radio-bulk');
+                    $('#pdf-submit-button').hide();
+                    $('#user-id-input').hide();
+                    $('#pdf-submit-button').hide();
                     $('#user_id').val('');
+                    $('#bulk_progress_box').prop('hidden', true);
                 });
-                $('#radio_student').click(function() {
-                    sessionStorage.setItem('radio_student', true);
-                    sessionStorage.removeItem('radio_bulk');
-                    sessionStorage.removeItem('radio_normal');
-                    $('#pdf_submit_button').hide();
-                    $('#user_id_input').show();
+                $('#radio-student').click(function() {
+                    sessionStorage.setItem('radio-student', true);
+                    sessionStorage.removeItem('radio-bulk');
+                    sessionStorage.removeItem('radio-normal');
+                    $('#pdf-submit-button').hide();
+                    $('#user-id-input').show();
+                    $('#bulk_progress_box').prop('hidden', true);
                 });
-                $('#radio_bulk').click(function()  {
-                    sessionStorage.setItem('radio_bulk', true);
-                    sessionStorage.removeItem('radio_student');
-                    sessionStorage.removeItem('radio_normal');
-                    $('#user_id_input').hide();
-                    $('#pdf_submit_button').show();
+                $('#radio-bulk').click(function()  {
+                    sessionStorage.setItem('radio-bulk', true);
+                    sessionStorage.removeItem('radio-student');
+                    sessionStorage.removeItem('radio-normal');
+                    $('#user-id-input').hide();
+                    $('#pdf-submit-button').show();
                     $('#user_id').val('');
+                    $('#bulk_progress_box').prop('hidden', false);
                 });
-                $('#use_qr').click(function(){
-                    (sessionStorage.getItem('use_qr')) ? sessionStorage.removeItem('use_qr') : sessionStorage.setItem('use_qr', true);
+                $('#use-qr').click(function(){
+                    (sessionStorage.getItem('use-qr')) ? sessionStorage.removeItem('use-qr') : sessionStorage.setItem('use-qr', true);
                     $('#num_pages').prop('hidden', !$('#num_pages').is(':hidden'));
                     $('#qr_prefix').prop('hidden', !$('#qr_prefix').is(':hidden'));
                     $('#qr_suffix').prop('hidden', !$('#qr_suffix').is(':hidden'));
-                    $('#prefix_prompt').prop('hidden', !$('#prefix_prompt').is(':hidden'));
-                    $('#pages_prompt').prop('hidden', !$('#pages_prompt').is(':hidden'));
-                    $('#qr_progress_box').prop('hidden', !$('#qr_progress_box').is(':hidden'));
+                    $('#prefix-prompt').prop('hidden', !$('#prefix-prompt').is(':hidden'));
+                    $('#pages-prompt').prop('hidden', !$('#pages-prompt').is(':hidden'));
+                    $('#expected-num-box').prop('hidden',!$('#expected-num-box').is(':hidden'));
                 });
                 $("#user_id").autocomplete({
                     source: students_full
@@ -147,47 +177,255 @@
     {# /Admin submission type selector #}
 
     {% if is_vcs %}
-        {#
-            TODO: Build ability for students to specify their own repo url
-            if (strpos($gradeable->getSubdirectory(),"\$repo_id") !== false) {
-                $return .= <<<HTML
-    repository id: <input type="text" id="repo_id" class="required" value="" placeholder="(Required)"/><br /><br />
-    HTML;
-            }
-            else if ($gradeable->getSubdirectory() == "" && $this->core->getConfig()->getVcsBaseUrl() == "") {
-                $return .= <<<HTML
-    Enter the URL for your repository, ex. <kbd>https://github.com/username/homework-1</kbd><br />
-    repository URL: <input type="text" id="repo_id" class="required" value ="" placeholder="(Required)"/><br /><br />
-    HTML;
-            }
-        #}
-        <h3>To access your Repository:</h3>
-        <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
-        <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp><br /><br />
+        {% if vcs_host_type == 0 or vcs_host_type == 1 %}
+            <h3>To access your Repository:</h3>
+            <span><em>Note: There may be a delay before your repository is prepared, please refer to assignment instructions.</em></span><br />
+            <samp>git  clone  {{ repository_path }}  SPECIFY_TARGET_DIRECTORY</samp>
+        {% endif %}
+
+        {% if vcs_host_type == 2 or vcs_host_type == 3 %}
+            <h3>Please enter your GitHub URL: </h3>
+
+            GitHub URL: &nbsp;&nbsp; <kbd>https://www.github.com/</kbd>
+            <input type="text" id="github-user-id" name="git_user_id" class="required github-id" value="{{ github_user_id }}" placeholder="user_name"/>
+            <kbd>/</kbd>
+            <input type="text" id="github-repo-id" name="git_repo_id" class="required github-id" value="{{ github_repo_id }}" placeholder="repo_name"/>
+
+            {% if vcs_host_type == 2 %}
+            Note: This should be a <em>public repository</em>, visible to everyone.
+            {% else %}
+            Note: If this is not a <em>public repository</em>, please ensure that you have granted read access to INCOMPLETE! FIXME! SPECIAL USER.
+            {% endif %}
+
+        {% endif %}
         <input type="submit" id="submit" class="btn btn-primary" value="Grade My Repository" />
     {% else %}
-        <div id="upload-boxes" style="display:table; border-spacing: 5px; width:100%">
 
-            {# Text boxes #}
-            {% for textbox in textboxes %}
-                {{ self.render_textbox(textbox, image_data, loop.index0) }}
+        {# Notebook #}
+        <div class="notebook">
+
+            {# Render content #}
+            {% set num_short_answer = 0 %}
+            {% set num_codeboxes = 0 %}
+            {% set num_multiple_choice = 0%}
+            {% for cell in notebook %}
+                <div id="content_{{ loop.index0 }}">
+
+                    {# Handle if cell is markdown #}
+                    {% if cell.type == "markdown" %}
+
+                        {# Render markdown #}
+                        {{ cell.markdown_data | markdown }}
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
+
+                    {# Handle if cell is image #}
+                    {% elseif cell.type == "image" %}
+
+                        <img src="{{ attribute(image_data, cell.image) }}"
+
+                        {% if cell.width > 0 %}
+                            width="{{ cell.width }}"
+                        {% endif %}
+
+                        {% if cell.height > 0 %}
+                            height="{{ cell.height }}"
+                        {% endif %}
+
+                        {% if cell.alt_text is defined %}
+                            alt="{{ cell.alt_text }}"
+                        {% endif %}
+
+                        >
+
+                        {{ self.render_testcase_messages(cell, testcase_messages) }}
+
+                    {# Handle if cell is short_answer #}
+                    {% elseif cell.type == "short_answer" %}
+
+                        {# If programming language not defined render regular text boxes #}
+                        {% if cell.programming_language is not defined %}
+
+                            {{ self.render_short_answer(cell, num_short_answer, highest_version, testcase_messages) }}
+                            {% set num_short_answer = num_short_answer + 1 %}
+
+                        {# Else render a codebox #}
+                        {% else %}
+                                <div>
+                                    {% if cell.label %}
+                                        {{ cell.label | markdown }}
+                                    {% else %}
+                                        Write your {{ cell.programming_language | title }} below:
+                                    {% endif %}
+                                </div>
+
+                                <div id="codebox_{{ num_codeboxes }}"
+                                     name="codebox_{{ num_codeboxes }}"
+                                     class="codebox"
+                                     data-initial_value="{{ cell.initial_value }}"
+                                     data-recent_submission="{{ cell.recent_submission }}"
+                                     onKeyPress="handle_input_keypress();">
+                                </div>
+
+                                <button type="button" id="codebox_{{ num_codeboxes }}_clear_button" class="btn btn-primary codebox-clear-reset">Clear</button>
+                                <button type="button" id="codebox_{{ num_codeboxes }}_recent_button" class="btn btn-primary codebox-clear-reset">Use Most Recent Submission</button>
+
+                                <script>
+
+                                    var editor_{{num_codeboxes}} = CodeMirror(document.getElementById("codebox_{{ num_codeboxes }}"),
+                                        {
+                                            "mode": "{{ cell.programming_language }}",
+                                            lineNumbers: true,
+                                            "theme": "eclipse"
+                                        }
+                                    );
+
+                                    {# Populate codebox initially #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "recent");
+                                    {% else %}
+                                        setCodeBox("codebox_{{ num_codeboxes }}", "clear");
+                                    {% endif %}
+
+                                    {# Hide recent button if no previous submissions #}
+                                    {% if highest_version == 0 %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").style.visibility = 'hidden';
+                                    {% endif %}
+
+                                    {# Setup init state of buttons #}
+                                    {% if core.getConfig().keepPreviousFiles() %}
+
+                                        {% if highest_version == 0 %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        {% else %}
+                                            document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = false;
+                                        {% endif %}
+
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = true;
+                                    {% else %}
+                                        document.getElementById("codebox_{{ num_codeboxes }}_clear_button").disabled = true;
+                                        document.getElementById("codebox_{{ num_codeboxes }}_recent_button").disabled = false;
+
+                                    {% endif %}
+                                </script>
+                            {% set num_codeboxes = num_codeboxes + 1 %}
+                        {% endif %}
+
+                    {# Handle if cell is multiple choice #}
+                    {% elseif cell.type == "multiple_choice" %}
+
+                        <fieldset id="mc_field_{{ num_multiple_choice }}"
+                                  class="mc"
+                                  {% if cell.recent_submission is defined %}data-prev_checked="{{ cell.recent_submission }}"{% endif %}>
+                            {% if cell.allow_multiple == true %}
+                                <legend>
+                                    {% if cell.label %}
+                                        {{ cell.label | markdown }}
+                                    {% else %}
+                                        You may select many:
+                                    {% endif %}
+                                </legend>
+
+                                {{ self.render_testcase_messages(cell, testcase_messages) }}
+
+                                {% for choice in cell.choices %}
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                                        <input type="checkbox"
+                                               name="multiple_choice_{{ num_multiple_choice }}"
+                                               id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
+                                               value="{{ choice.value }}"
+                                               onclick="handle_input_keypress();" 
+                                        />
+                                        {{ choice.description | markdown }}
+                                    </label>
+                                {% endfor %}
+                            {% else %}
+                                <legend>
+                                    {% if cell.label %}
+                                        {{ cell.label | markdown }}
+                                    {% else %}
+                                        Select one:
+                                    {% endif %}
+                                </legend>
+
+                                {{ self.render_testcase_messages(cell, testcase_messages) }}
+
+                                {% for choice in cell.choices %}                                      
+                                    <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
+                                        <input type="radio"
+                                               name="multiple_choice_{{ num_multiple_choice }}"
+                                               id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
+                                               value="{{ choice.value }}"
+                                               onclick="handle_input_keypress();" 
+                                        />
+                                        {{ choice.description | markdown }}
+                                    </label>
+                                {% endfor %}
+                            {% endif %}
+                        </fieldset>
+
+                        {# Create reset to recent submission button #}
+                        <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
+                        <button type="button" id="mc_{{ num_multiple_choice }}_recent_button" class="btn btn-primary mc-recent">Use Most Recent Submission</button>
+
+                        <script>
+                            {# Populate checkboxes initially #}
+                            {% if cell.recent_submission is defined and core.getConfig().keepPreviousFiles() %}
+                                setMultipleChoices("mc_field_{{ num_multiple_choice }}");
+                            {% endif %}
+
+                            {# Hide button if no previous submissions #}
+                            {% if cell.recent_submission is not defined %}
+                                $("#mc_{{ num_multiple_choice }}_recent_button").hide();
+                            {% endif %}
+
+                            {# Configure initial state for the button #}
+                            {% if core.getConfig().keepPreviousFiles() %}
+
+                                {% if highest_version == 0 %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                {% else %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", false);
+                                {% endif %}
+
+                                $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", true);
+                            {% else %}
+                                    $("#mc_{{ num_multiple_choice }}_clear_button").attr("disabled", true);
+                                    $("#mc_{{ num_multiple_choice }}_recent_button").attr("disabled", false);
+                            {% endif %}
+                        </script>
+
+                        {% set num_multiple_choice = num_multiple_choice + 1 %}
+
+                    {% endif %}
+
+                </div>
+
             {% endfor %}
-            {# /Text boxes #}
 
+        </div>
+
+        {# File upload boxes #}
+        <div id="upload-boxes">
             {# Submit boxes #}
             {% for part in part_names %}
-                <div id="upload{{ loop.index }}" style="cursor: pointer; text-align: center; border: dashed 2px lightgrey; display:table-cell; height: 150px;">
-                    <h3 class="label" id="label{{ loop.index }}">
+                {# uploadIndex and input-file + Index required for drag-and-drop.js #}
+                <div tabindex="0"
+                     id="upload{{ loop.index }}"
+                     class="upload-box"
+                     onkeypress="clicked_on_box(event)"
+                     role="text"
+                     aria-label="Press enter to upload your {{ part }} file"
+                >
+                    <h2 class="label" id="label{{ loop.index }}">
                         {% if part_names|length > 1 %}
                             Drag your {{ part }} here or click to open file browser
                         {% else %}
                             Drag your file(s) here or click to open file browser
                         {% endif %}
-                    </h3>
-                    <input type="file" name="files" id="input_file{{ loop.index }}" style="display: none" onchange="addFilesFromInput({{ loop.index }})" multiple />
+                    </h2>
+                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                 </div>
             {% endfor %}
-            {# /Submit boxes #}
         </div>
 
         {# Page selector #}
@@ -196,35 +434,36 @@
                 <div class="sub">
                     <div>Enter the page number that corresponds to each question. If the answer spans multiple pages, enter the page the answer starts on.</div>
                     {% for component_name in component_names %}
-                        <div>{{ component_name }}: <input type="number" id="page_{{ loop.index0 }}" min="1"></div><br />
+                        <div>{{ component_name }}: <input type="number" id="page_{{ loop.index0 }}" min="1"></div>
                     {% endfor %}
                 </div>
             </form>
         {% endif %}
         {# /Page selector #}
 
-        <div>
+        <p>
             {{ upload_message }}
-            <br>
-            &nbsp;
-        </div>
+        </p>
 
-        <button type="button" id="submit" class="btn btn-success" style="margin-right: 100px;">Submit</button>
-        <button type="button" id="startnew" class="btn btn-primary">Clear</button>
+        <button type="button" id="submit" class="btn btn-success">Submit</button>
 
-        {% if display_version == highest_version and display_version > 0 %}
-            <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+        {% if part_names is not empty %}
+            <button type="button" id="startnew" class="btn btn-primary">Clear</button>
 
-            {% if core.getConfig().keepPreviousFiles() %}
-            <script type="text/javascript">
-                $(function() {
-                    setUsePrevious();
-                    {% for file in old_files %}
-                        addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
-                        readPrevious('{{ file.name }}', {{ file.part }});
-                    {% endfor %}
-                });
-            </script>
+            {% if display_version == highest_version and display_version > 0 %}
+                <button type="button" id= "getprev" class="btn btn-primary">Use Most Recent Submission</button>
+
+                {% if core.getConfig().keepPreviousFiles() %}
+                <script type="text/javascript">
+                    $(function() {
+                        setUsePrevious();
+                        {% for file in old_files %}
+                            addLabel('{{ file.name }}', '{{ file.size }}', {{ file.part }}, true);
+                            readPrevious('{{ file.name }}', {{ file.part }});
+                        {% endfor %}
+                    });
+                </script>
+                {% endif %}
             {% endif %}
         {% endif %}
 
@@ -273,30 +512,30 @@
 
 {% if core.getUser().accessFullGrading() %}
     {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
-    {% include 'submission/homework/QRProgressBox.twig' %}
+    {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
 <script type="text/javascript">
-    function makeSubmission(user_id, highest_version, is_pdf, path, count, repo_id, merge_previous=false, clobber=false) {
+    function makeSubmission(user_id, highest_version, is_pdf, path, git_user_id, git_repo_id, merge_previous=false, clobber=false) {
         // submit the selected pdf
         path = decodeURIComponent(path);
         if (is_pdf) {
-            submitSplitItem("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, path, count, merge_previous, clobber);
-            moveNextInput(count);
+            submitSplitItem("{{ csrf_token }}", "{{ gradeable_id }}", user_id, path, merge_previous, clobber);
         }
-
         // otherwise, this is a regular submission of the uploaded files
         else if (user_id == "") {
             handleSubmission({{ late_days_use }},
+                {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 {{ highest_version }},
                 {{ max_submissions }},
-                "{{ core.getCsrfToken() }}",
+                "{{ csrf_token }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 "{{ user_id }}",
-                repo_id,
+                git_user_id,
+                git_repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
@@ -305,15 +544,17 @@
         }
         else {
             handleSubmission({{ late_days_use }},
+                {{ days_to_be_charged }},
                 {{ allowed_late_days }},
                 highest_version,
                 {{ max_submissions }},
-                "{{ core.getCsrfToken() }}",
+                "{{ csrf_token }}",
                 {{ is_vcs ? "true" : "false" }},
-                {{ num_text_boxes }},
+                {{ num_inputs }},
                 "{{ gradeable_id }}",
                 user_id,
-                repo_id,
+                git_user_id,
+                git_repo_id,
                 {{ student_page ? "true" : "false" }},
                 {{ component_names|length }},
                 merge_previous,
@@ -324,17 +565,16 @@
     $(function() {
         $("#submit").click(function(e){ // Submit button
             var user_id = "";
-            var repo_id = "";
             var num_pages = 0;
-            if ($('#radio_student').is(':checked')) {
+            if ($('#radio-student').is(':checked')) {
                 user_id = $("#user_id").val();
             };
-            if ($('#radio_bulk').is(':checked')) {
+            if ($('#radio-bulk').is(':checked')) {
                 num_pages = $("#num_pages").val();
-                use_qr = $("#use_qr").is(":checked");
+                use_qr = $("#use-qr").is(":checked");
                 qr_prefix = $('#qr_prefix').val();
                 qr_suffix = $('#qr_suffix').val();
-                if($('#use_qr').is(':checked')){
+                if($('#use-qr').is(':checked')){
                     if(!sessionStorage.getItem('qr_prefix'))
                         sessionStorage.setItem('qr_prefix', qr_prefix );
                     if(!sessionStorage.getItem('qr_suffix'))
@@ -342,47 +582,131 @@
                 }
             };
             // vcs upload
+            var git_user_id = "";
+            var git_repo_id = "";
             if ({{ is_vcs ? "true" : "false" }}) {
-                repo_id = $("#repo_id").val();
+                git_user_id = $("#github-user-id").val();
+                git_repo_id = $("#github-repo-id").val();
             }
             // bulk upload
-            if ($("#radio_bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix, qr_suffix );
+            if ($("#radio-bulk").is(":checked")) {
+                handleBulk("{{ gradeable_id }}", 
+                            {{ max_post_size }}, 
+                            {{ max_file_size }},
+                            num_pages, use_qr, qr_prefix, qr_suffix 
+                          );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
-                makeSubmission(user_id, {{ highest_version }}, false, "", "", repo_id);
+                makeSubmission(user_id, {{ highest_version }}, false, "", git_repo_id);
             }
             // user id entered, need to validate first
             else {
-                validateUserId("{{ core.getCsrfToken() }}", "{{ gradeable_id }}", user_id, false, "", "", repo_id, makeSubmission);
+                validateUserId("{{ csrf_token }}", "{{ gradeable_id }}", user_id)
+                .then(function(response){
+                    if(response['data']['previous_submission']){
+                        let has_been_called = false;
+                        var option = displayPreviousSubmissionOptions(getSubmissionOptionForStudentOnly);
+
+                        return;
+
+                        function getSubmissionOptionForStudentOnly(option){
+                            if(has_been_called)
+                                return;
+
+                            var merge_previous = false;
+                            var clobber = false;
+
+                            if(option == 2){
+                                merge_previous = true;
+                            } else if(option == 3){
+                                merge_previous = true;
+                                clobber = true;
+                            }
+
+                            makeSubmission(user_id,response['data']['highest_version'], false, "", "", "", merge_previous,clobber);
+                        }
+                    }else{
+                        makeSubmission(user_id, response['data']['highest_version'], false, "", "", "");
+                    }
+                });
             }
             e.stopPropagation();
         });
     });
 </script>
 
-{% macro render_textbox(textbox, images, index) %}
-    {% for image in textbox.images %}
-        <img src="{{ attribute(images, image.name) }}" alt=""
-        {% if image.width > 0 %}
-            width="{{ image.width }}"
-        {% endif %}
-        {% if image.height > 0 %}
-            height="{{ image.height }}"
-        {% endif %}
-        />
-    {% endfor %}
+{% macro render_testcase_messages(cell, testcase_messages) %}
 
-    <p style="max-width: 50em;">
-        <label for="textbox_{{ index }}">{{ textbox.label }}
-        <br>
-        {% if textbox.row_count == 0 %}
+    {# If testcase_ref is set then attempt to display associated messages #}
+    {% if cell.testcase_ref is defined %}
+
+        {% if testcase_messages[cell.testcase_ref] is defined %}
+
+            {% for msg in testcase_messages[cell.testcase_ref] %}
+                <p class="feedback-msg-{{ msg.type }}">{{ msg.message }}</p>
+            {% endfor %}
+
+        {% endif %}
+
+    {% endif %}
+
+{% endmacro %}
+
+{% macro render_short_answer(short_answer, index, version, testcase_messages) %}
+    <p class="short-answer">
+        {% if short_answer.rows == 0 %}
+            <label>
+                <div>
+                    {% if short_answer.label %}
+                        {{ short_answer.label | markdown }}
+                    {% else %}
+                        Write your answer below:
+                    {% endif %}
+                </div>
+
+                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
+
+                <input
+                    type="text"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    class="sa-box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    {% if core.getConfig().keepPreviousFiles() %}
+                        value="{{ short_answer.recent_submission }}"
+                    {% else %}
+                        value="{{ short_answer.initial_value }}"
+                    {% endif %}
+                    onKeyPress="handle_input_keypress();"
+                />
             </label>
-            <input type="text" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();">
         {% else %}
-            Press <kbd>TAB</kbd> to indent.  Press <kbd>ESC</kbd> to advance from textarea.</label>
-            <textarea rows="{{ textbox.row_count }}" cols="50"  style="width:60em; height:100%; min-height:110px;" name="textbox_{{ index }}" id="textbox_{{ index }}" onKeyPress="handle_textbox_keypress();"></textarea>
+            <label>
+                <div>
+                    {% if short_answer.label %}
+                        {{ short_answer.label | markdown }}
+                    {% else %}
+                        Write your answer below:
+                    {% endif %}
+                    Press <kbd>TAB</kbd> to indent. Press <kbd>ESC</kbd> to advance from textarea.
+                </div>
+
+                {{ self.render_testcase_messages(short_answer, testcase_messages) }}
+
+                {# Single line to prevent whitespace from being captured #}
+                <textarea
+                    rows="{{ short_answer.rows }}"
+                    cols="50"
+                    name="short_answer_{{ index }}"
+                    id="short_answer_{{ index }}"
+                    class="sa-box"
+                    data-initial_value="{{ short_answer.initial_value }}"
+                    data-recent_submission="{{ short_answer.recent_submission }}"
+                    onKeyPress="handle_input_keypress()"
+                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
+            </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)
                 http://stackoverflow.com/questions/6140632/how-to-handle-tab-in-textarea
@@ -390,9 +714,32 @@
                 q.v. function enableTabsInTextArea(jQuerySelector) in server.js
             #}
             <script>
-                enableTabsInTextArea('#textbox_{{ index }}');
-           </script>
+                enableTabsInTextArea('#short_answer_{{ index }}');
+            </script>
         {% endif %}
+        <button type="button" id="short_answer_{{ index }}_clear_button" class="btn btn-primary sa-clear-reset">Clear</button>
+        <button type="button" id="short_answer_{{ index }}_recent_button" class="btn btn-primary sa-clear-reset">Use Most Recent Submission</button>
+        <script>
+
+            {% if version == 0 %}
+                document.getElementById("short_answer_{{ index }}_recent_button").style.visibility = 'hidden';
+            {% endif %}
+
+            // Setup init state of buttons
+            {% if core.getConfig().keepPreviousFiles() %}
+
+                {% if version == 0 %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                {% else %}
+                    document.getElementById("short_answer_{{ index }}_clear_button").disabled = false;
+                {% endif %}
+
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = true;
+            {% else %}
+                document.getElementById("short_answer_{{ index }}_clear_button").disabled = true;
+                document.getElementById("short_answer_{{ index }}_recent_button").disabled = false;
+            {% endif %}
+
+        </script>
     </p>
-    <br>
 {% endmacro %}

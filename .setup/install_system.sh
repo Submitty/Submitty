@@ -109,6 +109,7 @@ The vagrant box comes with some handy aliases:
     submitty_restart_services    - restarts all Submitty related systemctl
     migrator                     - run the migrator tool
     vagrant_info                 - print out the MotD again
+    ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
     SUBMITTY_REPOSITORY, SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
@@ -140,9 +141,10 @@ alias install_submitty_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setu
 alias submitty_install_bin='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/INSTALL_SUBMITTY_HELPER_BIN.sh'
 alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/code_watcher.py'
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
-alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmptd'
+alias submitty_restart_services='submitty_restart_autograding && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
+alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
 cd ${SUBMITTY_INSTALL_DIR}" >> /root/.bashrc
 else
     #TODO: We should get options for ./.setup/CONFIGURE_SUBMITTY.py script
@@ -185,6 +187,9 @@ pip3 install paramiko
 pip3 install tzlocal
 pip3 install PyPDF2
 pip3 install distro
+pip3 install jsonschema
+pip3 install jsonref
+pip3 install docker
 
 # for Lichen / Plagiarism Detection
 pip3 install parso
@@ -206,6 +211,14 @@ pip3 install numpy
 if [ ${VAGRANT} == 1 ]; then
     pip3 install nullsmtpd
 fi
+
+#################################################################
+# Node Package Setup
+####################
+# NOTE: with umask 0027, the npm packages end up with the wrong permissions.
+# (this happens if we re-run install_system on an existing installation).
+# So let's manually set the umask just for this call.
+(umask 0022 && npm install -g npm)
 
 #################################################################
 # STACK SETUP
@@ -247,7 +260,7 @@ else
 fi
 
 # The COURSE_BUILDERS_GROUP allows instructors/head TAs/course
-# managers to write website custimization files and run course
+# managers to write website customization files and run course
 # management scripts.
 if ! cut -d ':' -f 1 /etc/group | grep -q ${COURSE_BUILDERS_GROUP} ; then
         addgroup ${COURSE_BUILDERS_GROUP}
@@ -256,7 +269,7 @@ else
 fi
 
 if [ ${VAGRANT} == 1 ]; then
-	adduser vagrant sudo
+	usermod -aG sudo vagrant
 fi
 
 # change the default user umask (was 002)
@@ -266,16 +279,16 @@ grep -q "^UMASK 027" /etc/login.defs || (echo "ERROR! failed to set umask" && ex
 #add users not needed on a worker machine.
 if [ ${WORKER} == 0 ]; then
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${PHP_USER} ; then
-        adduser "${PHP_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${PHP_USER}"
     fi
     usermod -a -G "${DAEMONPHP_GROUP}" "${PHP_USER}"
     if ! cut -d ':' -f 1 /etc/passwd | grep -q ${CGI_USER} ; then
-        adduser "${CGI_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+        useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${CGI_USER}"
     fi
     usermod -a -G "${PHP_GROUP}" "${CGI_USER}"
     usermod -a -G "${DAEMONCGI_GROUP}" "${CGI_USER}"
     # THIS USER SHOULD NOT BE NECESSARY AS A UNIX GROUP
-    #adduser "${DB_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    #useradd -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DB_USER}"
 
     # NOTE: ${CGI_USER} must be in the shadow group so that it has access to the
     # local passwords for pam authentication
@@ -288,7 +301,7 @@ if [ ${WORKER} == 0 ]; then
 fi
 
 if ! cut -d ':' -f 1 /etc/passwd | grep -q ${DAEMON_USER} ; then
-    adduser "${DAEMON_USER}" --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password
+    useradd -m -c "First Last,RoomNumber,WorkPhone,HomePhone" "${DAEMON_USER}"
 fi
 
 # The VCS directores (/var/local/submitty/vcs) are owfned by root:$DAEMONCGI_GROUP
@@ -317,7 +330,6 @@ echo "Getting JUnit & Hamcrest..."
 
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest
-mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/emma
 mkdir -p ${SUBMITTY_INSTALL_DIR}/java_tools/jacoco
 
 if [ ${WORKER} == 0 ]; then
@@ -339,19 +351,6 @@ popd > /dev/null
 # And maybe also Hamcrest 2.0 (or maybe that piece isn't needed anymore)
 
 
-# EMMA is a tool for computing code coverage of Java programs
-echo "Getting emma..."
-
-
-pushd ${SUBMITTY_INSTALL_DIR}/java_tools/emma > /dev/null
-wget https://github.com/Submitty/emma/archive/${EMMA_VERSION}.zip -O emma-${EMMA_VERSION}.zip -o /dev/null > /dev/null 2>&1
-unzip emma-${EMMA_VERSION}.zip > /dev/null
-mv emma-${EMMA_VERSION}/lib/emma.jar emma.jar
-rm -rf emma-${EMMA_VERSION}*
-chmod o+r . *.jar
-popd > /dev/null
-
-
 # JaCoCo is a replacement for EMMA
 
 echo "Getting JaCoCo..."
@@ -368,6 +367,9 @@ chmod o+r . *.jar
 popd > /dev/null
 
 
+# fix all java_tools permissions
+chown -R root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_INSTALL_DIR}/java_tools
+chmod -R 755 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 
 #################################################################
@@ -422,7 +424,7 @@ if [ ${WORKER} == 0 ]; then
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
     rm -f /tmp/composer-setup.php
 
-    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi
+    a2enmod include actions cgi suexec authnz_external headers ssl proxy_fcgi rewrite
 
     # A real user will have to do these steps themselves for a non-vagrant setup as to do it in here would require
     # asking the user questions as well as searching the filesystem for certificates, etc.
@@ -434,10 +436,9 @@ if [ ${WORKER} == 0 ]; then
         rm /etc/apache2/sites*/000-default.conf
         rm /etc/apache2/sites*/default-ssl.conf
 
-        cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/submitty.conf /etc/apache2/sites-available/submitty.conf
-        # cp ${SUBMITTY_REPOSITORY}/.setup/vagrant/sites-available/git.conf      /etc/apache2/sites-available/git.conf
+        cp ${SUBMITTY_REPOSITORY}/.setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
 
-        sed -i -e "s/SUBMITTY_URL/${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
+        sed -i -e "s/Require host __your_domain__/Require ip ${SUBMISSION_URL:7}/g" /etc/apache2/sites-available/submitty.conf
 
         # permissions: rw- r-- ---
         chmod 0640 /etc/apache2/sites-available/*.conf
@@ -608,20 +609,28 @@ if [ ${WORKER} == 1 ]; then
     python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --worker
 else
     if [ ${VAGRANT} == 1 ]; then
-    # This should be set by setup_distro.sh for whatever distro we have, but
-    # in case it is not, default to our primary URL
-    if [ -z "${SUBMISSION_URL}" ]; then
-        SUBMISSION_URL='http://192.168.56.101'
-    fi
-    echo -e "/var/run/postgresql
-    ${DB_USER}
-    ${DATABASE_PASSWORD}
-    America/New_York
-    ${SUBMISSION_URL}
+        # This should be set by setup_distro.sh for whatever distro we have, but
+        # in case it is not, default to our primary URL
+        if [ -z "${SUBMISSION_URL}" ]; then
+            SUBMISSION_URL='http://192.168.56.101'
+        fi
+        echo -e "/var/run/postgresql
+${DB_USER}
+${DATABASE_PASSWORD}
+America/New_York
+${SUBMISSION_URL}
 
 
-    1" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
+1
+submitty-admin
+submitty-admin
+y
 
+
+submitty@vagrant
+do-not-reply@vagrant
+localhost
+25" | python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py --debug
     else
         python3 ${SUBMITTY_REPOSITORY}/.setup/CONFIGURE_SUBMITTY.py
     fi
@@ -702,15 +711,26 @@ if [ ${WORKER} == 0 ]; then
         rm -rf ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty
 
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
+        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/autograding ${SUBMITTY_DATA_DIR}/logs/autograding
         chown ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
         chmod 770 ${SUBMITTY_DATA_DIR}/logs/autograding
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/access ${SUBMITTY_DATA_DIR}/logs/access
-        chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/access
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/access
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/bulk_uploads ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
+
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
+        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
+        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
+        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
 
         mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors
         ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/site_errors ${SUBMITTY_DATA_DIR}/logs/site_errors
@@ -722,38 +742,18 @@ if [ ${WORKER} == 0 ]; then
         chown -R ${PHP_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/ta_grading
         chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/ta_grading
 
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails
-        mkdir -p ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails/mailboxes
-        ln -s ${SUBMITTY_REPOSITORY}/.vagrant/${DISTRO}/${VERSION}/logs/submitty/emails ${SUBMITTY_DATA_DIR}/logs/emails
-        chown -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
-        chmod -R 770 ${SUBMITTY_DATA_DIR}/logs/emails
-
         # Call helper script that makes the courses and refreshes the database
         if [ ${NO_SUBMISSIONS} == 1 ]; then
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --no_submissions --submission_url ${SUBMISSION_URL}
         else
             python3 ${SUBMITTY_REPOSITORY}/.setup/bin/setup_sample_courses.py --submission_url ${SUBMISSION_URL}
         fi
-        #################################################################
-        # SET CSV FIELDS (for classlist upload data)
-        #################
-        # Vagrant auto-settings are based on Rensselaer Polytechnic Institute School
-        # of Science 2015-2016.
-
-        # Other Universities will need to rerun /bin/setcsvfields to match their
-        # classlist csv data.  See wiki for details.
-        ${SUBMITTY_INSTALL_DIR}/sbin/setcsvfields.py 13 12 15 7
     fi
 fi
 
 if [[ ${VAGRANT} == 1 ]]; then
-    # add email configuration stuff to database.json
-    jq '.email_sender |= "submitty@vagrant"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_server_hostname |= "localhost"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_server_port |= 25' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    jq '.email_logs_path |= "/var/local/submitty/logs/emails/"' ${SUBMITTY_INSTALL_DIR}/config/database.json > ${SUBMITTY_INSTALL_DIR}/config/database.tmp && mv ${SUBMITTY_INSTALL_DIR}/config/database.tmp ${SUBMITTY_INSTALL_DIR}/config/database.json
-    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/database.json
-    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/database.json
+    chown root:${DAEMONPHP_GROUP} ${SUBMITTY_INSTALL_DIR}/config/email.json
+    chmod 440 ${SUBMITTY_INSTALL_DIR}/config/email.json
     rsync -rtz  ${SUBMITTY_REPOSITORY}/.setup/vagrant/nullsmtpd.service  /etc/systemd/system/nullsmtpd.service
     chown -R root:root /etc/systemd/system/nullsmtpd.service
     chmod 444 /etc/systemd/system/nullsmtpd.service
@@ -766,22 +766,32 @@ fi
 # DOCKER SETUP
 #################
 
-# WIP: creates basic container for grading CS1 & DS assignments
-# CAUTION: needs users/groups for security
-# These commands should be run manually if testing Docker integration
+# If we are in vagrant and http_proxy is set, then vagrant-proxyconf
+# is probably being used, and it will work for the rest of this script,
+# but fail here if we do not manually set the proxy for docker
+if [[ ${VAGRANT} == 1 ]]; then
+    if [ ! -z ${http_proxy+x} ]; then
+        mkdir -p /home/${DAEMON_USER}/.docker
+        proxy="            \"httpProxy\": \"${http_proxy}\""
+        if [ ! -z ${https_proxy+x} ]; then
+            proxy="${proxy},\n            \"httpsProxy\": \"${https_proxy}\""
+        fi
+        if [ ! -z ${no_proxy+x} ]; then
+            proxy="${proxy},\n            \"noProxy\": \"${no_proxy}\""
+        fi
+        echo -e "{
+    \"proxies\": {
+        \"default\": {
+${proxy}
+        }
+    }
+}" > /home/${DAEMON_USER}/.docker/config.json
+        chown -R ${DAEMON_USER}:${DAEMON_USER} /home/${DAEMON_USER}/.docker
+    fi
+fi
 
-rm -rf /tmp/docker
-mkdir -p /tmp/docker
-cp ${SUBMITTY_REPOSITORY}/.setup/Dockerfile /tmp/docker/Dockerfile
-cp -R ${SUBMITTY_INSTALL_DIR}/drmemory/ /tmp/docker/
-cp -R ${SUBMITTY_INSTALL_DIR}/SubmittyAnalysisTools /tmp/docker/
-
-chown ${DAEMON_USER}:${DAEMON_GROUP} -R /tmp/docker
-
-pushd /tmp/docker
-su -c 'docker build --network=host -t ubuntu:custom -f Dockerfile .' ${DAEMON_USER}
-popd > /dev/null
-
+su -c 'docker pull submitty/autograding-default:latest' ${DAEMON_USER}
+su -c 'docker tag submitty/autograding-default:latest ubuntu:custom' ${DAEMON_USER}
 
 #################################################################
 # RESTART SERVICES
@@ -791,6 +801,18 @@ if [ ${WORKER} == 0 ]; then
     service php${PHP_VERSION}-fpm restart
     service postgresql restart
 fi
+
+
+#####################################################################################
+# Obtain API auth token for submitty-admin user
+# (This is attempted in INSTALL_SUBMITTY_HELPER.sh, but the API is not
+# operational at that time.)
+if [ ${WORKER} == 0 ]; then
+
+    python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+
+fi
+
 
 echo "Done."
 exit 0

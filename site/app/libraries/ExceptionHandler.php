@@ -87,7 +87,7 @@ class ExceptionHandler {
         $line = 1;
         $line_code = "";
         $fh = fopen($file, 'r');
-        while (($buffer = fgets($fh)) !== FALSE) {
+        while (($buffer = fgets($fh)) !== false) {
             if ($line == $exception_line) {
                 $line_code = $buffer;
                 break;
@@ -96,7 +96,7 @@ class ExceptionHandler {
         }
 
         $message = "{$exception_name} (Code: {$exception->getCode()}) thrown in {$file} (Line {$exception_line}) by:\n";
-        $message .= "{$line_code}\n\nMessage:\n{$exception->getMessage()}\n\nStrack Trace:\n";
+        $message .= "{$line_code}\n\nMessage:\n{$exception->getMessage()}\n\nStack Trace:\n";
         $message .= "{$trace_string}\n";
 
         if ($is_base_exception) {
@@ -118,7 +118,7 @@ class ExceptionHandler {
             }
         }
 
-       if ($log_exception) {
+        if ($log_exception) {
             Logger::fatal($message);
         }
 

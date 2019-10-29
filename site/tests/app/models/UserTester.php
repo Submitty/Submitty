@@ -7,7 +7,7 @@ use app\models\User;
 
 class UserTester extends \PHPUnit\Framework\TestCase {
     private $core;
-    public function setUp() {
+    public function setUp(): void {
         $this->core = $this->createMock(Core::class);
     }
 
@@ -15,13 +15,14 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = array(
             'user_id' => "test",
             'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
             'user_password' => "test",
             'user_firstname' => "User",
             'user_preferred_firstname' => null,
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -30,6 +31,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
+        $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
         $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_firstname'], $user->getDisplayedFirstName());
@@ -51,12 +53,13 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = array(
             'user_id' => "test",
             'anon_id' => "TestAnon",
+            'user_numeric_id' => '123456789',
             'user_firstname' => "User",
             'user_preferred_firstname' => "Paul",
             'user_lastname' => "Tester",
             'user_preferred_lastname' => "Bunyan",
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -65,6 +68,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $user = new User($this->core, $details);
         $this->assertEquals($details['user_id'], $user->getId());
         $this->assertEquals($details['anon_id'], $user->getAnonId());
+        $this->assertEquals($details['user_numeric_id'], $user->getNumericId());
         $this->assertEquals($details['user_firstname'], $user->getLegalFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getPreferredFirstName());
         $this->assertEquals($details['user_preferred_firstname'], $user->getDisplayedFirstName());
@@ -76,13 +80,14 @@ class UserTester extends \PHPUnit\Framework\TestCase {
     public function testPassword() {
         $details = array(
             'user_id' => "test",
+            'user_numeric_id' => "123456789",
             'user_password' => "test",
             'user_firstname' => "User",
             'user_preferred_firstname' => null,
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -101,13 +106,15 @@ class UserTester extends \PHPUnit\Framework\TestCase {
         $details = array(
             'user_id' => "test",
             'anon_id' => "TestAnonymous",
+            'user_numeric_id' => '123456789',
             'user_password' => "test",
             'user_firstname' => "User",
             'user_preferred_firstname' => null,
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
+            'user_access_level' => User::LEVEL_FACULTY,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -124,20 +131,41 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'email' => 'test@example.com',
             'legal_first_name' => 'User',
             'grading_registration_sections' => array(1,2),
-            'group' => 1,
+            'group' => User::GROUP_INSTRUCTOR,
+            'access_level' => User::LEVEL_FACULTY,
             'id' => 'test',
             'legal_last_name' => 'Tester',
             'loaded' => true,
             'manual_registration' => false,
             'preferred_first_name' => "",
             'preferred_last_name' => "",
+            'numeric_id' => '123456789',
             'registration_section' => 1,
             'rotating_section' => null,
             'modified' => true,
             'anon_id' => "TestAnonymous",
             'user_updated' => false,
             'instructor_updated' => false,
-            'notification_settings' => array('reply_in_post_thread' => false, 'merge_threads' => false, 'all_new_threads' => false, 'all_new_posts' => false, 'all_modifications_forum' => false)
+            'notification_settings' => array(
+                'reply_in_post_thread' => false,
+                'merge_threads' => false,
+                'all_new_threads' => false,
+                'all_new_posts' => false,
+                'all_modifications_forum' => false,
+                'team_invite' => true,
+                'team_joined' => true,
+                'team_member_submission' => true,
+                'self_notification' => false,
+                'reply_in_post_thread_email' => false,
+                'merge_threads_email' => false,
+                'all_new_threads_email' => false,
+                'all_new_posts_email' => false,
+                'all_modifications_forum_email' => false,
+                'team_invite_email' => true,
+                'team_joined_email' => true,
+                'team_member_submission_email' => true,
+                'self_notification_email' => false
+            )
         );
         $this->assertEquals($expected, $actual);
     }

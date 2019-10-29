@@ -1,27 +1,23 @@
 Point precision:
 <input type="text" id="point_precision_id" name="precision" onchange="onPrecisionChange()" value="{{ gradeable.getPrecision() }}" class="ignore" />
-<br/>
 
 <div class="electronic_file ignore" id="gradeable_rubric">
-    Are student submissions/uploads a single file PDF with a fixed/prescribed format?<br>
-    And do you expect each specific problem/item/component to appear on a specific page number of the PDF document?
-
     <fieldset>
+        <legend>
+            Are student submissions/uploads a single file PDF with a fixed/prescribed format?<br>
+            And do you expect each specific problem/item/component to appear on a specific page number of the PDF document?
+        </legend>
         <input type="radio" id="yes_pdf_page" name="pdf_page" value="true" onchange="updatePdfPageSettings()"
                 {{ is_pdf_page ? 'checked' : '' }} /> Yes
         <input type="radio" id="no_pdf_page" name="pdf_page" value="false" onchange="updatePdfPageSettings()"
                 {{ not is_pdf_page ? 'checked' : '' }} /> No
-
-        <br />
-
-        <div id="pdf_page">
-            <br />
-            Who will assign page numbers to problems/item/components?<br>
-            <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false" onchange="updatePdfPageSettings()"
-                    {{ not is_pdf_page_student ? 'checked' : '' }} /> Instructor (specify the starting page number for each problem/item/component below)<br>
-            <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"
-                    {{ is_pdf_page_student ? 'checked' : '' }} /> Student (student will be asked for page numbers at submission time)
-        </div>
+    </fieldset>
+    <fieldset id="pdf_page">
+        Who will assign page numbers to problems/item/components?<br>
+        <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false" onchange="updatePdfPageSettings()"
+                {{ not is_pdf_page_student ? 'checked' : '' }} /> Instructor (specify the starting page number for each problem/item/component below)<br>
+        <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"
+                {{ is_pdf_page_student ? 'checked' : '' }} /> Student (student will be asked for page numbers at submission time)
     </fieldset>
     <div>
         <div id="rubric-total-container">

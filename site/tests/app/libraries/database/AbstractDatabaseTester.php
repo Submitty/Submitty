@@ -211,13 +211,11 @@ SELECT * FROM test ORDER BY pid");
         $database->disconnect();
     }
 
-    /**
-     * @expectedException \app\exceptions\DatabaseException
-     * @expectedExceptionMessage SQLSTATE[HY000]: General error: 1 no such table: test
-     */
     public function testIteratorDatabaseException() {
         $database = new SqliteDatabase(array('memory' => true));
         $database->connect();
+        $this->expectException(\app\exceptions\DatabaseException::class);
+        $this->expectExceptionMessage('SQLSTATE[HY000]: General error: 1 no such table: test');
         $database->queryIterator('SELECT * FROM test ORDER BY pid');
         $this->fail("DatabaseException should have been thrown");
     }
@@ -244,7 +242,7 @@ SELECT * FROM test ORDER BY pid");
         $this->setupDatabase($database);
         $result = $database->queryIterator('INSERT INTO test VALUES (?, ?)', array(3, 'c'));
         $this->assertTrue($result);
-        $iterator = $database->queryIterator('SELECT * FROM test ORDER BY pid', array(), function($result) {
+        $iterator = $database->queryIterator('SELECT * FROM test ORDER BY pid', array(), function ($result) {
             return array('id' => $result['pid']);
         });
         $expected = array(0 => array('id' => 1), 1 => array('id' => 2), 2 => array('id' => 3));
@@ -303,20 +301,16 @@ SELECT * FROM test ORDER BY pid");
         $this->assertSame(array('pid' => 1, 'tcol' => 'a', 'bcol' => true), $result);
     }
 
-    /**
-     * @expectedException \app\exceptions\DatabaseException
-     */
     public function testInvalidDSN() {
         $database = new PostgresqlDatabase(array('dbname' => 'invalid_db'));
+        $this->expectException(\app\exceptions\DatabaseException::class);
         $database->connect();
     }
 
-    /**
-     * @expectedException \app\exceptions\DatabaseException
-     */
     public function testBadQuery() {
         $database = new SqliteDatabase(array('memory' => true));
         $database->connect();
+        $this->expectException(\app\exceptions\DatabaseException::class);
         $database->query("SELECT * FROM invalid_table");
     }
 

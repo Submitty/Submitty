@@ -1,15 +1,28 @@
 ## Admins / Project Managers
-[Barbara Cutler](http://www.cs.rpi.edu/~cutler/)  
-[Matthew Peveler](http://mpeveler.com/)  
+[Barbara Cutler](http://www.cs.rpi.edu/~cutler/) 2014-current  
+[Matthew Peveler](http://mpeveler.com/) 2014-current  
+Evan Maicus 2016-current  
 
 ## Developers
 
+Eli Schiff 2019-current
+Ben Kelly 2019-current
+Saketh Dargula 2019-current  
+Kevin McKinney 2019-current  
+Jacob McKnight 2019-current  
+Alexa Orosz 2019-current  
+Maya Tung 2019-current  
+Xiao Han, 2019-current, Google Summer of Code 2019  
+Fon Noel, 2019-current, Google Summer of Code 2019  
+Drumil Patil, 2019-current, Google Summer of Code 2019  
+Anubhav Singh, 2019-current, Google Summer of Code 2019  
+Preston Carman 2019-current  
 Matthew Garber 2019-current  
 Matthew Raneri 2019-current  
 Thomas Shweh 2019-current  
-Kasra Sheik 2018-current  
-Ryan Waddell 2018-current  
-Victor Li 2018-current  
+Kasra Sheik 2018-2019  
+Ryan Waddell 2018-2019  
+Victor Li 2018-2019  
 Eric Tran 2018-current  
 Kevin Mackenzie 2018-current  
 Glenn Smith 2018-current  
@@ -17,7 +30,6 @@ Andrew Aikens 2017-current
 Shail Patel 2018-current  
 Leon Montealegre 2017-current  
 Buster Holzbauer 2017-current  
-Evan Maicus 2016-current  
 Ana Milanova 2016-current  
 Steven Lindsey 2014-current  
 Peter Bailie 2014-current  
@@ -27,8 +39,8 @@ John (Jack) Hulton 2018
 Victor Nazzaro 2018  
 Joanna Ng 2018  
 Nick Roper 2018  
-Tushar Gurjar 2018-current, Google Summer of Code 2018  
-Gagan Kumar  2018-current, Google Summer of Code 2018  
+Tushar Gurjar 2018, Google Summer of Code 2018  
+Gagan Kumar  2018, Google Summer of Code 2018  
 Timothy Cyrus 2017-2018  
 Rylan O'Connell 2018  
 Salles Viana Gomes de Magalhaes 2018  

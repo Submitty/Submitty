@@ -15,11 +15,10 @@ class CoreTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($core->isTesting());
     }
 
-    /**
-     * @expectedException \Exception
-     */
     public function testErrorDatabaseBeforeConfig() {
         $core = new Core();
-        $core->loadDatabases();
+        $this->expectException(\Exception::class);
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $core->loadMasterDatabase();
     }
 }

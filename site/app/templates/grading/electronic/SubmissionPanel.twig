@@ -1,7 +1,7 @@
 {% import _self as self %}
 <div id="submission_browser" class="draggable rubric_panel">
-    <div id="directory_view">
-        <div class="draggable_content">
+    <div class="draggable_content">
+        <div id="directory_view">
             <span class="grading_label">Submissions and Results Browser</span>
             <button class="btn btn-default expand-button" data-linked-type="submissions" data-clicked-state="wasntClicked" id="toggleSubmissionButton">Open/Close Submissions</button>
 
@@ -29,7 +29,7 @@
             </script>
 
             {% if not peer %}
-                <button class="btn btn-default" onclick="downloadZip('{{  gradeable_id }}','{{ submitter_id }}')">Download Zip File</button>
+                <button class="btn btn-default" onclick="downloadSubmissionZip('{{  gradeable_id }}','{{ submitter_id }}', {{ active_version }})">Download Zip File</button>
             {% endif %}
 
             <div id="changeCodeStyle" class="btn-group btn-group-toggle" onchange="changeEditorStyle($('[name=codeStyle]:checked')[0].id);" data-toggle="buttons">
@@ -65,15 +65,14 @@
                 // });
             </script>
         </div>
-    </div>
-    <div id="file_view" style="display: none; position: absolute; float: right; right: -100%; width:100%; height: 100%">
-        <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30; display: none">No changes</strong>
-        <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
-        <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
-        <a onclick='collapseFile()'><i class="fas fa-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
-        {% include "grading/electronic/PDFAnnotationBar.twig" %}
-        <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
-
+        <div id="file_view" style="display: none; position: absolute; float: right; right: -100%; width:100%; height: 100%">
+            <strong id="save_status" style="position: sticky; top: 27px; margin: 10px; float:right; z-index: 30; display: none">No changes</strong>
+            <span class="grading_label" style="padding-bottom: 0px">Submissions and Results Browser ></span>
+            <span class="grading_label" style="padding-top: 5px; margin-left: -15px" id="grading_file_name"></span>
+            <a onclick='collapseFile()'><i class="fas fa-reply" style="font-size:24px" aria-hidden="true" title="Back"></i></a>
+            {% include "grading/electronic/PDFAnnotationBar.twig" %}
+            <div id="file_content" style="overflow: auto; height:90%;position: absolute;width: 100%;"></div>
+        </div>
     </div>
 </div>
 
@@ -101,7 +100,7 @@
                 expandFile(html_file, url_file);
             }
             else {
-                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
+                iframe.html("<iframe id='" + iframeId + "' onload='resizeFrame(\"" + iframeId + "\");' src='{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true' width='95%' style='border: 0'></iframe>");
                 if(iframe.hasClass("full_panel")){
                     $('#'+iframeId).attr("height", "1200px");
                 }
@@ -140,7 +139,7 @@
         else if (url_file.includes("split_pdf")) {
             directory = "split_pdf";
         }
-        window.open("{{ site_url|escape("js") }}&component=misc&page=display_file&dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
+        window.open("{{ display_file_url }}?dir=" + encodeURIComponent(directory) + "&file=" + encodeURIComponent(html_file) + "&path=" + encodeURIComponent(url_file) + "&ta_grading=true","_blank","toolbar=no,scrollbars=yes,resizable=yes, width=700, height=600");
         return false;
     }
     //TODO: Name better
@@ -167,12 +166,12 @@
             $('#save_status').show();
             return $.ajax({
                 type: 'POST',
-                url: buildUrl({'component': 'pdf', 'page': 'grader_embedded'}),
+                url: buildCourseUrl(['gradeable', '{{ gradeable_id }}', 'grading', 'pdf']),
                 data: {
-                    'gradeable_id': '{{ gradeable_id }}',
                     'user_id': '{{ submitter_id }}',
                     'filename': name,
-                    'page_num': page_num
+                    'page_num': page_num,
+                    'csrf_token': csrfToken
                 },
                 success: function(data){
                     $('#file_content').append(data);
@@ -212,12 +211,12 @@
 
 {% macro display_files(self, files, id, indent, title) %}
     {# Files on top #}
-    {% for dir, path in files if path is not iterable %}
+    {% for dir, path in files|filter((path,dir) => path is not iterable) %}
         {{ self.display_file(self, dir, path, id ~ "f" ~ loop.index, indent, title) }}
     {% endfor %}
 
     {# Directories underneath #}
-    {% for dir, path in files if path is iterable %}
+    {% for dir, path in files|filter((path,dir) => path is iterable) %}
         {{ self.display_dir(self, dir, path, id ~ "d" ~ loop.index, indent, title) }}
     {% endfor %}
 {% endmacro %}
@@ -230,7 +229,7 @@
                 {{ dir }}</a> &nbsp;
             <a onclick='openFile("{{ dir }}", "{{ path }}")'><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             <a onclick='expandFile("{{ dir }}", "{{ path }}")'><i class="fas fa-share" aria-hidden="true" title="Show file in full panel"></i></a>
-            <a onclick='downloadFile("{{ dir }}", "{{ path }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path }}", "{{ title }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
         </div>
         <div id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>

@@ -1,5 +1,17 @@
 #!/usr/bin/env bash
 
+#####################################################################
+#            DEPRECATED
+#
+# Support for Debian 8 (jessie) is deprecated as of 05/01/2019.
+# This script has not been maintained since then and we will not
+# accept PRs fixing any drift that exists. Use at your own risk.
+#
+# To see the officially supported distros, please go to:
+#     https://submitty.org/sysadmin/server_os
+#
+#####################################################################
+
 # this script must be run by root or sudo
 if [[ "$UID" -ne "0" ]] ; then
     echo "ERROR: This script must be run by root or sudo"

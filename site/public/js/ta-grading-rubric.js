@@ -60,9 +60,6 @@ COUNT_DIRECTION_DOWN = -1;
 PDF_PAGE_NONE = 0;
 PDF_PAGE_STUDENT = -1;
 PDF_PAGE_INSTRUCTOR = -2;
-PDF_PAGE_HEIGHT = 841.89;
-PDF_BORDER_HEIGHT = 0;
-PDF_OFFSET = 0;
 
 /**
  * Whether ajax requests will be asynchronous or synchronous.  This
@@ -96,12 +93,7 @@ function ajaxGetGradeableRubric(gradeable_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_gradeable_rubric',
-                'gradeable_id': gradeable_id
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'rubric']),
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable rubric: ' + response.message);
@@ -137,14 +129,9 @@ function ajaxSaveComponent(gradeable_id, component_id, title, ta_comment, studen
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_component'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
                 'ta_comment': ta_comment,
@@ -183,13 +170,7 @@ function ajaxGetComponentRubric(gradeable_id, component_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_component_rubric',
-                'gradeable_id': gradeable_id,
-                'component_id': component_id,
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components']) + `?component_id=${component_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component rubric: ' + response.message);
@@ -217,13 +198,7 @@ function ajaxGetGradedGradeable(gradeable_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_graded_gradeable',
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable']) + `?anon_id=${anon_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable grade: ' + response.message);
@@ -252,14 +227,7 @@ function ajaxGetGradedComponent(gradeable_id, component_id, anon_id) {
         $.getJSON({
             type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_graded_component',
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id,
-                'component_id': component_id
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']) + `?anon_id=${anon_id}&component_id=${component_id}`,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the component grade: ' + response.message);
@@ -297,14 +265,9 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_graded_component'
-            }),
+            url:  buildCourseUrl(['gradeable', gradeable_id, 'grading', 'graded_gradeable', 'graded_component']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
                 'graded_version': graded_version,
@@ -338,17 +301,10 @@ function ajaxSaveGradedComponent(gradeable_id, component_id, anon_id, graded_ver
 function ajaxGetOverallComment(gradeable_id, anon_id) {
     return new Promise(function (resolve, reject) {
         $.getJSON({
-            type: "POST",
+            type: "GET",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_overall_comment'
-            }),
-            data: {
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id
-            },
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']) + `?anon_id=${anon_id}`,
+            data: null,
             success: function (response) {
                 if (response.status !== 'success') {
                     console.error('Something went wrong fetching the gradeable comment: ' + response.message);
@@ -377,11 +333,7 @@ function ajaxSaveOverallComment(gradeable_id, anon_id, overall_comment) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_overall_comment'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'grading', 'comments']),
             data: {
                 'csrf_token': csrfToken,
                 'gradeable_id': gradeable_id,
@@ -418,14 +370,9 @@ function ajaxAddNewMark(gradeable_id, component_id, title, points, publish) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'add_new_mark'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'add']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'title': title,
                 'points': points,
@@ -459,14 +406,9 @@ function ajaxDeleteMark(gradeable_id, component_id, mark_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'delete_mark'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'delete']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id
             },
@@ -501,14 +443,9 @@ function ajaxSaveMark(gradeable_id, component_id, mark_id, title, points, publis
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_mark'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'mark_id': mark_id,
                 'points': points,
@@ -543,15 +480,11 @@ function ajaxGetMarkStats(gradeable_id, component_id, mark_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'get_mark_stats'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'stats']),
             data: {
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
-                'mark_id': mark_id
+                'mark_id': mark_id,
+                'csrf_token': csrfToken
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -581,14 +514,9 @@ function ajaxSaveMarkOrder(gradeable_id, component_id, order) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_mark_order'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'marks', 'save_order']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'order': JSON.stringify(order)
             },
@@ -619,14 +547,9 @@ function ajaxSaveComponentPages(gradeable_id, pages) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_component_pages'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'save_pages']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'pages': JSON.stringify(pages)
             },
             success: function (response) {
@@ -656,14 +579,9 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'save_component_order'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'order']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'order': JSON.stringify(order)
             },
             success: function (response) {
@@ -692,14 +610,9 @@ function ajaxAddComponent(gradeable_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'add_component'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'new']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
             },
             success: function (response) {
                 if (response.status !== 'success') {
@@ -728,14 +641,9 @@ function ajaxDeleteComponent(gradeable_id, component_id) {
         $.getJSON({
             type: "POST",
             async: AJAX_USE_ASYNC,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'delete_component'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'delete']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id
             },
             success: function (response) {
@@ -766,14 +674,9 @@ function ajaxVerifyComponent(gradeable_id, component_id, anon_id) {
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'verify_component'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']),
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
                 'component_id': component_id,
                 'anon_id': anon_id,
             },
@@ -804,15 +707,11 @@ function ajaxVerifyAllComponents(gradeable_id, anon_id) {
         $.getJSON({
             type: "POST",
             async: true,
-            url: buildUrl({
-                'component': 'grading',
-                'page': 'electronic',
-                'action': 'verify_all_components'
-            }),
+            url: buildCourseUrl(['gradeable', gradeable_id, 'components', 'verify']) + '?verify_all=true',
             data: {
                 'csrf_token': csrfToken,
-                'gradeable_id': gradeable_id,
-                'anon_id': anon_id
+                'component_id': component_id,
+                'anon_id': anon_id,
             },
             success: function (response) {
                 if (response.status !== "success") {
@@ -1666,9 +1565,11 @@ function openMarkStatsPopup(component_title, mark_title, stats) {
 
     // Create an array of links for each submitter
     let submitterHtmlElements = [];
+    let [base_url, search_params] = location.href.split('?');
+    search_params = new URLSearchParams(search_params);
     stats.submitter_ids.forEach(function (id) {
-        let href = window.location.href.replace(/&who_id=([a-z0-9_]*)/, '&who_id=' + id);
-        submitterHtmlElements.push('<a href="' + href + '">' + id + '</a>');
+        search_params.set('who_id', id);
+        submitterHtmlElements.push(`<a href="${base_url}?${search_params.toString()}">${id}</a>`);
     });
     popup.find('.student-names').html(submitterHtmlElements.join(', '));
 
@@ -1814,7 +1715,7 @@ function onAddComponent() {
  * Called when the 'Import Components' button is pressed
  */
 function importComponentsFromFile() {
-    let submit_url = buildUrl({'component': 'admin', 'page': 'admin_gradeable', 'action': 'import_components', 'gradeable_id': getGradeableId()});
+    let submit_url = buildCourseUrl(['gradeable', getGradeableId(), 'components', 'import']);
     let formData = new FormData();
 
     let files = $('#import-components-file')[0].files;
@@ -1874,7 +1775,7 @@ function onGetMarkStats(me) {
         .then(function (stats) {
             let component_title = getComponentFromDOM(component_id).title;
             let mark_title = getMarkFromDOM(mark_id).title;
-            
+
             openMarkStatsPopup(component_title, mark_title, stats);
         })
         .catch(function (err) {
@@ -2068,6 +1969,17 @@ function onClickCountUp(me) {
     let component_id = getComponentIdFromDOMElement(me);
     let mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'No Credit');
+    $.get('Mark.twig',null,function(){
+        $("input[id^='mark-editor-']").each(function () {
+            $(this).attr("overall","No Credit");
+            if(this.value<0){
+                this.style.backgroundColor = "var(--standard-vibrant-yellow)";
+            }
+            else{
+                this.style.backgroundColor = "var(--default-white)";
+            }
+        });
+    });
 }
 
 /**
@@ -2078,6 +1990,17 @@ function onClickCountDown(me) {
     let component_id = getComponentIdFromDOMElement(me);
     let mark_id = getComponentFirstMarkId(component_id);
     setMarkTitle(mark_id, 'Full Credit');
+    $.get('Mark.twig',null,function(){
+        $("input[id^='mark-editor-']").each(function () {
+            $(this).attr("overall","Full Credit");
+            if(this.value>0){
+                this.style.backgroundColor = "var(--standard-vibrant-yellow)";
+            }
+            else{
+                this.style.backgroundColor = "var(--default-white)";
+            }
+        });
+    });
 }
 
 /**
@@ -2528,13 +2451,14 @@ function openComponentGrading(component_id) {
  * @return {void}
  */
 function scrollToPage(page_num){
-    let files = $('.openable-element-submissions');
+    let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
-        let zoom = localStorage.getItem('scale') || 1;
         if(files[i].innerText.trim() == "upload.pdf"){
-            let scrollY = zoom*(page_num-1)*(PDF_PAGE_HEIGHT+PDF_OFFSET)+PDF_BORDER_HEIGHT;
+            let page = $("#pageContainer" + page_num);
             if($("#file_view").is(":visible")){
-                $('#file_content').animate({scrollTop: scrollY}, 500);
+                if(page.length) {
+                    $('#file_content').animate({scrollTop: page[0].offsetTop}, 500);
+                }
             } else {
                 expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }

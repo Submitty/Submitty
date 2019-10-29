@@ -45,6 +45,7 @@ public:
 
   int getID() const { return test_case_id; }
   std::string getTitle() const;
+  std::string getTestcaseLabel() const;
   std::string getDetails () const { return _json.value("details",""); }
 
   int getPoints() const { return _json.value("points", 0); }
@@ -78,6 +79,8 @@ public:
   // -------------------------------
   // COMMANDS
   std::vector<std::string> getCommands() const;
+  std::vector<std::string> getSolutionCommands() const;
+  std::vector<std::string> getInputGeneratorCommands() const;
 
 
   // -------------------------------
@@ -95,7 +98,7 @@ public:
 
   // -------------------------------
   // GRADING & GRADERS
-  TestResultsFixedSize do_the_grading (int j, nlohmann::json complete_config) const;
+  TestResultsFixedSize do_the_grading (int j, nlohmann::json complete_config, const std::string& username) const;
 
   int numFileGraders() const {
     const nlohmann::json::const_iterator itr = _json.find("validation");
@@ -118,7 +121,7 @@ private:
 
   // -------------------------------
   // PRIVATE HELPER FUNCTIONS
-  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json complete_config) const;
+  TestResults* dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json complete_config, const std::string& username) const;
   TestResults* custom_dispatch(const nlohmann::json& grader) const;
 
   // -------------------------------
@@ -147,5 +150,12 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages);
 
 void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty);
+
+// FILE LOCATION FUNCTIONS
+// This function will return folder path which will contain specific output file For eg:- test_output/ , random_output/testXX
+std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filename);
+
+// This function will return path for output file for eg:- test_output/output1.txt , random_output/testXX/randomoutput1.txt
+std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std::string &id);
 
 #endif

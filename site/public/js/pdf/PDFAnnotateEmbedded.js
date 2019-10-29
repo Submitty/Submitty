@@ -1,9 +1,12 @@
-const { UI } = PDFAnnotate;
+if (PDFAnnotate.default) {
+  PDFAnnotate = PDFAnnotate.default;
+}
 
-let currentTool;
+var currentTool;
+var documentId = '';
+var PAGE_HEIGHT;
+var NUM_PAGES = 0;
 
-let documentId = '';
-let PAGE_HEIGHT;
 window.RENDER_OPTIONS = {
     documentId,
     userId: "",
@@ -18,9 +21,9 @@ window.GENERAL_INFORMATION = {
     file_name: "",
 }
 
-PDFJS.workerSrc = 'js/pdf/pdf.worker.min.js';
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
-let NUM_PAGES = 0;
+
 
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
@@ -39,28 +42,32 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
     window.RENDER_OPTIONS.userId = grader_id;
     if(url === ""){
-        url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
+        url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
     }
     $.ajax({
         type: 'POST',
         url: url,
         data: {
-            gradeable_id: gradeable_id,
             user_id: user_id,
-            filename: file_name
+            filename: file_name,
+            csrf_token: csrfToken
         },
-        success: (data)=>{
-            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalStoreAdapter(GENERAL_INFORMATION.grader_id));
+        success: (data) => {
+            PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(GENERAL_INFORMATION.grader_id));
             // documentId = file_name;
 
             let pdfData;
             try {
-                pdfData = JSON.parse(data);
+                pdfData = JSON.parse(data)['data'];
                 pdfData = atob(pdfData);
             } catch (err){
                 alert("Something went wrong, please try again later.");
             }
-            PDFJS.getDocument({data:pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({
+                data: pdfData,
+                cMapUrl: '../../vendor/pdfjs/cmaps/',
+                cMapPacked: true
+            }).then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
                 $(viewer).on('touchstart touchmove', function(e){
@@ -71,29 +78,25 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                 });
                 $("a[value='zoomcustom']").text(parseInt(window.RENDER_OPTIONS.scale * 100) + "%");
                 viewer.innerHTML = '';
-                NUM_PAGES = pdf.pdfInfo.numPages;
+                NUM_PAGES = pdf.numPages;
                 for (let i=0; i<NUM_PAGES; i++) {
-                    let page = UI.createPage(i+1);
+                    let page = PDFAnnotate.UI.createPage(i+1);
                     viewer.appendChild(page);
                     let page_id = i+1;
-                    UI.renderPage(page_id, window.RENDER_OPTIONS).then(([pdfPage, annotations]) => {
-                        let viewport = pdfPage.getViewport(window.RENDER_OPTIONS.scale, window.RENDER_OPTIONS.rotate);
-                        PAGE_HEIGHT = viewport.height;
-                        if(i == page_num) {
-                            $('#file_content').animate({scrollTop: page_num * PAGE_HEIGHT}, 500);
+                    PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(function(){
+                        if (i == page_num) {
+                            // scroll to page on load
+                            let initialPage = $("#pageContainer" + page_id);
+                            if(initialPage.length) {
+                                $('#file_content').animate({scrollTop: initialPage[0].offsetTop}, 500);
+                            }
                         }
-                    }).then(function(){
-                        document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
-                            //Makes sure the panel don't move when writing on it.
-                            $("#submission_browser").draggable('disable');
+                        document.getElementById('pageContainer'+page_id).addEventListener('pointerdown', function(){
                             let selected = $(".tool-selected");
                             if(selected.length != 0 && $(selected[0]).attr('value') != 'cursor'){
                                 $("#save_status").text("Changes not saved");
                                 $("#save_status").css("color", "red");
                             }
-                        });
-                        document.getElementById('pageContainer'+page_id).addEventListener('mouseup', function(){
-                            $("#submission_browser").draggable('enable');
                         });
                     });
                 }
@@ -102,12 +105,12 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     });
 }
 
-
-//TODO: Stretch goal, find a better solution to load/unload annotation. Maybe use session storage?
-$(window).unload(function() {
-    for(let i = 0; i < localStorage.length; i++){
-        if(localStorage.key(i).includes('annotations')){
-            localStorage.removeItem(localStorage.key(i));
-        }
+// TODO: Stretch goal, find a better solution to load/unload
+// annotation. Maybe use session storage?
+$(window).on('unload', () => {
+  for (let i = 0; i < localStorage.length; i++) {
+    if (localStorage.key(i).includes('annotations')) {
+      localStorage.removeItem(localStorage.key(i));
     }
+  }
 });

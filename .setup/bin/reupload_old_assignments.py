@@ -1,18 +1,32 @@
 #!/usr/bin/env python3 
-import sys
 import os
 import json
 import shutil
 import argparse
 from submitty_utils import dateutils
-from sqlalchemy import create_engine, Table, MetaData, bindparam, and_
+from sqlalchemy import create_engine, Table, MetaData, and_
 import grp
 
-SUBMITTY_DATA_DIR = "__INSTALL__FILLIN__SUBMITTY_DATA_DIR__"
+# This file gets installed to SUBMITTY_INSTALL_DIR/.setup/bin/
+SUBMITTY_INSTALL_DIR = os.path.realpath(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
+)
 
-DB_HOST = "__INSTALL__FILLIN__DATABASE_HOST__"
-DB_USER = "__INSTALL__FILLIN__DATABASE_USER__"
-DB_PASS = "__INSTALL__FILLIN__DATABASE_PASSWORD__"
+# Verify that this has been installed by just checking that this file is located in
+# a directory next to the config directory which has submitty.json in it
+if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
+    raise SystemExit('You must install the test suite before being able to run it.')
+
+with open(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')) as open_file:
+    SUBMITTY_JSON = json.load(open_file)
+
+SUBMITTY_DATA_DIR = SUBMITTY_JSON['submitty_data_dir']
+
+with open(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'database.json')) as open_file:
+    DB_JSON = json.load(open_file)
+DB_HOST = DB_JSON['database_host']
+DB_USER = DB_JSON['database_user']
+DB_PASS = DB_JSON['database_password']
 
 
 # This script was created to help professors re-upload an old semester's assignments for autograding.

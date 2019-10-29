@@ -1,0 +1,10 @@
+Code should include descriptive comments.
+Code should be organized into logical and intuitive functions.
+Code should include a readme(block comments) section at the top.
+Use four spaces, no tabs.
+Code may make use of classes and methods or just a bunch of functions.
+The use of builtin functions is prohibited for this exercise.
+A switch case should be used and not the if-else structure.
+Code should make use of recursion and not iteration.
+Code should be properly indented and readable.
+Code should be broken down into functions that each solve a part of the problem. 

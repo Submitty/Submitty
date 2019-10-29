@@ -1,0 +1,156 @@
+{% extends 'generic/Popup.twig' %}
+{% block popup_id %}set-folder-release-form{% endblock %}
+{% block title %}Set Folder Release{% endblock %}
+{% block body %}
+
+
+
+    <center>
+        <label for="date_to_release">
+            <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
+            <script>
+                //inserts file path into title show what folder you are editing
+                window.onclick = function() {
+                    var rD = document.getElementById("release_title");
+                    var folderPath =rD.dataset.path;
+                    document.getElementById("release_title").innerHTML = folderPath;
+                }
+            </script>
+        </label>
+    <br/>
+    <br/>
+    <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
+    </center>
+    <script>
+
+        function getNewDateTime(id){
+            var releaseDate = document.getElementById(id);
+            // pass filename to server to record the new date and time of the file to be released
+            var newDateTime = $("#"+id).val();
+            //set the value to the new date and time
+            releaseDate.value = newDateTime;
+        }
+
+        function determineRelease(nDT) {
+            //get current date and time to determine what color the box is based
+            //on time you want released and the current date
+            var now = new Date();
+
+            function pad(str){
+                return ('0'+str).slice(-2);
+            }
+
+            var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+
+            var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
+            var currentDT = date+' '+time;
+            var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
+
+            if (new Date(nDT).getTime() <= new Date(currentDT).getTime()) {
+                return "#87db88";
+            }
+            else if(new Date(nDT).getTime()>=new Date(neverDT).getTime()){
+                return "#f76c6c";
+            }
+            else {
+                return "#ffeb54";
+            }
+        }
+        function setChildPerm(dirArr,handleData){
+            changeFolderPermission(dirArr,'1',function (output) {
+                if(output){
+                    if(handleData){
+                        handleData(true);
+                    }
+                }
+            });
+        }
+        function setChild(dirArr,releaseDate,handleData) {
+            //send the array of folder paths and set the time to the new one
+            changeFolderNewDateTime(dirArr,releaseDate.value,function (output) {
+                if(output){
+                    if(handleData){
+                        handleData(true);
+                    }
+                }
+
+            });
+
+        }
+        function confirmReleaseDate(){
+            var directory = document.getElementById("submit_time");
+            var dirArr = JSON.parse(directory.dataset.indir);
+            var ID = directory.dataset.iden;
+
+            var releaseDate = document.getElementById("date_to_release");
+            //makes sure you cannot set to null times
+            if(releaseDate.value == ""){
+                window.alert("No blank time allowed");
+                return;
+            }
+            setChildPerm(dirArr,function (output) {
+                if(output){
+                    setChild(dirArr,releaseDate,function (output) {
+                        //when done reload
+                        if(output) {
+                            var selectedDiv = 'date_to_release_'+ID;
+                            //change value immediately and background color (will only appear after refresh bc you have to reload the stylesheet)
+                            $("[id^="+selectedDiv+"]").val(releaseDate.value);
+                            $("[id^='date_to_release_']").css("backgroundColor", 'determineRelease(releaseDate.value)').show();
+                            //delay so function can finish most of the way
+                            //window.setTimeout('parent.location.reload()',100);
+                            parent.location.reload();
+                        }
+                    });
+                }
+            });
+        }
+
+        flatpickr("#date_to_release", {
+                    plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        updateToServerTime(fp);
+                                        break;
+                                    case 1:
+                                        updateToTomorrowServerTime(fp);
+                                        break;
+                                    case 2:
+                                        date = new Date("9998-01-01 00:00:00");
+                                        fp.setDate(date,true);
+                                        break;
+
+                                }
+                            }
+                        }
+                    )],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S"
+                    });
+    </script>
+
+{% endblock %}
+
+{% block buttons %}
+    {{ block('close_button') }}
+    <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirmReleaseDate()"/>
+
+{% endblock %}

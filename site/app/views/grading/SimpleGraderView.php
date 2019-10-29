@@ -2,6 +2,7 @@
 
 namespace app\views\grading;
 
+use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\Component;
@@ -70,9 +71,11 @@ class SimpleGraderView extends AbstractView {
         }
         $component_ids = json_encode($comp_ids);
 
-        $this->core->getOutput()->addInternalJs('twig.min.js');
+        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('twigjs', 'twig.min.js'));
         $this->core->getOutput()->addInternalJs('ta-grading-keymap.js');
         $this->core->getOutput()->addInternalJs('simple-grading.js');
+        $this->core->getOutput()->addInternalCss('simple-grading.css');
+        $this->core->getOutput()->addBreadcrumb("Grading {$gradeable->getTitle()}");
 
         $return = $this->core->getOutput()->renderTwigTemplate("grading/simple/Display.twig", [
             "gradeable" => $gradeable,
@@ -86,6 +89,8 @@ class SimpleGraderView extends AbstractView {
             "sort" => $sort,
             "sections" => $sections,
             "component_ids" => $component_ids,
+            "print_lab_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'print']),
+            "grading_url" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading'])
         ]);
 
         $return .= $this->core->getOutput()->renderTwigTemplate("grading/simple/StatisticsForm.twig", [

@@ -19,13 +19,13 @@
         Preferred first and last names are optional.<br>
         Do not use a header row.<br>
     </p>
-    <input type="hidden" name="csrf_token" value="{{ core.getCsrfToken() }}" />
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <div>
-        <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
+        <input type="file" name="upload" id="grader-list-upload" accept=".xlsx, .csv" aria-label="Choose File">
     </div>
 {% endblock %}
 {% block form %}
-    <form method="post" action="{{ core.buildUrl({'component': 'admin', 'page': 'users', 'action': 'upload_grader_list'}) }}" enctype="multipart/form-data">
+    <form method="post" action="{{ return_url_upload_grader_list }}" enctype="multipart/form-data">
         {{ parent() }}
     </form>
 {% endblock %}

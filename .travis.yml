@@ -31,7 +31,7 @@ jobs:
     # Warm up the pip and composer caches to use it for the rest of the build stages
     - &00-cache
       stage: 00 warm up cache
-      php: 7.0
+      php: 7.2
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
         - pushd site
@@ -49,92 +49,113 @@ jobs:
         - pip3 install tzlocal
         - pip3 install paramiko
         - pip3 install psutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
+        - pip3 install docker
       script: skip
     - <<: *00-cache
-      php: 7.1
-      if: branch = master OR type = pull_request
-    - <<: *00-cache
-      php: 7.2
+      php: 7.3
       if: branch = master OR type = pull_request
 
     - &00-python-cache
       language: python
-      python: 3.5
+      python: 3.6
       install:
         - pip3 install flake8 flake8-bugbear flake8-docstrings sqlalchemy psycopg2-binary
       script: skip
     - <<: *00-python-cache
-      python: 3.6
+      python: 3.7
       if: branch = master OR type = pull_request
 
     # Lint the codebase to ensure that the code is compliant to our system
     - &01-php-lint
       stage: 01 lint
-      php: 7.0
-      script:
-        - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
-    - <<: *01-php-lint
-      php: 7.1
-      if: branch = master OR type = pull_request
-    - <<: *01-php-lint
       php: 7.2
+      install:
+        - pushd site
+        - composer install --prefer-dist --no-interaction
+        - popd
+      script:
+        - pushd site
+        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+        - vendor/bin/phpcs --standard=tests/ruleset.xml
+        - vendor/bin/phpstan analyze app
+        - popd
+    - <<: *01-php-lint
+      php: 7.3
       if: branch = master OR type = pull_request
-    
+
     - &01-python-lint
       language: python
-      python: 3.5
+      python: 3.6
       install:
         - pip3 install flake8 flake8-bugbear flake8-docstrings
       script:
         - flake8
     - <<: *01-python-lint
-      python: 3.6
+      python: 3.7
       if: branch = master OR type = pull_request
 
     - &02-php-unit
       stage: 02 unit test
-      php: 7.0
+      php: 7.2
+      before_install:
+        - phpenv config-rm xdebug.ini
+      install:
+        - pecl install ds
+        - pecl install pcov
+        - pushd site
+        - travis_retry composer install --prefer-dist --no-interaction
+        - popd
       script:
         - pushd site
         - vendor/bin/phpunit --version
-        - vendor/bin/phpunit --configuration tests/phpunit.xml
+        - vendor/bin/phpunit -c tests/phpunit.xml
         - popd
       after_success:
-        - pushd site
-        - travis_retry php vendor/bin/php-coveralls -v -c tests/coveralls.yml
-        - popd
+        # must run from root folder or else coveralls.io shows messed up paths for files
+        #- travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        - bash <(curl -s https://codecov.io/bash) -cF php -f site/tests/report/clover.xml
     - <<: *02-php-unit
-      php: 7.1
-      if: branch = master OR type = pull_request
-    - <<: *02-php-unit
-      php: 7.2
+      php: 7.3
       if: branch = master OR type = pull_request
 
     - &02-python-unit
       language: python
-      python: 3.4
+      python: 3.6
       install:
         - pip3 install -U pip
         - pip3 install tzlocal
         - pip3 install sqlalchemy
+        - pip3 install jsonschema
+        - pip3 install jsonref
+        - pip3 install docker
+        - pip3 install coverage
       script:
         - pushd python_submitty_utils
-        - python3 setup.py test
+        - coverage run -m unittest discover
+        - coverage xml
+        - python3 setup.py install
         - popd
-
         - pushd migration
-        - python3 -m unittest discover
+        - coverage run -m unittest discover
+        - coverage xml
         - popd
+        - pushd autograder
+        - coverage run -m unittest discover
+        - coverage xml
+        - popd
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -cF autograder -f autograder/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF python_submitty_utils -f python_submitty_utils/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF migrator -f migration/coverage.xml
     - <<: *02-python-unit
-      python: 3.5
-      if: branch = master OR type = pull_request
-    - <<: *02-python-unit
-      python: 3.6
+      python: 3.7
       if: branch = master OR type = pull_request
 
     - &03-e2e
       stage: 03 e2e test
-      php: 7.0
+      php: 7.2
       env: AUTH_METHOD=1
       services:
         - xvfb
@@ -149,6 +170,10 @@ jobs:
           packages:
             - apache2
             - libapache2-mod-fastcgi
+            - apache2-suexec-custom
+            - libapache2-mod-authnz-external
+            - libapache2-mod-authz-unixgroup
+            - libapache2-mod-wsgi-py3
             - build-essential
             - automake
             - cmake
@@ -168,11 +193,16 @@ jobs:
             - google-chrome-stable
             - libpam-passwdqc
             - libboost-all-dev
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+        - phpenv config-rm xdebug.ini
       install:
+        - pecl install ds
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
-        - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
-        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl; a2enmod php${PHP_VERSION};
+        - sudo add-apt-repository -y ppa:ondrej/php
+        - sudo apt-get -qq update
+        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds
+        - sudo a2enmod php${PHP_VERSION}
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML
@@ -180,10 +210,13 @@ jobs:
         - pip3 install sqlalchemy
         - pip3 install pylint_runner
         - pip3 install python-dateutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
         - pip3 install selenium
         - pip3 install pause
         - pip3 install paramiko
         - pip3 install psutil
+        - pip3 install docker
         - CHROME_VERSION=$(google-chrome --version | egrep -o -e '[0-9]+\.[0-9]+\.[0-9]+')
         - CHROME_DRIVER_VERSION=$(curl -L https://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION})
         - wget https://chromedriver.storage.googleapis.com/${CHROME_DRIVER_VERSION}/chromedriver_linux64.zip
@@ -207,40 +240,54 @@ jobs:
         - sudo bash .setup/travis/setup.sh
         - sudo python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/bin/setup_sample_courses.py --no_submissions sample
         - sudo bash .setup/travis/setup_test_suite.sh
-        - sudo sed -e "s?www-data?submitty_php?g" --in-place /etc/apache2/envvars
-        - sudo a2enmod include rewrite actions cgi alias headers
+        - sudo a2enmod include rewrite actions cgi alias headers fastcgi suexec authnz_external headers proxy_fcgi
         - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+        - cp .setup/php-fpm/pool.d/submitty.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+        - sudo mkdir /run/php
+        - sudo chown www-data:www-data /run/php
+        - sudo chmod 755 /run/php
+        - sudo ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
         - sudo a2dissite 000-default
         - sudo rm -rf /etc/apache2/sites-available/*
         - sudo rm -rf /etc/apache2/sites-enabled/*
-        - sudo cp -f .setup/travis/apache.conf /etc/apache2/sites-available/submitty.conf
+        - sudo cp -f .setup/apache/submitty.conf /etc/apache2/sites-available/submitty.conf
+        - sudo sed -e "s/Require host __your_domain__/Require all granted/g" --in-place /etc/apache2/sites-available/submitty.conf
+        # - sudo sed '54d' --in-place /etc/apache2/sites-available/submitty.conf
+        - sudo cp .setup/apache/www-data /etc/apache2/suexec/www-data
+        - sudo chmod 0640 /etc/apache2/suexec/www-data
         - sudo a2ensite submitty
-        - sudo chown -R submitty_php:submitty_php /var/lib/apache2/fastcgi
-        # TODO: Figure out why these chmod's are necessary and fix whatever has
-        #       bad permission (https://github.com/Submitty/Submitty/issues/1040)
-        - sudo chmod -R 755 /usr/local/submitty
-        - sudo chmod -R 777 /usr/local/submitty/test_suite
-        - sudo chown root:submitty_daemon  /usr/local/submitty/sbin/untrusted_execute
-        - sudo chmod 4550 /usr/local/submitty/sbin/untrusted_execute
         - sudo bash -c 'echo "export PATH=$PATH" >> /etc/apache2/envvars'
+        - cat /etc/apache2/sites-available/submitty.conf
+        - sudo apache2ctl -t
         - sudo service apache2 restart
       script:
         - TEST_URL="http://localhost" python -m unittest discover -v --start-directory tests
+        - SEMESTER=$(python3 -c 'from datetime import datetime; today = datetime.today(); semester = ("s" if today.month < 7 else "f") + str(today.year)[-2:]; print(semester)')
+        - sudo python3 /usr/local/submitty/bin/generate_repos.py ${SEMESTER} sample open_homework
+        - pushd /tmp
+        - git clone http://instructor:instructor@localhost/git/${SEMESTER}/sample/open_homework/instructor open_homework
+        - cd open_homework
+        - touch test.txt
+        - git add .
+        - git commit -m "First commit"
+        - git push
+        - touch test2.txt
+        - git add .
+        - git commit -m "Second commit"
+        - git push
+        - git reset --hard HEAD~1
+        - git pull
+        - cd ..
+        - EXIT_CODE=0; git clone http://student:student@localhost/git/${SEMESTER}/sample/open_homework/instructor || EXIT_CODE=$?; test ${EXIT_CODE} -ne 0
     - <<: *03-e2e
-      php: 7.1
+      php: 7.3
       if: branch = master OR type = pull_request
     - <<: *03-e2e
       php: 7.2
-      if: branch = master OR type = pull_request
-    - <<: *03-e2e
-      php: 7.0
-      env: AUTH_METHOD=2
-    - <<: *03-e2e
-      php: 7.1
       env: AUTH_METHOD=2
       if: branch = master OR type = pull_request
     - <<: *03-e2e
-      php: 7.2
+      php: 7.3
       env: AUTH_METHOD=2
       if: branch = master OR type = pull_request
 
@@ -275,18 +322,23 @@ jobs:
       env: CLANG_VER="5.0.1"
       before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
       install:
-        - sudo apt-get install clang
         - export LLVM_ARCHIVE_PATH=${HOME}/clang+llvm.tar.xz
         - wget http://releases.llvm.org/${CLANG_VER}/clang+llvm-${CLANG_VER}-x86_64-linux-gnu-ubuntu-14.04.tar.xz -O ${LLVM_ARCHIVE_PATH}
         - mkdir ${HOME}/clang+llvm
         - tar xf ${LLVM_ARCHIVE_PATH} -C ${HOME}/clang+llvm --strip-components 1
         - export PATH=${HOME}/clang+llvm/bin:${PATH}
+        # Create symlink so that it's in expected location for whitelist
+        - sudo ln -s $(which clang) /usr/bin/clang
+        - sudo ln -s $(which clang++) /usr/bin/clang++
         - pip3 install -U pip
         - pip3 install PyYAML
         - pip3 install python-dateutil
+        - pip3 install jsonschema
+        - pip3 install jsonref
         - pip3 install paramiko
         - pip3 install psycopg2-binary
         - pip3 install sqlalchemy
+        - pip3 install docker
         - pushd ${TRAVIS_BUILD_DIR}/python_submitty_utils
         - pip3 install .
         - popd

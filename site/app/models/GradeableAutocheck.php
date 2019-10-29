@@ -35,6 +35,9 @@ class GradeableAutocheck extends AbstractModel {
     /** @property @var boolean If this check's file is in results_public */
     protected $public;
 
+    /** @property @var boolean If this check's file should be displayed as a sequence diagram */
+    protected $display_as_sequence_diagram;
+
     /**
      * GradeableAutocheck constructor.
      *
@@ -60,6 +63,12 @@ class GradeableAutocheck extends AbstractModel {
             }
         }
         
+        if(isset($details["display_as_sequence_diagram"])){
+            $this->display_as_sequence_diagram = $details["display_as_sequence_diagram"];
+        }else{
+            $this->display_as_sequence_diagram = false;
+        }
+
         $actual_file = $expected_file = $difference_file = $image_difference ="";
 
         if(isset($details["actual_file"])) {
@@ -73,13 +82,28 @@ class GradeableAutocheck extends AbstractModel {
     
         
     
-        if(isset($details["expected_file"]) &&
-            file_exists($course_path . "/" . $details["expected_file"])) {
-            $expected_file = $course_path . "/" . $details["expected_file"];
-        }else if(isset($details["expected_file"]) &&
-            !file_exists($course_path . "/" . $details["expected_file"])) {
-            $this->core->addErrorMessage("Expected file not found.");
+        if(isset($details["expected_file"])) {
+            if(substr($details["expected_file"],0,11) == "test_output"){
+                if(file_exists($course_path . "/" . $details["expected_file"])){ 
+                    $expected_file = $course_path . "/" . $details["expected_file"];
+                } else {
+                    $this->core->addErrorMessage("Expected file not found.");
+                }
+            } else if(substr($details["expected_file"],0,13) == "random_output"){
+                if(file_exists($results_path . "/" . $details["expected_file"])){ 
+                    $expected_file = $results_path. "/" . $details["expected_file"];
+                } else {
+                    $this->core->addErrorMessage("Expected file not found.");
+                }
+            // Try to find the file in the details directory. Do not print an error,
+            // as the file is likely student generated.
+            } else {
+                if(file_exists($results_path . "/details/" . $details["expected_file"])){
+                    $expected_file = $results_path . "/details/" . $details["expected_file"];
+                }
+            }
         }
+        
         if(isset($details["difference_file"]) && file_exists($results_path . "/details/" . $details["difference_file"])) {
             $difference_file = $results_path . "/details/" . $details["difference_file"];
         }

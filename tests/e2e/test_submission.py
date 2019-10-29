@@ -2,8 +2,9 @@ import os
 from unittest import skipIf
 
 from .base_testcase import BaseTestCase
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 
@@ -14,7 +15,7 @@ class TestSubmission(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
 
-    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Open Homework']")):
+    def setup_test_start(self, gradeable_category="open", gradeable_id="open_homework", button_name="submit", loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Open Homework']")):
         self.log_in()
         self.click_class("sample", "SAMPLE")
         self.click_nav_submit_button(gradeable_category, gradeable_id, button_name, loaded_selector)
@@ -115,7 +116,16 @@ class TestSubmission(BaseTestCase):
         self.accept_alerts(1)
 
         # wait until the page reloads to change the active version, completing the test
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version))))        
+        select = Select(self.driver.find_element_by_id('submission-version-select'))
+        select_idx = -1
+        for i in range(len(select.options)):
+            if select.options[i].text.endswith('GRADE THIS VERSION'):
+                select_idx = i
+        self.assertGreater(select_idx, -1)
+        select.select_by_visible_text(select.options[select_idx].text)
+
+        version_xpath = "//div[@class='content']/select/option[@value='{}' and @selected and substring(text(), string-length(text())-17)='GRADE THIS VERSION']".format(new_version)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, version_xpath)))
 
     # for test cases that require switching versions, make submissions to ensure they will
     def ensure_multiple_versions(self):
@@ -133,7 +143,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(autograding=True), autograding=True)
 
@@ -142,7 +152,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(autograding=True), drag_and_drop=True, autograding=True)
 
@@ -151,7 +161,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(multiple=True, autograding=True), autograding=True)
 
@@ -160,7 +170,7 @@ class TestSubmission(BaseTestCase):
         self.setup_test_start(gradeable_category="graded",
                               gradeable_id="grades_released_homework_autohiddenEC",
                               button_name="submit",
-                              loaded_selector=(By.XPATH, "//div[@class='content']/div[1]/h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
+                              loaded_selector=(By.XPATH, "//h1[1][normalize-space(text())='New submission for: Autograder Hidden and Extra Credit (C++ Hidden Tests)']")
                               )
         self.make_submission(self.create_file_paths(multiple=True, autograding=True), drag_and_drop=True, autograding=True)
 

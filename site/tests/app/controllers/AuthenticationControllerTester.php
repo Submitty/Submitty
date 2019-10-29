@@ -9,15 +9,26 @@ use app\models\User;
 use app\models\gradeable\Gradeable;
 use tests\BaseUnitTest;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class AuthenticationControllerTester extends BaseUnitTest {
+
+    public function setUp(): void {
+        // set up variables that logger needs
+        $_COOKIE['submitty_token'] = 'test';
+        $_SERVER['REMOTE_ADDR'] = 'test';
+        $_SERVER['HTTP_USER_AGENT'] = 'test';
+    }
 
     private function getAuthenticationCore($authenticate=false, $queries=[]) {
         $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $queries);
         $auth = $this->createMock(AbstractAuthentication::class);
         $auth->method('setUserId')->willReturn(null);
         $auth->method('setPassword')->willReturn(null);
-        $core->method('authenticate')->willReturn($authenticate);
+        $auth->method('authenticate')->willReturn($authenticate);
         $core->method('getAuthentication')->willReturn($auth);
+        $core->method('authenticate')->willReturn($authenticate);
         return $core;
     }
 
@@ -27,8 +38,8 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $core = $this->createMockCore();
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
-        $this->assertEquals(['status' => 'error', 'message' => 'Missing value for one of the fields'], $response);
+        $response = $controller->vcsLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Missing value for one of the fields'], $response);
     }
 
     public function testVcsLoginMissingPassword() {
@@ -37,8 +48,8 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $core = $this->createMockCore();
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
-        $this->assertEquals(['status' => 'error', 'message' => 'Missing value for one of the fields'], $response);
+        $response = $controller->vcsLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Missing value for one of the fields'], $response);
     }
 
     public function testVcsLoginMissingGradeableId() {
@@ -47,8 +58,8 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $core = $this->createMockCore();
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
-        $this->assertEquals(['status' => 'error', 'message' => 'Missing value for one of the fields'], $response);
+        $response = $controller->vcsLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Missing value for one of the fields'], $response);
     }
 
     public function testVcsLoginMissingId() {
@@ -57,8 +68,8 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['gradeable_id'] = 'test';
         $core = $this->createMockCore();
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
-        $this->assertEquals(['status' => 'error', 'message' => 'Missing value for one of the fields'], $response);
+        $response = $controller->vcsLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Missing value for one of the fields'], $response);
     }
 
 
@@ -69,8 +80,8 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $core = $this->createMockCore();
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
-        $this->assertEquals(['status' => 'error', 'message' => 'Missing value for one of the fields'], $response);
+        $response = $controller->vcsLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Missing value for one of the fields'], $response);
     }
 
     public function testVcsLoginAuthenticationFail() {
@@ -80,7 +91,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $core = $this->getAuthenticationCore();
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => 'Could not login using that user id or password'], $response);
     }
 
@@ -91,7 +102,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_POST['id'] = 'test';
         $core = $this->getAuthenticationCore(true, ['getUserById' => null]);
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => 'Could not find that user for that course'], $response);
     }
 
@@ -104,7 +115,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $user->method('accessFullGrading')->willReturn(true);
         $core = $this->getAuthenticationCore(true, ['getUserById' => $user]);
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
             [
                 'status' => 'success',
@@ -125,7 +136,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $user = $this->createMockModel(User::class);
         $core = $this->getAuthenticationCore(true, ['getUserById' => $user, 'getGradeableConfig' => null]);
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
             [
                 'status' => 'fail',
@@ -143,7 +154,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $user = $this->createMockModel(User::class);
         $core = $this->getAuthenticationCore(true, ['getUserById' => $user, 'getGradeableConfig' => null]);
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
             [
                 'status' => 'success',
@@ -175,7 +186,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
             ]
         );
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
             [
                 'status' => 'fail',
@@ -204,7 +215,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
             ]
         );
         $controller = new AuthenticationController($core);
-        $response = $controller->vcsLogin();
+        $response = $controller->vcsLogin()->json_response->json;
         $this->assertEquals(
             [
                 'status' => 'success',
@@ -215,5 +226,51 @@ class AuthenticationControllerTester extends BaseUnitTest {
             ],
             $response
         );
+    }
+
+    public function testLoginMissingUserId() {
+        unset($_POST['user_id']);
+        $_POST['no_redirect'] = true;
+        $_POST['password'] = 'test';
+        $core = $core = $this->getAuthenticationCore();
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Cannot leave user id or password blank'], $response);
+    }
+
+    public function testLoginMissingPassword() {
+        unset($_POST['password']);
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $core = $this->getAuthenticationCore();
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => 'Cannot leave user id or password blank'], $response);
+    }
+
+    public function testLoginSuccess() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'test';
+        $core = $this->getAuthenticationCore(true);
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin()->json_response->json;
+        $this->assertEquals(
+            [
+                'status' => 'success',
+                'data' => ['message' => "Successfully logged in as test", 'authenticated' => true]
+            ],
+            $response
+        );
+    }
+
+    public function testLoginFailure() {
+        $_POST['no_redirect'] = true;
+        $_POST['user_id'] = 'test';
+        $_POST['password'] = 'test';
+        $core = $this->getAuthenticationCore(false);
+        $controller = new AuthenticationController($core);
+        $response = $controller->checkLogin()->json_response->json;
+        $this->assertEquals(['status' => 'fail', 'message' => "Could not login using that user id or password"], $response);
     }
 }

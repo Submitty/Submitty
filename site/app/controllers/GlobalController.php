@@ -11,17 +11,10 @@ use app\models\User;
 
 class GlobalController extends AbstractController {
 
-    public function run() {
-        //TODO: Whenever run() stops taking GET parameters require access to
-        // header() and footer() to use run()
-    }
-
     public function header() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-        $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl([
-                'component' => 'misc',
-                'page' => 'read_file',
+        $wrapper_urls = array_map(function ($file) {
+            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
@@ -55,18 +48,28 @@ class GlobalController extends AbstractController {
                         "icon" => "fa-home"
                     ]);
                 }
+                $navigation_url = $this->core->buildCourseUrl();
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation')),
+                    "href" => $navigation_url,
                     "title" => "Gradeables",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-submitty",
                     "icon" => "fa-star"
                 ]);
             }
+            elseif ($this->core->getUser()->accessFaculty()) {
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildUrl(['home', 'courses', 'new']),
+                    "title" => "New Course",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-new-course",
+                    "icon" => "fa-plus-square"
+                ]);
+            }
 
             if ($unread_notifications_count !== null) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'navigation', 'page' => 'notifications')),
+                    "href" => $this->core->buildCourseUrl(['notifications']),
                     "title" => "Notifications",
                     "badge" => $unread_notifications_count,
                     "class" => "nav-row",
@@ -79,14 +82,14 @@ class GlobalController extends AbstractController {
         if ($this->core->userLoaded() && $this->core->getConfig()->isCourseLoaded()) {
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'admin_gradeable', 'action' => 'view_gradeable_page')),
+                    "href" => $this->core->buildCourseUrl(['gradeable']),
                     "title" => "New Gradeable",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-new-gradeable",
                     "icon" => "fa-plus-square"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'configuration', 'action' => 'view')),
+                    "href" => $this->core->buildCourseUrl(['config']),
                     "title" => "Course Settings",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-settings",
@@ -94,12 +97,33 @@ class GlobalController extends AbstractController {
                 ]);
             }
 
+            if ($this->core->getConfig()->isQueueEnabled()) {
+                if ($this->core->getQueries()->isQueueOpen()) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildCourseUrl(['office_hours_queue']),
+                        "title" => "Office Hours",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-queue",
+                        "icon" => "fa-door-open"
+                    ]);
+                }
+                else {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildCourseUrl(['office_hours_queue']),
+                        "title" => "Office Hours",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-queue",
+                        "icon" => "fa-door-closed"
+                    ]);
+                }
+            }
+
             $course_path = $this->core->getConfig()->getCoursePath();
             $course_materials_path = $course_path . "/uploads/course_materials";
             $any_files = FileUtils::getAllFiles($course_materials_path);
             if ($this->core->getUser()->accessAdmin() || !empty($any_files)) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'course_materials', 'action' => 'view_course_materials_page')),
+                    "href" => $this->core->buildCourseUrl(['course_materials']),
                     "title" => "Course Materials",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-course-materials",
@@ -109,7 +133,7 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getConfig()->isForumEnabled()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread')),
+                    "href" => $this->core->buildCourseUrl(['forum']),
                     "title" => "Discussion Forum",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-forum",
@@ -158,21 +182,21 @@ class GlobalController extends AbstractController {
             if ($this->core->getUser()->accessAdmin()) {
                 $at_least_one_grader_link = true;
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users')),
+                    "href" => $this->core->buildCourseUrl(['users']),
                     "title" => "Manage Students",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-students",
                     "icon" => "fa-user-graduate"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'graders')),
+                    "href" => $this->core->buildCourseUrl(['graders']),
                     "title" => "Manage Graders",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-graders",
                     "icon" => "fa-address-book"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'users', 'action' => 'rotating_sections')),
+                    "href" => $this->core->buildCourseUrl(['sections']),
                     "title" => "Manage Sections",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-sections",
@@ -187,7 +211,7 @@ class GlobalController extends AbstractController {
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                        "href" => $this->core->buildCourseUrl(['student_photos']),
                         "title" => "Student Photos",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-photos",
@@ -198,7 +222,7 @@ class GlobalController extends AbstractController {
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
                         $sidebar_buttons[] = new Button($this->core, [
-                            "href" => $this->core->buildUrl(array('component' => 'grading', 'page' => 'images', 'action' => 'view_images_page')),
+                            "href" => $this->core->buildCourseUrl(['student_photos']),
                             "title" => "Student Photos",
                             "class" => "nav-row",
                             "id" => "nav-sidebar-photos",
@@ -216,28 +240,35 @@ class GlobalController extends AbstractController {
 
             if ($this->core->getUser()->accessAdmin()) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_late')),
+                    "href" => $this->core->buildCourseUrl(['late_days']),
                     "title" => "Late Days Allowed",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-late-days-allowed",
                     "icon" => "fa-calendar-check"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'late', 'action' => 'view_extension')),
+                    "href" => $this->core->buildCourseUrl(['extensions']),
                     "title" => "Excused Absence Extensions",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-extensions",
                     "icon" => "fa-calendar-plus"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'plagiarism')),
+                    "href" => $this->core->buildCourseUrl(['grade_override']),
+                    "title" => "Grade Override",
+                    "class" => "nav-row",
+                    "id" => "nav-sidebar-grade-override",
+                    "icon" => "fa-eraser"
+                ]);
+                $sidebar_buttons[] = new Button($this->core, [
+                    "href" => $this->core->buildCourseUrl(['plagiarism']),
                     "title" => "Plagiarism Detection",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-plagiarism",
                     "icon" => "fa-exclamation-triangle"
                 ]);
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'admin', 'page' => 'reports', 'action' => 'reportpage')),
+                    "href" => $this->core->buildCourseUrl(['reports']),
                     "title" => "Grade Reports",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-reports",
@@ -252,7 +283,7 @@ class GlobalController extends AbstractController {
             $display_rainbow_grades_summary = $this->core->getConfig()->displayRainbowGradesSummary();
             if ($display_rainbow_grades_summary) {
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'rainbow')),
+                    "href" => $this->core->buildCourseUrl(['grades']),
                     "title" => "Rainbow Grades",
                     "class" => "nav-row",
                     "id" => "nav-sidebar-grades",
@@ -261,7 +292,7 @@ class GlobalController extends AbstractController {
             }
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'student', 'page' => 'view_late_table')),
+                "href" => $this->core->buildCourseUrl(['late_table']),
                 "title" => "My Late Days/Extensions",
                 "class" => "nav-row",
                 "id" => "nav-sidebar-late-days",
@@ -285,11 +316,11 @@ class GlobalController extends AbstractController {
             ]);
 
             $sidebar_buttons[] = new Button($this->core, [
-                "href" => $this->core->buildUrl(array('component' => 'authentication', 'page' => 'logout')),
+                "href" => $this->core->buildUrl(['authentication', 'logout']),
                 "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
-                "icon" => "fa-sign-out-alt"
+                "icon" => "fa-power-off"
             ]);
         }
 
@@ -312,15 +343,25 @@ class GlobalController extends AbstractController {
             }
         }
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js);
+        $now = getDate(date_timestamp_get($this->core->getDateTimeNow()));
+        $month = $now['mon'];
+        $day = $now['mday'];
+
+        $duck_img = 'moorthy_duck.png';
+        if($month === 10 && ($day >= 27 && $day <= 31)  ){
+            //halloween
+            $duck_img = 'moorthy_halloween.png';
+        }
+        //else if(...){}
+        //more Holidays go here!
+
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js, $duck_img);
     }
 
     public function footer() {
         $wrapper_files = $this->core->getConfig()->getWrapperFiles();
-        $wrapper_urls = array_map(function($file) {
-            return $this->core->buildUrl([
-                'component' => 'misc',
-                'page' => 'read_file',
+        $wrapper_urls = array_map(function ($file) {
+            return $this->core->buildCourseUrl(['read_file']) . '?' . http_build_query([
                 'dir' => 'site',
                 'path' => $file,
                 'file' => pathinfo($file, PATHINFO_FILENAME),
@@ -338,16 +379,16 @@ class GlobalController extends AbstractController {
                 // $row can also have an 'icon' column, but it is optional.
                 foreach ($footer_links_json_data as $row) {
                     switch (false) {
-                    case array_key_exists('url', $row):
-                    case array_key_exists('title', $row):
-                        //Validation fail.  Exclude $row.
-                        continue;
-                    default:
-                        //Validation OK.  Include $row.
-                        if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
-                            $row['icon'] = "fa-" . $row['icon'];
-                        }
-                        $footer_links[] = $row;
+                        case array_key_exists('url', $row):
+                        case array_key_exists('title', $row):
+                            //Validation fail.  Exclude $row.
+                            continue 2;
+                        default:
+                            //Validation OK.  Include $row.
+                            if (isset($row['icon']) && !Utils::startsWith($row['icon'], "fa-")) {
+                                $row['icon'] = "fa-" . $row['icon'];
+                            }
+                            $footer_links[] = $row;
                     }
                 }
             }
@@ -382,10 +423,10 @@ class GlobalController extends AbstractController {
         $query_a = array_filter(explode("&", $query_a));
         $query_b = array_filter(explode("&", $query_b));
 
-        $query_a = array_filter($query_a, function($param) use($ignored_params) {
+        $query_a = array_filter($query_a, function ($param) use ($ignored_params) {
             return !in_array(explode("=", $param)[0], $ignored_params);
         });
-        $query_b = array_filter($query_b, function($param) use($ignored_params) {
+        $query_b = array_filter($query_b, function ($param) use ($ignored_params) {
             return !in_array(explode("=", $param)[0], $ignored_params);
         });
 

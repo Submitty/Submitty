@@ -12,8 +12,6 @@
 #define tab "    "
 #define OtherType 0
 #define ByLineByChar 1
-#define ByWordByChar 2
-#define ByLineByWord 3
 
 class Difference: public TestResults {
 public:

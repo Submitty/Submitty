@@ -19,14 +19,14 @@ class GradingQueueTester extends BaseUnitTest {
     private $version = 0;
     private $time = 0;
 
-    public function setUp() {
+    public function setUp(): void {
         $this->path = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         FileUtils::createDir($this->path);
         $this->queue_path = FileUtils::joinPaths($this->path, 'to_be_graded_queue');
         FileUtils::createDir($this->queue_path);
     }
 
-    public function tearDown() {
+    public function tearDown(): void {
         if (file_exists($this->path)) {
             FileUtils::recursiveRmdir($this->path);
         }

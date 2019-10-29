@@ -3,10 +3,10 @@
 namespace app\models\gradeable;
 
 
+use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
-use app\models\gradeable\AutogradingTestcase;
 
 /**
  * Class AutogradingConfig
@@ -37,7 +37,10 @@ class AutogradingConfig extends AbstractModel {
     protected $max_submissions;
     /** @property @var string A message to show the user above the file upload box */
     protected $gradeable_message;
-
+    /** @property @var bool Indicates if list of test should be shown at the bottom of the page */
+    protected $hide_version_and_test_details;
+    /** @property @var bool Indicates if list os submitted files should be shown on page */
+    protected $hide_submitted_files;
     /** @property @var string Any additional requirements for worker machine (i.e. "extra_ram")  */
     protected $required_capabilities;
     /** @property @var int The number of seconds allowed for autograding */
@@ -46,8 +49,10 @@ class AutogradingConfig extends AbstractModel {
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
 
-    /** @property @var SubmissionTextBox[] Text box configs for text box submissions*/
-    private $textboxes = [];
+    /** @property @var array Array of notebook objects */
+    private $notebook = [];
+    /** @property @var AbstractGradingInput[] Grading input configs for all new types of gradeable input*/
+    private $inputs = [];
     /** @property @var AutogradingTestcase[] Cut-down information about autograding test cases*/
     private $testcases = [];
 
@@ -60,11 +65,11 @@ class AutogradingConfig extends AbstractModel {
     protected $early_submission_minimum_days_early = 0;
     /** @property @var int The minimum number of points required to receive the early submission incentive */
     protected $early_submission_minimum_points = 0;
-    /** @property @var GradeableTestcase[] The test cases for which the points must be earned to satisfy the incentive */
+    /** @property @var AutogradingTestcase[] The test cases for which the points must be earned to satisfy the incentive */
     protected $early_submission_test_cases = [];
 
 
-    /* Properties accumulated from GradeableTestcase's */
+    /* Properties accumulated from the AutogradingTestcases */
 
     /** @property @var int Total number of non-hidden non-extra-credit ('normal') points for all test cases */
     protected $total_non_hidden_non_extra_credit = 0;
@@ -86,10 +91,14 @@ class AutogradingConfig extends AbstractModel {
         $this->max_submission_size = floatval($details['max_submission_size'] ?? 0);
         $this->max_submissions = intval($details['max_submissions'] ?? 0);
         if (isset($details['assignment_message'])) {
-            $this->gradeable_message = Utils::prepareHtmlString($details['assignment_message'] ?? '');
+            $this->gradeable_message = $details['assignment_message'] ?? '';
         } else if (isset($details['gradeable_message'])) {
-            $this->gradeable_message = Utils::prepareHtmlString($details['gradeable_message'] ?? '');
+            $this->gradeable_message = $details['gradeable_message'] ?? '';
         }
+
+        // These two items default to false if they don't exist in the gradeable config.json
+        $this->hide_version_and_test_details = $details['hide_version_and_test_details'] ?? false;
+        $this->hide_submitted_files = $details['hide_submitted_files'] ?? false;
 
         $this->required_capabilities = $details['required_capabilities'] ?? 'default';
         $this->max_possible_grading_time = $details['max_possible_grading_time'] ?? -1;
@@ -130,11 +139,81 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
+        // Setup $this->notebook
+        $actual_input = array();
+        if (isset($details['notebook'])) {
+
+            // For each item in the notebook array inside the $details collect data and assign to variables in
+            // $this->notebook
+            for ($i = 0; $i < count($details['notebook']); $i++) {
+                $notebook_cell = $details['notebook'][$i];
+                $do_add = true;
+
+                // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
+                // markdown forward as 'data' as opposed to 'string' or 'file'
+                if(isset($notebook_cell['type']) &&
+                   $notebook_cell['type'] == 'markdown')
+                {
+                    $markdown = $this->getMarkdownData($notebook_cell);
+
+                    // Remove string or file from $notebook_cell
+                    unset($notebook_cell['markdown_string']);
+                    unset($notebook_cell['markdown_file']);
+
+                    // Readd as data
+                    $notebook_cell['markdown_data'] = $markdown;
+
+                    // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
+                    if ($i < count($details['notebook']) - 1)
+                    {
+                        $next_cell = &$details['notebook'][$i + 1];
+                        if (isset($next_cell['type']) &&
+                            ($next_cell['type'] == 'short_answer' || $next_cell['type'] == 'multiple_choice'))
+                        {
+                            $next_cell['label'] = $markdown;
+                            // Do not add current cell to notebook, since it is embedded in the label
+                            $do_add = false;
+                        }
+                    }
+                }
+
+                // Add this cell $this->notebook
+                if ($do_add) {
+                    array_push($this->notebook, $notebook_cell);
+                }
+
+                // If cell is a type of input add it to the $actual_inputs array
+                if(isset($notebook_cell['type']) &&
+                   ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice'))
+                {
+                    array_push($actual_input, $notebook_cell);
+                }
+            }
+        }
+
+        // Setup $this->inputs
+        for ($i = 0; $i < count($actual_input); $i++) {
+            if ($actual_input[$i]['type'] == 'short_answer') {
+
+                // If programming language is set then this is a codebox
+                if(isset($actual_input[$i]['programming_language']))
+                {
+                    $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
+                }
+                // Else regular textbox
+                else
+                {
+                    $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
+
+                }
+
+            } elseif ($actual_input[$i]['type'] == 'multiple_choice') {
+                $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
+            }
+        }
+
         // defaults to 1 if no set
         $num_parts = count($details['part_names'] ?? [1]);
-
-        // defaults to 0 if not set
-        $num_textboxes = count($details['textboxes'] ?? []);
 
         // Get all of the part names
         for ($i = 1; $i <= $num_parts; $i++) {
@@ -146,10 +225,26 @@ class AutogradingConfig extends AbstractModel {
                 $this->part_names[$i] = "Part " . $i;
             }
         }
+    }
 
-        // Get textbox details
-        for ($i = 0; $i < $num_textboxes; $i++) {
-            $this->textboxes[$i] = new SubmissionTextBox($this->core, $details['textboxes'][$i]);
+    private function getMarkdownData($cell)
+    {
+        // If markdown_string is set then just return that
+        if(isset($cell['markdown_string']))
+        {
+            return $cell['markdown_string'];
+        }
+        // Else if markdown_file is set then read the file and return its contents
+        else if(isset($cell['markdown_file']))
+        {
+            // TODO: Implement reading from markdown_file and passing that along
+            throw new NotImplementedException("Reading from a markdown_file is not yet implemented.");
+        }
+        // Else something unexpected happened
+        else
+        {
+            throw new \InvalidArgumentException("An error occured parsing notebook data.\n" .
+                "Markdown configuration may only specify one of 'markdown_string' or 'markdown_file'");
         }
     }
 
@@ -157,7 +252,7 @@ class AutogradingConfig extends AbstractModel {
         $details = parent::toArray();
 
         $details['testcases'] = parent::parseObject($this->testcases);
-        $details['textboxes'] = parent::parseObject($this->textboxes);
+        $details['inputs'] = parent::parseObject($this->inputs);
 
         return $details;
     }
@@ -171,11 +266,15 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
-     * Gets the text boxes for this configuration
-     * @return SubmissionTextBox[]
+     * Gets the abstract inputs for this configuration
+     * @return AbstractGradeableInput[]
      */
-    public function getTextboxes() {
-        return $this->textboxes;
+    public function getInputs() {
+        return $this->inputs;
+    }
+
+    public function getNotebook() {
+        return $this->notebook;
     }
 
     /**
@@ -195,11 +294,11 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
-     * Gets the number of text boxes on the submission page
+     * Gets the number of inputs on the submission page
      * @return int
      */
-    public function getNumTextBoxes() {
-        return count($this->getTextboxes());
+    public function getNumInputs() {
+        return count($this->getInputs());
     }
 
     /**

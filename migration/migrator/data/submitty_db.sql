@@ -21,7 +21,7 @@ SET row_security = off;
 --
 
 CREATE EXTENSION IF NOT EXISTS plpgsql WITH SCHEMA pg_catalog;
-
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 --
 -- TOC entry 2161 (class 0 OID 0)
@@ -50,11 +50,12 @@ CREATE TABLE courses (
 
 CREATE TABLE emails (
     id serial NOT NULL,
-    recipient  varchar(255) NOT NULL,
+    user_id character varying NOT NULL,
     subject TEXT NOT NULL,
     body TEXT NOT NULL,
     created TIMESTAMP WITHOUT TIME zone NOT NULL,
-    sent TIMESTAMP WITHOUT TIME zone
+    sent TIMESTAMP WITHOUT TIME zone,
+    error character varying NOT NULL default ''
 );
 
 
@@ -117,15 +118,19 @@ CREATE TABLE sessions (
 
 CREATE TABLE users (
     user_id character varying NOT NULL,
+    user_numeric_id character varying,
     user_password character varying,
     user_firstname character varying NOT NULL,
     user_preferred_firstname character varying,
     user_lastname character varying NOT NULL,
     user_preferred_lastname character varying,
+    user_access_level INTEGER NOT NULL DEFAULT 3,
     user_email character varying NOT NULL,
     user_updated BOOLEAN NOT NULL DEFAULT FALSE,
     instructor_updated BOOLEAN NOT NULL DEFAULT FALSE,
-    last_updated timestamp(6) with time zone
+    last_updated timestamp(6) with time zone,
+    api_key character varying(255) NOT NULL UNIQUE DEFAULT encode(gen_random_bytes(16), 'hex'),
+    CONSTRAINT users_user_access_level_check CHECK ((user_access_level >= 1) AND (user_access_level <= 3))
 );
 
 CREATE TABLE courses_registration_sections (
@@ -199,6 +204,11 @@ ALTER TABLE ONLY courses_users
     ADD CONSTRAINT courses_users_user_fkey FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
 
 
+
+ALTER TABLE ONLY emails
+    ADD CONSTRAINT emails_user_id_fk FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE;
+
+
 --
 -- TOC entry 2038 (class 2606 OID 19641)
 -- Name: sessions_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
@@ -238,8 +248,8 @@ BEGIN
     IF (TG_OP = 'INSERT') THEN
         -- FULL data sync on INSERT of a new user record.
         SELECT * INTO user_row FROM users WHERE user_id=NEW.user_id;
-        query_string := 'INSERT INTO users (user_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated, user_group, registration_section, manual_registration) ' ||
-                        'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_literal(user_row.user_firstname) || ', ' || quote_nullable(user_row.user_preferred_firstname) || ', ' || quote_literal(user_row.user_lastname) || ', ' ||
+        query_string := 'INSERT INTO users (user_id, user_numeric_id, user_firstname, user_preferred_firstname, user_lastname, user_preferred_lastname, user_email, user_updated, instructor_updated, user_group, registration_section, manual_registration) ' ||
+                        'VALUES (' || quote_literal(user_row.user_id) || ', ' || quote_nullable(user_row.user_numeric_id) || ', ' || quote_literal(user_row.user_firstname) || ', ' || quote_nullable(user_row.user_preferred_firstname) || ', ' || quote_literal(user_row.user_lastname) || ', ' ||
                         '' || quote_nullable(user_row.user_preferred_lastname) || ', ' || quote_literal(user_row.user_email) || ', ' || quote_literal(user_row.user_updated) || ', ' || quote_literal(user_row.instructor_updated) || ', ' ||
                         '' || NEW.user_group || ', ' || quote_nullable(NEW.registration_section) || ', ' || NEW.manual_registration || ')';
         IF query_string IS NULL THEN
@@ -275,7 +285,7 @@ BEGIN
     FOR course_row IN SELECT semester, course FROM courses_users WHERE user_id=NEW.user_id LOOP
         RAISE NOTICE 'Semester: %, Course: %', course_row.semester, course_row.course;
         db_conn := format('dbname=submitty_%s_%s', course_row.semester, course_row.course);
-        query_string := 'UPDATE users SET user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
+        query_string := 'UPDATE users SET user_numeric_id=' || quote_nullable(NEW.user_numeric_id) || ', user_firstname=' || quote_literal(NEW.user_firstname) || ', user_preferred_firstname=' || quote_nullable(NEW.user_preferred_firstname) || ', user_lastname=' || quote_literal(NEW.user_lastname) || ', user_preferred_lastname=' || quote_nullable(NEW.user_preferred_lastname) || ', user_email=' || quote_literal(NEW.user_email) || ', user_updated=' || quote_literal(NEW.user_updated) || ', instructor_updated=' || quote_literal(NEW.instructor_updated) || ' WHERE user_id=' || quote_literal(NEW.user_id);
         -- Need to make sure that query_string was set properly as dblink_exec will happily take a null and then do nothing
         IF query_string IS NULL THEN
             RAISE EXCEPTION 'query_string error in trigger function sync_user()';
@@ -336,6 +346,15 @@ EXCEPTION WHEN integrity_constraint_violation THEN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION generate_api_key() RETURNS TRIGGER AS $generate_api_key$
+-- TRIGGER function to generate api_key on INSERT or UPDATE of user_password in
+-- table users.
+BEGIN
+    NEW.api_key := encode(gen_random_bytes(16), 'hex');
+    RETURN NEW;
+END;
+$generate_api_key$ LANGUAGE plpgsql;
+
 -- Foreign Key Constraint *REQUIRES* insert trigger to be assigned to course_users.
 -- Updates can happen in either users and/or courses_users.
 CREATE TRIGGER user_sync_courses_users AFTER INSERT OR UPDATE ON courses_users FOR EACH ROW EXECUTE PROCEDURE sync_courses_user();
@@ -344,3 +363,6 @@ CREATE TRIGGER user_sync_users AFTER UPDATE ON users FOR EACH ROW EXECUTE PROCED
 -- INSERT and DELETE triggers for syncing registration sections happen on different instances of TG_WHEN (after vs before).
 CREATE TRIGGER insert_sync_registration_id AFTER INSERT OR UPDATE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_insert_registration_section();
 CREATE TRIGGER delete_sync_registration_id BEFORE DELETE ON courses_registration_sections FOR EACH ROW EXECUTE PROCEDURE sync_delete_registration_section();
+
+-- Generate API key when a user is created or its password is changed.
+CREATE TRIGGER generate_api_key BEFORE INSERT OR UPDATE OF user_password ON users FOR EACH ROW EXECUTE PROCEDURE generate_api_key();

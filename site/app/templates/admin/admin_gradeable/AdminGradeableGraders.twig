@@ -32,8 +32,18 @@ Variables
 {# 
 Form
 #}
+
+{% if no_rotating_sections %}
+	<div name="grader-warning-popup edit-gradeable" id="grader-warning" hidden>
+		<p> WARNING: Rotating Sections are not set up yet.  <br />
+			All Access Grading and Grading by Rotating Section rely on rotating sections. <br />
+			To set them up, go to the Manage Sections page. <br />
+		</p>
+	</div>
+{% endif %}
+
 What is the lowest privileged user group that can grade this?
-    <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
+    <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
@@ -44,47 +54,51 @@ What is the lowest privileged user group that can grade this?
 <fieldset>
     <legend>
         How should graders be assigned to grade this item?
-        <a class="helpicon" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
-        <br />
+        <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
-    <input type="radio" name="grade_by_registration" value="true" id="registration_section"
-        {{ (gradeable.isGradeByRegistration() == true or action == "new") ? 'checked' : '' }}> Registration Section
+	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
+        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> All Access Grading
+	
+    <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
+        {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> Registration Section
 
-    <input type='radio' name="grade_by_registration" value="false" id="rotating_section"
-        {{ gradeable.isGradeByRegistration() == false ? 'checked' : '' }}> Rotating Section
-
-    <div id="rotating_data">
-        {% if rotating_gradeables|length != 0 %}
-            <br />
-            Rotating Section History By Grader:
-            <br />
-            <div class="table-wrapper">
-                <div class="table-scroll">
-                    <table id="grader-history">
-                        <tr>
-                            <th></th>
-                            {% for row in rotating_gradeables if row != gradeable.getId() %}
-                                <th>{{ row }}</th>
+    <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
+        {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> Rotating Section
+</fieldset>
+<div id="rotating_data">
+    {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
+        <br />
+        Rotating Section History By Grader:
+        <br />
+        <div class="table-wrapper">
+            <div class="table-scroll">
+                <table id="grader-history">
+                    <tr>
+                        <th></th>
+                        {% for row in rotating_gradeables|filter((row) => row != gradeable.getId()) %}
+                            <th>{{ row }}</th>
+                        {% endfor %}
+                    </tr>
+                    <tr>
+                        {% for user_group,users in graders_from_usertypes %}
+                            {% for user in users %}
+                                <tr class="g_history g{{ user_group }}">
+                                    <th>{{ user[1] ~ " " ~ user[2] ~ "(" ~ user[0] ~ ")" }} </th>
+                                    {% for g_id in rotating_gradeables|filter((g_id) => g_id != gradeable.getId()) %}
+                                        <td>{{ gradeable_section_history[user[0]][g_id]|join(',') }}</td>
+                                    {% endfor %}
+                                </tr>
                             {% endfor %}
-                        </tr>
-                        <tr>
-                            {% for user_group,users in graders_from_usertypes %}
-                                {% for user in users %}
-                                    <tr class="g_history g{{ user_group }}">
-                                        <th>{{ user[1] ~ " " ~ user[2] ~ "(" ~ user[0] ~ ")" }} </th>
-                                        {% for g_id in rotating_gradeables if g_id != gradeable.getId() %}
-                                            <td>{{ gradeable_section_history[user[0]][g_id]|join(',') }}</td>
-                                        {% endfor %}
-                                    </tr>
-                                {% endfor %}
-                            {% endfor %}
-                    </table>
-                </div>
+                        {% endfor %}
+                    </tr>
+                </table>
             </div>
-        {% endif %}
-        <table id="grader_assignment">
-            {# Helpful debuging line.  Uncomment to view graders data #}
-            {# <tr>{{ all_graders|json_encode() }}</tr> #}
+        </div>
+    {% endif %}
+    <table id="grader_assignment">
+        {# Helpful debuging line.  Uncomment to view graders data #}
+        {# <tr>{{ all_graders|json_encode() }}</tr> #}
+        {% if num_rotating_sections > 0 %}
             <tr>
                 <th />
                 <th>All</th>
@@ -110,9 +124,12 @@ What is the lowest privileged user group that can grade this?
             <!-- Limited Access Graders -->
             {{ self.display_graders(graders_from_usertypes[3], 'g3',
                 section_numbers, gradeable_section_history, gradeable.getId()) }}
-        </table>
-    </div>
-</fieldset>
+        {% elseif num_rotating_sections == 0 %}
+            <br/>
+            <p><b>Rotating Sections have not been set up yet. <br/> You can set up Rotating Sections using the "Manage Sections" option on the sidebar.</b></p>
+        {% endif %}
+    </table>
+</div>
 
 <script type="text/javascript">
 
@@ -143,13 +160,17 @@ What is the lowest privileged user group that can grade this?
     }
 
     function onSectionTypeChange() {
-        if($('#rotating_section').is(':checked')) {
-            // $('#rotating_data').show();
+        if ($('#rotating_section').is(':checked')) {
             disableElementChildren('#rotating_data', false);
+            disableElementChildren('#grader-warning',false);
+        }
+        else if ($('#all_access').is(':checked')) {
+            disableElementChildren('#rotating_data', true);
+            disableElementChildren('#grader-warning',false);
         }
         else {
-            // $('#rotating_data').hide();
             disableElementChildren('#rotating_data', true);
+            disableElementChildren('#grader-warning',true);
         }
     }
 
@@ -178,7 +199,7 @@ What is the lowest privileged user group that can grade this?
     $(document).ready(function() {
         // Hide rotating sections settings if on registration sections
         onSectionTypeChange();
-        $('[name="grade_by_registration"]').change(onSectionTypeChange);
+        $('[name="grader_assignment_method"]').change(onSectionTypeChange);
 
         // Only show the graders who should have grade access to the assignment
         onMinGraderChange();

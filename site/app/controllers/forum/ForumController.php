@@ -3,11 +3,15 @@
 namespace app\controllers\forum;
 
 use app\libraries\Core;
+use app\libraries\ForumUtils;
 use app\models\Notification;
 use app\controllers\AbstractController;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\DateUtils;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
+
 
 /**
  * Class ForumHomeController
@@ -15,87 +19,14 @@ use app\libraries\DateUtils;
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
  */
-class ForumController extends AbstractController {
-
-	/**
+class ForumController extends AbstractController{
+    /**
      * ForumHomeController constructor.
      *
      * @param Core $core
      */
     public function __construct(Core $core) {
         parent::__construct($core);
-    }
-
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'create_thread':
-                $this->showCreateThread();
-                break;
-            case 'publish_thread':
-                $this->publishThread();
-                break;
-            case 'make_announcement':
-                $this->alterAnnouncement(1);
-                break;
-            case 'publish_post':
-                $this->publishPost();
-                break;
-            case 'delete_post':
-                $this->alterPost(0);
-                break;
-            case 'edit_post':
-                $this->alterPost(1);
-                break;
-            case 'undelete_post':
-                $this->alterPost(2);
-                break;
-            case 'search_threads':
-                $this->search();
-                break;
-            case 'get_edit_post_content':
-                $this->getEditPostContent();
-                break;
-            case 'remove_announcement':
-                $this->alterAnnouncement(0);
-                break;
-            case 'get_threads':
-                $this->getThreads();
-                break;
-            case 'get_history':
-                $this->getHistory();
-                break;
-            case 'add_category':
-                $this->addNewCategory();
-                break;
-            case 'delete_category':
-                $this->deleteCategory();
-                break;
-            case 'edit_category':
-                $this->editCategory();
-                break;
-            case 'reorder_categories':
-                $this->reorderCategories();
-                break;
-            case 'show_stats':
-                $this->showStats();
-                break;
-            case 'merge_thread':
-                $this->mergeThread();
-                break;
-            case 'pin_thread':
-                $this->pinThread(1);
-                break;
-            case 'unpin_thread':
-                $this->pinThread(0);
-                break;
-            case 'change_thread_status_resolve':
-                $this->changeThreadStatus(1);
-                break;
-            case 'view_thread':
-            default:
-                $this->showThreads();
-                break;
-        }
     }
 
     private function showDeleted() {
@@ -107,31 +38,35 @@ class ForumController extends AbstractController {
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
-            //Notify User
-            $this->core->addErrorMessage($error);
-            if($isThread){
-                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
-            } else {
-                $url = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id));
-            }
-            return array(-1, $url);
+        //Notify User
+        $this->core->addErrorMessage($error);
+
+        if($isThread){
+            $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+        }
+        else {
+            $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+        }
+        return array(-1, $url);
     }
 
-	private function changeThreadStatus($status) {
-		$thread_id = $_POST['thread_id'];
-		$result = array();
-		if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
-			if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
-				$result['success'] = 'Thread resolve state has been changed.';
-			} else {
-				$result['error'] = 'The thread resolve state could not be updated. Please try again.';
-			}
-		} else {
-            $result["error"] = "You do not have permissions to do that.";
-		}
-        $this->core->getOutput()->renderJson($result);
-		return $this->core->getOutput()->getOutput();
-	}
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads/status", methods={"POST"})
+     */
+    public function changeThreadStatus($status, $thread_id=null) {
+        if (is_null($thread_id)) {
+            $thread_id = $_POST['thread_id'];
+        }
+        if($this->core->getQueries()->getAuthorOfThread($thread_id) === $this->core->getUser()->getId() || $this->core->getUser()->accessGrading()) {
+            if($this->core->getQueries()->updateResolveState($thread_id, $status)) {
+                return $this->core->getOutput()->renderJsonSuccess();
+            } else {
+                return $this->core->getOutput()->renderJsonFail('The thread resolve state could not be updated. Please try again.');
+            }
+        } else {
+            return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
+        }
+    }
 
     private function checkGoodAttachment($isThread, $thread_id, $file_post){
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
@@ -197,149 +132,169 @@ class ForumController extends AbstractController {
         return false;
     }
 
-    public function addNewCategory(){
+    /**
+     * @Route("/{_semester}/{_course}/forum/categories/new", methods={"POST"})
+     * @AccessControl(permission="forum.modify_category")
+     */
+    public function addNewCategory($category = []){
         $result = array();
-        if($this->core->getUser()->accessGrading()){
-            if(!empty($_REQUEST["newCategory"])) {
-                $category = $_REQUEST["newCategory"];
-                if($this->isValidCategories(-1, array($category))) {
-                    $result["error"] = "That category already exists.";
-                } else {
+        if(!empty($_POST["newCategory"])) {
+            $category = trim($_POST["newCategory"]);
+            if($this->isValidCategories(-1, array($category))) {
+                return $this->core->getOutput()->renderJsonFail("That category already exists.");
+            } else {
+                if(strlen($category)>50){
+                    return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
+                }
+                else {
                     $newCategoryId = $this->core->getQueries()->addNewCategory($category);
                     $result["new_id"] = $newCategoryId["category_id"];
                 }
-            } else {
-                $result["error"] = "No category data submitted. Please try again.";
             }
-        } else {
-            $result["error"] = "You do not have permissions to do that.";
+        } elseif (count($category) > 0){
+            $result["new_ids"] = [];
+            foreach ($category as $categoryName){
+                if(!$this->isValidCategories(-1, array($categoryName))) {
+                    $newCategoryId = $this->core->getQueries()->addNewCategory($categoryName);
+                    $result["new_ids"][] = $newCategoryId;
+                }
+            }
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        else {
+            return $this->core->getOutput()->renderJsonFail("No category data submitted. Please try again.");
+        }
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/categories/delete", methods={"POST"})
+     * @AccessControl(permission="forum.modify_category")
+     */
     public function deleteCategory(){
-        $result = array();
-        if($this->core->getUser()->accessGrading()){
-            if(!empty($_REQUEST["deleteCategory"])) {
-                $category = (int)$_REQUEST["deleteCategory"];
-                if(!$this->isValidCategories(array($category))) {
-                    $result["error"] = "That category doesn't exists.";
-                } else if(!$this->isCategoryDeletionGood($category)) {
-                    $result["error"] = "Last category can't be deleted.";
+        if(!empty($_POST["deleteCategory"])) {
+            $category = (int)$_POST["deleteCategory"];
+            if(!$this->isValidCategories(array($category))) {
+                return $this->core->getOutput()->renderJsonFail("That category doesn't exists.");
+            } else if(!$this->isCategoryDeletionGood($category)) {
+                return $this->core->getOutput()->renderJsonFail("Last category can't be deleted.");
+            } else {
+                if($this->core->getQueries()->deleteCategory($category)) {
+                    return $this->core->getOutput()->renderJsonSuccess();
                 } else {
-                    if($this->core->getQueries()->deleteCategory($category)) {
-                        $result["success"] = "OK";
-                    } else {
-                        $result["error"] = "Category is in use.";
-                    }
+                    return $this->core->getOutput()->renderJsonFail("Category is in use.");
                 }
-            } else {
-                $result["error"] = "No category data submitted. Please try again.";
             }
         } else {
-            $result["error"] = "You do not have permissions to do that.";
+            return $this->core->getOutput()->renderJsonFail("No category data submitted. Please try again.");
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/categories/edit", methods={"POST"})
+     * @AccessControl(permission="forum.modify_category")
+     */
     public function editCategory(){
-        $result = array();
-        if($this->core->getUser()->accessGrading()){
-            $category_id = $_REQUEST["category_id"];
-            $category_desc = null;
-            $category_color = null;
-            $should_update = true;
+        $category_id = $_POST["category_id"];
+        $category_desc = null;
+        $category_color = null;
 
-            if(!empty($_REQUEST["category_desc"])) {
-                $category_desc = $_REQUEST["category_desc"];
-                if($this->isValidCategories(-1, array($category_desc))) {
-                    $result["error"] = "That category already exists.";
-                    $should_update = false;
-                }
+        if(!empty($_POST["category_desc"])) {
+            $category_desc = trim($_POST["category_desc"]);
+            if($this->isValidCategories(-1, array($category_desc))) {
+                return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
-            if(!empty($_REQUEST["category_color"])) {
-                $category_color = $_REQUEST["category_color"];
-                if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
-                    $result["error"] = "Given category color is not allowed.";
-                    $should_update = false;
-                }
+            else if(strlen($category_desc) > 50){
+                return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
             }
-            if($should_update) {
-                $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
-                $result["success"] = "OK";
-            } else if(!isset($result["error"])) {
-                $result["error"] = "No category data updated. Please try again.";
-            }
-        } else {
-            $result["error"] = "You do not have permissions to do that.";
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        if(!empty($_POST["category_color"])) {
+            $category_color = $_POST["category_color"];
+            if(!in_array(strtoupper($category_color), $this->getAllowedCategoryColor())) {
+                return $this->core->getOutput()->renderJsonFail("Given category color is not allowed.");
+            }
+        }
+
+        $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
+        return $this->core->getOutput()->renderJsonSuccess();
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/categories/reorder", methods={"POST"})
+     * @AccessControl(permission="forum.modify_category")
+     */
     public function reorderCategories(){
-        $result = array();
-        if($this->core->getUser()->accessGrading()){
-            $rows = $this->core->getQueries()->getCategories();
+        $rows = $this->core->getQueries()->getCategories();
 
-            $current_order = array();
-            foreach ($rows as $row) {
-                $current_order[] = (int)$row['category_id'];
-            }
-            $new_order = array();
-            foreach ($_POST['categorylistitem'] as $item) {
-                $new_order[] = (int)$item;
-            }
-
-            if(count(array_diff(array_merge($current_order, $new_order), array_intersect($current_order, $new_order))) === 0) {
-                $this->core->getQueries()->reorderCategories($new_order);
-                $results["success"] = "ok";
-            } else {
-                $result["error"] = "Different Categories IDs given";
-            }
-        } else {
-            $result["error"] = "You do not have permissions to do that.";
+        $current_order = array();
+        foreach ($rows as $row) {
+            $current_order[] = (int)$row['category_id'];
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        $new_order = array();
+        foreach ($_POST['categorylistitem'] as $item) {
+            $new_order[] = (int)$item;
+        }
+
+        if(count(array_diff(array_merge($current_order, $new_order), array_intersect($current_order, $new_order))) === 0) {
+            $this->core->getQueries()->reorderCategories($new_order);
+            return $this->core->getOutput()->renderJsonSuccess();
+        } else {
+            return $this->core->getOutput()->renderJsonFail("Different Categories IDs given");
+        }
     }
 
     //CODE WILL BE CONSOLIDATED IN FUTURE
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads/new", methods={"POST"})
+     * @AccessControl(permission="forum.publish")
+     */
     public function publishThread(){
+        $markdown = !empty($_POST['markdown_status']);
+        $current_user_id = $this->core->getUser()->getId();
         $result = array();
-        $title = $_POST["title"];
+        $thread_title = trim($_POST["title"]);
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
+
+        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads', 'new']);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
+        }
+
+        if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin() ){
+            $lock_thread_date = $_POST['lock_thread_date'];
+        } else {
+            $lock_thread_date = null;
+        }
+
+
         $thread_status = $_POST["thread_status"];
+
         $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
-        $email_announcement = (isset($_POST["EmailAnnouncement"]) && $_POST["EmailAnnouncement"] == "EmailAnnouncement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
             $categories_ids[] = (int)$category_id;
         }
-        if(empty($title) || empty($thread_post_content)){
+        if(empty($thread_title) || empty($thread_post_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         } else if(!$this->isValidCategories($categories_ids)){
             $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
-            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'create_thread'));
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(true, -1, 'file_input');
             if($hasGoodAttachment[0] == -1){
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
                 // Good Attachment
-                $result = $this->core->getQueries()->createThread($this->core->getUser()->getId(), $title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids);
-                $id = $result["thread_id"];
+                $result = $this->core->getQueries()->createThread($markdown, $current_user_id, $thread_title, $thread_post_content, $anon, $announcement, $thread_status, $hasGoodAttachment[0], $categories_ids, $lock_thread_date);
+
+                $thread_id = $result["thread_id"];
                 $post_id = $result["post_id"];
 
                 if($hasGoodAttachment[0] == 1) {
-
-                    $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $id);
+                    $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
                     FileUtils::createDir($thread_dir);
 
                     $post_dir = FileUtils::joinPaths($thread_dir, $post_id);
@@ -351,49 +306,83 @@ class ForumController extends AbstractController {
                     }
 
                 }
-
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => $announcement ? 'new_announcement' : 'new_thread', 'thread_id' => $id, 'thread_title' => $title));
-                $this->core->getQueries()->pushNotification($notification);
-
-                if($email_announcement) {
-                    $this->sendEmailAnnouncement($title, $thread_post_content);
+                $full_course_name = $this->core->getFullCourseName();
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
+                // notify on a new announcement
+                if ($announcement) {
+                    $subject = "New Announcement: ".Notification::textShortner($thread_title);
+                    $content = "An Instructor or Teaching Assistant made an announcement in:\n".$full_course_name."\n\n".$thread_title."\n\n".$thread_post_content;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
+                    $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
-                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $id));
+                // notify on a new thread
+                else {
+                    $subject = "New Thread: ".Notification::textShortner($thread_title);
+                    $content = "A new discussion thread was created in:\n".$full_course_name."\n\n".$thread_title."\n\n".$thread_post_content;
+                    $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
+                    $this->core->getNotificationFactory()->onNewThread($event);
+                }
+
+                $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
             }
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
-    private function search(){
+    /**
+     * @Route("/{_semester}/{_course}/forum/search", methods={"POST"})
+     */
+    public function search(){
         $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/posts/new", methods={"POST"})
+     * @AccessControl(permission="forum.publish")
+     */
     public function publishPost(){
+        $current_user_id = $this->core->getUser()->getId();
         $result = array();
         $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
         $post_content_tag = 'thread_post_content';
         $file_post = 'file_input';
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        if(strlen($post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+            $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over ". ForumUtils::FORUM_CHAR_POST_LIMIT ." characters long", $result);
+        }
+
+        if(isset($_POST['thread_status'])){
+            $this->changeThreadStatus($_POST['thread_status'], $thread_id);
+        }
+
+        $markdown = !empty($_POST['markdown_status']);
+
+        setcookie("markdown_enabled", ($markdown?1:0), time() + (86400 * 30), "/");
+
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
-            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         } else if(!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
-            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
-            $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread'));
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
+            $this->core->addErrorMessage("Thread is locked.");
+            $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         } else {
             $hasGoodAttachment = $this->checkGoodAttachment(false, $thread_id, $file_post);
             if($hasGoodAttachment[0] == -1){
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
-                $post_id = $this->core->getQueries()->createPost($this->core->getUser()->getId(), $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $parent_id);
+                $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $parent_id);
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
                 if(!is_dir($thread_dir)) {
@@ -408,67 +397,45 @@ class ForumController extends AbstractController {
                         move_uploaded_file($_FILES[$file_post]["tmp_name"][$i], $target_file);
                     }
                 }
-                // Notification to parent post author
-                $post = $this->core->getQueries()->getPost($parent_id);
-                $post_author = $post['author_user_id'];
-                $notification_anonymous = ($anon == 1) ? true : false;
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'reply', 'thread_id' => $thread_id, 'post_id' => $parent_id, 'post_content' => $post['content'], 'reply_to' => $post_author, 'child_id' => $post_id, 'anonymous' => $notification_anonymous));
-                $this->core->getQueries()->pushNotification($notification);
-                $result['next_page'] = $this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'option' => $display_option, 'thread_id' => $thread_id));
+
+                $full_course_name = $this->core->getFullCourseName();
+                $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+                $parent_post = $this->core->getQueries()->getPost($parent_id);
+                $parent_post_content = $parent_post['content'];
+
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
+
+                $subject = "New Reply: ".Notification::textShortner($thread_title);
+                $content = "A new message was posted in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nNew Reply:\n\n".$post_content;
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
+                $this->core->getNotificationFactory()->onNewPost($event);
+
+                $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '?' . http_build_query(['option' => $display_option]);
             }
         }
-        $this->core->getOutput()->renderJson($result);
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonSuccess($result);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/announcements", methods={"POST"})
+     * @AccessControl(permission="forum.modify_announcement")
+     */
     public function alterAnnouncement($type){
-        if($this->core->getUser()->getGroup() <= 2){
-            $thread_id = $_POST["thread_id"];
-            $this->core->getQueries()->setAnnouncement($thread_id, $type);
-            if($type) {
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'updated_announcement', 'thread_id' => $thread_id, 'thread_title' => $this->core->getQueries()->getThreadTitle($thread_id)['title']));
-                $this->core->getQueries()->pushNotification($notification);
-            }
-        } else {
-            $this->core->addErrorMessage("You do not have permissions to do that.");
-        }
+        $thread_id = $_POST["thread_id"];
+        $this->core->getQueries()->setAnnouncement($thread_id, $type);
+
+        //TODO: notify on edited announcement
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads/pin", methods={"POST"})
+     */
     public function pinThread($type){
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
         $response = array('user' => $current_user, 'thread' => $thread_id, 'type' => $type);
-        $this->core->getOutput()->renderJson($response);
-        return $this->core->getOutput()->getOutput();
-    }
-
-    private function checkPostEditAccess($post_id) {
-        if($this->core->getUser()->accessGrading()){
-                // Instructor/full access ta/mentor
-                return true;
-        } else {
-            $post = $this->core->getQueries()->getPost($post_id);
-            if($post['author_user_id'] === $this->core->getUser()->getId()) {
-                // Original Author
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private function checkThreadEditAccess($thread_id) {
-        if($this->core->getUser()->accessGrading()){
-                // Instructor/full access ta/mentor
-                return true;
-        } else {
-            $post = $this->core->getQueries()->getThread($thread_id)[0];
-            if($post['created_by'] === $this->core->getUser()->getId()) {
-                // Original Author
-                return true;
-            }
-        }
-        return false;
+        return $this->core->getOutput()->renderJsonSuccess($response);
     }
 
     /**
@@ -477,48 +444,69 @@ class ForumController extends AbstractController {
      * If applied on the first post of a thread, same action will be reflected on the corresponding thread
      *
      * @param integer(0/1/2) $modifyType - 0 => delete, 1 => edit content, 2 => undelete
+     *
+     * @Route("/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
      */
-    public function alterPost($modifyType){
+    public function alterPost($modify_type){
+        $full_course_name = $this->core->getFullCourseName();
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
-        if(!($this->checkPostEditAccess($post_id))) {
-                $this->core->addErrorMessage("You do not have permissions to do that.");
-                return;
+        $post = $this->core->getQueries()->getPost($post_id);
+        $current_user_id = $this->core->getUser()->getId();
+
+        $markdown = !empty($_POST['markdown_status']);
+
+        if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
+                return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if($modifyType == 0) { //delete post or thread
+        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin() ){
+            $this->core->addErrorMessage("Thread is locked.");
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
+        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin() ){
+            return $this->core->getOutput()->renderJsonFail('Thread is locked');
+        }
+        else if($modify_type == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
+            $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
                 $type = "thread";
             } else {
                 $type = "post";
             }
-            $post = $this->core->getQueries()->getPost($post_id);
-            $post_author = $post['author_user_id'];
-            $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'deleted', 'thread_id' => $thread_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-            $this->core->getQueries()->pushNotification($notification);
+
+            $post_author_id = $post['author_user_id'];
+            $metadata = json_encode(array());
+            $subject = "Deleted: ".Notification::textShortner($post["content"]);
+            $content = "In ".$full_course_name."\n\nThread: ".$thread_title."\n\nPost:\n".$post["content"]." was deleted.";
+            $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+            $this->core->getNotificationFactory()->onPostModified($event);
+
             $this->core->getQueries()->removeNotificationsPost($post_id);
-            $this->core->getOutput()->renderJson($response = array('type' => $type));
-            return $this->core->getOutput()->getOutput();
-        } else if($modifyType == 2) { //undelete post or thread
+            return $this->core->getOutput()->renderJsonSuccess(array('type' => $type));
+        } else if($modify_type == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
                 $error = "Parent post must be undeleted first.";
-                $this->core->getOutput()->renderJson($response = array('error' => $error));
+                return $this->core->getOutput()->renderJsonFail($error);
             } else {
-                /// We want to reload same thread again, in both case (thread/post undelete)
+                // We want to reload same thread again, in both case (thread/post undelete)
+                $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+                $post_author_id = $post['author_user_id'];
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
+                $subject = "Undeleted: ".Notification::textShortner($post["content"]);
+                $content = "In ".$full_course_name."\n\nThe following post was undeleted.\n\nThread: ".$thread_title."\n\n".$post["content"];
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+                $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
-                $post = $this->core->getQueries()->getPost($post_id);
-                $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'undeleted', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                $this->core->getQueries()->pushNotification($notification);
-                $this->core->getOutput()->renderJson($response = array('type' => $type));
+                return $this->core->getOutput()->renderJsonSuccess(array('type' => $type));
             }
-            return $this->core->getOutput()->getOutput();
-        } else if($modifyType == 1) { //edit post or thread
+        } else if($modify_type == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
+
             $any_changes = false;
+            $type = null;
             $isError = false;
             $messageString = '';
              // Author of first post and thread must be same
@@ -532,10 +520,11 @@ class ForumController extends AbstractController {
                     $any_changes = true;
                 } else {
                     $isError = true;
-                    $messageString = "{$type} updation failed. Please try again.";
+                    $messageString = "{$type} update failed. Please try again.";
                 }
             } else {
                 if($status_edit_thread && $status_edit_post) {
+                    $type = "Thread and Post";
                     $messageString = "Thread and post updated successfully.";
                     $any_changes = true;
                 } else {
@@ -544,34 +533,95 @@ class ForumController extends AbstractController {
                     $isError = true;
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
-                        $messageString = "{$type} updated successfully. {$type_opposite} updation failed. Please try again.";
+                        $messageString = "{$type} updated successfully. {$type_opposite} update failed. Please try again.";
                         $any_changes = true;
                     } else {
-                        $messageString = "Thread and Post updation failed. Please try again.";
+                        $messageString = "Thread and Post update failed. Please try again.";
                     }
                 }
             }
             if($any_changes) {
-                $post = $this->core->getQueries()->getPost($post_id);
-                $post_author = $post['author_user_id'];
-                $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'edited', 'thread_id' => $thread_id, 'post_id' => $post_id, 'post_content' => $post['content'], 'reply_to' => $post_author));
-                $this->core->getQueries()->pushNotification($notification);
+                $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
+                $post_author_id = $post['author_user_id'];
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
+                if ($type == "Post") {
+                    $post_content = $_POST["thread_post_content"];
+                    $subject = "Post Edited: ".Notification::textShortner($post_content);
+                    $content = "A message was edited in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\n\nEdited Post: \n\n".$post_content;
+                }
+                else if ($type == "Thread and Post") {
+                    $post_content = $_POST["thread_post_content"];
+                    $subject = "Thread Edited: ".Notification::textShortner($thread_title);
+                    $content = "A thread was edited in:\n".$full_course_name."\n\nEdited Thread: ".$thread_title."\n\nEdited Post: \n\n".$post_content;
+                }
+
+                $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
+                $this->core->getNotificationFactory()->onPostModified($event);
             }
             if($isError) {
-                $this->core->addErrorMessage($messageString);
-            } else {
-                $this->core->addSuccessMessage($messageString);
+                return $this->core->getOutput()->renderJsonFail($messageString);
             }
-            $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
         }
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads/merge", methods={"POST"})
+     * @AccessControl(permission="forum.merge_thread")
+     */
+    public function mergeThread(){
+        $current_user_id = $this->core->getUser()->getId();
+        $parent_thread_id = $_POST["merge_thread_parent"];
+        $child_thread_id = $_POST["merge_thread_child"];
+        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
+        $parent_thread_id = $result[1];
+        $thread_id = $child_thread_id;
+        if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
+            $message = "";
+            $child_root_post = -1;
+            if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message, $child_root_post)) {
+                $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
+                if(is_dir($child_thread_dir)) {
+                    $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
+                    if(!is_dir($parent_thread_dir)) {
+                        FileUtils::createDir($parent_thread_dir);
+                    }
+                    $child_posts_dirs = FileUtils::getAllDirs($child_thread_dir);
+                    foreach ($child_posts_dirs as $post_id) {
+                        $child_post_dir = FileUtils::joinPaths($child_thread_dir, $post_id);
+                        $parent_post_dir = FileUtils::joinPaths($parent_thread_dir, $post_id);
+                        rename($child_post_dir, $parent_post_dir);
+                    }
+                }
+
+                $full_course_name = $this->core->getFullCourseName();
+                $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
+                $child_thread_author = $child_thread['created_by'];
+                $child_thread_title = $child_thread['title'];
+                $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string)$child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post));
+                $subject = "Thread Merge: ".Notification::textShortner($child_thread_title);
+                $content = "Two threads were merged in:\n".$full_course_name."\n\nAll messages posted in Merged Thread:\n".$child_thread_title."\n\nAre now contained within Parent Thread:\n".$parent_thread_title;
+                $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
+                $this->core->getNotificationFactory()->onPostModified($event);
+                $this->core->addSuccessMessage("Threads merged!");
+                $thread_id = $parent_thread_id;
+            } else {
+                $this->core->addErrorMessage("Merging Failed! ".$message);
+            }
+        }
+        $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
     }
 
     private function editThread(){
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if(!$this->checkThreadEditAccess($thread_id)) {
-                return false;
+            if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
+                $lock_thread_date = $_POST['lock_thread_date'];
+            }
+            else{
+                $lock_thread_date = null;
             }
             $thread_title = $_POST["title"];
             $status = $_POST["thread_status"];
@@ -584,7 +634,7 @@ class ForumController extends AbstractController {
             if(!$this->isValidCategories($categories_ids)) {
                 return false;
             }
-            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status);
+            return $this->core->getQueries()->editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date);
         }
         return null;
     }
@@ -593,17 +643,26 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
+
+            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+                $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
+                return null;
+            }
+
             $post_id = $_POST["edit_post_id"];
             $original_post = $this->core->getQueries()->getPost($post_id);
             if(!empty($original_post)) {
                 $original_creator = $original_post['author_user_id'];
             }
-            $anon = ($_POST["Anon"] == "Anon") ? 1 : 0;
+            $anon = (!empty($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
             $current_user = $this->core->getUser()->getId();
             if(!$this->modifyAnonymous($original_creator)) {
                 $anon = $original_post["anonymous"] ? 1 : 0;
             }
-            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon);
+
+            $markdown = !empty($_POST['markdown_status']);
+
+            return $this->core->getQueries()->editPost($original_creator, $current_user, $post_id, $new_post_content, $anon, $markdown);
         }
         return null;
     }
@@ -632,8 +691,11 @@ class ForumController extends AbstractController {
         return $ordered_threads;
     }
 
-    public function getThreads(){
-        $pageNumber = !empty($_GET["page_number"]) && is_numeric($_GET["page_number"]) ? (int)$_GET["page_number"] : 1;
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads", methods={"POST"})
+     */
+    public function getThreads($page_number = null){
+        $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int)$page_number : 1;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
         $show_merged_thread = $this->showMergedThreads($currentCourse);
@@ -659,14 +721,19 @@ class ForumController extends AbstractController {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showAlteredDisplayList', $threads, true, $currentThreadId, $currentCategoriesIds);
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
-        return $this->core->getOutput()->renderJson(array(
+        return $this->core->getOutput()->renderJsonSuccess(array(
                 "html" => $this->core->getOutput()->getOutput(),
                 "count" => count($threads),
                 "page_number" => $pageNumber,
             ));
     }
 
-    public function showThreads(){
+    /**
+     * @Route("/{_semester}/{_course}/forum", methods={"GET"})
+     * @Route("/{_semester}/{_course}/forum/threads", methods={"GET"})
+     * @Route("/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
+     */
+    public function showThreads($thread_id = null, $option = 'tree'){
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
@@ -695,16 +762,17 @@ class ForumController extends AbstractController {
         $show_merged_thread = $this->showMergedThreads($currentCourse);
         $current_user = $this->core->getUser()->getId();
 
+        $thread_resolve_state = 0;
+
         $posts = null;
         $option = 'tree';
-        if(!empty($_REQUEST['option'])) {
-           $option = $_REQUEST['option'];
-        } else if(!empty($_COOKIE['forum_display_option'])) {
-           $option = $_COOKIE['forum_display_option'];
+        if(!empty($_COOKIE['forum_display_option'])) {
+            $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
-        if(!empty($_REQUEST["thread_id"])){
-            $thread_id = (int)$_REQUEST["thread_id"];
+        if(!empty($thread_id)){
+            $thread_id = (int)$thread_id;
+            $thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
             $this->core->getQueries()->markNotificationAsSeen($user, -2, (string)$thread_id);
             $unread_p = $this->core->getQueries()->getUnviewedPosts($thread_id, $current_user);
             foreach ($unread_p as $up) {
@@ -716,21 +784,22 @@ class ForumController extends AbstractController {
                 if($thread['merged_thread_id'] != -1){
                     // Redirect merged thread to parent
                     $this->core->addSuccessMessage("Requested thread is merged into current thread.");
-                    $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread['merged_thread_id'])));
+                    $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread['merged_thread_id']]));
                     return;
                 }
                 if($option == "alpha"){
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
-                } else {
+                } else if($option == "reverse-time") {
+                    $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'reverse-time');
+                }else {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');
                 }
                 if(empty($posts)){
                     $this->core->addErrorMessage("No posts found for selected thread.");
                 }
             }
-
         }
-        if(empty($_REQUEST["thread_id"]) || empty($posts)) {
+        if(empty($thread_id) || empty($posts)) {
             $new_posts = $this->core->getQueries()->getUnviewedPosts(-1, $current_user);
             $posts = $this->core->getQueries()->getPostsForThread($current_user, -1, $show_deleted);
         }
@@ -738,10 +807,20 @@ class ForumController extends AbstractController {
         if(!empty($posts)){
             $thread_id = $posts[0]["thread_id"];
         }
+        foreach($posts as &$post) {
+            do {
+                $post['content'] = preg_replace('/(?:!\[(.*?)\]\((.*?)\))/', '$2', $post['content'], -1, $count);
+            } while($count > 0);
+        }
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
+        if(!empty($_REQUEST["ajax"])){
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
+        }
+        else {
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
+        }
     }
 
     private function getAllowedCategoryColor() {
@@ -757,76 +836,103 @@ class ForumController extends AbstractController {
         return $colors;
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/threads/new", methods={"GET"})
+     */
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+        if(empty($this->core->getQueries()->getCategories())){
+            $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
+            return;
+        }
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/categories", methods={"GET"})
+     */
+    public function showCategories(){
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/forum/posts/history", methods={"POST"})
+     * @AccessControl(role="LIMITED_ACCESS_GRADER")
+     */
     public function getHistory(){
         $post_id = $_POST["post_id"];
         $output = array();
-        if($this->core->getUser()->accessGrading()){
-            $_post = array();
-            $older_posts = $this->core->getQueries()->getPostHistory($post_id);
-            $current_post = $this->core->getQueries()->getPost($post_id);
-            $oc = $current_post["author_user_id"];
-            $anon = $current_post["anonymous"];
-            foreach ($older_posts as $post) {
-                $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
-                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $post["content"]);
-                $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
-                $output[] = $_post;
-            }
-            if(count($output) == 0) {
-                // Current post
-                $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
-                $_post['content'] = $this->core->getOutput()->renderTemplate('forum\ForumThread', 'filter_post_content',  $current_post["content"]);
-                $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
-                $output[] = $_post;
-            }
-            // Fetch additional information
-            foreach ($output as &$_post) {
-                $emptyUser = empty($_post['user']);
-                $_post['user_info'] = $emptyUser ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
-                $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
-            }
-        } else {
-            $output['error'] = "You do not have permissions to do that.";
+        $_post = array();
+        $older_posts = $this->core->getQueries()->getPostHistory($post_id);
+        $current_post = $this->core->getQueries()->getPost($post_id);
+        $oc = $current_post["author_user_id"];
+        $anon = $current_post["anonymous"];
+        foreach ($older_posts as $post) {
+            $_post['user'] = !$this->modifyAnonymous($oc) && $oc == $post["edit_author"] && $anon ? '' : $post["edit_author"];
+            $_post['content'] = $return = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "post_content" => $post["content"]
+            ]);
+            $_post['post_time'] = DateUtils::parseDateTime($post['edit_timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
+            $output[] = $_post;
         }
-        $this->core->getOutput()->renderJson($output);
-        return $this->core->getOutput()->getOutput();
+        if(count($output) == 0) {
+            // Current post
+            $_post['user'] = !$this->modifyAnonymous($oc) && $anon ? '' : $oc;
+            $_post['content'] = $return = $this->core->getOutput()->renderTwigTemplate("forum/RenderPost.twig", [
+                "post_content" => $current_post["content"]
+            ]);
+            $_post['post_time'] = DateUtils::parseDateTime($current_post['timestamp'], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
+            $output[] = $_post;
+        }
+        // Fetch additional information
+        foreach ($output as &$_post) {
+            $emptyUser = empty($_post['user']);
+            $_post['user_info'] = $emptyUser ? array('first_name' => 'Anonymous', 'last_name' => '', 'email' => '') : $this->core->getQueries()->getDisplayUserInfoFromUserId($_post['user']);
+            $_post['is_staff_post'] = $emptyUser ? false : $this->core->getQueries()->isStaffPost($_post['user']);
+        }
+        return $this->core->getOutput()->renderJsonSuccess($output);
     }
 
     public function modifyAnonymous($author) {
         return $this->core->getUser()->accessFullGrading() || $this->core->getUser()->getId() === $author;
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/posts/get", methods={"POST"})
+     */
     public function getEditPostContent(){
         $post_id = $_POST["post_id"];
-        if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
+        if(!empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
-            $output = array();
-            $output['post'] = $result["content"];
-            $output['post_time'] = $result['timestamp'];
-            $output['anon'] = $result['anonymous'];
-            $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
-            $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
-            if(isset($_POST["thread_id"])) {
-                $this->getThreadContent($_POST["thread_id"], $output);
+            if($this->core->getAccess()->canI("forum.modify_post", ['post_author' => $result['author_user_id']])) {
+                $output = array();
+                $output['post'] = $result["content"];
+                $output['post_time'] = $result['timestamp'];
+                $output['anon'] = $result['anonymous'];
+                $output['change_anon'] = $this->modifyAnonymous($result["author_user_id"]);
+                $output['user'] = $output['anon'] ? 'Anonymous' : $result["author_user_id"];
+                $output['markdown'] = $result['render_markdown'];
+                if(isset($_POST["thread_id"])) {
+                    $this->getThreadContent($_POST["thread_id"], $output);
+                }
+                return $this->core->getOutput()->renderJsonSuccess($output);
+            } else {
+                return $this->core->getOutput()->renderJsonFail("You do not have permissions to do that.");
             }
-            $this->core->getOutput()->renderJson($output);
-        } else {
-            $this->core->getOutput()->renderJson(array('error' => "You do not have permissions to do that."));
         }
-        return $this->core->getOutput()->getOutput();
+        return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
     private function getThreadContent($thread_id, &$output){
         $result = $this->core->getQueries()->getThread($thread_id)[0];
+        $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/forum/stats")
+     */
     public function showStats(){
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
@@ -859,65 +965,4 @@ class ForumController extends AbstractController {
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
     }
-
-    public function mergeThread(){
-        $parent_thread_id = $_POST["merge_thread_parent"];
-        $child_thread_id = $_POST["merge_thread_child"];
-        preg_match('/\((.*?)\)/', $parent_thread_id, $result);
-        $parent_thread_id = $result[1];
-        $thread_id = $child_thread_id;
-        if($this->core->getUser()->accessGrading()){
-            if(is_numeric($parent_thread_id) && is_numeric($child_thread_id)) {
-                $message = "";
-                $child_root_post = -1;
-                if($this->core->getQueries()->mergeThread($parent_thread_id, $child_thread_id, $message, $child_root_post)) {
-                    $child_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $child_thread_id);
-                    if(is_dir($child_thread_dir)) {
-                        $parent_thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $parent_thread_id);
-                        if(!is_dir($parent_thread_dir)) {
-                            FileUtils::createDir($parent_thread_dir);
-                        }
-                        $child_posts_dirs = FileUtils::getAllDirs($child_thread_dir);
-                        foreach ($child_posts_dirs as $post_id) {
-                            $child_post_dir = FileUtils::joinPaths($child_thread_dir, $post_id);
-                            $parent_post_dir = FileUtils::joinPaths($parent_thread_dir, $post_id);
-                            rename($child_post_dir, $parent_post_dir);
-                        }
-                    }
-                    // Notify thread author
-                    $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
-                    $child_thread_author = $child_thread['created_by'];
-                    $child_thread_title = $child_thread['title'];
-                    $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
-                    $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author, 'child_root_post' => $child_root_post));
-                    $this->core->getQueries()->pushNotification($notification);
-                    $this->core->addSuccessMessage("Threads merged!");
-                    $thread_id = $parent_thread_id;
-                } else {
-                    $this->core->addErrorMessage("Merging Failed! ".$message);
-                }
-            }
-        } else {
-            $this->core->addErrorMessage("You do not have permissions to do that.");
-        }
-        $this->core->redirect($this->core->buildUrl(array('component' => 'forum', 'page' => 'view_thread', 'thread_id' => $thread_id)));
-    }
-
-    private function sendEmailAnnouncement($thread_title, $thread_content) { 
-            $course = $this->core->getConfig()->getCourse();
-            $formatted_subject = "[Submitty $course]: $thread_title";
-
-            $email_data = [
-                "subject" => $formatted_subject,
-                "body" => $thread_content
-            ];
-
-            $class_list = $this->core->getQueries()->getClassEmailList();
-
-            foreach($class_list as $student_email) {
-                $this->core->getQueries()->createEmail($email_data, $student_email["user_email"]);
-            }
-
-        } 
-
 }

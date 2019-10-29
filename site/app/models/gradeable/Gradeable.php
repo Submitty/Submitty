@@ -10,9 +10,11 @@ use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\libraries\Core;
 use app\models\AbstractModel;
+use app\models\grading\AbstractGradeableInput;
 use app\models\GradingSection;
 use app\models\Team;
 use app\models\User;
+use app\controllers\admin\AdminGradeableController;
 
 /**
  * All data describing the configuration of a gradeable
@@ -27,8 +29,8 @@ use app\models\User;
  * @method string getInstructionsUrl()
  * @method void setInstructionsUrl($url)
  * @method int getType()
- * @method bool isGradeByRegistration()
- * @method void setGradeByRegistration($grade_by_reg)
+ * @method int getGraderAssignmentMethod()
+ * @method void setGraderAssignmentMethod($method)
  * @method \DateTime getTaViewStartDate()
  * @method \DateTime getGradeStartDate()
  * @method \DateTime getGradeDueDate()
@@ -45,6 +47,8 @@ use app\models\User;
  * @method void setVcs($use_vcs)
  * @method string getVcsSubdirectory()
  * @method void setVcsSubdirectory($subdirectory)
+ * @method int getVcsHostType()
+ * @method void setVcsHostType($host_type)
  * @method bool isTeamAssignment()
  * @method int getTeamSizeMax()
  * @method \DateTime getTeamLockDate()
@@ -69,6 +73,8 @@ use app\models\User;
  * @method float getPrecision()
  * @method Component[] getComponents()
  * @method bool isRegradeAllowed()
+ * @method bool isGradeInquiryPerComponentAllowed()
+ * @method void setGradeInquiryPerComponentAllowed($is_grade_inquiry_per_component)
  * @method bool isDiscussionBased()
  * @method void setDiscussionBased($discussion_based)
  * @method string  getDiscussionThreadId()
@@ -77,6 +83,11 @@ use app\models\User;
  * @method void setHasDueDate($has_due_date)
  */
 class Gradeable extends AbstractModel {
+    /* Enum range for grader_assignment_method */
+    const ROTATING_SECTION = 0;
+    const REGISTRATION_SECTION = 1;
+    const ALL_ACCESS = 2;
+
     /* Properties for all types of gradeables */
 
     /** @property @var string The course-wide unique gradeable id */
@@ -87,8 +98,8 @@ class Gradeable extends AbstractModel {
     protected $instructions_url = "";
     /** @property @var int The type of gradeable */
     protected $type = GradeableType::ELECTRONIC_FILE;
-    /** @property @var bool If the gradeable should be graded per registration section (true) or rotating sections(false) */
-    protected $grade_by_registration = true;
+    /** @property @var int If the gradeable should be graded by all access (2) by registration section (1) or rotating sections (0) */
+    protected $grader_assignment_method = Gradeable::REGISTRATION_SECTION;
     /** @property @var int The minimum user group that can grade this gradeable (1=instructor) */
     protected $min_grading_group = 1;
     /** @property @var string The syllabus classification of this gradeable */
@@ -136,6 +147,8 @@ class Gradeable extends AbstractModel {
     protected $vcs = false;
     /** @property @var string The subdirectory within the VCS repository for this gradeable */
     protected $vcs_subdirectory = "";
+    /** @property @var int Where are we hosting VCS (-1 -> Not VCS gradeable, 0,1 -> Submitty, 2,3 -> public/private Github) */
+    protected $vcs_host_type = -1;
     /** @property @var bool If the gradeable is a team assignment */
     protected $team_assignment = false;
     /** @property @var int The maximum team size (if the gradeable is a team assignment) */
@@ -190,9 +203,11 @@ class Gradeable extends AbstractModel {
     protected $regrade_request_date = null;
     /** @property @var bool are grade inquiries enabled for this assignment*/
     protected $regrade_allowed = true;
-    /** @property @var bool does this assignmennt have a discussion component*/
+    /** @property @var bool are grade inquiries for specific components enabled for this assignment*/
+    protected $grade_inquiry_per_component_allowed = false;
+    /** @property @var bool does this assignment have a discussion component*/
     protected $discussion_based = false;
-    /** @property @var string thread id for cooresponding to discussion forum thread*/
+    /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
 
 
@@ -210,7 +225,7 @@ class Gradeable extends AbstractModel {
         $this->setTitle($details['title']);
         $this->setInstructionsUrl($details['instructions_url']);
         $this->setTypeInternal($details['type']);
-        $this->setGradeByRegistration($details['grade_by_registration']);
+        $this->setGraderAssignmentMethod($details['grader_assignment_method']);
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
@@ -219,6 +234,7 @@ class Gradeable extends AbstractModel {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
             $this->setVcs($details['vcs']);
             $this->setVcsSubdirectory($details['vcs_subdirectory']);
+            $this->setVcsHostType($details['vcs_host_type']);
             $this->setTeamAssignmentInternal($details['team_assignment']);
             $this->setTeamSizeMax($details['team_size_max']);
             $this->setTaGradingInternal($details['ta_grading']);
@@ -232,6 +248,7 @@ class Gradeable extends AbstractModel {
             $this->setLateSubmissionAllowed($details['late_submission_allowed']);
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
+            $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
             $this->setDiscussionBased((boolean)$details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
         }
@@ -542,7 +559,7 @@ class Gradeable extends AbstractModel {
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
         //  into the second parameter.
-        $coerce_dates = function(array $date_properties, array $black_list, array $date_values, $compare) {
+        $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
@@ -572,13 +589,13 @@ class Gradeable extends AbstractModel {
         // Blacklist the dates checked by validation
         $black_list = $this->getDateValidationSet();
 
-		// First coerce in the forward direction, then in the reverse direction
-		return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
+        // First coerce in the forward direction, then in the reverse direction
+        return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
             $coerce_dates(self::date_validated_properties, $black_list, $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
                 }),
-            function(\DateTime $val, \DateTime $cmp) {
+            function (\DateTime $val, \DateTime $cmp) {
                 return $val > $cmp;
             }
         );
@@ -731,9 +748,8 @@ class Gradeable extends AbstractModel {
         throw new NotImplementedException('Individual date setters are disabled, use "setDates" instead');
     }
 
-    /** @internal */
-    public function setAutogradingConfig() {
-        throw new \BadFunctionCallException('Cannot set the autograding config data');
+    public function setAutogradingConfig(AutogradingConfig $autograding_config): void {
+        $this->autograding_config = $autograding_config;
     }
 
     /**
@@ -776,7 +792,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Sets the gradeable type
-     * @param GradeableType $type Must be a valid GradeableType
+     * @param int $type Must be a valid GradeableType
      */
     private function setTypeInternal($type) {
         // Call this to make an exception if the type is invalid
@@ -787,6 +803,17 @@ class Gradeable extends AbstractModel {
     /** @internal */
     public function setType($type) {
         throw new \BadFunctionCallException('Cannot change gradeable type');
+    }
+
+    /**
+     * gets bool representing if gradeable is set to grade by registration
+     * @return boolean
+     */
+    public function isGradeByRegistration() {
+        if ($this->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -881,8 +908,18 @@ class Gradeable extends AbstractModel {
      * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
      * @return Component the created component
      */
-    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
-                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+    public function addComponent(
+        string $title,
+        string $ta_comment,
+        string $student_comment,
+        float $lower_clamp,
+        float $default,
+        float $max_value,
+        float $upper_clamp,
+        bool $text,
+        bool $peer,
+        int $pdf_page
+    ) {
         $component = new Component($this->core, $this, [
             'title' => $title,
             'ta_comment' => $ta_comment,
@@ -988,7 +1025,7 @@ class Gradeable extends AbstractModel {
     private function setTeamAssignmentInternal($use_teams) {
         $this->team_assignment = $use_teams === true;
     }
-    
+
     /** @internal */
     public function setTeamAssignment($use_teams) {
         throw new \BadFunctionCallException('Cannot change teamness of gradeable');
@@ -1042,6 +1079,10 @@ class Gradeable extends AbstractModel {
 
             // This line brings me great pain
             throw $e;
+        }
+        // make sure grade_inquiry_per_component_allowed is false when regrade allowed is false
+        if (!$regrade_allowed) {
+            $this->grade_inquiry_per_component_allowed = false;
         }
     }
 
@@ -1188,11 +1229,11 @@ class Gradeable extends AbstractModel {
 
     /**
      * Used to decide whether a gradeable can be deleted or not.
-     * This means: No submissions, No manual grades entered, and No teams formed
+     * This means: No submissions, No manual grades entered, No teams formed, and No VCS repos created
      * @return bool True if the gradeable can be deleted
      */
     public function canDelete() {
-        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams();
+        return !$this->anySubmissions() && !$this->anyManualGrades() && !$this->anyTeams() && !($this->isVcs() && !$this->isTeamAssignment());
     }
 
     /**
@@ -1527,7 +1568,6 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_registration_id'];
             }
-            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
         } else {
             if ($this->isTeamAssignment()) {
@@ -1547,7 +1587,6 @@ class Gradeable extends AbstractModel {
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_rotating_id'];
             }
-            $section_names[] = null; // add in the null section
             $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
         }
 
@@ -1558,7 +1597,7 @@ class Gradeable extends AbstractModel {
 
         return $sections;
     }
-  
+
     /**
      * return true if students can currently submit regrades for this assignment, false otherwise
      * @return bool
@@ -1641,6 +1680,11 @@ class Gradeable extends AbstractModel {
         if (!@file_put_contents($settings_file, FileUtils::encodeJson($json))) {
             throw new \Exception("Failed to write to team history to settings file");
         }
+
+        if ($this->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+        }
     }
 
     public function getRepositoryPath(User $user, Team $team = null) {
@@ -1671,7 +1715,7 @@ class Gradeable extends AbstractModel {
      */
     public function hasSubmission(Submitter $submitter) {
         if ($submitter->isTeam() && !$this->isTeamAssignment()) {
-           return false;
+            return false;
         }
         if (!$submitter->isTeam() && $this->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $submitter->getId());
@@ -1681,6 +1725,19 @@ class Gradeable extends AbstractModel {
             $submitter = new Submitter($this->core, $team);
         }
         return $this->core->getQueries()->getHasSubmission($this, $submitter);
+    }
+
+    /**
+     * Gets if a user has a overridden grades for this gradeable
+     * @param Submitter $submitter
+     * @return bool
+     */
+    public function hasOverriddenGrades(Submitter $submitter) {
+        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(),$submitter->getId());
+        if($userWithOverriddenGrades === null ){
+            return false;
+        }
+        return true;
     }
 
     /**

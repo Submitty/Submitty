@@ -6,14 +6,22 @@ import os
 import subprocess
 import traceback
 import sys
-from pprint import pprint
-import traceback
 import shutil
-# global variable available to be used by the test suite modules
-SUBMITTY_INSTALL_DIR = "__INSTALL__FILLIN__SUBMITTY_INSTALL_DIR__"
-SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
+from submitty_utils import submitty_schema_validator
 
-GRADING_SOURCE_DIR =  SUBMITTY_INSTALL_DIR + "/src/grading"
+# global variable available to be used by the test suite modules
+# this file is at SUBMITTY_INSTALL_DIR/test_suite/integrationTests
+SUBMITTY_INSTALL_DIR = os.path.realpath(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), '..', '..')
+)
+
+# Verify that this has been installed by just checking that this file is located in
+# a directory next to the config directory which has submitty.json in it
+if not os.path.exists(os.path.join(SUBMITTY_INSTALL_DIR, 'config', 'submitty.json')):
+    raise SystemExit('You must install the test suite before being able to run it.')
+
+SUBMITTY_TUTORIAL_DIR = SUBMITTY_INSTALL_DIR + "/GIT_CHECKOUT/Tutorial"
+GRADING_SOURCE_DIR = SUBMITTY_INSTALL_DIR + "/src/grading"
 
 LOG_FILE = None
 LOG_DIR = SUBMITTY_INSTALL_DIR + "/test_suite/log"
@@ -208,6 +216,9 @@ class TestcaseWrapper:
             os.mkdir(os.path.join(self.testcase_path, "build"))
             # the bin directory will contain the autograding executables
             os.mkdir(os.path.join(self.testcase_path, "bin"))
+            # The data directory in which configure will be run. This is needed to
+            # make complete_config.json for schema testing
+            os.mkdir(os.path.join(self.testcase_path, "data"))
         except OSError as e:
             pass
         # copy the cmake file to the build directory
@@ -404,7 +415,7 @@ class TestcaseWrapper:
             f2 = f1
 
         f1 = os.path.join("data", f1)
-        if not 'data' in os.path.split(f2):
+        if not 'data' in os.path.split(os.path.split(f2)[0]):
             f2 = os.path.join("validation", f2)
 
         filename1 = os.path.join(self.testcase_path, f1)
@@ -503,8 +514,9 @@ class TestcaseWrapper:
         # if only 1 filename provided...
         if not f2:
             f2 = f1
-
-        f1 = os.path.join("data", f1)
+            f1 = os.path.join('validation', f1)
+        else:
+            f1 = os.path.join("data", f1)
         if not 'data' in os.path.split(f2):
             f2 = os.path.join("validation", f2)
 
@@ -618,6 +630,14 @@ class TestcaseWrapper:
         if self.simplify_emma_coverage(filename1) != self.simplify_emma_coverage(filename2):
             raise RuntimeError("JUNIT OUTPUT files " + filename1 + " and " + filename2 + " are different")
 
+    # Validate a configuration against the submitty complete_config_schema.json
+    def validate_complete_config(self, config_path):
+        schema_path = os.path.join(SUBMITTY_INSTALL_DIR, 'bin', 'json_schemas', 'complete_config_schema.json')
+        try:
+            submitty_schema_validator.validate_complete_config_schema_using_filenames(config_path, schema_path)
+        except submitty_schema_validator.SubmittySchemaException as s:
+            s.print_human_readable_error()
+            raise
 
 
 ###################################################################################

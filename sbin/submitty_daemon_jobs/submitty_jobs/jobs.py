@@ -9,9 +9,14 @@ import shutil
 import subprocess
 import json
 import stat
-import urllib.parse
-
+import traceback
+import datetime
+import fcntl
+from urllib.parse import unquote
+from . import bulk_qr_split
+from . import bulk_upload_split
 from . import INSTALL_DIR, DATA_DIR
+from . import write_to_log as logger
 
 
 class AbstractJob(ABC):
@@ -97,6 +102,22 @@ class CourseGradeableJob(CourseJob):
         return self.job_details['gradeable'] not in ['', '.', '..']
 
 
+class RunAutoRainbowGrades(CourseJob):
+    def run_job(self):
+
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+
+        path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
+        debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
+
+        try:
+            with open(debug_output, "w") as file:
+                subprocess.call(['python3', path, semester, course], stdout=file, stderr=file)
+        except PermissionError:
+            print("error, could not open "+file+" for writing")
+
+
 class BuildConfig(CourseGradeableJob):
     def run_job(self):
         semester = self.job_details['semester']
@@ -111,6 +132,28 @@ class BuildConfig(CourseGradeableJob):
                 subprocess.call([build_script, gradeable, "--clean"], stdout=output_file, stderr=output_file)
         except PermissionError:
             print("error, could not open "+output_file+" for writing")
+
+
+class RunGenerateRepos(CourseGradeableJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+
+        gen_script = os.path.join(INSTALL_DIR,'bin','generate_repos.py')
+
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "vcs_generation")
+        datestring = "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,today.day)
+        log_file_path = os.path.join(log_path, datestring)
+        current_time = today.strftime("%m/%d/%Y, %H:%M:%S")
+        try:
+            with open(log_file_path, "a") as output_file:
+                print ("At time: "+current_time, file=output_file)
+                output_file.flush()
+                subprocess.run(["sudo", gen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        except PermissionError:
+            print("error, could not open " + output_file + " for writing")
 
 
 class RunLichen(CourseGradeableJob):
@@ -160,8 +203,8 @@ class DeleteLichenResult(CourseGradeableJob):
             msg = 'Deleted lichen plagiarism results and saved config for {}'.format(gradeable)
             open_file.write(msg) 
 
-class BulkQRSplit(CourseJob):
-    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename']
+class BulkUpload(CourseJob):
+    required_keys = CourseJob.required_keys + ['timestamp', 'g_id', 'filename', 'is_qr']
 
     def add_permissions(self,item,perms):
         if os.getuid() == os.stat(item).st_uid:
@@ -170,10 +213,10 @@ class BulkQRSplit(CourseJob):
     def add_permissions_recursive(self,top_dir,root_perms,dir_perms,file_perms):
         for root, dirs, files in os.walk(top_dir):
             self.add_permissions(root,root_perms)
-        for d in dirs:
-            self.add_permissions(os.path.join(root, d),dir_perms)
-        for f in files:
-            self.add_permissions(os.path.join(root, f),file_perms)
+            for d in dirs:
+                self.add_permissions(os.path.join(root, d),dir_perms)
+            for f in files:
+                self.add_permissions(os.path.join(root, f),file_perms)
 
     def run_job(self):
         semester = self.job_details['semester']
@@ -181,11 +224,37 @@ class BulkQRSplit(CourseJob):
         timestamp = self.job_details['timestamp']
         gradeable_id = self.job_details['g_id']
         filename = self.job_details['filename']
+        is_qr = self.job_details['is_qr']
 
-        qr_prefix = urllib.parse.unquote(self.job_details['qr_prefix'])
-        qr_suffix = urllib.parse.unquote(self.job_details['qr_suffix'])
+        if is_qr and ('qr_prefix' not in self.job_details or 'qr_suffix' not in self.job_details):
+            msg = "did not pass in qr prefix or suffix"
+            print(msg)
+            return 
 
-        qr_script = Path(INSTALL_DIR, 'sbin', 'bulk_qr_split.py')
+        if is_qr:
+            qr_prefix = unquote(unquote(self.job_details['qr_prefix']))
+            qr_suffix = unquote(unquote(self.job_details['qr_suffix']))
+        else:
+            if 'num' not in self.job_details:
+                msg = "Did not pass in the number to divide " + filename + " by"
+                print(msg)
+                return
+            num  = self.job_details['num']
+
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "bulk_uploads")
+        log_file_path = os.path.join(log_path, 
+                                "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,
+                                today.day))
+
+        pid = os.getpid()
+        log_msg = "Process " + str(pid) + ": Starting to split " + filename + " on " + timestamp + ". "
+        if is_qr:
+            log_msg += "QR bulk upload job, QR Prefx: \'" + qr_prefix + "\', QR Suffix: \'" + qr_suffix + "\'"
+        else:
+            log_msg += "Normal bulk upload job, pages per PDF: " + str(num)
+        
+        logger.write_to_log(log_file_path, log_msg)
         #create paths
         try:
             with open("/usr/local/submitty/config/submitty.json", encoding='utf-8') as data_file:
@@ -195,36 +264,89 @@ class BulkQRSplit(CourseJob):
             uploads_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads")
             bulk_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/bulk_pdf",gradeable_id,timestamp)
             split_path = os.path.join(CONFIG["submitty_data_dir"],"courses",semester,course,"uploads/split_pdf",gradeable_id,timestamp)
-        except Exception as err:
-            print("Failed while parsing args and creating paths")
-            print(err)
-            sys.exit(1)
+        except Exception:
+            msg = "Process " + str(pid) + ": Failed while parsing args and creating paths"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
 
         #copy file over to correct folders
         try:
             if not os.path.exists(split_path):
-                os.makedirs(split_path)
-
-            # adding write permissions for PHP
-            self.add_permissions_recursive(uploads_path, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP | stat.S_IXGRP, stat.S_IWGRP)
+                #if the directory has been made by another job continue as normal
+                try:
+                    os.makedirs(split_path)
+                except Exception:
+                    pass
 
             # copy over file to new directory
             if not os.path.isfile(os.path.join(split_path, filename)):
                 shutil.copyfile(os.path.join(bulk_path, filename), os.path.join(split_path, filename))
 
+            # reset permissions just in case, group needs read/write
+            # access so submitty_php can view & delete pdfs when they are
+            # assigned to a student and/or deleted
+            self.add_permissions_recursive(split_path,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR | stat.S_IXUSR |   stat.S_IRGRP | stat.S_IWGRP | stat.S_IXGRP |   stat.S_ISGID,
+                                       stat.S_IRUSR | stat.S_IWUSR |                  stat.S_IRGRP | stat.S_IWGRP                                  )
+
             # move to copy folder
             os.chdir(split_path)
-        except Exception as err:
-            print("Failed while copying files")
-            print(err)
-            sys.exit(1)
+        except Exception:
+            msg = "Process " + str(pid) + ": Failed while copying files"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
+            return
 
         try:
-            subprocess.call([str(qr_script), filename, split_path, qr_prefix, qr_suffix])
-            
-            os.chdir(current_path)
-        except Exception as err:
-            print("Failed to launch bulk_qr_split subprocess!")
-            print(err)
-            sys.exit(1)
-        
+            if is_qr:
+                bulk_qr_split.main([filename, split_path, qr_prefix, qr_suffix, log_file_path])
+            else: 
+                bulk_upload_split.main([filename, split_path, num, log_file_path])
+        except Exception:
+            msg = "Failed to launch bulk_split subprocess!"
+            print(msg)
+            traceback.print_exc()
+            logger.write_to_log(log_file_path, msg + "\n" + traceback.format_exc())
+            return
+
+        os.chdir(split_path)
+        #if the original file has been deleted, continue as normal
+        try:
+            os.remove(filename)
+        except Exception:
+            pass
+
+        os.chdir(current_path)
+
+
+# pylint: disable=abstract-method
+class CreateCourse(AbstractJob):
+    def validate_job_details(self):
+        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
+            if key not in self.job_details or self.job_details[key] is None:
+                return False
+            if self.job_details[key] in ['', '.', '..']:
+                return False
+            if self.job_details[key] != os.path.basename(self.job_details[key]):
+                return False
+        return True
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        head_instructor = self.job_details['head_instructor']
+        base_course_semester = self.job_details['base_course_semester']
+        base_course_title = self.job_details['base_course_title']
+
+        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
+
+        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
+            semester, course, head_instructor, base_group
+        ))
+
+        with log_file_path.open("w") as output_file:
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)

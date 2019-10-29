@@ -1,137 +1,119 @@
 {% import _self as self %}
-{% if btn_type == "request" %}
-    <div>
-        <h3>Grade Inquiry</h3>
-    </div>
-    <div>
-        <p>"{{ regrade_message }}"</p>
-    </div>
-    {% set message = "Submit Grade Inquiry" %}
-{% elseif btn_type == "admin_open" %}
-    <div>
-        <h3>Grade Inquiry
-            <span>
-                <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
-                <span class="red-message">Unresolved Grade Inquiry</span>
-            </span> 
-        </h3>
-    </div>
-    {% set message = "Type response here" %}
-    {% set button_message = "Respond and Resolve request" %}
-{% elseif btn_type == "admin_closed" %}
-    <div>
-        <h3>Grade Inquiry
-            <span>
-                <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>  
-                <span class="green-message">Grade Inquiry Has Been Resolved</span>
-            </span>
-        </h3>
-    </div>
-    {% set message = "Type response here" %}
-    {% set button_message = "Post Message" %}
-{% elseif btn_type == "pending" %}
-    <div>
-        <h3>Grade Inquiry
-            <script type="text/javascript">
-                toggleRegradeRequests();
-                document.getElementById("ShowRegradeRequestButton").style.display = 'none';
-            </script>
-        <span>
-            <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span> 
-            <span class="red-message">Grade Inquiry Under Review</span>
-        </span> 
-        </h3>
-    </div>
-    <div>
-        <p>"{{ regrade_message }}"</p>
-    </div>
-    {% set message = "Additional Details" %}
-    {% set button_message = "Submit Additional Information" %}
-{% elseif btn_type == "completed" %}
-    <div>
-        <h3>Grade Inquiry
-            <script type="text/javascript">
-                toggleRegradeRequests();
-                document.getElementById("ShowRegradeRequestButton").style.display = 'none';
-            </script>
-        <span>
-            <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>  
-            <span class="green-message">Grade Inquiry has been Resolved</span>
-        </span>
-        </h3>
-    </div>
-    <div>
-        <p>"{{ regrade_message }}"</p>
-    </div>
-    {% set message = "Request Reviewed" %}
-    {% set button_message = "Send Information Without Reopening Grade Inquiry" %}
+{% if grade_inquiry_per_component_allowed %}
+<h3>Grade Inquiries</h3>
 {% endif %}
-{% for post in posts %}
-    <div style="margin-top: 20px;">
-        <div class='{{ post.is_staff ? "post_box important" : "post_box" }} {{ loop.index0 == 0 ? "first_post" : "" }}' style="padding:20px;">
-            <p style='white-space:pre-wrap;'>{{ post.content }}</p>
-            <hr>
-            <div style="float:right">
-                <b>{{ post.name }}</b> &nbsp;
-                {{ post.date }}
+<p>{{ regrade_message }}</p>
+{% if not has_submission %}
+    <span class="yellow-message">No Submission</span>
+{% endif %}
+{% if can_inquiry and has_submission %}
+    {% if grade_inquiry_per_component_allowed %}
+        {%  include "submission/regrade/ComponentTabs.twig" with { "gradeable_components": gradeable_components, 'grade_inquiries': grade_inquiries } only %}
+    {% endif %}
+    <div class='grade-inquiries'>
+        {% for component in gradeable_components %}
+            <div class="grade-inquiry" data-component_id={{ component.id }}>
+                <div class="grade-inquiry-header-div">
+                    {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
+                        <h3 class="grade-inquiry-header">Grade Inquiry:</h3>
+                        <span class="grade-inquiry-status">
+                        {% if grade_inquiries[component.id].status == -1 and is_grading %}
+                                <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
+                                <span class="red-message">Unresolved Grade Inquiry</span>
+                        {% elseif grade_inquiries[component.id].status == -1 %}
+                            <span class="fas fa-hourglass" style="font-size: 16px; color: #af0000"></span>
+                            <span class="red-message">Grade Inquiry Under Review</span>
+                        {% elseif grade_inquiries[component.id] is defined and grade_inquiries[component.id].status is not null and grade_inquiries[component.id].status == 0 %}
+                            <span class="fas fa-check" style="font-size: 16px; color: #008800"></span>
+                            <span class="green-message">Grade Inquiry Has Been Resolved</span>
+                        {% endif %}
+                        </span>
+                    {% endif %}
+                </div>
+                {% if not grade_inquiries[component.id].posts is empty %}
+                    {% for post in grade_inquiries[component.id].posts %}
+                        <div class='{{ post.is_staff ? "post_box important" : "post_box" }}'>
+                            <p style='white-space:pre-wrap;'>{% include "forum/RenderPost.twig" with { "post_content": post.content } only %}</p>
+                            <hr>
+                            <div style="float:left">
+                                {% if grade_inquiry_per_component_allowed and component.id == 0 %}
+                                    <p class="component-identifier-post"><b>{{ post.gc_title }}</b></p>
+                                {% endif %}
+                            </div>
+                            <div style="float:right">
+                                <b>{{ post.name }}</b> &nbsp;
+                                {{ post.date }}
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% elseif component.id == 0 %}
+                    <p class="yellow-message no-post-warning" >No posts!</p>
+                {% endif %}
+                {% if (grade_inquiry_per_component_allowed and (not component.id == 0 or grade_inquiries[component.id].status == -1)) or not grade_inquiry_per_component_allowed %}
+                    <form method="POST" class="reply-text-form" id="reply-text-form-{{ component.id }}" >
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" >
+                        <input type="hidden" id="thread_id" name="thread_id" value="{{ grade_inquiries[component.id].id is defined ? grade_inquiries[component.id].id : 0  }}">
+                        <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
+                        <input type="hidden" id="gc_id" name="gc_id" value="{{ component.id }}">
+                        {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status == 0 %}
+                            {% set text_area_label_text = 'Write an inquiry:' %}
+                        {% elseif grade_inquiries[component.id] == -1 %}
+                            {% set text_area_label_text = 'Add comment to grade inquiry:' %}
+                        {% endif %}
+                        <label for="reply-text-area">{{ text_area_label_text }}</label>
+                        <textarea name="replyTextArea" id="reply-text-area-{{ component.id }}" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ "Type Response Here" }}" required onkeyup="onReplyTextAreaKeyUp(this)"></textarea>
+                        <div class="row" style="justify-content: flex-end">
+                        <div style="margin-right: auto">
+                        {{ self.markdown_buttons() }}
+                        </div>
+                            {% if grade_inquiries[component.id] is not defined or grade_inquiries[component.id].status is null %}
+                                {# No request yet #}
+                                <button disabled type="button" formaction="{{ request_regrade_url }}" class="gi-submit btn btn-primary" style="float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Submit Grade Inquiry
+                                </button>
+                            {% elseif grade_inquiries[component.id].status == -1 and is_grading %}
+                                {# Grader view,request is open #}
+                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Respond and Resolve Grade Inquiry
+                                </button>
+                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Post Additional Information
+                                </button>
+                                <button type="button" id="grading-close gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Close Grade Inquiry
+                                </button>
+                            {% elseif grade_inquiries[component.id].status == -1 %}
+                                {# Request pending, we can submit new posts #}
+                                <button disabled type="button" formaction="{{ make_request_post_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Post Additional Information
+                                </button>
+                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Close Grade Inquiry
+                                </button>
+                            {% elseif grade_inquiries[component.id].status == 0 and is_grading %}
+                                {# Grader view, Request closed #}
+                                <button type="button" id="gi-ignore-disabled" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-primary" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Reopen Grade Inquiry
+                                </button>
+                            {% elseif grade_inquiries[component.id].status == 0 %}
+                                {# Request closed #}
+                                <button disabled type="button" formaction="{{ change_request_status_url }}" class="gi-submit btn btn-default" style="margin:15px 0 0 5px; float: right" onclick="onGradeInquirySubmitClicked(this)">
+                                    Reopen Grade Inquiry
+                                </button>
+                            {% endif %}
+                        </div>
+                    </form>
+                {% endif %}
             </div>
-        </div>
+        {% endfor %}
     </div>
-{% endfor %}
-<div style="padding:20px;">
-    <form method="POST" id="replyTextForm" action="{{ url }}">
-        <input type="hidden" id="thread_id" name="thread_id" value="{{ thread_id }}">
-        <input type="hidden" id="gradeable_id" name="gradeable_id" value="{{ gradeable_id }}">
-        <input type="hidden" id="submitter_id" name="submitter_id" value="{{ submitter_id }}">
-        <input type="hidden" id="status" name="status" value="0">
-        <textarea name="replyTextArea" id="replyTextArea" style="resize:none;min-height:100px;width:100%; font-family: inherit;" rows="10" cols="30" placeholder="{{ message }}" required></textarea>
-        {% if btn_type == 'pending' %}
-            {# Request pending, we can submit new posts #}
-            <input type="submit" value="{{ button_message }}" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Cancel Grade Inquiry" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id }}', '{{ submitter_id }}', 0);">
-            {{ self.bbcode_buttons() }}
-        {% elseif btn_type == 'completed' %}
-            {# Request closed #}
-            <input type="button" class="btn btn-primary" id="cancelRegrade" value="Reopen Grade Inquiry Without Responding" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
-            <input type="submit" value="{{ button_message }}" class="btn btn-default" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
-            {{ self.bbcode_buttons() }}
-        {% elseif btn_type == 'admin_open' %}
-            {# Admin, request is open #}
-            <input type="submit" value="Respond and Resolve Grade Inquiry" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="closeAllComponents();$('#status').val(0);">
-            {{ self.bbcode_buttons() }}
-            <input type="submit" class="btn btn-default" id="extraInfoRegrade" value="Request Additional Information" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Resolve Grade Inquiry Without Response" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', 0);">
-        {% elseif btn_type == 'admin_closed' %}
-            {# Admin, request is closed #}
-            <input type="submit" value="Post" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(0);">
-            <input type="button" class="btn btn-default" id="cancelRegrade" value="Submit Grade Inquiry" style="margin-top: 15px; float: right" onclick="changeRegradeStatus({{ thread_id }}, '{{ gradeable_id}}', '{{ submitter_id }}', -1);">
-            {{ self.bbcode_buttons() }}
-        {% else %}
-            {# No request yet #}
-            <input type="submit" value="Submit Grade Inquiry" class="btn btn-primary" style="margin-top: 15px; float: right" onclick="$('#status').val(-1);">
-            {{ self.bbcode_buttons() }}
-        {% endif %}
-    </form>
-</div>
-<script type="text/javascript">
-    $("#replyTextForm").submit(function(event) {
-        $.ajax({
-            type: "POST",
-            url: $(this).attr("action"),
-            data: $(this).serialize(),
-            success: function(data){
-                window.location.reload();
-            }
-        });
-        event.preventDefault();
-    });
-</script>
+{% endif %}
 
-{% macro bbcode_buttons() %}
-    <button type="button" title="Insert a link" onclick="addBBCode(1, '#replyTextArea')" style="margin-right:10px;" class="btn btn-default">
+{% macro markdown_buttons() %}
+    <button type="button" title="Insert a link" onclick="addMarkdownCode(1, '#reply-text-area')" style="margin-right:10px;" class="btn btn-default">
         Link <i class="fas fa-link fa-1x"></i>
     </button>
-    <button title="Insert a code segment" type="button" onclick="addBBCode(0, '#replyTextArea')" class="btn btn-default">
+    <button title="Insert a code segment" type="button" onclick="addMarkdownCode(0, '#reply-text-area')" class="btn btn-default">
         Code <i class="fas fa-code fa-1x"></i>
     </button>
 {% endmacro %}

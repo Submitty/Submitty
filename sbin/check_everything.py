@@ -142,6 +142,7 @@ def main():
 
             global_success &= CheckItemBits(course_path+"/bin",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/provided_code",True,c_instructor,c_group,0o770)
+            global_success &= CheckItemBits(course_path+"/instructor_solution",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/test_input",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/test_output",True,c_instructor,c_group,0o770)
             global_success &= CheckItemBits(course_path+"/custom_validation_code",True,c_instructor,c_group,0o770)

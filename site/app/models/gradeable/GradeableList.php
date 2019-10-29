@@ -34,7 +34,7 @@ class GradeableList extends AbstractModel {
 
     /** @property @var User */
     protected $user;
-    
+
     /** @property @var Gradeable[]  */
     protected $gradeables = array();
 
@@ -58,7 +58,7 @@ class GradeableList extends AbstractModel {
     /** @var \DateTime Timestamp of when we initially loaded the GradeableList so that all timestamp comparisons are
      against the same time (and don't have any potential mismatch of seconds */
     protected $now;
-    
+
     /**
      * GradeableList constructor.
      *
@@ -84,10 +84,7 @@ class GradeableList extends AbstractModel {
             else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
                 // Filter out gradeables with no due date
                 if ($gradeable->isStudentSubmit()) {
-                    if ($gradeable->hasSubmission($submitter)) {
-                        // Once the user has a submission for this gradeable, move it to the 'closed' section
-                        $this->closed_gradeables[$gradeable->getId()] = $gradeable;
-                    } else if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
+                    if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
                         // Put in 'grading' category only if user is a grader
                         $this->grading_gradeables[$gradeable->getId()] = $gradeable;
                     } else {
@@ -131,7 +128,7 @@ class GradeableList extends AbstractModel {
             // We have to use @ since on calling Mocked PHPUnit classes within this
             // causes a warning to be raised as the mocked object tracks some debug
             // information which changes the internal object in PHP < 7.0. Annoying!
-            @uasort($this->$list, function(Gradeable $a, Gradeable $b) use ($function) {
+            @uasort($this->$list, function (Gradeable $a, Gradeable $b) use ($function) {
                 if ($a->$function() == $b->$function()) {
                     if ($a->getId() < $b->getId()) {
                         return -1;
@@ -149,7 +146,7 @@ class GradeableList extends AbstractModel {
             });
         }
     }
-    
+
     /**
      * Fetch gradeable from the stored gradeables (assuming it exists). Will return
      * false if the gradeable does not exist.
@@ -170,7 +167,7 @@ class GradeableList extends AbstractModel {
         }
         return null;
     }
-    
+
     /**
      * @param GradeableType|null $type
      *

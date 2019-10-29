@@ -36,8 +36,9 @@
                 {% if lock %}
                     <span>&emsp;{{ invited }}</span> <br />
                 {% else %}
-                    <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'cancel'}) }}" method="post">
+                    <form action="{{ cancel_invitation_url }}" method="post">
                         <input type="hidden" name="cancel_id" value={{ invited }} />
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                         &emsp;{{ invited }}: <input type="submit" value = "Cancel" class="btn btn-danger" />
                     </form>
                     <br />
@@ -74,12 +75,13 @@
     <div class="content">
         <h3>Invite new teammates by their user ID:</h3>
         <br />
-        <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'invitation'}) }}" method="post">
+        <form action="{{ send_invitation_url }}" method="post">
             <input type="text" name="invite_id" id="invite_id" placeholder="User ID" />
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
             <input type="submit" value = "Invite" class="btn btn-primary" />
         </form>
         <br />
-        <button class="btn btn-danger" onclick="location.href='{{ core.buildUrl({'component' : 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'leave_team'}) }}'">Leave Team</button>
+        <button class="btn btn-danger" onclick="location.href='{{ leave_team_url }}'">Leave Team</button>
     </div>
 {% elseif team == null %}
     <div class="content">
@@ -89,8 +91,9 @@
             <h3>Invitations:</h3> <br />
 
             {% for invite in invites_received %}
-                <form action="{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'accept'}) }}" method="post">
+                <form action="{{ accept_invitation_url }}" method="post">
                     <input type="hidden" name="team_id" value={{ invite.getId() }} />
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
                     &emsp;{{  invite.getMemberList() }}: <input type="submit" value = "Accept" class="btn btn-success" />
                 </form>
                 <br />
@@ -99,12 +102,12 @@
 
         {# Create new team button #}
         <br />
-        <button class="btn btn-primary" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'create_new_team'}) }}'">Create New Team </button>
+        <button class="btn btn-primary" onclick="location.href='{{ create_team_url }}'">Create New Team </button>
 
         {% if seeking_partner %}
-            <button class="btn btn-danger" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'stop_seek_team'}) }}'">Stop Seeking Team/Partner </button>
+            <button class="btn btn-danger" onclick="location.href='{{ stop_seek_url }}'">Stop Seeking Team/Partner </button>
         {% else %}
-            &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{{ core.buildUrl({'component': 'student', 'gradeable_id': gradeable.getId(), 'page': 'team', 'action': 'seek_team'}) }}'">Seek Team/Partner </button>
+            &nbsp;or&nbsp;<button class="btn btn-primary" onclick="location.href='{{ seek_url }}'">Seek Team/Partner </button>
         {% endif %}
     </div>
 {% endif %}
@@ -114,15 +117,17 @@
 <div class="content">
     <div style="width:60%;">
         <h3>Users Seeking Team/Partner:</h3><br />
+        {# This is a data table #}
         <table class="table table-striped table-bordered persist-area">
+            <caption />
             <thead class="persist thead">
-            <tr>
-                <td width="3%"></td>
-                <td width="10%">First Name</td>
-                <td width="10%">Last Name</td>
-                <td width="10%">User ID</td>
-                <td width="40%">Email</td>
-            </tr>
+                <tr>
+                    <th width="3%"></th>
+                    <th width="10%">First Name</th>
+                    <th width="10%">Last Name</th>
+                    <th width="10%">User ID</th>
+                    <th width="40%">Email</th>
+                </tr>
             </thead>
             <tbody>
                 {% for user_details in seekers %}

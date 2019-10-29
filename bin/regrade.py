@@ -102,7 +102,7 @@ def replay(starttime,endtime):
             pause.until(pause_time)
             queue_time = dateutils.write_submitty_date()
             print(datetime.datetime.now(),"      REPLAY: ",original_time," ",my_job)
-            # FIXME : This will need to be adjust for team assigments
+            # FIXME : This will need to be adjust for team assignments
             # and assignments with special required capabilities!
             item = {"semester": what[0],
                     "course": what[1],
@@ -217,6 +217,9 @@ def main():
                     my_team = my_who
                     my_is_team = True
 
+                # FIXME: Set this value appropriately
+                is_vcs_checkout = False
+
                 grade_queue.append({"semester": my_semester,
                                     "course": my_course,
                                     "gradeable": my_gradeable,
@@ -225,6 +228,7 @@ def main():
                                     "who": my_who,
                                     "is_team": my_is_team,
                                     "version": my_version,
+                                    "vcs_checkout": is_vcs_checkout,
                                     "required_capabilities" : required_capabilities,
                                     "queue_time":queue_time,
                                     "regrade":True,

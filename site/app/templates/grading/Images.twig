@@ -1,3 +1,5 @@
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /> 
+
 <div class="content">
     {% if hasInstructorPermission %}
         <div style="float: right; margin-bottom: 20px;">
@@ -5,10 +7,11 @@
         </div>
     {% endif %}
     <h1>Student Photos</h1>
+    {# This is a layout table #}
     <table class="table table-bordered persist-area">
         {% if sections|length > 0 %}
             {% for registration, students in sections %}
-                <tr class="info persist-header">
+                <tr class="info">
                     <td colspan="8" style="text-align: center">Students Enrolled in Registration Section {{ registration }}</td>
                 </tr>
                 <tbody id="section-{{ registration }}">
@@ -16,23 +19,17 @@
                     {% if loop.index % 5 == 1 %}
                         <tr id="user-{{ student.getId() }}">
                     {% endif %}
-                    {% set image_found = false %}
-                    {% for imageData in imageDataArray if not image_found %}
-                        {% set imgName = imageNameArray[loop.index-1] %}
-                        {% if student.getId() == imgName %}
-                            <td><img src="data:imgName/png;base64,{{ imageData }}" width="150" height="200/>
-                            <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
-                            <br />{{student.getId()}}</div>
-                            </td>
-                            {% set image_found = true %}
-                        {% endif %}
-                    {% endfor %}
-                    {% if not image_found %}
+                    {% if imageData[student.getId()] is defined %}
+                        <td>{{ base64_image(imageData[student.getId()].path, student.getId()) }}
+                        <div class="name"><br /><br />{{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
+                        <br />{{student.getId()}}</div>
+                        </td>
+                    {% else %}
                         {% if errorImageData == '_NONE_' %}
                             <td><i><font color="gray"><img alt="No Image Available" /></font></i>
                             <div class="name"><br />
                         {% else %}
-                            <td><img src="data:imgName/png;base64,{{ errorImageData }}" width="150" height="200/>
+                            <td>{{ base64_image(errorImageData.path, 'No Image Available') }}
                             <div class="name"><br /><br />
                         {% endif %}
                         {{student.getDisplayedFirstName()}} {{student.getDisplayedLastName()}}
@@ -40,9 +37,9 @@
                         </td>
                     {% endif %}
                     {% if loop.index % 5 == 0 %}
-
                         </tr>
                     {% endif %}
+                    {% flush %}
                 {% endfor %}
                 </tbody>
             {% endfor %}
@@ -53,5 +50,4 @@
         {% endif %}
     </table>
 </div>
-{% include('admin/users/UserForm.twig') with {'action': 'update_student'} %}
 {% include('grading/UploadImagesForm.twig') %}

@@ -4,84 +4,181 @@ namespace app\controllers\admin;
 
 use app\authentication\DatabaseAuthentication;
 use app\controllers\AbstractController;
-use app\libraries\Core;
-use app\libraries\Output;
-use app\libraries\Utils;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
+use app\libraries\response\JsonResponse;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
 use app\models\User;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
 
+//Enable us to throw, catch, and handle exceptions as needed.
+use app\exceptions\ValidationException;
+use app\exceptions\DatabaseException;
+
+/**
+ * Class UsersController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
 class UsersController extends AbstractController {
-    public function run() {
-        switch ($_REQUEST['action']) {
-            case 'get_user_details':
-                $this->ajaxGetUserDetails();
-                break;
-            case 'update_student':
-                $this->updateUser('students');
-                break;
-            case 'update_grader':
-                $this->updateUser('graders');
-                break;
-            case 'graders':
-                $this->core->getOutput()->addBreadcrumb('Manage Graders');
-                $this->listGraders();
-                break;
-            case 'rotating_sections':
-                $this->core->getOutput()->addBreadcrumb('Manage Sections');
-                $this->rotatingSectionsForm();
-                break;
-            case 'update_registration_sections':
-                $this->updateRegistrationSections();
-                break;
-            case 'update_rotating_sections':
-                $this->updateRotatingSections();
-                break;
-            case 'upload_grader_list':
-                $this->uploadGraderList();
-                break;
-            case 'upload_class_list':
-                $this->uploadClassList();
-                break;
-            case 'students':
-            default:
-                $this->core->getOutput()->addBreadcrumb('Manage Students');
-                $this->listStudents();
-                break;
+    /**
+     * @Route("/{_semester}/{_course}/users", methods={"GET"})
+     * @Route("/api/{_semester}/{_course}/users", methods={"GET"})
+     * @return Response
+     */
+    public function getStudents() {
+        $students = $this->core->getQueries()->getAllUsers();
+        //Assemble students into sections
+        $sorted_students = [];
+        $download_info = [];
+        foreach ($students as $student) {
+            $rot_sec = ($student->getRotatingSection() === null) ? 'NULL' : $student->getRotatingSection();
+            $reg_sec = ($student->getRegistrationSection() === null) ? 'NULL' : $student->getRegistrationSection();
+            $sorted_students[$reg_sec][] = $student;
+            switch ($student->getGroup()) {
+                case User::GROUP_INSTRUCTOR:
+                    $grp = 'Instructor';
+                    break;
+                case User::GROUP_FULL_ACCESS_GRADER:
+                    $grp = 'Full Access Grader (Grad TA)';
+                    break;
+                case User::GROUP_LIMITED_ACCESS_GRADER:
+                    $grp = 'Limited Access Grader (Mentor)';
+                    break;
+                default:
+                    $grp = 'Student';
+                    break;
+            }
+            array_push($download_info, [
+                'first_name' => $student->getDisplayedFirstName(),
+                'last_name' => $student->getDisplayedLastName(),
+                'user_id' => $student->getId(),
+                'email' => $student->getEmail(),
+                'reg_section' => $reg_sec,
+                'rot_section' => $rot_sec,
+                'group' => $grp
+            ]);
         }
+
+        return new Response(
+            JsonResponse::getSuccessResponse($download_info),
+            new WebResponse(
+                ['admin', 'Users'],
+                'listStudents',
+                $sorted_students,
+                $this->core->getQueries()->getRegistrationSections(),
+                $this->core->getQueries()->getRotatingSections(),
+                $download_info,
+                $this->core->getAuthentication() instanceof DatabaseAuthentication
+            )
+        );
     }
 
-    public function listStudents() {
-        $students = $this->core->getQueries()->getAllUsers();
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listStudents', $students, $reg_sections, $rot_sections, $use_database);
-        $this->renderDownloadForm('user', $use_database);
-    }
-
-    public function listGraders() {
+    /**
+     * @Route("/{_semester}/{_course}/graders", methods={"GET"})
+     * @Route("/api/{_semester}/{_course}/graders", methods={"GET"})
+     * @return Response
+     */
+    public function getGraders() {
         $graders = $this->core->getQueries()->getAllGraders();
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $rot_sections = $this->core->getQueries()->getRotatingSections();
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+        $graders_sorted = [
+            User::GROUP_INSTRUCTOR => [],
+            User::GROUP_FULL_ACCESS_GRADER => [],
+            User::GROUP_LIMITED_ACCESS_GRADER => []
+        ];
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'listGraders', $graders, $reg_sections, $rot_sections, $use_database);
-        $this->renderDownloadForm('grader', $use_database);
+        $download_info = [];
+
+        foreach ($graders as $grader) {
+            $rot_sec = ($grader->getRotatingSection() === null) ? 'NULL' : $grader->getRotatingSection();
+            switch ($grader->getGroup()) {
+                case User::GROUP_INSTRUCTOR:
+                    $reg_sec = 'All';
+                    $grp = 'Instructor';
+                    $graders_sorted[User::GROUP_INSTRUCTOR][] = $grader;
+                    break;
+                case User::GROUP_FULL_ACCESS_GRADER:
+                    $grp = 'Full Access Grader (Grad TA)';
+                    $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                    $graders_sorted[User::GROUP_FULL_ACCESS_GRADER][] = $grader;
+                    break;
+                case User::GROUP_LIMITED_ACCESS_GRADER:
+                    $grp = 'Limited Access Grader (Mentor)';
+                    $reg_sec = implode(',', $grader->getGradingRegistrationSections());
+                    $graders_sorted[User::GROUP_LIMITED_ACCESS_GRADER][] = $grader;
+                    break;
+                default:
+                    $grp = 'UNKNOWN';
+                    $reg_sec = "";
+                    break;
+            }
+            array_push($download_info, [
+                'first_name' => $grader->getDisplayedFirstName(),
+                'last_name' => $grader->getDisplayedLastName(),
+                'user_id' => $grader->getId(),
+                'email' => $grader->getEmail(),
+                'reg_section' => $reg_sec,
+                'rot_section' => $rot_sec,
+                'group' => $grp
+            ]);
+        }
+
+        return new Response(
+            JsonResponse::getSuccessResponse($download_info),
+            new WebResponse(
+                ['admin', 'Users'],
+                'listGraders',
+                $graders_sorted,
+                $this->core->getQueries()->getRegistrationSections(),
+                $this->core->getQueries()->getRotatingSections(),
+                $download_info,
+                $this->core->getAuthentication() instanceof DatabaseAuthentication
+            )
+        );
     }
 
-    private function renderDownloadForm($code, $use_database) {
-        $students = $this->core->getQueries()->getAllUsers();
-        $graders = $this->core->getQueries()->getAllGraders();
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'downloadForm', $code, $students, $graders, $reg_sections, $use_database);
+    /**
+     * @Route("/{_semester}/{_course}/graders/assign_registration_sections", methods={"POST"})
+     */
+    public function reassignRegistrationSections() {
+        $return_url = $this->core->buildCourseUrl(['graders']);
+        $new_registration_information = array();
+
+        foreach ($_POST as $key => $value) {
+            $key_array = explode("_",$key,2);
+            if (!array_key_exists($key_array[0],$new_registration_information)) {
+                $new_registration_information[$key_array[0]] = array();
+            }
+            if ($key_array[1] != 'all') {
+                $new_registration_information[$key_array[0]][] = $key_array[1];
+            }
+        }
+
+        foreach($this->core->getQueries()->getAllGraders() as $grader) {
+            $grader_id = $grader->getId();
+            if (array_key_exists($grader_id,$new_registration_information)) {
+                $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
+            }
+            else {
+                $grader->setGradingRegistrationSections(array());
+            }
+            $this->core->getQueries()->updateUser($grader, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+        }
+
+        $this->core->redirect($return_url);
     }
 
-    public function ajaxGetUserDetails() {
-        $user_id = $_REQUEST['user_id'];
+    /**
+     * @Route("/{_semester}/{_course}/users/details", methods={"GET"})
+     */
+    public function ajaxGetUserDetails($user_id) {
         $user = $this->core->getQueries()->getUserById($user_id);
-        $this->core->getOutput()->renderJson(array(
+        $this->core->getOutput()->renderJsonSuccess(array(
             'user_id' => $user->getId(),
+            'already_in_course' => true,
+            'user_numeric_id' => $user->getNumericId(),
             'user_firstname' => $user->getLegalFirstName(),
             'user_lastname' => $user->getLegalLastName(),
             'user_preferred_firstname' => $user->getPreferredFirstName(),
@@ -97,15 +194,48 @@ class UsersController extends AbstractController {
         ));
     }
 
-    public function updateUser($action='students') {
-        $return_url = $this->core->buildUrl(array('component' => 'admin', 'page' => 'users',
-            'action' => $action), 'user-'.$_POST['user_id']);
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token.");
-            $this->core->redirect($return_url);
+    /**
+     * @Route("/{_semester}/{_course}/user_information", methods={"GET"})
+     */
+    public function ajaxGetSubmittyUsers() {
+        $submitty_users = $this->core->getQueries()->getAllSubmittyUsers();
+        $user_ids = array_keys($submitty_users);
+        $course_users = $this->core->getQueries()->getUsersById($user_ids);
+
+        //uses more thorough course information if it exists, if not uses database information
+        $user_information = array();
+        foreach ($user_ids as $user_id) {
+            $already_in_course = array_key_exists($user_id,$course_users);
+            $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
+            $user_information[$user_id] = array(
+                'already_in_course' => $already_in_course,
+                'user_numeric_id' => $user->getNumericId(),
+                'user_firstname' => $user->getLegalFirstName(),
+                'user_lastname' => $user->getLegalLastName(),
+                'user_preferred_firstname' => $user->getPreferredFirstName() ?? '',
+                'user_preferred_lastname' => $user->getPreferredLastName() ?? '',
+                'user_email' => $user->getEmail(),
+                'user_group' => $user->getGroup(),
+                'registration_section' => $user->getRegistrationSection(),
+                'rotating_section' => $user->getRotatingSection(),
+                'user_updated' => $user->isUserUpdated(),
+                'instructor_updated' => $user->isInstructorUpdated(),
+                'manual_registration' => $user->isManualRegistration(),
+                'grading_registration_sections' => $user->getGradingRegistrationSections()
+            );
         }
+        $this->core->getOutput()->renderJsonSuccess($user_information);
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/users", methods={"POST"})
+     */
+    public function updateUser($type='users') {
+        $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
+        $semester = $this->core->getConfig()->getSemester();
+        $course = $this->core->getConfig()->getCourse();
 
         if (empty($_POST['user_id'])) {
             $this->core->addErrorMessage("User ID cannot be empty");
@@ -146,13 +276,11 @@ class UsersController extends AbstractController {
             }
         }
         else {
-            if ($user !== null) {
-                $this->core->addErrorMessage("A user with that ID already exists");
-                $this->core->redirect($return_url);
-            }
             $user = $this->core->loadModel(User::class);
             $user->setId(trim($_POST['user_id']));
         }
+
+        $user->setNumericId(trim($_POST['user_numeric_id']));
 
         $user->setLegalFirstName(trim($_POST['user_firstname']));
         if (isset($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) != "") {
@@ -196,50 +324,72 @@ class UsersController extends AbstractController {
         }
 
         if ($_POST['edit_user'] == "true") {
-            $this->core->getQueries()->updateUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+            $this->core->getQueries()->updateUser($user, $semester, $course);
             $this->core->addSuccessMessage("User '{$user->getId()}' updated");
         }
         else {
             if ($this->core->getQueries()->getSubmittyUser($_POST['user_id']) === null) {
                 $this->core->getQueries()->insertSubmittyUser($user);
                 $this->core->addSuccessMessage("Added a new user {$user->getId()} to Submitty");
-                $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
+                $this->core->getQueries()->insertCourseUser($user, $semester, $course);
                 $this->core->addSuccessMessage("New Submitty user '{$user->getId()}' added");
             }
             else {
+                $this->core->getQueries()->updateUser($user);
                 $this->core->getQueries()->insertCourseUser($user, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
                 $this->core->addSuccessMessage("Existing Submitty user '{$user->getId()}' added");
+            }
+
+            $all_gradeable_ids = $this->core->getQueries()->getAllGradeablesIds();
+            foreach ($all_gradeable_ids as $row) {
+                $g_id = $row['g_id'];
+                $gradeable = $this->tryGetGradeable($g_id, false);
+                if ($gradeable === false) {
+                    continue;
+                }
+                if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+                    AdminGradeableController::enqueueGenerateRepos($semester,$course,$g_id);
+                }
             }
 
         }
         $this->core->redirect($return_url);
     }
 
-    public function rotatingSectionsForm() {
+    /**
+     * @Route("/{_semester}/{_course}/sections", methods={"GET"})
+     */
+    public function sectionsForm() {
         $students = $this->core->getQueries()->getAllUsers();
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $non_null_counts = $this->core->getQueries()->getCountUsersRotatingSections();
+
+        //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
+        $sections_with_students = array();
+        foreach ($non_null_counts as $rows) {
+            array_push($sections_with_students,$rows['rotating_section']);
+        }
+        for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
+            if ( !in_array($i,$sections_with_students) ) {
+                array_push($non_null_counts,[
+                    "rotating_section" => $i,
+                    "count" => 0
+                ]);
+            }
+        }
+
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'rotatingSectionsForm', $students, $reg_sections,
+        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'sectionsForm', $students, $reg_sections,
             $non_null_counts, $null_counts, $max_section);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/sections/registration", methods={"POST"})
+     */
     public function updateRegistrationSections() {
-        $return_url = $this->core->buildUrl(
-            array('component' => 'admin',
-                  'page' => 'users',
-                  'action' => 'rotating_sections')
-        );
+        $return_url = $this->core->buildCourseUrl(['sections']);
 
-        if (!$this->core->checkCsrfToken()) {
-            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
-            $this->core->redirect($return_url);
-        }
-
-        $reg_sections = $this->core->getQueries()->getRegistrationSections();
-        $students = $this->core->getQueries()->getAllUsers();
-        $graders = $this->core->getQueries()->getAllGraders();
         if (isset($_POST['add_reg_section']) && $_POST['add_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['add_reg_section'])) {
                 // SQL query's ON CONFLICT clause should resolve foreign key conflicts, so we are able to INSERT after successful validation.
@@ -261,7 +411,19 @@ class UsersController extends AbstractController {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
                 // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
+                $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
+                $json = file_get_contents($fp);
+                $jsonArray = json_decode($json, true);
+                foreach ($jsonArray as $key => $value){
+                    if(isset($value['sections'])){
+                        $sections = $value['sections'];
+                        if ($key = array_search($_POST['delete_reg_section'], $sections) !== false) {
+                            $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  This section is referenced in course materials");
+                            $this->core->redirect($return_url);
+                        }
+                    }
+                }
+                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);        
                 if ($num_del_sections === 0) {
                     $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
                 }
@@ -278,49 +440,43 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/sections/rotating", methods={"POST"})
+     */
     public function updateRotatingSections() {
-        $return_url = $this->core->buildUrl(
-            array('component' => 'admin',
-                  'page' => 'users',
-                  'action' => 'rotating_sections')
-        );
+        $return_url = $this->core->buildCourseUrl(['sections']);
 
-        if (!$this->core->checkCsrfToken()) {
-            $this->core->addErrorMessage("Invalid CSRF token. Try again.");
-            $this->core->redirect($return_url);
-        }
-
-        if (!isset($_REQUEST['sort_type'])) {
+        if (!isset($_POST['sort_type'])) {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_REQUEST['sort_type'] === "drop_null") {
+        else if ($_POST['sort_type'] === "drop_null") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $this->core->addSuccessMessage("Non registered students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_REQUEST['sort_type'] === "drop_all") {
+        else if ($_POST['sort_type'] === "drop_all") {
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->addSuccessMessage("All students removed from rotating sections");
             $this->core->redirect($return_url);
         }
 
-        if (isset($_REQUEST['rotating_type']) && in_array($_REQUEST['rotating_type'], array('random', 'alphabetically'))) {
-            $type = $_REQUEST['rotating_type'];
+        if (isset($_POST['rotating_type']) && in_array($_POST['rotating_type'], array('random', 'alphabetically'))) {
+            $type = $_POST['rotating_type'];
         }
         else {
             $type = 'random';
         }
 
-        $section_count = intval($_REQUEST['sections']);
+        $section_count = intval($_POST['sections']);
         if ($section_count < 1) {
             $this->core->addErrorMessage("You must have at least one rotating section");
             $this->core->redirect($return_url);
         }
 
-        if (in_array($_REQUEST['sort_type'], array('redo', 'fewest')) && $type == "random") {
-            $sort = $_REQUEST['sort_type'];
+        if (in_array($_POST['sort_type'], array('redo', 'fewest')) && $type == "random") {
+            $sort = $_POST['sort_type'];
         }
         else {
             $sort = 'redo';
@@ -342,7 +498,7 @@ class UsersController extends AbstractController {
                 }
             }
             //remove people who should not be added to rotating sections
-            for ($j = 0;$j < count($users_with_reg_section);) {
+            for ($j = 0; $j < count($users_with_reg_section);) {
                 for ($i = 0;$i < count($exclude_sections);++$i) {
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
                         array_splice($users_with_reg_section,$j,1);
@@ -353,16 +509,16 @@ class UsersController extends AbstractController {
                 ++$j;
 
             }
-            for ($i = 0;$i < count($users);) {
+            for ($i = 0; $i < count($users);) {
                 $found_in = false;
-                for ($j = 0;$j < count($users_with_reg_section);++$j) {
+                for ($j = 0; $j < count($users_with_reg_section); ++$j) {
                     if ($users[$i] == $users_with_reg_section[$j]->getId()) {
                         $found_in = true;
                         break;
                     }
                 }
                 if (!$found_in) {
-                    array_splice($users,$i,1);
+                    array_splice($users, $i, 1);
                     continue;
                 }
                 ++$i;
@@ -385,7 +541,7 @@ class UsersController extends AbstractController {
                 $section_counts[$section]++;
             }
             foreach ($teams as $g_id => $team_ids) {
-                for ($i = 0; $i < count($team_ids); $i ++) {
+                for ($i = 0; $i < count($team_ids); $i++) {
                     $section = $i % $section_count;
 
                     if (!array_key_exists($g_id, $team_section_counts)) {
@@ -428,7 +584,7 @@ class UsersController extends AbstractController {
                 $use_section = ($use_section + 1) % $section_count;
             }
             foreach ($teams as $g_id => $team_ids) {
-                for ($i = 0; $i < count($team_ids); $i ++) {
+                for ($i = 0; $i < count($team_ids); $i++) {
                     $use_section = ($use_section + 1) % $section_count;
 
                     if (!array_key_exists($g_id, $team_section_counts)) {
@@ -449,7 +605,7 @@ class UsersController extends AbstractController {
         }
 
         foreach ($team_section_counts as $g_id => $counts) {
-            for ($i = 0; $i < $section_count; $i ++) {
+            for ($i = 0; $i < $section_count; $i++) {
                 $update_teams = array_splice($teams[$g_id], 0, $team_section_counts[$g_id][$i]);
 
                 foreach ($update_teams as $team_id) {
@@ -462,18 +618,47 @@ class UsersController extends AbstractController {
         $this->core->redirect($return_url);
     }
 
-    private function getCsvOrXlsxData($filename, $tmp_name, $return_url) {
-        $content_type = FileUtils::getContentType($filename);
-        $mime_type = FileUtils::getMimeType($tmp_name);
+    /**
+     * Parse uploaded users data file as either XLSX or CSV, and return its data
+     *
+     * @param string $filename  Original name of uploaded file
+     * @param string $tmp_name  PHP assigned unique name and path of uploaded file
+     * @param string $return_url
+     *
+     * @return array $contents  Data rows and columns read from xlsx or csv file
+     */
+    private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
+        // Data is confidential, and therefore must be deleted immediately after
+        // this process ends, regardless if process completes successfully or not.
+        register_shutdown_function(
+            function () use (&$csv_file, &$xlsx_file) {
+                foreach (array($csv_file, $xlsx_file) as $file) {
+                    if (isset($file) && file_exists($file)) {
+                        unlink($file);
+                    }
+                }
+            }
+        );
 
+        $content_type = FileUtils::getContentType($filename);
+        $mime_type = mime_content_type($tmp_name);
+
+        // If an XLSX spreadsheet is uploaded.
         if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            $csv_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
-            $xlsx_file = sys_get_temp_dir() . '/' . Utils::generateRandomString();
-            $old_umask = umask(0007);
+            // Declare tmp file paths with unique file names.
+            $csv_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpPath(), uniqid("", true));
+            $xlsx_file = FileUtils::joinPaths($this->core->getConfig()->getCgiTmpPath(), uniqid("", true));
+
+            // This is to create tmp files and set permissions to RW-RW----
+            // chmod() is disabled by security policy, so we are using umask().
+            $old_umask = umask(0117);
             file_put_contents($csv_file, "");
+            $did_move = move_uploaded_file($tmp_name, $xlsx_file);
             umask($old_umask);
 
-            if (move_uploaded_file($tmp_name, $xlsx_file)) {
+            if ($did_move) {
+                // exec() and similar functions are disabled by security policy,
+                // so we are using a python script via CGI to invoke external program 'xlsx2csv'
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
@@ -500,295 +685,293 @@ class UsersController extends AbstractController {
 
                 curl_close($ch);
             } else {
-                $this->core->addErrorMessage("Error isolating uploaded XLSX. Contact your sysadmin.");
+                $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
 
         } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
             $csv_file = $tmp_name;
-            $xlsx_file = null;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
         }
 
-        register_shutdown_function(
-            function() use ($csv_file, $xlsx_file) {
-                if (file_exists($xlsx_file)) {
-                    unlink($xlsx_file);
-                }
-                if (file_exists($csv_file)) {
-                    unlink($csv_file);
-                }
-            }
-        );
-
-        //Set environment config to allow '\r' EOL encoding. (Used by older versions of Microsoft Excel on Macintosh)
+        // Parse user data (should be a CSV file either uploaded or converted from XLSX).
+        // First, set environment config to allow '\r' EOL encoding. (Used by Microsoft Excel on Macintosh)
         ini_set("auto_detect_line_endings", true);
 
-        $contents = file($csv_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-        if ($contents === false) {
+        // Read csv file as an entire string.
+        $user_data = file_get_contents($csv_file);
+
+        // Make sure read was successful.
+        if ($user_data === false) {
             $this->core->addErrorMessage("File was not properly uploaded. Contact your sysadmin.");
             $this->core->redirect($return_url);
         }
 
-        if ($content_type === 'spreadsheet/xlsx' && $mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
-            unset($contents[0]); //xlsx2csv will add a row to the top of the spreadsheet
-        }
+        // Remove UTF-8 BOM, if it exists.  Otherwise, it will cause a validation error on row 1, $val[0].
+        // First, define BOM (byte order mark).  Always hexadecimal EFBBBF.
+        // (note that EFBBBF is not printable)
+        $bom = hex2bin('EFBBBF');
 
-        return $contents;
+        // Remove BOM from $user_data.
+        $user_data = preg_replace("~^{$bom}~", "", $user_data);
+
+        // convert csv data string to array of $user_data[$rows][$vals].
+        $user_data = array_map('str_getcsv', str_getcsv($user_data, PHP_EOL));
+
+        // Remove all empty-data rows.  This should preserve original row number
+        // ordering, so error messaging refers to appropriately labeled row(s)
+        // in the spreadsheet / csv upload.
+        $user_data = array_filter($user_data, function ($row) {
+            return !empty(array_filter($row, function ($val) {
+                return !empty($val);
+            }));
+        });
+
+        //Apply trim() to all data values.
+        array_walk_recursive($user_data, function (&$val) {
+            $val = trim($val);
+        });
+
+        return $user_data;
     }
 
-    public function uploadGraderList() {
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'graders'));
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+    /**
+     * Upload user list data to database
+     *
+     * @param string $list_type "classlist" or "graderlist"
+     * @Route("/{_semester}/{_course}/users/upload", methods={"POST"})
+     */
+    public function uploadUserList($list_type = "classlist") {
+        // A few places have different behaviors depending on $list_type.
+        // These closure functions will help control those few times when
+        // $list_type dictates behavior.
+        /**
+         * Closure to validate $vals[4] depending on $list_type
+         *
+         * @return boolean true on successful validation, false otherwise.
+         */
+        $row4_validation_function = function () use ($list_type, &$vals) {
+            //$row[4] is different based on classlist vs graderlist
+            switch($list_type) {
+                case "classlist":
+                    //student
+                    if (isset($vals[4]) && strtolower($vals[4]) === "null") {
+                        $vals[4] = null;
+                    }
+                    //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
+                    return User::validateUserData('registration_section', $vals[4]);
+                case "graderlist":
+                    //grader
+                    if (isset($vals[4]) && is_numeric($vals[4])) {
+                        $vals[4] = intval($vals[4]); //change float read from xlsx to int
+                    }
+                    //grader-level check is a digit between 1 - 4.
+                    return User::validateUserData('user_group', $vals[4]);
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$row4_validation_function'));
+            }
+        };
 
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
-        }
+        /**
+         * Closure to get (as return) either user's registration_section or group_id, based on $list-type
+         *
+         * @return string
+         */
+        $get_user_registration_or_group_function = function ($user) use ($list_type) {
+            switch($list_type) {
+                case "classlist":
+                    return $user->getRegistrationSection();
+                case "graderlist":
+                    return (string)$user->getGroup();
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
+            }
+        };
+
+        /**
+         * Closure to set a user's registration_section or group_id based on $list_type)
+         */
+        $set_user_registration_or_group_function = function (&$user) use ($list_type, &$row) {
+            switch($list_type) {
+                case "classlist":
+                    // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
+                    // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
+                    $this->core->getQueries()->insertNewRegistrationSection($row[4]);
+                    $user->setRegistrationSection($row[4]);
+                    $user->setGroup(4);
+                    break;
+                case "graderlist":
+                    $user->setGroup($row[4]);
+                    break;
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$set_user_registration_or_group_function'));
+            }
+        };
+
+        /**
+         * Closure to INSERT or UPDATE user data based on $action
+         *
+         * @param string $action "insert" or "update"
+         */
+        $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
+            try {
+                switch($action) {
+                    case 'insert':
+                        //User must first exist in Submitty before being enrolled to a course.
+                        //$uploaded_data[0] = authentication ID.
+                        if (is_null($this->core->getQueries()->getSubmittyUser($uploaded_data[0]))) {
+                            $this->core->getQueries()->insertSubmittyUser($user);
+                        }
+                        $this->core->getQueries()->insertCourseUser($user, $semester, $course);
+                        break;
+                    case 'update':
+                        $this->core->getQueries()->updateUser($user, $semester, $course);
+                        break;
+                    default:
+                        throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
+                        break;
+                }
+            }
+            catch (DatabaseException $e) {
+                $this->core->addErrorMessage("Database Exception.  Please contact your sysadmin.");
+                $this->core->redirect($return_url);
+            }
+        };
+
+        /**
+         * Closure to determine $return_url action ("students" or "graders").
+         *
+         * @return string
+         */
+        $set_return_url_action_function = function () use ($list_type) {
+            switch($list_type) {
+                case "classlist":
+                    return "users";
+                case "graderlist":
+                    return "graders";
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
+            }
+        };
+
+        $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
 
         if ($_FILES['upload']['name'] == "") {
             $this->core->addErrorMessage("No input file specified");
             $this->core->redirect($return_url);
         }
 
-        $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
+        $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
 
-        //Validation and error checking.
+        // Validation and error checking.
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
-        $error_message = "";
-        $row_num = 0;
-        $graders_data = array();
-        foreach($contents as $content) {
-            $row_num++;
-            $vals = str_getcsv($content);
-            $vals = array_map('trim', $vals);
-            if (isset($vals[4])) $vals[4] = intval($vals[4]); //change float read from xlsx to int
-
-            //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
-
-            //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"".strip_tags($vals[1])."\"<br>";
-            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
-
-            //Check email address for appropriate format. e.g. "grader@university.edu", "grader@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
-
-            //grader-level check is a digit between 1 - 4.
-            $error_message .= User::validateUserData('user_group', $vals[4]) ? "" : "ERROR on row {$row_num}, Grader Group \"".strip_tags($vals[4])."\"<br>";
-
-            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
+        $bad_rows = array();
+        foreach($uploaded_data as $row_num => $vals) {
+            // Blacklist validation.  Validation fails if any test resolves as false.
+            switch(false) {
+                // Bounds check to ensure minimum required number of rows is present.
+                case count($vals) >= 5:
+                    // Username must contain only lowercase alpha, numbers, underscores, hyphens
+                case User::validateUserData('user_id', $vals[0]):
+                    // First and Last name must be alpha characters, white-space, or certain punctuation.
+                case User::validateUserData('user_legal_firstname', $vals[1]):
+                case User::validateUserData('user_legal_lastname', $vals[2]):
+                    // Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
+                case User::validateUserData('user_email', $vals[3]):
+                    // $row[4] validation varies by $list_type
+                    // "classlist" validates registration_section, and "graderlist" validates user_group
+                case $row4_validation_function():
+                    // Database password cannot be blank, no check on format.
+                    // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
+                case !$use_database || User::validateUserData('user_password', $row[5]):
+                    // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
+                    // Automatically validate if not set (this field is optional).
+                case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
+                case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                    // Validation failed somewhere.  Record which row failed.
+                    // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
+                    $bad_rows[] = ($row_num+1);
+                    break;
             }
-            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
-            }
-
-            //Database password cannot be blank, no check on format
-            if ($use_database) {
-                $error_message .= User::validateUserData('user_password', $vals[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
-            }
-
-            $graders_data[] = $vals;
         }
 
-        //Display any accumulated errors.  Quit on errors, otherwise continue.
-        if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+        // $bad_rows will contain rows with errors.  No errors to report when empty.
+        if (!empty($bad_rows)) {
+            $msg = "Error(s) on row(s) ";
+            array_walk($bad_rows, function ($row_num) use (&$msg) {
+                $msg .= " {$row_num}";
+            });
+            $this->core->addErrorMessage($msg);
             $this->core->redirect($return_url);
         }
 
-        //Existing graders are not updated.
+        // Isolate existing users ($users_to_update[]) and new users ($users_to_add[])
         $existing_users = $this->core->getQueries()->getAllUsers();
-        $graders_to_add = array();
-        $graders_to_update = array();
-        foreach($graders_data as $grader_data) {
+        $users_to_add = array();
+        $users_to_update = array();
+        foreach($uploaded_data as $row) {
             $exists = false;
             foreach($existing_users as $i => $existing_user) {
-                if ($grader_data[0] === $existing_user->getId()) {
-                    if ($grader_data[4] !== $existing_user->getGroup()) {
-                        $graders_to_update[] = $grader_data;
+                if ($row[0] === $existing_user->getId()) {
+                    // Validate if this user has any data to update.
+                    // Did student registration section or grader group change?
+                    if ($row[4] !== $get_user_registration_or_group_function($existing_user)) {
+                        $users_to_update[] = $row;
                     }
-                    unset($existing_users[$i]);
                     $exists = true;
+                    //Unset this existing user.
+                    //Those that remain in this list are candidates to be moved to NULL reg section, later.
+                    unset($existing_users[$i]);
                     break;
                 }
             }
             if (!$exists) {
-                $graders_to_add[] = $grader_data;
+                $users_to_add[] = $row;
             }
         }
 
-        //Insert new graders to database
+        // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach($graders_to_add as $grader_data) {
-            $grader = new User($this->core);
-            $grader->setId($grader_data[0]);
-            $grader->setLegalFirstName($grader_data[1]);
-            $grader->setLegalLastName($grader_data[2]);
-            $grader->setEmail($grader_data[3]);
-            $grader->setGroup($grader_data[4]);
-            if (isset($grader_data[$pref_firstname_idx]) && ($grader_data[$pref_firstname_idx] !== "")) {
-                $grader->setPreferredFirstName($grader_data[$pref_firstname_idx]);
+        foreach($users_to_add as $uploaded_data) {
+            $user = new User($this->core);
+            $user->setId($uploaded_data[0]);
+            $user->setLegalFirstName($uploaded_data[1]);
+            $user->setLegalLastName($uploaded_data[2]);
+            $user->setEmail($uploaded_data[3]);
+            $set_user_registration_or_group_function($user);
+            if (isset($uploaded_data[$pref_firstname_idx]) && !empty($uploaded_data[$pref_firstname_idx])) {
+                $user->setPreferredFirstName($uploaded_data[$pref_firstname_idx]);
             }
-            if (isset($grader_data[$pref_lastname_idx]) && ($grader_data[$pref_lastname_idx] !== "")) {
-                $grader->setPreferredLastName($grader_data[$pref_lastname_idx]);
-            }
-
-            if ($use_database) {
-                $grader->setPassword($grader_data[5]);
-            }
-            if ($this->core->getQueries()->getSubmittyUser($grader_data[0]) === null) {
-                $this->core->getQueries()->insertSubmittyUser($grader);
-            }
-            $this->core->getQueries()->insertCourseUser($grader, $semester, $course);
-        }
-        foreach($graders_to_update as $grader_data) {
-            $grader = $this->core->getQueries()->getUserById($grader_data[0]);
-            $grader->setGroup($grader_data[4]);
-            $this->core->getQueries()->updateUser($grader, $semester, $course);
-        }
-
-        $added = count($graders_to_add);
-        $updated = count($graders_to_update);
-        $this->core->addSuccessMessage("Uploaded {$_FILES['upload']['name']}: ({$added} added, {$updated} updated)");
-        $this->core->redirect($return_url);
-    }
-
-    public function uploadClassList() {
-        $return_url = $this->core->buildUrl(array('component'=>'admin', 'page'=>'users', 'action'=>'students'));
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        if (!$this->core->checkCsrfToken($_POST['csrf_token'])) {
-            $this->core->addErrorMessage("Invalid CSRF token");
-            $this->core->redirect($return_url);
-        }
-
-        if ($_FILES['upload']['name'] == "") {
-            $this->core->addErrorMessage("No input file specified");
-            $this->core->redirect($return_url);
-        }
-
-        $contents = $this->getCsvOrXlsxData($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
-
-        //Validation and error checking.
-        $num_reg_sections = count($this->core->getQueries()->getRegistrationSections());
-        $pref_firstname_idx = $use_database ? 6 : 5;
-        $pref_lastname_idx = $pref_firstname_idx + 1;
-        $error_message = "";
-        $row_num = 0;
-        $students_data = array();
-        foreach($contents as $content) {
-            $row_num++;
-            $vals = str_getcsv($content);
-            $vals = array_map('trim', $vals);
-
-            if (isset($vals[4])) {
-                if (strtolower($vals[4]) === "null") {
-                    $vals[4] = null;
-                }
-            }
-
-            //Username must contain only lowercase alpha, numbers, underscores, hyphens
-            $error_message .= User::validateUserData('user_id', $vals[0]) ? "" : "ERROR on row {$row_num}, User Name \"".strip_tags($vals[0])."\"<br>";
-
-            //First and Last name must be alpha characters, white-space, or certain punctuation.
-            $error_message .= User::validateUserData('user_legal_firstname', $vals[1]) ? "" : "ERROR on row {$row_num}, First Name \"{$vals[1]}\"<br>";
-            $error_message .= User::validateUserData('user_legal_lastname', $vals[2]) ? "" : "ERROR on row {$row_num}, Last Name \"".strip_tags($vals[2])."\"<br>";
-
-            //Check email address for appropriate format. e.g. "student@university.edu", "student@cs.university.edu", etc.
-            $error_message .= User::validateUserData('user_email', $vals[3]) ? "" : "ERROR on row {$row_num}, email \"".strip_tags($vals[3])."\"<br>";
-
-            //Check registration for appropriate format. Allowed characters - A-Z,a-z,_,-
-            $error_message .= User::validateUserData('registration_section', $vals[4]) ? "" : "ERROR on row {$row_num}, Registration Section \"".strip_tags($vals[4])."\"<br>";
-
-            //Preferred first and last name must be alpha characters, white-space, or certain punctuation.
-            if (isset($vals[$pref_firstname_idx]) && ($vals[$pref_firstname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]) ? "" : "ERROR on row {$row_num}, Preferred First Name \"".strip_tags($vals[$pref_firstname_idx])."\"<br>";
-            }
-            if (isset($vals[$pref_lastname_idx]) && ($vals[$pref_lastname_idx] !== "")) {
-                $error_message .= User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]) ? "" : "ERROR on row {$row_num}, Preferred Last Name \"".strip_tags($vals[$pref_lastname_idx])."\"<br>";
-            }
-
-            //Database password cannot be blank, no check on format
-            if ($use_database) {
-                $error_message .= User::validateUserData('user_password', $vals[5]) ? "" : "ERROR on row {$row_num}, password cannot be blank<br>";
-            }
-
-            $students_data[] = $vals;
-        }
-
-        //Display any accumulated errors.  Quit on errors, otherwise continue.
-        if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
-            $this->core->redirect($return_url);
-        }
-
-        //Existing students are not updated.
-        $existing_users = $this->core->getQueries()->getAllUsers();
-        $students_to_add = array();
-        $students_to_update = array();
-        foreach($students_data as $student_data) {
-            $exists = false;
-            foreach($existing_users as $i => $existing_user) {
-                if ($student_data[0] === $existing_user->getId()) {
-                    if ($student_data[4] !== $existing_user->getRegistrationSection()) {
-                        $students_to_update[] = $student_data;
-                    }
-                    unset($existing_users[$i]);
-                    $exists = true;
-                    break;
-                }
-            }
-            if (!$exists) {
-                $students_to_add[] = $student_data;
-            }
-        }
-
-        //Insert new students to database
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
-        foreach($students_to_add as $student_data) {
-            $student = new User($this->core);
-            $student->setId($student_data[0]);
-            $student->setLegalFirstName($student_data[1]);
-            $student->setLegalLastName($student_data[2]);
-            $student->setEmail($student_data[3]);
-            $student->setRegistrationSection($student_data[4]);
-            $student->setGroup(4);
-            if (isset($student_data[$pref_firstname_idx]) && ($student_data[$pref_firstname_idx] !== "")) {
-                $student->setPreferredFirstName($student_data[$pref_firstname_idx]);
-            }
-            if (isset($student_data[$pref_lastname_idx]) && ($student_data[$pref_lastname_idx] !== "")) {
-                $student->setPreferredLastName($student_data[$pref_lastname_idx]);
+            if (isset($uploaded_data[$pref_lastname_idx]) && !empty($uploaded_data[$pref_lastname_idx])) {
+                $user->setPreferredLastName($uploaded_data[$pref_lastname_idx]);
             }
             if ($use_database) {
-                $student->setPassword($student_data[5]);
+                $user->setPassword($uploaded_data[5]);
             }
-            if ($this->core->getQueries()->getSubmittyUser($student_data[0]) === null) {
-                $this->core->getQueries()->insertSubmittyUser($student);
-            }
-            $this->core->getQueries()->insertCourseUser($student, $semester, $course);
-        }
-        foreach($students_to_update as $student_data) {
-            $student = $this->core->getQueries()->getUserById($student_data[0]);
-            $student->setRegistrationSection($student_data[4]);
-            $this->core->getQueries()->updateUser($student, $semester, $course);
+            $insert_or_update_user_function('insert', $user);
         }
 
-        $added = count($students_to_add);
-        $updated = count($students_to_update);
+        // Existing users update
+        foreach($users_to_update as $row) {
+            $user = $this->core->getQueries()->getUserById($row[0]);
+            //Update registration section (student) or group (grader)
+            $set_user_registration_or_group_function($user);
+            $insert_or_update_user_function('update', $user);
+        }
+        $added = count($users_to_add);
+        $updated = count($users_to_update);
 
-        if (isset($_POST['move_missing'])) {
-            foreach($existing_users as $user) {
-                if ($user->getRegistrationSection() != null) {
-                    $user->setRegistrationSection(null);
-                    $this->core->getQueries()->updateUser($user, $semester, $course);
+        //Special case to move students to the NULL section with a classlist upload.
+        if ($list_type === "classlist" && isset($_POST['move_missing'])) {
+            foreach($existing_users as $existing_user) {
+                if (!is_null($existing_user->getRegistrationSection())) {
+                    $existing_user->setRegistrationSection(null);
+                    $insert_or_update_user_function('update', $existing_user);
                     $updated++;
                 }
             }

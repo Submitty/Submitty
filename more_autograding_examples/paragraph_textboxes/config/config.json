@@ -4,70 +4,109 @@
         "submission_to_validation" : [ "*.txt", "*.png" ],
         "work_to_details" : [ "*.txt", "*.png" ]
     },
-    "textboxes" : [
-        { 
-            "label": "The above animal:",
-            "images": [
-                {
-                    "image_name" : "image1.png"
-                }
+    "notebook" : [
+        {
+            "type": "markdown",
+            "markdown_string": "word1  \n  \n  \ntwo  \nthree\nfour"
+        },
+        {
+            "type": "image",
+            "image" : "image1.png",
+            "alt_text" : "A very happy pig.",
+            "height": 300,
+            "width": 300
+        },
+        {
+            "type": "image",
+            "image" : "image1.png"
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "The above animal:",
+            "testcase_ref": "animal"
+        },
+        {
+            "type": "short_answer",
+            "filename": "box_one.txt",
+            "initial_value": "Box one"
+        },
+        {
+          "type": "short_answer",
+          "filename": "box_two.txt",
+          "initial_value": ".\n^\n$\n*\n+\n-\n?\n( )\n[ ]\n{ }\n\\\n|\n`",
+          "rows": 5
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "Multiple choice select one:"
+        },
+        {
+            "type": "multiple_choice",
+            "filename": "select_one.txt",
+            "choices":[
+                {"value": "short", "description": "# the plant will  \n ## be short because it  \n ### doesn't get enough water"},
+                {"value": "medium", "description": "### the plant will grow normally"},
+                {"value": "tall", "description": "[the plant will be tall because it gets lots of light](http://submitty.org)"}
             ],
-            "filename" : "animal.txt"
+            "allow_multiple": false
         },
-        {    
-            "label": "200-300 word description",
-            "rows" : 5,
-            "filename" : "description.txt"
+        {
+            "type": "markdown",
+            "markdown_string": "Multiple choice select many:"
         },
-        {    
-            "label": "Write a haiku about one of the above images:",
-            "images": [
-                {
-                    "image_name" : "image2.png",
-                    "image_height" : 200,
-                    "image_width" : 200
-                },
-                {
-                    "image_name" : "image3.png",
-                    "image_height" : 200,
-                    "image_width" : 200
-                },
-                {
-                    "image_name" : "image4.png",
-                    "image_height" : 200,
-                    "image_width" : 200
-                }
+        {
+            "type": "multiple_choice",
+            "filename": "select_many.txt",
+            "choices":[
+                {"value": "1", "description": "one"},
+                {"value": "2", "description": "two"},
+                {"value": "3", "description": "three"},
+                {"value": "4", "description": "four"},
+                {"value": "5", "description": "five"}
             ],
-            "filename" : "haiku.txt"
+            "allow_multiple": true
         },
-        { 
-            "label": "Number of hours spent on this assignment:",
-            "filename" : "hours.txt"
+        {
+          "type": "markdown",
+          "markdown_string": "Codebox"
+        },
+        {
+          "type": "short_answer",
+          "programming_language": "python",
+          "filename": "codebox.txt",
+            "initial_value": ".\n^\n$\n*\n+\n-\n?\n( )\n[ ]\n{ }\n\\\n|\n`"
         }
     ],
     "testcases" : [ 
         {
             "type" : "FileCheck",
-            "title" : "Review Favorite Color",
-            "actual_file" : "animal.txt",
+            "title" : "First Box",
+            "actual_file" : "box_one.txt",
+            "testcase_label": "animal",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Description",
-            "actual_file" : "description.txt",
+            "title" : "Second Box",
+            "actual_file" : "box_two.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Haiku",
-            "actual_file" : "haiku.txt",
+            "title" : "Select One",
+            "actual_file" : "select_one.txt",
             "points" : 0
         },
         {
             "type" : "FileCheck",
-            "title" : "Review Hours",
-            "actual_file" : "hours.txt",
+            "title" : "Select Many",
+            "actual_file" : "select_many.txt",
+            "points" : 0
+        },
+        {
+            "type" : "FileCheck",
+            "title" : "Codebox",
+            "actual_file" : "codebox.txt",
             "points" : 0
         }
     ]

@@ -1,21 +1,24 @@
-const { UI } = PDFAnnotate;
-let loaded = sessionStorage.getItem('toolbar_loaded');
-window.onbeforeunload = function(){
+if (PDFAnnotate.default) {
+  PDFAnnotate = PDFAnnotate.default;
+}
+
+var loaded = sessionStorage.getItem('toolbar_loaded');
+window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
 //Toolbar stuff
-(function (){
+(function () {
     let active_toolbar = true;
     const debounce = (fn, time, ...args) => {
-        if(active_toolbar){
+        if (active_toolbar) {
             fn(args);
             active_toolbar = false;
-            setTimeout(function(){
+            setTimeout(function() {
                 active_toolbar = true;
             }, time);
         }
     }
-    function setActiveToolbarItem(option){
+    function setActiveToolbarItem(option) {
         let selected = $('.tool-selected');
         let clicked_button = $("a[value="+option+"]");
         if(option != selected.attr('value')){
@@ -28,17 +31,17 @@ window.onbeforeunload = function(){
                 switch($(selected[0]).attr('value')){
                     case 'pen':
                         $('#file_content').css('overflow', 'auto');
-                        $('#scroll_lock_mode').removeAttr('checked');
-                        UI.disablePen();
+                        $('#scroll_lock_mode').prop('checked', false);
+                        PDFAnnotate.UI.disablePen();
                         break;
                     case 'eraser':
-                        UI.disableEraser();
+                        PDFAnnotate.UI.disableEraser();
                         break;
                     case 'cursor':
-                        UI.disableEdit();
+                        PDFAnnotate.UI.disableEdit();
                         break;
                     case 'text':
-                        UI.disableText();
+                        PDFAnnotate.UI.disableText();
                         break;
                 }
                 $('.selection_panel').hide();
@@ -46,14 +49,14 @@ window.onbeforeunload = function(){
             switch(option){
                 case 'pen':
                     currentTool = 'pen';
-                    UI.enablePen();
+                    PDFAnnotate.UI.enablePen();
                     break;
                 case 'eraser':
                     currentTool = 'eraser';
-                    UI.enableEraser();
+                    PDFAnnotate.UI.enableEraser();
                     break;
                 case 'cursor':
-                    UI.enableEdit();
+                    PDFAnnotate.UI.enableEdit();
                     break;
                 case 'clear':
                     clearCanvas();
@@ -75,7 +78,7 @@ window.onbeforeunload = function(){
                     break;
                 case 'text':
                     currentTool = 'text';
-                    UI.enableText();
+                    PDFAnnotate.UI.enableText();
                     break;
             }
         } else {
@@ -101,9 +104,9 @@ window.onbeforeunload = function(){
         let zoom_flag = true;
         let zoom_level = window.RENDER_OPTIONS.scale;
         if(option == 'in'){
-            zoom_level += 1;
+            zoom_level += 0.1;
         } else if(option == 'out'){
-            zoom_level -= 1;
+            zoom_level -= 0.1;
         } else {
             if(custom_val != null){
                 zoom_level = custom_val/100;
@@ -136,14 +139,15 @@ window.onbeforeunload = function(){
 
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
-        let url = buildUrl({'component': 'PDF','page': 'save_pdf_annotation'});
+        let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
             url: url,
             data: {
                 annotation_layer,
-                GENERAL_INFORMATION
+                GENERAL_INFORMATION,
+                'csrf_token': csrfToken
             },
             success: function(data){
                 let response = JSON.parse(data);
@@ -244,7 +248,7 @@ window.onbeforeunload = function(){
         }
 
         if (modified) {
-            UI.setPen(penSize, penColor);
+            PDFAnnotate.UI.setPen(penSize, penColor);
         }
     }
 
@@ -284,7 +288,7 @@ window.onbeforeunload = function(){
         }
 
         if (modified) {
-            UI.setText(textSize, textColor);
+            PDFAnnotate.UI.setText(textSize, textColor);
         }
     }
     if(!loaded){

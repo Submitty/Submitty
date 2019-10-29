@@ -1,10 +1,10 @@
 input[readonly] {
-    background:rgba(0,0,0,0);
+    background:var(--default-white);
     border:none;
 }
 
 input[disabled] {
-    background: #999;
+    background: var(--standard-medium-gray);
 }
 
 #gradeable-dates input[type="text"] {
@@ -13,7 +13,9 @@ input[disabled] {
 
 select {
     margin-top:7px;
-    /* width: 60px; */
+    width: -webkit-fill-available;
+    width: -moz-available;
+    width:  fill-available;
     min-width: 60px;
 }
 
@@ -51,14 +53,45 @@ select {
     display: none;
 }
 
-.nav-bar {
-    cursor: pointer;
-    vertical-align: center;
-    padding-right: 10px;
-    padding-left: 10px;
-    padding-top: 4px;
-    padding-bottom: 4px;
-    background-color: green;
+.tab-bar-wrapper {
+    border-bottom: 1px solid gray;
+    display: flex;
+    height: 35px;
+}
+
+a.nav-bar {
+    padding: 6px 12px;
+    text-decoration: none;
+    background-color: var(--default-white);
+    color: var(--text-black);
+    border-radius: 6px 6px 0 0;
+}
+
+a.nav-bar.normal-btn:hover {
+    background-color: var(--standard-pastel-blue);
+    color: var(--text-black);
+    border: 1px solid gray;
+    border-bottom: none;
+}
+
+a.nav-bar.disabled-btn {
+    color: var(--standard-medium-gray) ;
+    cursor: default;
+    border: none !important;
+    pointer-events: none;
+}
+
+a.nav-bar.normal-btn {
+    background-color: var(--default-white) ;
+    color: var(--text-black);
+    border: 1px solid gray;
+    border-bottom: none;
+}
+
+a.nav-bar.active-btn {
+    background-color: var(--submitty-logo-blue);
+    color: var(--default-white);
+    font-weight: bold;
 }
 
 /* align the radio, buttons and checkboxes with labels */
@@ -67,15 +100,16 @@ input[type="radio"],input[type="checkbox"] {
     vertical-align: middle;
 }
 
-fieldset {
-    margin: 8px;
-    border: 1px solid silver;
+.settings {
     padding: 8px;
     border-radius: 4px;
-    display: block;
 }
 
-legend{
+#electronic_file {
+    padding-left: 20px;
+}
+
+.settings-description {
     padding: 2px;
     font-size: 12pt;
 }
@@ -94,7 +128,7 @@ legend{
 
 table#grader-history th, table#grader-history td {
     padding: 8px;
-    border: 3px solid black;
+    border: 3px solid var(--text-black);
     text-align: center;
 }
 
@@ -110,6 +144,13 @@ table#grader-history th, table#grader-history td {
     margin-top: 20px;
 }
 
+[name = 'config_search_error'] {
+    font-weight:normal;
+    /* color is danger-red from colors.css can be changed when available */
+    color: var(--danger-red);
+
+}
+
 div.log-container {
     margin-top: 20px;
 }
@@ -119,27 +160,52 @@ div.btn-container {
     margin-bottom: 5px;
 }
 
+#regrade_request_enable_container {
+    margin-top: 10px;
+}
+
+#discussion_grading_enable_container {
+    margin-top: 10px;
+}
+
 #team-settings-container {
-    margin-top: 10px
+    margin-top: 10px;
 }
 
-.disabled-btn{
-    background-color:#d4d4d4 ;
-    color: #5a5a5a ;
-    cursor: default;
-}
-.normal-btn{
-    background-color: #d0d0d0 ;
-    color: #111111 ;
-    border:solid 1px rgba(0,0,0,0.75);
-}
-.normal-btn:hover{
-    border: none;
+#rebuild-status-panel {
+    display: inline-block;
+    background-color: lightgrey;
+
+    position: relative;
+    top: 5px;
+    left: 50px;
+    height: 34px;
+    width: auto;
+
+    padding: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
 }
 
-.active-btn{
-    background-color: #008000;
-    color: #ffffff;
-    border: none;
+#rebuild-gradeable-button {
+    float: left;
+    display: inline-block;
 }
 
+#rebuild-status-label {
+    display: inline-block;
+}
+
+#rebuild-status {
+    display: inline-block;
+    margin: auto;
+}
+
+#rebuild-log-button {
+    display: inline-block;
+    padding-left: 55px;
+    position: relative;
+    top: 5px;
+    float: right;
+}
