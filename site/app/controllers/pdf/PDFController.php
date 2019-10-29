@@ -100,7 +100,7 @@ class PDFController extends AbstractController {
         }
 
         if (strpos($annotation_info['file_name'], '..') !== false) {
-          return false;
+            return false;
         }
 
         $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
@@ -117,9 +117,9 @@ class PDFController extends AbstractController {
     public function showGraderPDFEmbedded($gradeable_id){
         //This is the embedded pdf annotator that we built.
         //User can be a team
-        $id = $_POST['user_id'] ?? NULL;
-        $filename = $_POST['filename'] ?? NULL;
-        $page_num = $_POST['page_num'] ?? NULL;
+        $id = $_POST['user_id'] ?? null;
+        $filename = $_POST['filename'] ?? null;
+        $page_num = $_POST['page_num'] ?? null;
         $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){

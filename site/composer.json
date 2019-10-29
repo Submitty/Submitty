@@ -16,7 +16,7 @@
     }
   },
   "require": {
-    "twig/twig": "2.11.3",
+    "twig/twig": "2.12.1",
     "ramsey/uuid": "3.8.0",
     "aptoma/twig-markdown": "3.2.0",
     "erusev/parsedown": "1.7.3",
@@ -25,14 +25,14 @@
     "symfony/config": "4.3.5",
     "symfony/http-foundation": "4.3.5",
     "doctrine/annotations": "1.8.0",
-    "doctrine/cache": "1.8.0",
+    "doctrine/cache": "1.8.1",
     "php-ds/php-ds": "1.2.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "8.4.1",
+    "phpunit/phpunit": "8.4.2",
     "submitty/php-codesniffer": "2.2.0",
     "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
     "php-mock/php-mock-phpunit": "2.5.0",
-    "phpstan/phpstan": "0.11.18"
+    "phpstan/phpstan": "0.11.19"
   }
 }

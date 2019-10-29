@@ -15,7 +15,7 @@ use app\libraries\GradeableType;
  * This class is a RainbowGrades Customization.  It may contain the data found in customization.json but it also
  * contains additional data that is used by the web user interface to aid in generation/customization.
  */
-class RainbowCustomization extends AbstractModel{
+class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $customization_data = [];
@@ -195,7 +195,7 @@ class RainbowCustomization extends AbstractModel{
         // Add data into retArray
         foreach ($displayBenchmarks as $displayBenchmark)
         {
-            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = True : $isUsed = False;
+            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = true : $isUsed = false;
 
             // Add benchmark to return array
             $retArray[] = ['id' => $displayBenchmark, 'isUsed' => $isUsed];

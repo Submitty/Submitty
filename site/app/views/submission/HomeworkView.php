@@ -337,11 +337,11 @@ class HomeworkView extends AbstractView {
             }
         }
 
-        $component_names = array_map(function(Component $component) {
+        $component_names = array_map(function (Component $component) {
             return $component->getTitle();
         }, $gradeable->getComponents());
 
-        $input_data = array_map(function(AbstractGradeableInput $inp) {
+        $input_data = array_map(function (AbstractGradeableInput $inp) {
             return $inp->toArray();
         }, $inputs);
 
@@ -407,7 +407,9 @@ class HomeworkView extends AbstractView {
             'upload_message' => $this->core->getConfig()->getUploadMessage(),
             "csrf_token" => $this->core->getCsrfToken(),
             'has_overridden_grades' => $graded_gradeable ? $graded_gradeable->hasOverriddenGrades() : false,
-            'days_to_be_charged' => $days_to_be_charged
+            'days_to_be_charged' => $days_to_be_charged,
+            'max_file_size' => Utils::returnBytes(ini_get('upload_max_filesize')),
+            'max_post_size' => Utils::returnBytes(ini_get('post_max_size'))
         ]);
     }
 
@@ -527,8 +529,6 @@ class HomeworkView extends AbstractView {
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
         $gradeable_id = $_REQUEST['gradeable_id'] ?? '';
-        $current_time = $this->core->getDateTimeNow()->format("m-d-Y_H:i:sO");
-        $ch = curl_init();
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/BulkUploadBox.twig', [
             'gradeable_id' => $gradeable->getId(),
             'team_assignment' => $gradeable->isTeamAssignment(),
@@ -573,7 +573,7 @@ class HomeworkView extends AbstractView {
         $active_version_number = $auto_graded_gradeable->getActiveVersion();
         $display_version = 0;
 
-        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
                 'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0

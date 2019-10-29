@@ -29,9 +29,10 @@ class OfficeHoursQueueView extends AbstractView {
         'code' => $oh_queue->getCode(),
         'new_code_url' => $this->core->buildCourseUrl(["office_hours_queue/code"]),
         'toggle_open_url' => $this->core->buildCourseUrl(["office_hours_queue/toggle"]),
+        'empty_queue_url' => $this->core->buildCourseUrl(["office_hours_queue/empty"]),
         'remove_url' => $this->core->buildCourseUrl(["office_hours_queue/remove"]),
         'start_help_url' => $this->core->buildCourseUrl(["office_hours_queue/startHelp"]),
         'finish_help_url' => $this->core->buildCourseUrl(["office_hours_queue/finishHelp"])
-    ]);
+        ]);
     }
 }

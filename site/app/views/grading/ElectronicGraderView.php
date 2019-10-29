@@ -46,7 +46,8 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings) {
+        bool $show_warnings
+    ) {
 
         $peer = false;
         if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -203,8 +204,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
-                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) && $no_rotating_sections
+                && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -582,7 +583,7 @@ HTML;
         }
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function($a,$b) {
+        usort($sections, function ($a,$b) {
             return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
         });
 
@@ -928,7 +929,7 @@ HTML;
         }
 
         // TODO: this is duplicated in Homework View
-        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
                 'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0

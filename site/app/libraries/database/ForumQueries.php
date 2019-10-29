@@ -5,7 +5,8 @@ namespace app\libraries\database;
 use app\models\forum\Thread;
 use app\models\forum\Post;
 
-class ForumQueries { //extends DatabaseQueries {
+class ForumQueries {
+ //extends DatabaseQueries {
 
 
     public function createPost(Post &$p, bool $isFirst){
@@ -18,7 +19,7 @@ class ForumQueries { //extends DatabaseQueries {
         }
 
         try {
-            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($p->getThreadId(), $p->getParentId(), $p->getAuthor(), $p->getContent(), $anonymous, 0, NULL, $type, $hasAttachment));
+            $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?)", array($p->getThreadId(), $p->getParentId(), $p->getAuthor(), $p->getContent(), $anonymous, 0, null, $type, $hasAttachment));
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", [ $p->getThreadId(), $p->getUser() ] );
         } catch (DatabaseException $dbException){
             if($this->course_db->inTransaction()){
