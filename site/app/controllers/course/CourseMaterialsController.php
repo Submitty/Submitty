@@ -18,7 +18,7 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
             'listCourseMaterials',
-            $user = $this->core->getUser()
+            $this->core->getUser()
         );
     }
 
@@ -222,7 +222,7 @@ class CourseMaterialsController extends AbstractController {
 
         $new_data_time = htmlspecialchars($newdatatime);
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === FALSE){
+        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === false){
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
@@ -298,18 +298,18 @@ class CourseMaterialsController extends AbstractController {
         if(isset($_POST['sections'])){
             $sections = $_POST['sections'];
         }
-        
+
         $hide_from_students = null;
         if(isset($_POST['hide_from_students'])){
             $hide_from_students = $_POST['hide_from_students'];
         }
-        
+
         if(empty($sections) && !is_null($sections)){
             $sections = [];
         }
 
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === FALSE){
+        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === false){
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
@@ -432,7 +432,6 @@ class CourseMaterialsController extends AbstractController {
                                     'hide_from_students' => $hide_from_students
                                 ];
                             }
-                            
                             else{
                                 $json[$path] = [
                                     'checked' => '1',

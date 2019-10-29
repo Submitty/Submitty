@@ -158,6 +158,19 @@ class OfficeHoursQueueController extends AbstractController {
 
     /**
     * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/empty", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function emptyQueue(){
+        $this->core->getQueries()->emptyQueue($this->core->getUser()->getId());
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/remove", methods={"POST"})
     * @return Response
     */
@@ -188,12 +201,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @return Response
     */
     public function generateNewCode(){
-        if(!$this->core->getUser()->accessGrading()){
-            return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
-            );
-        }
-        $this->core->getQueries()->openQueue();
+        $this->core->getQueries()->genNewQueueCode();
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
