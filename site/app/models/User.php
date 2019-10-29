@@ -270,7 +270,7 @@ class User extends AbstractModel {
         $this->displayed_first_name = (!empty($this->preferred_first_name)) ? $this->preferred_first_name : $this->legal_first_name;
     }
 
-    private function setDisplayedlastName() {
+    private function setDisplayedLastName() {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
