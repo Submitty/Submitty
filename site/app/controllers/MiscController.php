@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -285,27 +284,21 @@ class MiscController extends AbstractController {
                     new \RecursiveDirectoryIterator($paths[$x]),
                     \RecursiveIteratorIterator::LEAVES_ONLY
                 );
-                $zip -> addEmptyDir($folder_names[$x]);
-                foreach ($files as $name => $file)
-                {
+                $zip->addEmptyDir($folder_names[$x]);
+                foreach ($files as $name => $file) {
                     // Skip directories (they would be added automatically)
-                    if (!$file->isDir())
-                    {
+                    if (!$file->isDir()) {
                         // Get real and relative path for current file
-                        $filePath = $file->getRealPath();
-                        $relativePath = substr($filePath, strlen($paths[$x]) + 1);
-
-                        if($this->core->getUser()->accessGrading()){
-                            // Add current file to archive
-                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
-                        }else if ($gradeable->isScannedExam()
-                                  && FileUtils::getContentType($filePath) === "application/pdf"){
-                            //If the user is a student, only get PDFs if this is a bulk upload gradeable
-                            // Add current file to archive
+                        $file_path = $file->getRealPath();
+                        $relative_path = substr($filePath, strlen($paths[$x]) + 1);
+                        if ($gradeable->isScannedExam()) {
+                            if (mime_content_type($filePath) === 'application/pdf') {
+                                $zip->addFile($filePath, $folder_names[$x] . '/' . $relativePath);
+                            }
+                        }
+                        else {
                             $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
                         }
-
-
                     }
                 }
             }
