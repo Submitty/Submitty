@@ -62,7 +62,7 @@ class ForumThreadView extends AbstractView {
                 $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["p_author"]);
                 $first_name = trim($user_info["first_name"]);
                 $last_name = trim($user_info["last_name"]);
-                $visible_username = $first_name . " " . substr($last_name, 0 , 1) . ".";
+                $visible_username = $first_name . " " . substr($last_name, 0, 1) . ".";
 
                 if($post["anonymous"]){
                     $visible_username = 'Anonymous';
@@ -560,9 +560,9 @@ class ForumThreadView extends AbstractView {
     }
 
     public function contentMarkdownToPlain($str){
-        $str = preg_replace("/\[[^)]+\]/","",$str);
+        $str = preg_replace("/\[[^)]+\]/", "", $str);
         $str = preg_replace('/\(([^)]+)\)/s', '$1', $str);
-        $str = str_replace("```","", $str);
+        $str = str_replace("```", "", $str);
         return $str;
     }
 
@@ -749,7 +749,7 @@ class ForumThreadView extends AbstractView {
         }
         //This code is for legacy posts that had an extra \r per newline
         if(strpos($original_post_content, "\r") !== false){
-            $post_content = str_replace("\r","", $post_content);
+            $post_content = str_replace("\r", "", $post_content);
         }
 
         //end link handling
@@ -939,7 +939,7 @@ class ForumThreadView extends AbstractView {
             "current_user" => $current_user,
             "author_email" => $author_email,
             "post_user_info" => $post_user_info,
-            "post_date" => $function_date($date,'n/j g:i A'),
+            "post_date" => $function_date($date, 'n/j g:i A'),
             "edit_date" => $edit_date,
             "post_buttons" => $post_button,
             "visible_username" => $visible_username,

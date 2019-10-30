@@ -23,18 +23,18 @@ class CourseMaterialsController extends AbstractController {
     }
 
     public function deleteHelper($file, &$json) {
-        if ((array_key_exists('name',$file))) {
+        if ((array_key_exists('name', $file))) {
             $filename = $file['path'];
             unset($json[$filename]);
             return;
         }
         else {
-            if(array_key_exists('files',$file)) {
-                $this->deleteHelper($file['files'],$json);
+            if(array_key_exists('files', $file)) {
+                $this->deleteHelper($file['files'], $json);
             }
             else {
                 foreach ($file as $f) {
-                    $this->deleteHelper($f,$json);
+                    $this->deleteHelper($f, $json);
                 }
             }
         }
@@ -62,7 +62,7 @@ class CourseMaterialsController extends AbstractController {
             $all_files = is_dir($path) ? FileUtils::getAllFiles($path) : [$path];
             foreach($all_files as $file) {
                 if(is_array($file)){
-                    $this->deleteHelper($file,$json);
+                    $this->deleteHelper($file, $json);
                 }
                 else{
                     unset($json[$file]);
@@ -470,7 +470,7 @@ class CourseMaterialsController extends AbstractController {
             }
         }
 
-        FileUtils::writeJsonFile($fp,$json);
+        FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
     }
 }

@@ -33,7 +33,7 @@ class CourseMaterialsView extends AbstractView {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
-                array_push($in_dir,$expected_file_path);
+                array_push($in_dir, $expected_file_path);
 
                 // Check whether the file is shared to student or not
                 // If shared, will add to courseMaterialsArray
@@ -82,7 +82,7 @@ class CourseMaterialsView extends AbstractView {
                     $ex_file_path['checked'] = '1';
                     $isShareToOther = $ex_file_path['checked'];
                     $date = $now_date_time->format("Y-m-d H:i:sO");
-                    $date = substr_replace($date,"9999",0,4);
+                    $date = substr_replace($date, "9999", 0, 4);
                     $ex_file_path['release_datetime'] = $date;
                     $ex_file_path['hide_from_students'] = "on";
                     $releaseData = $ex_file_path['release_datetime'];
@@ -116,7 +116,7 @@ class CourseMaterialsView extends AbstractView {
                 if( $releaseData == $now_date_time->format("Y-m-d H:i:sO")){
                     //for uploaded files that have had no manually set date to be set to never and maintained as never
                     //also permission set to yes
-                    $releaseData = substr_replace($releaseData,"9999",0,4);
+                    $releaseData = substr_replace($releaseData, "9999", 0, 4);
                     $json[$expected_file_path]['checked'] = '1';
                     $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
@@ -124,7 +124,7 @@ class CourseMaterialsView extends AbstractView {
             }
 
             if($json == false){
-                FileUtils::writeJsonFile($fp,$no_json);
+                FileUtils::writeJsonFile($fp, $no_json);
             }
             $can_write = is_writable($fp);
             if(!$can_write){
@@ -149,7 +149,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp, $file_sections, $hide_from_students);
+        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {

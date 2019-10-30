@@ -28,7 +28,7 @@ HTML;
             $delete_form_action = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'delete']);
 
             if(file_exists($course_path . "/lichen/ranking/" . $id . ".txt")) {
-                $timestamp = date("F d Y H:i:s.",filemtime($course_path . "/lichen/ranking/" . $id . ".txt"));
+                $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $id . ".txt"));
                 $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), array('.', '..'));
                 $submissions = 0;
                 foreach($students as $student) {
@@ -104,7 +104,7 @@ HTML;
                     $content = file_get_contents($ranking_file_path);
                     $content = trim(str_replace(array("\r", "\n"), '', $content));
                     $rankings = preg_split('/ +/', $content);
-                    $rankings = array_chunk($rankings,3);
+                    $rankings = array_chunk($rankings, 3);
                     $matches_and_topmatch = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
 
                     $return .= <<<HTML

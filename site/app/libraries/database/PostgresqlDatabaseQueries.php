@@ -473,7 +473,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
       grading_rotating
     GROUP BY g_id, user_id
   ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
-  ORDER BY user_group, user_id, g_grade_start_date",$params);
+  ORDER BY user_group, user_id, g_grade_start_date", $params);
         $rows = $this->course_db->rows();
         $modified_rows = [];
         foreach($rows as $row) {
@@ -502,7 +502,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
         u.user_id
     ORDER BY
         u.user_group ASC
-    ",array($gradeable_id));
+    ", array($gradeable_id));
 
         // Split arrays into php arrays
         $rows = $this->course_db->rows();
@@ -738,7 +738,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
         $return = array();
         if (count($sections) > 0) {
-            $orderBy = str_replace("gt.registration_section","SUBSTRING(gt.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(gt.registration_section, '[0-9]+')::INT, -1), SUBSTRING(gt.registration_section, '[^0-9]*$')",$orderBy);
+            $orderBy = str_replace("gt.registration_section", "SUBSTRING(gt.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(gt.registration_section, '[0-9]+')::INT, -1), SUBSTRING(gt.registration_section, '[^0-9]*$')", $orderBy);
             $placeholders = implode(",", array_fill(0, count($sections), "?"));
             $params = [$g_id];
             $params = array_merge($params, $sections);
@@ -1295,7 +1295,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
             $graded_gradeable->setAutoGradedGradeable($auto_graded_gradeable);
 
             if (isset($row['array_grade_inquiries'])) {
-                $grade_inquiries = json_decode($row['array_grade_inquiries'],true);
+                $grade_inquiries = json_decode($row['array_grade_inquiries'], true);
                 $grade_inquiries_arr = array();
                 foreach ($grade_inquiries as $grade_inquiry) {
                     $grade_inquiries_arr[] = new RegradeRequest($this->core, $grade_inquiry);

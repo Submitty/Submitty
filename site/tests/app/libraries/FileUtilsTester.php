@@ -197,7 +197,7 @@ class FileUtilsTester extends \PHPUnit\Framework\TestCase {
         file_put_contents(FileUtils::joinPaths($this->path, "b", "test.txt"), "aa");
         FileUtils::emptyDir($this->path);
         $this->assertFileExists($this->path);
-        $this->assertCount(2,scandir($this->path));
+        $this->assertCount(2, scandir($this->path));
     }
 
     public function testReadJsonFile() {

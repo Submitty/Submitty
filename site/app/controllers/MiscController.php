@@ -468,7 +468,7 @@ class MiscController extends AbstractController {
                 else
                     continue;
                 //remove 'bulk_upload_' and '.json' from job file name
-                $result[] = substr($job,11,-5);
+                $result[] = substr($job, 11, -5);
             }
             //look in the split upload folder to see what is complete
             $split_uploads = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $gradeable_id);

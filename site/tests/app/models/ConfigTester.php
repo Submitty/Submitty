@@ -139,7 +139,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_server_hostname' => 'localhost',
             'email_server_port' => 25
         );
-        $config = array_replace($config,$extra);
+        $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
 
         // Create version json
@@ -148,7 +148,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "short_installed_commit" => "d150131c",
             "most_recent_git_tag" => "v19.07.00"
         );
-        $config = array_replace($config,$extra);
+        $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
 
     }

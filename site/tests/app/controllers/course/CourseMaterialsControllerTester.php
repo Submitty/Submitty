@@ -58,7 +58,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             for($i = 0; $i < $depth; $i++){
                 for($j = 0; $j < $num_files; $j++){
                     $fname = "test" . $j . ".txt";
-                    $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname , "w");
+                    $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname, "w");
                     $zip->addFile( $this->config['course_path'] . $lev . "/" . $fname  );
                     $files[] = $this->config['course_path'] . $lev . "/" . $fname;
                 }
@@ -199,7 +199,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date );
 
-        $this->assertEquals( ['status' => 'success', 'data' => 'Time successfully set.']  , $ret);
+        $this->assertEquals( ['status' => 'success', 'data' => 'Time successfully set.'], $ret);
         $json = FileUtils::readJsonFile($this->json_path);
 
         //check the date has been updated to the new time

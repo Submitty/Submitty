@@ -112,7 +112,7 @@ class RainbowCustomization extends AbstractModel {
         }
 
         //XXX: Assuming that the contents of these buckets will be lowercase
-        $this->available_buckets = array_diff(self::syllabus_buckets,$this->used_buckets);
+        $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
     }
 
     /**

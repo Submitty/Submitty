@@ -15,7 +15,7 @@ class ImagesController extends AbstractController {
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
         $images_course_path = $this->core->getConfig()->getCoursePath();
-        $images_path = Fileutils::joinPaths($images_course_path,"uploads/student_images");
+        $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
         $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
         if ($user_group === USER::GROUP_STUDENT || (($user_group === USER::GROUP_FULL_ACCESS_GRADER || $user_group === USER::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
