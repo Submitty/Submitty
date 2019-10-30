@@ -221,14 +221,27 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(path, file_name) {
+function newEditCourseMaterialsForm(path, file_name, this_file_section, this_hide_from_students) {
 
     //let url = buildCourseUrl(["course_materials", "edit"]) + "?path=" + path;
     //$('.popup-form').css('display', 'none');
     var form = $("#edit-course-materials-form");
     form.css("display", "block");
-    $('[id="material-edit-form"]',form).attr('data-fileName', file_name);
     var requestedPath = document.getElementById('material-edit-form').getAttribute("data-fileName");
+    if(this_hide_from_students == "on"){
+        $("#hide-materials-checkbox", form).attr('checked',"on");
+    }
+    else{
+        $("#hide-materials-checkbox", form).attr('checked',false);
+    }
+    if(this_file_section != null){
+        for(let index = 0; index < this_file_section.length; ++index){
+            console.log(this_file_section[index]);
+            $("#section-" + this_file_section[index], form).attr('checked',"on");
+        }
+    }
+    $("#hide-materials-checkbox", form).attr('checked',"off");
+    $("#hide-materials-checkbox", form).attr('checked',"off");
     //$('[name="edit-course-material-message"]', form).html('');
     //$('[name="edit-course-material-message"]', form).append('<b>'+file_name+'</b>');
     //$('[name="edit-confirmation"]', form).attr('action', url);

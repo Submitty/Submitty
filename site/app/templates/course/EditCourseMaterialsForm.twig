@@ -2,7 +2,7 @@
 {% block popup_id %}edit-course-materials-form{% endblock %}
 {% block title %}Edit Course Materials{% endblock %}
 {% block body %}
-    <div id="material-edit-form" class="flex-col flex-col-space" data-fileName = "">
+    <div id="material-edit-form" class="flex-col flex-col-space">
         <label id="upload_sections">
             <p class="black-message">
                 Do you want to restrict this course material to some sections?
@@ -44,22 +44,15 @@
             Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <div id="upload-boxes">
-            {# upload1 and input-file1 required for drag-and-drop.js #}
-            <div id="upload1" class="file-input">
-                <label class="label" for="input-file1">"Drag your file(s) here or click to open file browser"</label>
-                <input type="file" name="files" id="input-file1" onchange="addFilesFromInput(1,false)" multiple />
-            </div>
-        </div>
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
     <script type="text/javascript">
         function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
+            handleEditCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections, filenames);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
-
+                console.log("TEST1");
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var cb = $("input#expand_zip_checkbox");
@@ -84,9 +77,10 @@
                     sections = null;
                 }
                 var cmPath = document.getElementById('cm_path').innerHTML;
-
+                console.log("TEST2");
                 var requestedPath = document.getElementById("input-provide-full-path").value;
                 makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
+                console.log("TEST3");
                 e.stopPropagation();
             });
         });

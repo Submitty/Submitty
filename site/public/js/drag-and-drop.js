@@ -963,6 +963,7 @@ function handleDownloadImages(csrf_token) {
  */
 
 function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path,cmTime, sections) {
+    console.log("TEST");
     var submit_url = buildCourseUrl(['course_materials', 'upload']);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
@@ -1026,6 +1027,62 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (filesToBeAdded == false){
         return;
     }
+
+    $.ajax({
+        url: submit_url,
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function(data) {
+            try {
+                var jsondata = JSON.parse(data);
+
+                if (jsondata['status'] === 'success') {
+                    window.location.href = return_url;
+                }
+                else {
+                    alert(jsondata['message']);
+                }
+            }
+            catch (e) {
+                alert("Error parsing response from server. Please copy the contents of your Javascript Console and " +
+                    "send it to an administrator, as well as what you were doing and what files you were uploading. - [handleUploadCourseMaterials]");
+                console.log(data);
+            }
+        },
+        error: function(data) {
+            window.location.href = buildCourseUrl(['course_materials']);
+        }
+    });
+}
+
+/**
+ * @param csrf_token
+ */
+
+function handleEditCourseMaterials(csrf_token, expand_zip, hide_from_students, cmPath, requested_path,cmTime, sections, filenames) {
+    console.log("TEST");
+    var submit_url = buildCourseUrl(['course_materials', 'edit']);
+    var return_url = buildCourseUrl(['course_materials']);
+    var formData = new FormData();
+
+    formData.append('csrf_token', csrf_token);
+    formData.append('expand_zip', expand_zip);
+    formData.append('hide_from_students', hide_from_students);
+    formData.append('requested_path', requested_path);
+    formData.append('release_time',cmTime);
+    formData.append('file_names',cmTime);
+    if(sections !== null){
+        formData.append('sections', sections);
+    }
+    var target_path = cmPath; // this one has slash at the end.
+    if (requested_path && requested_path.trim().length) {
+        target_path = cmPath + requested_path;
+    }
+
+    if (target_path[target_path.length-1] == '/')
+        target_path = target_path.slice(0, -1); // remove slash
 
     $.ajax({
         url: submit_url,
