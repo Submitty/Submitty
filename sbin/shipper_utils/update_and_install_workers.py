@@ -29,7 +29,7 @@ SYSTEMCTL_WRAPPER_SCRIPT = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_u
 # Tells a foreign autograding worker to reinstall.
 def install_worker(user, host):
     command = "sudo {0}".format(os.path.join(SUBMITTY_INSTALL_DIR, ".setup", "INSTALL_SUBMITTY.sh"))
-    run_command_on_worker(user, host, [command,], 'installation' )
+    return run_commands_on_worker(user, host, [command,], 'installation' )
 
 # ==================================================================================
 # Tells a worker to update it's docker container dependencies
@@ -58,10 +58,10 @@ def update_docker_images(user, host, worker, autograding_workers, autograding_co
               traceback.print_exc()   
     else:
         commands = list()
-        script_directory = os.path.join(INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
+        script_directory = os.path.join(SUBMITTY_INSTALL_DIR, 'sbin', 'shipper_utils', 'docker_command_wrapper.py')
         for image in images_to_update:
             commands.append(f'python3 {script_directory} {image}')
-        run_commands_on_worker(user, host, commands, operation=command)
+        run_commands_on_worker(user, host, commands, operation='docker image update')
 
 
 def run_commands_on_worker(user, host, commands, operation='unspecified operation'):
@@ -69,6 +69,7 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
     if host == "localhost":
         return True
     else:
+        success = False
         try:
             ssh = paramiko.SSHClient()
             ssh.get_host_keys()
@@ -78,12 +79,12 @@ def run_commands_on_worker(user, host, commands, operation='unspecified operatio
             print(f"ERROR: could not ssh to {user}@{host} due to following error: {str(e)}")
             return False
         try:
+            success = True
             for command in commands:
                 print(f'{host}: performing {command}')
                 (stdin, stdout, stderr) = ssh.exec_command(command, timeout=60)
                 status = int(stdout.channel.recv_exit_status())
                 if status != 0:
-                    success = True
                     print(f"ERROR: Failure performing {operation} on {user}@{host}")
                     success = False
         except Exception as e:
@@ -163,7 +164,7 @@ if __name__ == "__main__":
         
         # We don't have to update the code for the primary machine or docker_images is specified. 
         if not primary and not args.docker_images:
-            copy_code_to_worker(worker. user, host, submitty_repository)               
+            copy_code_to_worker(worker, user, host, submitty_repository)
 
             print("beginning installation...")
             success = install_worker(user, host)
@@ -176,5 +177,5 @@ if __name__ == "__main__":
                 exit_code = run_systemctl_command(worker, 'stop')
             print()
 
-    # Install new docker containers for everyone.
-    update_docker_images(user, host, worker, autograding_workers, autograding_containers)
+        # Install new docker containers for everyone.
+        update_docker_images(user, host, worker, autograding_workers, autograding_containers)
