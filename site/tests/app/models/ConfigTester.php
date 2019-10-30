@@ -135,7 +135,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_user' => '',
             'email_password' => '',
             'email_sender' => 'submitty@myuniversity.edu',
-            'email_reply_to'=> 'submitty_do_not_reply@myuniversity.edu',
+            'email_reply_to' => 'submitty_do_not_reply@myuniversity.edu',
             'email_server_hostname' => 'localhost',
             'email_server_port' => 25
         );
@@ -169,8 +169,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
-        $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
-        $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals($this->temp_dir . "/courses/s17/csci0000", $config->getCoursePath());
+        $this->assertEquals($this->temp_dir . "/logs", $config->getLogPath());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
@@ -215,8 +215,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
             'submitty_path' => $this->temp_dir,
-            'course_path' => $this->temp_dir.'/courses/s17/csci0000',
-            'submitty_log_path' => $this->temp_dir.'/logs',
+            'course_path' => $this->temp_dir . '/courses/s17/csci0000',
+            'submitty_log_path' => $this->temp_dir . '/logs',
             'log_exceptions' => true,
             'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
@@ -224,7 +224,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
-            'course_json_path' => $this->temp_dir.'/courses/s17/csci0000/config/config.json',
+            'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',

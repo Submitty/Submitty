@@ -252,8 +252,8 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param int    $part
      */
     private function addUploadFile($filename, $content="", $part=1) {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), true, 0777);
-        $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part, $filename);
+        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part), true, 0777);
+        $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part, $filename);
         if (file_put_contents($filepath, $content) === false) {
             throw new IOException("Could not write file to {$filepath}");
         }
@@ -274,15 +274,15 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param int    $part
      */
     private function addUploadZip($zip_name, $files, $part=1) {
-        $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part);
+        $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
         FileUtils::createDir($root_path, true, 0777);
-        $zip_path =  FileUtils::joinPaths($part_path, $zip_name.'.zip');
+        $zip_path =  FileUtils::joinPaths($part_path, $zip_name . '.zip');
         $zip = new ZipArchive();
         $zip->open($zip_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
         $this->createZip($files, $zip, $root_path);
         $zip->close();
-        $_FILES["files{$part}"]['name'][] = $zip_name.'.zip';
+        $_FILES["files{$part}"]['name'][] = $zip_name . '.zip';
         $_FILES["files{$part}"]['type'][] = mime_content_type($zip_path);
         $_FILES["files{$part}"]['size'][] = filesize($zip_path);
         $_FILES["files{$part}"]['tmp_name'][] = $zip_path;
@@ -987,7 +987,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__".$touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__" . $touch_file));
     }
 
     public function testEmptyPost() {
@@ -1104,7 +1104,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testErrorPreviousFilesFirstVersion() {
-        $_POST['previous_files'] = json_encode(array(0=>array('test.txt')));
+        $_POST['previous_files'] = json_encode(array(0 => array('test.txt')));
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1228,7 +1228,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->fail('cannot open the file');
         }
         $stat = fstat($fh);
-        ftruncate($fh, $stat['size']-1);
+        ftruncate($fh, $stat['size'] - 1);
         fclose($fh);
 
         $controller = new SubmissionController($this->core);

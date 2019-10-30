@@ -137,12 +137,12 @@ class Logger {
                 break;
         }
 
-        $log_message .= "\n".$message."\n";
+        $log_message .= "\n" . $message . "\n";
         if (isset($_SERVER['HTTP_HOST']) && isset($_SERVER['REQUEST_URI'])) {
             $log_message .= 'URL: http' . (isset($_SERVER['HTTPS']) ? 's' : '') . '://';
             $log_message .= "{$_SERVER['HTTP_HOST']}/{$_SERVER['REQUEST_URI']}\n";
         }
-        $log_message .= str_repeat("=-", 30)."="."\n";
+        $log_message .= str_repeat("=-", 30) . "=" . "\n";
 
         // Appends to the file using a locking mechanism, and supressing any potential error from this
         @file_put_contents(FileUtils::joinPaths(static::$log_path, 'site_errors', "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
@@ -157,7 +157,7 @@ class Logger {
     private static function getFilename() {
         FileUtils::createDir(static::$log_path);
         $date = getdate(time());
-        return $date['year']. Utils::pad($date['mon']) . Utils::pad($date['mday']);
+        return $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']);
     }
 
     /**
@@ -167,9 +167,9 @@ class Logger {
      */
     private static function getTimestamp() {
         $date = getdate(time());
-        $log_message = Utils::pad($date['hours']).":".Utils::pad($date['minutes']).":".Utils::pad($date['seconds']);
+        $log_message = Utils::pad($date['hours']) . ":" . Utils::pad($date['minutes']) . ":" . Utils::pad($date['seconds']);
         $log_message .= " ";
-        $log_message .= Utils::pad($date['mon'])."/".Utils::pad($date['mday'])."/".$date['year'];
+        $log_message .= Utils::pad($date['mon']) . "/" . Utils::pad($date['mday']) . "/" . $date['year'];
         return $log_message;
     }
 
@@ -224,7 +224,7 @@ class Logger {
         $filename = static::getFilename();
         array_unshift($log_message, static::getTimestamp());
         $log_message[] = $_SERVER['HTTP_USER_AGENT'];
-        $log_message = implode(" | ", $log_message)."\n";
+        $log_message = implode(" | ", $log_message) . "\n";
         @file_put_contents(FileUtils::joinPaths(static::$log_path, $folder, "{$filename}.log"), $log_message, FILE_APPEND | LOCK_EX);
     }
 }

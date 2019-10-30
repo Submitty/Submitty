@@ -75,23 +75,23 @@ class OfficeHoursQueueStudent extends AbstractModel {
 
 
     public function getTimeBeingHelped(){
-        $diff = strtotime($this->time_out_iso)-strtotime($this->time_helped_iso);
+        $diff = strtotime($this->time_out_iso) - strtotime($this->time_helped_iso);
         $h = $diff / 3600 % 24;
         $m = $diff / 60 % 60;
         $s = $diff % 60;
-        return $h."h ".$m."m ".$s."s";
+        return $h . "h " . $m . "m " . $s . "s";
     }
 
     public function getTimeWaitingInQueue(){
         if($this->status  == 2){
-            $diff = strtotime($this->time_helped_iso)-strtotime($this->time_in_iso);
+            $diff = strtotime($this->time_helped_iso) - strtotime($this->time_in_iso);
         }else{
-            $diff = strtotime($this->time_out_iso)-strtotime($this->time_in_iso);
+            $diff = strtotime($this->time_out_iso) - strtotime($this->time_in_iso);
         }
         $h = $diff / 3600 % 24;
         $m = $diff / 60 % 60;
         $s = $diff % 60;
-        return $h."h ".$m."m ".$s."s";
+        return $h . "h " . $m . "m " . $s . "s";
     }
 
     public function getRemovedBy(){

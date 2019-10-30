@@ -29,7 +29,7 @@ class GlobalView extends AbstractView {
         if ($this->core->getUser() === null) {
             $page_title = "Submitty Login";
         } else if ($this->core->getConfig()->isCourseLoaded()) {
-            $page_title = "Submitty ".$course_name." ".$page_name;
+            $page_title = "Submitty " . $course_name . " " . $page_name;
         }
 
         $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"), true);

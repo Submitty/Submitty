@@ -356,7 +356,7 @@ class ForumController2 extends AbstractController {
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
             } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
-                $type = is_null($status_edit_thread)?"Post":"Thread";
+                $type = is_null($status_edit_thread) ? "Post" : "Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
                     $messageString = "{$type} updated successfully.";
@@ -370,8 +370,8 @@ class ForumController2 extends AbstractController {
                     $messageString = "Thread and post updated successfully.";
                     $any_changes = true;
                 } else {
-                    $type = ($status_edit_thread)?"Thread":"Post";
-                    $type_opposite = (!$status_edit_thread)?"Thread":"Post";
+                    $type = ($status_edit_thread) ? "Thread" : "Post";
+                    $type_opposite = (!$status_edit_thread) ? "Thread" : "Post";
                     $isError = true;
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
@@ -510,7 +510,7 @@ class ForumController2 extends AbstractController {
         $thread_status = array();
         $new_posts = array();
         $unread_threads = false;
-        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1 ) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
@@ -640,7 +640,7 @@ class ForumController2 extends AbstractController {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
         $users = array();
-        for($i=0;$i<$num_posts;$i++){
+        for($i = 0;$i < $num_posts;$i++){
             $user = $posts[$i]["author_user_id"];
             $content = $posts[$i]["content"];
             if(!isset($users[$user])){
@@ -648,13 +648,13 @@ class ForumController2 extends AbstractController {
                 $u = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
                 $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
-                $users[$user]["posts"]=array();
-                $users[$user]["id"]=array();
-                $users[$user]["timestamps"]=array();
-                $users[$user]["total_threads"]=0;
+                $users[$user]["posts"] = array();
+                $users[$user]["id"] = array();
+                $users[$user]["timestamps"] = array();
+                $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
             }
-            if($posts[$i]["parent_id"]==-1){
+            if($posts[$i]["parent_id"] == -1){
                 $users[$user]["total_threads"]++;
             }
             $users[$user]["posts"][] = $content;
@@ -697,13 +697,13 @@ class ForumController2 extends AbstractController {
                     $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
                     $child_thread_author = $child_thread['created_by'];
                     $child_thread_title = $child_thread['title'];
-                    $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                    $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
                     $notification = new Notification($this->core, array('component' => 'forum', 'type' => 'merge_thread', 'child_thread_id' => $child_thread_id, 'parent_thread_id' => $parent_thread_id, 'child_thread_title' => $child_thread_title, 'parent_thread_title' => $parent_thread_title, 'child_thread_author' => $child_thread_author, 'child_root_post' => $child_root_post));
                     $this->core->getQueries()->pushNotification($notification);
                     $this->core->addSuccessMessage("Threads merged!");
                     $thread_id = $parent_thread_id;
                 } else {
-                    $this->core->addErrorMessage("Merging Failed! ".$message);
+                    $this->core->addErrorMessage("Merging Failed! " . $message);
                 }
             }
         } else {

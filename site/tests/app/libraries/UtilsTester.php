@@ -231,9 +231,9 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function uploadedImageProvider() {
         return [
-            [__TEST_DATA__.'/images/test_image.png', true],
-            [__TEST_DATA__.'/images/test_image.jpg', true],
-            [__TEST_DATA__.'/.gitkeep', false]
+            [__TEST_DATA__ . '/images/test_image.png', true],
+            [__TEST_DATA__ . '/images/test_image.jpg', true],
+            [__TEST_DATA__ . '/.gitkeep', false]
         ];
     }
     /**
@@ -261,8 +261,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     public function testCheckUploadedImageFileImageSizeFalse() {
         try {
             $_FILES['test'] = [
-                'name' => [basename(__TEST_DATA__.'/images/test_image.png')],
-                'tmp_name' => [__TEST_DATA__.'/images/test_image.png'],
+                'name' => [basename(__TEST_DATA__ . '/images/test_image.png')],
+                'tmp_name' => [__TEST_DATA__ . '/images/test_image.png'],
                 'type' => ['image/png'],
                 'error' => [UPLOAD_ERR_OK],
                 'size' => [123]

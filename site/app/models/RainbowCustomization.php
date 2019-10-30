@@ -88,7 +88,7 @@ class RainbowCustomization extends AbstractModel {
             $max_score = $gradeable->getTAPoints();
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()){
-                $last_index = count($this->customization_data[$bucket])-1;
+                $last_index = count($this->customization_data[$bucket]) - 1;
                 $max_score += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
 

@@ -141,7 +141,7 @@ class AdminGradeableController extends AbstractController {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
+            $all_uploaded_config_paths[] = [ 'UPLOADED: ' . substr($file['path'],strlen($uploaded_configs_dir) + 1) , $file['path'] ];
         }
         // Configs stored in a private repository (specified in course config)
         $config_repo_string = $this->core->getConfig()->getPrivateRepository();
@@ -466,7 +466,7 @@ class AdminGradeableController extends AbstractController {
 
         while(count($dir_queue) != 0) {
             if ($count >= 1000) {
-                $error_messages[] = "Repository #".$repo_id_number." entered on the \"Course Settings\" is too large to parse.";
+                $error_messages[] = "Repository #" . $repo_id_number . " entered on the \"Course Settings\" is too large to parse.";
                 return array();
             }
 
@@ -475,19 +475,19 @@ class AdminGradeableController extends AbstractController {
             $dir_queue = array_values($dir_queue);
 
             if (!file_exists($dir) || !is_dir($dir)) {
-                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
 
             try {
                 $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
             } catch(\Exception $e) {
-                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
 
             if ($this->checkPathToConfigFile($dir)) {
-                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)),$dir];
+                $return_array[] = ["DIRECTORY " . $repo_id_number . ": " . substr($dir,strlen($repository_path)),$dir];
             }
             else {
                 while($iter->valid()) {
@@ -1027,7 +1027,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
         if (!$gradeable->canDelete()) {
-            $this->core->addErrorMessage("Gradeable ".$gradeable_id." cannot be deleted.");
+            $this->core->addErrorMessage("Gradeable " . $gradeable_id . " cannot be deleted.");
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
@@ -1144,8 +1144,8 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
     public function getBuildStatusOfGradeable($gradeable_id) {
-        $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
-        $rebuilding_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
+        $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
         $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 
@@ -1239,11 +1239,11 @@ class AdminGradeableController extends AbstractController {
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
         if ($success === true) {
-            $this->core->addSuccessMessage($message.$gradeable_id);
+            $this->core->addSuccessMessage($message . $gradeable_id);
         } else if ($success === false) {
-            $this->core->addErrorMessage($message.$gradeable_id);
+            $this->core->addErrorMessage($message . $gradeable_id);
         } else {
-            $this->core->addErrorMessage("Failed to update status of ".$gradeable_id);
+            $this->core->addErrorMessage("Failed to update status of " . $gradeable_id);
         }
 
         $this->core->redirect($this->core->buildCourseUrl());

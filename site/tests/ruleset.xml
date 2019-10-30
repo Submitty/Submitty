@@ -65,8 +65,6 @@
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMiddle"/>
         <exclude name="PSR12.Keywords.ShortFormTypeKeywords.LongFound" />
-        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceBefore"/>
-        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter"/>
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
@@ -94,9 +92,6 @@
         <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.LanguageConstructSpacing.IncorrectSingle" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceAfter" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceBefore" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.NoSpaceBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
         <exclude name="Squiz.WhiteSpace.SemicolonSpacing.Incorrect" />

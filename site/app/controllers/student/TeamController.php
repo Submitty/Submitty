@@ -197,14 +197,14 @@ class TeamController extends AbstractController {
         $metadata = json_encode(
             ['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id,'team'])]
         );
-        $subject = "New Team Invitation: ".$graded_gradeable->getGradeable()->getTitle();
+        $subject = "New Team Invitation: " . $graded_gradeable->getGradeable()->getTitle();
         $content = "You have received a new invitation to join a team from $user_id";
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'sender_id' => $user_id];
         $this->core->getNotificationFactory()->onTeamEvent($event,[$invite_id]);
 
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -269,16 +269,16 @@ class TeamController extends AbstractController {
         $team_members = $accept_team->getMembers();
         // send notification to team members that user joined
         $metadata =  json_encode(
-            ['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id,'team'])]
+            ['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team'])]
         );
-        $subject = "New Team Member: ".$gradeable->getTitle();
-        $content = "A new team member with the user name, $user_id, joined your team for gradeable, ".$gradeable->getTitle();
+        $subject = "New Team Member: " . $gradeable->getTitle();
+        $content = "A new team member with the user name, $user_id, joined your team for gradeable, " . $gradeable->getTitle();
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_joined', 'sender_id' => $user_id];
         $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
 
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $accept_team_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -334,7 +334,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->cancelTeamInvitation($team->getId(), $cancel_id);
         $this->core->addSuccessMessage("Cancelled invitation to {$cancel_id}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {

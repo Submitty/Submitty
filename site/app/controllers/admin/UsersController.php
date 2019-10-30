@@ -245,18 +245,18 @@ class UsersController extends AbstractController {
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
-        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"".strip_tags($_POST['user_id'])."\"<br>";
+        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"" . strip_tags($_POST['user_id']) . "\"<br>";
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
-        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
+        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_firstname']) . "\"<br>";
+        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_lastname']) . "\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
+        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
+            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_firstname']) . "\"<br>";
         }
         if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"".strip_tags($_POST['user_preferred_lastname'])."\"<br>";
+            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_lastname']) . "\"<br>";
         }
 
         //Database password cannot be blank, no check on format
@@ -265,7 +265,7 @@ class UsersController extends AbstractController {
         }
 
         if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+            $this->core->addErrorMessage($error_message . " Contact your sysadmin if this should not cause an error.");
             $this->core->redirect($return_url);
         }
 
@@ -662,7 +662,7 @@ class UsersController extends AbstractController {
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 $output = curl_exec($ch);
 
@@ -673,13 +673,13 @@ class UsersController extends AbstractController {
 
                 $output = json_decode($output, true);
                 if ($output === null) {
-                    $this->core->addErrorMessage("Error parsing JSON response: ".json_last_error_msg());
+                    $this->core->addErrorMessage("Error parsing JSON response: " . json_last_error_msg());
                     $this->core->redirect($return_url);
                 } else if ($output['error'] === true) {
-                    $this->core->addErrorMessage("Error parsing xlsx to csv: ".$output['error_message']);
+                    $this->core->addErrorMessage("Error parsing xlsx to csv: " . $output['error_message']);
                     $this->core->redirect($return_url);
                 } else if ($output['success'] !== true) {
-                    $this->core->addErrorMessage("Error on response on parsing xlsx: ".curl_error($ch));
+                    $this->core->addErrorMessage("Error on response on parsing xlsx: " . curl_error($ch));
                     $this->core->redirect($return_url);
                 }
 
@@ -891,10 +891,10 @@ class UsersController extends AbstractController {
                     // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                     // Automatically validate if not set (this field is optional).
                 case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
                     // Validation failed somewhere.  Record which row failed.
                     // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
-                    $bad_rows[] = ($row_num+1);
+                    $bad_rows[] = ($row_num + 1);
                     break;
             }
         }

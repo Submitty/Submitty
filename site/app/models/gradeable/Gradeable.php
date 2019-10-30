@@ -515,7 +515,7 @@ class Gradeable extends AbstractModel {
             // Only add in submission due date if student submission is enabled
             if ($this->isStudentSubmit() && $this->hasDueDate()) {
                 // Make sure we insert the due date into the correct location (after the open date)
-                array_splice($result, array_search('submission_open_date', $result)+1, 0, 'submission_due_date');
+                array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
             }
 
             // Only add in grade inquiry date if its allowed & enabled
@@ -573,7 +573,7 @@ class Gradeable extends AbstractModel {
                 }
 
                 // Get a value for the date to compare against
-                $prev_date = $date_values[$date_properties[$i-1]];
+                $prev_date = $date_values[$date_properties[$i - 1]];
 
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
@@ -1040,7 +1040,7 @@ class Gradeable extends AbstractModel {
         $num_sections = $this->core->getQueries()->getNumberRotatingSections();
 
         $parsed_graders_sections = [];
-        foreach($rotating_grader_sections as $user=>$grader_sections) {
+        foreach($rotating_grader_sections as $user => $grader_sections) {
             if($grader_sections !== null) {
                 if(!is_array($grader_sections)) {
                     throw new \InvalidArgumentException('Rotating grader section for grader was not array');
@@ -1603,7 +1603,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
