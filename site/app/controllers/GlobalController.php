@@ -27,7 +27,7 @@ class GlobalController extends AbstractController {
         $js = $this->core->getOutput()->getJs();
 
         if (array_key_exists('override.css', $wrapper_urls)) {
-            $css[] = $wrapper_urls['override.css'];
+            $css->add($wrapper_urls['override.css']);
         }
 
         $unread_notifications_count = null;
@@ -355,7 +355,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js, $duck_img);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
     }
 
     public function footer() {
