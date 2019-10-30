@@ -69,8 +69,6 @@
         <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter"/>
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
-        <exclude name="PEAR.Functions.ValidDefaultValue.NotAtEnd" />
-
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceBeforeBracket" />
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
