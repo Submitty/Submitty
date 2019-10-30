@@ -55,7 +55,7 @@ class PlagiarismController extends AbstractController {
                     return 1;
                 }
                 else {
-                    return ($semester_a[0] === 'f') ? 0 : 1 ;
+                    return ($semester_a[0] === 'f') ? 0 : 1;
                 }
             });
         }

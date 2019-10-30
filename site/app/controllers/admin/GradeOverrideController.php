@@ -33,7 +33,7 @@ class GradeOverrideController extends AbstractController {
         return $this->core->getOutput()->renderJsonSuccess(array(
             'gradeable_id' => $gradeable_id,
             'users' => $user_table,
-        )); 
+        ));
     }
 
     /**

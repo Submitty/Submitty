@@ -34,7 +34,7 @@ class ForumController extends AbstractController {
     }
 
     private function showMergedThreads($currentCourse) {
-        return  (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
+        return (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
@@ -270,7 +270,7 @@ class ForumController extends AbstractController {
 
         $thread_status = $_POST["thread_status"];
 
-        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {

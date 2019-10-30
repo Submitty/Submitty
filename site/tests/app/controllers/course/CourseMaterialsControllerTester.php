@@ -146,7 +146,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $keys =     array_keys($json);
 
         $expected_json1 = [
-            'checked' => '1', 
+            'checked' => '1',
             'release_datetime' => $_POST['release_time'],
             'hide_from_students' => null
         ];
@@ -230,7 +230,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->assertEquals(2, count($json));   //2 files
 
         $expected_json2 = [
-            'checked' => '1', 
+            'checked' => '1',
             'release_datetime' => $new_date,
             'hide_from_students' => null
         ];

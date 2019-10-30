@@ -84,13 +84,13 @@ class GradeableAutocheck extends AbstractModel {
     
         if(isset($details["expected_file"])) {
             if(substr($details["expected_file"],0,11) == "test_output"){
-                if(file_exists($course_path . "/" . $details["expected_file"])){ 
+                if(file_exists($course_path . "/" . $details["expected_file"])){
                     $expected_file = $course_path . "/" . $details["expected_file"];
                 } else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }
             } else if(substr($details["expected_file"],0,13) == "random_output"){
-                if(file_exists($results_path . "/" . $details["expected_file"])){ 
+                if(file_exists($results_path . "/" . $details["expected_file"])){
                     $expected_file = $results_path . "/" . $details["expected_file"];
                 } else {
                     $this->core->addErrorMessage("Expected file not found.");

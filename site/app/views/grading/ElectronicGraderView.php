@@ -1011,7 +1011,7 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
-        return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
             "graded_gradeable" => $graded_gradeable,
             "can_inquiry" => $can_inquiry
         ]);
