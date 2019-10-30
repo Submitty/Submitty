@@ -143,7 +143,7 @@ class AutoGradingView extends AbstractView {
                     "name" => $file_name,
                     "path" => $file_path,
                     "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
-                        "dir" => $public ? "results_public": "results",
+                        "dir" => $public ? "results_public" : "results",
                         "file" => $file_name,
                         "path" => $file_path
                     ])
@@ -334,7 +334,7 @@ class AutoGradingView extends AbstractView {
         $late_days_url = $this->core->buildCourseUrl(['late_table']);
         $regrade_allowed = $gradeable->isRegradeAllowed();
         $regrade_date = $gradeable->getRegradeRequestDate();
-        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
+        $regrade_date = DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         // Get the number of decimal places for floats to display nicely
         $num_decimals = 0;
         $precision_parts = explode('.', strval($gradeable->getPrecision()));
@@ -400,9 +400,9 @@ class AutoGradingView extends AbstractView {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
-                        if(file_get_contents($fileinfo->getPathname())!=""){
-                            $pdf_id=$pdf_id.'.pdf';
-                            $annotated_file_names[]=$pdf_id;
+                        if(file_get_contents($fileinfo->getPathname()) != ""){
+                            $pdf_id = $pdf_id . '.pdf';
+                            $annotated_file_names[] = $pdf_id;
                         }
                     }
                 }
@@ -418,7 +418,7 @@ class AutoGradingView extends AbstractView {
 
 
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'files'=> $files,
+            'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
@@ -441,7 +441,7 @@ class AutoGradingView extends AbstractView {
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
-            'can_download' =>$can_download,
+            'can_download' => $can_download,
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
             "annotated_file_names" =>  $annotated_file_names

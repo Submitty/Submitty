@@ -82,7 +82,7 @@ class CourseMaterialsView extends AbstractView {
                     $ex_file_path['checked'] = '1';
                     $isShareToOther = $ex_file_path['checked'];
                     $date = $now_date_time->format("Y-m-d H:i:sO");
-                    $date=substr_replace($date,"9999",0,4);
+                    $date = substr_replace($date,"9999",0,4);
                     $ex_file_path['release_datetime'] = $date;
                     $ex_file_path['hide_from_students'] = "on";
                     $releaseData = $ex_file_path['release_datetime'];
@@ -116,9 +116,9 @@ class CourseMaterialsView extends AbstractView {
                 if( $releaseData == $now_date_time->format("Y-m-d H:i:sO")){
                     //for uploaded files that have had no manually set date to be set to never and maintained as never
                     //also permission set to yes
-                    $releaseData=substr_replace($releaseData,"9999",0,4);
-                    $json[$expected_file_path]['checked']='1';
-                    $json[$expected_file_path]['release_datetime']= $releaseData;
+                    $releaseData = substr_replace($releaseData,"9999",0,4);
+                    $json[$expected_file_path]['checked'] = '1';
+                    $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
@@ -126,7 +126,7 @@ class CourseMaterialsView extends AbstractView {
             if($json == false){
                 FileUtils::writeJsonFile($fp,$no_json);
             }
-            $can_write =is_writable($fp);
+            $can_write = is_writable($fp);
             if(!$can_write){
                 $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
             }
@@ -141,7 +141,7 @@ class CourseMaterialsView extends AbstractView {
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        $path_length = strlen($expected_path)+1;
+        $path_length = strlen($expected_path) + 1;
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         //Sort the files/folders in alphabetical order

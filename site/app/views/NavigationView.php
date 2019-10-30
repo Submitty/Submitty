@@ -410,7 +410,7 @@ class NavigationView extends AbstractView {
 
 
             //If the button is autograded and has been submitted once, give a progress bar.
-            if (!is_nan($points_percent) &&  $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
+            if (!is_nan($points_percent) && $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 ($list_section == GradeableList::CLOSED || $list_section == GradeableList::OPEN)) {
                 $progress = $points_percent * 100;
             }
@@ -545,10 +545,10 @@ class NavigationView extends AbstractView {
     private function getGradeButton(Gradeable $gradeable, int $list_section) {
         //Location, location never changes
         if($this->core->getUser()->accessAdmin()){
-            $view="all";
+            $view = "all";
         }
         else{
-            $view=null;
+            $view = null;
         }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
@@ -744,7 +744,7 @@ class NavigationView extends AbstractView {
 
             $button = new Button($this->core, [
                 "subtitle" => "CLOSE SUBMISSIONS NOW",
-                "onclick" => "displayCloseSubmissionsWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
+                "onclick" => "displayCloseSubmissionsWarning(\"" . $url . "\",\"" . $gradeable->getTitle() . "\");",
                 "class" => "btn btn-default btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);

@@ -105,7 +105,7 @@ GROUP BY user_id", array($user_id));
     public function getAllUsers($section_key="registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
-        $orderBy="";
+        $orderBy = "";
         if($section_key == "registration_section") {
             $orderBy = "SUBSTRING(u.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(u.registration_section, '[0-9]+')::INT, -1), SUBSTRING(u.registration_section, '[^0-9]*$'), u.user_id";
         }
@@ -299,7 +299,7 @@ WHERE semester=? AND course=? AND user_id=?", $params);
                       AND submissions.user_id = lde.user_id";
         if($user_id !== null) {
             if (is_array($user_id)) {
-                $query .= " WHERE submissions.user_id IN (".implode(", ", array_fill(0, count($user_id), '?')).")";
+                $query .= " WHERE submissions.user_id IN (" . implode(", ", array_fill(0, count($user_id), '?')) . ")";
                 $params = array_merge($params, $user_id);
             }
             else {
@@ -312,13 +312,13 @@ WHERE semester=? AND course=? AND user_id=?", $params);
     }
 
     public function getAverageComponentScores($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team) {
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $return = array();
         $this->course_db->query("
@@ -372,13 +372,13 @@ ORDER BY gc_order
     }
 
     public function getAverageAutogradedScores($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if($is_team){
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $this->course_db->query("
 SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_dev, 0 AS max, COUNT(*) FROM(
@@ -400,13 +400,13 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
     }
 
     public function getAverageForGradeable($g_id, $section_key, $is_team) {
-        $u_or_t="u";
-        $users_or_teams="users";
-        $user_or_team_id="user_id";
+        $u_or_t = "u";
+        $users_or_teams = "users";
+        $user_or_team_id = "user_id";
         if ($is_team) {
-            $u_or_t="t";
-            $users_or_teams="gradeable_teams";
-            $user_or_team_id="team_id";
+            $u_or_t = "t";
+            $users_or_teams = "gradeable_teams";
+            $user_or_team_id = "team_id";
         }
         $this->course_db->query("SELECT COUNT(*) as cnt FROM gradeable_component WHERE g_id=?", array($g_id));
         $count = $this->course_db->row()['cnt'];
@@ -1003,7 +1003,7 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
                team.registration_section,
                team.rotating_section';
 
-            $submitter_inject ='
+            $submitter_inject = '
               JOIN (
                 SELECT gt.team_id,
                   gt.registration_section,

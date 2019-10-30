@@ -11,8 +11,8 @@ class RainbowGradesController extends AbstractController {
      * @Route("/{_semester}/{_course}/grades")
      */
     public function run() {
-        $grade_path = $this->core->getConfig()->getCoursePath()."/reports/summary_html/"
-            .$this->core->getUser()->getId()."_summary.html";
+        $grade_path = $this->core->getConfig()->getCoursePath() . "/reports/summary_html/"
+            . $this->core->getUser()->getId() . "_summary.html";
 
         $grade_file = null;
         if (file_exists($grade_path)) {

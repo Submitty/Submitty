@@ -76,7 +76,7 @@ class WrapperController extends AbstractController {
             );
         }
 
-        $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
+        $this->core->addSuccessMessage("Uploaded " . $upload['name'] . " as " . $filename);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
@@ -109,7 +109,7 @@ class WrapperController extends AbstractController {
             );
         }
 
-        $this->core->addSuccessMessage("Deleted ".$filename);
+        $this->core->addSuccessMessage("Deleted " . $filename);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );

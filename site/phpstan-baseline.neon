@@ -1,0 +1,2660 @@
+
+
+parameters:
+	ignoreErrors:
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 97$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 150$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 130$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 91$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 158$#"
+			count: 2
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 191$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$render_json true to render a JSEND response to the output in the failure/error case\\)\\: Unexpected token \"\\$render_json\", expected TOKEN_IDENTIFIER at offset 165$#"
+			count: 1
+			path: app/controllers/AbstractController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$as_instructor\\)\\: Unexpected token \"\\$as_instructor\", expected TOKEN_IDENTIFIER at offset 41$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/controllers/HomePageController.php
+
+		-
+			message: "#^Offset int does not exist on array\\(\\?0 \\=\\> 'results'\\|'results_public'\\|'submissions', \\?1 \\=\\> 'checkout'\\|'results_public', \\?2 \\=\\> 'results'\\|'results_public', \\?3 \\=\\> 'results_public'\\)\\.$#"
+			count: 3
+			path: app/controllers/MiscController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$show_all\\)\\: Unexpected token \"\\$show_all\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$nid\\)\\: Unexpected token \"\\$nid\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 2
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$seen\\)\\: Unexpected token \"\\$seen\", expected TOKEN_IDENTIFIER at offset 37$#"
+			count: 1
+			path: app/controllers/NotificationController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\)\\: Unexpected token \"\\\\n    \\*\", expected TOKEN_IDENTIFIER at offset 16$#"
+			count: 8
+			path: app/controllers/OfficeHoursQueueController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$gradeable$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Variable \\$repo_paths in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^Call to an undefined method app\\\\libraries\\\\Core\\:\\:buildNewCourseUrl\\(\\)\\.$#"
+			count: 2
+			path: app/controllers/admin/AdminGradeableController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$config_path\\)\\: Unexpected token \"\\$config_path\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/controllers/admin/AutogradingConfigController.php
+
+		-
+			message: "#^Variable \\$seating_assignment_emails might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/EmailRoomSeatingController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$csv_option string csv_option_overwrite_all or csv_option_preserve_higher\\)\\: Unexpected token \"\\$csv_option\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/controllers/admin/LateController.php
+
+		-
+			message: "#^Variable \\$threshold might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$sequence_length might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$regex_for_selecting_files might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$instructor_provided_code_path might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$max_matching_version might not be defined\\.$#"
+			count: 3
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$user_2_index_in_others might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$tokens_user_2 might not be defined\\.$#"
+			count: 6
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^Variable \\$color might not be defined\\.$#"
+			count: 1
+			path: app/controllers/admin/PlagiarismController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(GradedGradeable\\[\\] The list of graded gradeables, indexed by gradeable id\\)\\: Unexpected token \"The\", expected TOKEN_VARIABLE at offset 127$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(GradedGradeable\\[\\] The list of graded gradeables, indexed by gradeable id\\)\\: Unexpected token \"The\", expected TOKEN_VARIABLE at offset 192$#"
+			count: 1
+			path: app/controllers/admin/ReportController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(integer\\(0/1/2\\) \\$modifyType \\- 0 \\=\\> delete, 1 \\=\\> edit content, 2 \\=\\> undelete\\)\\: Unexpected token \"\\(\", expected TOKEN_VARIABLE at offset 200$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Variable \\$content might not be defined\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Variable \\$subject might not be defined\\.$#"
+			count: 1
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^Variable \\$original_creator might not be defined\\.$#"
+			count: 2
+			path: app/controllers/forum/ForumController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool verify all components or not\\)\\: Unexpected token \"verify\", expected TOKEN_VARIABLE at offset 83$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$graded_component might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$num_components might not be defined\\.$#"
+			count: 4
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$peer_grade_set might not be defined\\.$#"
+			count: 3
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$my_grading might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$team_users might not be defined\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$all_teams might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Offset 0 does not exist on array\\(\\)\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$from This is the user that was being viewed when a navigation button was clicked on the TA grading\ninterface\\.  Knowing who we were viewing allows us to decide who to view next\\.\\)\\: Unexpected token \"\\$from\", expected TOKEN_IDENTIFIER at offset 236$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$to Used to determine the direction to move in, either 'prev' or 'next'\\)\\: Unexpected token \"\\$to\", expected TOKEN_IDENTIFIER at offset 452$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$to_ungraded Should the next student we go to be the next submission or next ungraded submission\\?\\)\\: Unexpected token \"\\$to_ungraded\", expected TOKEN_IDENTIFIER at offset 538$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$who_id This is the user we wish to view, this field will only be passed on when the request originates\non the grading index page\\)\\: Unexpected token \"\\$who_id\", expected TOKEN_IDENTIFIER at offset 68$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$order_all_sections might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$goToStudent might not be defined\\.$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^Variable \\$total_submitted might not be defined\\.$#"
+			count: 2
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sections\\)\\: Unexpected token \"\\$sections\", expected TOKEN_IDENTIFIER at offset 131$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$full_sets$#"
+			count: 1
+			path: app/controllers/grading/ElectronicGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 4
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$section\\)\\: Unexpected token \"\\$section\", expected TOKEN_IDENTIFIER at offset 46$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$section_type\\)\\: Unexpected token \"\\$section_type\", expected TOKEN_IDENTIFIER at offset 69$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sort\\)\\: Unexpected token \"\\$sort\", expected TOKEN_IDENTIFIER at offset 97$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sort\\)\\: Unexpected token \"\\$sort\", expected TOKEN_IDENTIFIER at offset 66$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$view\\)\\: Unexpected token \"\\$view\", expected TOKEN_IDENTIFIER at offset 46$#"
+			count: 1
+			path: app/controllers/grading/SimpleGraderController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected TOKEN_IDENTIFIER at offset 46$#"
+			count: 1
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 3
+			path: app/controllers/pdf/PDFController.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 3
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$component_string might not be defined\\.$#"
+			count: 8
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$body might not be defined\\.$#"
+			count: 5
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$subject might not be defined\\.$#"
+			count: 3
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$notifications might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$emails might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/GradeInquiryController.php
+
+		-
+			message: "#^Variable \\$teams might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Variable \\$uploaded_file might not be defined\\.$#"
+			count: 6
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Binary operation \"\\.\" between string and app\\\\models\\\\User results in an error\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Variable \\$uploaded_file in isset\\(\\) always exists and is not nullable\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^Variable \\$team might not be defined\\.$#"
+			count: 1
+			path: app/controllers/student/SubmissionController.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$iterators with type array\\<Iterator\\> is not subtype of native type array\\<int, mixed\\>\\.$#"
+			count: 1
+			path: app/libraries/CascadingIterator.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$course\\)\\: Unexpected token \"\\$course\", expected TOKEN_IDENTIFIER at offset 484$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$semester\\)\\: Unexpected token \"\\$semester\", expected TOKEN_IDENTIFIER at offset 460$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected TOKEN_IDENTIFIER at offset 22$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$status_code$#"
+			count: 1
+			path: app/libraries/Core.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$core Core core\\)\\: Unexpected token \"\\$core\", expected TOKEN_IDENTIFIER at offset 230$#"
+			count: 1
+			path: app/libraries/DateUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$actual_file\\)\\: Unexpected token \"\\$actual_file\", expected TOKEN_IDENTIFIER at offset 175$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$diff_file\\)\\: Unexpected token \"\\$diff_file\", expected TOKEN_IDENTIFIER at offset 231$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$expected_file\\)\\: Unexpected token \"\\$expected_file\", expected TOKEN_IDENTIFIER at offset 202$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$id_prepend\\)\\: Unexpected token \"\\$id_prepend\", expected TOKEN_IDENTIFIER at offset 288$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$image_difference\\)\\: Unexpected token \"\\$image_difference\", expected TOKEN_IDENTIFIER at offset 256$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$actual \\(array\\) does not accept string\\|false\\.$#"
+			count: 2
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\DiffViewer\\:\\:\\$expected \\(array\\) does not accept string\\|false\\.$#"
+			count: 2
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Option for displaying\\. Currently only supports show empty space\\)\\: Unexpected token \"Option\", expected TOKEN_VARIABLE at offset 78$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string Option for displaying\\. Currently only supports show empty space\\)\\: Unexpected token \"Option\", expected TOKEN_VARIABLE at offset 73$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$html the original HTML before any text transformation\\)\\: Unexpected token \"\\$html\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$with_escape Show escape characters instead of character representations\\)\\: Unexpected token \"\\$with_escape\", expected TOKEN_IDENTIFIER at offset 87$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$description \\(What is the description of this character\\)\\)\\: Unexpected token \"\\$description\", expected TOKEN_IDENTIFIER at offset 111$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$text String\\)\\: Unexpected token \"\\$text\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$what String\\)\\: Unexpected token \"\\$what\", expected TOKEN_IDENTIFIER at offset 45$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$which String\\(Reference\\)\\)\\: Unexpected token \"\\$which\", expected TOKEN_IDENTIFIER at offset 72$#"
+			count: 1
+			path: app/libraries/DiffViewer.php
+
+		-
+			message: "#^Call to an undefined method Throwable\\:\\:getDetails\\(\\)\\.$#"
+			count: 1
+			path: app/libraries/ExceptionHandler.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$mode\\)\\: Unexpected token \"\\$mode\", expected TOKEN_IDENTIFIER at offset 38$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$path\\)\\: Unexpected token \"\\$path\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$zipname\\)\\: Unexpected token \"\\$zipname\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected TOKEN_IDENTIFIER at offset 637$#"
+			count: 1
+			path: app/libraries/FileUtils.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$type with type app\\\\libraries\\\\GradeableType\\|int is not subtype of native type int\\.$#"
+			count: 1
+			path: app/libraries/GradeableType.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/GradeableType.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\: message to log to the file\\)\\: Unexpected token \"\\$message\", expected TOKEN_IDENTIFIER at offset 484$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$action\\)\\: Unexpected token \"\\$action\", expected TOKEN_IDENTIFIER at offset 513$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$token\\)\\: Unexpected token \"\\$token\", expected TOKEN_IDENTIFIER at offset 492$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 469$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$params All the params in a key\\-value array\\)\\: Unexpected token \"\\$params\", expected TOKEN_IDENTIFIER at offset 502$#"
+			count: 1
+			path: app/libraries/Logger.php
+
+		-
+			message: "#^Call to an undefined method Twig\\\\Extension\\\\ExtensionInterface\\:\\:setTimezone\\(\\)\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\Output\\:\\:renderTemplate\\(\\) should return string but returns null\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$json\\)\\: Unexpected token \"\\$json\", expected TOKEN_IDENTIFIER at offset 223$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$message\\)\\: Unexpected token \"\\$message\", expected TOKEN_IDENTIFIER at offset 79$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$view$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^Cannot call method exceptionPage\\(\\) on string\\.$#"
+			count: 1
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @return with type array is incompatible with native type Ds\\\\Set\\.$#"
+			count: 2
+			path: app/libraries/Output.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$session_id\\)\\: Unexpected token \"\\$session_id\", expected TOKEN_IDENTIFIER at offset 257$#"
+			count: 1
+			path: app/libraries/SessionManager.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/SessionManager.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\Utils\\:\\:stripStringFromArray\\(\\) should return array but returns null\\.$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$string\\)\\: Unexpected token \"\\$string\", expected TOKEN_IDENTIFIER at offset 119$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected TOKEN_IDENTIFIER at offset 404$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$array\\)\\: Unexpected token \"\\$array\", expected TOKEN_IDENTIFIER at offset 163$#"
+			count: 1
+			path: app/libraries/Utils.php
+
+		-
+			message: "#^Property app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:\\$link \\(PDO\\) does not accept null\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$callback\\)\\: Unexpected token \"\\$callback\", expected TOKEN_IDENTIFIER at offset 484$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$parameters\\)\\: Unexpected token \"\\$parameters\", expected TOKEN_IDENTIFIER at offset 458$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$query\\)\\: Unexpected token \"\\$query\", expected TOKEN_IDENTIFIER at offset 437$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$columns\\)\\: Unexpected token \"\\$columns\", expected TOKEN_IDENTIFIER at offset 40$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$result\\)\\: Unexpected token \"\\$result\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$value\\)\\: Unexpected token \"\\$value\", expected TOKEN_IDENTIFIER at offset 288$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\AbstractDatabase\\:\\:convertBoolean\\(\\) should return string but returns int\\.$#"
+			count: 1
+			path: app/libraries/database/AbstractDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 81$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 94$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 99$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$api_key\\)\\: Unexpected token \"\\$api_key\", expected TOKEN_IDENTIFIER at offset 57$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array\\(int\\)    categories_ids     Filter threads having atleast provided categories\\)\\: Unexpected token \"\\(\", expected TOKEN_VARIABLE at offset 123$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array\\(int\\)    thread_status      Filter threads having thread status among \\$thread_status\\)\\: Unexpected token \"\\(\", expected TOKEN_VARIABLE at offset 221$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool          show_deleted       Consider deleted threads\\)\\: Unexpected token \"show_deleted\", expected TOKEN_VARIABLE at offset 426$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool          show_merged_thread Consider merged threads\\)\\: Unexpected token \"show_merged_thread\", expected TOKEN_VARIABLE at offset 499$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(bool          unread_threads     Filter threads to show only unread threads\\)\\: Unexpected token \"unread_threads\", expected TOKEN_VARIABLE at offset 335$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int           blockNumber        Index of window of thread list\\(\\-1 for last\\)\\)\\: Unexpected token \"blockNumber\", expected TOKEN_VARIABLE at offset 644$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(int           thread_id          If blockNumber is not known, find it using thread_id\\)\\: Unexpected token \"thread_id\", expected TOKEN_VARIABLE at offset 736$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string        current_user       user_id of currrent user\\)\\: Unexpected token \"current_user\", expected TOKEN_VARIABLE at offset 571$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(integer\\(0/1\\) \\$newStatus \\- 1 implies deletion and 0 as undeletion\\)\\: Unexpected token \"\\(\", expected TOKEN_VARIABLE at offset 269$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:setDeletePostStatus\\(\\) should return bool but returns null\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$g_id the gradeable id to check for\\)\\: Unexpected token \"\\$g_id\", expected TOKEN_IDENTIFIER at offset 72$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable\\)\\: Unexpected token \"\\$gradeable\", expected TOKEN_IDENTIFIER at offset 212$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sections\\)\\: Unexpected token \"\\$sections\", expected TOKEN_IDENTIFIER at offset 237$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$team_id\\)\\: Unexpected token \"\\$team_id\", expected TOKEN_IDENTIFIER at offset 46$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 79$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable\\)\\: Unexpected token \"\\$gradeable\", expected TOKEN_IDENTIFIER at offset 91$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$g_id\\)\\: Unexpected token \"\\$g_id\", expected TOKEN_IDENTIFIER at offset 725$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$team_id\\)\\: Unexpected token \"\\$team_id\", expected TOKEN_IDENTIFIER at offset 768$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$timestamp\\)\\: Unexpected token \"\\$timestamp\", expected TOKEN_IDENTIFIER at offset 814$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 745$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$version\\)\\: Unexpected token \"\\$version\", expected TOKEN_IDENTIFIER at offset 791$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$g_id\\)\\: Unexpected token \"\\$g_id\", expected TOKEN_IDENTIFIER at offset 351$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$team_id\\)\\: Unexpected token \"\\$team_id\", expected TOKEN_IDENTIFIER at offset 394$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 371$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$version\\)\\: Unexpected token \"\\$version\", expected TOKEN_IDENTIFIER at offset 417$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$team_id\\)\\: Unexpected token \"\\$team_id\", expected TOKEN_IDENTIFIER at offset 157$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 180$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$team_id\\)\\: Unexpected token \"\\$team_id\", expected TOKEN_IDENTIFIER at offset 166$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 189$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$team_id\\)\\: Unexpected token \"\\$team_id\", expected TOKEN_IDENTIFIER at offset 161$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable\\)\\: Unexpected token \"\\$gradeable\", expected TOKEN_IDENTIFIER at offset 210$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$session_id\\)\\: Unexpected token \"\\$session_id\", expected TOKEN_IDENTIFIER at offset 52$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$session_id\\)\\: Unexpected token \"\\$session_id\", expected TOKEN_IDENTIFIER at offset 77$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @return has invalid value \\(\\[ team ids \\]\\)\\: Unexpected token \"\\[\", expected TOKEN_IDENTIFIER at offset 137$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getAUserWithOverriddenGrades\\(\\) should return array\\<app\\\\models\\\\SimpleGradeOverriddenUser\\> but returns app\\\\models\\\\SimpleGradeOverriddenUser\\|null\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$submitty_path$#"
+			count: 2
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$column$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$user_id$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$column \\(\"reply_in_thread\" or \"reply_in_thread_email\"\\)\\)\\: Unexpected token \"\\$column\", expected TOKEN_IDENTIFIER at offset 150$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$thread_id\\)\\: Unexpected token \"\\$thread_id\", expected TOKEN_IDENTIFIER at offset 125$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$notifications$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$submitter with type app\\\\models\\\\gradeable\\\\Submitter\\|null is not subtype of native type app\\\\models\\\\gradeable\\\\Submitter\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\\\app\\\\models\\\\gradeable\\\\Gradeable\\[\\] The gradeable\\(s\\) to retrieve data for\\)\\: Unexpected token \"The\", expected TOKEN_VARIABLE at offset 258$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$thread_id\\)\\: Unexpected token \"\\$thread_id\", expected TOKEN_IDENTIFIER at offset 56$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param for parameter \\$gradeable with type app\\\\models\\\\gradeable\\\\Gradeable\\\\Gradeable is not subtype of native type app\\\\models\\\\gradeable\\\\Gradeable\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^Parameter \\$gradeable of method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:getUsersNotFullyGraded\\(\\) has invalid typehint type app\\\\models\\\\gradeable\\\\Gradeable\\\\Gradeable\\.$#"
+			count: 1
+			path: app/libraries/database/DatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(array  &\\$return     this is the array being built to contain the parsed PG array\\)\\: Unexpected token \"&\", expected TOKEN_VARIABLE at offset 466$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^Binary operation \"\\+\" between string and 0 results in an error\\.$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabase.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 79$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\\\app\\\\models\\\\gradeable\\\\Gradeable\\[\\] The gradeable\\(s\\) to retrieve data for\\)\\: Unexpected token \"The\", expected TOKEN_VARIABLE at offset 184$#"
+			count: 1
+			path: app/libraries/database/PostgresqlDatabaseQueries.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$type\\)\\: Unexpected token \"\\$type\", expected TOKEN_IDENTIFIER at offset 153$#"
+			count: 1
+			path: app/libraries/response/JsonResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$url\\)\\: Unexpected token \"\\$url\", expected TOKEN_IDENTIFIER at offset 55$#"
+			count: 1
+			path: app/libraries/response/RedirectResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$view_class\\)\\: Unexpected token \"\\$view_class\", expected TOKEN_IDENTIFIER at offset 204$#"
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$view_function\\)\\: Unexpected token \"\\$view_function\", expected TOKEN_IDENTIFIER at offset 230$#"
+			count: 1
+			path: app/libraries/response/WebResponse.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$logged_in\\)\\: Unexpected token \"\\$logged_in\", expected TOKEN_IDENTIFIER at offset 96$#"
+			count: 1
+			path: app/libraries/routers/WebRouter.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool flag on whether this model has been changed or not by the application layer\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$check_property\\)\\: Unexpected token \"\\$check_property\", expected TOKEN_IDENTIFIER at offset 350$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$object\\)\\: Unexpected token \"\\$object\", expected TOKEN_IDENTIFIER at offset 328$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$arguments\\)\\: Unexpected token \"\\$arguments\", expected TOKEN_IDENTIFIER at offset 451$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$name\\)\\: Unexpected token \"\\$name\", expected TOKEN_IDENTIFIER at offset 431$#"
+			count: 1
+			path: app/models/AbstractModel.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(string\\)\\: Unexpected token \"\\*/\", expected TOKEN_VARIABLE at offset 21$#"
+			count: 1
+			path: app/models/Breadcrumb.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(string\\|null\\)\\: Unexpected token \"\\*/\", expected TOKEN_VARIABLE at offset 26$#"
+			count: 2
+			path: app/models/Breadcrumb.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$title\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$subtitle\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$href\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$onclick\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string \\$class\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool \\$disabled\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float\\|null \\$progress\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool \\$title_on_hover\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$aria_label\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$badge\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null \\$icon\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Button.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n     \\*\", expected TOKEN_IDENTIFIER at offset 245$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string contains the semester to use, generally from the \\$_REQUEST\\['semester'\\] global\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string contains the course to use, generally from the \\$_REQUEST\\['course'\\] global\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string path on the filesystem that points to the course data directory\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string path to the json file that contains all the course specific settings\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 5
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n    \", expected TOKEN_IDENTIFIER at offset 105$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 20
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var DateTimeZone\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 11
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n     \", expected TOKEN_IDENTIFIER at offset 140$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n     \", expected TOKEN_IDENTIFIER at offset 146$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n     \", expected TOKEN_IDENTIFIER at offset 121$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n     \", expected TOKEN_IDENTIFIER at offset 125$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Text shown to all users for system announcement\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 2
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Config.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string the semester in which the course is taking place\\.\"\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Course.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var the proper title of the course\\.\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Course.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var the display name of the course\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Course.php
+
+		-
+			message: "#^Class app\\\\models\\\\User referenced with incorrect case\\: app\\\\models\\\\user\\.$#"
+			count: 2
+			path: app/models/CourseMaterial.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Subject line of email\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Email.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Body of email\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Email.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string user name\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Email.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Description to show for displaying the diff\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array\\[\\] Message to show underneath the description for a diff\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var boolean If this check's file is in results_public\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var boolean If this check's file should be displayed as a sequence diagram\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$course_path\\)\\: Unexpected token \"\\$course_path\", expected TOKEN_IDENTIFIER at offset 112$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected TOKEN_IDENTIFIER at offset 89$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$idx\\)\\: Unexpected token \"\\$idx\", expected TOKEN_IDENTIFIER at offset 202$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$results_path\\)\\: Unexpected token \"\\$results_path\", expected TOKEN_IDENTIFIER at offset 139$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$results_public_path\\)\\: Unexpected token \"\\$results_public_path\", expected TOKEN_IDENTIFIER at offset 167$#"
+			count: 1
+			path: app/models/GradeableAutocheck.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$component_id\\)\\: Unexpected token \"\\$component_id\", expected TOKEN_IDENTIFIER at offset 89$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:getPrevSubmitterMatching\\(\\) should return app\\\\models\\\\gradeable\\\\Submitter but returns null\\.$#"
+			count: 2
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^Method app\\\\models\\\\GradingOrder\\:\\:getNextSubmitterMatching\\(\\) should return app\\\\models\\\\gradeable\\\\Submitter but returns null\\.$#"
+			count: 2
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$direction Direction of sort \\(ASC or DESC\\)\\)\\: Unexpected token \"\\$direction\", expected TOKEN_IDENTIFIER at offset 225$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sort Sort type\\)\\: Unexpected token \"\\$sort\", expected TOKEN_IDENTIFIER at offset 195$#"
+			count: 1
+			path: app/models/GradingOrder.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 83$#"
+			count: 1
+			path: app/models/GradingSection.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\|null\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 21$#"
+			count: 1
+			path: app/models/GradingSection.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var User\\[\\]\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 21$#"
+			count: 2
+			path: app/models/GradingSection.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Team\\[\\]\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 21$#"
+			count: 1
+			path: app/models/GradingSection.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Notification fetched from DB\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Type of component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Current logged in user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Notification source user \\(can be null\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Notification target user\\(s\\) \\(null implies all users\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Notification text content\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Notification information about redirection link\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Should \\$notify_source be ignored from \\$notify_target\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Notification ID\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Is notification already seen\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var real Time elapsed from creation of notification in secs\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Timestamp for creation of notification\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Type of notification used for settings\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @return has invalid value \\(\\$trimmed_message\\)\\: Unexpected token \"\\$trimmed_message\", expected TOKEN_IDENTIFIER at offset 119$#"
+			count: 1
+			path: app/models/Notification.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$event\\)\\: Unexpected token \"\\$event\", expected TOKEN_IDENTIFIER at offset 18$#"
+			count: 2
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$recipients\\)\\: Unexpected token \"\\$recipients\", expected TOKEN_IDENTIFIER at offset 39$#"
+			count: 2
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$event$#"
+			count: 1
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$recipients$#"
+			count: 1
+			path: app/models/NotificationFactory.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
+			count: 1
+			path: app/models/OfficeHoursQueueInstructor.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$details$#"
+			count: 1
+			path: app/models/OfficeHoursQueueStudent.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected TOKEN_IDENTIFIER at offset 67$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$label The label you would like to assign to the sectionID\\)\\: Unexpected token \"\\$label\", expected TOKEN_IDENTIFIER at offset 91$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$sectionID The sectionID\\)\\: Unexpected token \"\\$sectionID\", expected TOKEN_IDENTIFIER at offset 52$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^Argument of an invalid type app\\\\models\\\\RainbowCustomizationJSON supplied for foreach, only iterables are supported\\.$#"
+			count: 1
+			path: app/models/RainbowCustomizationJSON.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Is this user actually loaded \\(else you cannot access the other member variables\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The id of this user which should be a unique identifier \\(ex\\: RCS ID at RPI\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The first name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The preferred first name of the user if exists\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The name to be displayed by the system \\(either preferred last name or legal first name\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The last name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The preferred last name of the user if exists\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The name to be displayed by the system \\(either preferred last name or legal last name\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  integer The overrided marks\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The comment to be displayed\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleGradeOverriddenUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Is this user actually loaded \\(else you cannot access the other member variables\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The id of this user which should be a unique identifier \\(ex\\: RCS ID at RPI\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The first name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The preferred first name of the user if exists\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The name to be displayed by the system \\(either preferred last name or legal first name\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The last name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The preferred last name of the user if exists\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The name to be displayed by the system \\(either preferred last name or legal last name\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The allowed late days of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The day late days are put into effect\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The extensions of a user \\(allowed late days for a specific homework\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleLateUser.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Title of gradeable or component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float Maximum value of gradeable or component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Order for components to be shown in\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float Average grade\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float Standard deviation\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int number of people graded\\(completely graded\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var number of active grade inquiries for given grading component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Does this component use peer grading\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The id of this team of form \"\\<unique number\\>_\\<creator user id\\>\"\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var integer rotating section \\(registration or rotating\\) of team creator\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var integer registration section \\(registration or rotating\\) of team creator\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\[\\] containing user ids of team members\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\[\\] containing user ids of those invited to the team\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var User\\[\\] containing users of team members\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var User\\[\\] containing users of those invited to the team\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string containing comma\\-seperated list of team members\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/Team.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Is this user actually loaded \\(else you cannot access the other member variables\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The id of this user which should be a unique identifier \\(ex\\: RCS ID at RPI\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Alternate ID for a user, such as a campus assigned ID \\(ex\\: RIN at RPI\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The anonymous id of this user which should be unique for each course they are in\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(\\)\\: Unexpected token \"\\\\n     \\*\", expected TOKEN_IDENTIFIER at offset 20$#"
+			count: 4
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The first name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The preferred first name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The first name to be displayed by the system \\(either first name or preferred first name\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The last name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The preferred last name of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var  string The last name to be displayed by the system \\(either last name or preferred last name\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The email of the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The group of the user, used for access controls \\(ex\\: student, instructor, etc\\.\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The access level of the user \\(ex\\: superuser, faculty, user\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string What is the registration section that the user was assigned to for the course\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int What is the assigned rotating section for the user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 2
+			path: app/models/User.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(string gradable_id\\)\\: Unexpected token \"gradable_id\", expected TOKEN_VARIABLE at offset 98$#"
+			count: 1
+			path: app/models/User.php
+
+		-
+			message: "#^Method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:threadExists\\(\\) invoked with 1 parameter, 0 required\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Forum\\:\\:checkPostEditAccess\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Forum\\:\\:modifyAnonymous\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Thread\\:\\:getContent\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\libraries\\\\database\\\\DatabaseQueries\\:\\:createEmail\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^Call to an undefined method app\\\\models\\\\forum\\\\Forum\\:\\:isValidCategories\\(\\)\\.$#"
+			count: 1
+			path: app/models/forum/Forum.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int post id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/forum/Post.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int thread id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/forum/Post.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int parent id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/forum/Post.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\User user\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/forum/Post.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string content of post\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/forum/Post.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool post display as anon\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/forum/Post.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The name of the file to save text box data to\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AbstractGradeableInput.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The row height for the text box\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AbstractTextBox.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Whether or not this text box is a code box or not\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AbstractTextBox.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var GradedGradeable A reference to the graded gradeable this auto grade belongs to\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The active submission version for electronic gradeables\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutoGradedVersion\\[\\] The graded versions for electronic gradeables\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^Method app\\\\models\\\\gradeable\\\\AutoGradedGradeable\\:\\:getTotalPoints\\(\\) should return int but returns float\\.$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutogradingTestcase The reference to the testcase this grade is for\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number points the submitter earned for this testcase\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the user can view these results\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The message to show the user for this testcase\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var GradeableAutocheck\\[\\]\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The submission version for this AutoGradedVersion\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number of \"normal\" points\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number of \"normal extra credit\" points\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number of \"hidden\" points\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number of \"hidden extra credit\" points\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\Datetime Time the user submitted this version\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the autograding has complete for this version\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutoGradedTestcase\\[\\] The testcases for this version indexed by testcase id \\(lazy loaded\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number of early submission incentive points this version is worth\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\[\\] An array of the names of all meta files in submission directory\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array\\[\\] An array indexed by part number of array of file paths\nNote\\: paths are relative to part directory\nNote\\: 0'th part contains all files, flattened\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array\\[\\] An array of all the autograded results files\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array\\[\\] An array of all the autograded results public files\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The position of the submission in the queue \\(0 if being graded, \\-1 if not in queue\\)\nNote\\: null default value used to indicate that no queue status data has been loaded\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersion.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime Time the version went into the queue\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the grading run was a batch regrade\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The time the grading began\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Seconds the version spent in the queue\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The time the grading finished\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Seconds the version took to grade\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string VCS revision id \\(i\\.e\\. git commit hash\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The time of the most recent submission\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutoGradedVersionHistory.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The maximum allowed size \\(in bytes\\) of a submission\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The maximum number of submissions allowed\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string A message to show the user above the file upload box\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Indicates if list of test should be shown at the bottom of the page\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Indicates if list os submitted files should be shown on page\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Any additional requirements for worker machine \\(i\\.e\\. \"extra_ram\"\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The number of seconds allowed for autograding\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\[\\] The names of different upload bins on the submission page \\(1\\-indexed\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array Array of notebook objects\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AbstractGradingInput\\[\\] Grading input configs for all new types of gradeable input\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutogradingTestcase\\[\\] Cut\\-down information about autograding test cases\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If there is an early submission incentive\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The message given to describe the early submission\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The minimum number days early to receive the early submission incentive\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The minimum number of points required to receive the early submission incentive\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutogradingTestcase\\[\\] The test cases for which the points must be earned to satisfy the incentive\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Total number of non\\-hidden non\\-extra\\-credit \\('normal'\\) points for all test cases\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Total number of non\\-hidden extra\\-credit points for all test cases\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Total number of hidden non\\-extra\\-credit points for all test cases\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Total number of hidden extra\\-credit points for all test cases\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingConfig.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The index of this testcase in the autograding config\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Name of this testcase\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string TODO\\: The command to run\\?\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Number of points this testcase is worth\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If this testcase is extra credit\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If this testcase is hidden\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the user should see the message from a GradedAutogradingTestCase\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/AutogradingTestcase.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The course\\-wide unique numeric id of this component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The title of this component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The comment only visible to the TA/manual grader\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The comment visible to the student\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The minimum points this component can contribute to the score \\(can be negative\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The number of points this component is worth with no marks\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The full value of this component without extra credit\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The maximum number of points this component can contribute to the score \\(can be \\> \\$max_value\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If this is a text component \\(true\\) or a numeric component \\(false\\) for numeric/text components\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If this is a peer grading component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The order of this component in the gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The pdf page this component will reside in\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Mark\\[\\] All possible common marks that can be assigned to this component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Mark\\[\\] Array of marks loaded from the database\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If any submitters have grades for this component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected TOKEN_IDENTIFIER at offset 108$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected TOKEN_IDENTIFIER at offset 69$#"
+			count: 1
+			path: app/models/gradeable/Component.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The course\\-wide unique gradeable id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The gradeable's title\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The instructions url to give to students\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The type of gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int If the gradeable should be graded by all access \\(2\\) by registration section \\(1\\) or rotating sections \\(0\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The minimum user group that can grade this gradeable \\(1\\=instructor\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The syllabus classification of this gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Component\\[\\] An array of all of this gradeable's components\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Component\\[\\] An array of all gradeable components loaded from the database\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If any submitters have active grade inquiries\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If any manual grades have been entered for this gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If any submissions exist\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If any errors occurred in the build output\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Team\\[\\] Any teams that have been formed\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string\\[\\]\\[\\] Which graders are assigned to which rotating sections \\(empty if \\$grade_by_registration is true\\)\nArray \\(indexed by grader id\\) of arrays of rotating section numbers\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutogradingConfig The object that contains the autograding config data\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array Array of all split pdf uploads\\. Each key is a filename and then each element is an array\nthat contains filename, file path, and the file size\\.\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The overall ta instructions for grading \\(numeric\\-text/checkpoint only\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The location of the autograding configuration file\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the gradeable is using vcs upload \\(true\\) or manual upload \\(false\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The subdirectory within the VCS repository for this gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int Where are we hosting VCS \\(\\-1 \\-\\> Not VCS gradeable, 0,1 \\-\\> Submitty, 2,3 \\-\\> public/private Github\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the gradeable is a team assignment\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The maximum team size \\(if the gradeable is a team assignment\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the gradeable is using any manual grading\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the gradeable is a 'scanned exam'\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If students can view submissions\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If students can only view submissions after grades released date\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If students can make submissions\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the gradeable uses peer grading\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The number of peers each student will be graded by\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If submission after student's max deadline\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The point precision for manual grading\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If this gradeable has a due date or not\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The so\\-called 'TA Beta\\-Testing' date\\.  This is when the gradeable appears for TA's\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The date that graders may start grading\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The date that graders must have grades in by\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The date that grades will be released to students\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The date after which only instructors may change grades \\(aka when grades are 'due'\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The deadline for joining teams \\(if the gradeable is a team assignment\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The date students can start making submissions\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The date, before which all students must make a submissions \\(or be marked late\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The number of late days allowed\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The deadline for submitting a grade inquiry\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool are grade inquiries enabled for this assignment\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool are grade inquiries for specific components enabled for this assignment\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool does this assignment have a discussion component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string thread id for corresponding to discussion forum thread\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$points float\\|string The number to round\\)\\: Unexpected token \"\\$points\", expected TOKEN_IDENTIFIER at offset 100$#"
+			count: 1
+			path: app/models/gradeable/Gradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var User\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradeableList.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Gradeable\\[\\]\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 5
+			path: app/models/gradeable/GradeableList.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Gradeable\\[\\] These are gradeables which are only viewable by admin users\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradeableList.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Gradeable\\[\\] These are gradeables which are only viewable by admin & TA users\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradeableList.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Id of the component this grade is attached to\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int\\[\\] The mark ids the submitter received for this component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int\\[\\]\\|null The mark ids the submitter received for this component as reflected in the db\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool True if the marks array was modified after construction\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The score for this component \\(or custom mark point value\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The comment on this mark / custom mark description\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The Id of the grader who most recently updated the component's grade\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The submission version this grade is for\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The time which this grade was most recently updated\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The Id of the verifier who verified the grade\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The time which this grade was verified\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponent.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var GradedComponent\\[\\] The graded components for this Component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedComponentContainer.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string Id of the gradeable this grade is attached to\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var Submitter The submitter who received this graded gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var TaGradedGradeable\\|null The TA Grading info or null if it doesn't exist\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var AutoGradedGradeable The Autograding info\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array The grade inquiries for this submitter/gradeable\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array The late day exceptions indexed by user id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gc_id int Gradeable Component id\\)\\: Unexpected token \"\\$gc_id\", expected TOKEN_IDENTIFIER at offset 95$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Cannot call method getMarks\\(\\) on array\\<app\\\\models\\\\SimpleGradeOverriddenUser\\>\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^Cannot call method getComment\\(\\) on array\\<app\\\\models\\\\SimpleGradeOverriddenUser\\>\\.$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected TOKEN_IDENTIFIER at offset 87$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The number of unused late days the user has as of this gradeable, not including exceptions\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/LateDayInfo.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var LateDayInfo\\[\\] The late day info of each gradeable, indexed by gradeable id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array All entries for the user in the `late_days` table\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$status\\)\\: Unexpected token \"\\$status\", expected TOKEN_IDENTIFIER at offset 68$#"
+			count: 1
+			path: app/models/gradeable/LateDays.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The course\\-wide unique numeric id of this mark\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var float The number of points this mark will add to the score \\(negative for deductions\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The description of this mark \\(aka why a student would lose/gain these points\\)\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The order of the mark within the component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If the student should be able to see this mark\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool If any submitters have received this mark\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$details\\)\\: Unexpected token \"\\$details\", expected TOKEN_IDENTIFIER at offset 103$#"
+			count: 1
+			path: app/models/gradeable/Mark.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime The timestamp \\(readonly\\) of most recent update to \\$status\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/RegradeRequest.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The status of the grade inquiry\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/RegradeRequest.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int\\|null The gradeable component that this grade inquiry is referencing\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/RegradeRequest.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The programming language of the text box\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/SubmissionCodeBox.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool Whether or not the MC is multiselect\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/SubmissionMultipleChoice.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var array The collection of options for the MC\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/SubmissionMultipleChoice.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var GradedGradeable A reference to the graded gradeable this Ta grade belongs to\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var int The id of this gradeable data\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var string The grader's overall comment\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var \\\\DateTime\\|null The date the user viewed their grade\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var GradedComponentContainer\\[\\] The GradedComponentContainers, indexed by component id\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var GradedComponent\\[\\] The components that have been marked for deletion\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/TaGradedGradeable.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$popup_css_file\\)\\: Unexpected token \"\\$popup_css_file\", expected TOKEN_IDENTIFIER at offset 211$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns false\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^Method app\\\\views\\\\AutoGradingView\\:\\:autoShouldDisplayPopup\\(\\) should return string but returns true\\.$#"
+			count: 1
+			path: app/views/AutoGradingView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$annotation_jsons\\)\\: Unexpected token \"\\$annotation_jsons\", expected TOKEN_IDENTIFIER at offset 179$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$filename\\)\\: Unexpected token \"\\$filename\", expected TOKEN_IDENTIFIER at offset 155$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$gradeable_id\\)\\: Unexpected token \"\\$gradeable_id\", expected TOKEN_IDENTIFIER at offset 104$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$is_student\\)\\: Unexpected token \"\\$is_student\", expected TOKEN_IDENTIFIER at offset 211$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^PHPDoc tag @param has invalid value \\(\\$user_id\\)\\: Unexpected token \"\\$user_id\", expected TOKEN_IDENTIFIER at offset 132$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Method app\\\\views\\\\PDFView\\:\\:showPDFEmbedded\\(\\) with return type void returns void but should not return anything\\.$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
+			count: 1
+			path: app/views/PDFView.php
+
+		-
+			message: "#^Variable \\$row might not be defined\\.$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$next_id$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$prev_id$#"
+			count: 1
+			path: app/views/grading/ElectronicGraderView.php
+
+		-
+			message: "#^Result of method app\\\\libraries\\\\Output\\:\\:renderTwigOutput\\(\\) \\(void\\) is used\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^Variable \\$data might not be defined\\.$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+		-
+			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
+			count: 1
+			path: app/views/submission/HomeworkView.php
+
+

@@ -34,7 +34,7 @@ class NotificationFactory {
         $notifications = $this->createNotificationsArray($event,$recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails =$this->createEmailsArray($event,$recipients);
+            $emails = $this->createEmailsArray($event,$recipients);
             $this->sendEmails($emails);
         }
     }
@@ -52,7 +52,7 @@ class NotificationFactory {
             $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
             $recipients[] = $this->core->getUser()->getId();
             $recipients = array_unique($recipients);
-            $emails =$this->createEmailsArray($event,$recipients);
+            $emails = $this->createEmailsArray($event,$recipients);
             $this->sendEmails($emails);
         }
     }
@@ -81,7 +81,7 @@ class NotificationFactory {
             $email_recipients = array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference);
             $email_recipients[] = $current_user_id;
             $email_recipients = array_unique($email_recipients);
-            $emails =$this->createEmailsArray($event,$email_recipients);
+            $emails = $this->createEmailsArray($event,$email_recipients);
             $this->sendEmails($emails);
         }
     }
@@ -99,7 +99,7 @@ class NotificationFactory {
         $this->sendNotifications($notifications);
 
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'].'_email');
+            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'] . '_email');
             $email_recipients[] = $event['recipient'];
             $email_recipients[] = $this->core->getUser()->getId();
             $email_recipients = array_unique($email_recipients);
@@ -130,7 +130,7 @@ class NotificationFactory {
             if ($user_settings[$event['type']]) {
                 $notification_recipients[] = $recipient;
             }
-            if ($user_settings[$event['type'].'_email']) {
+            if ($user_settings[$event['type'] . '_email']) {
                 $email_recipients[] = $recipient;
             }
         }
@@ -208,7 +208,7 @@ class NotificationFactory {
         if (!empty($flattened_notifications)) {
             // some notifications may not have been added to the flattened notifications
             // so to calculate the number of notifications we must use flattened notifications
-            $this->core->getQueries()->insertNotifications($flattened_notifications,count($flattened_notifications)/5);
+            $this->core->getQueries()->insertNotifications($flattened_notifications,count($flattened_notifications) / 5);
         }
 
     }
@@ -239,7 +239,7 @@ class NotificationFactory {
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails,count($flattened_emails)/3);
+            $this->core->getQueries()->insertEmails($flattened_emails,count($flattened_emails) / 3);
         }
 
     }

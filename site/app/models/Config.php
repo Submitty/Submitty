@@ -224,7 +224,7 @@ class Config extends AbstractModel {
 
     public function loadMasterConfigs($config_path) {
         if (!is_dir($config_path)) {
-            throw new ConfigException("Could not find config directory: ". $config_path, true);
+            throw new ConfigException("Could not find config directory: " . $config_path, true);
         }
         $this->config_path = $config_path;
         // Load config details from the master config file
@@ -286,20 +286,20 @@ class Config extends AbstractModel {
             $this->system_message = strval($submitty_json['system_message']);
         }
 
-        $this->base_url = rtrim($this->base_url, "/")."/";
+        $this->base_url = rtrim($this->base_url, "/") . "/";
 
         if (!empty($submitty_json['cgi_url'])){
-            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/")."/";
+            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/") . "/";
         }
         else {
-            $this->cgi_url = $this->base_url."cgi-bin/";
+            $this->cgi_url = $this->base_url . "cgi-bin/";
         }
 
         if (empty($submitty_json['vcs_url'])) {
             $this->vcs_url = $this->base_url . '{$vcs_type}/';
         }
         else {
-            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
+            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
@@ -361,12 +361,12 @@ class Config extends AbstractModel {
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
 
         if (!file_exists($course_json_path)) {
-            throw new ConfigException("Could not find course config file: ".$course_json_path, true);
+            throw new ConfigException("Could not find course config file: " . $course_json_path, true);
         }
         $this->course_json_path = $course_json_path;
         $this->course_json = json_decode(file_get_contents($course_json_path), true);
         if ($this->course_json === null) {
-            throw new ConfigException("Error parsing the config file: ".json_last_error_msg());
+            throw new ConfigException("Error parsing the config file: " . json_last_error_msg());
         }
 
         if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
@@ -388,12 +388,12 @@ class Config extends AbstractModel {
             $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
         }
 
-        $this->vcs_base_url = rtrim($this->vcs_base_url, "/")."/";
+        $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
 
         if (isset($this->course_json['hidden_details'])) {
             $this->hidden_details = $this->course_json['hidden_details'];
             if (isset($this->course_json['hidden_details']['course_url'])) {
-                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/")."/";
+                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/") . "/";
             }
         }
 

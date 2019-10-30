@@ -153,7 +153,7 @@ class Core {
     }
 
     public function loadAuthentication() {
-        $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
+        $auth_class = "\\app\\authentication\\" . $this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
@@ -504,7 +504,7 @@ class Core {
      * @return string
      */
     public function buildUrl($parts=array()) {
-        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+        $url = $this->getConfig()->getBaseUrl() . implode("/", $parts);
         return $url;
     }
 
@@ -557,7 +557,7 @@ class Core {
     public function getFullCourseName() {
         $course_name = strtoupper($this->getConfig()->getCourse());
         if ($this->getConfig()->getCourseName() !== "") {
-            $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
+            $course_name .= ": " . htmlentities($this->getConfig()->getCourseName());
         }
         return $course_name;
     }
@@ -585,7 +585,7 @@ class Core {
             else if($arr1[0] == "s")  $semester .= "Spring ";
             else if ($arr1[0] == "u") $semester .= "Summer ";
 
-            $semester .= "20". $arr1[1]. $arr1[2];
+            $semester .= "20" . $arr1[1] . $arr1[2];
         }
         return $semester;
     }

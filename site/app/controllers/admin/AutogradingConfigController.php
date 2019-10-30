@@ -69,7 +69,7 @@ class AutogradingConfigController extends AbstractController {
         }
 
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
-        $counter = count(scandir($target_dir))-1;
+        $counter = count(scandir($target_dir)) - 1;
         $try_dir = FileUtils::joinPaths($target_dir, $counter);
         while(is_dir($try_dir)){
             $counter++;
