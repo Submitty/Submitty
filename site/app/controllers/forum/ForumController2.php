@@ -105,7 +105,7 @@ class ForumController2 extends AbstractController {
     }
 
     private function showMergedThreads($currentCourse) {
-        return  (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
+        return (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){

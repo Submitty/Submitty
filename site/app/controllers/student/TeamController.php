@@ -370,7 +370,7 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->addToSeekingTeam($gradeable_id,$user_id);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**
@@ -394,7 +394,7 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**

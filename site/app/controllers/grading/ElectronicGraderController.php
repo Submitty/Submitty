@@ -231,7 +231,7 @@ class ElectronicGraderController extends AbstractController {
         $overall_scores = null;
         $order = null;
         $num_submitted = array();
-        $num_unsubmitted = 0 ;
+        $num_unsubmitted = 0;
         $total_indvidual_students = 0;
         $viewed_grade = 0;
 
