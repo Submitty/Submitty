@@ -6,7 +6,6 @@ use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\models\OfficeHoursQueueStudent;
 
-
 class OfficeHoursQueueInstructor extends AbstractModel {
 
     private $entries = array();

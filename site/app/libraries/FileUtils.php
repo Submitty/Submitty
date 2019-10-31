@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\exceptions\FileReadException;
 
 /**

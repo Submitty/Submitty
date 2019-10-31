@@ -7,7 +7,6 @@ use app\libraries\response\WebResponse;
 use app\models\Config;
 use PHPUnit\Framework\TestCase;
 
-
 class WebResponseTester extends TestCase {
     public function testWebResponse() {
         $core = new Core();

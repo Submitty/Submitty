@@ -42,8 +42,6 @@
         <exclude name="PSR2.Methods.FunctionCallSignature.CloseBracketLine" />
         <exclude name="PSR2.Methods.FunctionCallSignature.MultipleArguments" />
         <exclude name="PSR2.Methods.MethodDeclaration.StaticBeforeVisibility" />
-        <exclude name="PSR2.Namespaces.UseDeclaration.SpaceAfterLastUse" />
-        <exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
 
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />

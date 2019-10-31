@@ -1,6 +1,7 @@
 <?php
 
 namespace app\views;
+
 use app\models\Breadcrumb;
 
 class GlobalView extends AbstractView {

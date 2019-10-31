@@ -5,7 +5,6 @@ namespace app\libraries\response;
 
 use app\libraries\Core;
 
-
 /**
  * Class Response
  * @package app\libraries\response

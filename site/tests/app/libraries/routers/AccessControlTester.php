@@ -9,7 +9,6 @@ use app\models\User;
 use app\libraries\routers\WebRouter;
 use Symfony\Component\HttpFoundation\Request;
 
-
 class AccessControlTester extends BaseUnitTest {
     private $semester = 'test_semester';
 

@@ -14,8 +14,6 @@ use app\models\User;
 use app\models\NotificationFactory;
 use Symfony\Component\HttpFoundation\Request;
 
-
-
 /**
  * Class Core
  *
