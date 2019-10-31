@@ -472,7 +472,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
               grading_rotating
             GROUP BY g_id, user_id
             ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
-            ORDER BY user_group, user_id, g_grade_start_date",$params
+            ORDER BY user_group, user_id, g_grade_start_date", $params
         );
         $rows = $this->course_db->rows();
         $modified_rows = [];
