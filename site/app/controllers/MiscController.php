@@ -114,7 +114,7 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
-            header("Content-type: ".$mime_type);
+            header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
@@ -468,7 +468,7 @@ class MiscController extends AbstractController {
                 else
                     continue;
                 //remove 'bulk_upload_' and '.json' from job file name
-                $result[] = substr($job,11,-5);
+                $result[] = substr($job, 11, -5);
             }
             //look in the split upload folder to see what is complete
             $split_uploads = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $gradeable_id);

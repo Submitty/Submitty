@@ -88,7 +88,7 @@ class Forum extends AbstractModel {
 
     private function sendEmailAnnouncement(Thread $thread) {
         $class_list = $this->core->getQueries()->getEmailListWithIds();
-        $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n".$thread->getContent();
+        $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n" . $thread->getContent();
 
         foreach($class_list as $user) {
             $user_id = $user['user_id'];

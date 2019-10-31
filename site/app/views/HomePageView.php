@@ -7,12 +7,13 @@ use app\models\User;
 
 
 class HomePageView extends AbstractView {
-
-
-    /*
-    *@param List of courses the student is in.
-    */
-    public function showHomePage(User $user, $unarchived_courses = array(), $archived_courses = array(), $change_name_text) {
+    /**
+     * @param User $user
+     * @param array $unarchived_courses
+     * @param array $archived_courses
+     * @param string $change_name_text
+     */
+    public function showHomePage(User $user, $unarchived_courses, $archived_courses, $change_name_text) {
         $statuses = array();
         $course_types = [$unarchived_courses, $archived_courses];
         $rank_titles = [

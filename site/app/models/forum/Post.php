@@ -79,6 +79,6 @@ class Post extends AbstractModel {
         //setDeleted($details['deleted']);
         //setType($details['type']);
         //setAttachment($details['has_attachment']);
-    } 
+    }
 
 }

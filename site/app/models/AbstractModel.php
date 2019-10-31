@@ -145,7 +145,7 @@ abstract class AbstractModel {
             return $this->$property_name === true;
         }
 
-        throw new \BadMethodCallException('Call to undefined method '.__CLASS__.'::'.$name.'()');
+        throw new \BadMethodCallException('Call to undefined method ' . __CLASS__ . '::' . $name . '()');
     }
 
     /**
@@ -160,7 +160,7 @@ abstract class AbstractModel {
      */
     private function convertName($name, $prefix_length=3) {
         $regex_func = function ($matches) {
-            return "_".strtolower($matches[0]);
+            return "_" . strtolower($matches[0]);
         };
         $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, $prefix_length))));
         return $name;

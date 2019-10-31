@@ -22,9 +22,6 @@
         <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
         <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
         <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.SpaceBeforeComma" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.NoSpaceAfterComma" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
@@ -65,11 +62,7 @@
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMiddle"/>
         <exclude name="PSR12.Keywords.ShortFormTypeKeywords.LongFound" />
-        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceBefore"/>
-        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter"/>
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
-
-        <exclude name="PEAR.Functions.ValidDefaultValue.NotAtEnd" />
 
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceBeforeBracket" />
@@ -95,14 +88,8 @@
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
         <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-        <exclude name="Squiz.WhiteSpace.LanguageConstructSpacing.IncorrectSingle" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceAfter" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceBefore" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.NoSpaceBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
-        <exclude name="Squiz.WhiteSpace.SemicolonSpacing.Incorrect" />
-        <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace.EndLine" />
 
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />
