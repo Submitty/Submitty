@@ -320,7 +320,7 @@ class User extends AbstractModel {
      * @param mixed $data
      * @return bool
      */
-    static public function validateUserData($field, $data) {
+    public static function validateUserData($field, $data) {
 
         switch($field) {
             case 'user_id':
@@ -358,7 +358,7 @@ class User extends AbstractModel {
         }
     }
 
-    static public function constructNotificationSettings($details) {
+    public static function constructNotificationSettings($details) {
         $notification_settings = [];
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
         $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;
