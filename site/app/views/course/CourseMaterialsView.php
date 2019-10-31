@@ -9,7 +9,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 
-
 class CourseMaterialsView extends AbstractView {
     /**
      * @param User $user

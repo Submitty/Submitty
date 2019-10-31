@@ -2,7 +2,6 @@
 
 namespace app\controllers\student;
 
-
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 

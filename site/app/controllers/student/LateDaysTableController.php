@@ -2,7 +2,6 @@
 
 namespace app\controllers\student;
 
-
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\models\gradeable\LateDays;

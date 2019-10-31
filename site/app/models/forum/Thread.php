@@ -5,7 +5,6 @@ namespace app\models\forum;
 use app\libraries\Core;
 use app\models\AbstractModel;
 
-
 /**
  * Class Thread
  *

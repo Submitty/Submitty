@@ -5,7 +5,6 @@ namespace app\models;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 
-
 class OfficeHoursQueueStudent extends AbstractModel {
 
     private $user_id = null;

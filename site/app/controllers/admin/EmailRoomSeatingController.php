@@ -12,7 +12,6 @@ use app\libraries\routers\AccessControl;
 use app\models\Email;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class EmailRoomSeatingController
  * @package app\controllers\admin

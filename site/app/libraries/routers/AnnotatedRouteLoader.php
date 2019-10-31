@@ -5,7 +5,6 @@ namespace app\libraries\routers;
 use Symfony\Component\Routing\Loader\AnnotationClassLoader;
 use Symfony\Component\Routing\Route;
 
-
 class AnnotatedRouteLoader extends AnnotationClassLoader {
 
 

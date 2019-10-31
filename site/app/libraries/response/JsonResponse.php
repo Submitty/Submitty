@@ -5,7 +5,6 @@ namespace app\libraries\response;
 
 use app\libraries\Core;
 
-
 /**
  * Class JsonResponse
  * @package app\libraries\response

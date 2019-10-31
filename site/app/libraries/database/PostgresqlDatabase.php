@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-
 class PostgresqlDatabase extends AbstractDatabase {
     protected $host;
     protected $port;

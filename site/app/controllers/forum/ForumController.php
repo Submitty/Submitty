@@ -12,7 +12,6 @@ use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class ForumHomeController
  *

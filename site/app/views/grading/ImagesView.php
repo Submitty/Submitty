@@ -7,7 +7,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 
-
 class ImagesView extends AbstractView {
     /**
      * @param User[] $students

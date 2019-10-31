@@ -1503,6 +1503,11 @@ parameters:
 			path: app/models/SimpleStat.php
 
 		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool is this a component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var string The id of this team of form \"\\<unique number\\>_\\<creator user id\\>\"\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
 			count: 1
 			path: app/models/Team.php
@@ -2656,5 +2661,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
-

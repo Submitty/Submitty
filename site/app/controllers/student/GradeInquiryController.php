@@ -10,7 +10,6 @@ use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id

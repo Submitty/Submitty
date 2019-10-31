@@ -11,7 +11,6 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class AutogradingConfigController
  * @package app\controllers\admin

@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\libraries\GradingQueue;
 use app\models\AbstractModel;

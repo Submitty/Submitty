@@ -7,7 +7,6 @@ use app\models\User;
 use app\libraries\DataTime;
 use app\models\AbstractModel;
 
-
 /**
  * Class Post
  *

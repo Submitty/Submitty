@@ -5,7 +5,6 @@ namespace app\libraries\response;
 
 use app\libraries\Core;
 
-
 /**
  * Class WebResponse
  * @package app\libraries\response

@@ -21,7 +21,6 @@ use app\libraries\FileUtils;
 use app\controllers\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 class ElectronicGraderController extends AbstractController {
     /**
      * Checks that a given diff viewer option is valid using DiffViewer::isValidSpecialCharsOption

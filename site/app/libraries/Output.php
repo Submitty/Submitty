@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\libraries\FileUtils;
