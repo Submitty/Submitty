@@ -29,14 +29,14 @@ class PlagiarismController extends AbstractController {
 
             while(!feof($file)) {
                 $line = fgets($file);
-                $line = trim($line," ");
-                $line = explode("/",$line);
+                $line = trim($line, " ");
+                $line = explode("/", $line);
                 $sem = $line[5];
                 $course = $line[6];
                 $gradeables = array();
                 while (!feof($file)) {
                     $line = fgets($file);
-                    if (trim(trim($line, " "),"\n") === "") {
+                    if (trim(trim($line, " "), "\n") === "") {
                         break;
                     }
                     array_push($gradeables, trim(trim($line, " "), "\n"));
@@ -140,7 +140,7 @@ class PlagiarismController extends AbstractController {
         $content = file_get_contents($file_path);
         $content = trim(str_replace(array("\r", "\n"), '', $content));
         $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings,3);
+        $rankings = array_chunk($rankings, 3);
         foreach($rankings as $i => $ranking) {
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedFirstName());
             array_push($rankings[$i], $this->core->getQueries()->getUserById($ranking[1])->getDisplayedLastName());
@@ -432,9 +432,9 @@ class PlagiarismController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $saved_config = json_decode(file_get_contents("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json"),true);
+        $saved_config = json_decode(file_get_contents("/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/config/lichen_" . $semester . "_" . $course . "_" . $gradeable_id . ".json"), true);
 
-        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null , $prior_term_gradeables, $saved_config);
+        $this->core->getOutput()->renderOutput(array('admin', 'Plagiarism'), 'configureGradeableForPlagiarismForm', 'edit', null, $prior_term_gradeables, $saved_config);
 
     }
 
@@ -515,7 +515,7 @@ class PlagiarismController extends AbstractController {
         $content = file_get_contents($file_path);
         $content = trim(str_replace(array("\r", "\n"), '', $content));
         $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings,3);
+        $rankings = array_chunk($rankings, 3);
         foreach($rankings as $ranking) {
             if($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];
@@ -530,7 +530,7 @@ class PlagiarismController extends AbstractController {
         $data = "";
         if(($this->core->getUser()->accessAdmin()) && (file_exists($file_name))) {
             if(isset($user_id_2) && !empty($user_id_2) && isset($version_user_2) && !empty($version_user_2)) {
-                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2 , '1');
+                $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, $user_id_2, $version_user_2, '1');
             }
             else {
                 $color_info = $this->getColorInfo($course_path, $gradeable_id, $user_id_1, $version_user_1, '', '', '1');
@@ -670,7 +670,7 @@ class PlagiarismController extends AbstractController {
         $content = file_get_contents($file_path);
         $content = trim(str_replace(array("\r", "\n"), '', $content));
         $rankings = preg_split('/ +/', $content);
-        $rankings = array_chunk($rankings,3);
+        $rankings = array_chunk($rankings, 3);
         foreach($rankings as $ranking) {
             if($ranking[1] == $user_id_1) {
                 $max_matching_version = $ranking[2];

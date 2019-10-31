@@ -22,9 +22,6 @@
         <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
         <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
         <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.SpaceBeforeComma" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.NoSpaceAfterComma" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />

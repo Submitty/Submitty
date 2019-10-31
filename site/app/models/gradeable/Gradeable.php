@@ -1683,7 +1683,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
         }
     }
 
@@ -1733,7 +1733,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function hasOverriddenGrades(Submitter $submitter) {
-        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(),$submitter->getId());
+        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(), $submitter->getId());
         if($userWithOverriddenGrades === null ){
             return false;
         }

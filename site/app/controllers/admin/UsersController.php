@@ -147,8 +147,8 @@ class UsersController extends AbstractController {
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
-            $key_array = explode("_",$key,2);
-            if (!array_key_exists($key_array[0],$new_registration_information)) {
+            $key_array = explode("_", $key, 2);
+            if (!array_key_exists($key_array[0], $new_registration_information)) {
                 $new_registration_information[$key_array[0]] = array();
             }
             if ($key_array[1] != 'all') {
@@ -158,7 +158,7 @@ class UsersController extends AbstractController {
 
         foreach($this->core->getQueries()->getAllGraders() as $grader) {
             $grader_id = $grader->getId();
-            if (array_key_exists($grader_id,$new_registration_information)) {
+            if (array_key_exists($grader_id, $new_registration_information)) {
                 $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
             }
             else {
@@ -205,7 +205,7 @@ class UsersController extends AbstractController {
         //uses more thorough course information if it exists, if not uses database information
         $user_information = array();
         foreach ($user_ids as $user_id) {
-            $already_in_course = array_key_exists($user_id,$course_users);
+            $already_in_course = array_key_exists($user_id, $course_users);
             $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
             $user_information[$user_id] = array(
                 'already_in_course' => $already_in_course,
@@ -348,7 +348,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester,$course,$g_id);
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
                 }
             }
 
@@ -367,11 +367,11 @@ class UsersController extends AbstractController {
         //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
         $sections_with_students = array();
         foreach ($non_null_counts as $rows) {
-            array_push($sections_with_students,$rows['rotating_section']);
+            array_push($sections_with_students, $rows['rotating_section']);
         }
         for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
-            if ( !in_array($i,$sections_with_students) ) {
-                array_push($non_null_counts,[
+            if ( !in_array($i, $sections_with_students) ) {
+                array_push($non_null_counts, [
                     "rotating_section" => $i,
                     "count" => 0
                 ]);
@@ -494,14 +494,14 @@ class UsersController extends AbstractController {
             foreach ($reg_sections as $row) {
                 $test = $row['sections_registration_id'];
                 if (isset($_POST[$test])) {
-                    array_push($exclude_sections,$_POST[$row['sections_registration_id']]);
+                    array_push($exclude_sections, $_POST[$row['sections_registration_id']]);
                 }
             }
             //remove people who should not be added to rotating sections
             for ($j = 0; $j < count($users_with_reg_section);) {
                 for ($i = 0;$i < count($exclude_sections);++$i) {
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
-                        array_splice($users_with_reg_section,$j,1);
+                        array_splice($users_with_reg_section, $j, 1);
                         $j--;
                         break;
                     }
@@ -891,7 +891,7 @@ class UsersController extends AbstractController {
                     // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                     // Automatically validate if not set (this field is optional).
                 case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx] ):
                     // Validation failed somewhere.  Record which row failed.
                     // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
                     $bad_rows[] = ($row_num + 1);

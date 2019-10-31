@@ -148,7 +148,7 @@ class ElectronicGraderView extends AbstractView {
                     $viewed_total = $total / $num_components;
                     $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
                     $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
-                        number_format(($individual_viewed_grade / $total_students_submitted) * 100,1);
+                        number_format(($individual_viewed_grade / $total_students_submitted) * 100, 1);
                 }
             }
             if(!$peer) {

@@ -93,7 +93,7 @@ class NavigationView extends AbstractView {
                     $message_file_details = $message_json->special_message;
 
                     //If any fields are missing, treat this as though we just didn't have a message for this user.
-                    if(!property_exists($message_file_details,'title') || !property_exists($message_file_details,'description') || !property_exists($message_file_details,'filename') ){
+                    if(!property_exists($message_file_details, 'title') || !property_exists($message_file_details, 'description') || !property_exists($message_file_details, 'filename') ){
                         $display_custom_message = false;
                         $messsage_file_details = null;
                     }
@@ -427,7 +427,7 @@ class NavigationView extends AbstractView {
                 $list_section === GradeableList::GRADED;
             if ($gradeable->isTeamAssignment()) {
                 if ($grade_ready_for_view &&
-                    $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId()) === null) {
+                    $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(), $this->core->getUser()->getId()) === null) {
                     $class = "btn-success";
                 }
             }

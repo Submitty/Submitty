@@ -111,7 +111,7 @@ class SubmissionController extends AbstractController {
                     $graded_gradeable->getOrCreateTaGradedGradeable()->setUserViewedDate($now);
                     $this->core->getQueries()->saveTaGradedGradeable($graded_gradeable->getTaGradedGradeable());
                     if ($graded_gradeable->getSubmitter()->isTeam()) {
-                        $this->core->getQueries()->updateTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId());
+                        $this->core->getQueries()->updateTeamViewedTime($graded_gradeable->getSubmitter()->getId(), $this->core->getUser()->getId());
                     }
                 }
 
@@ -519,7 +519,7 @@ class SubmissionController extends AbstractController {
         //images are order <original>_<split-number>_<page-number>, so grab everuthing with the same suffixes
         preg_match("/\d*$/", pathinfo($path, PATHINFO_FILENAME), $matches);
         $split_number = count($matches) >= 1 ? reset($matches) : "-1";
-        $image_files = glob(FileUtils::joinPaths(  dirname($uploaded_file)   , "*.*"));
+        $image_files = glob(FileUtils::joinPaths(  dirname($uploaded_file), "*.*"));
 
         $regex = "/.*_{$split_number}_\d*\.\w*$/";
         $image_files = preg_grep($regex, $image_files);
@@ -883,9 +883,9 @@ class SubmissionController extends AbstractController {
             $short_answer_objects    = $_POST['short_answer_answers'] ?? "";
             $codebox_objects         = $_POST['codebox_answers'] ?? "";
             $multiple_choice_objects = $_POST['multiple_choice_answers'] ?? "";
-            $short_answer_objects    = json_decode($short_answer_objects,true);
-            $codebox_objects         = json_decode($codebox_objects,true);
-            $multiple_choice_objects = json_decode($multiple_choice_objects,true);
+            $short_answer_objects    = json_decode($short_answer_objects, true);
+            $codebox_objects         = json_decode($codebox_objects, true);
+            $multiple_choice_objects = json_decode($multiple_choice_objects, true);
 
             $this_config_inputs = $gradeable->getAutogradingConfig()->getInputs() ?? array();
 
@@ -1090,9 +1090,9 @@ class SubmissionController extends AbstractController {
             $vcs_path = $gradeable->getVcsSubdirectory();
 
             if ($gradeable->getVcsHostType() == 0 || $gradeable->getVcsHostType() == 1) {
-                $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
-                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
-                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
+                $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
+                $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
+                $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);
                 $vcs_full_path = $vcs_base_url . $vcs_path;
             }
 
@@ -1107,13 +1107,13 @@ class SubmissionController extends AbstractController {
             }
             // use base url + path with variable string replacements
             else {
-                if (strpos($vcs_path,"\$repo_id") !== false && $repo_id == "") {
+                if (strpos($vcs_path, "\$repo_id") !== false && $repo_id == "") {
                     return $this->uploadResult("repository id input cannot be blank.", false);
                 }
-                $vcs_path = str_replace("{\$gradeable_id}",$gradeable_id,$vcs_path);
-                $vcs_path = str_replace("{\$user_id}",$who_id,$vcs_path);
-                $vcs_path = str_replace("{\$team_id}",$who_id,$vcs_path);
-                $vcs_path = str_replace("{\$repo_id}",$repo_id,$vcs_path);
+                $vcs_path = str_replace("{\$gradeable_id}", $gradeable_id, $vcs_path);
+                $vcs_path = str_replace("{\$user_id}", $who_id, $vcs_path);
+                $vcs_path = str_replace("{\$team_id}", $who_id, $vcs_path);
+                $vcs_path = str_replace("{\$repo_id}", $repo_id, $vcs_path);
                 $vcs_full_path = $vcs_base_url . $vcs_path;
             }
 
@@ -1248,7 +1248,7 @@ class SubmissionController extends AbstractController {
             $subject = "Team Member Submission: " . $graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, " . $graded_gradeable->getGradeable()->getTitle();
             $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];
-            $this->core->getNotificationFactory()->onTeamEvent($event,$team_members);
+            $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
         }
         else {
             $this->core->getQueries()->insertVersionDetails($gradeable->getId(), $user_id, null, $new_version, $current_time);

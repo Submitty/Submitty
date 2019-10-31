@@ -580,7 +580,7 @@ class DiffViewer {
     private function replaceUTF($text, $what, &$which, $description){
         $count = 0;
         $what = '<span class="whitespace">' . $what . '</span>';
-        $which = str_replace($text, $what, $which,$count);
+        $which = str_replace($text, $what, $which, $count);
         if($count > 0) $this->white_spaces[$description] = strip_tags($what);
         return $what;
     }

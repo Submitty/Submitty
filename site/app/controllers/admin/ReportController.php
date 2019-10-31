@@ -531,7 +531,7 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
 
             // Print the form
-            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 "used_buckets" => $customization->getUsedBuckets(),

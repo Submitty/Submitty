@@ -1211,9 +1211,9 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      */
     public function getActiveVersionForTeam($gradeable_id,$team_id) {
         $params = array($gradeable_id,$team_id);
-        $this->course_db->query("SELECT active_version FROM electronic_gradeable_version WHERE g_id = ? and team_id = ?",$params);
+        $this->course_db->query("SELECT active_version FROM electronic_gradeable_version WHERE g_id = ? and team_id = ?", $params);
         $query_result = $this->course_db->row();
-        return array_key_exists('active_version',$query_result) ? $query_result['active_version'] : 0;
+        return array_key_exists('active_version', $query_result) ? $query_result['active_version'] : 0;
     }
 
     public function getNumUsersGraded($g_id) {
@@ -1570,7 +1570,7 @@ ORDER BY user_id ASC");
     public function getUsersOnTeamsForGradeable($gradeable) {
         $params = array($gradeable->getId());
         $this->course_db->query("SELECT user_id FROM teams WHERE
-                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
+                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)", $params);
 
         $users = [];
         foreach ($this->course_db->rows() as $row){
@@ -1730,7 +1730,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
      * @param $user_id
      */
     public function getTeamViewedTime($team_id,$user_id) {
-        $this->course_db->query("SELECT last_viewed_time FROM teams WHERE team_id = ? and user_id=?",array($team_id,$user_id));
+        $this->course_db->query("SELECT last_viewed_time FROM teams WHERE team_id = ? and user_id=?", array($team_id,$user_id));
         return $this->course_db->rows()[0]['last_viewed_time'];
     }
 
@@ -1764,7 +1764,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     public function getAllTeamViewedTimesForGradeable($gradeable) {
         $params = array($gradeable->getId());
         $this->course_db->query("SELECT team_id,user_id,last_viewed_time FROM teams WHERE
-                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)",$params);
+                team_id = ANY(SELECT team_id FROM gradeable_teams WHERE g_id = ?)", $params);
 
         $user_viewed_info = [];
         foreach ($this->course_db->rows() as $row){
@@ -1772,7 +1772,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
             $user = $row['user_id'];
             $time = $row['last_viewed_time'];
 
-            if (!array_key_exists($team,$user_viewed_info)) {
+            if (!array_key_exists($team, $user_viewed_info)) {
                 $user_viewed_info[$team] = array();
             }
             $user_viewed_info[$team][$user] = $time;
@@ -1994,7 +1994,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     public function getTeamsWithMembersFromGradeableID($g_id) {
         $team_map = $this->core->getQueries()->getTeamIdsAllGradeables();
 
-        if (!array_key_exists( $g_id ,$team_map)) {
+        if (!array_key_exists( $g_id, $team_map)) {
             return array();
         }
 
@@ -2006,7 +2006,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
             $teams_with_members[] = $row['team_id'];
         }
 
-        return array_intersect($teams,$teams_with_members);
+        return array_intersect($teams, $teams_with_members);
     }
 
 
@@ -2043,7 +2043,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
 
         $users_seeking_team = array();
         foreach($this->course_db->rows() as $row) {
-            array_push($users_seeking_team,$row['user_id']);
+            array_push($users_seeking_team, $row['user_id']);
         }
         return $users_seeking_team;
     }
@@ -2590,7 +2590,7 @@ AND gc_id IN (
     }
 
     public function viewedThread($user, $thread_id){
-        $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))" , array($thread_id, $user, $thread_id));
+        $this->course_db->query("SELECT * FROM viewed_responses v WHERE thread_id = ? AND user_id = ? AND NOT EXISTS(SELECT thread_id FROM (posts LEFT JOIN forum_posts_history ON posts.id = forum_posts_history.post_id) AS jp WHERE jp.thread_id = ? AND (jp.timestamp > v.timestamp OR (jp.edit_timestamp IS NOT NULL AND jp.edit_timestamp > v.timestamp)))", array($thread_id, $user, $thread_id));
         return count($this->course_db->rows()) > 0;
     }
 
@@ -2837,7 +2837,7 @@ AND gc_id IN (
         ];
         $query = "SELECT user_id FROM notification_settings WHERE {$column} = 'true'";
         $this->course_db->query($query);
-        if (!in_array($column,$preferences)) {
+        if (!in_array($column, $preferences)) {
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query);
         }
         return $this->rowsToArray($this->course_db->rows());
@@ -2852,7 +2852,7 @@ AND gc_id IN (
         $params = $user_ids;
         $user_id_query = $this->createParamaterList(count($user_ids));
         $query = "SELECT * FROM notification_settings WHERE user_id in " . $user_id_query;
-        $this->course_db->query($query,$params);
+        $this->course_db->query($query, $params);
         return $this->course_db->rows();
     }
 
@@ -2878,7 +2878,7 @@ AND gc_id IN (
                     author_user_id AS user_id
                   FROM
                     parents) AS parents;";
-        $this->course_db->query($query,$params);
+        $this->course_db->query($query, $params);
         return $this->rowsToArray($this->course_db->rows());
     }
 
@@ -2897,7 +2897,7 @@ AND gc_id IN (
         if ($column != 'reply_in_post_thread' && $column != 'reply_in_post_thread_email') {
             throw new DatabaseException("Given column, {$column}, is not a valid column", $query, $params);
         }
-        $this->course_db->query($query,$params);
+        $this->course_db->query($query, $params);
         return $this->rowsToArray($this->course_db->rows());
 
     }
@@ -3083,7 +3083,7 @@ AND gc_id IN (
         $grade_inquiry_ids = $this->createParamaterList(count($grade_inquiries));
         $params = array_map(function ($grade_inquiry) {
             return $grade_inquiry->getId();
-        },$grade_inquiries);
+        }, $grade_inquiries);
         $this->course_db->query("SELECT * FROM regrade_discussion WHERE regrade_id IN $grade_inquiry_ids AND deleted=false ORDER BY timestamp ASC ", $params);
         $result = [];
         foreach ($params as $id) {
@@ -4105,7 +4105,7 @@ AND gc_id IN (
         $this->course_db->query("SELECT * FROM queue where user_id = ? order by time_in DESC limit 1", array($user_id));
         if(count($this->course_db->rows()) == 0){
             $name = $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName();
-            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, null,null,null,null);
+            return new OfficeHoursQueueStudent($this->core, -1, $this->core->getUser()->getId(), $name, -1, $num_in_queue, -1, null, null, null, null);
         }
         $row = $this->course_db->rows()[0];
         $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;

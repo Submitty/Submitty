@@ -116,7 +116,7 @@ class AdminGradeableController extends AbstractController {
         // The current gradeable will always load its grader history,
         // but if it is grade by registration it should not be in $rotating_gradeables array
         if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
-            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            $current_g_id_key = array_search($gradeable->getId(), $rotating_gradeables);
             unset($rotating_gradeables[$current_g_id_key]);
             $rotating_gradeables = array_values($rotating_gradeables);
         }
@@ -141,22 +141,22 @@ class AdminGradeableController extends AbstractController {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = [ 'UPLOADED: ' . substr($file['path'],strlen($uploaded_configs_dir) + 1) , $file['path'] ];
+            $all_uploaded_config_paths[] = [ 'UPLOADED: ' . substr($file['path'], strlen($uploaded_configs_dir) + 1) , $file['path'] ];
         }
         // Configs stored in a private repository (specified in course config)
         $config_repo_string = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
         $repository_error_messages = array();
         $repo_id_number = 1;
-        foreach (explode(',',$config_repo_string) as $config_repo_name) {
+        foreach (explode(',', $config_repo_string) as $config_repo_name) {
             $config_repo_name = str_replace(' ', '', $config_repo_name);
             if ($config_repo_name == '') {
                 continue;
             }
             $directory_queue = array($config_repo_name);
-            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue,$repository_error_messages,$repo_id_number);
+            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue, $repository_error_messages, $repo_id_number);
             if (isset($repo_paths)) {
-                $all_repository_config_paths = array_merge($all_repository_config_paths,$repo_paths);
+                $all_repository_config_paths = array_merge($all_repository_config_paths, $repo_paths);
             }
             $repo_id_number++;
         }
@@ -234,7 +234,7 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
-            'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
+            'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
@@ -487,7 +487,7 @@ class AdminGradeableController extends AbstractController {
             }
 
             if ($this->checkPathToConfigFile($dir)) {
-                $return_array[] = ["DIRECTORY " . $repo_id_number . ": " . substr($dir,strlen($repository_path)),$dir];
+                $return_array[] = ["DIRECTORY " . $repo_id_number . ": " . substr($dir, strlen($repository_path)),$dir];
             }
             else {
                 while($iter->valid()) {
@@ -700,7 +700,7 @@ class AdminGradeableController extends AbstractController {
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if (array_key_exists('gradeable_template',$details) && $details['gradeable_template'] !== '--None--') {
+        if (array_key_exists('gradeable_template', $details) && $details['gradeable_template'] !== '--None--') {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
@@ -864,7 +864,7 @@ class AdminGradeableController extends AbstractController {
 
         $config = $this->core->getConfig();
         if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
         }
 
         return $build_status;

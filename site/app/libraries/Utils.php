@@ -311,7 +311,7 @@ class Utils {
     */
     public static function formatBytes(string $format, int $bytes): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
-        return ($bytes / pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
+        return ($bytes / pow(1024, floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
 
 }

@@ -20,7 +20,7 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $css = $this->core->getOutput()->getCss();
@@ -367,7 +367,7 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");

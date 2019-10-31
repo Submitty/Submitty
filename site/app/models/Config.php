@@ -448,7 +448,7 @@ class Config extends AbstractModel {
         }
         $users_file_contents = json_decode(file_get_contents($users_file));
         $submitty_admin_user = "";
-        if (property_exists($users_file_contents,"verified_submitty_admin_user")) {
+        if (property_exists($users_file_contents, "verified_submitty_admin_user")) {
             $submitty_admin_user = $users_file_contents->verified_submitty_admin_user;
         }
         return $submitty_admin_user;
