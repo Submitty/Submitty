@@ -15,7 +15,7 @@ use app\libraries\Utils;
  */
 abstract class AbstractModel {
 
-    static protected $properties = array();
+    protected static $properties = array();
 
     /** @var Core */
     protected $core;

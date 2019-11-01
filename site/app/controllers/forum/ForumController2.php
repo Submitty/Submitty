@@ -798,5 +798,4 @@ class ForumController2 extends AbstractController {
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
         $output['thread_status'] = $result["status"];
     }
-
 }

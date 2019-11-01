@@ -443,5 +443,4 @@ class GlobalController extends AbstractController {
 
         return true;
     }
-
 }

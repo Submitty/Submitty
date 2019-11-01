@@ -114,5 +114,4 @@ class WrapperController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
     }
-
 }

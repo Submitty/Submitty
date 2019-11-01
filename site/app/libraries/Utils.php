@@ -313,5 +313,4 @@ class Utils {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
         return ($bytes / pow(1024, floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
-
 }

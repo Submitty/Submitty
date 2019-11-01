@@ -66,5 +66,4 @@ class SimpleGradeOverriddenUser extends AbstractModel {
             $this->comment = $details['comment'];
         }
     }
-
 }

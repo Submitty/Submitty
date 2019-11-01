@@ -206,5 +206,4 @@ class OfficeHoursQueueController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
     }
-
 }

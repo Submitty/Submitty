@@ -1138,5 +1138,4 @@ class ForumThreadView extends AbstractView {
         return $return;
 
     }
-
 }

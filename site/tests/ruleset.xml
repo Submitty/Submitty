@@ -28,8 +28,6 @@
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
-        <exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody" />
-        <exclude name="PSR2.Classes.PropertyDeclaration.StaticBeforeVisibility" />
         <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
         <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed" />
@@ -52,7 +50,6 @@
         <exclude name="PSR12.Files.FileHeader.SpacingInsideBlock" />
         <exclude name="PSR12.Files.ImportStatement.LeadingSlash"/>
         <exclude name="PSR12.Functions.ReturnTypeDeclaration.SpaceBeforeColon" />
-        <exclude name="PSR12.Classes.ClassInstantiation.MissingParentheses" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMixed"/>
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>

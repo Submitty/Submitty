@@ -36,5 +36,4 @@ class SqliteDatabase extends AbstractDatabase {
     public function fromPHPToDatabaseArray($array) {
         throw new NotImplementedException();
     }
-
 }

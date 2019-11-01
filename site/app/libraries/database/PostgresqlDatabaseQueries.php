@@ -1622,5 +1622,4 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
         }
         return $versions;
     }
-
 }

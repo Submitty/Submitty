@@ -13,5 +13,4 @@ class AnnotatedRouteLoader extends AnnotationClassLoader {
         $route->setDefault('_controller', $class->getName());
         $route->setDefault('_method', $method->getName());
     }
-
 }

@@ -1483,5 +1483,4 @@ class SubmissionController extends AbstractController {
 
         $this->core->getOutput()->renderOutput('grading\ElectronicGrader', 'statPage', $users);
     }
-
 }

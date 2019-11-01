@@ -74,5 +74,4 @@ class ForumUtils {
         }
         return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
     }
-
 }
