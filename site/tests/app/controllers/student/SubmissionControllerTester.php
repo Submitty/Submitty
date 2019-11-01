@@ -251,7 +251,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string $content
      * @param int    $part
      */
-    private function addUploadFile($filename, $content="", $part=1) {
+    private function addUploadFile($filename, $content = "", $part = 1) {
         FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part), true, 0777);
         $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part, $filename);
         if (file_put_contents($filepath, $content) === false) {
@@ -273,7 +273,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param array  $files
      * @param int    $part
      */
-    private function addUploadZip($zip_name, $files, $part=1) {
+    private function addUploadZip($zip_name, $files, $part = 1) {
         $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
         FileUtils::createDir($root_path, true, 0777);
@@ -302,7 +302,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string      $dir
      * @param string|null $root_dir
      */
-    private function createZip($files, $zip, $dir, $root_dir=null) {
+    private function createZip($files, $zip, $dir, $root_dir = null) {
         if ($root_dir === null) {
             $root_dir = $dir;
         }

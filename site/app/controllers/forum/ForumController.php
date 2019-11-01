@@ -36,7 +36,7 @@ class ForumController extends AbstractController {
         return (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
-    private function returnUserContentToPage($error, $isThread, $thread_id){
+    private function returnUserContentToPage($error, $isThread, $thread_id) {
         //Notify User
         $this->core->addErrorMessage($error);
 
@@ -52,7 +52,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/threads/status", methods={"POST"})
      */
-    public function changeThreadStatus($status, $thread_id=null) {
+    public function changeThreadStatus($status, $thread_id = null) {
         if (is_null($thread_id)) {
             $thread_id = $_POST['thread_id'];
         }
@@ -67,7 +67,7 @@ class ForumController extends AbstractController {
         }
     }
 
-    private function checkGoodAttachment($isThread, $thread_id, $file_post){
+    private function checkGoodAttachment($isThread, $thread_id, $file_post) {
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
             return array(0);
         }
@@ -81,7 +81,7 @@ class ForumController extends AbstractController {
         return array($imageCheck);
     }
 
-    private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1){
+    private function isValidCategories($inputCategoriesIds = -1, $inputCategoriesName = -1) {
         $rows = $this->core->getQueries()->getCategories();
         if(is_array($inputCategoriesIds)) {
             if(count($inputCategoriesIds) < 1) {
@@ -120,7 +120,7 @@ class ForumController extends AbstractController {
         return true;
     }
 
-    private function isCategoryDeletionGood($category_id){
+    private function isCategoryDeletionGood($category_id) {
         // Check if not the last category which exists
         $rows = $this->core->getQueries()->getCategories();
         foreach($rows as $index => $values){
@@ -135,7 +135,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/categories/new", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
-    public function addNewCategory($category = []){
+    public function addNewCategory($category = []) {
         $result = array();
         if(!empty($_POST["newCategory"])) {
             $category = trim($_POST["newCategory"]);
@@ -169,7 +169,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/categories/delete", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
-    public function deleteCategory(){
+    public function deleteCategory() {
         if(!empty($_POST["deleteCategory"])) {
             $category = (int)$_POST["deleteCategory"];
             if(!$this->isValidCategories(array($category))) {
@@ -192,7 +192,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/categories/edit", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
-    public function editCategory(){
+    public function editCategory() {
         $category_id = $_POST["category_id"];
         $category_desc = null;
         $category_color = null;
@@ -221,7 +221,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/categories/reorder", methods={"POST"})
      * @AccessControl(permission="forum.modify_category")
      */
-    public function reorderCategories(){
+    public function reorderCategories() {
         $rows = $this->core->getQueries()->getCategories();
 
         $current_order = array();
@@ -247,7 +247,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/threads/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
-    public function publishThread(){
+    public function publishThread() {
         $markdown = !empty($_POST['markdown_status']);
         $current_user_id = $this->core->getUser()->getId();
         $result = array();
@@ -331,7 +331,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/search", methods={"POST"})
      */
-    public function search(){
+    public function search() {
         $results = $this->core->getQueries()->searchThreads($_POST['search_content']);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'searchResult', $results);
     }
@@ -340,7 +340,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/posts/new", methods={"POST"})
      * @AccessControl(permission="forum.publish")
      */
-    public function publishPost(){
+    public function publishPost() {
         $current_user_id = $this->core->getUser()->getId();
         $result = array();
         $parent_id = (!empty($_POST["parent_id"])) ? htmlentities($_POST["parent_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : -1;
@@ -419,7 +419,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/announcements", methods={"POST"})
      * @AccessControl(permission="forum.modify_announcement")
      */
-    public function alterAnnouncement($type){
+    public function alterAnnouncement($type) {
         $thread_id = $_POST["thread_id"];
         $this->core->getQueries()->setAnnouncement($thread_id, $type);
 
@@ -429,7 +429,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/threads/pin", methods={"POST"})
      */
-    public function pinThread($type){
+    public function pinThread($type) {
         $thread_id = $_POST["thread_id"];
         $current_user = $this->core->getUser()->getId();
         $this->core->getQueries()->addPinnedThread($current_user, $thread_id, $type);
@@ -446,7 +446,7 @@ class ForumController extends AbstractController {
      *
      * @Route("/{_semester}/{_course}/forum/posts/modify", methods={"POST"})
      */
-    public function alterPost($modify_type){
+    public function alterPost($modify_type) {
         $full_course_name = $this->core->getFullCourseName();
         $post_id = $_POST["post_id"] ?? $_POST["edit_post_id"];
         $post = $this->core->getQueries()->getPost($post_id);
@@ -568,7 +568,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/threads/merge", methods={"POST"})
      * @AccessControl(permission="forum.merge_thread")
      */
-    public function mergeThread(){
+    public function mergeThread() {
         $current_user_id = $this->core->getUser()->getId();
         $parent_thread_id = $_POST["merge_thread_parent"];
         $child_thread_id = $_POST["merge_thread_child"];
@@ -612,7 +612,7 @@ class ForumController extends AbstractController {
         $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
     }
 
-    private function editThread(){
+    private function editThread() {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
@@ -638,7 +638,7 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function editPost(){
+    private function editPost() {
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
@@ -666,7 +666,7 @@ class ForumController extends AbstractController {
         return null;
     }
 
-    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1){
+    private function getSortedThreads($categories_ids, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, &$blockNumber, $thread_id = -1) {
         $current_user = $this->core->getUser()->getId();
         if(!$this->isValidCategories($categories_ids)) {
             // No filter for category
@@ -693,7 +693,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/threads", methods={"POST"})
      */
-    public function getThreads($page_number = null){
+    public function getThreads($page_number = null) {
         $pageNumber = !empty($page_number) && is_numeric($page_number) ? (int)$page_number : 1;
         $show_deleted = $this->showDeleted();
         $currentCourse = $this->core->getConfig()->getCourse();
@@ -732,7 +732,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/threads", methods={"GET"})
      * @Route("/{_semester}/{_course}/forum/threads/{thread_id}", methods={"GET", "POST"}, requirements={"thread_id": "\d+"})
      */
-    public function showThreads($thread_id = null, $option = 'tree'){
+    public function showThreads($thread_id = null, $option = 'tree') {
         $user = $this->core->getUser()->getId();
         $currentCourse = $this->core->getConfig()->getCourse();
         $category_id = in_array('thread_category', $_POST) ? $_POST['thread_category'] : -1;
@@ -838,7 +838,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/threads/new", methods={"GET"})
      */
-    public function showCreateThread(){
+    public function showCreateThread() {
         if(empty($this->core->getQueries()->getCategories())){
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads']));
             return;
@@ -849,7 +849,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/categories", methods={"GET"})
      */
-    public function showCategories(){
+    public function showCategories() {
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
     }
 
@@ -857,7 +857,7 @@ class ForumController extends AbstractController {
      * @Route("/{_semester}/{_course}/forum/posts/history", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
-    public function getHistory(){
+    public function getHistory() {
         $post_id = $_POST["post_id"];
         $output = array();
         $_post = array();
@@ -898,7 +898,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/posts/get", methods={"POST"})
      */
-    public function getEditPostContent(){
+    public function getEditPostContent() {
         $post_id = $_POST["post_id"];
         if(!empty($post_id)) {
             $result = $this->core->getQueries()->getPost($post_id);
@@ -921,7 +921,7 @@ class ForumController extends AbstractController {
         return $this->core->getOutput()->renderJsonFail("Empty edit post content.");
     }
 
-    private function getThreadContent($thread_id, &$output){
+    private function getThreadContent($thread_id, &$output) {
         $result = $this->core->getQueries()->getThread($thread_id)[0];
         $output['lock_thread_date'] = $result['lock_thread_date'];
         $output['title'] = $result["title"];
@@ -932,7 +932,7 @@ class ForumController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/forum/stats")
      */
-    public function showStats(){
+    public function showStats() {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
         $users = array();

@@ -27,7 +27,7 @@ class PostgresqlDatabaseQueries extends DatabaseQueries {
     //given a user_id check the users table for a valid entry, returns a user object if found, null otherwise
     //if is_numeric is true, the numeric_id key will be used to lookup the user
     //this should be called through getUserById() or getUserByNumericId()
-    private function getUser($user_id, $is_numeric = false ){
+    private function getUser($user_id, $is_numeric = false) {
         if(!$is_numeric){
             $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
         }else{
@@ -84,7 +84,7 @@ class PostgresqlDatabaseQueries extends DatabaseQueries {
 
     //looks up if the given id is a user_id, if null will then check
     //the numerical_id table
-    public function getUserByIdOrNumericId($id){
+    public function getUserByIdOrNumericId($id) {
         $ret = $this->getUser($id);
         if($ret === null ){
             return $this->getUser($id, true);
@@ -102,7 +102,7 @@ GROUP BY user_id", array($user_id));
         return $this->course_db->row();
     }
 
-    public function getAllUsers($section_key="registration_section") {
+    public function getAllUsers($section_key = "registration_section") {
         $keys = array("registration_section", "rotating_section");
         $section_key = (in_array($section_key, $keys)) ? $section_key : "registration_section";
         $orderBy = "";
@@ -201,7 +201,7 @@ VALUES (?,?,?,?,?,?)", $params);
         $this->updateGradingRegistration($user->getId(), $user->getGroup(), $user->getGradingRegistrationSections());
     }
 
-    public function updateUser(User $user, $semester=null, $course=null) {
+    public function updateUser(User $user, $semester = null, $course = null) {
         $params = array($user->getNumericId(), $user->getLegalFirstName(), $user->getPreferredFirstName(),
                        $user->getLegalLastName(), $user->getPreferredLastName(), $user->getEmail(),
                        $this->submitty_db->convertBoolean($user->isUserUpdated()),
@@ -500,7 +500,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
      * @param string $csv_option value determined by selected radio button
      * @todo maybe process csv uploads as a batch transaction
      */
-    public function updateLateDays($user_id, $timestamp, $days, $csv_option=null) {
+    public function updateLateDays($user_id, $timestamp, $days, $csv_option = null) {
         //Update query and values list.
         $query = "
             INSERT INTO late_days (user_id, since_timestamp, allowed_late_days)
@@ -687,7 +687,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
      * @param string $orderBy
      * @return Team[]
      */
-    public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy="registration_section") {
+    public function getTeamsByGradeableAndRegistrationSections($g_id, $sections, $orderBy = "registration_section") {
         $return = array();
         if (count($sections) > 0) {
             $orderBy = str_replace("gt.registration_section", "SUBSTRING(gt.registration_section, '^[^0-9]*'), COALESCE(SUBSTRING(gt.registration_section, '[0-9]+')::INT, -1), SUBSTRING(gt.registration_section, '[^0-9]*$')", $orderBy);
@@ -723,7 +723,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
      * @param string $orderBy
      * @return Team[]
      */
-    public function getTeamsByGradeableAndRotatingSections($g_id, $sections, $orderBy="rotating_section") {
+    public function getTeamsByGradeableAndRotatingSections($g_id, $sections, $orderBy = "rotating_section") {
         $return = array();
         if (count($sections) > 0) {
             $placeholders = implode(",", array_fill(0, count($sections), "?"));

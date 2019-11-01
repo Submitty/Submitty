@@ -16,8 +16,7 @@ class CourseMaterial extends AbstractModel {
      * @return bool Indicates if the file has been released or not
      * @throws FileNotFoundException The course_materials_file_data.json was not found
      */
-    public static function isMaterialReleased(Core $core, string $path_to_file)
-    {
+    public static function isMaterialReleased(Core $core, string $path_to_file) {
         // Before students are allowed to view or download a course materials file we must ensure
         // it has been released.  To return true the file metadata must be found in course_materials_file_data.json
         // and the current time must be greater than the release_datetime
@@ -59,8 +58,7 @@ class CourseMaterial extends AbstractModel {
      * @return bool Indicates if the file has been released or not
      * @throws FileNotFoundException The course_materials_file_data.json was not found
      */
-    public static function isSectionAllowed(Core $core, string $path_to_file ,user $current_user)
-    {
+    public static function isSectionAllowed(Core $core, string $path_to_file, user $current_user) {
         // Before students are allowed to view or download a course materials file we must ensure
         // it has been released.  To return true the file metadata must be found in course_materials_file_data.json
         // and the user's section must be in the file's sections, or the file must not contain sections info, or the

@@ -132,7 +132,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -244,7 +244,7 @@ class User extends AbstractModel {
         return $this->notification_settings; //either receives it or not
     }
 
-    public function getNotificationSetting($type){
+    public function getNotificationSetting($type) {
         return $this->notification_settings[$type];
     }
 

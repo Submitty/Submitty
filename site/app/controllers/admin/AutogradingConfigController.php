@@ -112,7 +112,7 @@ class AutogradingConfigController extends AbstractController {
      * @Route("/{_semester}/{_course}/autograding_config/rename", methods={"POST"})
      * @return Response
      */
-    public function renameConfig(){
+    public function renameConfig() {
         $config_file_path = $_POST['curr_config_name'] ?? null;
         if($config_file_path == null){
             $this->core->addErrorMessage("Unable to find file");
@@ -144,7 +144,7 @@ class AutogradingConfigController extends AbstractController {
      * @Route("/{_semester}/{_course}/autograding_config/delete", methods={"POST"})
      * @return Response
      */
-    public function deleteConfig(){
+    public function deleteConfig() {
         $config_path = $_POST['config_path'] ?? null;
         $in_use = false;
         foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){

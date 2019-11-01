@@ -31,7 +31,7 @@ class AuthenticationController extends AbstractController {
      * @param Core $core
      * @param bool $logged_in
      */
-    public function __construct(Core $core, $logged_in=false) {
+    public function __construct(Core $core, $logged_in = false) {
         parent::__construct($core);
         $this->logged_in = $logged_in;
     }

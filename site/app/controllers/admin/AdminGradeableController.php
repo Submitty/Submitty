@@ -159,7 +159,7 @@ class AdminGradeableController extends AbstractController {
             }
             $repo_id_number++;
         }
-        usort($all_repository_config_paths, function ($a,$b) {
+        usort($all_repository_config_paths, function ($a, $b) {
             return $a[0] > $b[0];
         });
 
@@ -458,7 +458,7 @@ class AdminGradeableController extends AbstractController {
      * @param integer $repo_id_number
      * @return array
      */
-    private function getValidPathsToConfigDirectories($dir_queue,&$error_messages,$repo_id_number) {
+    private function getValidPathsToConfigDirectories($dir_queue, &$error_messages, $repo_id_number) {
         $repository_path = $dir_queue[0];
         $count = 0;
         $return_array = array();
@@ -1089,7 +1089,7 @@ class AdminGradeableController extends AbstractController {
         return null;
     }
 
-    public static function enqueueGenerateRepos($semester,$course,$g_id) {
+    public static function enqueueGenerateRepos($semester, $course, $g_id) {
         // FIXME:  should use a variable intead of hardcoded top level path
         $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
 

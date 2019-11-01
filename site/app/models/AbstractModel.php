@@ -53,7 +53,7 @@ abstract class AbstractModel {
      * @param $check_property
      * @return mixed
      */
-    protected function parseObject($object, $check_property=true) {
+    protected function parseObject($object, $check_property = true) {
         if (is_object($object)) {
             if (is_a($object, 'app\Models\AbstractModel') || is_subclass_of($object, 'app\Models\AbstractModel')) {
                 /** @noinspection PhpUndefinedMethodInspection */
@@ -159,7 +159,7 @@ abstract class AbstractModel {
      *
      * @return string
      */
-    private function convertName($name, $prefix_length=3) {
+    private function convertName($name, $prefix_length = 3) {
         $regex_func = function ($matches) {
             return "_" . strtolower($matches[0]);
         };

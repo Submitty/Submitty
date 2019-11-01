@@ -555,7 +555,7 @@ STRING;
         );
     }
 
-    public function testvalidateUploadedFilesBig(){
+    public function testvalidateUploadedFilesBig() {
         FileUtils::createDir($this->path);
         $this->buildFakeFile("big.txt", 3, 0, 100 + Utils::returnBytes(ini_get('upload_max_filesize')));
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
@@ -584,7 +584,7 @@ STRING;
         );
     }
 
-    public function testvalidateUploadedFilesFail(){
+    public function testvalidateUploadedFilesFail() {
         $stat = FileUtils::validateUploadedFiles(null);
         $this->assertArrayHasKey("failed", $stat);
         $this->assertEquals($stat["failed"], "No files sent to validate" );

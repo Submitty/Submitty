@@ -19,7 +19,7 @@ class PDFController extends AbstractController {
      * @param $filename
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf")
      */
-    public function showStudentPDF($gradeable_id, $filename = null){
+    public function showStudentPDF($gradeable_id, $filename = null) {
         $filename = html_entity_decode($filename);
         $id = $this->core->getUser()->getId();
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -66,7 +66,7 @@ class PDFController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/pdf/annotations", methods={"POST"})
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
-    public function savePDFAnnotation($gradeable_id){
+    public function savePDFAnnotation($gradeable_id) {
         //Save the annotation layer to a folder.
         $annotation_layer = $_POST['annotation_layer'];
         $annotation_info = $_POST['GENERAL_INFORMATION'];
@@ -114,7 +114,7 @@ class PDFController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/pdf")
      * @AccessControl(role="LIMITED_ACCESS_GRADER")
      */
-    public function showGraderPDFEmbedded($gradeable_id){
+    public function showGraderPDFEmbedded($gradeable_id) {
         //This is the embedded pdf annotator that we built.
         //User can be a team
         $id = $_POST['user_id'] ?? null;
@@ -163,7 +163,7 @@ class PDFController extends AbstractController {
     /**
      * NOT IN USE
      */
-    private function showGraderPDFFullpage(){
+    private function showGraderPDFFullpage() {
         //This shows the pdf-annotate.js library's default pdf annotator. It might be useful in the future to have
         //a full-sized annotator, so keeping this in for now.
         $this->core->getOutput()->useFooter(false);

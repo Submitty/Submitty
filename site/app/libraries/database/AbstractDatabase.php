@@ -80,7 +80,7 @@ abstract class AbstractDatabase {
      *
      * @return array
      */
-    abstract public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null);
+    abstract public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null);
     abstract public function fromPHPToDatabaseArray($array);
 
     /**
@@ -143,7 +143,7 @@ abstract class AbstractDatabase {
      *
      * @return boolean true if query suceeded, else false.
      */
-    public function query($query, $parameters=array()) {
+    public function query($query, $parameters = array()) {
         try {
             $this->query_count++;
             $this->all_queries[] = array($query, $parameters);
@@ -192,7 +192,7 @@ abstract class AbstractDatabase {
      *
      * @throws \app\exceptions\DatabaseException
      */
-    public function queryIterator($query, $parameters=array(), $callback=null) {
+    public function queryIterator($query, $parameters = array(), $callback = null) {
         $lower = trim(strtolower($query));
         if (!Utils::startsWith($lower, "select")) {
             return $this->query($query, $parameters);

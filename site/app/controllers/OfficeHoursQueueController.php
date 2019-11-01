@@ -26,7 +26,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @Route("/{_semester}/{_course}/office_hours_queue")
     * @return Response
     */
-    public function showQueue(){
+    public function showQueue() {
         if(!$this->core->getConfig()->isQueueEnabled()){
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['home']))
@@ -59,7 +59,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @Route("/{_semester}/{_course}/office_hours_queue/add", methods={"POST"})
     * @return Response
     */
-    public function addPerson(){
+    public function addPerson() {
         if(!isset($_POST['code']) || !isset($_POST['name'])){
             $this->core->addErrorMessage("Missing name or code in request");
             return Response::RedirectOnlyResponse(
@@ -101,7 +101,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
     */
-    public function startHelpPerson(){
+    public function startHelpPerson() {
         if(!isset($_POST['entry_id'])){
             $this->core->addErrorMessage("Missing entry ID");
             return Response::RedirectOnlyResponse(
@@ -120,7 +120,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
     */
-    public function finishHelpPerson(){
+    public function finishHelpPerson() {
         if(!isset($_POST['entry_id'])){
             $this->core->addErrorMessage("Missing entry ID");
             return Response::RedirectOnlyResponse(
@@ -139,7 +139,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
     */
-    public function toggleQueue(){
+    public function toggleQueue() {
         if(!isset($_POST['queue_open'])){
             $this->core->addErrorMessage("Missing queue status");
             return Response::RedirectOnlyResponse(
@@ -162,7 +162,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
     */
-    public function emptyQueue(){
+    public function emptyQueue() {
         $this->core->getQueries()->emptyQueue($this->core->getUser()->getId());
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -174,7 +174,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @Route("/{_semester}/{_course}/office_hours_queue/remove", methods={"POST"})
     * @return Response
     */
-    public function removePerson(){
+    public function removePerson() {
         if(!isset($_POST['entry_id'])){
             $this->core->addErrorMessage("Missing entry ID");
             return Response::RedirectOnlyResponse(
@@ -200,7 +200,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
     */
-    public function generateNewCode(){
+    public function generateNewCode() {
         $this->core->getQueries()->genNewQueueCode();
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))

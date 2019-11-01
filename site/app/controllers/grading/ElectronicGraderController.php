@@ -54,12 +54,12 @@ class ElectronicGraderController extends AbstractController {
      */
     public function ajaxRemoveEmpty(
         $gradeable_id,
-        $who_id='',
-        $index='',
-        $option='original',
-        $version='',
-        $which='actual',
-        $autocheck_cnt='0'
+        $who_id = '',
+        $index = '',
+        $option = 'original',
+        $version = '',
+        $which = 'actual',
+        $autocheck_cnt = '0'
     ) {
         //There are three options: original (Don't show empty space), escape (with escape codes), and unicode (with characters)
         if (!$this->validateDiffViewerOption($option)) {
@@ -408,7 +408,7 @@ class ElectronicGraderController extends AbstractController {
      * Shows the list of submitters
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/details")
      */
-    public function showDetails($gradeable_id, $view = null, $sort="id", $direction="ASC") {
+    public function showDetails($gradeable_id, $view = null, $sort = "id", $direction = "ASC") {
         // Default is viewing your sections
         // Limited grader does not have "View All" option
         // If nothing to grade, Instructor will see all sections
@@ -826,7 +826,7 @@ class ElectronicGraderController extends AbstractController {
      *
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/grade")
      */
-    public function showGrading($gradeable_id, $who_id='', $from="", $to=null, $gradeable_version=null, $sort="id", $direction="ASC", $to_ungraded=null, $component_id="-1") {
+    public function showGrading($gradeable_id, $who_id = '', $from = "", $to = null, $gradeable_version = null, $sort = "id", $direction = "ASC", $to_ungraded = null, $component_id = "-1") {
         /** @var Gradeable $gradeable */
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
@@ -1118,7 +1118,7 @@ class ElectronicGraderController extends AbstractController {
      * Route for getting information about a individual grader
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable")
      */
-    public function ajaxGetGradedGradeable($gradeable_id, $anon_id='') {
+    public function ajaxGetGradedGradeable($gradeable_id, $anon_id = '') {
         $grader = $this->core->getUser();
 
         // Get the gradeable
@@ -1777,7 +1777,7 @@ class ElectronicGraderController extends AbstractController {
      * Route for getting the student's program output for the diff-viewer
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/student_output")
      */
-    public function ajaxGetStudentOutput($gradeable_id, $who_id='', $version='', $index='') {
+    public function ajaxGetStudentOutput($gradeable_id, $who_id = '', $version = '', $index = '') {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -1996,7 +1996,7 @@ class ElectronicGraderController extends AbstractController {
      * Route for getting a GradedComponent
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/graded_gradeable/graded_component", methods={"GET"})
      */
-    public function ajaxGetGradedComponent($gradeable_id, $anon_id='', $component_id='') {
+    public function ajaxGetGradedComponent($gradeable_id, $anon_id = '', $component_id = '') {
         $grader = $this->core->getUser();
 
         // Get the gradeable

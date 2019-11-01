@@ -21,7 +21,7 @@ class Forum extends AbstractModel {
         //$this->forum_db = $forum_db;
     }
 
-    public function publish(array $data, bool $isThread) : bool {
+    public function publish(array $data, bool $isThread): bool {
 
         $pushFunction = null;
 
@@ -109,7 +109,7 @@ class Forum extends AbstractModel {
 
     }
 
-    private function getThreadContent($thread_id, &$output){
+    private function getThreadContent($thread_id, &$output) {
         $result = $this->core->getQueries()->getThread($thread_id)[0];
         $output['title'] = $result["title"];
         $output['categories_ids'] = $this->core->getQueries()->getCategoriesIdForThread($thread_id);
@@ -117,7 +117,7 @@ class Forum extends AbstractModel {
     }
 
     // Validation of form data
-    private function validateThreadData(array $data, bool $createObject) : array {
+    private function validateThreadData(array $data, bool $createObject): array {
 
         //Validate the post data prior to thread data
         $goodPost = $this->validatePostData($data, false, true);
@@ -134,7 +134,7 @@ class Forum extends AbstractModel {
 
     }
 
-    private function validatePostData(array $data, bool $createObject, bool $isThread) : array {
+    private function validatePostData(array $data, bool $createObject, bool $isThread): array {
 
         if( empty($data['content']) || empty($data['anon']) ||
             empty($data['thread_id']) || empty($data['parent_id']) ||

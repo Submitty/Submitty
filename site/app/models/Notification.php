@@ -78,7 +78,7 @@ class Notification extends AbstractModel {
         parent::__construct($core);
     }
 
-    public static function createNotification(Core $core,array $event) {
+    public static function createNotification(Core $core, array $event) {
         $instance = new self($core);
         $instance->setComponent($event['component']);
         $instance->setNotifyMetadata($event['metadata']);

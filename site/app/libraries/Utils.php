@@ -158,7 +158,7 @@ class Utils {
      *
      * @return bool true if successfully able to set the cookie, else false
      */
-    public static function setCookie(string $name, $data, int $expire=0): bool {
+    public static function setCookie(string $name, $data, int $expire = 0): bool {
         if (is_array($data)) {
             $data = json_encode($data);
         }
@@ -182,7 +182,7 @@ class Utils {
             (substr($filename, -4) == ".gif");
     }
 
-    public static function checkUploadedImageFile($id){
+    public static function checkUploadedImageFile($id) {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
