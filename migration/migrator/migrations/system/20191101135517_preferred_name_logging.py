@@ -29,7 +29,7 @@ def up(config):
     try:
         os.mkdir(psql_log_folder)
         os.chown(psql_log_folder, postgres_uid, config.submitty_users['daemon_gid'], follow_symlinks=False)
-        os.chmod(path=psql_log_folder, mode=0o2770, follow_symlinks=False)
+        os.chmod(path=psql_log_folder, mode=0o2770)
     except FileExistsError:
         pass
     except Exception as e:
@@ -97,7 +97,7 @@ def up(config):
     try:
         shutil.copyfile(pfn_script_src, pfn_script_dst, follow_symlinks=False)
         os.chown(pfn_script_dst, 0, config.submitty_users['daemon_gid'], follow_symlinks=False)
-        os.chmod(pfn_script_dst, 0o0550, follow_symlinks=False)
+        os.chmod(pfn_script_dst, 0o0550)
     except shutil.SameFileError:
         pass
     except Exception as e:
