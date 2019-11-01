@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\libraries\routers;
 
 use app\libraries\response\RedirectResponse;

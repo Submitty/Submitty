@@ -2,9 +2,9 @@
 
 namespace tests\app\libraries;
 
-use \app\libraries\Logger;
-use \app\libraries\Utils;
-use \app\libraries\FileUtils;
+use app\libraries\Logger;
+use app\libraries\Utils;
+use app\libraries\FileUtils;
 
 class LoggerTester extends \PHPUnit\Framework\TestCase {
     private $error;

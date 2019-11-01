@@ -1,6 +1,5 @@
 <?php
 
-
 namespace tests\app\libraries\routers;
 
 use app\libraries\routers\AccessControl;

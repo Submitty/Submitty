@@ -2,7 +2,7 @@
 
 namespace tests\app\controllers\student;
 
-use \ZipArchive;
+use ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
 use app\libraries\Core;

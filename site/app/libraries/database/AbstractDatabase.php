@@ -2,16 +2,13 @@
 
 namespace app\libraries\database;
 
-use \PDO;
-use \PDOException;
-
 use app\exceptions\DatabaseException;
 use app\libraries\Utils;
 
 abstract class AbstractDatabase {
 
     /**
-     * @var PDO
+     * @var \PDO
      */
     protected $link = null;
 
@@ -98,19 +95,19 @@ abstract class AbstractDatabase {
             $this->all_queries = array();
             try {
                 if (isset($this->username) && isset($this->password)) {
-                    $this->link = new PDO($this->getDSN(), $this->username, $this->password);
+                    $this->link = new \PDO($this->getDSN(), $this->username, $this->password);
                 }
                 else if (isset($this->username)) {
-                    $this->link = new PDO($this->getDSN(), $this->username);
+                    $this->link = new \PDO($this->getDSN(), $this->username);
                 }
                 else {
-                    $this->link = new PDO($this->getDSN());
+                    $this->link = new \PDO($this->getDSN());
                 }
 
-                $this->link->setAttribute(PDO::ATTR_EMULATE_PREPARES, $this->emulate_prepares);
-                $this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulate_prepares);
+                $this->link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             }
-            catch (PDOException $pdoException) {
+            catch (\PDOException $pdoException) {
                 throw new DatabaseException($pdoException->getMessage());
             }
         }
@@ -171,7 +168,7 @@ abstract class AbstractDatabase {
                 $this->row_count = count($this->results);
             }
         }
-        catch (PDOException $pdoException) {
+        catch (\PDOException $pdoException) {
             throw new DatabaseException($pdoException->getMessage(), $query, $parameters);
         }
 
@@ -205,7 +202,7 @@ abstract class AbstractDatabase {
             $this->row_count = null;
             return new DatabaseRowIterator($statement, $this, $callback);
         }
-        catch (PDOException $exception) {
+        catch (\PDOException $exception) {
             throw new DatabaseException($exception->getMessage(), $query, $parameters);
         }
     }
@@ -236,10 +233,10 @@ abstract class AbstractDatabase {
         foreach ($result as $col => $value) {
             if (isset($columns[$col])) {
                 $column = $columns[$col];
-                if ($column['native_type'] === 'integer' && $column['pdo_type'] !== PDO::PARAM_INT) {
+                if ($column['native_type'] === 'integer' && $column['pdo_type'] !== \PDO::PARAM_INT) {
                     $value = (integer) $value;
                 }
-                elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== PDO::PARAM_BOOL) {
+                elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== \PDO::PARAM_BOOL) {
                     $value = (boolean) $value;
                 }
                 $result[$col] = $value;

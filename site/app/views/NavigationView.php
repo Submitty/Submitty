@@ -1,8 +1,9 @@
 <?php
+
 namespace app\views;
 
 use app\models\Button;
-use \app\libraries\GradeableType;
+use app\libraries\GradeableType;
 use app\models\User;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;

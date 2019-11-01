@@ -2,9 +2,6 @@
 
 namespace app\libraries;
 
-use \DateTime;
-use \DateTimeZone;
-
 /**
  * Class DateUtils
  *
@@ -20,17 +17,17 @@ class DateUtils {
      * up to the nearest day in the positive direction. Thus if there's a difference of 2 days and 3 hours, then
      * the function would return 3 days. Likewise, if the difference was -3 hours, then 0 days would be returned.
      *
-     * @param string|DateTime $date1
-     * @param string|DateTime $date2
+     * @param string|\DateTime $date1
+     * @param string|\DateTime $date2
      *
      * @return int
      */
     public static function calculateDayDiff($date1, $date2 = "now"): int {
-        if (!($date1 instanceof DateTime)) {
-            $date1 = new DateTime($date1);
+        if (!($date1 instanceof \DateTime)) {
+            $date1 = new \DateTime($date1);
         }
-        if (!($date2 instanceof DateTime)) {
-            $date2 = new DateTime($date2);
+        if (!($date2 instanceof \DateTime)) {
+            $date2 = new \DateTime($date2);
         }
         // Set the period as "1 day" for the interval
         if ($date1 == $date2) {
@@ -119,7 +116,7 @@ class DateUtils {
      * @param bool $add_utc_offset If the UTC offset should be part of the output
      * @return string The formatted date
      */
-    public static function dateTimeToString(DateTime $date, bool $add_utc_offset = true): string {
+    public static function dateTimeToString(\DateTime $date, bool $add_utc_offset = true): string {
         return $date->format('Y-m-d H:i:s' . ($add_utc_offset ? 'O' : ''));
     }
 

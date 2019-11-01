@@ -3,8 +3,8 @@
 namespace tests\app\libraries;
 
 use app\exceptions\FileReadException;
-use \app\libraries\FileUtils;
-use \app\libraries\Utils;
+use app\libraries\FileUtils;
+use app\libraries\Utils;
 
 class FileUtilsTester extends \PHPUnit\Framework\TestCase {
     use \phpmock\phpunit\PHPMock;

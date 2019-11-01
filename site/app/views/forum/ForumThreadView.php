@@ -1,4 +1,5 @@
 <?php
+
 namespace app\views\forum;
 
 use app\libraries\DateUtils;
