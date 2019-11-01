@@ -479,6 +479,43 @@ class FileUtils {
         return $words_detected;
     }
 
+    public static function checkZipFileStatus($file){
+        $zip = new \ZipArchive();
+        //open file with additional checks
+        $res = $zip->open($file, \ZipArchive::CHECKCONS);
+        $err = "";
+
+        if ($res !== True){
+            switch ($res) {
+                case \ZipArchive::ER_NOENT:
+                    $err = "File does not exist " . $filename ;
+                    break;
+                case \ZipArchive::ER_NOZIP:
+                    $err = "File not a zip archive";
+                    break;
+                case \ZipArchive::ER_COMPNOTSUPP:
+                    $err = "Compression method not supported";
+                    break;
+                case \ZipArchive::ER_INTERNAL:
+                    $err = "Internel Error";
+                    break;
+                case \ZipArchive::ER_INCONS:
+                    $err = "Zip archive inconsistent";
+                    break;
+                case \ZipArchive::ER_CRC:
+                    $err = "Failed to check file integrity (CRC fail)";
+                    break;
+                default:
+                    $err = "Unknown error " . $res;
+            }
+
+            return ['success' => False, 'error' => $err, 'err_code' => $res];
+        }
+
+        return ['success' => True, 'error' => 'OK', 'err_code' => \ZipArchive::ER_OK];
+
+    }
+
     /**
      * Given an array of uploaded files, makes sure they are properlly uploaded
      *
@@ -500,12 +537,24 @@ class FileUtils {
         for ($i = 0; $i < $num_files; $i++) {
             //extract the values from each file
             $name = $files['name'][$i];
-            $type = mime_content_type($files['tmp_name'][$i]);
-            $size = $files['size'][$i];
-            $err_msg = "";
-
-            //did anything go wrong?
+            $tmp_name = $files['tmp_name'][$i];
+            $type = mime_content_type($tmp_name);
+            
+            $zip_status = FileUtils::checkZipFileStatus($tmp_name);
             $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
+
+            $is_zip = False;
+
+            //check if its a zip file or we got a bad zip file
+            if ($zip_status['success']){
+                $is_zip = True;
+            }else if($zip_status['err_code'] != \ZipArchive::ER_NOZIP){
+                $is_zip = True;
+                $err_msg = $zip_status['error'];
+            }
+
+            //for zip files use the size of the contents in case it gets extracted
+            $size = $is_zip ? FileUtils::getZipSize($tmp_name) : $files['size'][$i];
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
@@ -518,14 +567,19 @@ class FileUtils {
                 $err_msg = "Invalid filename";
             }
 
-            $success = $err_msg === "No error.";
+            //if zip file check files inside
+            if($is_zip && !FileUtils::checkFileInZipName($tmp_name) ){
+                $err_msg = "Invalid filename within zip file"; 
+            }
 
+            $success = $err_msg === "No error.";
             $ret[] = [
                 'name' => $name,
                 'type'=> $type,
                 'error'=> $err_msg,
                 'size' => $size,
-                'success' => $success
+                'success' => $success,
+                'is_zip' => $is_zip
             ];
         }
 
