@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 
 /**
@@ -17,7 +18,7 @@ use app\libraries\Core;
 
  */
 class SimpleStat extends AbstractModel {
-    /** @ property @var bool is this a component */
+    /** @property @var bool is this a component */
     protected $component = true;
     /** @property @var string Title of gradeable or component */
     protected $title = "";

@@ -27,7 +27,7 @@ class PamAuthentication extends AbstractAuthentication {
             // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
             // as that would require some hacky path handling specific to PAM authentication
             $output = $this->core->curlRequest(
-                $this->core->getConfig()->getCgiUrl()."pam_check.cgi",
+                $this->core->getConfig()->getCgiUrl() . "pam_check.cgi",
                 [
                     'username' => $this->user_id,
                     'password' => $this->password,
@@ -36,7 +36,7 @@ class PamAuthentication extends AbstractAuthentication {
 
             $output_after = json_decode($output, true);
             if ($output_after === null) {
-                throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
+                throw new AuthenticationException("Error JSON response for PAM: " . json_last_error_msg());
             }
             elseif (!isset($output_after['authenticated'])) {
                 throw new AuthenticationException('Missing response in JSON for PAM');
@@ -46,7 +46,7 @@ class PamAuthentication extends AbstractAuthentication {
             }
         }
         catch (CurlException $exc) {
-            throw new AuthenticationException('Error attempting to authenticate against PAM: '.$exc->getMessage());
+            throw new AuthenticationException('Error attempting to authenticate against PAM: ' . $exc->getMessage());
         }
 
         return true;

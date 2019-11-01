@@ -33,10 +33,10 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $this->assertDirectoryExists($this->directory);
         Logger::setLogPath($this->directory);
         $date = getdate(time());
-        $filename = $date['year'].Utils::pad($date['mon']).Utils::pad($date['mday']);
-        $this->access = FileUtils::joinPaths($this->directory, 'access', $filename.".log");
-        $this->error = FileUtils::joinPaths($this->directory, 'site_errors', $filename.".log");
-        $this->ta_grading = FileUtils::joinPaths($this->directory, 'ta_grading', $filename.".log");
+        $filename = $date['year'] . Utils::pad($date['mon']) . Utils::pad($date['mday']);
+        $this->access = FileUtils::joinPaths($this->directory, 'access', $filename . ".log");
+        $this->error = FileUtils::joinPaths($this->directory, 'site_errors', $filename . ".log");
+        $this->ta_grading = FileUtils::joinPaths($this->directory, 'ta_grading', $filename . ".log");
     }
 
     public function tearDown(): void {
@@ -173,5 +173,4 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(Utils::pad($current_date['hours']), $time[0], "Hours place is not right");
         $this->assertEquals(Utils::pad($current_date['minutes']), $time[1], "Minutes place is not right");
     }
-
 }

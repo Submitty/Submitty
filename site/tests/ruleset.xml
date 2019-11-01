@@ -22,17 +22,12 @@
         <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
         <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
         <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.SpaceBeforeComma" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.NoSpaceAfterComma" />
-        <exclude name="Generic.Functions.FunctionCallArgumentSpacing.TooMuchSpaceAfterComma" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
-        <exclude name="PSR2.Classes.ClassDeclaration.CloseBraceAfterBody" />
-        <exclude name="PSR2.Classes.PropertyDeclaration.StaticBeforeVisibility" />
         <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
         <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed" />
@@ -44,9 +39,6 @@
         <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket" />
         <exclude name="PSR2.Methods.FunctionCallSignature.CloseBracketLine" />
         <exclude name="PSR2.Methods.FunctionCallSignature.MultipleArguments" />
-        <exclude name="PSR2.Methods.MethodDeclaration.StaticBeforeVisibility" />
-        <exclude name="PSR2.Namespaces.UseDeclaration.SpaceAfterLastUse" />
-        <exclude name="PSR2.Namespaces.NamespaceDeclaration.BlankLineAfter" />
 
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
@@ -58,18 +50,13 @@
         <exclude name="PSR12.Files.FileHeader.SpacingInsideBlock" />
         <exclude name="PSR12.Files.ImportStatement.LeadingSlash"/>
         <exclude name="PSR12.Functions.ReturnTypeDeclaration.SpaceBeforeColon" />
-        <exclude name="PSR12.Classes.ClassInstantiation.MissingParentheses" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMixed"/>
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMiddle"/>
         <exclude name="PSR12.Keywords.ShortFormTypeKeywords.LongFound" />
-        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceBefore"/>
-        <exclude name="PSR12.Operators.OperatorSpacing.NoSpaceAfter"/>
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
-
-        <exclude name="PEAR.Functions.ValidDefaultValue.NotAtEnd" />
 
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceBeforeBracket" />
@@ -95,14 +82,8 @@
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
         <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-        <exclude name="Squiz.WhiteSpace.LanguageConstructSpacing.IncorrectSingle" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceAfter" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.TooMuchSpaceBefore" />
-        <exclude name="Squiz.WhiteSpace.LogicalOperatorSpacing.NoSpaceBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
-        <exclude name="Squiz.WhiteSpace.SemicolonSpacing.Incorrect" />
-        <exclude name="Squiz.WhiteSpace.SuperfluousWhitespace.EndLine" />
 
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />

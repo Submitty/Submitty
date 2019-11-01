@@ -11,7 +11,7 @@ class ForumQueries {
 
     public function createPost(Post &$p, bool $isFirst){
 
-        $parent_id = $p->getParentId(); 
+        $parent_id = $p->getParentId();
 
         if(!$isFirst && $parent_id == 0){
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", [ $p->getThreadId() ] );
@@ -71,6 +71,4 @@ class ForumQueries {
         //Will change...
         return [true, 'thread_id' => $id, 'post_id' => $post_id];
     }
-
-
 }

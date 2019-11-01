@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\libraries\FileUtils;
@@ -315,8 +316,8 @@ HTML;
         $this->useFooter(false);
         $this->useHeader(false);
         $this->output_buffer = $contents;
-        header("Content-Type: ".$filetype);
-        header("Content-Disposition: attachment; filename=".$filename);
+        header("Content-Type: " . $filetype);
+        header("Content-Disposition: attachment; filename=" . $filename);
         header("Content-Length: " . strlen($contents));
     }
 
@@ -498,7 +499,7 @@ HTML;
 
     public function timestampResource($file, $folder) {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        return $this->core->getConfig()->getBaseUrl().$folder."/".$file.(($timestamp !== 0) ? "?v={$timestamp}" : "");
+        return $this->core->getConfig()->getBaseUrl() . $folder . "/" . $file . (($timestamp !== 0) ? "?v={$timestamp}" : "");
     }
 
     /**

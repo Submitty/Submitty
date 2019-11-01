@@ -57,7 +57,7 @@ class WebRouter {
      * @param Core $core
      * @return Response|mixed should be of type Response only in the future
      */
-    static public function getApiResponse(Request $request, Core $core) {
+    public static function getApiResponse(Request $request, Core $core) {
         try {
             $router = new self($request, $core);
             $router->loadCourse();
@@ -102,7 +102,7 @@ class WebRouter {
      * @return Response|mixed should be of type Response only in the future
      * @throws \ReflectionException|\Exception
      */
-    static public function getWebResponse(Request $request, Core $core) {
+    public static function getWebResponse(Request $request, Core $core) {
         $logged_in = false;
         try {
             $router = new self($request, $core);

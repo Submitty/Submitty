@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\models\forum\Thread;
@@ -73,5 +74,4 @@ class ForumUtils {
         }
         return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
     }
-
 }

@@ -5,7 +5,6 @@ namespace app\models\forum;
 use app\libraries\Core;
 use app\models\AbstractModel;
 
-
 /**
  * Class Thread
  *
@@ -43,10 +42,9 @@ class Thread extends AbstractModel {
         setParentId($details['parent_id']);
         setThreadId($details['thread_id']);
 
-    } 
+    }
 
     public function getFirstPost() : Post {
         return $posts_list[0];
     }
-
 }

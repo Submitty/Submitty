@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-
 use app\exceptions\NotImplementedException;
 
 class SqliteDatabase extends AbstractDatabase {
@@ -37,5 +36,4 @@ class SqliteDatabase extends AbstractDatabase {
     public function fromPHPToDatabaseArray($array) {
         throw new NotImplementedException();
     }
-
 }

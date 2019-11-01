@@ -3,7 +3,6 @@
 
 namespace tests\app\exceptions;
 
-
 use app\exceptions\FileNotFoundException;
 
 class FileNotFoundExceptionTester extends \PHPUnit\Framework\TestCase {
