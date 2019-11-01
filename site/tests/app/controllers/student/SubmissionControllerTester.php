@@ -1680,5 +1680,4 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['refresh']);
         $this->assertEquals("REFRESH_ME", $return['string']);
     }
-
 }

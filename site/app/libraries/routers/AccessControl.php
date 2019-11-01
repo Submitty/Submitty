@@ -106,7 +106,7 @@ class AccessControl {
             $this->role = $role;
         }
         else {
-            throw new \InvalidArgumentException;
+            throw new \InvalidArgumentException();
         }
     }
 
@@ -130,5 +130,4 @@ class AccessControl {
     public function getPermission() {
         return $this->permission;
     }
-
 }

@@ -146,7 +146,4 @@ class Forum extends AbstractModel {
         return $createObject ? [true, new Post($this->core, $data)] : [true, null];
 
     }
-
-
-
 }

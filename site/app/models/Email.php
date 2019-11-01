@@ -52,5 +52,4 @@ class Email extends AbstractModel {
     private function formatBody($body){
         return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     }
-
 }

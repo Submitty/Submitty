@@ -71,6 +71,4 @@ class ForumQueries {
         //Will change...
         return [true, 'thread_id' => $id, 'post_id' => $post_id];
     }
-
-
 }

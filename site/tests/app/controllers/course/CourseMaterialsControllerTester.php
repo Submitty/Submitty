@@ -49,7 +49,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     private function buildFakeZipFile($name, $part=1, $num_files=1, $depth = 1){
-        $zip = new ZipArchive;
+        $zip = new ZipArchive();
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);
         $files = array();

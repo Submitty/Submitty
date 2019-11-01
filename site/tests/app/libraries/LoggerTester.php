@@ -173,5 +173,4 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(Utils::pad($current_date['hours']), $time[0], "Hours place is not right");
         $this->assertEquals(Utils::pad($current_date['minutes']), $time[1], "Minutes place is not right");
     }
-
 }

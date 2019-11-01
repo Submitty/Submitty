@@ -80,5 +80,4 @@ class Course extends AbstractModel {
             "display_semester" => $this->getLongSemester()
         ];
     }
-
 }
