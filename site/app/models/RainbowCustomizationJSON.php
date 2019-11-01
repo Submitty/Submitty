@@ -53,8 +53,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @return array
      */
-    public function getGradeables()
-    {
+    public function getGradeables() {
         return $this->gradeables;
     }
 
@@ -63,8 +62,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @return array The display benchmarks
      */
-    public function getDisplayBenchmarks()
-    {
+    public function getDisplayBenchmarks() {
         return $this->display_benchmark;
     }
 
@@ -75,8 +73,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param string $benchmark The benchmark to add
      * @throws BadArgumentException The passed in argument is not allowed
      */
-    public function addDisplayBenchmarks(string $benchmark)
-    {
+    public function addDisplayBenchmarks(string $benchmark) {
         if(!in_array($benchmark, self::allowed_display_benchmarks))
         {
             throw new BadArgumentException('Passed in benchmark not found in the list of allowed benchmarks');
@@ -93,8 +90,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @return bool Indicates if a custom_customization.json exists
      */
-    public function doesCustomCustomizationExist()
-    {
+    public function doesCustomCustomizationExist() {
         // Get path to custom_customization.json
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
@@ -108,8 +104,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @throws FileReadException Failure to read the contents of the file
      * @throws MalformedDataException Failure to decode the contents of the JSON string
      */
-    public function loadFromJsonFile()
-    {
+    public function loadFromJsonFile() {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
@@ -172,8 +167,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param $display The item to add
      * @throws BadArgumentException The passed in argument is not allowed.
      */
-    public function addDisplay($display)
-    {
+    public function addDisplay($display) {
         if(!in_array($display, self::allowed_display))
         {
             throw new BadArgumentException('Passed in display not found in the list of allowed display items');
@@ -192,8 +186,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      * @param $label The label you would like to assign to the sectionID
      * @throws BadArgumentException The passed in section label is empty
      */
-    public function addSection($sectionID, $label)
-    {
+    public function addSection($sectionID, $label) {
         if(empty($label))
         {
             throw new BadArgumentException('The section label may not be empty.');
@@ -207,8 +200,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @return object
      */
-    public function getSection()
-    {
+    public function getSection() {
         return $this->section;
     }
 
@@ -217,8 +209,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param object $gradeable
      */
-    public function addGradeable(object $gradeable)
-    {
+    public function addGradeable(object $gradeable) {
         // TODO: Validate gradeable data
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
@@ -236,8 +227,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @return array
      */
-    public function getMessages()
-    {
+    public function getMessages() {
         return $this->messages;
     }
 
@@ -247,8 +237,7 @@ class RainbowCustomizationJSON extends AbstractModel {
      *
      * @param string $message
      */
-    public function addMessage(string $message)
-    {
+    public function addMessage(string $message) {
         if(empty($message))
         {
             throw new BadArgumentException('You may not add an empty message.');
@@ -260,8 +249,7 @@ class RainbowCustomizationJSON extends AbstractModel {
     /**
      * Save the contents in this objects properties to the customization.json for the current course
      */
-    public function saveToJsonFile()
-    {
+    public function saveToJsonFile() {
         // Get path of where to save file
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');

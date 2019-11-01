@@ -583,7 +583,7 @@ HTML;
         }
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function ($a,$b) {
+        usort($sections, function ($a, $b) {
             return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
         });
 

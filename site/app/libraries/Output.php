@@ -95,7 +95,7 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (... $args) {
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
@@ -473,7 +473,7 @@ HTML;
         return $this->getOutput();
     }
 
-    public function addInternalCss($file, $folder='css') {
+    public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
 
@@ -485,7 +485,7 @@ HTML;
         $this->css->add($url);
     }
 
-    public function addInternalJs($file, $folder='js') {
+    public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
 
@@ -514,7 +514,7 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function addBreadcrumb($string, $url=null, $external_link=false) {
+    public function addBreadcrumb($string, $url = null, $external_link = false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
     }
 

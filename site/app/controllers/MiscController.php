@@ -32,7 +32,7 @@ class MiscController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return Response
      */
-    public function encodePDF($gradeable_id){
+    public function encodePDF($gradeable_id) {
         $id = $_POST['user_id'] ?? null;
         $file_name = $_POST['filename'] ?? null;
         $file_name = html_entity_decode($file_name);
@@ -453,7 +453,7 @@ class MiscController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
      */
-    public function checkBulkProgress($gradeable_id){
+    public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";
         $result = [];
         $found = false;

@@ -34,8 +34,8 @@ class AccessControlTester extends BaseUnitTest {
      */
     public function testAccess(
         $endpoint,
-        $method="GET",
-        $params=[],
+        $method = "GET",
+        $params = [],
         $min_role = User::LEVEL_USER,
         $min_permission = ['course.view'],
         $logged_in = true

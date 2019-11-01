@@ -32,7 +32,7 @@ class Email extends AbstractModel {
    * @param array $details
    */
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -49,7 +49,7 @@ class Email extends AbstractModel {
     }
 
     //inject a "do not reply" note in the footer of the body
-    private function formatBody($body){
+    private function formatBody($body) {
         return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     }
 }

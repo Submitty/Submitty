@@ -12,7 +12,7 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class PlagiarismController extends AbstractController {
-    private function getGradeablesFromPriorTerm(){
+    private function getGradeablesFromPriorTerm() {
         $return = array();
 
         $filename = FileUtils::joinPaths(
@@ -172,7 +172,7 @@ class PlagiarismController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/plagiarism/configuration/new", methods={"POST"})
      */
-    public function saveNewPlagiarismConfiguration($new_or_edit, $gradeable_id=null) {
+    public function saveNewPlagiarismConfiguration($new_or_edit, $gradeable_id = null) {
 
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
@@ -645,7 +645,7 @@ class PlagiarismController extends AbstractController {
         return $color_info;
     }
 
-    public function getDisplayForCode($file_name , $color_info){
+    public function getDisplayForCode($file_name, $color_info) {
         $content = file_get_contents($file_name);
         return $content;
     }

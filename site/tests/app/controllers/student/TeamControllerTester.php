@@ -14,7 +14,7 @@ class TeamControllerTester extends BaseUnitTest {
 
     private $config = array();
 
-    public function setUp() : void{
+    public function setUp(): void {
         $config['gradeable_id'] = "test";
 
         $config['semester'] = "test";
@@ -27,26 +27,26 @@ class TeamControllerTester extends BaseUnitTest {
         $this->core = $this->createMockCore($this->config);
     }
     //remove any external resources here
-    public function tearDown() : void{
+    public function tearDown(): void {
         $this->assertTrue(FileUtils::recursiveRmdir($this->config['course_path']));
     }
 
     //Test making teams
-    public function testCreateTeamOnNullGradeable(){
+    public function testCreateTeamOnNullGradeable() {
         $controller = new TeamController($this->core);
         $response = $controller->createNewTeam(false);
         $this->assertEquals(["status" => "fail", "message" => "Invalid or missing gradeable id!"], $response);
     }
 
     //create a normal gradeable, we should not be able to create a team
-    public function testCreateTeamOnNonTeamGradeable(){
+    public function testCreateTeamOnNonTeamGradeable() {
         $this->core->getQueries()->method('getGradeableConfig')->with('test')->willReturn($this->createMockGradeable(false));
         $controller = new TeamController($this->core);
         $response = $controller->createNewTeam($this->config['gradeable_id']);
         $this->assertEquals(["status" => "fail", "message" => "Test Gradeable is not a team assignment"], $response);
     }
 
-    public function testCreateTeamSuccess(){
+    public function testCreateTeamSuccess() {
         $this->config['use_mock_time'] = true;
         $this->core = $this->createMockCore($this->config);
 

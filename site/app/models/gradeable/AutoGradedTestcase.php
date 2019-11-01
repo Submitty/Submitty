@@ -118,7 +118,7 @@ class AutoGradedTestcase extends AbstractModel {
     }
 
     /** @internal */
-    public function setView(){
+    public function setView() {
         throw new \BadFunctionCallException('Setters disabled for AutoGradedTestcase');
     }
 

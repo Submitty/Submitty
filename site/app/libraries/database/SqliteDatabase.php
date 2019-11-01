@@ -8,7 +8,7 @@ class SqliteDatabase extends AbstractDatabase {
     protected $path;
     protected $memory = true;
 
-    public function __construct($connection_params=array()) {
+    public function __construct($connection_params = array()) {
         parent::__construct($connection_params);
         if (isset($connection_params['path'])) {
             $this->path = $connection_params['path'];
@@ -29,7 +29,7 @@ class SqliteDatabase extends AbstractDatabase {
         return "sqlite:{$param}";
     }
 
-    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
+    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null) {
         throw new NotImplementedException();
     }
 

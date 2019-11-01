@@ -18,7 +18,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      * port
      * dbname
      */
-    public function __construct($connection_params=array()) {
+    public function __construct($connection_params = array()) {
         parent::__construct($connection_params);
         if (isset($connection_params['host'])) {
             $this->host = $connection_params['host'];
@@ -60,7 +60,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      *
      * @return array PHP array representation
      */
-    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
+    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {

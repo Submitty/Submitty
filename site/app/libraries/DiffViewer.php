@@ -141,7 +141,7 @@ class DiffViewer {
      *
      * @throws \Exception
      */
-    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend="id") {
+    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend = "id") {
         $this->id = rtrim($id_prepend, "_") . "_";
         $this->actual_file = $actual_file;
         $this->expected_file = $expected_file;
@@ -538,7 +538,7 @@ class DiffViewer {
         return $html;
     }
 
-    public function getWhiteSpaces(){
+    public function getWhiteSpaces() {
         $return = "";
         foreach($this->white_spaces as $key => $value){
             $return .= "$value" . " = " . "$key" . " ";
@@ -554,7 +554,7 @@ class DiffViewer {
      *
      * @return string HTML after white spaces replaced with visuals
      */
-    private function replaceEmptyChar($html, $with_escape){
+    private function replaceEmptyChar($html, $with_escape) {
         $return = $html;
         if($with_escape){
             foreach(self::SPECIAL_CHARS_LIST as $name => $representations){
@@ -577,7 +577,7 @@ class DiffViewer {
      *
      * This function replaces string $text with string $what in string $which.
      */
-    private function replaceUTF($text, $what, &$which, $description){
+    private function replaceUTF($text, $what, &$which, $description) {
         $count = 0;
         $what = '<span class="whitespace">' . $what . '</span>';
         $which = str_replace($text, $what, $which, $count);

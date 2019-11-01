@@ -237,7 +237,7 @@ class LateController extends AbstractController {
     /**
      * @return Response
      */
-    private function getLateDays(){
+    private function getLateDays() {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = array();
         foreach($users as $user){

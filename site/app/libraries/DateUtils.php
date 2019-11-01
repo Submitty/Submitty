@@ -25,7 +25,7 @@ class DateUtils {
      *
      * @return int
      */
-    public static function calculateDayDiff($date1, $date2="now"): int {
+    public static function calculateDayDiff($date1, $date2 = "now"): int {
         if (!($date1 instanceof DateTime)) {
             $date1 = new DateTime($date1);
         }

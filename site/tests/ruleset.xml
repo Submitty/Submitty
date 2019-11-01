@@ -20,8 +20,6 @@
         <exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" />
         <exclude name="Generic.Files.LineLength.TooLong" />
         <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
-        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.BraceOnNewLine" />
-        <exclude name="Generic.Functions.OpeningFunctionBraceKernighanRitchie.SpaceBeforeBrace" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
@@ -49,7 +47,6 @@
         <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" />
         <exclude name="PSR12.Files.FileHeader.SpacingInsideBlock" />
         <exclude name="PSR12.Files.ImportStatement.LeadingSlash"/>
-        <exclude name="PSR12.Functions.ReturnTypeDeclaration.SpaceBeforeColon" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMixed"/>
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>
@@ -67,13 +64,6 @@
         <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterSecond" />
         <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceBeforeArrow" />
         <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceAfterArrow" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingAfterVariadic" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceAfterEquals" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeEquals" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpacingBeforeClose" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.SpaceBeforeComma" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeArg" />
-        <exclude name="Squiz.Functions.FunctionDeclarationArgumentSpacing.NoSpaceBeforeHint" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />

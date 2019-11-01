@@ -28,7 +28,7 @@ class FileUtils {
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
+    public static function getAllFiles(string $dir, array $skip_files = [], bool $flatten = false): array {
         $skip_files = array_map(function ($str) {
             return strtolower($str);
         }, $skip_files);
@@ -392,7 +392,7 @@ class FileUtils {
      * @param $filename
      * @return null|string
      */
-    public static function getContentType($filename){
+    public static function getContentType($filename) {
         if ($filename === null) {
             return null;
         }

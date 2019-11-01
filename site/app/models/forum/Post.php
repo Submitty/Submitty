@@ -62,7 +62,7 @@ class Post extends AbstractModel {
     //protected $post_type;
     //protected $has_attachment;
 
-    public function __construct(Core $core, $details=array()){
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
 
         if(empty($details)) {

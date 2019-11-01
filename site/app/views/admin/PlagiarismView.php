@@ -162,7 +162,7 @@ HTML;
         return $return;
     }
 
-    public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
+    public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title, $rankings) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));

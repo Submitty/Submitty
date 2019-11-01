@@ -16,7 +16,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     private $json_path;
     private $upload_path;
 
-    public function setUp() : void{
+    public function setUp(): void {
         $this->config = array();
         $this->config['course_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $this->config['use_mock_time'] = true;
@@ -48,7 +48,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
     }
 
-    private function buildFakeZipFile($name, $part=1, $num_files=1, $depth = 1){
+    private function buildFakeZipFile($name, $part = 1, $num_files = 1, $depth = 1) {
         $zip = new ZipArchive();
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);

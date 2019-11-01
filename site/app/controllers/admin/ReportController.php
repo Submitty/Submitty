@@ -352,7 +352,7 @@ class ReportController extends AbstractController {
      * @param LateDays $ld
      * @return array
      */
-    public function generateGradeSummary(GradedGradeable $gg,User $user, LateDays $ld) {
+    public function generateGradeSummary(GradedGradeable $gg, User $user, LateDays $ld) {
         $g = $gg->getGradeable();
 
         $entry = [
@@ -501,7 +501,7 @@ class ReportController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
-    public function generateCustomization(){
+    public function generateCustomization() {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();

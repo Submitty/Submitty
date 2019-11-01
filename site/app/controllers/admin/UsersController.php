@@ -230,7 +230,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/users", methods={"POST"})
      */
-    public function updateUser($type='users') {
+    public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);

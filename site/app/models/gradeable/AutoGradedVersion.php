@@ -154,8 +154,7 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
-    public function getTestcaseMessages()
-    {
+    public function getTestcaseMessages() {
         $this->loadTestcases();
 
         $output = array();

@@ -26,7 +26,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @return Core
      */
-    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array()) {
+    protected function createMockCore($config_values = array(), $user_config = array(), $queries = array(), $access = array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -190,8 +190,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @throws ReflectionException
      * @return mixed Method return.
      */
-    public function invokeMethod(&$object, $methodName, ...$parameters)
-    {
+    public function invokeMethod(&$object, $methodName, ...$parameters) {
         $reflection = new \ReflectionClass(get_class($object));
         $method = $reflection->getMethod($methodName);
         $method->setAccessible(true);

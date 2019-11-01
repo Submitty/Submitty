@@ -226,8 +226,7 @@ class AutogradingConfig extends AbstractModel {
         }
     }
 
-    private function getMarkdownData($cell)
-    {
+    private function getMarkdownData($cell) {
         // If markdown_string is set then just return that
         if(isset($cell['markdown_string']))
         {
