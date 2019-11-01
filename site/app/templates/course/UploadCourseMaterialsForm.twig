@@ -15,6 +15,32 @@
             </p>
             <input type="text" id="input-provide-full-path" class="full-width" name="eg_config_path" value="" placeholder="optional/subdirectory"/>
         </label>
+        <label id="upload_sections">
+            <p class="black-message">
+                Do you want to restrict this course material to some sections?
+            </p>
+            <label class = "radio">
+                <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
+                No
+            </label>
+            <label class = "radio">
+                <input name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
+                Yes
+            </label>
+            <script type="text/javascript">
+                function toggleRegistrationSections(){
+                    $("#show_Some_Section_Selection").toggle();
+                } 
+            </script>
+            <div id = "show_Some_Section_Selection" style="display: none">
+            {% for section in reg_sections %}
+                <tr>
+                    <td>Section {{ section['sections_registration_id'] }}</td>
+                    <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                </tr>
+            {% endfor %}
+            </div>
+        </label>
         <label id="upload_dt">
             <p>
                 <strong>Choose a time to release the files being uploaded:</strong>
@@ -24,6 +50,10 @@
         <label>
             <input id="expand-zip-checkbox" type="checkbox" value="off"/>
             Unzip zip files (Note: If checked, will replace all folders/files)
+        </label>
+        <label>
+            <input id="hide-materials-checkbox" type="checkbox" value="off"/>
+            Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
         <div id="upload-boxes">
@@ -36,24 +66,39 @@
         <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
     <script type="text/javascript">
-
-        function makeSubmission(expandZip,cmPath, requestedPath,cmTime) {
-            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, cmPath, requestedPath,cmTime);
+        function makeSubmission(expandZip, hideFromStudents ,cmPath, requestedPath,cmTime, sections) {
+            handleUploadCourseMaterials("{{ csrf_token }}", expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
 
+                var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var cb = $("input#expand_zip_checkbox");
                 var expandZip = 'off';
                 if  ($('#expand-zip-checkbox').is(':checked'))  {
                     expandZip = 'on';
                 }
-
+                var hideFromStudents = 'off';
+                if  ($('#hide-materials-checkbox').is(':checked'))  {
+                    hideFromStudents = 'on';
+                }
+                var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
+                
+                reg_sectionArray.forEach(function(element){
+                    var currentSection = '#section-' +element['sections_registration_id']
+                    if  ($(currentSection).is(':checked'))  {
+                        sections.push(element['sections_registration_id']);
+                    }
+                });
+                
+                if(document.getElementById('show_Some_Section_Selection').style.display == "none"){
+                    sections = null;
+                }
                 var cmPath = document.getElementById('cm_path').innerHTML;
 
                 var requestedPath = document.getElementById("input-provide-full-path").value;
-                makeSubmission(expandZip, cmPath, requestedPath,cmTime);
+                makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
                 e.stopPropagation();
             });
         });

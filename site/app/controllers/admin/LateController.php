@@ -78,7 +78,7 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) ||  (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d";
                 $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
@@ -194,14 +194,14 @@ class LateController extends AbstractController {
                 }
             }
             if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
-                $this->core->addNoticeMessage("User already has " . $late_days ." extensions; no changes made");
+                $this->core->addNoticeMessage("User already has " . $late_days . " extensions; no changes made");
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
-            if($team != NULL && $team->getSize() > 1){
+            if($team != null && $team->getSize() > 1){
                 if($option == 0){
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");

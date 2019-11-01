@@ -11,7 +11,6 @@ use app\models\Config;
 use app\models\User;
 use ReflectionException;
 
-
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     protected static $mock_builders = [];
 

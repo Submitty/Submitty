@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-
 use app\exceptions\NotImplementedException;
 
 class SqliteDatabase extends AbstractDatabase {

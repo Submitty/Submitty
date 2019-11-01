@@ -22,14 +22,14 @@ class ExtensionsView extends AbstractView {
         $current_gid = isset($_COOKIE['exception_gid']) ? $_COOKIE['exception_gid'] : null;
         // get gradeable with matching gid
         $g_key = array_search($current_gid, array_column($gradeables, 'g_id'));
-        $current_gradeable = $g_key === false ? null : $gradeables[$g_key]; 
+        $current_gradeable = $g_key === false ? null : $gradeables[$g_key];
 
         $users = $this->core->getQueries()->getUsersWithExtensions($current_gid);
         $current_exceptions = array();
         foreach($users as $user) {
             $current_exceptions[] = array('user_id' => $user->getId(),
-                                          'user_firstname' => $user->getDisplayedFirstName(), 
-                                          'user_lastname' => $user->getDisplayedLastName(), 
+                                          'user_firstname' => $user->getDisplayedFirstName(),
+                                          'user_lastname' => $user->getDisplayedLastName(),
                                           'late_day_exceptions' => $user->getLateDayExceptions());
         }
         if (empty($current_exceptions)) $current_exceptions = null;

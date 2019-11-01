@@ -5,7 +5,6 @@ namespace app\libraries\response;
 
 use app\libraries\Core;
 
-
 /**
  * Class RedirectResponse
  * @package app\libraries\response

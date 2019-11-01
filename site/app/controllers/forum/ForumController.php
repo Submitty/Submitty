@@ -12,14 +12,13 @@ use app\libraries\DateUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class ForumHomeController
  *
  * Controller to deal with the submitty home page. Once the user has been authenticated, but before they have
  * selected which course they want to access, they are forwarded to the home page.
  */
-class ForumController extends AbstractController{
+class ForumController extends AbstractController {
     /**
      * ForumHomeController constructor.
      *
@@ -34,18 +33,20 @@ class ForumController extends AbstractController{
     }
 
     private function showMergedThreads($currentCourse) {
-        return  (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
+        return (isset($_COOKIE["{$currentCourse}_show_merged_thread"]) && $_COOKIE["{$currentCourse}_show_merged_thread"] == "1");
     }
 
     private function returnUserContentToPage($error, $isThread, $thread_id){
-            //Notify User
-            $this->core->addErrorMessage($error);
-            if($isThread){
-                $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
-            } else {
-                $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
-            }
-            return array(-1, $url);
+        //Notify User
+        $this->core->addErrorMessage($error);
+
+        if($isThread){
+            $url = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
+        }
+        else {
+            $url = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
+        }
+        return array(-1, $url);
     }
 
     /**
@@ -141,7 +142,7 @@ class ForumController extends AbstractController{
             if($this->isValidCategories(-1, array($category))) {
                 return $this->core->getOutput()->renderJsonFail("That category already exists.");
             } else {
-                if(strlen($category)>50){
+                if(strlen($category) > 50){
                     return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
                 }
                 else {
@@ -259,7 +260,7 @@ class ForumController extends AbstractController{
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
 
-        if( !empty($_POST['lock_thread_date'])  and $this->core->getUser()->accessAdmin() ){
+        if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin() ){
             $lock_thread_date = $_POST['lock_thread_date'];
         } else {
             $lock_thread_date = null;
@@ -268,7 +269,7 @@ class ForumController extends AbstractController{
 
         $thread_status = $_POST["thread_status"];
 
-        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0 ;
+        $announcement = (isset($_POST["Announcement"]) && $_POST["Announcement"] == "Announcement" && $this->core->getUser()->accessFullGrading()) ? 1 : 0;
 
         $categories_ids  = array();
         foreach ($_POST["cat"] as $category_id) {
@@ -308,15 +309,15 @@ class ForumController extends AbstractController{
                 $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
                 // notify on a new announcement
                 if ($announcement) {
-                    $subject = "New Announcement: ".Notification::textShortner($thread_title);
-                    $content = "An Instructor or Teaching Assistant made an announcement in:\n".$full_course_name."\n\n".$thread_title."\n\n".$thread_post_content;
+                    $subject = "New Announcement: " . Notification::textShortner($thread_title);
+                    $content = "An Instructor or Teaching Assistant made an announcement in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewAnnouncement($event);
                 }
                 // notify on a new thread
                 else {
-                    $subject = "New Thread: ".Notification::textShortner($thread_title);
-                    $content = "A new discussion thread was created in:\n".$full_course_name."\n\n".$thread_title."\n\n".$thread_post_content;
+                    $subject = "New Thread: " . Notification::textShortner($thread_title);
+                    $content = "A new discussion thread was created in:\n" . $full_course_name . "\n\n" . $thread_title . "\n\n" . $thread_post_content;
                     $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject];
                     $this->core->getNotificationFactory()->onNewThread($event);
                 }
@@ -350,7 +351,7 @@ class ForumController extends AbstractController{
 
         if(strlen($post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
-            return $this->core->getOutput()->renderJsonFail("Posts cannot be over ". ForumUtils::FORUM_CHAR_POST_LIMIT ." characters long", $result);
+            return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
 
         if(isset($_POST['thread_status'])){
@@ -359,7 +360,7 @@ class ForumController extends AbstractController{
 
         $markdown = !empty($_POST['markdown_status']);
 
-        setcookie("markdown_enabled", ($markdown?1:0), time() + (86400 * 30), "/");
+        setcookie("markdown_enabled", ($markdown ? 1 : 0), time() + (86400 * 30), "/");
 
         $display_option = (!empty($_POST["display_option"])) ? htmlentities($_POST["display_option"], ENT_QUOTES | ENT_HTML5, 'UTF-8') : "tree";
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
@@ -372,7 +373,7 @@ class ForumController extends AbstractController{
         } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        } else if($this->core->getQueries()->isThreadLocked($thread_id) and !$this->core->getUser()->accessAdmin() ) {
+        } else if($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         } else {
@@ -403,8 +404,8 @@ class ForumController extends AbstractController{
 
                 $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
 
-                $subject = "New Reply: ".Notification::textShortner($thread_title);
-                $content = "A new message was posted in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\nPost: ".Notification::textShortner($parent_post_content)."\n\nNew Reply:\n\n".$post_content;
+                $subject = "New Reply: " . Notification::textShortner($thread_title);
+                $content = "A new message was posted in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\nPost: " . Notification::textShortner($parent_post_content) . "\n\nNew Reply:\n\n" . $post_content;
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'post_id' => $post_id, 'thread_id' => $thread_id];
                 $this->core->getNotificationFactory()->onNewPost($event);
 
@@ -456,10 +457,10 @@ class ForumController extends AbstractController{
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin() ){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) and !$this->core->getUser()->accessAdmin() ){
+        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin() ){
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
         else if($modify_type == 0) { //delete post or thread
@@ -473,8 +474,8 @@ class ForumController extends AbstractController{
 
             $post_author_id = $post['author_user_id'];
             $metadata = json_encode(array());
-            $subject = "Deleted: ".Notification::textShortner($post["content"]);
-            $content = "In ".$full_course_name."\n\nThread: ".$thread_title."\n\nPost:\n".$post["content"]." was deleted.";
+            $subject = "Deleted: " . Notification::textShortner($post["content"]);
+            $content = "In " . $full_course_name . "\n\nThread: " . $thread_title . "\n\nPost:\n" . $post["content"] . " was deleted.";
             $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
             $this->core->getNotificationFactory()->onPostModified($event);
 
@@ -491,8 +492,8 @@ class ForumController extends AbstractController{
                 $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
                 $post_author_id = $post['author_user_id'];
                 $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
-                $subject = "Undeleted: ".Notification::textShortner($post["content"]);
-                $content = "In ".$full_course_name."\n\nThe following post was undeleted.\n\nThread: ".$thread_title."\n\n".$post["content"];
+                $subject = "Undeleted: " . Notification::textShortner($post["content"]);
+                $content = "In " . $full_course_name . "\n\nThe following post was undeleted.\n\nThread: " . $thread_title . "\n\n" . $post["content"];
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $type = "post";
@@ -511,7 +512,7 @@ class ForumController extends AbstractController{
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
             } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
-                $type = is_null($status_edit_thread)?"Post":"Thread";
+                $type = is_null($status_edit_thread) ? "Post" : "Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
                     $messageString = "{$type} updated successfully.";
@@ -526,8 +527,8 @@ class ForumController extends AbstractController{
                     $messageString = "Thread and post updated successfully.";
                     $any_changes = true;
                 } else {
-                    $type = ($status_edit_thread)?"Thread":"Post";
-                    $type_opposite = (!$status_edit_thread)?"Thread":"Post";
+                    $type = ($status_edit_thread) ? "Thread" : "Post";
+                    $type_opposite = (!$status_edit_thread) ? "Thread" : "Post";
                     $isError = true;
                     if($status_edit_thread || $status_edit_post) {
                         //$type is true
@@ -544,13 +545,13 @@ class ForumController extends AbstractController{
                 $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]) . '#' . (string)$post_id, 'thread_id' => $thread_id, 'post_id' => $post_id));
                 if ($type == "Post") {
                     $post_content = $_POST["thread_post_content"];
-                    $subject = "Post Edited: ".Notification::textShortner($post_content);
-                    $content = "A message was edited in:\n".$full_course_name."\n\nThread Title: ".$thread_title."\n\nEdited Post: \n\n".$post_content;
+                    $subject = "Post Edited: " . Notification::textShortner($post_content);
+                    $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
                 }
                 else if ($type == "Thread and Post") {
                     $post_content = $_POST["thread_post_content"];
-                    $subject = "Thread Edited: ".Notification::textShortner($thread_title);
-                    $content = "A thread was edited in:\n".$full_course_name."\n\nEdited Thread: ".$thread_title."\n\nEdited Post: \n\n".$post_content;
+                    $subject = "Thread Edited: " . Notification::textShortner($thread_title);
+                    $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
                 }
 
                 $event = ['component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $post_author_id, 'preference' => 'all_modifications_forum'];
@@ -596,16 +597,16 @@ class ForumController extends AbstractController{
                 $child_thread = $this->core->getQueries()->getThread($child_thread_id)[0];
                 $child_thread_author = $child_thread['created_by'];
                 $child_thread_title = $child_thread['title'];
-                $parent_thread_title =$this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
+                $parent_thread_title = $this->core->getQueries()->getThreadTitle($parent_thread_id)['title'];
                 $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $parent_thread_id]) . '#' . (string)$child_root_post, 'thread_id' => $parent_thread_id, 'post_id' => $child_root_post));
-                $subject = "Thread Merge: ".Notification::textShortner($child_thread_title);
-                $content = "Two threads were merged in:\n".$full_course_name."\n\nAll messages posted in Merged Thread:\n".$child_thread_title."\n\nAre now contained within Parent Thread:\n".$parent_thread_title;
+                $subject = "Thread Merge: " . Notification::textShortner($child_thread_title);
+                $content = "Two threads were merged in:\n" . $full_course_name . "\n\nAll messages posted in Merged Thread:\n" . $child_thread_title . "\n\nAre now contained within Parent Thread:\n" . $parent_thread_title;
                 $event = [ 'component' => 'forum', 'metadata' => $metadata, 'content' => $content, 'subject' => $subject, 'recipient' => $child_thread_author, 'preference' => 'merge_threads'];
                 $this->core->getNotificationFactory()->onPostModified($event);
                 $this->core->addSuccessMessage("Threads merged!");
                 $thread_id = $parent_thread_id;
             } else {
-                $this->core->addErrorMessage("Merging Failed! ".$message);
+                $this->core->addErrorMessage("Merging Failed! " . $message);
             }
         }
         $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $thread_id]));
@@ -615,7 +616,7 @@ class ForumController extends AbstractController{
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if( !empty($_POST['lock_thread_date']) and $this->core->getUser()->accessAdmin()){
+            if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
                 $lock_thread_date = $_POST['lock_thread_date'];
             }
             else{
@@ -739,7 +740,7 @@ class ForumController extends AbstractController{
         $thread_status = array();
         $new_posts = array();
         $unread_threads = false;
-        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) &&  $category_id[0] == -1 ) {
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1 ) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
@@ -765,7 +766,7 @@ class ForumController extends AbstractController{
         $posts = null;
         $option = 'tree';
         if(!empty($_COOKIE['forum_display_option'])) {
-           $option = $_COOKIE['forum_display_option'];
+            $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';
         if(!empty($thread_id)){
@@ -935,7 +936,7 @@ class ForumController extends AbstractController{
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
         $users = array();
-        for($i=0;$i<$num_posts;$i++){
+        for($i = 0;$i < $num_posts;$i++){
             $user = $posts[$i]["author_user_id"];
             $content = $posts[$i]["content"];
             if(!isset($users[$user])){
@@ -943,13 +944,13 @@ class ForumController extends AbstractController{
                 $u = $this->core->getQueries()->getSubmittyUser($user);
                 $users[$user]["first_name"] = htmlspecialchars($u -> getDisplayedFirstName());
                 $users[$user]["last_name"] = htmlspecialchars($u -> getDisplayedLastName());
-                $users[$user]["posts"]=array();
-                $users[$user]["id"]=array();
-                $users[$user]["timestamps"]=array();
-                $users[$user]["total_threads"]=0;
+                $users[$user]["posts"] = array();
+                $users[$user]["id"] = array();
+                $users[$user]["timestamps"] = array();
+                $users[$user]["total_threads"] = 0;
                 $users[$user]["num_deleted_posts"] = count($this->core->getQueries()->getDeletedPostsByUser($user));
             }
-            if($posts[$i]["parent_id"]==-1){
+            if($posts[$i]["parent_id"] == -1){
                 $users[$user]["total_threads"]++;
             }
             $users[$user]["posts"][] = $content;

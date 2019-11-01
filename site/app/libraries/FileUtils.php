@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\exceptions\FileReadException;
 
 /**
@@ -51,8 +52,8 @@ class FileUtils {
                     $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
                     if ($flatten) {
                         foreach ($temp as $file => $details) {
-                            $details['relative_name'] = $entry."/".$details['relative_name'];
-                            $return[$entry."/".$file] = $details;
+                            $details['relative_name'] = $entry . "/" . $details['relative_name'];
+                            $return[$entry . "/" . $file] = $details;
                         }
                     }
                     else {
@@ -377,7 +378,7 @@ class FileUtils {
         }
 
         $sep = DIRECTORY_SEPARATOR;
-        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+        return preg_replace('#' . preg_quote($sep) . '+#', $sep, join($sep, $paths));
     }
 
     /**
@@ -490,7 +491,7 @@ class FileUtils {
      */
     public static function validateUploadedFiles($files) {
         if (empty($files)) {
-           return array("failed" => "No files sent to validate");
+            return array("failed" => "No files sent to validate");
         }
 
         $ret = array();
@@ -522,8 +523,8 @@ class FileUtils {
 
             $ret[] = [
                 'name' => $name,
-                'type'=> $type,
-                'error'=> $err_msg,
+                'type' => $type,
+                'error' => $err_msg,
                 'size' => $size,
                 'success' => $success
             ];

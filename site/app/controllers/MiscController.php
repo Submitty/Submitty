@@ -2,7 +2,6 @@
 
 namespace app\controllers;
 
-
 use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -11,7 +10,6 @@ use app\libraries\routers\AccessControl;
 use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
-
 
 class MiscController extends AbstractController {
 
@@ -35,8 +33,8 @@ class MiscController extends AbstractController {
      * @return Response
      */
     public function encodePDF($gradeable_id){
-        $id = $_POST['user_id'] ?? NULL;
-        $file_name = $_POST['filename'] ?? NULL;
+        $id = $_POST['user_id'] ?? null;
+        $file_name = $_POST['filename'] ?? null;
         $file_name = html_entity_decode($file_name);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         $submitter = $this->core->getQueries()->getSubmitterById($id);
@@ -93,9 +91,15 @@ class MiscController extends AbstractController {
             if($dir == 'course_materials')
             {
                 // If the user attempting to access the file is not at least a grader then ensure the file has been released
-                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path))
+                if(!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path))
                 {
                     $this->core->getOutput()->showError("You may not access this file until it is released.");
+                    return false;
+                }
+
+                if(!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser()))
+                {
+                    $this->core->getOutput()->showError("Your section may not access this file.");
                     return false;
                 }
             }
@@ -108,7 +112,7 @@ class MiscController extends AbstractController {
         $this->core->getOutput()->useHeader(false);
         $this->core->getOutput()->useFooter(false);
         if ($mime_type === "application/pdf" || Utils::startsWith($mime_type, "image/")) {
-            header("Content-type: ".$mime_type);
+            header("Content-type: " . $mime_type);
             header('Content-Disposition: inline; filename="' . $file_name . '"');
             readfile($corrected_name);
             $this->core->getOutput()->renderString($path);
@@ -173,18 +177,18 @@ class MiscController extends AbstractController {
         }
 
         // If attempting to obtain course materials
-        if($dir == 'course_materials') {
+        if ($dir == 'course_materials') {
             // If the user attempting to access the file is not at least a grader then ensure the file has been released
-            if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isMaterialReleased($this->core, $path)) {
+            if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isMaterialReleased($this->core, $path)) {
                 $this->core->getOutput()->showError("You may not access this file until it is released.");
                 return false;
             }
         }
 
-        if($dir == 'submissions'){
+        if ($dir == 'submissions') {
             //cannot download scanned images for bulk uploads
             if (strpos(basename($path), "upload_page_" ) !== false &&
-                FileUtils::getContentType($path) !== "application/pdf"){
+                FileUtils::getContentType($path) !== "application/pdf") {
 
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
@@ -289,14 +293,17 @@ class MiscController extends AbstractController {
                         $filePath = $file->getRealPath();
                         $relativePath = substr($filePath, strlen($paths[$x]) + 1);
 
-                        //Only get PDFs if this is a bulk upload gradeable
-                        if ($gradeable->isScannedExam() 
-                            && FileUtils::getContentType($filePath) === "application/pdf"){
+                        if($this->core->getUser()->accessGrading()){
+                            // Add current file to archive
+                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        }else if ($gradeable->isScannedExam()
+                                  && FileUtils::getContentType($filePath) === "application/pdf"){
+                            //If the user is a student, only get PDFs if this is a bulk upload gradeable
                             // Add current file to archive
                             $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
                         }
 
-                       
+
                     }
                 }
             }
@@ -450,7 +457,7 @@ class MiscController extends AbstractController {
         $job_path = "/var/local/submitty/daemon_job_queue/";
         $result = [];
         $found = false;
-        $job_data = NULL;
+        $job_data = null;
         $complete_count = 0;
         try{
             foreach(scandir($job_path) as $job){
@@ -459,7 +466,7 @@ class MiscController extends AbstractController {
                 else
                     continue;
                 //remove 'bulk_upload_' and '.json' from job file name
-                $result[] = substr($job,11,-5);
+                $result[] = substr($job, 11, -5);
             }
             //look in the split upload folder to see what is complete
             $split_uploads = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf", $gradeable_id);

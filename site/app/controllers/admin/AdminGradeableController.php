@@ -13,7 +13,6 @@ use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class AdminGradeableController
  * @package app\controllers\admin
@@ -116,7 +115,7 @@ class AdminGradeableController extends AbstractController {
         // The current gradeable will always load its grader history,
         // but if it is grade by registration it should not be in $rotating_gradeables array
         if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
-            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            $current_g_id_key = array_search($gradeable->getId(), $rotating_gradeables);
             unset($rotating_gradeables[$current_g_id_key]);
             $rotating_gradeables = array_values($rotating_gradeables);
         }
@@ -141,22 +140,22 @@ class AdminGradeableController extends AbstractController {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
+            $all_uploaded_config_paths[] = [ 'UPLOADED: ' . substr($file['path'], strlen($uploaded_configs_dir) + 1) , $file['path'] ];
         }
         // Configs stored in a private repository (specified in course config)
         $config_repo_string = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
         $repository_error_messages = array();
         $repo_id_number = 1;
-        foreach (explode(',',$config_repo_string) as $config_repo_name) {
+        foreach (explode(',', $config_repo_string) as $config_repo_name) {
             $config_repo_name = str_replace(' ', '', $config_repo_name);
             if ($config_repo_name == '') {
                 continue;
             }
             $directory_queue = array($config_repo_name);
-            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue,$repository_error_messages,$repo_id_number);
+            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue, $repository_error_messages, $repo_id_number);
             if (isset($repo_paths)) {
-                $all_repository_config_paths = array_merge($all_repository_config_paths,$repo_paths);
+                $all_repository_config_paths = array_merge($all_repository_config_paths, $repo_paths);
             }
             $repo_id_number++;
         }
@@ -234,7 +233,7 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
-            'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
+            'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
@@ -466,7 +465,7 @@ class AdminGradeableController extends AbstractController {
 
         while(count($dir_queue) != 0) {
             if ($count >= 1000) {
-                $error_messages[] = "Repository #".$repo_id_number." entered on the \"Course Settings\" is too large to parse.";
+                $error_messages[] = "Repository #" . $repo_id_number . " entered on the \"Course Settings\" is too large to parse.";
                 return array();
             }
 
@@ -475,19 +474,19 @@ class AdminGradeableController extends AbstractController {
             $dir_queue = array_values($dir_queue);
 
             if (!file_exists($dir) || !is_dir($dir)) {
-                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
 
             try {
                 $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
             } catch(\Exception $e) {
-                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
 
             if ($this->checkPathToConfigFile($dir)) {
-                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)),$dir];
+                $return_array[] = ["DIRECTORY " . $repo_id_number . ": " . substr($dir, strlen($repository_path)),$dir];
             }
             else {
                 while($iter->valid()) {
@@ -700,7 +699,7 @@ class AdminGradeableController extends AbstractController {
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if (array_key_exists('gradeable_template',$details) && $details['gradeable_template'] !== '--None--') {
+        if (array_key_exists('gradeable_template', $details) && $details['gradeable_template'] !== '--None--') {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
@@ -864,7 +863,7 @@ class AdminGradeableController extends AbstractController {
 
         $config = $this->core->getConfig();
         if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-            $this->enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
         }
 
         return $build_status;
@@ -1027,7 +1026,7 @@ class AdminGradeableController extends AbstractController {
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
         if (!$gradeable->canDelete()) {
-            $this->core->addErrorMessage("Gradeable ".$gradeable_id." cannot be deleted.");
+            $this->core->addErrorMessage("Gradeable " . $gradeable_id . " cannot be deleted.");
             $this->core->redirect($this->core->buildNewCourseUrl());
         }
 
@@ -1144,8 +1143,8 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
      */
     public function getBuildStatusOfGradeable($gradeable_id) {
-        $queued_filename = $this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
-        $rebuilding_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
+        $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
+        $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
         $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
         $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
 
@@ -1239,11 +1238,11 @@ class AdminGradeableController extends AbstractController {
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
         if ($success === true) {
-            $this->core->addSuccessMessage($message.$gradeable_id);
+            $this->core->addSuccessMessage($message . $gradeable_id);
         } else if ($success === false) {
-            $this->core->addErrorMessage($message.$gradeable_id);
+            $this->core->addErrorMessage($message . $gradeable_id);
         } else {
-            $this->core->addErrorMessage("Failed to update status of ".$gradeable_id);
+            $this->core->addErrorMessage("Failed to update status of " . $gradeable_id);
         }
 
         $this->core->redirect($this->core->buildCourseUrl());

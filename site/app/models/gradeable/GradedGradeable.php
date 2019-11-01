@@ -238,7 +238,7 @@ class GradedGradeable extends AbstractModel {
      */
     public function getTotalScore() {
         if ($this->hasOverriddenGrades()){
-            $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(),$this->submitter->getId());
+            $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
             return floatval(max(0.0, $userWithOverriddenGrades->getMarks()));
         } else {
             return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
@@ -247,7 +247,7 @@ class GradedGradeable extends AbstractModel {
 
     public function getOverriddenComment() {
         $overridden_comment = "";
-        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(),$this->submitter->getId());
+        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
         if ($userWithOverriddenGrades !== null){
             $overridden_comment = $userWithOverriddenGrades->getComment();
         }
@@ -376,7 +376,7 @@ class GradedGradeable extends AbstractModel {
         $file_contents = file_get_contents($complete_file_path);
 
         // If file_contents is False an error has occured
-        if($file_contents === False)
+        if($file_contents === false)
         {
             throw new IOException("An error occurred retrieving submission contents.");
         }

@@ -42,7 +42,7 @@ class PDFController extends AbstractController {
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
                         $grader_id = $pdf_info[1];
-                        if($pdf_id.'.pdf' === $filename){
+                        if($pdf_id . '.pdf' === $filename){
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
                     }
@@ -100,10 +100,10 @@ class PDFController extends AbstractController {
         }
 
         if (strpos($annotation_info['file_name'], '..') !== false) {
-          return false;
+            return false;
         }
 
-        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" .$grader_id .'.json';
+        $new_file_name = preg_replace('/\\.[^.\\s]{3,4}$/', '', $annotation_info['file_name']) . "_" . $grader_id . '.json';
         file_put_contents(FileUtils::joinPaths($annotation_version_path, $new_file_name), $annotation_layer);
         $this->core->getOutput()->renderJsonSuccess('Annotation saved successfully!');
         return true;
@@ -117,9 +117,9 @@ class PDFController extends AbstractController {
     public function showGraderPDFEmbedded($gradeable_id){
         //This is the embedded pdf annotator that we built.
         //User can be a team
-        $id = $_POST['user_id'] ?? NULL;
-        $filename = $_POST['filename'] ?? NULL;
-        $page_num = $_POST['page_num'] ?? NULL;
+        $id = $_POST['user_id'] ?? null;
+        $filename = $_POST['filename'] ?? null;
+        $page_num = $_POST['page_num'] ?? null;
         $filename = html_entity_decode($filename);
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if($gradeable->isTeamAssignment()){
@@ -142,7 +142,7 @@ class PDFController extends AbstractController {
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
                         $grader_id = $pdf_info[1];
-                        if($pdf_id.'.pdf' === $filename){
+                        if($pdf_id . '.pdf' === $filename){
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
                     }
