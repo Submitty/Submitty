@@ -4,7 +4,7 @@ namespace app\models\gradeable;
 
 use app\exceptions\AuthorizationException;
 use app\libraries\Core;
-use \app\models\AbstractModel;
+use app\models\AbstractModel;
 use app\models\User;
 use app\libraries\FileUtils;
 use app\exceptions\FileNotFoundException;

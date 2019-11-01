@@ -1,4 +1,5 @@
 <?php
+
 namespace app\views\admin;
 
 use app\views\AbstractView;

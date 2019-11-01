@@ -1,4 +1,5 @@
 <?php
+
 namespace tests\app\controllers\student;
 
 use tests\BaseUnitTest;
@@ -6,7 +7,6 @@ use app\controllers\student\TeamController;
 use app\models\gradeable\Gradeable;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use \DateTime;
 
 class TeamControllerTester extends BaseUnitTest {
 

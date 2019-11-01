@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\models;
 
 use app\exceptions\BadArgumentException;

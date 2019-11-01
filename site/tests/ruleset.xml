@@ -41,12 +41,6 @@
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.LineIndent" />
-        <exclude name="PSR12.Files.OpenTag.NotAlone"/>
-        <exclude name="PSR12.Files.DeclareStatement.SpaceFoundAfterDirective"/>
-        <exclude name="PSR12.Files.DeclareStatement.SpaceFoundBeforeDirectiveValue"/>
-        <exclude name="PSR12.Files.FileHeader.SpacingAfterBlock" />
-        <exclude name="PSR12.Files.FileHeader.SpacingInsideBlock" />
-        <exclude name="PSR12.Files.ImportStatement.LeadingSlash"/>
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMixed"/>
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>

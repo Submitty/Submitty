@@ -6,7 +6,7 @@ use tests\BaseUnitTest;
 use app\controllers\course\CourseMaterialsController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use \ZipArchive;
+use ZipArchive;
 
 class CourseMaterialsControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;

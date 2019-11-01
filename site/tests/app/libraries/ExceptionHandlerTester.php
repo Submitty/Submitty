@@ -3,10 +3,10 @@
 namespace tests\app\libraries;
 
 use app\exceptions\AuthenticationException;
-use \app\exceptions\BaseException;
-use \app\libraries\ExceptionHandler;
-use \app\libraries\FileUtils;
-use \app\libraries\Logger;
+use app\exceptions\BaseException;
+use app\libraries\ExceptionHandler;
+use app\libraries\FileUtils;
+use app\libraries\Logger;
 use app\libraries\Utils;
 
 class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {

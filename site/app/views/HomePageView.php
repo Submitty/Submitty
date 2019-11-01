@@ -1,4 +1,5 @@
 <?php
+
 namespace app\views;
 
 use app\authentication\DatabaseAuthentication;

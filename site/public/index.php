@@ -7,7 +7,6 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
