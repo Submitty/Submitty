@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\exceptions\FileReadException;
 
 /**
@@ -9,9 +10,9 @@ use app\exceptions\FileReadException;
  * Contains various useful functions for interacting with files and directories.
  */
 class FileUtils {
-    const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
-    const IGNORE_FILES = ['.ds_store'];
-    const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
+    public const IGNORE_FOLDERS = [".svn", ".git", ".idea", "__macosx"];
+    public const IGNORE_FILES = ['.ds_store'];
+    public const ALLOWED_IMAGE_TYPES = ['jpg', 'jpeg', 'png', 'gif'];
 
     /**
      * Return all files from a given directory.  All subdirectories
@@ -22,15 +23,18 @@ class FileUtils {
      * just be elements of the directory array with they key being
      * {subdirectory}/{entry} giving a one-dimensional array.
      *
-     * @param string $dir
-     * @param array  $skip_files
-     * @param bool   $flatten
+     * @param  string $dir
+     * @param  array  $skip_files
+     * @param  bool   $flatten
      * @return array
      */
-    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
-        $skip_files = array_map(function ($str) {
-            return strtolower($str);
-        }, $skip_files);
+    public static function getAllFiles(string $dir, array $skip_files = [], bool $flatten = false): array {
+        $skip_files = array_map(
+            function ($str) {
+                return strtolower($str);
+            },
+            $skip_files
+        );
 
         // we ignore these files and folders as they're "junk" folders that are
         // not really useful in the context of our application that potentially
@@ -43,7 +47,9 @@ class FileUtils {
 
         if (is_dir($dir)) {
             foreach (new \FilesystemIterator($dir) as $file) {
-                /** @var \SplFileInfo $file */
+                /**
+ * @var \SplFileInfo $file
+*/
                 $entry = $file->getFilename();
                 $path = FileUtils::joinPaths($dir, $entry);
                 // recurse into subdirectories
@@ -51,15 +57,15 @@ class FileUtils {
                     $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
                     if ($flatten) {
                         foreach ($temp as $file => $details) {
-                            $details['relative_name'] = $entry."/".$details['relative_name'];
-                            $return[$entry."/".$file] = $details;
+                            $details['relative_name'] = $entry . "/" . $details['relative_name'];
+                            $return[$entry . "/" . $file] = $details;
                         }
                     }
                     else {
                         $return[$entry] = ['files' => $temp, 'path' => $path];
                     }
                 }
-                else if (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
+                elseif (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
                     // add file to array
                     $return[$entry] = [
                         'name' => $entry,
@@ -79,14 +85,14 @@ class FileUtils {
      * Recursively goes through a directory deleting everything in it before deleting the folder itself. Returns
      * true if successful, false otherwise.
      *
-     * @param string $dir
+     * @param  string $dir
      * @return bool
      */
     public static function recursiveRmdir(string $dir): bool {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
+                if ($object !== "." && $object !== "..") {
                     if (is_dir($dir . "/" . $object)) {
                         if (!FileUtils::recursiveRmdir($dir . "/" . $object)) {
                             return false;
@@ -123,13 +129,15 @@ class FileUtils {
      */
     public static function recursiveFlattenImageCopy(string $src, string $dst): void {
         foreach (new \FilesystemIterator($src) as $iter) {
-            /** @var \SplFileInfo $iter */
+            /**
+ * @var \SplFileInfo $iter
+*/
             if ($iter->isFile()) {
                 if (FileUtils::isValidImage($iter->getPathname())) {
                     copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
@@ -144,10 +152,12 @@ class FileUtils {
      * off the string.
      */
     public static function getAllFilesTrimSearchPath(string $search_path, int $path_length): array {
-        $files = array_map(function ($entry) use ($path_length) {
-            return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
-        }, array_values(FileUtils::getAllFiles($search_path, [], true)));
-        return $files;
+        return array_map(
+            function ($entry) use ($path_length) {
+                return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
+            },
+            array_values(FileUtils::getAllFiles($search_path, [], true))
+        );
     }
 
     /**
@@ -159,8 +169,8 @@ class FileUtils {
         if (is_dir($dir)) {
             $objects = scandir($dir);
             foreach ($objects as $object) {
-                if ($object != "." && $object != "..") {
-                    if (filetype($dir . "/" . $object) == "dir") {
+                if ($object !== "." && $object !== "..") {
+                    if (filetype($dir . "/" . $object) === "dir") {
                         FileUtils::recursiveRmdir($dir . "/" . $object);
                     }
                     else {
@@ -213,7 +223,7 @@ class FileUtils {
      */
     public static function recursiveChmod($path, $mode) {
         $dir = new \FilesystemIterator($path);
-        $files = array();
+        $files = []
         foreach ($dir as $item) {
             if ($item->isDir()) {
                 static::recursiveChmod($item->getPathname(), $mode);
@@ -237,13 +247,13 @@ class FileUtils {
      * @return array
      */
     public static function getAllDirs($path) {
-        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
-        $return = array();
+        $disallowed_folders = [".", "..", ".svn", ".git", ".idea", "__macosx"];
+        $return = [];
         if (is_dir($path)) {
             if ($handle = opendir($path)) {
                 while (false !== ($entry = readdir($handle))) {
                     $file = "{$path}/{$entry}";
-                    if(is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
+                    if (is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
                         $return[] = $entry;
                     }
                 }
@@ -306,15 +316,15 @@ class FileUtils {
     }
 
     /**
-     * @param $zipname
+     * @param  $zipname
      * @return bool
      */
     public static function checkFileInZipName($zipname) {
         $zip = zip_open($zipname);
-        if(is_resource(($zip))) {
+        if (is_resource(($zip))) {
             while ($inner_file = zip_read($zip)) {
                 $fname = zip_entry_name($inner_file);
-                if(FileUtils::isValidFileName($fname) === false) {
+                if (FileUtils::isValidFileName($fname) === false) {
                     return false;
                 }
             }
@@ -326,7 +336,7 @@ class FileUtils {
      * Given a string filename, checks the string for any quotes, brackets or slashes, returning
      * false if any of them are found within the string.
      *
-     * @param string $filename
+     * @param  string $filename
      * @return bool
      */
     public static function isValidFileName($filename) {
@@ -335,11 +345,14 @@ class FileUtils {
         }
         else {
             foreach (str_split($filename) as $char) {
-                if ($char == "'" ||
-                    $char == '"' ||
-                    $char == "\\" ||
-                    $char == "<" ||
-                    $char == ">") {
+                //WTF DOES IT WANT
+                if (
+                    $char === "'" ||
+                    $char === '"' ||
+                    $char === "\\" ||
+                    $char === "<" ||
+                    $char === ">" ||
+                ) {
                     return false;
                 }
             }
@@ -368,7 +381,7 @@ class FileUtils {
      * @return string
      */
     public static function joinPaths() {
-        $paths = array();
+        $paths = [];
 
         foreach (func_get_args() as $arg) {
             if ($arg !== '') {
@@ -377,7 +390,7 @@ class FileUtils {
         }
 
         $sep = DIRECTORY_SEPARATOR;
-        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+        return preg_replace('#' . preg_quote($sep) . '+#', $sep, join($sep, $paths));
     }
 
     /**
@@ -388,19 +401,19 @@ class FileUtils {
      * appropriate. This is a weaker check for binary files than mime_content_type which does
      * some basic analysis of the actual file to determine the information as opposed to just the filename.
      *
-     * @param $filename
+     * @param  $filename
      * @return null|string
      */
-    public static function getContentType($filename){
+    public static function getContentType($filename) {
         if ($filename === null) {
             return null;
         }
         switch (strtolower(pathinfo($filename, PATHINFO_EXTENSION))) {
-            // pdf
+                // pdf
             case 'pdf':
                 $content_type = "application/pdf";
                 break;
-            // images
+                    // images
             case 'png':
                 $content_type = "image/png";
                 break;
@@ -414,7 +427,7 @@ class FileUtils {
             case 'bmp':
                 $content_type = "image/bmp";
                 break;
-            // text
+                    // text
             case 'c':
                 $content_type = 'text/x-csrc';
                 break;
@@ -450,8 +463,8 @@ class FileUtils {
     /**
      * Search over a file to see if it contains specified words
      *
-     * @param string $file Path to file to search through
-     * @param array $words An array of words to look for
+     * @param  string $file  Path to file to search through
+     * @param  array  $words An array of words to look for
      * @throws FileReadException Unable to either locate or read the file
      * @return bool true if any words in the $words array were found in the file, false otherwise
      */
@@ -460,7 +473,7 @@ class FileUtils {
         $file_contents = @file_get_contents($file);
 
         // Check for failure
-        if($file_contents == false) {
+        if ($file_contents === false) {
             throw new FileReadException('Unable to either locate or read the file contents');
         }
 
@@ -470,7 +483,7 @@ class FileUtils {
         foreach ($words as $word) {
             $word_was_found = strpos($file_contents, $word);
 
-            if($word_was_found) {
+            if ($word_was_found) {
                 $words_detected = true;
                 break;
             }
@@ -479,16 +492,16 @@ class FileUtils {
         return $words_detected;
     }
 
-    public static function checkZipFileStatus($file){
+    public static function checkZipFileStatus($file) {
         $zip = new \ZipArchive();
         //open file with additional checks
         $res = $zip->open($file, \ZipArchive::CHECKCONS);
         $err = "";
 
-        if ($res !== True){
+        if ($res !== true) {
             switch ($res) {
                 case \ZipArchive::ER_NOENT:
-                    $err = "File does not exist " . $filename ;
+                    $err = "File does not exist " . $filename;
                     break;
                 case \ZipArchive::ER_NOZIP:
                     $err = "File not a zip archive";
@@ -509,17 +522,16 @@ class FileUtils {
                     $err = "Unknown error " . $res;
             }
 
-            return ['success' => False, 'error' => $err, 'err_code' => $res];
+            return ['success' => false, 'error' => $err, 'err_code' => $res];
         }
 
-        return ['success' => True, 'error' => 'OK', 'err_code' => \ZipArchive::ER_OK];
-
+        return ['success' => true, 'error' => 'OK', 'err_code' => \ZipArchive::ER_OK];
     }
 
     /**
      * Given an array of uploaded files, makes sure they are properlly uploaded
      *
-     * @param array $files - should be in the same format as the $_FILES[] variable
+     * @param  array $files - should be in the same format as the $_FILES[] variable
      * @return array representing the status of each file
      * e.g. array('name' => 'foo.txt','type' => 'application/octet-stream', 'error' =>
      *            'success','size' => 100, 'success' => true)
@@ -527,10 +539,10 @@ class FileUtils {
      */
     public static function validateUploadedFiles($files) {
         if (empty($files)) {
-            return array("failed" => "No files sent to validate");
+            return ["failed" => "No files sent to validate"];
         }
 
-        $ret = array();
+        $ret = [];
         $num_files = count($files['name']);
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
 
@@ -543,13 +555,14 @@ class FileUtils {
             $zip_status = FileUtils::checkZipFileStatus($tmp_name);
             $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
 
-            $is_zip = False;
+            $is_zip = false;
 
             //check if its a zip file or we got a bad zip file
-            if ($zip_status['success']){
-                $is_zip = True;
-            }else if($zip_status['err_code'] != \ZipArchive::ER_NOZIP){
-                $is_zip = True;
+            if ($zip_status['success']) {
+                $is_zip = true;
+            }
+            elseif ($zip_status['err_code'] !== \ZipArchive::ER_NOZIP) {
+                $is_zip = true;
                 $err_msg = $zip_status['error'];
             }
 
@@ -558,7 +571,7 @@ class FileUtils {
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
-            if($size > $max_size){
+            if ($size > $max_size) {
                 $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }
 
@@ -568,15 +581,15 @@ class FileUtils {
             }
 
             //if zip file check files inside
-            if($is_zip && !FileUtils::checkFileInZipName($tmp_name) ){
-                $err_msg = "Invalid filename within zip file"; 
+            if ($is_zip && !FileUtils::checkFileInZipName($tmp_name)) {
+                $err_msg = "Invalid filename within zip file";
             }
 
             $success = $err_msg === "No error.";
             $ret[] = [
                 'name' => $name,
-                'type'=> $type,
-                'error'=> $err_msg,
+                'type' => $type,
+                'error' => $err_msg,
                 'size' => $size,
                 'success' => $success,
                 'is_zip' => $is_zip
