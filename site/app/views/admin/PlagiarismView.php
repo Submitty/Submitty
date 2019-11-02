@@ -69,7 +69,7 @@ HTML;
             }
 
             #lichen job in processing stage for this gradeable but not completed
-            else if (file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
+            elseif (file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
                 $return .= <<<HTML
         <tr style="color:green;">
             <td>$title
@@ -515,7 +515,7 @@ HTML;
 HTML;
         }
 
-        else if($new_or_edit == "edit") {
+        elseif($new_or_edit == "edit") {
             $title = '';
             if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
                 $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
@@ -611,7 +611,7 @@ HTML;
                         <option value="">None</option>
 HTML;
                 foreach($prior_term_gradeables as $sem => $sem_courses) {
-                    if( $sem == $saved_prev_sem) {
+                    if($sem == $saved_prev_sem) {
                         $return .= <<<HTML
                         <option value="{$sem}" selected>$sem</option>
 HTML;
@@ -628,7 +628,7 @@ HTML;
 HTML;
 
                 foreach($prior_term_gradeables[$saved_prev_sem] as $sem_course => $course_gradeables) {
-                    if( $sem_course == $saved_prev_course) {
+                    if($sem_course == $saved_prev_course) {
                         $return .= <<<HTML
                         <option value="{$sem_course}" selected>$sem_course</option>
 HTML;
@@ -645,7 +645,7 @@ HTML;
                         <option value="">None</option>
 HTML;
                 foreach($prior_term_gradeables[$saved_prev_sem][$saved_prev_course] as $course_gradeable) {
-                    if( $course_gradeable == $saved_prev_gradeable) {
+                    if($course_gradeable == $saved_prev_gradeable) {
                         $return .= <<<HTML
                         <option value="{$course_gradeable}" selected>$course_gradeable</option>
 HTML;

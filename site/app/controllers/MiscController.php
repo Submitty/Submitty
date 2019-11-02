@@ -155,7 +155,7 @@ class MiscController extends AbstractController {
             elseif (substr($path, '-4') === '.css') {
                 $mime_type = 'text/css';
             }
-            else if (substr($path, '-5') === '.html') {
+            elseif (substr($path, '-5') === '.html') {
                 $mime_type = 'text/html';
             }
         }
@@ -296,7 +296,7 @@ class MiscController extends AbstractController {
                         if($this->core->getUser()->accessGrading()){
                             // Add current file to archive
                             $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
-                        }else if ($gradeable->isScannedExam()
+                        }elseif ($gradeable->isScannedExam()
                                   && FileUtils::getContentType($filePath) === "application/pdf"){
                             //If the user is a student, only get PDFs if this is a bulk upload gradeable
                             // Add current file to archive

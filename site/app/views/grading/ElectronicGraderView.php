@@ -89,7 +89,7 @@ class ElectronicGraderView extends AbstractView {
         }
         if ($total === 0 && $no_team_total === 0){
             $graded_percentage = -1;
-        } else if ($total === 0 && $no_team_total > 0){
+        } elseif ($total === 0 && $no_team_total > 0){
             $graded_percentage = 0;
         } else{
             $graded_percentage = number_format(($graded / $total) * 100, 1);
@@ -449,7 +449,7 @@ HTML;
 
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
-            } else if ($gradeable->isGradeByRegistration()) {
+            } elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $row->getSubmitter()->getRegistrationSection();
             } else {
                 $section_title = $row->getSubmitter()->getRotatingSection();
@@ -497,12 +497,12 @@ HTML;
                 if ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
-                } else if ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                } elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
                     $info["graded_groups"][] = "grade-inquiry";
-                } else if(!$graded_component->getVerifier()){
+                } elseif(!$graded_component->getVerifier()){
                     //no verifier exists, show the grader group
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
-                } else if($graded_component->getGrader()->accessFullGrading()){
+                } elseif($graded_component->getGrader()->accessFullGrading()){
                     //verifier exists and original grader is full access, show verifier grader group
                     $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
                 } else{
@@ -540,7 +540,7 @@ HTML;
 
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
-            } else if ($gradeable->isGradeByRegistration()) {
+            } elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $teamless_user->getRegistrationSection();
             } else {
                 $section_title = $teamless_user->getRotatingSection();
@@ -724,7 +724,7 @@ HTML;
                 "message" => "Overridden grades"
             ]);
         }
-        else if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "var(--standard-creamsicle-orange)", // mango orange

@@ -26,9 +26,6 @@
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
-        <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
-        <exclude name="PSR2.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
-        <exclude name="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed" />
         <exclude name="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket" />
         <exclude name="PSR2.Methods.FunctionCallSignature.Indent" />
         <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
@@ -97,5 +94,9 @@
 
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">
         <exclude-pattern>../public/index.php</exclude-pattern>
+    </rule>
+
+    <rule ref="PSR2.ControlStructures.ElseIfDeclaration.NotAllowed">
+        <type>error</type>
     </rule>
 </ruleset>

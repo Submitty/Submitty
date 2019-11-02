@@ -82,7 +82,7 @@ class CourseMaterial extends AbstractModel {
         else
         {
             $current_user_group = $current_user->getGroup();
-            if ( !isset( $meta_data->$path_to_file->sections ) ){
+            if (!isset( $meta_data->$path_to_file->sections )){
                 $retVal = true;
                 return $retVal;
             }

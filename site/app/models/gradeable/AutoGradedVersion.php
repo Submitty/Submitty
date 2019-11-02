@@ -383,7 +383,7 @@ class AutoGradedVersion extends AbstractModel {
 
         if ($clamp === true && $result > 1.0) {
             return 1.0;
-        } else if ($result < 0) {
+        } elseif ($result < 0) {
             return 0.0;
         }
         return $result;
@@ -424,7 +424,7 @@ class AutoGradedVersion extends AbstractModel {
 
         if ($clamp === true && $result > 1.0) {
             return 1.0;
-        } else if ($result < 0) {
+        } elseif ($result < 0) {
             return 0.0;
         }
         return $result;

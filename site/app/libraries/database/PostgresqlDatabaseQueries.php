@@ -86,7 +86,7 @@ class PostgresqlDatabaseQueries extends DatabaseQueries {
     //the numerical_id table
     public function getUserByIdOrNumericId($id) {
         $ret = $this->getUser($id);
-        if($ret === null ){
+        if($ret === null){
             return $this->getUser($id, true);
         }
 

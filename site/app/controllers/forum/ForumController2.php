@@ -174,7 +174,7 @@ class ForumController2 extends AbstractController {
                 $category = (int)$_REQUEST["deleteCategory"];
                 if(!$this->isValidCategories(array($category))) {
                     $result["error"] = "That category doesn't exists.";
-                } else if(!$this->isCategoryDeletionGood($category)) {
+                } elseif(!$this->isCategoryDeletionGood($category)) {
                     $result["error"] = "Last category can't be deleted.";
                 } else {
                     if($this->core->getQueries()->deleteCategory($category)) {
@@ -218,7 +218,7 @@ class ForumController2 extends AbstractController {
             if($should_update) {
                 $this->core->getQueries()->editCategory($category_id, $category_desc, $category_color);
                 $result["success"] = "OK";
-            } else if(!isset($result["error"])) {
+            } elseif(!isset($result["error"])) {
                 $result["error"] = "No category data updated. Please try again.";
             }
         } else {
@@ -329,7 +329,7 @@ class ForumController2 extends AbstractController {
             $this->core->getQueries()->removeNotificationsPost($post_id);
             $this->core->getOutput()->renderJson($response = array('type' => $type));
             return $this->core->getOutput()->getOutput();
-        } else if($modifyType == 2) { //undelete post or thread
+        } elseif($modifyType == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
@@ -345,7 +345,7 @@ class ForumController2 extends AbstractController {
                 $this->core->getOutput()->renderJson($response = array('type' => $type));
             }
             return $this->core->getOutput()->getOutput();
-        } else if($modifyType == 1) { //edit post or thread
+        } elseif($modifyType == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
@@ -355,7 +355,7 @@ class ForumController2 extends AbstractController {
              // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
-            } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
+            } elseif(is_null($status_edit_thread) || is_null($status_edit_post)) {
                 $type = is_null($status_edit_thread) ? "Post" : "Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
@@ -424,7 +424,7 @@ class ForumController2 extends AbstractController {
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
-            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT){
                 $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
                 return null;
             }
@@ -458,7 +458,7 @@ class ForumController2 extends AbstractController {
 
         foreach ($ordered_threads as &$thread) {
             $list = array();
-            foreach(explode("|", $thread['categories_ids']) as $id ) {
+            foreach(explode("|", $thread['categories_ids']) as $id) {
                 $list[] = (int)$id;
             }
             $thread['categories_ids'] = $list;
@@ -510,7 +510,7 @@ class ForumController2 extends AbstractController {
         $thread_status = array();
         $new_posts = array();
         $unread_threads = false;
-        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1 ) {
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
@@ -535,7 +535,7 @@ class ForumController2 extends AbstractController {
         $option = 'tree';
         if(!empty($_REQUEST['option'])) {
             $option = $_REQUEST['option'];
-        } else if(!empty($_COOKIE['forum_display_option'])) {
+        } elseif(!empty($_COOKIE['forum_display_option'])) {
             $option = $_COOKIE['forum_display_option'];
         }
         $option = ($this->core->getUser()->accessGrading() || $option != 'alpha') ? $option : 'tree';

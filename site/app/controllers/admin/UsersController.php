@@ -369,7 +369,7 @@ class UsersController extends AbstractController {
             array_push($sections_with_students, $rows['rotating_section']);
         }
         for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
-            if ( !in_array($i, $sections_with_students) ) {
+            if (!in_array($i, $sections_with_students)) {
                 array_push($non_null_counts, [
                     "rotating_section" => $i,
                     "count" => 0
@@ -406,7 +406,7 @@ class UsersController extends AbstractController {
                 $_SESSION['request'] = $_POST;
             }
         }
-        else if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
+        elseif (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
                 // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
@@ -449,12 +449,12 @@ class UsersController extends AbstractController {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_POST['sort_type'] === "drop_null") {
+        elseif ($_POST['sort_type'] === "drop_null") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $this->core->addSuccessMessage("Non registered students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_POST['sort_type'] === "drop_all") {
+        elseif ($_POST['sort_type'] === "drop_all") {
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->addSuccessMessage("All students removed from rotating sections");
@@ -557,7 +557,7 @@ class UsersController extends AbstractController {
             if ($max_section === null) {
                 $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");
             }
-            else if ($max_section != $section_count) {
+            elseif ($max_section != $section_count) {
                 $this->core->addErrorMessage("Cannot use a different number of sections when setting up via fewest");
                 $this->core->redirect($return_url);
             }
@@ -674,10 +674,10 @@ class UsersController extends AbstractController {
                 if ($output === null) {
                     $this->core->addErrorMessage("Error parsing JSON response: " . json_last_error_msg());
                     $this->core->redirect($return_url);
-                } else if ($output['error'] === true) {
+                } elseif ($output['error'] === true) {
                     $this->core->addErrorMessage("Error parsing xlsx to csv: " . $output['error_message']);
                     $this->core->redirect($return_url);
-                } else if ($output['success'] !== true) {
+                } elseif ($output['success'] !== true) {
                     $this->core->addErrorMessage("Error on response on parsing xlsx: " . curl_error($ch));
                     $this->core->redirect($return_url);
                 }
@@ -688,7 +688,7 @@ class UsersController extends AbstractController {
                 $this->core->redirect($return_url);
             }
 
-        } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
+        } elseif ($content_type === 'text/csv' && $mime_type === 'text/plain') {
             $csv_file = $tmp_name;
         } else {
             $this->core->addErrorMessage("Must upload xlsx or csv");

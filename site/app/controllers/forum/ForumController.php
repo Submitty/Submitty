@@ -174,7 +174,7 @@ class ForumController extends AbstractController {
             $category = (int)$_POST["deleteCategory"];
             if(!$this->isValidCategories(array($category))) {
                 return $this->core->getOutput()->renderJsonFail("That category doesn't exists.");
-            } else if(!$this->isCategoryDeletionGood($category)) {
+            } elseif(!$this->isCategoryDeletionGood($category)) {
                 return $this->core->getOutput()->renderJsonFail("Last category can't be deleted.");
             } else {
                 if($this->core->getQueries()->deleteCategory($category)) {
@@ -202,7 +202,7 @@ class ForumController extends AbstractController {
             if($this->isValidCategories(-1, array($category_desc))) {
                 return $this->core->getOutput()->renderJsonFail("That category already exists.");
             }
-            else if(strlen($category_desc) > 50){
+            elseif(strlen($category_desc) > 50){
                 return $this->core->getOutput()->renderJsonFail("Category name is more than 50 characters.");
             }
         }
@@ -255,12 +255,12 @@ class ForumController extends AbstractController {
         $thread_post_content = str_replace("\r", "", $_POST["thread_post_content"]);
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
 
-        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+        if(strlen($thread_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT){
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads', 'new']);
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
 
-        if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin() ){
+        if(!empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
             $lock_thread_date = $_POST['lock_thread_date'];
         } else {
             $lock_thread_date = null;
@@ -278,7 +278,7 @@ class ForumController extends AbstractController {
         if(empty($thread_title) || empty($thread_post_content)){
             $this->core->addErrorMessage("One of the fields was empty or bad. Please re-submit your thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
-        } else if(!$this->isValidCategories($categories_ids)){
+        } elseif(!$this->isValidCategories($categories_ids)){
             $this->core->addErrorMessage("You must select valid categories. Please re-submit your thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', 'new']);
         } else {
@@ -349,7 +349,7 @@ class ForumController extends AbstractController {
         $post_content = str_replace("\r", "", $_POST[$post_content_tag]);
         $thread_id = htmlentities($_POST["thread_id"], ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        if(strlen($post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+        if(strlen($post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT){
             $result['next_page'] = $this->core->buildUrl(['forum', 'threads']);
             return $this->core->getOutput()->renderJsonFail("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long", $result);
         }
@@ -367,13 +367,13 @@ class ForumController extends AbstractController {
         if(empty($post_content) || empty($thread_id)){
             $this->core->addErrorMessage("There was an error submitting your post. Please re-submit your post.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        } else if(!$this->core->getQueries()->existsThread($thread_id)) {
+        } elseif(!$this->core->getQueries()->existsThread($thread_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Thread doesn't exist.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        } else if(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
+        } elseif(!$this->core->getQueries()->existsPost($thread_id, $parent_id)) {
             $this->core->addErrorMessage("There was an error submitting your post. Parent post doesn't exist in given thread.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads']);
-        } else if($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
+        } elseif($this->core->getQueries()->isThreadLocked($thread_id) && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage("Thread is locked.");
             $result['next_page'] = $this->core->buildCourseUrl(['forum', 'threads', $thread_id]);
         } else {
@@ -457,13 +457,13 @@ class ForumController extends AbstractController {
         if(!$this->core->getAccess()->canI("forum.modify_post", ['post_author' => $post['author_user_id']])) {
                 return $this->core->getOutput()->renderJsonFail('You do not have permissions to do that.');
         }
-        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin() ){
+        if(!empty($_POST['edit_thread_id']) && $this->core->getQueries()->isThreadLocked($_POST['edit_thread_id']) && !$this->core->getUser()->accessAdmin()){
             $this->core->addErrorMessage("Thread is locked.");
             $this->core->redirect($this->core->buildCourseUrl(['forum', 'threads', $_POST['edit_thread_id']]));
-        } else if($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin() ){
+        } elseif($this->core->getQueries()->isThreadLocked($_POST['thread_id']) && !$this->core->getUser()->accessAdmin()){
             return $this->core->getOutput()->renderJsonFail('Thread is locked');
         }
-        else if($modify_type == 0) { //delete post or thread
+        elseif($modify_type == 0) { //delete post or thread
             $thread_id = $_POST["thread_id"];
             $thread_title = $this->core->getQueries()->getThread($thread_id)[0]['title'];
             if($this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 1)){
@@ -481,7 +481,7 @@ class ForumController extends AbstractController {
 
             $this->core->getQueries()->removeNotificationsPost($post_id);
             return $this->core->getOutput()->renderJsonSuccess(array('type' => $type));
-        } else if($modify_type == 2) { //undelete post or thread
+        } elseif($modify_type == 2) { //undelete post or thread
             $thread_id = $_POST["thread_id"];
             $result = $this->core->getQueries()->setDeletePostStatus($post_id, $thread_id, 0);
             if(is_null($result)) {
@@ -499,7 +499,7 @@ class ForumController extends AbstractController {
                 $type = "post";
                 return $this->core->getOutput()->renderJsonSuccess(array('type' => $type));
             }
-        } else if($modify_type == 1) { //edit post or thread
+        } elseif($modify_type == 1) { //edit post or thread
             $thread_id = $_POST["edit_thread_id"];
             $status_edit_thread = $this->editThread();
             $status_edit_post   = $this->editPost();
@@ -511,7 +511,7 @@ class ForumController extends AbstractController {
              // Author of first post and thread must be same
             if(is_null($status_edit_thread) && is_null($status_edit_post)) {
                 $this->core->addErrorMessage("No data submitted. Please try again.");
-            } else if(is_null($status_edit_thread) || is_null($status_edit_post)) {
+            } elseif(is_null($status_edit_thread) || is_null($status_edit_post)) {
                 $type = is_null($status_edit_thread) ? "Post" : "Thread";
                 if($status_edit_thread || $status_edit_post) {
                     //$type is true
@@ -548,7 +548,7 @@ class ForumController extends AbstractController {
                     $subject = "Post Edited: " . Notification::textShortner($post_content);
                     $content = "A message was edited in:\n" . $full_course_name . "\n\nThread Title: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
                 }
-                else if ($type == "Thread and Post") {
+                elseif ($type == "Thread and Post") {
                     $post_content = $_POST["thread_post_content"];
                     $subject = "Thread Edited: " . Notification::textShortner($thread_title);
                     $content = "A thread was edited in:\n" . $full_course_name . "\n\nEdited Thread: " . $thread_title . "\n\nEdited Post: \n\n" . $post_content;
@@ -616,7 +616,7 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         if(!empty($_POST["title"])) {
             $thread_id = $_POST["edit_thread_id"];
-            if( !empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
+            if(!empty($_POST['lock_thread_date']) && $this->core->getUser()->accessAdmin()){
                 $lock_thread_date = $_POST['lock_thread_date'];
             }
             else{
@@ -643,7 +643,7 @@ class ForumController extends AbstractController {
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
 
-            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT ){
+            if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT){
                 $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
                 return null;
             }
@@ -680,7 +680,7 @@ class ForumController extends AbstractController {
 
         foreach ($ordered_threads as &$thread) {
             $list = array();
-            foreach(explode("|", $thread['categories_ids']) as $id ) {
+            foreach(explode("|", $thread['categories_ids']) as $id) {
                 $list[] = (int)$id;
             }
             $thread['categories_ids'] = $list;
@@ -740,7 +740,7 @@ class ForumController extends AbstractController {
         $thread_status = array();
         $new_posts = array();
         $unread_threads = false;
-        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1 ) {
+        if(!empty($_COOKIE[$currentCourse . '_forum_categories']) && $category_id[0] == -1) {
             $category_id = explode('|', $_COOKIE[$currentCourse . '_forum_categories']);
         }
         if(!empty($_COOKIE['forum_thread_status'])){
@@ -788,7 +788,7 @@ class ForumController extends AbstractController {
                 }
                 if($option == "alpha"){
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'alpha');
-                } else if($option == "reverse-time") {
+                } elseif($option == "reverse-time") {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'reverse-time');
                 }else {
                     $posts = $this->core->getQueries()->getPostsForThread($current_user, $thread_id, $show_deleted, 'tree');

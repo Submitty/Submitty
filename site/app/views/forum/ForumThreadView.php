@@ -321,7 +321,7 @@ class ForumThreadView extends AbstractView {
             $generatePostContent = $this->generatePostList($currentThread, $posts, $unviewed_posts, $currentCourse, true, $threadExists, $display_option, $categories, $cookieSelectedCategories, $cookieSelectedThreadStatus, $cookieSelectedUnread, $currentCategoriesIds, $currentThreadFavorite, false);
         }
 
-        if ( !empty($activeThread['id']) ) {
+        if (!empty($activeThread['id'])) {
             $this->core->getQueries()->visitThread($user, $activeThread['id']);
         }
 
@@ -476,7 +476,7 @@ class ForumThreadView extends AbstractView {
 
         $form_action_link = $this->core->buildCourseUrl(['forum', 'posts', 'new']);
 
-        if(($isThreadLocked != 1 || $accessFullGrading ) && $includeReply  ) {
+        if(($isThreadLocked != 1 || $accessFullGrading ) && $includeReply) {
 
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
 

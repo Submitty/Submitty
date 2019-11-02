@@ -83,9 +83,9 @@ class OfficeHoursQueueController extends AbstractController {
         }else{
             if($_POST['name'] == ""){
                 $this->core->addErrorMessage("Invalid Name");
-            }else if(is_null($section_id)){
+            }elseif(is_null($section_id)){
                 $this->core->addErrorMessage("Invalid Code");
-            }else if(!$this->core->getQueries()->isQueueOpen()){
+            }elseif(!$this->core->getQueries()->isQueueOpen()){
                 $this->core->addErrorMessage("Queue is closed");
             }
 

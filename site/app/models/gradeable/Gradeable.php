@@ -506,7 +506,7 @@ class Gradeable extends AbstractModel {
                 } else {
                     $result = self::date_properties_bare;
                 }
-            } else if ($this->isTaGrading()) {
+            } elseif ($this->isTaGrading()) {
                 $result = self::date_properties_elec_ta;
             } else {
                 $result = self::date_properties_elec_no_ta;
@@ -1636,12 +1636,12 @@ class Gradeable extends AbstractModel {
         // Inherit rotating/registration section from leader if not provided
         if ($registration_section === '') {
             $registration_section = $leader->getRegistrationSection();
-        } else if($registration_section === 'NULL') {
+        } elseif($registration_section === 'NULL') {
             $registration_section = null;
         }
         if ($rotating_section < 0) {
             $rotating_section = $leader->getRotatingSection();
-        } else if ($rotating_section === 0) {
+        } elseif ($rotating_section === 0) {
             $rotating_section = null;
         }
 
@@ -1734,7 +1734,7 @@ class Gradeable extends AbstractModel {
      */
     public function hasOverriddenGrades(Submitter $submitter) {
         $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(), $submitter->getId());
-        if($userWithOverriddenGrades === null ){
+        if($userWithOverriddenGrades === null){
             return false;
         }
         return true;

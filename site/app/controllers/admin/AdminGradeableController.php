@@ -167,14 +167,14 @@ class AdminGradeableController extends AbstractController {
         if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if($gradeable->isScannedExam()) {
                 $type_string = self::gradeable_type_strings['electronic_exam'];
-            } else if($gradeable->isVcs()) {
+            } elseif($gradeable->isVcs()) {
                 $type_string = self::gradeable_type_strings['electronic_hw_vcs'];
             } else {
                 $type_string = self::gradeable_type_strings['electronic_hw'];
             }
-        } else if($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        } elseif($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             $type_string = self::gradeable_type_strings['numeric'];
-        } else if($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        } elseif($gradeable->getType() === GradeableType::CHECKPOINTS) {
             $type_string = self::gradeable_type_strings['checkpoint'];
         }
 
@@ -325,10 +325,10 @@ class AdminGradeableController extends AbstractController {
             $mark0 = $this->newMark($component);
             $mark0->setTitle('No Credit');
             $component->setMarks([$mark0]);
-        } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        } elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             $component->setTitle('Checkpoint 1');
             $component->setPoints(['lower_clamp' => 0, 'default' => 0, 'max_value' => 1, 'upper_clamp' => 1]);
-        } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        } elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             // Add a new mark to the db if its electronic
             $mark = $this->newMark($component);
             $component->setMarks([$mark]);
@@ -514,7 +514,7 @@ class AdminGradeableController extends AbstractController {
         //  with a unified interface with TA grading and share a separate "rubric" controller for it.
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             throw new \InvalidArgumentException('Attempt to update rubric using outdated method!');
-        } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        } elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
             }
@@ -540,7 +540,7 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($x);
                 $new_components[] = $component;
             }
-        } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        } elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             if (!isset($details['numeric'])) {
                 $details['numeric'] = [];
             }
@@ -745,9 +745,9 @@ class AdminGradeableController extends AbstractController {
             // Find which radio button is pressed and what host type to use
             $host_type = -1;
             if      ($host_button === 'submitty-hosted')     { $host_type = 0; }
-            else if ($host_button === 'submitty-hosted-url') { $host_type = 1; }
-            else if ($host_button === 'public-github')       { $host_type = 2; }
-            else if ($host_button === 'private-github')      { $host_type = 3; }
+            elseif ($host_button === 'submitty-hosted-url') { $host_type = 1; }
+            elseif ($host_button === 'public-github')       { $host_type = 2; }
+            elseif ($host_button === 'private-github')      { $host_type = 3; }
 
             $subdir = '';
             // Submitty hosted -> this gradeable subdirectory
@@ -1151,7 +1151,7 @@ class AdminGradeableController extends AbstractController {
         if (is_file($queued_path)) {
             $status = 'queued';
         }
-        else if (is_file($rebuilding_path)) {
+        elseif (is_file($rebuilding_path)) {
             $status = 'processing';
         }
         else {
@@ -1198,7 +1198,7 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Grades already released for";
                 $success = false;
             }
-        } else if ($action === "open_ta_now") {
+        } elseif ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
                 $this->shiftDates($dates, 'ta_view_start_date', $now);
                 $message .= "Opened TA access to ";
@@ -1207,7 +1207,7 @@ class AdminGradeableController extends AbstractController {
                 $message .= "TA access already open for ";
                 $success = false;
             }
-        } else if ($action === "open_grading_now") {
+        } elseif ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
                 $this->shiftDates($dates, 'grade_start_date', $now);
                 $message .= "Opened grading for ";
@@ -1216,7 +1216,7 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Grading already open for ";
                 $success = false;
             }
-        } else if ($action === "open_students_now") {
+        } elseif ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
                 $this->shiftDates($dates, 'submission_open_date', $now);
                 $message .= "Opened student access to ";
@@ -1225,7 +1225,7 @@ class AdminGradeableController extends AbstractController {
                 $message .= "Student access already open for ";
                 $success = false;
             }
-        } else if ($action === "close_submissions") {
+        } elseif ($action === "close_submissions") {
             if ($dates['submission_due_date'] > $now) {
                 $this->shiftDates($dates, 'submission_due_date', $now);
                 $message .= "Closed assignment ";
@@ -1239,7 +1239,7 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->updateGradeable($gradeable);
         if ($success === true) {
             $this->core->addSuccessMessage($message . $gradeable_id);
-        } else if ($success === false) {
+        } elseif ($success === false) {
             $this->core->addErrorMessage($message . $gradeable_id);
         } else {
             $this->core->addErrorMessage("Failed to update status of " . $gradeable_id);
