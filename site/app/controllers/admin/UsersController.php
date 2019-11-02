@@ -12,7 +12,6 @@ use app\libraries\response\WebResponse;
 use app\models\User;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
@@ -147,8 +146,8 @@ class UsersController extends AbstractController {
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
-            $key_array = explode("_",$key,2);
-            if (!array_key_exists($key_array[0],$new_registration_information)) {
+            $key_array = explode("_", $key, 2);
+            if (!array_key_exists($key_array[0], $new_registration_information)) {
                 $new_registration_information[$key_array[0]] = array();
             }
             if ($key_array[1] != 'all') {
@@ -158,7 +157,7 @@ class UsersController extends AbstractController {
 
         foreach($this->core->getQueries()->getAllGraders() as $grader) {
             $grader_id = $grader->getId();
-            if (array_key_exists($grader_id,$new_registration_information)) {
+            if (array_key_exists($grader_id, $new_registration_information)) {
                 $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
             }
             else {
@@ -205,7 +204,7 @@ class UsersController extends AbstractController {
         //uses more thorough course information if it exists, if not uses database information
         $user_information = array();
         foreach ($user_ids as $user_id) {
-            $already_in_course = array_key_exists($user_id,$course_users);
+            $already_in_course = array_key_exists($user_id, $course_users);
             $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
             $user_information[$user_id] = array(
                 'already_in_course' => $already_in_course,
@@ -230,7 +229,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/users", methods={"POST"})
      */
-    public function updateUser($type='users') {
+    public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
@@ -245,18 +244,18 @@ class UsersController extends AbstractController {
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
-        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"".strip_tags($_POST['user_id'])."\"<br>";
+        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"" . strip_tags($_POST['user_id']) . "\"<br>";
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
-        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
+        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_firstname']) . "\"<br>";
+        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_lastname']) . "\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
+        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
+            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_firstname']) . "\"<br>";
         }
         if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"".strip_tags($_POST['user_preferred_lastname'])."\"<br>";
+            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_lastname']) . "\"<br>";
         }
 
         //Database password cannot be blank, no check on format
@@ -265,7 +264,7 @@ class UsersController extends AbstractController {
         }
 
         if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+            $this->core->addErrorMessage($error_message . " Contact your sysadmin if this should not cause an error.");
             $this->core->redirect($return_url);
         }
 
@@ -348,7 +347,7 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester,$course,$g_id);
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
                 }
             }
 
@@ -367,11 +366,11 @@ class UsersController extends AbstractController {
         //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
         $sections_with_students = array();
         foreach ($non_null_counts as $rows) {
-            array_push($sections_with_students,$rows['rotating_section']);
+            array_push($sections_with_students, $rows['rotating_section']);
         }
         for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
-            if ( !in_array($i,$sections_with_students) ) {
-                array_push($non_null_counts,[
+            if ( !in_array($i, $sections_with_students) ) {
+                array_push($non_null_counts, [
                     "rotating_section" => $i,
                     "count" => 0
                 ]);
@@ -423,7 +422,7 @@ class UsersController extends AbstractController {
                         }
                     }
                 }
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);        
+                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
                 if ($num_del_sections === 0) {
                     $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
                 }
@@ -494,14 +493,14 @@ class UsersController extends AbstractController {
             foreach ($reg_sections as $row) {
                 $test = $row['sections_registration_id'];
                 if (isset($_POST[$test])) {
-                    array_push($exclude_sections,$_POST[$row['sections_registration_id']]);
+                    array_push($exclude_sections, $_POST[$row['sections_registration_id']]);
                 }
             }
             //remove people who should not be added to rotating sections
             for ($j = 0; $j < count($users_with_reg_section);) {
                 for ($i = 0;$i < count($exclude_sections);++$i) {
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
-                        array_splice($users_with_reg_section,$j,1);
+                        array_splice($users_with_reg_section, $j, 1);
                         $j--;
                         break;
                     }
@@ -662,7 +661,7 @@ class UsersController extends AbstractController {
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 $output = curl_exec($ch);
 
@@ -673,13 +672,13 @@ class UsersController extends AbstractController {
 
                 $output = json_decode($output, true);
                 if ($output === null) {
-                    $this->core->addErrorMessage("Error parsing JSON response: ".json_last_error_msg());
+                    $this->core->addErrorMessage("Error parsing JSON response: " . json_last_error_msg());
                     $this->core->redirect($return_url);
                 } else if ($output['error'] === true) {
-                    $this->core->addErrorMessage("Error parsing xlsx to csv: ".$output['error_message']);
+                    $this->core->addErrorMessage("Error parsing xlsx to csv: " . $output['error_message']);
                     $this->core->redirect($return_url);
                 } else if ($output['success'] !== true) {
-                    $this->core->addErrorMessage("Error on response on parsing xlsx: ".curl_error($ch));
+                    $this->core->addErrorMessage("Error on response on parsing xlsx: " . curl_error($ch));
                     $this->core->redirect($return_url);
                 }
 
@@ -891,10 +890,10 @@ class UsersController extends AbstractController {
                     // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                     // Automatically validate if not set (this field is optional).
                 case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx] ):
                     // Validation failed somewhere.  Record which row failed.
                     // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
-                    $bad_rows[] = ($row_num+1);
+                    $bad_rows[] = ($row_num + 1);
                     break;
             }
         }

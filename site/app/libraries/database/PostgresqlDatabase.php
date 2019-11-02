@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-
 class PostgresqlDatabase extends AbstractDatabase {
     protected $host;
     protected $port;
@@ -19,7 +18,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      * port
      * dbname
      */
-    public function __construct($connection_params=array()) {
+    public function __construct($connection_params = array()) {
         parent::__construct($connection_params);
         if (isset($connection_params['host'])) {
             $this->host = $connection_params['host'];
@@ -45,7 +44,7 @@ class PostgresqlDatabase extends AbstractDatabase {
             $params[] = "dbname={$this->dbname}";
         }
 
-        return 'pgsql:'.implode(';', $params);
+        return 'pgsql:' . implode(';', $params);
     }
 
     /**
@@ -61,7 +60,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      *
      * @return array PHP array representation
      */
-    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
+    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null) {
         $text = trim($text);
 
         if(empty($text) || $text[0] != "{") {
@@ -91,10 +90,10 @@ class PostgresqlDatabase extends AbstractDatabase {
                     $quot = $ch;
                 }
                 else if ($in_string && $ch == "\\" && strlen($text) > $i) {
-                    if ($text[$i+1] === "\\") {
+                    if ($text[$i + 1] === "\\") {
                         $element .= "\\";
                         $i++;
-                    } else if ($text[$i+1] === "\"") {
+                    } else if ($text[$i + 1] === "\"") {
                         $element .= "\"";
                         $i++;
                     } else {
@@ -184,7 +183,7 @@ class PostgresqlDatabase extends AbstractDatabase {
             }
             else if (is_string($e)) {
                 //Turn every \ into \\ that's either preceding a " another \ or the end
-                $elements[] = '"'. str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) .'"';
+                $elements[] = '"' . str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) . '"';
             }
             else if (is_bool($e)) {
                 $elements[] = ($e === true) ? "true" : "false";
@@ -193,7 +192,7 @@ class PostgresqlDatabase extends AbstractDatabase {
                 $elements[] = "{$e}";
             }
         }
-        $text = "{".implode(", ", $elements)."}";
+        $text = "{" . implode(", ", $elements) . "}";
         return $text;
     }
 

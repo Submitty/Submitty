@@ -141,8 +141,8 @@ class DiffViewer {
      *
      * @throws \Exception
      */
-    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend="id") {
-        $this->id = rtrim($id_prepend, "_")."_";
+    public function __construct($actual_file, $expected_file, $diff_file, $image_difference, $id_prepend = "id") {
+        $this->id = rtrim($id_prepend, "_") . "_";
         $this->actual_file = $actual_file;
         $this->expected_file = $expected_file;
         $this->diff_file = $diff_file;
@@ -183,7 +183,7 @@ class DiffViewer {
                 if(filesize($actual_file) < $size_limit){
                     $this->actual_file_name = $actual_file;
                     $this->actual = file_get_contents($actual_file);
-                    $this->has_actual = trim($this->actual) !== "" ? true: false;
+                    $this->has_actual = trim($this->actual) !== "" ? true : false;
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
                 }
@@ -192,7 +192,7 @@ class DiffViewer {
                     $can_diff = false;
                     //load in the first sizelimit characters of the file (TEMP VALUE)
                     $this->actual = file_get_contents($actual_file, null, null, 0, $size_limit);
-                    $this->has_actual = trim($this->actual) !== "" ? true: false;
+                    $this->has_actual = trim($this->actual) !== "" ? true : false;
                     $this->actual = explode("\n", $this->actual);
                     $this->display_actual = true;
                 }
@@ -475,19 +475,19 @@ class DiffViewer {
                     $test2 = str_replace("\0", "null", $html_orig_error);
                     if($option == self::SPECIAL_CHARS_ORIGINAL){
                         $html .= $html_orig;
-                        $html .= "<span class='highlight-char'>".$html_orig_error."</span>";
+                        $html .= "<span class='highlight-char'>" . $html_orig_error . "</span>";
                     } else if($option == self::SPECIAL_CHARS_UNICODE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig, false);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, false);
                         $html .= $html_no_empty;
-                        $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
+                        $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     } else if($option == self::SPECIAL_CHARS_ESCAPE) {
                         $html_no_empty = $this->replaceEmptyChar($html_orig, true);
                         $html_no_empty_error = $this->replaceEmptyChar($html_orig_error, true);
                         $html .= $html_no_empty;
-                        $html .= "<span class='highlight-char'>".$html_no_empty_error."</span>";
+                        $html .= "<span class='highlight-char'>" . $html_no_empty_error . "</span>";
                     }
-                    $current = $diff[1]+1;
+                    $current = $diff[1] + 1;
                 }
                 $html .= "<span class='line_code_inner'>";
                 $inner = htmlentities(substr($lines[$i], $current));
@@ -529,7 +529,7 @@ class DiffViewer {
                 }
             }
 
-            if ($start !== null && !isset($this->diff[$type][($i+1)])) {
+            if ($start !== null && !isset($this->diff[$type][($i + 1)])) {
                 $start = null;
                 $html .= "\t</div>\n";
             }
@@ -538,10 +538,10 @@ class DiffViewer {
         return $html;
     }
 
-    public function getWhiteSpaces(){
+    public function getWhiteSpaces() {
         $return = "";
         foreach($this->white_spaces as $key => $value){
-            $return .= "$value" . " = " . "$key". " ";
+            $return .= "$value" . " = " . "$key" . " ";
         }
         return $this->white_spaces;
     }
@@ -554,7 +554,7 @@ class DiffViewer {
      *
      * @return string HTML after white spaces replaced with visuals
      */
-    private function replaceEmptyChar($html, $with_escape){
+    private function replaceEmptyChar($html, $with_escape) {
         $return = $html;
         if($with_escape){
             foreach(self::SPECIAL_CHARS_LIST as $name => $representations){
@@ -577,10 +577,10 @@ class DiffViewer {
      *
      * This function replaces string $text with string $what in string $which.
      */
-    private function replaceUTF($text, $what, &$which, $description){
+    private function replaceUTF($text, $what, &$which, $description) {
         $count = 0;
-        $what = '<span class="whitespace">'.$what.'</span>';
-        $which = str_replace($text, $what, $which,$count);
+        $what = '<span class="whitespace">' . $what . '</span>';
+        $which = str_replace($text, $what, $which, $count);
         if($count > 0) $this->white_spaces[$description] = strip_tags($what);
         return $what;
     }
@@ -604,7 +604,7 @@ class DiffViewer {
         $return = array();
         $temp = array();
         foreach ($range as $number) {
-            if ($number != $last+1) {
+            if ($number != $last + 1) {
                 if (count($temp) > 0) {
                     $return[] = array($temp[0], end($temp));
                     $temp = array();

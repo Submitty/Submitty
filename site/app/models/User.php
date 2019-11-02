@@ -132,7 +132,7 @@ class User extends AbstractModel {
      * @param Core  $core
      * @param array $details
      */
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
         if (count($details) == 0) {
             return;
@@ -244,7 +244,7 @@ class User extends AbstractModel {
         return $this->notification_settings; //either receives it or not
     }
 
-    public function getNotificationSetting($type){
+    public function getNotificationSetting($type) {
         return $this->notification_settings[$type];
     }
 
@@ -270,7 +270,7 @@ class User extends AbstractModel {
         $this->displayed_first_name = (!empty($this->preferred_first_name)) ? $this->preferred_first_name : $this->legal_first_name;
     }
 
-    private function setDisplayedlastName() {
+    private function setDisplayedLastName() {
         $this->displayed_last_name = (!empty($this->preferred_last_name)) ? $this->preferred_last_name : $this->legal_last_name;
     }
 
@@ -320,7 +320,7 @@ class User extends AbstractModel {
      * @param mixed $data
      * @return bool
      */
-    static public function validateUserData($field, $data) {
+    public static function validateUserData($field, $data) {
 
         switch($field) {
             case 'user_id':
@@ -358,7 +358,7 @@ class User extends AbstractModel {
         }
     }
 
-    static public function constructNotificationSettings($details) {
+    public static function constructNotificationSettings($details) {
         $notification_settings = [];
         $notification_settings['reply_in_post_thread'] = $details['reply_in_post_thread'] ?? false;
         $notification_settings['merge_threads'] = $details['merge_threads'] ?? false;

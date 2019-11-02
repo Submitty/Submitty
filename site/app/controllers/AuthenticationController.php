@@ -31,7 +31,7 @@ class AuthenticationController extends AbstractController {
      * @param Core $core
      * @param bool $logged_in
      */
-    public function __construct(Core $core, $logged_in=false) {
+    public function __construct(Core $core, $logged_in = false) {
         parent::__construct($core);
         $this->logged_in = $logged_in;
     }
@@ -112,7 +112,7 @@ class AuthenticationController extends AbstractController {
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
             Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
-            $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
+            $msg = "Successfully logged in as " . htmlentities($_POST['user_id']);
 
             $this->core->addSuccessMessage($msg);
             return new Response(

@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
@@ -119,7 +118,7 @@ class AutoGradedTestcase extends AbstractModel {
     }
 
     /** @internal */
-    public function setView(){
+    public function setView() {
         throw new \BadFunctionCallException('Setters disabled for AutoGradedTestcase');
     }
 

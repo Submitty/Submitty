@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
@@ -155,8 +154,7 @@ class AutoGradedVersion extends AbstractModel {
         }
     }
 
-    public function getTestcaseMessages()
-    {
+    public function getTestcaseMessages() {
         $this->loadTestcases();
 
         $output = array();

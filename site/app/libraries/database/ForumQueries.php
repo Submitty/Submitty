@@ -5,12 +5,13 @@ namespace app\libraries\database;
 use app\models\forum\Thread;
 use app\models\forum\Post;
 
-class ForumQueries { //extends DatabaseQueries {
+class ForumQueries {
+ //extends DatabaseQueries {
 
 
-    public function createPost(Post &$p, bool $isFirst){
+    public function createPost(Post &$p, bool $isFirst) {
 
-        $parent_id = $p->getParentId(); 
+        $parent_id = $p->getParentId();
 
         if(!$isFirst && $parent_id == 0){
             $this->course_db->query("SELECT MIN(id) as id FROM posts where thread_id = ?", [ $p->getThreadId() ] );
@@ -70,6 +71,4 @@ class ForumQueries { //extends DatabaseQueries {
         //Will change...
         return [true, 'thread_id' => $id, 'post_id' => $post_id];
     }
-
-
 }

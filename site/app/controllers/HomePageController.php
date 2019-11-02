@@ -31,7 +31,7 @@ class HomePageController extends AbstractController {
      * @Route("/current_user/change_password", methods={"POST"})
      * @return Response
      */
-    public function changePassword(){
+    public function changePassword() {
         $user = $this->core->getUser();
         if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']) {
@@ -51,7 +51,7 @@ class HomePageController extends AbstractController {
      * @Route("/current_user/change_username", methods={"POST"})
      * @return Response
      */
-    public function changeUserName(){
+    public function changeUserName() {
         $user = $this->core->getUser();
         if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
             $newFirstName = trim($_POST['user_firstname_change']);

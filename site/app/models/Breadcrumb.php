@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 
 /**
@@ -44,5 +45,4 @@ class Breadcrumb extends AbstractModel {
         $this->url = $url;
         $this->external_url = $external_url;
     }
-
 }

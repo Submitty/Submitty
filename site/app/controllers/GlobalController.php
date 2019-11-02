@@ -1,8 +1,6 @@
 <?php
 
-
 namespace app\controllers;
-
 
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -20,14 +18,14 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $css = $this->core->getOutput()->getCss();
         $js = $this->core->getOutput()->getJs();
 
         if (array_key_exists('override.css', $wrapper_urls)) {
-            $css[] = $wrapper_urls['override.css'];
+            $css->add($wrapper_urls['override.css']);
         }
 
         $unread_notifications_count = null;
@@ -317,7 +315,7 @@ class GlobalController extends AbstractController {
 
             $sidebar_buttons[] = new Button($this->core, [
                 "href" => $this->core->buildUrl(['authentication', 'logout']),
-                "title" => "Logout ".$this->core->getUser()->getDisplayedFirstName(),
+                "title" => "Logout " . $this->core->getUser()->getDisplayedFirstName(),
                 "id" => "logout",
                 "class" => "nav-row",
                 "icon" => "fa-power-off"
@@ -355,7 +353,7 @@ class GlobalController extends AbstractController {
         //else if(...){}
         //more Holidays go here!
 
-        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css, $js, $duck_img);
+        return $this->core->getOutput()->renderTemplate('Global', 'header', $breadcrumbs, $wrapper_urls, $sidebar_buttons, $unread_notifications_count, $css->toArray(), $js->toArray(), $duck_img);
     }
 
     public function footer() {
@@ -367,7 +365,7 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
@@ -444,5 +442,4 @@ class GlobalController extends AbstractController {
 
         return true;
     }
-
 }

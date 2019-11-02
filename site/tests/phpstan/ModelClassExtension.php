@@ -18,7 +18,7 @@ class ModelClassExtension implements MethodsClassReflectionExtension {
             return strtolower($match[2]);
         }, $method_name);
         $method_name = preg_replace_callback('/([A-Z])/', function ($match) {
-            return '_'.strtolower($match[0]);
+            return '_' . strtolower($match[0]);
         }, $method_name);
         return $reflection->hasProperty($method_name);
     }

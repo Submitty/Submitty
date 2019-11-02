@@ -352,7 +352,7 @@ class ReportController extends AbstractController {
      * @param LateDays $ld
      * @return array
      */
-    public function generateGradeSummary(GradedGradeable $gg,User $user, LateDays $ld) {
+    public function generateGradeSummary(GradedGradeable $gg, User $user, LateDays $ld) {
         $g = $gg->getGradeable();
 
         $entry = [
@@ -501,7 +501,7 @@ class ReportController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
-    public function generateCustomization(){
+    public function generateCustomization() {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
@@ -531,7 +531,7 @@ class ReportController extends AbstractController {
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
 
             // Print the form
-            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 "used_buckets" => $customization->getUsedBuckets(),
@@ -585,7 +585,7 @@ class ReportController extends AbstractController {
         }
 
         // Check the course auto_debug_output.txt to ensure no exceptions were thrown
-        $debug_output_path = '/var/local/submitty/courses/'.
+        $debug_output_path = '/var/local/submitty/courses/' .
             $this->core->getConfig()->getSemester() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';

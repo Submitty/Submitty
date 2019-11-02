@@ -6,7 +6,7 @@ use tests\BaseUnitTest;
 use app\controllers\course\CourseMaterialsController;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
-use \ZipArchive;
+use ZipArchive;
 
 class CourseMaterialsControllerTester extends BaseUnitTest {
     use \phpmock\phpunit\PHPMock;
@@ -16,7 +16,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     private $json_path;
     private $upload_path;
 
-    public function setUp() : void{
+    public function setUp(): void {
         $this->config = array();
         $this->config['course_path'] = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $this->config['use_mock_time'] = true;
@@ -48,8 +48,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
     }
 
-    private function buildFakeZipFile($name, $part=1, $num_files=1, $depth = 1){
-        $zip = new ZipArchive;
+    private function buildFakeZipFile($name, $part = 1, $num_files = 1, $depth = 1) {
+        $zip = new ZipArchive();
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);
         $files = array();
@@ -58,7 +58,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             for($i = 0; $i < $depth; $i++){
                 for($j = 0; $j < $num_files; $j++){
                     $fname = "test" . $j . ".txt";
-                    $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname , "w");
+                    $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname, "w");
                     $zip->addFile( $this->config['course_path'] . $lev . "/" . $fname  );
                     $files[] = $this->config['course_path'] . $lev . "/" . $fname;
                 }
@@ -146,7 +146,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $keys =     array_keys($json);
 
         $expected_json1 = [
-            'checked' => '1', 
+            'checked' => '1',
             'release_datetime' => $_POST['release_time'],
             'hide_from_students' => null
         ];
@@ -199,7 +199,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date );
 
-        $this->assertEquals( ['status' => 'success', 'data' => 'Time successfully set.']  , $ret);
+        $this->assertEquals( ['status' => 'success', 'data' => 'Time successfully set.'], $ret);
         $json = FileUtils::readJsonFile($this->json_path);
 
         //check the date has been updated to the new time
@@ -230,7 +230,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->assertEquals(2, count($json));   //2 files
 
         $expected_json2 = [
-            'checked' => '1', 
+            'checked' => '1',
             'release_datetime' => $new_date,
             'hide_from_students' => null
         ];

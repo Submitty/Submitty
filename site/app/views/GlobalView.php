@@ -1,11 +1,11 @@
 <?php
 
 namespace app\views;
+
 use app\models\Breadcrumb;
 
 class GlobalView extends AbstractView {
-    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css=array(), $js=array(), $duck_img) {
-
+    public function header($breadcrumbs, $wrapper_urls, $sidebar_buttons, $notifications_info, $css, $js, $duck_img) {
         $messages = [];
         foreach (array('error', 'notice', 'success') as $type) {
             foreach ($_SESSION['messages'][$type] as $key => $error) {
@@ -30,7 +30,7 @@ class GlobalView extends AbstractView {
         if ($this->core->getUser() === null) {
             $page_title = "Submitty Login";
         } else if ($this->core->getConfig()->isCourseLoaded()) {
-            $page_title = "Submitty ".$course_name." ".$page_name;
+            $page_title = "Submitty " . $course_name . " " . $page_name;
         }
 
         $config_data = json_decode(file_get_contents("/usr/local/submitty/config/submitty.json"), true);

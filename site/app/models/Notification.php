@@ -78,7 +78,7 @@ class Notification extends AbstractModel {
         parent::__construct($core);
     }
 
-    public static function createNotification(Core $core,array $event) {
+    public static function createNotification(Core $core, array $event) {
         $instance = new self($core);
         $instance->setComponent($event['component']);
         $instance->setNotifyMetadata($event['metadata']);
@@ -164,13 +164,13 @@ class Notification extends AbstractModel {
         if($elapsed_time < 60){
             return "Less than a minute ago";
         } else if($elapsed_time < 3600){
-            $minutes = floor($elapsed_time/60);
+            $minutes = floor($elapsed_time / 60);
             if($minutes == 1)
                 return "1 minute ago";
             else
                 return "{$minutes} minutes ago";
-        } else if($elapsed_time < 3600*24){
-            $hours = floor($elapsed_time/3600);
+        } else if($elapsed_time < 3600 * 24){
+            $hours = floor($elapsed_time / 3600);
             if($hours == 1)
                 return "1 hour ago";
             else

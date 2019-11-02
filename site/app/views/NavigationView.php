@@ -1,7 +1,9 @@
 <?php
+
 namespace app\views;
+
 use app\models\Button;
-use \app\libraries\GradeableType;
+use app\libraries\GradeableType;
 use app\models\User;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
@@ -93,7 +95,7 @@ class NavigationView extends AbstractView {
                     $message_file_details = $message_json->special_message;
 
                     //If any fields are missing, treat this as though we just didn't have a message for this user.
-                    if(!property_exists($message_file_details,'title') || !property_exists($message_file_details,'description') || !property_exists($message_file_details,'filename') ){
+                    if(!property_exists($message_file_details, 'title') || !property_exists($message_file_details, 'description') || !property_exists($message_file_details, 'filename') ){
                         $display_custom_message = false;
                         $messsage_file_details = null;
                     }
@@ -410,7 +412,7 @@ class NavigationView extends AbstractView {
 
 
             //If the button is autograded and has been submitted once, give a progress bar.
-            if (!is_nan($points_percent) &&  $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
+            if (!is_nan($points_percent) && $graded_gradeable->getAutoGradedGradeable()->isAutoGradingComplete() &&
                 ($list_section == GradeableList::CLOSED || $list_section == GradeableList::OPEN)) {
                 $progress = $points_percent * 100;
             }
@@ -427,7 +429,7 @@ class NavigationView extends AbstractView {
                 $list_section === GradeableList::GRADED;
             if ($gradeable->isTeamAssignment()) {
                 if ($grade_ready_for_view &&
-                    $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId()) === null) {
+                    $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(), $this->core->getUser()->getId()) === null) {
                     $class = "btn-success";
                 }
             }
@@ -545,10 +547,10 @@ class NavigationView extends AbstractView {
     private function getGradeButton(Gradeable $gradeable, int $list_section) {
         //Location, location never changes
         if($this->core->getUser()->accessAdmin()){
-            $view="all";
+            $view = "all";
         }
         else{
-            $view=null;
+            $view = null;
         }
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             $href = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']);
@@ -744,7 +746,7 @@ class NavigationView extends AbstractView {
 
             $button = new Button($this->core, [
                 "subtitle" => "CLOSE SUBMISSIONS NOW",
-                "onclick" => "displayCloseSubmissionsWarning(\"".$url."\",\"".$gradeable->getTitle()."\");",
+                "onclick" => "displayCloseSubmissionsWarning(\"" . $url . "\",\"" . $gradeable->getTitle() . "\");",
                 "class" => "btn btn-default btn-nav btn-nav-open",
                 "name" => "quick-link-btn"
             ]);

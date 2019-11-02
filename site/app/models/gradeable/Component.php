@@ -8,7 +8,6 @@ use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
 
-
 /**
  * Class Component
  * @package app\models\gradeable

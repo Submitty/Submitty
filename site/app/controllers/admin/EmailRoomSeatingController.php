@@ -12,7 +12,6 @@ use app\libraries\routers\AccessControl;
 use app\models\Email;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class EmailRoomSeatingController
  * @package app\controllers\admin
@@ -40,7 +39,7 @@ Please email your instructor with any questions or concerns.';
      * @Route("/{_semester}/{_course}/email_room_seating")
      * @return Response
      */
-    public function renderEmailTemplate(){
+    public function renderEmailTemplate() {
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'EmailRoomSeating'],
@@ -109,5 +108,4 @@ Please email your instructor with any questions or concerns.';
 
         return $message;
     }
-
 }

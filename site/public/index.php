@@ -7,7 +7,6 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -27,7 +26,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$loader = require_once(__DIR__.'/../vendor/autoload.php');
+$loader = require_once(__DIR__ . '/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $request = Request::createFromGlobals();
