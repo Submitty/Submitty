@@ -321,7 +321,7 @@ class DatabaseQueries {
             $results = $this->course_db->rows();
             $row_count = $results[0]['count'];
             $blockNumber = 1 + floor(($row_count - 1) / $blockSize);
-        } else if($blockNumber == 0) {
+        } elseif($blockNumber == 0) {
             // Load first block as default
             $blockNumber = 1;
             if($thread_id >= 1)
@@ -2673,7 +2673,7 @@ AND gc_id IN (
         if($option == 'alpha') {
             $this->course_db->query("SELECT posts.*, fph.edit_timestamp, users.user_lastname FROM posts INNER JOIN users ON posts.author_user_id=users.user_id {$history_query} WHERE thread_id=? AND {$query_delete} ORDER BY user_lastname, posts.timestamp;", array($thread_id));
         }
-        else if ( $option == 'reverse-time' ) {
+        elseif ($option == 'reverse-time') {
             $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp DESC ", array_reverse($param_list));
         }
         else {
@@ -3005,7 +3005,7 @@ AND gc_id IN (
         if($thread_id != -1) {
             $id_query = "metadata::json->>'thread_id' = ?";
             $parameters[] = $thread_id;
-        } else if($notification_id == -1) {
+        } elseif($notification_id == -1) {
             $id_query = "true";
         } else {
             $id_query = "id = ?";

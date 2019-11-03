@@ -91,7 +91,7 @@ class AutogradingConfig extends AbstractModel {
         $this->max_submissions = intval($details['max_submissions'] ?? 0);
         if (isset($details['assignment_message'])) {
             $this->gradeable_message = $details['assignment_message'] ?? '';
-        } else if (isset($details['gradeable_message'])) {
+        } elseif (isset($details['gradeable_message'])) {
             $this->gradeable_message = $details['gradeable_message'] ?? '';
         }
 
@@ -233,7 +233,7 @@ class AutogradingConfig extends AbstractModel {
             return $cell['markdown_string'];
         }
         // Else if markdown_file is set then read the file and return its contents
-        else if(isset($cell['markdown_file']))
+        elseif(isset($cell['markdown_file']))
         {
             // TODO: Implement reading from markdown_file and passing that along
             throw new NotImplementedException("Reading from a markdown_file is not yet implemented.");

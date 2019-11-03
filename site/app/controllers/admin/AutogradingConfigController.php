@@ -116,7 +116,7 @@ class AutogradingConfigController extends AbstractController {
         $config_file_path = $_POST['curr_config_name'] ?? null;
         if($config_file_path == null){
             $this->core->addErrorMessage("Unable to find file");
-        } else if (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+        } elseif (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
             $this->core->addErrorMessage("This action can't be completed.");
         } else {
             $new_name = $_POST['new_config_name'] ?? "";
@@ -155,9 +155,9 @@ class AutogradingConfigController extends AbstractController {
         }
         if ($config_path == null) {
             $this->core->addErrorMessage("Selecting config failed.");
-        } else if (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+        } elseif (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
             $this->core->addErrorMessage("This action can't be completed.");
-        } else if ($in_use){
+        } elseif ($in_use){
             $this->core->addErrorMessage("This config is currently in use.");
         } else {
             if(FileUtils::recursiveRmdir($config_path)){

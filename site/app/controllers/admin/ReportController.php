@@ -310,7 +310,7 @@ class ReportController extends AbstractController {
                     if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
                         // Version conflict or incomplete grading, so zero score
                         $row[$gg->getGradeableId()] = 0;
-                    } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                    } elseif ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
                         // BAD submission, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }
@@ -416,7 +416,7 @@ class ReportController extends AbstractController {
                         //  but to keep the rest of the report generation sane, they can be users if the
                         //  user is not on a team
                         $entry['note'] = 'User is not on a team';
-                    } else if (!$ta_gg->isComplete()) {
+                    } elseif (!$ta_gg->isComplete()) {
                         $entry['note'] = 'This has not been graded yet.';
                     } else {
                         $entry['note'] = 'Score is set to 0 because there are version conflicts.';

@@ -298,7 +298,7 @@ class GradedGradeable extends AbstractModel {
             }
 
             // Handle if notebook cell type is multiple_choice
-            else if(isset($notebookVal['type']) &&
+            elseif(isset($notebookVal['type']) &&
                     $notebookVal['type'] == "multiple_choice")
             {
 

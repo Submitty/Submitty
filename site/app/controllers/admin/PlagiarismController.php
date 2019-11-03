@@ -52,7 +52,7 @@ class PlagiarismController extends AbstractController {
                 if($year_a > $year_b) {
                     return 0;
                 }
-                else if ($year_a < $year_b) {
+                elseif ($year_a < $year_b) {
                     return 1;
                 }
                 else {
@@ -211,7 +211,7 @@ class PlagiarismController extends AbstractController {
             $file_option = "all";
         }
         if($file_option == "matching_regex") {
-            if( isset($_POST['regex_to_select_files']) && $_POST['regex_to_select_files'] !== '') {
+            if(isset($_POST['regex_to_select_files']) && $_POST['regex_to_select_files'] !== '') {
                 $regex_for_selecting_files = $_POST['regex_to_select_files'];
             }
             else {
@@ -221,14 +221,14 @@ class PlagiarismController extends AbstractController {
         }
 
         $language = $_POST['language'];
-        if( isset($_POST['threshold']) && $_POST['threshold'] !== '') {
+        if(isset($_POST['threshold']) && $_POST['threshold'] !== '') {
             $threshold = $_POST['threshold'];
         }
         else {
             $this->core->addErrorMessage("No input provided for threshold");
             $this->core->redirect($return_url);
         }
-        if( isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '') {
+        if(isset($_POST['sequence_length']) && $_POST['sequence_length'] !== '') {
             $sequence_length = $_POST['sequence_length'];
         }
         else {
@@ -237,7 +237,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $prev_term_gradeables = array();
-        for( $i = 0; $i < $prev_gradeable_number; $i++ ) {
+        for($i = 0; $i < $prev_gradeable_number; $i++) {
             if($_POST['prev_sem_' . $i] != "" && $_POST['prev_course_' . $i] != "" && $_POST['prev_gradeable_' . $i] != "") {
                 array_push($prev_term_gradeables, "/var/local/submitty/course/" . $_POST['prev_sem_' . $i] . "/" . $_POST['prev_course_' . $i] . "/submissions/" . $_POST['prev_gradeable_' . $i]);
             }
@@ -246,7 +246,7 @@ class PlagiarismController extends AbstractController {
         $ignore_submissions = array();
         $ignore_submission_option = $_POST['ignore_submission_option'];
         if ($ignore_submission_option == "ignore") {
-            for( $i = 0; $i < $ignore_submission_number; $i++ ) {
+            for($i = 0; $i < $ignore_submission_number; $i++) {
                 if(isset($_POST['ignore_submission_' . $i]) && $_POST['ignore_submission_' . $i] !== '') {
                     array_push($ignore_submissions, $_POST['ignore_submission_' . $i]);
                 }
@@ -606,7 +606,7 @@ class PlagiarismController extends AbstractController {
                         //Color is orange -- general match from selected match
                         $color = '#ffa500';
                     }
-                    else if(!$orange_color) {
+                    elseif(!$orange_color) {
                         //Color is yellow -- matches other students...
                         $color = '#ffff00';
                     }
@@ -627,11 +627,11 @@ class PlagiarismController extends AbstractController {
                         }
                     }
                 }
-                else if($match["type"] == "common") {
+                elseif($match["type"] == "common") {
                     //Color is grey -- common matches among all students
                     $color = '#cccccc';
                 }
-                else if($match["type"] == "provided") {
+                elseif($match["type"] == "provided") {
                     //Color is green -- instructor provided code #b5e3b5
                     $color = '#b5e3b5';
                 }

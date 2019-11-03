@@ -97,7 +97,7 @@ abstract class AbstractDatabase {
                 if (isset($this->username) && isset($this->password)) {
                     $this->link = new \PDO($this->getDSN(), $this->username, $this->password);
                 }
-                else if (isset($this->username)) {
+                elseif (isset($this->username)) {
                     $this->link = new \PDO($this->getDSN(), $this->username);
                 }
                 else {

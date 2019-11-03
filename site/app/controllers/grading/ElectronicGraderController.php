@@ -247,7 +247,7 @@ class ElectronicGraderController extends AbstractController {
             $overall_scores = null;
             $section_key = 'registration_section';
         }
-        else if ($gradeable->isGradeByRegistration()) {
+        elseif ($gradeable->isGradeByRegistration()) {
             if(!$this->core->getAccess()->canI("grading.electronic.status.full")) {
                 $sections = $this->core->getUser()->getGradingRegistrationSections();
             }
@@ -865,23 +865,23 @@ class ElectronicGraderController extends AbstractController {
 
                 $goToStudent = $order_all_sections->getPrevSubmitter($from_id);
 
-            } else if($to === 'prev' && $to_ungraded === 'false') {
+            } elseif($to === 'prev' && $to_ungraded === 'false') {
 
                 $goToStudent = $order_grading_sections->getPrevSubmitter($from_id);
 
-            } else if($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
+            } elseif($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
 
                 $goToStudent = $order_all_sections->getNextSubmitter($from_id);
 
-            } else if($to === 'next' && $to_ungraded === 'false') {
+            } elseif($to === 'next' && $to_ungraded === 'false') {
 
                 $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
 
-            } else if($to === 'prev' && $to_ungraded === 'true') {
+            } elseif($to === 'prev' && $to_ungraded === 'true') {
 
                 $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
 
-            } else if($to === 'next' && $to_ungraded === 'true') {
+            } elseif($to === 'next' && $to_ungraded === 'true') {
 
                 $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
 
@@ -917,7 +917,7 @@ class ElectronicGraderController extends AbstractController {
             $total = $gradeable->getPeerGradeSet();
             $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
         }
-        else if ($gradeable->isGradeByRegistration()) {
+        elseif ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
             $sections = $this->core->getUser()->getGradingRegistrationSections();
             if ($this->core->getAccess()->canI("grading.electronic.grade.if_no_sections_exist") && $sections == null) {
@@ -2182,7 +2182,7 @@ class ElectronicGraderController extends AbstractController {
         $sections = array();
         if ($full_stats) {
             $sections = $this->core->getQueries()->getAllSectionsForGradeable($gradeable);
-        } else if ($gradeable->isGradeByRegistration()) {
+        } elseif ($gradeable->isGradeByRegistration()) {
             $sections = $grader->getGradingRegistrationSections();
         } else {
             $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $grader->getId());

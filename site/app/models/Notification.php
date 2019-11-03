@@ -163,13 +163,13 @@ class Notification extends AbstractModel {
         $actual_time = $this->getCreatedAt();
         if($elapsed_time < 60){
             return "Less than a minute ago";
-        } else if($elapsed_time < 3600){
+        } elseif($elapsed_time < 3600){
             $minutes = floor($elapsed_time / 60);
             if($minutes == 1)
                 return "1 minute ago";
             else
                 return "{$minutes} minutes ago";
-        } else if($elapsed_time < 3600 * 24){
+        } elseif($elapsed_time < 3600 * 24){
             $hours = floor($elapsed_time / 3600);
             if($hours == 1)
                 return "1 hour ago";

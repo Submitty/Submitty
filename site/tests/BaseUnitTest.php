@@ -52,7 +52,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
-        if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true ){
+        if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true){
             $core->method('getDateTimeNow')->willReturn(new \DateTime('2001-01-01', $config->getTimezone()));
         }else{
             $core->method('getDateTimeNow')->willReturnCallback(function () use ($config) {

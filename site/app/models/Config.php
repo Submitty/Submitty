@@ -329,7 +329,7 @@ class Config extends AbstractModel {
             if (empty($secrets_json[$key])) {
                 throw new ConfigException("Missing secret var: {$key}");
             }
-            else if (strlen($secrets_json[$key]) < 32) {
+            elseif (strlen($secrets_json[$key]) < 32) {
                 // enforce a minimum 32 bytes for the secrets
                 throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
             }

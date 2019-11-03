@@ -90,7 +90,7 @@ class SubmissionController extends AbstractController {
             $this->core->getOutput()->renderOutput('Error', 'noGradeable', $gradeable_id);
             return array('error' => true, 'message' => 'No gradeable with that id.');
         }
-        else if ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
+        elseif ($gradeable->isTeamAssignment() && $graded_gradeable === null && !$this->core->getUser()->accessAdmin()) {
             $this->core->addErrorMessage('Must be on a team to access submission');
             $this->core->redirect($this->core->buildCourseUrl());
             return array('error' => true, 'message' => 'Must be on a team to access submission.');
@@ -358,7 +358,7 @@ class SubmissionController extends AbstractController {
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
 
                 //add new job to queue
-                if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT)) ){
+                if(!file_put_contents($bulk_upload_job, json_encode($qr_upload_data, JSON_PRETTY_PRINT))){
                     $this->core->getOutput()->renderJsonFail("Failed to write BulkQRSplit job");
                     return $this->uploadResult("Failed to write BulkQRSplit job", false);
                 }
@@ -379,7 +379,7 @@ class SubmissionController extends AbstractController {
                 $bulk_upload_job  = "/var/local/submitty/daemon_job_queue/bulk_upload_" . $uploaded_file["name"][$i] . ".json";
 
                 //add new job to queue
-                if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT)) ){
+                if(!file_put_contents($bulk_upload_job, json_encode($job_data, JSON_PRETTY_PRINT))){
                     $this->core->getOutput()->renderJsonFail("Failed to write Bulk upload job");
                     return $this->uploadResult("Failed to write Bulk upload job", false);
                 }
@@ -545,7 +545,7 @@ class SubmissionController extends AbstractController {
                     preg_match("/\d*$/", $image_name, $matches);
                     $image_num = count($matches) > 0 ? intval(reset($matches)) : -1;
 
-                    if(!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0 ){
+                    if(!$clobber && strpos($image_name, "_page_") !== false && $image_num >= 0){
                         $file_base_name = "upload_version_"  . $old_version . "_page_" . $image_num . "." . $image_extension;
                     }
 
@@ -894,11 +894,11 @@ class SubmissionController extends AbstractController {
                     $answers = $short_answer_objects["short_answer_" .  $num_short_answers] ?? array();
                     $num_short_answers += 1;
                 }
-                else if ($this_input instanceof SubmissionCodeBox) {
+                elseif ($this_input instanceof SubmissionCodeBox) {
                     $answers = $codebox_objects["codebox_" .  $num_codeboxes] ?? array();
                     $num_codeboxes += 1;
                 }
-                else if ($this_input instanceof SubmissionMultipleChoice) {
+                elseif ($this_input instanceof SubmissionMultipleChoice) {
                     $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
                     $num_multiple_choice += 1;
                 }
@@ -910,7 +910,7 @@ class SubmissionController extends AbstractController {
                 $filename = $this_input->getFileName();
                 $dst = FileUtils::joinPaths($version_path, $filename);
 
-                if ( count($answers) > 0)  $empty_inputs = false;
+                if (count($answers) > 0)  $empty_inputs = false;
 
                 // FIXME: add error checking
                 $file = fopen($dst, "w");
@@ -1275,7 +1275,7 @@ class SubmissionController extends AbstractController {
 
             }
             // @codeCoverageIgnoreEnd
-            else if ($this->upload_details['assignment_settings'] === true) {
+            elseif ($this->upload_details['assignment_settings'] === true) {
                 $settings_file = FileUtils::joinPaths($this->upload_details['user_path'], "user_assignment_settings.json");
                 $settings = json_decode(file_get_contents($settings_file), true);
                 if (count($settings['history']) == 1) {

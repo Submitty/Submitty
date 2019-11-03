@@ -206,7 +206,7 @@ class LateController extends AbstractController {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
-                } else if($option == 1){
+                } elseif($option == 1){
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for($i = 0; $i < count($team_member_ids); $i++) {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
