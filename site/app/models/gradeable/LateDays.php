@@ -55,8 +55,12 @@ class LateDays extends AbstractModel {
 
         // Construct late days info for each gradeable
         foreach ($graded_gradeables as $graded_gradeable) {
-            $info = new LateDayInfo($core, $user, $graded_gradeable,
-                $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate()));
+            $info = new LateDayInfo(
+                $core,
+                $user,
+                $graded_gradeable,
+                $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate())
+            );
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
     }
@@ -202,7 +206,9 @@ class LateDays extends AbstractModel {
                     'timestamp' => $update['since_timestamp'],
                     'update' => $update
                 ];
-            }, $this->late_days_updates));
+            },
+            $this->late_days_updates)
+        );
 
         // Sort by 'timestamp'
         usort($late_day_events, function ($e1, $e2) {

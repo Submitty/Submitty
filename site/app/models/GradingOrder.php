@@ -435,8 +435,12 @@ class GradingOrder extends AbstractModel {
      * @return GradedGradeable[] All graded gradeables for students, in the correct order
      */
     public function getSortedGradedGradeables() {
-        $iter = $this->core->getQueries()->getGradedGradeables([$this->gradeable],
-            $this->all_user_ids, $this->all_team_ids, [$this->getSectionKey(), 'team_id', 'user_id']);
+        $iter = $this->core->getQueries()->getGradedGradeables(
+            [$this->gradeable],
+            $this->all_user_ids,
+            $this->all_team_ids,
+            [$this->getSectionKey(), 'team_id', 'user_id']
+        );
 
         $gg_idx = [];
         $unsorted = [];

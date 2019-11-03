@@ -441,7 +441,12 @@ class Config extends AbstractModel {
         // grab the name of the submitty_admin user (only if 'verified',
         // that is, password successfully used to grab an API token.
         $users_file = FileUtils::joinPaths(
-            '/', 'usr', 'local', 'submitty', 'config', 'submitty_users.json'
+            '/',
+            'usr',
+            'local',
+            'submitty',
+            'config',
+            'submitty_users.json'
         );
         if(!is_file($users_file)) {
             throw new FileNotFoundException('Unable to locate the submity_users.json file');
@@ -465,8 +470,11 @@ class Config extends AbstractModel {
         }
         $course = $this->getCourse();
         $semester = $this->getSemester();
-        return $this->core->getQueries()->checkIsInstructorInCourse
-          ($submitty_admin_user, $course, $semester);
+        return $this->core->getQueries()->checkIsInstructorInCourse(
+            $submitty_admin_user,
+            $course,
+            $semester
+        );
     }
 
 

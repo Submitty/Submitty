@@ -15,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
  * to set it from inside of php to make sure the group read & execute
  * permissions aren't lost for newly created files & directories.
 */
-umask (0027);
+umask(0027);
 
 session_start();
 /*

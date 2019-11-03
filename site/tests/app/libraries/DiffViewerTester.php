@@ -50,16 +50,23 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testExpectedException() {
-        $diff = new DiffViewer(__TEST_DATA__ . "/diffs/diff_test_01/input_actual.txt",
-                               "file_that_doesnt_exist", "", "");
+        $diff = new DiffViewer(
+            __TEST_DATA__ . "/diffs/diff_test_01/input_actual.txt",
+            "file_that_doesnt_exist",
+            "",
+            ""
+        );
         $this->expectException(\Exception::class);
         $diff->buildViewer();
     }
 
     public function testDifferencesException() {
-        $diff = new DiffViewer(__TEST_DATA__ . "/diffs/diff_test_01/input_actual.txt",
-                               __TEST_DATA__ . "/diffs/diff_test_01/input_expected.txt",
-                               "file_that_doesnt_exist", "");
+        $diff = new DiffViewer(
+            __TEST_DATA__ . "/diffs/diff_test_01/input_actual.txt",
+            __TEST_DATA__ . "/diffs/diff_test_01/input_expected.txt",
+            "file_that_doesnt_exist",
+            ""
+        );
         $this->expectException(\Exception::class);
         $diff->buildViewer();
     }

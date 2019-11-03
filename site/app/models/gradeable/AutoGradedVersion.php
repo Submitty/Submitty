@@ -236,8 +236,13 @@ class AutoGradedVersion extends AbstractModel {
             if ($result_details != null &&
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
-                $graded_testcase = new AutoGradedTestcase
-                ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
+                $graded_testcase = new AutoGradedTestcase(
+                    $this->core,
+                    $testcase,
+                    $results_path,
+                    $results_public_path,
+                    $result_details['testcases'][$testcase->getIndex()]
+                );
                 $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
                 if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
                     $this->early_incentive_points += $graded_testcase->getPoints();
@@ -436,7 +441,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysLate() {
         return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+            $this->submission_time
+        )) : 0;
     }
 
     /**
@@ -445,7 +452,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysEarly() {
         return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, -DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+            $this->submission_time
+        )) : 0;
     }
 
     /**

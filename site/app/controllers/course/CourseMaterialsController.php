@@ -222,7 +222,7 @@ class CourseMaterialsController extends AbstractController {
 
         $new_data_time = htmlspecialchars($newdatatime);
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $new_data_time ) === false){
+        if(\DateTime::createFromFormat('Y-m-d H:i:s', $new_data_time) === false){
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
@@ -309,7 +309,7 @@ class CourseMaterialsController extends AbstractController {
         }
 
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === false){
+        if(\DateTime::createFromFormat('Y-m-d H:i:s', $release_time) === false){
             return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
@@ -419,7 +419,7 @@ class CourseMaterialsController extends AbstractController {
                         $zip->extractTo($upload_path, $entries);
 
                         foreach ($zfiles as $zfile) {
-                            $path = FileUtils::joinPaths( $upload_path, $zfile );
+                            $path = FileUtils::joinPaths($upload_path, $zfile);
                             if(!(is_null($sections))){
                                 $sections_exploded = @explode(",", $sections);
                                 if($sections_exploded == null){

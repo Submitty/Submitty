@@ -237,8 +237,11 @@ class TaGradedGradeable extends AbstractModel {
      * @return float percentage (0 to 1), or NAN if no grading started
      */
     public function getTotalScorePercent($clamp = false) {
-        return Utils::safeCalcPercent($this->getTotalScore(),
-            $this->getGradedGradeable()->getGradeable()->getTaPoints(), $clamp);
+        return Utils::safeCalcPercent(
+            $this->getTotalScore(),
+            $this->getGradedGradeable()->getGradeable()->getTaPoints(),
+            $clamp
+        );
     }
 
     /**
@@ -335,8 +338,10 @@ class TaGradedGradeable extends AbstractModel {
 
         if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
             // If the grader is null or we aren't peer grading, then delete all component grades for this component
-            $this->deleted_graded_components = array_merge($this->deleted_graded_components,
-                $container->getGradedComponents());
+            $this->deleted_graded_components = array_merge(
+                $this->deleted_graded_components,
+                $container->getGradedComponents()
+            );
 
             // Clear the container for this component
             $container->setGradedComponents([]);

@@ -46,9 +46,12 @@ class AutoGradedTestcase extends AbstractModel {
             foreach ($details['autochecks'] as $idx => $autocheck) {
                 $index = "id_{$testcase->getIndex()}_{$idx}";
                 $this->autochecks[$idx] = new GradeableAutocheck(
-                    $this->core, $autocheck,
+                    $this->core,
+                    $autocheck,
                     $this->core->getConfig()->getCoursePath(),
-                    $results_path, $results_public_path, $index
+                    $results_path,
+                    $results_public_path,
+                    $index
                 );
             }
         }
