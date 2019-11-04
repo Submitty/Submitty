@@ -531,8 +531,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
      */
     public function getTeamById($team_id) {
         $this->course_db->query(
-            "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            "SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
               (SELECT t.team_id, t.state, u.*
@@ -559,8 +558,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
      */
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query(
-            "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            "SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
               (SELECT t.team_id, t.state, u.*
@@ -589,8 +587,7 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
      */
     public function getTeamsByGradeableId($g_id) {
         $this->course_db->query(
-            "
-            SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
+            "SELECT gt.team_id, gt.registration_section, gt.rotating_section, json_agg(u) AS users
             FROM gradeable_teams gt
               JOIN
                 (SELECT t.team_id, t.state, u.*
