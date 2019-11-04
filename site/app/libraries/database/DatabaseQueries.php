@@ -3732,8 +3732,7 @@ AND gc_id IN (
         ], $mark_ids);
         $place_holders = $this->createParamaterList(count($mark_ids));
         $this->course_db->query(
-            "
-            DELETE FROM gradeable_component_mark_data
+            "DELETE FROM gradeable_component_mark_data
             WHERE gd_id=? AND gc_id=? AND gcd_grader_id=? AND gcm_id IN {$place_holders}",
             $param
         );
