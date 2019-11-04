@@ -27,12 +27,12 @@ class SimpleGraderController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return Response
      */
-    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id"){
+    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
         //convert from id --> u.user_id etc for use by the database.
         if ($sort === "id") {
             $sort_by = "u.user_id";
         }
-        else if($sort === "first"){
+        elseif($sort === "first"){
             $sort_by = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
         else {
@@ -205,11 +205,11 @@ class SimpleGraderController extends AbstractController {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid gradeable ID")
             );
-        } else if ($user === null) {
+        } elseif ($user === null) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid user ID")
             );
-        } else if (!isset($_POST['scores']) || empty($_POST['scores'])) {
+        } elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Didn't submit any scores")
             );

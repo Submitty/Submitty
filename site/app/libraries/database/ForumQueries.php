@@ -9,7 +9,7 @@ class ForumQueries {
  //extends DatabaseQueries {
 
 
-    public function createPost(Post &$p, bool $isFirst){
+    public function createPost(Post &$p, bool $isFirst) {
 
         $parent_id = $p->getParentId();
 

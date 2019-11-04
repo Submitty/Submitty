@@ -125,7 +125,7 @@ class ExceptionHandler {
         if (static::$display_exceptions) {
             return $message;
         }
-        else if ($display_message) {
+        elseif ($display_message) {
             return $exception->getMessage();
         }
         else {

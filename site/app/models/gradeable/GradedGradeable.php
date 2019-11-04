@@ -4,7 +4,7 @@ namespace app\models\gradeable;
 
 use app\exceptions\AuthorizationException;
 use app\libraries\Core;
-use \app\models\AbstractModel;
+use app\models\AbstractModel;
 use app\models\User;
 use app\libraries\FileUtils;
 use app\exceptions\FileNotFoundException;
@@ -298,7 +298,7 @@ class GradedGradeable extends AbstractModel {
             }
 
             // Handle if notebook cell type is multiple_choice
-            else if(isset($notebookVal['type']) &&
+            elseif(isset($notebookVal['type']) &&
                     $notebookVal['type'] == "multiple_choice")
             {
 

@@ -27,7 +27,7 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false ) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -53,7 +53,7 @@ class HomeworkView extends AbstractView {
         // showing submission if user is full grader or student can submit
         if ($this->core->getUser()->accessFullGrading()) {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-        } else if ($gradeable->isStudentSubmit()) {
+        } elseif ($gradeable->isStudentSubmit()) {
             if ($gradeable->canStudentSubmit()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
             } else {
@@ -151,7 +151,7 @@ class HomeworkView extends AbstractView {
                     'remaining' => $late_days_remaining
                 ]];
             } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
-            else if ($active_days_charged > $late_days_allowed) {
+            elseif ($active_days_charged > $late_days_allowed) {
                 $error = true;
                 $messages[] = ['type' => 'too_many_used', 'info' => [
                     'late' => $active_days_late,
@@ -197,7 +197,7 @@ class HomeworkView extends AbstractView {
                     $error = true;
                     $messages[] = ['type' => 'would_get_zero'];
                 } // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
-                else if ($new_late_charged > $late_days_allowed) {
+                elseif ($new_late_charged > $late_days_allowed) {
                     $messages[] = ['type' => 'would_too_many_used', 'info' => [
                         'allowed' => $late_days_allowed
                     ]];
@@ -492,7 +492,7 @@ class HomeworkView extends AbstractView {
         for ($i = 0; $i < count($files); $i++) {
             if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
                 continue;
-            }else if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+            }elseif(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
                 $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
 
@@ -804,7 +804,7 @@ class HomeworkView extends AbstractView {
         }
         // sort by most recent posts
         if (!empty($grade_inquiries_twig_array)) {
-            usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
+            usort($grade_inquiries_twig_array[0]['posts'], function ($a, $b) {
                 return strtotime($a['date']) - strtotime($b['date']);
             });
         }

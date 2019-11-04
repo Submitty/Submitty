@@ -2,7 +2,7 @@
 
 namespace tests\app\controllers\student;
 
-use \ZipArchive;
+use ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
 use app\libraries\Core;
@@ -251,7 +251,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string $content
      * @param int    $part
      */
-    private function addUploadFile($filename, $content="", $part=1) {
+    private function addUploadFile($filename, $content = "", $part = 1) {
         FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part), true, 0777);
         $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part, $filename);
         if (file_put_contents($filepath, $content) === false) {
@@ -273,7 +273,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param array  $files
      * @param int    $part
      */
-    private function addUploadZip($zip_name, $files, $part=1) {
+    private function addUploadZip($zip_name, $files, $part = 1) {
         $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
         FileUtils::createDir($root_path, true, 0777);
@@ -302,7 +302,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string      $dir
      * @param string|null $root_dir
      */
-    private function createZip($files, $zip, $dir, $root_dir=null) {
+    private function createZip($files, $zip, $dir, $root_dir = null) {
         if ($root_dir === null) {
             $root_dir = $dir;
         }
@@ -416,10 +416,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $this->assertEquals(".submit.timestamp", $iter->getFilename());
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertTrue(in_array($iter->getFilename(), array('part1', 'part2')));
                 $files[$iter->getFilename()] = array();
                 $iter2 = $iter->getChildren();
@@ -428,7 +428,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $files[$iter->getFilename()][$iter2->getFilename()] = file_get_contents($iter2->getPathname());
                     }
                     else {
@@ -486,10 +486,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $filenames[] = $iter->getFilename();
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("testDir", $iter->getFilename());
                 $iter2 = $iter->getChildren();
                 while ($iter2 !== "" && $iter2->getFilename() !== "") {
@@ -497,7 +497,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $this->assertEquals("test1.txt", $iter2->getFilename());
                     }
                     else {
@@ -825,7 +825,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -948,14 +948,14 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("folder with spaces", $iter->getFilename());
                 foreach (new \FilesystemIterator($iter->getPathname()) as $iter2) {
                     $this->assertTrue($iter2->isFile());
                     $this->assertEquals("filename with spaces2.txt", $iter2->getFilename());
                 }
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {

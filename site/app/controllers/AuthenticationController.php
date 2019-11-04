@@ -31,7 +31,7 @@ class AuthenticationController extends AbstractController {
      * @param Core $core
      * @param bool $logged_in
      */
-    public function __construct(Core $core, $logged_in=false) {
+    public function __construct(Core $core, $logged_in = false) {
         parent::__construct($core);
         $this->logged_in = $logged_in;
     }
@@ -207,7 +207,7 @@ class AuthenticationController extends AbstractController {
             $msg = "Could not find that user for that course";
             return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
-        else if ($user->accessFullGrading()) {
+        elseif ($user->accessFullGrading()) {
             $msg = "Successfully logged in as {$_POST['user_id']}";
             return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
         }

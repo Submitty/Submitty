@@ -225,7 +225,7 @@ class LateDays extends AbstractModel {
                 // Due to the way getLateDaysCharged works, this subtraction should never make the
                 //  count go below zero (if it does, fix getLateDaysCharged)
                 $late_days_remaining -= $info->getLateDaysCharged();
-            } else if (isset($event['update'])) {
+            } elseif (isset($event['update'])) {
                 // Late days update event, so add the difference between the new and old
                 //  available count and add that to the late days remaining.
                 //  Clamp to 0 to ensure that subtractions don't make us go below zero

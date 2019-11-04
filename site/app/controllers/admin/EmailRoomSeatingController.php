@@ -39,7 +39,7 @@ Please email your instructor with any questions or concerns.';
      * @Route("/{_semester}/{_course}/email_room_seating")
      * @return Response
      */
-    public function renderEmailTemplate(){
+    public function renderEmailTemplate() {
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'EmailRoomSeating'],

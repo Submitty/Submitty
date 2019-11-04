@@ -16,7 +16,7 @@ class ForumUtils {
 
     const FORUM_CHAR_POST_LIMIT = 5000;
 
-    public static function checkGoodAttachment($isThread, $thread_id, $file_post){
+    public static function checkGoodAttachment($isThread, $thread_id, $file_post) {
         if((!isset($_FILES[$file_post])) || $_FILES[$file_post]['error'][0] === UPLOAD_ERR_NO_FILE){
             return array(0);
         }
@@ -30,7 +30,7 @@ class ForumUtils {
         return array($imageCheck);
     }
 
-    public static function isValidCategories($rows, $inputCategoriesIds = -1, $inputCategoriesName = -1){
+    public static function isValidCategories($rows, $inputCategoriesIds = -1, $inputCategoriesName = -1) {
         if(is_array($inputCategoriesIds)) {
             if(count($inputCategoriesIds) < 1) {
                 return false;

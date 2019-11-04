@@ -179,13 +179,13 @@ class TaGradedGradeable extends AbstractModel {
             $v = $container->getGradedVersion();
             if ($v !== false && $strict !== true) {
                 return $v;
-            } else if ($v === false) {
+            } elseif ($v === false) {
                 return false;
             }
 
             if ($version === false) {
                 $version = $v;
-            } else if ($version !== $v) {
+            } elseif ($version !== $v) {
                 return false;
             }
         }

@@ -2,7 +2,7 @@
 
 namespace tests\app\libraries;
 
-use \app\libraries\DiffViewer;
+use app\libraries\DiffViewer;
 
 class DiffViewerTester extends \PHPUnit\Framework\TestCase {
 

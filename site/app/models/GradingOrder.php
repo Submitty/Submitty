@@ -466,17 +466,17 @@ class GradingOrder extends AbstractModel {
 
         if($sort == 'first' && $direction == 'ASC') {
             $msg = 'First Name Ascending';
-        } else if ($sort == 'first' && $direction == 'DESC') {
+        } elseif ($sort == 'first' && $direction == 'DESC') {
             $msg = 'First Name Descending';
-        } else if ($sort == 'last' && $direction == 'ASC') {
+        } elseif ($sort == 'last' && $direction == 'ASC') {
             $msg = 'Last Name Ascending';
-        } else if ($sort == 'last' && $direction == 'DESC') {
+        } elseif ($sort == 'last' && $direction == 'DESC') {
             $msg = 'Last Name Descending';
-        } else if ($sort == 'id' && $direction == 'ASC') {
+        } elseif ($sort == 'id' && $direction == 'ASC') {
             $msg = 'ID Ascending';
-        } else if ($sort == 'id' && $direction == 'DESC') {
+        } elseif ($sort == 'id' && $direction == 'DESC') {
             $msg = 'ID Descending';
-        } else if ($sort == 'random') {
+        } elseif ($sort == 'random') {
             $msg = 'Randomized';
         } else {
             $msg = false;

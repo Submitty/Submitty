@@ -307,7 +307,7 @@ class GradedComponent extends AbstractModel {
         $this->modified = true;
     }
 
-    public function setVerifier(User $verifier = null){
+    public function setVerifier(User $verifier = null) {
         $this->verifier = $verifier;
         $this->verifier_id = $verifier !== null ? $verifier->getId() : '';
         $this->modified = true;
@@ -317,7 +317,7 @@ class GradedComponent extends AbstractModel {
      * Gets the id of the verifier or '' if none exist
      * @return string
      */
-    public function getVerifierId(){
+    public function getVerifierId() {
         return $this->verifier_id;
     }
 
@@ -325,7 +325,7 @@ class GradedComponent extends AbstractModel {
      * Gets the verifier
      * @return User
      */
-    public function getVerifier(){
+    public function getVerifier() {
         return $this->verifier;
     }
 
@@ -333,7 +333,7 @@ class GradedComponent extends AbstractModel {
      * Sets the time for when this component was verified
      * @param string $verify_time
      */
-    public function setVerifyTime($verify_time){
+    public function setVerifyTime($verify_time) {
         if ($verify_time === null) {
             $this->verify_time = null;
         } else {
@@ -350,7 +350,7 @@ class GradedComponent extends AbstractModel {
      * Gets the time when this component was verified
      * @return \DateTime
      */
-    public function getVerifyTime(){
+    public function getVerifyTime() {
         return $this->verify_time;
     }
     /* Intentionally Unimplemented accessor methods */

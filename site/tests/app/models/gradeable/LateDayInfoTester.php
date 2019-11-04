@@ -23,7 +23,7 @@ class LateDayInfoTester extends BaseUnitTest {
         $gradeable->method('getLateDays')->willReturn($late_days);
 
         $auto_graded_gradeable = $this->createMockModel(AutoGradedGradeable::class);
-        if ($submission_date !== '' ) {
+        if ($submission_date !== '') {
             $auto_graded_version = $this->createMockModel(AutoGradedVersion::class);
             $auto_graded_version->method('getSubmissionTime')->willReturn(new \DateTime($submission_date));
             $auto_graded_version->method('getDaysLate')->willReturn(DateUtils::calculateDayDiff($due_date, $submission_date));

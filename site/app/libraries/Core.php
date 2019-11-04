@@ -485,7 +485,7 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token=null) {
+    public function checkCsrfToken($csrf_token = null) {
         if ($csrf_token === null) {
             return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
         }
@@ -501,7 +501,7 @@ class Core {
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
+    public function buildUrl($parts = array()) {
         $url = $this->getConfig()->getBaseUrl() . implode("/", $parts);
         return $url;
     }
@@ -516,7 +516,7 @@ class Core {
      *
      * @return string
      */
-    public function buildCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts = array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
@@ -565,7 +565,7 @@ class Core {
      *
      * @return string
      */
-    public function getDisplayedCourseName(){
+    public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
         }
@@ -574,14 +574,14 @@ class Core {
         }
     }
 
-    public function getFullSemester(){
+    public function getFullSemester() {
         $semester = $this->getConfig()->getSemester();
         if ($this->getConfig()->getSemester() !== ""){
             $arr1 = str_split($semester);
             $semester = "";
             if($arr1[0] == "f")  $semester .= "Fall ";
-            else if($arr1[0] == "s")  $semester .= "Spring ";
-            else if ($arr1[0] == "u") $semester .= "Summer ";
+            elseif($arr1[0] == "s")  $semester .= "Spring ";
+            elseif ($arr1[0] == "u") $semester .= "Summer ";
 
             $semester .= "20" . $arr1[1] . $arr1[2];
         }

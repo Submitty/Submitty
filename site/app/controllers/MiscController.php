@@ -32,7 +32,7 @@ class MiscController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/encode_pdf")
      * @return Response
      */
-    public function encodePDF($gradeable_id){
+    public function encodePDF($gradeable_id) {
         $id = $_POST['user_id'] ?? null;
         $file_name = $_POST['filename'] ?? null;
         $file_name = html_entity_decode($file_name);
@@ -155,7 +155,7 @@ class MiscController extends AbstractController {
             elseif (substr($path, '-4') === '.css') {
                 $mime_type = 'text/css';
             }
-            else if (substr($path, '-5') === '.html') {
+            elseif (substr($path, '-5') === '.html') {
                 $mime_type = 'text/html';
             }
         }
@@ -296,7 +296,7 @@ class MiscController extends AbstractController {
                         if($this->core->getUser()->accessGrading()){
                             // Add current file to archive
                             $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
-                        }else if ($gradeable->isScannedExam()
+                        }elseif ($gradeable->isScannedExam()
                                   && FileUtils::getContentType($filePath) === "application/pdf"){
                             //If the user is a student, only get PDFs if this is a bulk upload gradeable
                             // Add current file to archive
@@ -453,7 +453,7 @@ class MiscController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/bulk/progress")
      */
-    public function checkBulkProgress($gradeable_id){
+    public function checkBulkProgress($gradeable_id) {
         $job_path = "/var/local/submitty/daemon_job_queue/";
         $result = [];
         $found = false;

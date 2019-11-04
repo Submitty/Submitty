@@ -28,7 +28,7 @@ class FileUtils {
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
+    public static function getAllFiles(string $dir, array $skip_files = [], bool $flatten = false): array {
         $skip_files = array_map(function ($str) {
             return strtolower($str);
         }, $skip_files);
@@ -60,7 +60,7 @@ class FileUtils {
                         $return[$entry] = ['files' => $temp, 'path' => $path];
                     }
                 }
-                else if (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
+                elseif (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
                     // add file to array
                     $return[$entry] = [
                         'name' => $entry,
@@ -130,7 +130,7 @@ class FileUtils {
                     copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
@@ -392,7 +392,7 @@ class FileUtils {
      * @param $filename
      * @return null|string
      */
-    public static function getContentType($filename){
+    public static function getContentType($filename) {
         if ($filename === null) {
             return null;
         }
