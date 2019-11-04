@@ -2047,8 +2047,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
      */
     public function getUsersSeekingTeamByGradeableId($g_id) {
         $this->course_db->query(
-            "
-          SELECT user_id
+            "SELECT user_id
           FROM seeking_team
           WHERE g_id=?
           ORDER BY user_id",
