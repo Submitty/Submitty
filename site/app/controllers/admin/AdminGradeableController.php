@@ -977,7 +977,7 @@ class AdminGradeableController extends AbstractController {
                 $setter_name = 'set' . implode(
                     '',
                     array_map(function ($val) {
-                            return ucfirst($val);
+                        return ucfirst($val);
                     },
                     explode('_', $prop))
                 );
