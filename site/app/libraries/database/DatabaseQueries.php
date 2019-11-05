@@ -4070,14 +4070,11 @@ AND gc_id IN (
 
         // Select which subquery to use
         if($component_id != "-1") {
-
             // Use this sub query to select users who do not have a specific component within this gradable graded
             $sub_query = "(select gd_$id_string
                 from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id
                 where g_id = '$gradeable_id' and gc_id = $component_id);";
-
         } else {
-
             // Use this sub query to select users who have at least one component not graded
             $sub_query = "(select gradeable_data.gd_$id_string
              from gradeable_component_data left join gradeable_data on gradeable_component_data.gd_id = gradeable_data.gd_id

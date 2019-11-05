@@ -175,7 +175,6 @@ class HomeworkView extends AbstractView {
         // ------------------------------------------------------------
         // (IF LATE) PRINT LATE DAY INFORMATION
         if ($would_be_days_late > 0) {
-
             // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
             $new_late_charged = max(0, $would_be_days_late - $extensions);
 
@@ -183,7 +182,6 @@ class HomeworkView extends AbstractView {
             if ($active_version < 1 ||
                 ($new_late_charged <= $late_days_remaining &&
                     $new_late_charged <= $late_days_allowed)) {
-
                 // PRINT WOULD BE HOW MANY DAYS LATE
                 $messages[] = ['type' => 'would_late', 'info' => [
                     'late' => $would_be_days_late
@@ -275,7 +273,6 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-
             // Prepare notebook image data for displaying
             foreach ($notebook as $cell) {
                 if (isset($cell['type']) && $cell['type'] == "image")

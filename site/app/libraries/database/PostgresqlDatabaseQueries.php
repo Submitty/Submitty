@@ -1548,7 +1548,6 @@ SELECT round((AVG(score)),2) AS avg_score, round(stddev_pop(score), 2) AS std_de
             // Create the components
             $components = [];
             for ($i = 0; $i < count($unpacked_component_data['id']); ++$i) {
-
                 // Transpose a single component at a time
                 $component_data = [];
                 foreach ($component_properties as $property) {

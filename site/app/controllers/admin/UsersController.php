@@ -350,7 +350,6 @@ class UsersController extends AbstractController {
                     AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
                 }
             }
-
         }
         $this->core->redirect($return_url);
     }
@@ -513,7 +512,6 @@ class UsersController extends AbstractController {
                     }
                 }
                 ++$j;
-
             }
             for ($i = 0; $i < count($users);) {
                 $found_in = false;
@@ -694,7 +692,6 @@ class UsersController extends AbstractController {
                 $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
-
         } elseif ($content_type === 'text/csv' && $mime_type === 'text/plain') {
             $csv_file = $tmp_name;
         } else {

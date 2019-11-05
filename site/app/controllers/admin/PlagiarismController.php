@@ -185,7 +185,6 @@ class PlagiarismController extends AbstractController {
 
         if ($new_or_edit == "edit") {
             $return_url = $this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit']) . '?' . http_build_query(['gradeable_id' => $gradeable_id]);
-
         }
 
         if(file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json") || file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $gradeable_id . ".json")) {
@@ -623,7 +622,6 @@ class PlagiarismController extends AbstractController {
 
                             $userMatchesStarts[] = $user_2_matchingposition["start"];
                             $userMatchesEnds[] = $user_2_matchingposition["end"];
-
                         }
                     }
                 }
@@ -732,7 +730,6 @@ class PlagiarismController extends AbstractController {
                         $token_path_2 = $course_path . "/lichen/tokenized/" . $gradeable_id . "/" . $match_info['username'] . "/" . $match_info['version'] . "/tokens.json";
                         $tokens_user_2 = json_decode(file_get_contents($token_path_2), true);
                         foreach($match_info['matchingpositions'] as $matchingpos) {
-
                             array_push($matchingpositions, array("start_line" => $tokens_user_2[$matchingpos["start"] - 1]["line"] - 1 , "start_ch" => $tokens_user_2[$matchingpos["start"] - 1]["char"] - 1,
                                  "end_line" => $tokens_user_2[$matchingpos["end"] - 1]["line"] - 1, "end_ch" => $tokens_user_2[$matchingpos["end"] - 1]["char"] - 1 ));
                         }

@@ -140,7 +140,6 @@ class ElectronicGraderView extends AbstractView {
                     }
                     $section['graded'] = round($section['graded_components'] / $num_components, 1);
                     $section['total'] = $section['total_components'] / $num_components;
-
                 }
                 unset($section); // Clean up reference
 
@@ -287,7 +286,6 @@ HTML;
 				</tr>
 			</tbody>
 HTML;
-
         }
 
         $return .= <<<HTML
@@ -822,7 +820,6 @@ HTML;
                     <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
-
         }
 
         if(empty($threadIds)) {

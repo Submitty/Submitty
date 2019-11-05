@@ -130,7 +130,6 @@ class ConfigurationController extends AbstractController {
         }
         // Special validation for auto_rainbow_grades checkbox
         elseif($name === 'auto_rainbow_grades') {
-
             // Get a new customization json object
             $customization_json = new RainbowCustomizationJSON($this->core);
 
@@ -143,11 +142,9 @@ class ConfigurationController extends AbstractController {
                 }
                 // If no file exists do not allow user to enable this check mark until one is supplied
                 catch (\Exception $e) {
-
                     return Response::JsonOnlyResponse(
                         JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
                     );
-
                 }
             }
 

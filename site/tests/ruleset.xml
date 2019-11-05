@@ -49,9 +49,6 @@
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.Scope.MethodScope.Missing" />
-        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
-        <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
 

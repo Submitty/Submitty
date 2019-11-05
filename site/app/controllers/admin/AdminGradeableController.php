@@ -711,7 +711,6 @@ class AdminGradeableController extends AbstractController {
             foreach ($template_property_names as $name) {
                 $gradeable_create_data[$name] = $template_data[$name];
             }
-
         } else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
@@ -775,7 +774,6 @@ class AdminGradeableController extends AbstractController {
 
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-
             $jsonThreads = json_encode('{}');
             $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
 

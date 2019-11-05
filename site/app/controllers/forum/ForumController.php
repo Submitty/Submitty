@@ -303,7 +303,6 @@ class ForumController extends AbstractController {
                         $target_file = $post_dir . "/" . basename($_FILES["file_input"]["name"][$i]);
                         move_uploaded_file($_FILES["file_input"]["tmp_name"][$i], $target_file);
                     }
-
                 }
                 $full_course_name = $this->core->getFullCourseName();
                 $metadata = json_encode(array('url' => $this->core->buildCourseUrl(['forum', 'threads', $thread_id]), 'thread_id' => $thread_id));
@@ -642,7 +641,6 @@ class ForumController extends AbstractController {
         // Ensure authentication before call
         $new_post_content = $_POST["thread_post_content"];
         if(!empty($new_post_content)) {
-
             if(strlen($new_post_content) > ForumUtils::FORUM_CHAR_POST_LIMIT){
                 $this->core->addErrorMessage("Posts cannot be over " . ForumUtils::FORUM_CHAR_POST_LIMIT . " characters long");
                 return null;
@@ -958,8 +956,6 @@ class ForumController extends AbstractController {
             $users[$user]["timestamps"][] = DateUtils::parseDateTime($posts[$i]["timestamp"], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
-
-
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);

@@ -394,7 +394,6 @@ class Access {
             if ($grading_checks && self::checkBits($checks, self::CHECK_GRADEABLE_MIN_GROUP)) {
                 //Make sure they meet the minimum requirements
                 if (!$this->checkGroupPrivilege($group, $gradeable->getMinGradingGroup())) {
-
                     if (
                         //Full access graders are allowed to view submissions if there is no manual grading
                         !($group === User::GROUP_FULL_ACCESS_GRADER && !$gradeable->isTaGrading())
@@ -402,7 +401,6 @@ class Access {
                         //Students are allowed to see this if its a peer graded assignment
                         !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
                        ) {
-
                         //Otherwise, you're not allowed
                         $grading_checks = false;
                     }

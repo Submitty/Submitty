@@ -76,7 +76,6 @@ class OfficeHoursQueueController extends AbstractController {
                 }else{
                     $this->core->addErrorMessage("Unable to add to queue");
                 }
-
             }else{
                 $this->core->addErrorMessage("You are already in the queue");
             }
@@ -88,7 +87,6 @@ class OfficeHoursQueueController extends AbstractController {
             }elseif(!$this->core->getQueries()->isQueueOpen()){
                 $this->core->addErrorMessage("Queue is closed");
             }
-
         }
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))

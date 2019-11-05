@@ -244,7 +244,6 @@ class GradeInquiryController extends AbstractController {
                     $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
                     $body = "A student has made a post in a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 }
-
             } elseif ($type == 'resolve') {
                 if ($this->core->getUser()->accessGrading()) {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
