@@ -81,7 +81,7 @@ class GradeableList extends AbstractModel {
             if ($gradeable->getGradeReleasedDate() <= $this->now) {
                 $this->graded_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
+            elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && !$gradeable->hasDueDate()) {
                 // Filter out gradeables with no due date
                 if ($gradeable->isStudentSubmit()) {
                     if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
@@ -96,23 +96,23 @@ class GradeableList extends AbstractModel {
                     $this->grading_gradeables[$gradeable->getId()] = $gradeable;
                 }
             }
-            else if ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading()) ||
+            elseif ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading()) ||
                     $gradeable->getType() !== GradeableType::ELECTRONIC_FILE) &&
                     $gradeable->getGradeStartDate() <= $this->now) {
                 $this->grading_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
+            elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
                 $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getSubmissionDueDate() <= $this->now) {
                 $this->closed_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
+            elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
                 $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) {
                 $this->open_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ($this->core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $this->now) {
+            elseif ($this->core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $this->now) {
                 $this->beta_gradeables[$gradeable->getId()] = $gradeable;
             }
-            else if ($this->core->getUser()->accessAdmin()) {
+            elseif ($this->core->getUser()->accessAdmin()) {
                 $this->future_gradeables[$gradeable->getId()] = $gradeable;
             }
         }
@@ -128,7 +128,7 @@ class GradeableList extends AbstractModel {
             // We have to use @ since on calling Mocked PHPUnit classes within this
             // causes a warning to be raised as the mocked object tracks some debug
             // information which changes the internal object in PHP < 7.0. Annoying!
-            @uasort($this->$list, function(Gradeable $a, Gradeable $b) use ($function) {
+            @uasort($this->$list, function (Gradeable $a, Gradeable $b) use ($function) {
                 if ($a->$function() == $b->$function()) {
                     if ($a->getId() < $b->getId()) {
                         return -1;
@@ -161,7 +161,7 @@ class GradeableList extends AbstractModel {
             if ($type !== null && $gradeable->getType() === $type) {
                 return $gradeable;
             }
-            else if ($type === null) {
+            elseif ($type === null) {
                 return $gradeable;
             }
         }

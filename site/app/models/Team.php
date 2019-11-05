@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\models\gradeable\Gradeable;
@@ -63,7 +64,7 @@ class Team extends AbstractModel {
                     $this->member_users[] = $user;
                 }
             }
-            else if ($user_details['state'] === 0) {
+            elseif ($user_details['state'] === 0) {
                 $this->invited_user_ids[] = $user_details['user_id'];
                 if ($user !== null) {
                     $this->invited_users[] = $user;

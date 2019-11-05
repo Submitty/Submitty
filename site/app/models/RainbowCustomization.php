@@ -1,4 +1,5 @@
 <?php
+
 namespace app\models;
 
 use app\exceptions\ValidationException;
@@ -15,7 +16,7 @@ use app\libraries\GradeableType;
  * This class is a RainbowGrades Customization.  It may contain the data found in customization.json but it also
  * contains additional data that is used by the web user interface to aid in generation/customization.
  */
-class RainbowCustomization extends AbstractModel{
+class RainbowCustomization extends AbstractModel {
     /**/
     protected $core;
     private $customization_data = [];
@@ -64,7 +65,7 @@ class RainbowCustomization extends AbstractModel{
         }
     }
 
-    public function buildCustomization(){
+    public function buildCustomization() {
 
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
         foreach (self::syllabus_buckets as $bucket){
@@ -88,7 +89,7 @@ class RainbowCustomization extends AbstractModel{
             $max_score = $gradeable->getTAPoints();
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
             if ($gradeable->hasAutogradingConfig()){
-                $last_index = count($this->customization_data[$bucket])-1;
+                $last_index = count($this->customization_data[$bucket]) - 1;
                 $max_score += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
 
@@ -112,7 +113,7 @@ class RainbowCustomization extends AbstractModel{
         }
 
         //XXX: Assuming that the contents of these buckets will be lowercase
-        $this->available_buckets = array_diff(self::syllabus_buckets,$this->used_buckets);
+        $this->available_buckets = array_diff(self::syllabus_buckets, $this->used_buckets);
     }
 
     /**
@@ -128,8 +129,7 @@ class RainbowCustomization extends AbstractModel{
      *
      * @return array
      */
-    public function getBucketPercentages()
-    {
+    public function getBucketPercentages() {
         $retArray = [];
 
         if(!is_null($this->RCJSON))
@@ -154,20 +154,19 @@ class RainbowCustomization extends AbstractModel{
         return $retArray;
     }
 
-    public function getCustomizationData(){
+    public function getCustomizationData() {
         return $this->customization_data;
     }
 
-    public function getAvailableBuckets(){
+    public function getAvailableBuckets() {
         return $this->available_buckets;
     }
 
-    public function getUsedBuckets(){
+    public function getUsedBuckets() {
         return $this->used_buckets;
     }
 
-    public function getMessages()
-    {
+    public function getMessages() {
         $messages = !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
 
         return $messages;
@@ -181,8 +180,7 @@ class RainbowCustomization extends AbstractModel{
      *
      * @return array multidimensional array of display benchmark data
      */
-    public function getDisplayBenchmarks()
-    {
+    public function getDisplayBenchmarks() {
         // Get allowed benchmarks
         $displayBenchmarks = RainbowCustomizationJSON::allowed_display_benchmarks;
         $retArray = [];
@@ -195,7 +193,7 @@ class RainbowCustomization extends AbstractModel{
         // Add data into retArray
         foreach ($displayBenchmarks as $displayBenchmark)
         {
-            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = True : $isUsed = False;
+            in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = true : $isUsed = false;
 
             // Add benchmark to return array
             $retArray[] = ['id' => $displayBenchmark, 'isUsed' => $isUsed];
@@ -214,8 +212,7 @@ class RainbowCustomization extends AbstractModel{
      *
      * @return object The object mapping section ids to labels
      */
-    public function getSectionsAndLabels()
-    {
+    public function getSectionsAndLabels() {
         // Get sections from db
         $db = new DatabaseQueries($this->core);
         $db_sections = $db->getRegistrationSections();
@@ -260,7 +257,7 @@ class RainbowCustomization extends AbstractModel{
     }
 
     // This function handles processing the incoming post data
-    public function processForm(){
+    public function processForm() {
 
         // Get a new customization file
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
@@ -329,11 +326,11 @@ class RainbowCustomization extends AbstractModel{
 //        throw new ValidationException('Debug Rainbow Grades error', $this->error_messages);
     }
 
-    public function error(){
+    public function error() {
         return $this->has_error;
     }
 
-    public function getErrorMessages(){
+    public function getErrorMessages() {
         return $this->error_messages;
     }
 }

@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\libraries\GradeableType;
 use app\models\AbstractModel;
@@ -56,8 +55,12 @@ class LateDays extends AbstractModel {
 
         // Construct late days info for each gradeable
         foreach ($graded_gradeables as $graded_gradeable) {
-            $info = new LateDayInfo($core, $user, $graded_gradeable,
-                $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate()));
+            $info = new LateDayInfo(
+                $core,
+                $user,
+                $graded_gradeable,
+                $this->getLateDaysRemainingByContext($graded_gradeable->getGradeable()->getSubmissionDueDate())
+            );
             $this->late_day_info[$graded_gradeable->getGradeableId()] = $info;
         }
     }
@@ -203,7 +206,9 @@ class LateDays extends AbstractModel {
                     'timestamp' => $update['since_timestamp'],
                     'update' => $update
                 ];
-            }, $this->late_days_updates));
+            },
+            $this->late_days_updates)
+        );
 
         // Sort by 'timestamp'
         usort($late_day_events, function ($e1, $e2) {
@@ -226,7 +231,7 @@ class LateDays extends AbstractModel {
                 // Due to the way getLateDaysCharged works, this subtraction should never make the
                 //  count go below zero (if it does, fix getLateDaysCharged)
                 $late_days_remaining -= $info->getLateDaysCharged();
-            } else if (isset($event['update'])) {
+            } elseif (isset($event['update'])) {
                 // Late days update event, so add the difference between the new and old
                 //  available count and add that to the late days remaining.
                 //  Clamp to 0 to ensure that subtractions don't make us go below zero

@@ -27,16 +27,16 @@ class SimpleGraderController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/grading/print", methods={"GET"})
      * @return Response
      */
-    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id"){
+    public function printLab($gradeable_id, $section = null, $section_type = null, $sort = "id") {
         //convert from id --> u.user_id etc for use by the database.
         if ($sort === "id") {
             $sort_by = "u.user_id";
         }
-        else if($sort === "first"){
-            $sort_by = "coalesce(u.user_preferred_firstname, u.user_firstname)";
+        elseif($sort === "first"){
+            $sort_by = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
         else {
-            $sort_by = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            $sort_by = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
         }
 
         //Figure out what section we are supposed to print
@@ -121,10 +121,10 @@ class SimpleGraderController extends AbstractController {
             $sort_key = "u.user_id";
         }
         elseif ($sort === "first") {
-            $sort_key = "coalesce(u.user_preferred_firstname, u.user_firstname)";
+            $sort_key = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
         else {
-            $sort_key = "coalesce(u.user_preferred_lastname, u.user_lastname)";
+            $sort_key = "coalesce(NULLIF(u.user_preferred_lastname, ''), u.user_lastname)";
         }
 
         if ($gradeable->isGradeByRegistration()) {
@@ -151,7 +151,7 @@ class SimpleGraderController extends AbstractController {
         foreach ($sections as $section) {
             $students = array_merge($students, $section->getUsers());
         }
-        $student_ids = array_map(function(User $user) {
+        $student_ids = array_map(function (User $user) {
             return $user->getId();
         }, $students);
 
@@ -205,11 +205,11 @@ class SimpleGraderController extends AbstractController {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid gradeable ID")
             );
-        } else if ($user === null) {
+        } elseif ($user === null) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid user ID")
             );
-        } else if (!isset($_POST['scores']) || empty($_POST['scores'])) {
+        } elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Didn't submit any scores")
             );

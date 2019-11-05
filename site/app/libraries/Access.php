@@ -183,7 +183,7 @@ class Access {
         $this->permissions["path.write.checkout"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results"] = self::DENY_ALL | self::CHECK_CSRF;
         $this->permissions["path.write.results_public"] = self::DENY_ALL | self::CHECK_CSRF;
-        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF| self::CHECK_FILE_DIRECTORY;
+        $this->permissions["path.write.course_materials"] = self::ALLOW_MIN_INSTRUCTOR  | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.rainbow_grades"] = self::ALLOW_INSTRUCTOR | self::CHECK_CSRF | self::CHECK_FILE_DIRECTORY;
         $this->permissions["path.write.forum_attachments"] = self::ALLOW_MIN_STUDENT | self::CHECK_CSRF;
 
@@ -352,11 +352,11 @@ class Access {
         //Check user group first
         if ($group === User::GROUP_STUDENT && !self::checkBits($checks, self::ALLOW_STUDENT)) {
             return false;
-        } else if ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
+        } elseif ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
             return false;
-        } else if ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
+        } elseif ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
             return false;
-        } else if ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
+        } elseif ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
             return false;
         }
 
@@ -521,11 +521,11 @@ class Access {
                     return false;
                 }
                 // only students with a non-null registration section should be able to view courses (and only active==1 courses)
-                else if($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                elseif($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
                     return false;
                 }
                 // no one can view courses with status greater than 2
-                else if ($course_status > 2) {
+                elseif ($course_status > 2) {
                     return false;
                 }
             }
@@ -748,7 +748,7 @@ class Access {
                             //If we already have a graded gradeable in the args, make sure this file
                             // actually belongs to it
                             $graded_gradeable = $args["graded_gradeable"];
-                        } else if (array_key_exists("gradeable", $args)) {
+                        } elseif (array_key_exists("gradeable", $args)) {
                             $gradeable = $args["gradeable"];
                             $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
                             $args["graded_gradeable"] = $graded_gradeable;

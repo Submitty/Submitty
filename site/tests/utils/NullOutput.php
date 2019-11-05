@@ -1,11 +1,13 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace tests\utils;
 
 use app\libraries\Core;
 use app\libraries\Output;
 
-class NullOutput extends Output{
+class NullOutput extends Output {
     private $twig_output = [];
 
     public function loadTwig($full_load = true) {

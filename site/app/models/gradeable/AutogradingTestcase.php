@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
@@ -58,8 +57,7 @@ class AutogradingTestcase extends AbstractModel {
         $this->testcase_label = $testcase['testcase_label'] ?? '';
     }
 
-    public function getTestcaseLabel()
-    {
+    public function getTestcaseLabel() {
         return $this->testcase_label;
     }
 

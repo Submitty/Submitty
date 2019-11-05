@@ -78,7 +78,7 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) ||  (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d";
                 $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
@@ -194,19 +194,19 @@ class LateController extends AbstractController {
                 }
             }
             if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
-                $this->core->addNoticeMessage("User already has " . $late_days ." extensions; no changes made");
+                $this->core->addNoticeMessage("User already has " . $late_days . " extensions; no changes made");
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
-            if($team != NULL && $team->getSize() > 1){
+            if($team != null && $team->getSize() > 1){
                 if($option == 0){
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
-                } else if($option == 1){
+                } elseif($option == 1){
                     $team_member_ids = explode(", ", $team->getMemberList());
                     for($i = 0; $i < count($team_member_ids); $i++) {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
@@ -220,8 +220,10 @@ class LateController extends AbstractController {
                         $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
                             $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
                     }
-                    $popup_html = $this->core->getOutput()->renderTwigTemplate("admin/users/MoreExtensions.twig",
-                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]);
+                    $popup_html = $this->core->getOutput()->renderTwigTemplate(
+                        "admin/users/MoreExtensions.twig",
+                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
+                    );
                     return Response::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );
@@ -237,7 +239,7 @@ class LateController extends AbstractController {
     /**
      * @return Response
      */
-    private function getLateDays(){
+    private function getLateDays() {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = array();
         foreach($users as $user){
@@ -273,7 +275,7 @@ class LateController extends AbstractController {
         foreach($rows as $row) {
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
-            $fields = array_map(function($k) {
+            $fields = array_map(function ($k) {
                 return trim($k);
             }, $fields);
 

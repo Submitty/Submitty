@@ -113,6 +113,12 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
+@media (max-width: 541px) {
+    #moorthy-duck{
+        display: none;
+    }
+}
+
 @media (min-width: 541px) {
     #home-button, #logout-button {
         display: none;
@@ -137,4 +143,14 @@ footer .footer-separator {
         min-width: 450px;
         transform: translateX(-50%);
     }
+}
+
+.loading-bar-wrapper{
+    padding-left: 3px;
+    margin-bottom: 5px;
+    display: none;
+}
+
+#loading-bar-percentage{
+    margin-left: 10px;
 }

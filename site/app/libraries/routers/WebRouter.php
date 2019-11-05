@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\libraries\routers;
 
 use app\libraries\response\RedirectResponse;
@@ -17,7 +16,6 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
-
 
 class WebRouter {
     /** @var Core  */
@@ -49,7 +47,6 @@ class WebRouter {
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
-
         $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         $this->parameters = $matcher->matchRequest($this->request);
     }
@@ -59,7 +56,7 @@ class WebRouter {
      * @param Core $core
      * @return Response|mixed should be of type Response only in the future
      */
-    static public function getApiResponse(Request $request, Core $core) {
+    public static function getApiResponse(Request $request, Core $core) {
         try {
             $router = new self($request, $core);
             $router->loadCourse();
@@ -104,7 +101,7 @@ class WebRouter {
      * @return Response|mixed should be of type Response only in the future
      * @throws \ReflectionException|\Exception
      */
-    static public function getWebResponse(Request $request, Core $core) {
+    public static function getWebResponse(Request $request, Core $core) {
         $logged_in = false;
         try {
             $router = new self($request, $core);
@@ -138,6 +135,7 @@ class WebRouter {
                 );
             }
             else {
+
                 return Response::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );

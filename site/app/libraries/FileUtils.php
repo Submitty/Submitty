@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\exceptions\FileReadException;
 
 /**
@@ -27,8 +28,8 @@ class FileUtils {
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
-        $skip_files = array_map(function($str) {
+    public static function getAllFiles(string $dir, array $skip_files = [], bool $flatten = false): array {
+        $skip_files = array_map(function ($str) {
             return strtolower($str);
         }, $skip_files);
 
@@ -51,15 +52,15 @@ class FileUtils {
                     $temp = FileUtils::getAllFiles($path, $skip_files, $flatten);
                     if ($flatten) {
                         foreach ($temp as $file => $details) {
-                            $details['relative_name'] = $entry."/".$details['relative_name'];
-                            $return[$entry."/".$file] = $details;
+                            $details['relative_name'] = $entry . "/" . $details['relative_name'];
+                            $return[$entry . "/" . $file] = $details;
                         }
                     }
                     else {
                         $return[$entry] = ['files' => $temp, 'path' => $path];
                     }
                 }
-                else if (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
+                elseif (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
                     // add file to array
                     $return[$entry] = [
                         'name' => $entry,
@@ -129,7 +130,7 @@ class FileUtils {
                     copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
@@ -144,7 +145,7 @@ class FileUtils {
      * off the string.
      */
     public static function getAllFilesTrimSearchPath(string $search_path, int $path_length): array {
-        $files = array_map(function($entry) use ($path_length) {
+        $files = array_map(function ($entry) use ($path_length) {
             return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
         }, array_values(FileUtils::getAllFiles($search_path, [], true)));
         return $files;
@@ -377,7 +378,7 @@ class FileUtils {
         }
 
         $sep = DIRECTORY_SEPARATOR;
-        return preg_replace('#'.preg_quote($sep).'+#', $sep, join($sep, $paths));
+        return preg_replace('#' . preg_quote($sep) . '+#', $sep, join($sep, $paths));
     }
 
     /**
@@ -391,7 +392,7 @@ class FileUtils {
      * @param $filename
      * @return null|string
      */
-    public static function getContentType($filename){
+    public static function getContentType($filename) {
         if ($filename === null) {
             return null;
         }
@@ -490,7 +491,7 @@ class FileUtils {
      */
     public static function validateUploadedFiles($files) {
         if (empty($files)) {
-           return array("failed" => "No files sent to validate");
+            return array("failed" => "No files sent to validate");
         }
 
         $ret = array();
@@ -522,8 +523,8 @@ class FileUtils {
 
             $ret[] = [
                 'name' => $name,
-                'type'=> $type,
-                'error'=> $err_msg,
+                'type' => $type,
+                'error' => $err_msg,
                 'size' => $size,
                 'success' => $success
             ];

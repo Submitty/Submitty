@@ -53,7 +53,8 @@ class ConfigurationController extends AbstractController {
             'submitty_admin_user'            => $this->core->getConfig()->getSubmittyAdminUser(),
             'submitty_admin_user_verified'   => $this->core->getConfig()->isSubmittyAdminUserVerified(),
             'submitty_admin_user_in_course'  => $this->core->getConfig()->isSubmittyAdminUserInCourse(),
-            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades()
+            'auto_rainbow_grades'            => $this->core->getConfig()->getAutoRainbowGrades(),
+            'queue_enabled'                  => $this->core->getConfig()->isQueueEnabled(),
         );
         $categoriesCreated = empty($this->core->getQueries()->getCategories());
 
@@ -102,7 +103,7 @@ class ConfigurationController extends AbstractController {
                 );
             }
         }
-        else if(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+        elseif(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
             if(!ctype_digit($entry)) {
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Must enter a number for this field')
@@ -110,14 +111,17 @@ class ConfigurationController extends AbstractController {
             }
             $entry = intval($entry);
         }
-        else if(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
+        elseif(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
                                       'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
             $entry = $entry === "true" ? true : false;
+        }elseif($name === 'queue_enabled'){
+            $entry = $entry === "true" ? true : false;
+            $this->core->getQueries()->genQueueSettings();
         }
-        else if($name === 'upload_message') {
+        elseif($name === 'upload_message') {
             $entry = nl2br($entry);
         }
-        else if($name == "course_home_url") {
+        elseif($name == "course_home_url") {
             if(!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)){
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($entry . ' is not a valid URL')
@@ -125,7 +129,7 @@ class ConfigurationController extends AbstractController {
             }
         }
         // Special validation for auto_rainbow_grades checkbox
-        else if($name === 'auto_rainbow_grades') {
+        elseif($name === 'auto_rainbow_grades') {
 
             // Get a new customization json object
             $customization_json = new RainbowCustomizationJSON($this->core);
@@ -184,7 +188,7 @@ class ConfigurationController extends AbstractController {
 
         $seating_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'reports', 'seating');
 
-        $gradeable_seating_options = array_filter($gradeable_seating_options, function($seating_option) use($seating_dir) {
+        $gradeable_seating_options = array_filter($gradeable_seating_options, function ($seating_option) use ($seating_dir) {
             return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
         });
 
