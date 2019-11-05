@@ -187,7 +187,7 @@ class MiscController extends AbstractController {
 
         if ($dir == 'submissions') {
             //cannot download scanned images for bulk uploads
-            if (strpos(basename($path), "upload_page_" ) !== false &&
+            if (strpos(basename($path), "upload_page_") !== false &&
                 FileUtils::getContentType($path) !== "application/pdf") {
 
                 $this->core->getOutput()->showError("You do not have access to this file");
@@ -356,8 +356,11 @@ class MiscController extends AbstractController {
         $zip = new \ZipArchive();
         $zip->open($zip_name, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
         foreach ($paths as $path) {
-            $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), $path,
-                $gradeable->getId());
+            $gradeable_path = FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                $path,
+                $gradeable->getId()
+            );
             if($type === "all") {
                 $zip->addEmptyDir($path);
                 if (file_exists($gradeable_path)) {
@@ -399,8 +402,10 @@ class MiscController extends AbstractController {
                 }
                 else {
                     $section_key = "rotating_section";
-                    $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(),
-                        $this->core->getUser()->getId());
+                    $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser(
+                        $gradeable->getId(),
+                        $this->core->getUser()->getId()
+                    );
                     $students = $this->core->getQueries()->getUsersByRotatingSections($sections);
                 }
                 $students_array = array();

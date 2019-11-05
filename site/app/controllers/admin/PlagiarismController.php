@@ -690,7 +690,7 @@ class PlagiarismController extends AbstractController {
             foreach($content as $match) {
                 if($match["type"] == "match") {
                     foreach ($match["others"] as $match_info) {
-                        if(!in_array(array($match_info["username"],$match_info["version"]), $return )) {
+                        if(!in_array(array($match_info["username"],$match_info["version"]), $return)) {
                             array_push($return, array($match_info["username"],$match_info["version"]));
                         }
                     }

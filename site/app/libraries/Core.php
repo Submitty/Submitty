@@ -126,7 +126,7 @@ class Core {
         if (!empty($semester) && !empty($course)) {
             $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
             $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
-            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
+            if (file_exists($course_json_path) && is_readable($course_json_path)) {
                 $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
             else{
@@ -211,8 +211,11 @@ class Core {
             throw new \Exception("Need to load the config before we can initialize the grading queue");
         }
 
-        $this->grading_queue = new GradingQueue($this->config->getSemester(),
-            $this->config->getCourse(), $this->config->getSubmittyPath());
+        $this->grading_queue = new GradingQueue(
+            $this->config->getSemester(),
+            $this->config->getCourse(),
+            $this->config->getSubmittyPath()
+        );
     }
 
     /**

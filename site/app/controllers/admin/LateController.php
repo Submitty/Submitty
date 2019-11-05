@@ -220,8 +220,10 @@ class LateController extends AbstractController {
                         $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
                             $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
                     }
-                    $popup_html = $this->core->getOutput()->renderTwigTemplate("admin/users/MoreExtensions.twig",
-                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]);
+                    $popup_html = $this->core->getOutput()->renderTwigTemplate(
+                        "admin/users/MoreExtensions.twig",
+                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
+                    );
                     return Response::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );

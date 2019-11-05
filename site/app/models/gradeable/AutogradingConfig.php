@@ -320,10 +320,12 @@ class AutogradingConfig extends AbstractModel {
      * @return bool
      */
     public function anyPoints() {
-        return max($this->total_hidden_non_extra_credit,
-                $this->total_non_hidden_non_extra_credit,
-                $this->total_hidden_extra_credit,
-                $this->total_non_hidden_extra_credit) > 0;
+        return max(
+            $this->total_hidden_non_extra_credit,
+            $this->total_non_hidden_non_extra_credit,
+            $this->total_hidden_extra_credit,
+            $this->total_non_hidden_extra_credit
+        ) > 0;
     }
 
     /**

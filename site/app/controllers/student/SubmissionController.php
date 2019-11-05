@@ -99,8 +99,11 @@ class SubmissionController extends AbstractController {
             $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
             $this->core->getOutput()->addBreadcrumb($gradeable->getTitle(), $url);
             if (!$gradeable->hasAutogradingConfig()) {
-                $this->core->getOutput()->renderOutput('Error',
-                                                       'unbuiltGradeable', $gradeable->getTitle());
+                $this->core->getOutput()->renderOutput(
+                    'Error',
+                    'unbuiltGradeable',
+                    $gradeable->getTitle()
+                );
                 $error = true;
             }
             else {
@@ -127,8 +130,15 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->addInternalCss('grade-inquiry.css');
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
-                $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
+                $this->core->getOutput()->renderOutput(
+                    array('submission', 'Homework'),
+                    'showGradeable',
+                    $gradeable,
+                    $graded_gradeable,
+                    $version,
+                    $can_inquiry ?? false,
+                    $show_hidden
+                );
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -436,8 +446,11 @@ class SubmissionController extends AbstractController {
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
 
-        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
-            $gradeable->getId());
+        $gradeable_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "submissions",
+            $gradeable->getId()
+        );
 
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -519,7 +532,7 @@ class SubmissionController extends AbstractController {
         //images are order <original>_<split-number>_<page-number>, so grab everuthing with the same suffixes
         preg_match("/\d*$/", pathinfo($path, PATHINFO_FILENAME), $matches);
         $split_number = count($matches) >= 1 ? reset($matches) : "-1";
-        $image_files = glob(FileUtils::joinPaths(  dirname($uploaded_file), "*.*"));
+        $image_files = glob(FileUtils::joinPaths(dirname($uploaded_file), "*.*"));
 
         $regex = "/.*_{$split_number}_\d*\.\w*$/";
         $image_files = preg_grep($regex, $image_files);
@@ -569,7 +582,7 @@ class SubmissionController extends AbstractController {
             $i = 1;
             foreach ($image_files as $image) {
                 // copy over the uploaded image
-                if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension ))) {
+                if (!@copy($image, FileUtils::joinPaths($version_path, "upload_page_" . $i . "." . $image_extension))) {
                     return $this->uploadResult("Failed to copy uploaded image {$image} to current submission.", false);
                 }
                 if (!@unlink($image)) {
@@ -582,8 +595,13 @@ class SubmissionController extends AbstractController {
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
         $timestamp = substr($path, 0, strpos($path, DIRECTORY_SEPARATOR));
-        $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
-            $gradeable->getId(), $timestamp);
+        $timestamp_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "uploads",
+            "split_pdf",
+            $gradeable->getId(),
+            $timestamp
+        );
         $files = FileUtils::getAllFiles($timestamp_path);
         if (count($files) == 0) {
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
@@ -634,8 +652,11 @@ class SubmissionController extends AbstractController {
 
         $queue_file = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
             $gradeable->getId(), $who_id, $new_version);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-            implode("__", $queue_file));
+        $queue_file = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyPath(),
+            "to_be_graded_queue",
+            implode("__", $queue_file)
+        );
 
         $vcs_checkout = isset($_REQUEST['vcs_checkout']) ? $_REQUEST['vcs_checkout'] === "true" : false;
 
@@ -690,8 +711,13 @@ class SubmissionController extends AbstractController {
 
         $path = rawurldecode(htmlspecialchars_decode($_POST['path']));
 
-        $uploaded_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
-            $gradeable->getId(), $path);
+        $uploaded_file = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "uploads",
+            "split_pdf",
+            $gradeable->getId(),
+            $path
+        );
 
         $uploaded_file = rawurldecode(htmlspecialchars_decode($uploaded_file));
 
@@ -705,8 +731,13 @@ class SubmissionController extends AbstractController {
 
         // delete timestamp folder if empty
         $timestamp = substr($path, 0, strpos($path, DIRECTORY_SEPARATOR));
-        $timestamp_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "split_pdf",
-            $gradeable->getId(), $timestamp);
+        $timestamp_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "uploads",
+            "split_pdf",
+            $gradeable->getId(),
+            $timestamp
+        );
         $files = FileUtils::getAllFiles($timestamp_path);
         if(count($files) === 0){
             if (!FileUtils::recursiveRmdir($timestamp_path)) {
@@ -778,8 +809,11 @@ class SubmissionController extends AbstractController {
         }
 
         $graded_gradeable = $this->core->getQueries()->getGradedGradeable($gradeable, $user_id, null);
-        $gradeable_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
-            $gradeable->getId());
+        $gradeable_path = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "submissions",
+            $gradeable->getId()
+        );
 
         /*
          * Perform checks on the following folders (and whether or not they exist):
@@ -1187,8 +1221,11 @@ class SubmissionController extends AbstractController {
         $queue_file_helper = array($this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(),
                                    $gradeable->getId(), $who_id, $new_version);
         $queue_file_helper = implode("__", $queue_file_helper);
-        $queue_file = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), "to_be_graded_queue",
-                                           $queue_file_helper);
+        $queue_file = FileUtils::joinPaths(
+            $this->core->getConfig()->getSubmittyPath(),
+            "to_be_graded_queue",
+            $queue_file_helper
+        );
         // SPECIAL NAME FOR QUEUE FILE OF VCS GRADEABLES
         $vcs_queue_file = "";
         if ($vcs_checkout === true) {
@@ -1354,8 +1391,13 @@ class SubmissionController extends AbstractController {
         $original_user_id = $this->core->getUser()->getId();
         $submitter_id = $graded_gradeable->getSubmitter()->getId();
 
-        $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions",
-            $gradeable->getId(), $submitter_id, "user_assignment_settings.json");
+        $settings_file = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "submissions",
+            $gradeable->getId(),
+            $submitter_id,
+            "user_assignment_settings.json"
+        );
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
             $msg = "Failed to open settings file.";
@@ -1432,14 +1474,24 @@ class SubmissionController extends AbstractController {
             }
         }
 
-        $filepath = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "results", $gradeable_id,
-            $submitter_id, $gradeable_version, "results.json");
+        $filepath = FileUtils::joinPaths(
+            $this->core->getConfig()->getCoursePath(),
+            "results",
+            $gradeable_id,
+            $submitter_id,
+            $gradeable_version,
+            "results.json"
+        );
 
         $results_json_exists = file_exists($filepath);
 
         // if the results json exists, check the database to make sure that the autograding results are there.
         $has_results = $results_json_exists && $this->core->getQueries()->getGradeableVersionHasAutogradingResults(
-            $gradeable_id, $gradeable_version, $user_id, $team_id);
+            $gradeable_id,
+            $gradeable_version,
+            $user_id,
+            $team_id
+        );
 
         if ($has_results) {
             $refresh_string = "REFRESH_ME";

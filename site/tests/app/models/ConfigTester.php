@@ -202,8 +202,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayCustomMessage());
         $this->assertFalse($config->keepPreviousFiles());
         $this->assertFalse($config->displayRainbowGradesSummary());
-        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
-            $config->getCourseJsonPath());
+        $this->assertEquals(
+            FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
+            $config->getCourseJsonPath()
+        );
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());

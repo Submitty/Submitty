@@ -733,15 +733,17 @@ class ForumController2 extends AbstractController {
             $categories_ids[] = (int)$category_id;
         }
 
-        $result = $this->core->getForum()->publish( [   'title'              => $title,
-                                                        'content'            => $thread_post_content,
-                                                        'anon'               => $anon,
-                                                        'status'             => $thread_status,
-                                                        'announcement'       => $announcement,
-                                                        'email_announcement' => $email_announcement,
-                                                        'categories'         => $categories_ids,
-                                                        'parent_id'          => -1,
-                                                        'thread_id'          => -1 ], true );
+        $result = $this->core->getForum()->publish([
+            'title'              => $title,
+            'content'            => $thread_post_content,
+            'anon'               => $anon,
+            'status'             => $thread_status,
+            'announcement'       => $announcement,
+            'email_announcement' => $email_announcement,
+            'categories'         => $categories_ids,
+            'parent_id'          => -1,
+            'thread_id'          => -1
+        ], true);
 
         if($result) {
             //We published with success!
@@ -759,10 +761,12 @@ class ForumController2 extends AbstractController {
         $anon = !empty($_POST['Anon']) ? true : false;
 
 
-        return $this->core->getForum()->publish( [ 'content'   => $post_content,
-                                                   'anon'      => $anon,
-                                                   'thread_id' => $thread_id,
-                                                   'parent_id' => $parent_id ], false );
+        return $this->core->getForum()->publish([
+            'content'   => $post_content,
+            'anon'      => $anon,
+            'thread_id' => $thread_id,
+            'parent_id' => $parent_id
+        ], false);
     }
 
 

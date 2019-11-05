@@ -398,10 +398,25 @@ class ElectronicGraderController extends AbstractController {
             $total_students_submitted = 0;
         }
 
-        $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'statusPage', $gradeable, $sections,
-            $component_averages, $autograded_average, $overall_scores, $overall_average, $total_submissions, $individual_viewed_grade ?? 0,
-            $total_students_submitted, $registered_but_not_rotating, $rotating_but_not_registered, $viewed_grade,
-            $section_key, $regrade_requests, $show_warnings);
+        $this->core->getOutput()->renderOutput(
+            array('grading', 'ElectronicGrader'),
+            'statusPage',
+            $gradeable,
+            $sections,
+            $component_averages,
+            $autograded_average,
+            $overall_scores,
+            $overall_average,
+            $total_submissions,
+            $individual_viewed_grade ?? 0,
+            $total_students_submitted,
+            $registered_but_not_rotating,
+            $rotating_but_not_registered,
+            $viewed_grade,
+            $section_key,
+            $regrade_requests,
+            $show_warnings
+        );
     }
 
     /**
@@ -1298,8 +1313,16 @@ class ElectronicGraderController extends AbstractController {
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $this->saveGradedComponent($ta_graded_gradeable, $graded_component, $grader, $custom_points,
-                $custom_message, $marks, $component_version, !$silent_edit);
+            $this->saveGradedComponent(
+                $ta_graded_gradeable,
+                $graded_component,
+                $grader,
+                $custom_points,
+                $custom_message,
+                $marks,
+                $component_version,
+                !$silent_edit
+            );
             $this->core->getOutput()->renderJsonSuccess();
         } catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
@@ -1589,8 +1612,18 @@ class ElectronicGraderController extends AbstractController {
             $page = $gradeable->isPdfUpload() ? ($gradeable->isStudentPdfUpload() ? Component::PDF_PAGE_STUDENT : 1) : Component::PDF_PAGE_NONE;
 
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $component = $gradeable->addComponent('Problem ' . strval(count($gradeable->getComponents()) + 1), '', '', 0, 0,
-                0, 0, false, false, $page);
+            $component = $gradeable->addComponent(
+                'Problem ' . strval(count($gradeable->getComponents()) + 1),
+                '',
+                '',
+                0,
+                0,
+                0,
+                0,
+                false,
+                false,
+                $page
+            );
             $component->addMark('No Credit', 0.0, false);
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
@@ -1814,8 +1847,16 @@ class ElectronicGraderController extends AbstractController {
             $can_view_hidden = $this->core->getAccess()->canI("autograding.show_hidden_cases", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable]);
             $popup_css = "diff-viewer.css";
             $this->core->getOutput()->renderJsonSuccess(
-                $this->core->getOutput()->renderTemplate('AutoGrading', 'loadAutoChecks',
-                    $graded_gradeable, $version_instance, $testcase, $popup_css, $who_id, $can_view_hidden)
+                $this->core->getOutput()->renderTemplate(
+                    'AutoGrading',
+                    'loadAutoChecks',
+                    $graded_gradeable,
+                    $version_instance,
+                    $testcase,
+                    $popup_css,
+                    $who_id,
+                    $can_view_hidden
+                )
             );
         } catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());

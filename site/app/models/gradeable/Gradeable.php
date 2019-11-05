@@ -417,8 +417,12 @@ class Gradeable extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
 
         try {
-            $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
-                "build_{$this->id}.json"));
+            $details = FileUtils::readJsonFile(FileUtils::joinPaths(
+                $course_path,
+                'config',
+                'build',
+                "build_{$this->id}.json"
+            ));
 
             // If the file could not be found, the result will be false, so don't
             //  create the config if the file can't be found
@@ -590,11 +594,17 @@ class Gradeable extends AbstractModel {
         $black_list = $this->getDateValidationSet();
 
         // First coerce in the forward direction, then in the reverse direction
-        return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
-            $coerce_dates(self::date_validated_properties, $black_list, $dates,
+        return $coerce_dates(
+            array_reverse(self::date_validated_properties),
+            $black_list,
+            $coerce_dates(
+                self::date_validated_properties,
+                $black_list,
+                $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
-                }),
+                }
+            ),
             function (\DateTime $val, \DateTime $cmp) {
                 return $val > $cmp;
             }
@@ -1193,7 +1203,8 @@ class Gradeable extends AbstractModel {
                     $this->core->getConfig()->getSemester(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
-                    $this->getId());
+                    $this->getId()
+                );
                 if (is_dir($submission_path)) {
                     $this->any_submissions = true;
                 }
@@ -1405,7 +1416,8 @@ class Gradeable extends AbstractModel {
         if ($this->split_pdf_files === null) {
             $upload_path = FileUtils::joinPaths(
                 $this->core->getConfig()->getCoursePath(),
-                'uploads', 'split_pdf',
+                'uploads',
+                'split_pdf',
                 $this->id
             );
             $this->split_pdf_files = FileUtils::getAllFiles($upload_path);
@@ -1530,8 +1542,14 @@ class Gradeable extends AbstractModel {
 
             $sections = [];
             foreach ($section_names as $section_name) {
-                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name,
-                    $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+                $sections[] = new GradingSection(
+                    $this->core,
+                    $this->isGradeByRegistration(),
+                    $section_name,
+                    $graders[$section_name] ?? [],
+                    $users[$section_name] ?? null,
+                    $teams[$section_name] ?? null
+                );
             }
 
             return $sections;

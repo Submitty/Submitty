@@ -40,16 +40,16 @@ class CourseMaterialsView extends AbstractView {
                 $releaseData = $now_date_time->format("Y-m-d H:i:sO");
                 $isShareToOther = '0';
                 if ($json == true){
-                    if (isset( $json[$expected_file_path] ))
+                    if (isset($json[$expected_file_path]))
                     {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
 
-                        if (isset( $json[$expected_file_path]['sections'] )){
+                        if (isset($json[$expected_file_path]['sections'])){
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
                         }
                         $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
-                        if (isset( $json[$expected_file_path]['hide_from_students'] )){
+                        if (isset($json[$expected_file_path]['hide_from_students'])){
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
 
@@ -63,11 +63,11 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
                         $release_date = $json['release_time'];
-                        if (isset( $json[$expected_file_path]['hide_from_students'] )){
+                        if (isset($json[$expected_file_path]['hide_from_students'])){
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
-                        if (isset( $json[$expected_file_path]['sections'] )){
+                        if (isset($json[$expected_file_path]['sections'])){
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
                         }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
@@ -159,7 +159,7 @@ class CourseMaterialsView extends AbstractView {
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
+        $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $server_time = DateUtils::getServerTimeJson($this->core);
 

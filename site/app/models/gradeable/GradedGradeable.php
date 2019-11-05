@@ -355,7 +355,8 @@ class GradedGradeable extends AbstractModel {
             $gradable_dir,
             $student_id,
             $version,
-            $filename);
+            $filename
+        );
 
         // Check if the user has permission to access this submission
         $isAuthorized = $this->core->getAccess()->canI('path.read', ["dir" => "submissions", "path" => $complete_file_path]);

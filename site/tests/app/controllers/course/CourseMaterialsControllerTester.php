@@ -59,7 +59,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
                 for($j = 0; $j < $num_files; $j++){
                     $fname = "test" . $j . ".txt";
                     $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname, "w");
-                    $zip->addFile( $this->config['course_path'] . $lev . "/" . $fname  );
+                    $zip->addFile($this->config['course_path'] . $lev . "/" . $fname);
                     $files[] = $this->config['course_path'] . $lev . "/" . $fname;
                 }
                 $lev .= "/lev" . $i . "";
@@ -98,7 +98,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $json = FileUtils::readJsonFile($this->json_path);
         //we need to check that the file exists in the correct folder and also the JSON file
-        $filename_full = FileUtils::joinPaths( $this->upload_path, $name );
+        $filename_full = FileUtils::joinPaths($this->upload_path, $name);
         $expected_json = [
             $filename_full => [
                 "checked" => '1',
@@ -151,7 +151,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             'hide_from_students' => null
         ];
 
-        $this->assertEquals($expected_json1, $json[$keys[1]] );
+        $this->assertEquals($expected_json1, $json[$keys[1]]);
         $expected_files1 = [
             'name' => 'test0.txt',
             'path' => $this->upload_path . $this->config['course_path'] . '/lev0/test0.txt',
@@ -197,9 +197,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $new_date = new \DateTime('2005-01-01');
         $new_date = $new_date->format('Y-m-d H:i:s');
 
-        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date );
+        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'][0], $new_date);
 
-        $this->assertEquals( ['status' => 'success', 'data' => 'Time successfully set.'], $ret);
+        $this->assertEquals(['status' => 'success', 'data' => 'Time successfully set.'], $ret);
         $json = FileUtils::readJsonFile($this->json_path);
 
         //check the date has been updated to the new time
@@ -224,7 +224,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $ret = $controller->ajaxUploadCourseMaterialsFiles();
 
         $_POST['fn'][] = FileUtils::joinPaths($this->upload_path, $name);
-        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'], $new_date );
+        $ret = $controller->modifyCourseMaterialsFileTimeStamp($_POST['fn'], $new_date);
 
         $json = FileUtils::readJsonFile($this->json_path);
         $this->assertEquals(2, count($json));   //2 files
@@ -264,7 +264,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         //check that the file no longer exists in the path and json file
         $json = FileUtils::readJsonFile($this->json_path);
-        $this->assertEquals([], $json );
+        $this->assertEquals([], $json);
 
         $files = FileUtils::getAllFiles($this->upload_path);
         $this->assertEquals(0, count($files));
@@ -317,7 +317,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $ret = $controller->ajaxUploadCourseMaterialsFiles();
         $json = FileUtils::readJsonFile($this->json_path);
 
-        $filename_full = FileUtils::joinPaths( $this->upload_path, "foo/foo2", $name );
+        $filename_full = FileUtils::joinPaths($this->upload_path, "foo/foo2", $name);
         $expected_json = [
             $filename_full => [
                 "checked" => '1',

@@ -974,10 +974,13 @@ class AdminGradeableController extends AbstractController {
             // Try to set the property
             try {
                 //convert the property name to a setter name
-                $setter_name = 'set' . implode('',
-                        array_map(function ($val) {
-                            return ucfirst($val);
-                        }, explode('_', $prop)));
+                $setter_name = 'set' . implode(
+                    '',
+                    array_map(function ($val) {
+                        return ucfirst($val);
+                    },
+                    explode('_', $prop))
+                );
                 $gradeable->$setter_name($post_val);
             } catch (\Exception $e) {
                 // If something goes wrong, record it so we can tell the user

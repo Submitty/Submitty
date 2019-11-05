@@ -26,14 +26,7 @@
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
-        <exclude name="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.Indent" />
         <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceAfterOpenBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeOpenBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.CloseBracketLine" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.MultipleArguments" />
 
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
