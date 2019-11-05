@@ -110,11 +110,11 @@ def log_container_meta(log_path, event="", name="", container="", time=0):
     """ Given a log file, create or append container meta data to a log file. """
 
     now = dateutils.get_current_time()
-    datefile = datetime.strftime(now, "%Y%m%d")+".txt"
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     time_unit = "sec"
     parts = (easy_to_read_date, name, container, event, f"{time:.3f}", time_unit)
     write_to_log(log_path, parts)
+
 
 def write_to_log(log_path, message):
     """ Given a log file, create or append message to log file"""
@@ -125,6 +125,8 @@ def write_to_log(log_path, message):
             fcntl.flock(log_file, fcntl.LOCK_UN)
         except:
             print("Could not gain a lock on the log file.")
+
+
 # ==================================================================================
 #
 #  VALIDATION FUNCTIONS
