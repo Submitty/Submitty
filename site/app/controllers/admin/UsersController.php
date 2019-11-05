@@ -505,7 +505,7 @@ class UsersController extends AbstractController {
             }
             //remove people who should not be added to rotating sections
             for ($j = 0; $j < count($users_with_reg_section);) {
-                for ($i = 0;$i < count($exclude_sections);++$i) {
+                for ($i = 0; $i < count($exclude_sections); ++$i) {
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
                         array_splice($users_with_reg_section, $j, 1);
                         $j--;

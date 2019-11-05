@@ -44,10 +44,6 @@
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
-        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterFirst" />
-        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterSecond" />
-        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceBeforeArrow" />
-        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceAfterArrow" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />

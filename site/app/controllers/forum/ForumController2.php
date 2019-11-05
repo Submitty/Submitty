@@ -640,7 +640,7 @@ class ForumController2 extends AbstractController {
         $posts = $this->core->getQueries()->getPosts();
         $num_posts = count($posts);
         $users = array();
-        for($i = 0;$i < $num_posts;$i++){
+        for($i = 0; $i < $num_posts; $i++){
             $user = $posts[$i]["author_user_id"];
             $content = $posts[$i]["content"];
             if(!isset($users[$user])){
