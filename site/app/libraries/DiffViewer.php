@@ -96,7 +96,10 @@ class DiffViewer {
                                 "en dash" => ["\xE2\x80\x93", "–", "\\xE2\\x80\\x93"]
                                );
 
-    static function isValidSpecialCharsOption($option) {
+    const EXPECTED = 'expected';
+    const ACTUAL = 'actual';
+
+    public static function isValidSpecialCharsOption($option) {
         return in_array($option, [
             self::SPECIAL_CHARS_ORIGINAL,
             self::SPECIAL_CHARS_UNICODE,
@@ -104,10 +107,7 @@ class DiffViewer {
         ]);
     }
 
-    const EXPECTED = 'expected';
-    const ACTUAL = 'actual';
-
-    static function isValidType($type) {
+    public static function isValidType($type) {
         return in_array($type, [
             self::EXPECTED,
             self::ACTUAL
