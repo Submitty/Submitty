@@ -765,13 +765,13 @@ class Access {
                     }
                     break;
                 case "version":
-                    $args["gradeable_version"] = (int)$value;
+                    $args["gradeable_version"] = (int) $value;
                     break;
                 case "thread":
-                    $args["thread"] = (int)$value;
+                    $args["thread"] = (int) $value;
                     break;
                 case "post":
-                    $args["post"] = (int)$value;
+                    $args["post"] = (int) $value;
                     break;
             }
         }

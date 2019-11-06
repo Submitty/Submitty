@@ -43,8 +43,8 @@ class RainbowCustomizationJSON extends AbstractModel {
 
         // Items that must be initialized as objects
         // This is done so json_encode will properly encode the item when converting to json
-        $this->section = (object)[];
-        $this->benchmark_percent = (object)[];
+        $this->section = (object) [];
+        $this->benchmark_percent = (object) [];
     }
 
     /**
@@ -212,7 +212,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         // TODO: Validate gradeable data
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
-        $emptyObject = (object)[];
+        $emptyObject = (object) [];
         if($gradeable == $emptyObject)
         {
             throw new BadArgumentException('Gradeable may not be empty.');
@@ -261,7 +261,7 @@ class RainbowCustomizationJSON extends AbstractModel {
         }
 
         // Create object that will be written to file after collecting non-empty items
-        $json = (object)[];
+        $json = (object) [];
 
         // Copy each property from $this over to $json
         foreach($this as $key => $value)
