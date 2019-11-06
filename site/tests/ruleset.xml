@@ -48,7 +48,6 @@
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
-        <exclude name="Squiz.Scope.MethodScope.Missing" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
         <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
 
