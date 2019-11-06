@@ -142,7 +142,7 @@ class ForumThreadView extends AbstractView {
         }
 
         if($filteredThreadExists || $threadFiltering) {
-            $currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int)$_GET["thread_id"] < $max_thread && (int)$_GET["thread_id"] > 0 ? (int)$_GET["thread_id"] : $posts[0]["thread_id"];
+            $currentThread = isset($_GET["thread_id"]) && is_numeric($_GET["thread_id"]) && (int) $_GET["thread_id"] < $max_thread && (int) $_GET["thread_id"] > 0 ? (int) $_GET["thread_id"] : $posts[0]["thread_id"];
             $currentCategoriesIds = $this->core->getQueries()->getCategoriesIdForThread($currentThread);
         }
 
@@ -185,7 +185,7 @@ class ForumThreadView extends AbstractView {
 
         if(!empty($_COOKIE[$currentCourse . '_forum_categories'])) {
             foreach(explode('|', $_COOKIE[$currentCourse . '_forum_categories']) as $selectedId) {
-                if(in_array((int)$selectedId, $category_ids_array)) {
+                if(in_array((int) $selectedId, $category_ids_array)) {
                     $cookieSelectedCategories[] = $selectedId;
                 }
             }
@@ -193,7 +193,7 @@ class ForumThreadView extends AbstractView {
 
         if(!empty($_COOKIE['forum_thread_status'])) {
             foreach(explode('|', $_COOKIE['forum_thread_status']) as $selectedStatus) {
-                if(in_array((int)$selectedStatus, array(-1,0,1))) {
+                if(in_array((int) $selectedStatus, array(-1,0,1))) {
                     $cookieSelectedThreadStatus[] = $selectedStatus;
                 }
             }

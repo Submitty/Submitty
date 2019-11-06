@@ -504,7 +504,7 @@ class PlagiarismController extends AbstractController {
         }
 
         $return = "";
-        $active_version_user_1 =  (string)$graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
+        $active_version_user_1 =  (string) $graded_gradeable->getAutoGradedGradeable()->getActiveVersion();
         $file_path = $course_path . "/lichen/ranking/" . $gradeable_id . ".txt";
         if(!file_exists($file_path)) {
             $return = array('error' => 'Ranking file not exists.');

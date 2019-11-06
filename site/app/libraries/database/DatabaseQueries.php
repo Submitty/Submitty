@@ -355,7 +355,7 @@ class DatabaseQueries {
         $this->course_db->query("SELECT category_id from thread_categories t where t.thread_id = ?", array($thread_id));
         $categories_list = array();
         foreach ($this->course_db->rows() as $row) {
-            $categories_list[] = (int)$row["category_id"];
+            $categories_list[] = (int) $row["category_id"];
         }
         return $categories_list;
     }

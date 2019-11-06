@@ -19,7 +19,6 @@
         <exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed" />
         <exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" />
         <exclude name="Generic.Files.LineLength.TooLong" />
-        <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />

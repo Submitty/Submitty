@@ -70,11 +70,11 @@ class Post extends AbstractModel {
         }
 
         //setPostId($details['post_id']);
-        $this->setThreadId((int)$details['thread_id']);
-        $this->setParentId((int)$details['parent_id']);
+        $this->setThreadId((int) $details['thread_id']);
+        $this->setParentId((int) $details['parent_id']);
         $this->setContent($details['content']);
         //setTimestamp($details['timestamp']);
-        $this->setIsAnonymous((bool)$details['anon']);
+        $this->setIsAnonymous((bool) $details['anon']);
         //setDeleted($details['deleted']);
         //setType($details['type']);
         //setAttachment($details['has_attachment']);

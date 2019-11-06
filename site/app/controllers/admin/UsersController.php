@@ -787,7 +787,7 @@ class UsersController extends AbstractController {
                 case "classlist":
                     return $user->getRegistrationSection();
                 case "graderlist":
-                    return (string)$user->getGroup();
+                    return (string) $user->getGroup();
                 default:
                     throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
             }

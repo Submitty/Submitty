@@ -49,7 +49,7 @@ class RainbowCustomization extends AbstractModel {
         $this->has_error = "false";
         $this->error_messages = [];
 
-        $this->sections = (object)[];
+        $this->sections = (object) [];
 
         // Attempt to load json from customization file
         // If it fails then set to null, will be used to load defaults later
@@ -141,7 +141,7 @@ class RainbowCustomization extends AbstractModel {
             foreach ($json_gradeables as $json_gradeable)
             {
                 // Get percentage, cast back to whole number integer
-                $retArray[$json_gradeable->type] = (int)($json_gradeable->percent * 100);
+                $retArray[$json_gradeable->type] = (int) ($json_gradeable->percent * 100);
 
                 // Keep track of the sum
                 $sum += $retArray[$json_gradeable->type];
@@ -231,7 +231,7 @@ class RainbowCustomization extends AbstractModel {
         if(!is_null($this->RCJSON))
         {
             // Get sections from the file
-            $sectionsFromFile = (array)$this->RCJSON->getSection();
+            $sectionsFromFile = (array) $this->RCJSON->getSection();
 
             // If sections from database is larger than sections from file then there must be a new section in
             // in the database, add new fields into sections from file with defaults
@@ -242,17 +242,17 @@ class RainbowCustomization extends AbstractModel {
             {
                 for($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++)
                 {
-                    $sectionsFromFile[$i] = (string)$i;
+                    $sectionsFromFile[$i] = (string) $i;
                 }
             }
 
-            return (object)$sectionsFromFile;
+            return (object) $sectionsFromFile;
         }
         // RCJSON was null so return database sections as default
         else
         {
             // Collect sections out of the database
-            return (object)$sections;
+            return (object) $sections;
         }
     }
 
@@ -277,7 +277,7 @@ class RainbowCustomization extends AbstractModel {
         {
             foreach($form_json->section as $key => $value)
             {
-                $this->RCJSON->addSection((string)$key, $value);
+                $this->RCJSON->addSection((string) $key, $value);
             }
         }
 
@@ -301,7 +301,7 @@ class RainbowCustomization extends AbstractModel {
         $this->RCJSON->saveToJsonFile();
 
         // Configure json to go into jobs queue
-        $job_json = (object)[];
+        $job_json = (object) [];
         $job_json->job = 'RunAutoRainbowGrades';
         $job_json->semester = $this->core->getConfig()->getSemester();
         $job_json->course = $this->core->getConfig()->getCourse();
