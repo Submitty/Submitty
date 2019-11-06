@@ -614,16 +614,13 @@ def checkout_vcs_repo(my_file):
     return obj
 
 # ==================================================================================
-def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
+def get_job(my_name,which_machine,my_capabilities,which_untrusted):
     """
-    Picks a job from the queue
-
-    :param overall_lock: a lock on the directory containing all queue files
+    Pick a job from the queue.
     """
 
     time_get_job_begin = dateutils.get_current_time()
 
-    # overall_lock.acquire()
     folder = worker_folder(my_name)
 
 
@@ -727,8 +724,6 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         with open(os.path.join(grading_file), "w") as queue_file:
             json.dump({"untrusted": which_untrusted}, queue_file)
 
-    # overall_lock.release()
-
     time_get_job_end = dateutils.get_current_time()
 
     time_delta = time_get_job_end-time_get_job_begin
@@ -741,7 +736,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
 
 # ==================================================================================
 # ==================================================================================
-def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
+def shipper_process(my_name,my_data,full_address,which_untrusted):
     """
     Each shipper process spins in a loop, looking for a job that
     matches the capabilities of this machine, and then oversees the
@@ -760,7 +755,7 @@ def shipper_process(my_name,my_data,full_address,which_untrusted,overall_lock):
     counter=0
     while True:
         try:
-            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock)
+            my_job = get_job(my_name,which_machine,my_capabilities,which_untrusted)
             if not my_job == "":
                 counter=0
                 grade_queue_file(my_name,which_machine,which_untrusted,os.path.join(my_folder, my_job))
@@ -789,13 +784,6 @@ def launch_shippers(worker_status_map):
         raise SystemExit("ERROR: the submitty_autograding_shipper.py script must be run by the DAEMON_USER")
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="grade_scheduler.py launched")
 
-    # Clean up old files from previous shipping/autograding (any
-    # partially completed work will be re-done)
-    # for file_path in Path(INTERACTIVE_QUEUE).glob("GRADING_*"):
-    #     file_path = str(file_path)
-    #     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove old queue file: " + file_path)
-    #     os.remove(file_path)
-
     for file_path in Path(SUBMITTY_DATA_DIR, "autograding_TODO").glob("untrusted*"):
         file_path = str(file_path)
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding TODO file: " + file_path)
@@ -804,9 +792,6 @@ def launch_shippers(worker_status_map):
         file_path = str(file_path)
         autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="Remove autograding DONE file: " + file_path)
         os.remove(file_path)
-
-    # this lock will be used to edit the queue or new job event
-    overall_lock = multiprocessing.Lock()
 
     # The names of the worker machines, the capabilities of each
     # worker machine, and the number of workers per machine are stored
@@ -882,7 +867,7 @@ def launch_shippers(worker_status_map):
         for i in range(thread_count):
             thread_name = f'{name}_{i}'
             u = "untrusted" + str(i).zfill(2)
-            p = multiprocessing.Process(target=shipper_process,args=(thread_name,single_machine_data[name],full_address, u,overall_lock))
+            p = multiprocessing.Process(target=shipper_process,args=(thread_name,single_machine_data[name],full_address, u))
             p.start()
             processes.append((thread_name, p))
         total_num_workers += num_workers_on_machine
@@ -898,7 +883,6 @@ def launch_shippers(worker_status_map):
                     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: process "+name+" is not alive")
             if alive != total_num_workers:
                 autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: #shippers="+str(total_num_workers)+" != #alive="+str(alive))
-            #print ("shippers= ",total_num_workers,"  alive=",alive)
 
             # Find which workers are currently idle, as well as any autograding
             # jobs which need to be scheduled.
