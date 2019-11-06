@@ -564,7 +564,6 @@ class ForumController2 extends AbstractController {
                     $this->core->addErrorMessage("No posts found for selected thread.");
                 }
             }
-
         }
         if(empty($_REQUEST["thread_id"]) || empty($posts)) {
             $new_posts = $this->core->getQueries()->getUnviewedPosts(-1, $current_user);
@@ -662,8 +661,6 @@ class ForumController2 extends AbstractController {
             $users[$user]["timestamps"][] = DateUtils::parseDateTime($posts[$i]["timestamp"], $this->core->getConfig()->getTimezone())->format("n/j g:i A");
             $users[$user]["thread_id"][] = $posts[$i]["thread_id"];
             $users[$user]["thread_title"][] = $this->core->getQueries()->getThreadTitle($posts[$i]["thread_id"]);
-
-
         }
         ksort($users);
         $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);

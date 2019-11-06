@@ -141,7 +141,6 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->notebook
         $actual_input = array();
         if (isset($details['notebook'])) {
-
             // For each item in the notebook array inside the $details collect data and assign to variables in
             // $this->notebook
             for ($i = 0; $i < count($details['notebook']); $i++) {
@@ -193,7 +192,6 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-
                 // If programming language is set then this is a codebox
                 if(isset($actual_input[$i]['programming_language']))
                 {
@@ -203,9 +201,7 @@ class AutogradingConfig extends AbstractModel {
                 else
                 {
                     $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-
                 }
-
             } elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }

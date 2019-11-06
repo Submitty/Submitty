@@ -80,7 +80,6 @@ class MiscController extends AbstractController {
                 return false;
             }
         } else {
-
             // Check access through Access library
             if (!$this->core->getAccess()->canI("path.read", ["dir" => $dir, "path" => $path])) {
                 $this->core->getOutput()->showError("You do not have access to this file");
@@ -103,7 +102,6 @@ class MiscController extends AbstractController {
                     return false;
                 }
             }
-
         }
         $file_name = basename(rawurldecode(htmlspecialchars_decode($path)));
         $corrected_name = pathinfo($path, PATHINFO_DIRNAME) . "/" .  $file_name;
@@ -189,7 +187,6 @@ class MiscController extends AbstractController {
             //cannot download scanned images for bulk uploads
             if (strpos(basename($path), "upload_page_") !== false &&
                 FileUtils::getContentType($path) !== "application/pdf") {
-
                 $this->core->getOutput()->showError("You do not have access to this file");
                 return false;
             }
@@ -243,14 +240,12 @@ class MiscController extends AbstractController {
         // If the request is coming from the submissions page, then the results and results_public folder
         // should not be included, otherwise include them
         if($origin != 'submission') {
-
             if ($this->core->getAccess()->canI("path.read.results", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
                 $folder_names[] = "results";
             }
             if ($this->core->getAccess()->canI("path.read.results_public", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable, "gradeable_version" => $gradeable_version->getVersion()])) {
                 $folder_names[] = "results_public";
             }
-
         }
 
         //No results, no download
@@ -302,8 +297,6 @@ class MiscController extends AbstractController {
                             // Add current file to archive
                             $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
                         }
-
-
                     }
                 }
             }
@@ -392,7 +385,6 @@ class MiscController extends AbstractController {
                     $this->core->addErrorMessage($message);
                     $this->core->redirect($this->core->buildCourseUrl());
                 }
-
             } else {
                 //gets the students that are part of the sections
                 if ($gradeable->isGradeByRegistration()) {

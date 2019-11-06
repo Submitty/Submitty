@@ -84,7 +84,6 @@ class AutoGradingView extends AbstractView {
         // testcases should only be visible if autograding is complete
         if(!$incomplete_autograding) {
             foreach ($version_instance->getTestcases() as $testcase) {
-
                 if ($testcase->canView()) {
                     $num_visible_testcases++;
                 }

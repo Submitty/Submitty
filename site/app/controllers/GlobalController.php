@@ -35,7 +35,6 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons = [];
         if ($this->core->userLoaded()) {
-
             if ($this->core->getConfig()->isCourseLoaded()) {
                 if ($this->core->getConfig()->getCourseHomeUrl() != "") {
                     $sidebar_buttons[] = new Button($this->core, [

@@ -64,7 +64,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
                 }
                 $lev .= "/lev" . $i . "";
                 FileUtils::createDir($this->config['course_path'] . $lev);
-
             }
 
             $zip->close();

@@ -65,7 +65,6 @@ class Forum extends AbstractModel {
 
     public function getEditContent($post_id) {
         if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
-
             //This will return a Post obj also forum queries...
             $post = $this->core->getQueries()->getPost($post_id);
             $output = array();

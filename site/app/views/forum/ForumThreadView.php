@@ -477,9 +477,7 @@ class ForumThreadView extends AbstractView {
         $form_action_link = $this->core->buildCourseUrl(['forum', 'posts', 'new']);
 
         if(($isThreadLocked != 1 || $accessFullGrading ) && $includeReply) {
-
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
-
         }
 
         $merge_thread_content = [];
@@ -714,7 +712,6 @@ class ForumThreadView extends AbstractView {
             $return = [
                 "thread_content" => $thread_content,
             ];
-
         }
 
         return $return;
@@ -837,7 +834,6 @@ class ForumThreadView extends AbstractView {
 
         if($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
             if(!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )){
-
             } else {
                 if($deleted && $this->core->getUser()->getGroup() <= 3){
                     $ud_toggle_status = "false";
@@ -913,7 +909,6 @@ class ForumThreadView extends AbstractView {
                 "num_files" => $attachment_num_files,
                 "encoded_data" => json_encode($attachment_encoded_data)
             ];
-
         }
 
         $post_box_id = 1;

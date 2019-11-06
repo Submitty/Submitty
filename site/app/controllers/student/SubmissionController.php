@@ -590,7 +590,6 @@ class SubmissionController extends AbstractController {
                 }
                 $i++;
             }
-
         }
 
         // if split_pdf/gradeable_id/timestamp directory is now empty, delete that directory
@@ -1164,7 +1163,6 @@ class SubmissionController extends AbstractController {
                     return $this->uploadResult("Failed to write to VCS_CHECKOUT file.", false);
                 }
             }
-
         }
 
         // save the contents of the page number inputs to files
@@ -1309,7 +1307,6 @@ class SubmissionController extends AbstractController {
                 // @codeCoverageIgnoreStart
                 // Without the filesystem messing up here, we should not be able to hit this error
                 Logger::error("Could not clean up folder {$this->upload_details['version_path']}");
-
             }
             // @codeCoverageIgnoreEnd
             elseif ($this->upload_details['assignment_settings'] === true) {

@@ -507,10 +507,8 @@ class ReportController extends AbstractController {
         $customization->buildCustomization();
 
         if(isset($_POST["json_string"])){
-
             //Handle user input (the form) being submitted
             try {
-
                 $customization->processForm();
 
                 // Finally, send the requester back the information
@@ -524,7 +522,6 @@ class ReportController extends AbstractController {
             }
         }
         else{
-
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
 
@@ -541,7 +538,6 @@ class ReportController extends AbstractController {
                 'messages' => $customization->getMessages(),
                 'limited_functionality_mode' => !$this->core->getConfig()->isSubmittyAdminUserInCourse()
             ]);
-
         }
     }
 

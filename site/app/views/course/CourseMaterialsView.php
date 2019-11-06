@@ -29,7 +29,6 @@ class CourseMaterialsView extends AbstractView {
             $no_json = array();
 
             foreach($course_materials_array as $file) {
-
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
                 array_push($in_dir, $expected_file_path);
@@ -72,10 +71,8 @@ class CourseMaterialsView extends AbstractView {
                         }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
                     }
-
                 }
                 else{
-
                     $ex_file_path = $expected_file_path;
                     $ex_file_path = array();
                     $ex_file_path['checked'] = '1';
@@ -86,7 +83,6 @@ class CourseMaterialsView extends AbstractView {
                     $ex_file_path['hide_from_students'] = "on";
                     $releaseData = $ex_file_path['release_datetime'];
                     $no_json[$expected_file_path] = $ex_file_path;
-
                 }
 
                 if ($student_access && $isShareToOther === '0') {
@@ -104,7 +100,6 @@ class CourseMaterialsView extends AbstractView {
 
 
                     $working_dir = &$working_dir[$dir];
-
                 }
 
                 $working_dir[$filename] = $expected_file_path;

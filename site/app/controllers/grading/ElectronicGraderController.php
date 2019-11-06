@@ -852,7 +852,6 @@ class ElectronicGraderController extends AbstractController {
         // If $who_id is empty string then this request came from the TA grading interface navigation buttons
         // We must decide who to display prev/next and assign them to $who_id
         if($who_id === '') {
-
             $order_grading_sections = new GradingOrder($this->core, $gradeable, $this->core->getUser());
             $order_grading_sections->sort($sort, $direction);
 
@@ -877,29 +876,17 @@ class ElectronicGraderController extends AbstractController {
             // of if that submission is in their assigned section
             // Limited access graders should only be able to navigate to submissions in their assigned sections
             if($to === 'prev' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
-
                 $goToStudent = $order_all_sections->getPrevSubmitter($from_id);
-
             } elseif($to === 'prev' && $to_ungraded === 'false') {
-
                 $goToStudent = $order_grading_sections->getPrevSubmitter($from_id);
-
             } elseif($to === 'next' && $to_ungraded === 'false' && $this->core->getUser()->accessFullGrading()) {
-
                 $goToStudent = $order_all_sections->getNextSubmitter($from_id);
-
             } elseif($to === 'next' && $to_ungraded === 'false') {
-
                 $goToStudent = $order_grading_sections->getNextSubmitter($from_id);
-
             } elseif($to === 'prev' && $to_ungraded === 'true') {
-
                 $goToStudent = $order_grading_sections->getPrevUngradedSubmitter($from_id, $component_id);
-
             } elseif($to === 'next' && $to_ungraded === 'true') {
-
                 $goToStudent = $order_grading_sections->getNextUngradedSubmitter($from_id, $component_id);
-
             }
 
             // Reassign who_id
@@ -1355,7 +1342,6 @@ class ElectronicGraderController extends AbstractController {
             $graded_component = null;
         }
         else{
-
             //change the component to be unverified after changing a mark
             if($graded_component->isMarksModified()){
                 $graded_component->setVerifier();

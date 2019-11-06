@@ -203,7 +203,6 @@ class NotificationFactory {
                 $flattened_notifications[] = $notification->getNotifySource();
                 $flattened_notifications[] = $notification->getNotifyTarget();
             }
-
         }
         if (!empty($flattened_notifications)) {
             // some notifications may not have been added to the flattened notifications

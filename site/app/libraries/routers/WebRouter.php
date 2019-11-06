@@ -135,7 +135,6 @@ class WebRouter {
                 );
             }
             else {
-
                 return Response::RedirectOnlyResponse(
                     new RedirectResponse($core->buildUrl(['home']))
                 );

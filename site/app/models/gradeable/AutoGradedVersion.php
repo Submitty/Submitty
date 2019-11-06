@@ -120,7 +120,6 @@ class AutoGradedVersion extends AbstractModel {
 
 
         foreach($dirs as $dir) {
-
             $this->meta_files[$dir] = [];
             $this->files[$dir][0] = [];
 
@@ -150,7 +149,6 @@ class AutoGradedVersion extends AbstractModel {
                     }
                 }
             }
-
         }
     }
 
