@@ -28,8 +28,10 @@ class Logger {
     /**
      * Don't allow usage of this class outside a static context
      */
-    private function __construct() { }
-    private function __clone() { }
+    private function __construct() {
+    }
+    private function __clone() {
+    }
 
 
     /**

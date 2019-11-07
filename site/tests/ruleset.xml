@@ -43,8 +43,6 @@
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
-        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
-        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
 
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />
