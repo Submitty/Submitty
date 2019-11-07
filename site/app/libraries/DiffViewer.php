@@ -357,7 +357,6 @@ class DiffViewer {
         else {
             return "";
         }
-
     }
 
     /**

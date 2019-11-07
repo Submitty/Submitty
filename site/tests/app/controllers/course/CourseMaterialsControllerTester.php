@@ -45,7 +45,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
         $_FILES["files{$part}"]['error'][] = 0;
-
     }
 
     private function buildFakeZipFile($name, $part = 1, $num_files = 1, $depth = 1) {
@@ -159,7 +158,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         ];
 
         $this->assertEquals($expected_files1, $f1);
-
     }
 
      /**

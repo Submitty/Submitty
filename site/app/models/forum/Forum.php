@@ -46,7 +46,6 @@ class Forum extends AbstractModel {
         //$pushFunction($result);
 
         return true;
-
     }
 
 
@@ -105,7 +104,6 @@ class Forum extends AbstractModel {
             $announcement_email = new Email($this->core, $email_data);
             $this->core->getQueries()->createEmail($announcement_email);
         }
-
     }
 
     private function getThreadContent($thread_id, &$output) {
@@ -130,7 +128,6 @@ class Forum extends AbstractModel {
         }
 
         return $createObject ? [true, new Thread($this->core, $data)] : [true, null];
-
     }
 
     private function validatePostData(array $data, bool $createObject, bool $isThread): array {
@@ -143,6 +140,5 @@ class Forum extends AbstractModel {
         }
 
         return $createObject ? [true, new Post($this->core, $data)] : [true, null];
-
     }
 }

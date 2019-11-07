@@ -184,7 +184,6 @@ class GradingOrder extends AbstractModel {
         return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
             return $this->getHasSubmission($sub);
         });
-
     }
 
     /**

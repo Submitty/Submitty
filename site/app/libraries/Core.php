@@ -536,7 +536,6 @@ class Core {
         if (!$this->testing) {
             die();
         }
-
     }
 
     /**

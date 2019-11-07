@@ -459,7 +459,6 @@ STRING;
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
         $_FILES["files{$part}"]['error'][] = $err;
-
     }
 
     public function testvalidateUploadedFilesGood() {
