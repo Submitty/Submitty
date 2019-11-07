@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\libraries\Utils;
@@ -180,13 +179,13 @@ class TaGradedGradeable extends AbstractModel {
             $v = $container->getGradedVersion();
             if ($v !== false && $strict !== true) {
                 return $v;
-            } else if ($v === false) {
+            } elseif ($v === false) {
                 return false;
             }
 
             if ($version === false) {
                 $version = $v;
-            } else if ($version !== $v) {
+            } elseif ($version !== $v) {
                 return false;
             }
         }
@@ -238,8 +237,11 @@ class TaGradedGradeable extends AbstractModel {
      * @return float percentage (0 to 1), or NAN if no grading started
      */
     public function getTotalScorePercent($clamp = false) {
-        return Utils::safeCalcPercent($this->getTotalScore(),
-            $this->getGradedGradeable()->getGradeable()->getTaPoints(), $clamp);
+        return Utils::safeCalcPercent(
+            $this->getTotalScore(),
+            $this->getGradedGradeable()->getGradeable()->getTaPoints(),
+            $clamp
+        );
     }
 
     /**
@@ -336,8 +338,10 @@ class TaGradedGradeable extends AbstractModel {
 
         if ($grader === null || !$component->getGradeable()->isPeerGrading()) {
             // If the grader is null or we aren't peer grading, then delete all component grades for this component
-            $this->deleted_graded_components = array_merge($this->deleted_graded_components,
-                $container->getGradedComponents());
+            $this->deleted_graded_components = array_merge(
+                $this->deleted_graded_components,
+                $container->getGradedComponents()
+            );
 
             // Clear the container for this component
             $container->setGradedComponents([]);

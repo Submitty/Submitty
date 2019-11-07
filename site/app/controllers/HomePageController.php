@@ -31,7 +31,7 @@ class HomePageController extends AbstractController {
      * @Route("/current_user/change_password", methods={"POST"})
      * @return Response
      */
-    public function changePassword(){
+    public function changePassword() {
         $user = $this->core->getUser();
         if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
             && $_POST['new_password'] == $_POST['confirm_new_password']) {
@@ -51,7 +51,7 @@ class HomePageController extends AbstractController {
      * @Route("/current_user/change_username", methods={"POST"})
      * @return Response
      */
-    public function changeUserName(){
+    public function changeUserName() {
         $user = $this->core->getUser();
         if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
             $newFirstName = trim($_POST['user_firstname_change']);
@@ -96,14 +96,14 @@ class HomePageController extends AbstractController {
         // Filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
 
-        $unarchived_courses = array_filter($unarchived_courses, function(Course $course) use($user_id, $as_instructor) {
+        $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id, $as_instructor) {
             return $as_instructor ?
                 $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
                 :
                 $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
         });
 
-        $archived_courses = array_filter($archived_courses, function(Course $course) use($user_id, $as_instructor) {
+        $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id, $as_instructor) {
             return $as_instructor ?
                 $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
                 :
@@ -113,13 +113,13 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
                 "unarchived_courses" => array_map(
-                    function(Course $course) {
+                    function (Course $course) {
                         return $course->getCourseInfo();
                     },
                     $unarchived_courses
                 ),
                 "archived_courses" => array_map(
-                    function(Course $course) {
+                    function (Course $course) {
                         return $course->getCourseInfo();
                     },
                     $archived_courses

@@ -46,7 +46,7 @@ class NotificationController extends AbstractController {
         parent::__construct($core);
         $this->selections = self::NOTIFICATION_SELECTIONS;
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $this->selections = array_merge($this->selections,self::EMAIL_SELECTIONS);
+            $this->selections = array_merge($this->selections, self::EMAIL_SELECTIONS);
         }
     }
     /**

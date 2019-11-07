@@ -14,8 +14,6 @@ use app\models\User;
 use app\models\NotificationFactory;
 use Symfony\Component\HttpFoundation\Request;
 
-
-
 /**
  * Class Core
  *
@@ -128,7 +126,7 @@ class Core {
         if (!empty($semester) && !empty($course)) {
             $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
             $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
-            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
+            if (file_exists($course_json_path) && is_readable($course_json_path)) {
                 $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
             else{
@@ -153,7 +151,7 @@ class Core {
     }
 
     public function loadAuthentication() {
-        $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
+        $auth_class = "\\app\\authentication\\" . $this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
@@ -213,8 +211,11 @@ class Core {
             throw new \Exception("Need to load the config before we can initialize the grading queue");
         }
 
-        $this->grading_queue = new GradingQueue($this->config->getSemester(),
-            $this->config->getCourse(), $this->config->getSubmittyPath());
+        $this->grading_queue = new GradingQueue(
+            $this->config->getSemester(),
+            $this->config->getCourse(),
+            $this->config->getSubmittyPath()
+        );
     }
 
     /**
@@ -487,7 +488,7 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token=null) {
+    public function checkCsrfToken($csrf_token = null) {
         if ($csrf_token === null) {
             return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
         }
@@ -503,8 +504,8 @@ class Core {
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
-        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
+    public function buildUrl($parts = array()) {
+        $url = $this->getConfig()->getBaseUrl() . implode("/", $parts);
         return $url;
     }
 
@@ -518,7 +519,7 @@ class Core {
      *
      * @return string
      */
-    public function buildCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts = array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
@@ -557,7 +558,7 @@ class Core {
     public function getFullCourseName() {
         $course_name = strtoupper($this->getConfig()->getCourse());
         if ($this->getConfig()->getCourseName() !== "") {
-            $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
+            $course_name .= ": " . htmlentities($this->getConfig()->getCourseName());
         }
         return $course_name;
     }
@@ -567,7 +568,7 @@ class Core {
      *
      * @return string
      */
-    public function getDisplayedCourseName(){
+    public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
         }
@@ -576,16 +577,16 @@ class Core {
         }
     }
 
-    public function getFullSemester(){
+    public function getFullSemester() {
         $semester = $this->getConfig()->getSemester();
         if ($this->getConfig()->getSemester() !== ""){
             $arr1 = str_split($semester);
             $semester = "";
             if($arr1[0] == "f")  $semester .= "Fall ";
-            else if($arr1[0] == "s")  $semester .= "Spring ";
-            else if ($arr1[0] == "u") $semester .= "Summer ";
+            elseif($arr1[0] == "s")  $semester .= "Spring ";
+            elseif ($arr1[0] == "u") $semester .= "Summer ";
 
-            $semester .= "20". $arr1[1]. $arr1[2];
+            $semester .= "20" . $arr1[1] . $arr1[2];
         }
         return $semester;
     }

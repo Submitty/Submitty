@@ -4,7 +4,7 @@ namespace app\models\gradeable;
 
 use app\exceptions\AuthorizationException;
 use app\libraries\Core;
-use \app\models\AbstractModel;
+use app\models\AbstractModel;
 use app\models\User;
 use app\libraries\FileUtils;
 use app\exceptions\FileNotFoundException;
@@ -172,12 +172,12 @@ class GradedGradeable extends AbstractModel {
      */
     public function getActiveGradeInquiryCount() {
         if (!$this->gradeable->isGradeInquiryPerComponentAllowed()) {
-            return array_reduce($this->regrade_requests, function($carry, RegradeRequest $grade_inquiry) {
+            return array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
                 $carry += is_null($grade_inquiry->getGcId()) && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0;
                 return $carry;
             });
         }
-        return array_reduce($this->regrade_requests, function($carry, RegradeRequest $grade_inquiry) {
+        return array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
             $carry += $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0;
             return $carry;
         });
@@ -238,7 +238,7 @@ class GradedGradeable extends AbstractModel {
      */
     public function getTotalScore() {
         if ($this->hasOverriddenGrades()){
-            $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(),$this->submitter->getId());
+            $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
             return floatval(max(0.0, $userWithOverriddenGrades->getMarks()));
         } else {
             return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
@@ -247,7 +247,7 @@ class GradedGradeable extends AbstractModel {
 
     public function getOverriddenComment() {
         $overridden_comment = "";
-        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(),$this->submitter->getId());
+        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
         if ($userWithOverriddenGrades !== null){
             $overridden_comment = $userWithOverriddenGrades->getComment();
         }
@@ -268,11 +268,9 @@ class GradedGradeable extends AbstractModel {
         $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
 
         foreach ($newNotebook as $notebookKey => $notebookVal) {
-
             // Handle if the notebook cell type is short_answer
             if(isset($notebookVal['type']) &&
                $notebookVal['type'] == "short_answer") {
-
                 // If no previous submissions set string to default initial_value
                 if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
                 {
@@ -298,10 +296,9 @@ class GradedGradeable extends AbstractModel {
             }
 
             // Handle if notebook cell type is multiple_choice
-            else if(isset($notebookVal['type']) &&
+            elseif(isset($notebookVal['type']) &&
                     $notebookVal['type'] == "multiple_choice")
             {
-
                 // If no previous submissions do nothing
                 if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
                 {
@@ -355,7 +352,8 @@ class GradedGradeable extends AbstractModel {
             $gradable_dir,
             $student_id,
             $version,
-            $filename);
+            $filename
+        );
 
         // Check if the user has permission to access this submission
         $isAuthorized = $this->core->getAccess()->canI('path.read', ["dir" => "submissions", "path" => $complete_file_path]);
@@ -376,7 +374,7 @@ class GradedGradeable extends AbstractModel {
         $file_contents = file_get_contents($complete_file_path);
 
         // If file_contents is False an error has occured
-        if($file_contents === False)
+        if($file_contents === false)
         {
             throw new IOException("An error occurred retrieving submission contents.");
         }

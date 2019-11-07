@@ -303,14 +303,14 @@ class ReportController extends AbstractController {
             /** @var GradedGradeable $gg */
             //Append one gradeable score to row.  Scores are indexed by gradeable's ID.
             $row[$gg->getGradeableId()] = $gg->getTotalScore();
-            
+
             if (!$gg->hasOverriddenGrades()){
                 // Check if the score should be a zero
                 if ($gg->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {
                     if ($gg->getGradeable()->isTaGrading() && ($gg->getOrCreateTaGradedGradeable()->hasVersionConflict() || !$gg->isTaGradingComplete())) {
                         // Version conflict or incomplete grading, so zero score
                         $row[$gg->getGradeableId()] = 0;
-                    } else if ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
+                    } elseif ($late_days->getLateDayInfoByGradeable($gg->getGradeable())->getStatus() === LateDayInfo::STATUS_BAD) {
                         // BAD submission, so zero score
                         $row[$gg->getGradeableId()] = 0;
                     }
@@ -352,7 +352,7 @@ class ReportController extends AbstractController {
      * @param LateDays $ld
      * @return array
      */
-    public function generateGradeSummary(GradedGradeable $gg,User $user, LateDays $ld) {
+    public function generateGradeSummary(GradedGradeable $gg, User $user, LateDays $ld) {
         $g = $gg->getGradeable();
 
         $entry = [
@@ -374,7 +374,7 @@ class ReportController extends AbstractController {
 
         if ($gg->hasOverriddenGrades()){
             $entry['status'] = 'Overridden';
-            $entry['comment'] = $gg->getOverriddenComment(); 
+            $entry['comment'] = $gg->getOverriddenComment();
         }
         else {
             // Add information special to electronic file submissions
@@ -416,7 +416,7 @@ class ReportController extends AbstractController {
                         //  but to keep the rest of the report generation sane, they can be users if the
                         //  user is not on a team
                         $entry['note'] = 'User is not on a team';
-                    } else if (!$ta_gg->isComplete()) {
+                    } elseif (!$ta_gg->isComplete()) {
                         $entry['note'] = 'This has not been graded yet.';
                     } else {
                         $entry['note'] = 'Score is set to 0 because there are version conflicts.';
@@ -501,16 +501,14 @@ class ReportController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/reports/rainbow_grades_customization")
      */
-    public function generateCustomization(){
+    public function generateCustomization() {
         //Build a new model, pull in defaults for the course
         $customization = new RainbowCustomization($this->core);
         $customization->buildCustomization();
 
         if(isset($_POST["json_string"])){
-
             //Handle user input (the form) being submitted
             try {
-
                 $customization->processForm();
 
                 // Finally, send the requester back the information
@@ -524,24 +522,22 @@ class ReportController extends AbstractController {
             }
         }
         else{
-
             $this->core->getOutput()->addInternalJs('rainbow-customization.js');
             $this->core->getOutput()->addInternalCss('rainbow-customization.css');
 
             $this->core->getOutput()->addBreadcrumb('Rainbow Grades Customization');
 
             // Print the form
-            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig',[
+            $this->core->getOutput()->renderTwigOutput('admin/RainbowCustomization.twig', [
                 "customization_data" => $customization->getCustomizationData(),
                 "available_buckets" => $customization->getAvailableBuckets(),
                 "used_buckets" => $customization->getUsedBuckets(),
                 'display_benchmarks' => $customization->getDisplayBenchmarks(),
-                'sections_and_labels' => (array)$customization->getSectionsAndLabels(),
+                'sections_and_labels' => (array) $customization->getSectionsAndLabels(),
                 'bucket_percentages' => $customization->getBucketPercentages(),
                 'messages' => $customization->getMessages(),
                 'limited_functionality_mode' => !$this->core->getConfig()->isSubmittyAdminUserInCourse()
             ]);
-
         }
     }
 
@@ -567,7 +563,7 @@ class ReportController extends AbstractController {
         $max_wait_time = self::MAX_AUTO_RG_WAIT_TIME;
 
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($jobs_file) AND $max_wait_time)
+        while(file_exists($jobs_file) && $max_wait_time)
         {
             sleep(1);
             $max_wait_time--;
@@ -577,7 +573,7 @@ class ReportController extends AbstractController {
         // Jobs queue daemon actually changes the name of the job by prepending PROCESSING onto the filename
         // We must also wait for that file to be removed
         // Check the jobs queue every second to see if the job has finished yet
-        while(file_exists($processing_jobs_file) AND $max_wait_time)
+        while(file_exists($processing_jobs_file) && $max_wait_time)
         {
             sleep(1);
             $max_wait_time--;
@@ -585,7 +581,7 @@ class ReportController extends AbstractController {
         }
 
         // Check the course auto_debug_output.txt to ensure no exceptions were thrown
-        $debug_output_path = '/var/local/submitty/courses/'.
+        $debug_output_path = '/var/local/submitty/courses/' .
             $this->core->getConfig()->getSemester() . '/' .
             $this->core->getConfig()->getCourse() .
             '/rainbow_grades/auto_debug_output.txt';
@@ -604,7 +600,7 @@ class ReportController extends AbstractController {
 
         // If we finished the previous loops before max_wait_time hit 0 then the file successfully left the jobs queue
         // implying that it finished
-        if($max_wait_time AND $failure_detected == false)
+        if ($max_wait_time && $failure_detected == false)
         {
             $this->core->getOutput()->renderJsonSuccess($debug_contents);
         }

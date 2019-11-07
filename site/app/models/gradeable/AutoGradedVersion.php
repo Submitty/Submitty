@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\DateUtils;
@@ -121,7 +120,6 @@ class AutoGradedVersion extends AbstractModel {
 
 
         foreach($dirs as $dir) {
-
             $this->meta_files[$dir] = [];
             $this->files[$dir][0] = [];
 
@@ -151,12 +149,10 @@ class AutoGradedVersion extends AbstractModel {
                     }
                 }
             }
-
         }
     }
 
-    public function getTestcaseMessages()
-    {
+    public function getTestcaseMessages() {
         $this->loadTestcases();
 
         $output = array();
@@ -178,9 +174,9 @@ class AutoGradedVersion extends AbstractModel {
 
                     foreach ($autochecks as $autocheck)
                     {
-                      foreach ($autocheck->getMessages() as $msg)
+                        foreach ($autocheck->getMessages() as $msg)
                         {
-                        array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
+                            array_push($output[$testcase_label], $msg); //autocheck->getMessages()[0]);
                         }
                     }
                 }
@@ -238,12 +234,17 @@ class AutoGradedVersion extends AbstractModel {
             if ($result_details != null &&
                 count($result_details['testcases']) > $testcase->getIndex() &&
                 $result_details['testcases'][$testcase->getIndex()] != null) {
-              $graded_testcase = new AutoGradedTestcase
-                ($this->core, $testcase, $results_path, $results_public_path, $result_details['testcases'][$testcase->getIndex()]);
-              $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
-              if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
-                $this->early_incentive_points += $graded_testcase->getPoints();
-              }
+                $graded_testcase = new AutoGradedTestcase(
+                    $this->core,
+                    $testcase,
+                    $results_path,
+                    $results_public_path,
+                    $result_details['testcases'][$testcase->getIndex()]
+                );
+                $this->graded_testcases[$testcase->getIndex()] = $graded_testcase;
+                if (in_array($testcase, $config->getEarlySubmissionTestCases())) {
+                    $this->early_incentive_points += $graded_testcase->getPoints();
+                }
             }
         }
     }
@@ -385,7 +386,7 @@ class AutoGradedVersion extends AbstractModel {
 
         if ($clamp === true && $result > 1.0) {
             return 1.0;
-        } else if ($result < 0) {
+        } elseif ($result < 0) {
             return 0.0;
         }
         return $result;
@@ -426,7 +427,7 @@ class AutoGradedVersion extends AbstractModel {
 
         if ($clamp === true && $result > 1.0) {
             return 1.0;
-        } else if ($result < 0) {
+        } elseif ($result < 0) {
             return 0.0;
         }
         return $result;
@@ -438,7 +439,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysLate() {
         return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+            $this->submission_time
+        )) : 0;
     }
 
     /**
@@ -447,7 +450,9 @@ class AutoGradedVersion extends AbstractModel {
      */
     public function getDaysEarly() {
         return $this->getGradedGradeable()->getGradeable()->hasDueDate() ? max(0, -DateUtils::calculateDayDiff(
-            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(), $this->submission_time)) : 0;
+            $this->getGradedGradeable()->getGradeable()->getSubmissionDueDate(),
+            $this->submission_time
+        )) : 0;
     }
 
     /**

@@ -46,7 +46,8 @@ class ElectronicGraderView extends AbstractView {
         int $viewed_grade,
         string $section_type,
         int $regrade_requests,
-        bool $show_warnings) {
+        bool $show_warnings
+    ) {
 
         $peer = false;
         if($gradeable->isPeerGrading() && $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
@@ -88,7 +89,7 @@ class ElectronicGraderView extends AbstractView {
         }
         if ($total === 0 && $no_team_total === 0){
             $graded_percentage = -1;
-        } else if ($total === 0 && $no_team_total > 0){
+        } elseif ($total === 0 && $no_team_total > 0){
             $graded_percentage = 0;
         } else{
             $graded_percentage = number_format(($graded / $total) * 100, 1);
@@ -101,35 +102,35 @@ class ElectronicGraderView extends AbstractView {
                 $total_students = $total_submissions;
             }
             $num_components = count($gradeable->getNonPeerComponents());
-            $submitted_total = $total/$num_components;
-            $graded_total = round($graded/$num_components, 2);
+            $submitted_total = $total / $num_components;
+            $graded_total = round($graded / $num_components, 2);
             if($peer) {
                 $num_components = count($gradeable->getPeerComponents()) * $gradeable->getPeerGradeSet();
-                $graded_total = $graded/$num_components;
-                $submitted_total = $total/$num_components;
+                $graded_total = $graded / $num_components;
+                $submitted_total = $total / $num_components;
             }
-            if($total_submissions!=0){
+            if($total_submissions != 0){
                 $submitted_percentage = round(($submitted_total / $total_submissions) * 100, 1);
             }
             //Add warnings to the warnings array to display them to the instructor.
             $warnings = array();
             if($section_type === "rotating_section" && $show_warnings){
                 if ($registered_but_not_rotating > 0){
-                    array_push($warnings, "There are ".$registered_but_not_rotating." registered students without a rotating section.");
+                    array_push($warnings, "There are " . $registered_but_not_rotating . " registered students without a rotating section.");
                 }
                 if($rotating_but_not_registered > 0){
-                    array_push($warnings, "There are ".$rotating_but_not_registered." unregistered students with a rotating section.");
+                    array_push($warnings, "There are " . $rotating_but_not_registered . " unregistered students with a rotating section.");
                 }
             }
 
             if($gradeable->isTeamAssignment()){
-                $team_percentage = $total_students != 0 ? round(($team_total/$total_students) * 100, 1) : 0;
+                $team_percentage = $total_students != 0 ? round(($team_total / $total_students) * 100, 1) : 0;
             }
             if ($peer) {
                 $peer_count = count($gradeable->getPeerComponents());
-                $peer_total = floor($sections['stu_grad']['total_components']/$peer_count);
-                $peer_graded = floor($sections['stu_grad']['graded_components']/$peer_count);
-                $peer_percentage = number_format(($sections['stu_grad']['graded_components']/$sections['stu_grad']['total_components']) * 100, 1);
+                $peer_total = floor($sections['stu_grad']['total_components'] / $peer_count);
+                $peer_graded = floor($sections['stu_grad']['graded_components'] / $peer_count);
+                $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
             } else {
                 foreach ($sections as $key => &$section) {
                     if ($section['total_components'] == 0) {
@@ -137,17 +138,16 @@ class ElectronicGraderView extends AbstractView {
                     } else {
                         $section['percentage'] = number_format(($section['graded_components'] / $section['total_components']) * 100, 1);
                     }
-                    $section['graded'] = round($section['graded_components']/$num_components, 1);
-                    $section['total'] = $section['total_components']/$num_components;
-
+                    $section['graded'] = round($section['graded_components'] / $num_components, 1);
+                    $section['total'] = $section['total_components'] / $num_components;
                 }
                 unset($section); // Clean up reference
 
                 if ($gradeable->isTaGradeReleased()) {
-                    $viewed_total = $total/$num_components;
+                    $viewed_total = $total / $num_components;
                     $viewed_percent = number_format(($viewed_grade / max($viewed_total, 1)) * 100, 1);
                     $individual_viewed_percent = $total_students_submitted == 0 ? 0 :
-                        number_format(($individual_viewed_grade/$total_students_submitted)*100,1);
+                        number_format(($individual_viewed_grade / $total_students_submitted) * 100, 1);
                 }
             }
             if(!$peer) {
@@ -191,7 +191,7 @@ class ElectronicGraderView extends AbstractView {
             if ($gradeable->isTeamAssignment()) {
                 $valid_teams_or_students = 0;
                 foreach ($sections as $section) {
-                    $valid_teams_or_students+= $section['no_team']+$section['team'];
+                    $valid_teams_or_students += $section['no_team'] + $section['team'];
                 }
                 $no_rotating_sections = $valid_teams_or_students === 0;
             }
@@ -203,8 +203,8 @@ class ElectronicGraderView extends AbstractView {
             "gradeable_title" => $gradeable->getTitle(),
             "team_assignment" => $gradeable->isTeamAssignment(),
             "ta_grades_released" => $gradeable->isTaGradeReleased(),
-            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) and $no_rotating_sections
-                and $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
+            "rotating_sections_error" => (!$gradeable->isGradeByRegistration()) && $no_rotating_sections
+                && $this->core->getUser()->getGroup() == User::GROUP_INSTRUCTOR,
             "autograding_non_extra_credit" => $gradeable->getAutogradingConfig()->getTotalNonExtraCredit(),
             "peer" => $peer,
             "team_total" => $team_total,
@@ -286,7 +286,6 @@ HTML;
 				</tr>
 			</tbody>
 HTML;
-
         }
 
         $return .= <<<HTML
@@ -448,7 +447,7 @@ HTML;
 
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
-            } else if ($gradeable->isGradeByRegistration()) {
+            } elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $row->getSubmitter()->getRegistrationSection();
             } else {
                 $section_title = $row->getSubmitter()->getRotatingSection();
@@ -496,12 +495,12 @@ HTML;
                 if ($graded_component === null) {
                     //not graded
                     $info["graded_groups"][] = "NULL";
-                } else if ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
+                } elseif ($grade_inquiry !== null && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE && $gradeable->isGradeInquiryPerComponentAllowed()) {
                     $info["graded_groups"][] = "grade-inquiry";
-                } else if(!$graded_component->getVerifier()){
+                } elseif(!$graded_component->getVerifier()){
                     //no verifier exists, show the grader group
                     $info["graded_groups"][] = $graded_component->getGrader()->getGroup();
-                } else if($graded_component->getGrader()->accessFullGrading()){
+                } elseif($graded_component->getGrader()->accessFullGrading()){
                     //verifier exists and original grader is full access, show verifier grader group
                     $info["graded_groups"][] = $graded_component->getVerifier()->getGroup();
                 } else{
@@ -539,7 +538,7 @@ HTML;
 
             if ($peer) {
                 $section_title = "PEER STUDENT GRADER";
-            } else if ($gradeable->isGradeByRegistration()) {
+            } elseif ($gradeable->isGradeByRegistration()) {
                 $section_title = $teamless_user->getRegistrationSection();
             } else {
                 $section_title = $teamless_user->getRotatingSection();
@@ -582,7 +581,7 @@ HTML;
         }
 
         //sorts sections numerically, NULL always at the end
-        usort($sections, function($a,$b) {
+        usort($sections, function ($a, $b) {
             return ($a['title'] == 'NULL' || $b['title'] == 'NULL') ? ($a['title'] == 'NULL') : ($a['title'] > $b['title']);
         });
 
@@ -609,10 +608,10 @@ HTML;
                 if ($value != null) {
                     $not_viewed_yet = false;
                     $date_object = new \DateTime($value);
-                    $hover_over_string.= "Viewed by ".$user." at ".$date_object->format('F d, Y g:i')."\n";
+                    $hover_over_string .= "Viewed by " . $user . " at " . $date_object->format('F d, Y g:i') . "\n";
                 }
                 else {
-                    $hover_over_string.= "Not viewed by ".$user."\n";
+                    $hover_over_string .= "Not viewed by " . $user . "\n";
                 }
             }
 
@@ -688,7 +687,7 @@ HTML;
     //assigned section. canViewWholeGradeable determines whether hidden testcases can be viewed.
     public function hwGradingPage(Gradeable $gradeable, GradedGradeable $graded_gradeable, int $display_version, float $progress, bool $show_hidden_cases, bool $can_inquiry, bool $can_verify, bool $show_verify_all, bool $show_silent_edit, string $late_status, $sort, $direction, $from) {
         $peer = false;
-        if($this->core->getUser()->getGroup()==User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
+        if($this->core->getUser()->getGroup() == User::GROUP_STUDENT && $gradeable->isPeerGrading()) {
             $peer = true;
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('mermaid', 'mermaid.min.js'));
@@ -723,7 +722,7 @@ HTML;
                 "message" => "Overridden grades"
             ]);
         }
-        else if ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
+        elseif ($graded_gradeable->getAutoGradedGradeable()->getActiveVersion() === 0) {
             if ($graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                 $return .= $this->core->getOutput()->renderTwigTemplate("grading/electronic/ErrorMessage.twig", [
                     "color" => "var(--standard-creamsicle-orange)", // mango orange
@@ -821,7 +820,6 @@ HTML;
                     <a href="{$this->core->buildCourseUrl(['forum', 'threads', $threadId])}" target="_blank" rel="noopener nofollow" class="btn btn-default btn-sm" style=" text-decoration: none;" onClick=""> Go to thread</a>
                     <hr style="border-top:1px solid #999;margin-bottom: 5px;" /> <br/>
 HTML;
-
         }
 
         if(empty($threadIds)) {
@@ -928,7 +926,7 @@ HTML;
         }
 
         // TODO: this is duplicated in Homework View
-        $version_data = array_map(function(AutoGradedVersion $version) use ($gradeable) {
+        $version_data = array_map(function (AutoGradedVersion $version) use ($gradeable) {
             return [
                 'points' => $version->getNonHiddenPoints(),
                 'days_late' => $gradeable->isStudentSubmit() && $gradeable->hasDueDate() ? $version->getDaysLate() : 0
@@ -1010,9 +1008,9 @@ HTML;
      * @return string
      */
     public function renderRegradePanel(GradedGradeable $graded_gradeable, bool $can_inquiry) {
-        return  $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("grading/electronic/RegradePanel.twig", [
             "graded_gradeable" => $graded_gradeable,
-            "can_inquiry" =>$can_inquiry
+            "can_inquiry" => $can_inquiry
         ]);
     }
 

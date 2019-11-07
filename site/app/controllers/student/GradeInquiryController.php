@@ -10,7 +10,6 @@ use app\libraries\response\Response;
 use app\libraries\response\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 class GradeInquiryController extends AbstractController {
     /**
      * @param $gradeable_id
@@ -109,7 +108,7 @@ class GradeInquiryController extends AbstractController {
 
         try {
             $this->core->getQueries()->insertNewRegradePost($grade_inquiry_id, $user->getId(), $content);
-            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply',$gc_id);
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, 'reply', $gc_id);
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
@@ -168,11 +167,11 @@ class GradeInquiryController extends AbstractController {
         // toggle status
         $status = $grade_inquiry->getStatus();
         if ($status == -1) {
-          $status = 0;
-          $type = 'resolve';
+            $status = 0;
+            $type = 'resolve';
         } else {
-          $status = -1;
-          $type = 'reopen';
+            $status = -1;
+            $type = 'reopen';
         }
 
         try {
@@ -181,7 +180,7 @@ class GradeInquiryController extends AbstractController {
             if ($content != "") {
                 $this->core->getQueries()->insertNewRegradePost($grade_inquiry->getId(), $user->getId(), $content);
             }
-            $this->notifyGradeInquiryEvent($graded_gradeable,$gradeable_id,$content,$type,$gc_id);
+            $this->notifyGradeInquiryEvent($graded_gradeable, $gradeable_id, $content, $type, $gc_id);
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
@@ -237,7 +236,7 @@ class GradeInquiryController extends AbstractController {
                     $subject = "New Grade Inquiry: $gradeable_title - $user_id";
                     $body = "A student has submitted a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 }
-            } else if ($type == 'reply') {
+            } elseif ($type == 'reply') {
                 if ($this->core->getUser()->accessGrading()) {
                     $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
                     $body = "An Instructor/TA/Mentor made a post in a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
@@ -245,8 +244,7 @@ class GradeInquiryController extends AbstractController {
                     $subject = "New Grade Inquiry Reply: $gradeable_title - $user_id";
                     $body = "A student has made a post in a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$user_id writes:\n$content";
                 }
-
-            } else if ($type == 'resolve') {
+            } elseif ($type == 'resolve') {
                 if ($this->core->getUser()->accessGrading()) {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
                     $subject = "Grade Inquiry Resolved: $gradeable_title - $user_id";
@@ -256,7 +254,7 @@ class GradeInquiryController extends AbstractController {
                     $subject = "Grade Inquiry Resolved: $gradeable_title - $user_id";
                     $body = "A student has cancelled a grade inquiry for gradeable, $gradeable_title$component_string.\n\n$included_post_content";
                 }
-            } else if ($type == 'reopen') {
+            } elseif ($type == 'reopen') {
                 if ($this->core->getUser()->accessGrading()) {
                     $included_post_content = !empty($content) ? "$user_id writes:\n$content" : "";
                     $subject = "Grade Inquiry Reopened: $gradeable_title - $user_id";
@@ -269,7 +267,7 @@ class GradeInquiryController extends AbstractController {
             }
 
             // make graders' notifications and emails
-            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?'.http_build_query(['who_id' => $submitter->getId()])])]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'grade?' . http_build_query(['who_id' => $submitter->getId()])])]);
             if (empty($graders)) {
                 $graders = $this->core->getQueries()->getAllGraders();
             }

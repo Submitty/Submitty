@@ -249,7 +249,7 @@ class Gradeable extends AbstractModel {
             $this->setPrecision($details['precision']);
             $this->setRegradeAllowedInternal($details['regrade_allowed']);
             $this->setGradeInquiryPerComponentAllowed($details['grade_inquiry_per_component_allowed']);
-            $this->setDiscussionBased((boolean)$details['discussion_based']);
+            $this->setDiscussionBased((boolean) $details['discussion_based']);
             $this->setDiscussionThreadId($details['discussion_thread_ids']);
         }
 
@@ -417,8 +417,12 @@ class Gradeable extends AbstractModel {
         $course_path = $this->core->getConfig()->getCoursePath();
 
         try {
-            $details = FileUtils::readJsonFile(FileUtils::joinPaths($course_path, 'config', 'build',
-                "build_{$this->id}.json"));
+            $details = FileUtils::readJsonFile(FileUtils::joinPaths(
+                $course_path,
+                'config',
+                'build',
+                "build_{$this->id}.json"
+            ));
 
             // If the file could not be found, the result will be false, so don't
             //  create the config if the file can't be found
@@ -506,7 +510,7 @@ class Gradeable extends AbstractModel {
                 } else {
                     $result = self::date_properties_bare;
                 }
-            } else if ($this->isTaGrading()) {
+            } elseif ($this->isTaGrading()) {
                 $result = self::date_properties_elec_ta;
             } else {
                 $result = self::date_properties_elec_no_ta;
@@ -515,7 +519,7 @@ class Gradeable extends AbstractModel {
             // Only add in submission due date if student submission is enabled
             if ($this->isStudentSubmit() && $this->hasDueDate()) {
                 // Make sure we insert the due date into the correct location (after the open date)
-                array_splice($result, array_search('submission_open_date', $result)+1, 0, 'submission_due_date');
+                array_splice($result, array_search('submission_open_date', $result) + 1, 0, 'submission_due_date');
             }
 
             // Only add in grade inquiry date if its allowed & enabled
@@ -559,7 +563,7 @@ class Gradeable extends AbstractModel {
         //  and returns the modified date values to comply with the provided order, using
         //  a compare function, which returns true when first parameter should be coerced
         //  into the second parameter.
-        $coerce_dates = function(array $date_properties, array $black_list, array $date_values, $compare) {
+        $coerce_dates = function (array $date_properties, array $black_list, array $date_values, $compare) {
             // coerce them to be in increasing order (and fill in nulls)
             foreach ($date_properties as $i => $property) {
                 // Don't coerce the first date
@@ -573,7 +577,7 @@ class Gradeable extends AbstractModel {
                 }
 
                 // Get a value for the date to compare against
-                $prev_date = $date_values[$date_properties[$i-1]];
+                $prev_date = $date_values[$date_properties[$i - 1]];
 
                 // This may be null / not set
                 $date = $date_values[$property] ?? null;
@@ -590,12 +594,18 @@ class Gradeable extends AbstractModel {
         $black_list = $this->getDateValidationSet();
 
         // First coerce in the forward direction, then in the reverse direction
-        return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
-            $coerce_dates(self::date_validated_properties, $black_list, $dates,
+        return $coerce_dates(
+            array_reverse(self::date_validated_properties),
+            $black_list,
+            $coerce_dates(
+                self::date_validated_properties,
+                $black_list,
+                $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;
-                }),
-            function(\DateTime $val, \DateTime $cmp) {
+                }
+            ),
+            function (\DateTime $val, \DateTime $cmp) {
                 return $val > $cmp;
             }
         );
@@ -792,7 +802,7 @@ class Gradeable extends AbstractModel {
 
     /**
      * Sets the gradeable type
-     * @param GradeableType $type Must be a valid GradeableType
+     * @param int $type Must be a valid GradeableType
      */
     private function setTypeInternal($type) {
         // Call this to make an exception if the type is invalid
@@ -908,8 +918,18 @@ class Gradeable extends AbstractModel {
      * @param int $pdf_page set to Component::PDF_PAGE_NONE if not a pdf assignment
      * @return Component the created component
      */
-    public function addComponent(string $title, string $ta_comment, string $student_comment, float $lower_clamp,
-                                 float $default, float $max_value, float $upper_clamp, bool $text, bool $peer, int $pdf_page) {
+    public function addComponent(
+        string $title,
+        string $ta_comment,
+        string $student_comment,
+        float $lower_clamp,
+        float $default,
+        float $max_value,
+        float $upper_clamp,
+        bool $text,
+        bool $peer,
+        int $pdf_page
+    ) {
         $component = new Component($this->core, $this, [
             'title' => $title,
             'ta_comment' => $ta_comment,
@@ -1030,7 +1050,7 @@ class Gradeable extends AbstractModel {
         $num_sections = $this->core->getQueries()->getNumberRotatingSections();
 
         $parsed_graders_sections = [];
-        foreach($rotating_grader_sections as $user=>$grader_sections) {
+        foreach($rotating_grader_sections as $user => $grader_sections) {
             if($grader_sections !== null) {
                 if(!is_array($grader_sections)) {
                     throw new \InvalidArgumentException('Rotating grader section for grader was not array');
@@ -1129,7 +1149,7 @@ class Gradeable extends AbstractModel {
         }
 
         $points = floatval($points);
-        $q = (int)($points / $this->precision);
+        $q = (int) ($points / $this->precision);
         $r = fmod($points, $this->precision);
 
         // If the remainder is more than half the precision away from zero, then add one
@@ -1183,7 +1203,8 @@ class Gradeable extends AbstractModel {
                     $this->core->getConfig()->getSemester(),
                     $this->core->getConfig()->getCourse(),
                     'submissions',
-                    $this->getId());
+                    $this->getId()
+                );
                 if (is_dir($submission_path)) {
                     $this->any_submissions = true;
                 }
@@ -1395,7 +1416,8 @@ class Gradeable extends AbstractModel {
         if ($this->split_pdf_files === null) {
             $upload_path = FileUtils::joinPaths(
                 $this->core->getConfig()->getCoursePath(),
-                'uploads', 'split_pdf',
+                'uploads',
+                'split_pdf',
                 $this->id
             );
             $this->split_pdf_files = FileUtils::getAllFiles($upload_path);
@@ -1520,8 +1542,14 @@ class Gradeable extends AbstractModel {
 
             $sections = [];
             foreach ($section_names as $section_name) {
-                $sections[] = new GradingSection($this->core, $this->isGradeByRegistration(), $section_name,
-                    $graders[$section_name] ?? [], $users[$section_name] ?? null, $teams[$section_name] ?? null);
+                $sections[] = new GradingSection(
+                    $this->core,
+                    $this->isGradeByRegistration(),
+                    $section_name,
+                    $graders[$section_name] ?? [],
+                    $users[$section_name] ?? null,
+                    $teams[$section_name] ?? null
+                );
             }
 
             return $sections;
@@ -1593,7 +1621,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function isRegradeOpen() {
-        if ($this->core->getConfig()->isRegradeEnabled()==true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
+        if ($this->core->getConfig()->isRegradeEnabled() == true && $this->isTaGradeReleased() && $this->regrade_allowed && ($this->regrade_request_date > $this->core->getDateTimeNow())) {
             return true;
         }
         return false;
@@ -1626,12 +1654,12 @@ class Gradeable extends AbstractModel {
         // Inherit rotating/registration section from leader if not provided
         if ($registration_section === '') {
             $registration_section = $leader->getRegistrationSection();
-        } else if($registration_section === 'NULL') {
+        } elseif($registration_section === 'NULL') {
             $registration_section = null;
         }
         if ($rotating_section < 0) {
             $rotating_section = $leader->getRotatingSection();
-        } else if ($rotating_section === 0) {
+        } elseif ($rotating_section === 0) {
             $rotating_section = null;
         }
 
@@ -1673,7 +1701,7 @@ class Gradeable extends AbstractModel {
 
         if ($this->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
         }
     }
 
@@ -1705,7 +1733,7 @@ class Gradeable extends AbstractModel {
      */
     public function hasSubmission(Submitter $submitter) {
         if ($submitter->isTeam() && !$this->isTeamAssignment()) {
-           return false;
+            return false;
         }
         if (!$submitter->isTeam() && $this->isTeamAssignment()) {
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($this->getId(), $submitter->getId());
@@ -1723,8 +1751,8 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function hasOverriddenGrades(Submitter $submitter) {
-        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(),$submitter->getId());
-        if($userWithOverriddenGrades === null ){
+        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(), $submitter->getId());
+        if($userWithOverriddenGrades === null){
             return false;
         }
         return true;

@@ -109,18 +109,18 @@ class GradingOrder extends AbstractModel {
      */
     public function sort($type, $direction) {
         //Function to turn submitters into "keys" that are sorted (like python's list.sort)
-        $keyFn = function(Submitter $a) {
+        $keyFn = function (Submitter $a) {
             return $a->getId();
         };
 
         switch ($type) {
             case "id":
-                $keyFn = function(Submitter $a) {
+                $keyFn = function (Submitter $a) {
                     return $a->getId();
                 };
                 break;
             case "first":
-                $keyFn = function(Submitter $a) {
+                $keyFn = function (Submitter $a) {
                     if ($a->isTeam()) {
                         return $a->getId();
                     } else {
@@ -129,7 +129,7 @@ class GradingOrder extends AbstractModel {
                 };
                 break;
             case "last":
-                $keyFn = function(Submitter $a) {
+                $keyFn = function (Submitter $a) {
                     if ($a->isTeam()) {
                         return $a->getId();
                     } else {
@@ -138,7 +138,7 @@ class GradingOrder extends AbstractModel {
                 };
                 break;
             case "random":
-                $keyFn = function(Submitter $a) {
+                $keyFn = function (Submitter $a) {
                     //So it's (pseudo) randomly ordered, and will be different for each gradeable
                     return md5($a->getId() . $this->gradeable->getId());
                 };
@@ -155,7 +155,7 @@ class GradingOrder extends AbstractModel {
 
             $directionMult = ($direction === "DESC" ? -1 : 1);
 
-            usort($section, function(Submitter $a, Submitter $b) use ($keys, $directionMult) {
+            usort($section, function (Submitter $a, Submitter $b) use ($keys, $directionMult) {
                 return strcmp($keys[$a->getId()], $keys[$b->getId()]) * $directionMult;
             });
         }
@@ -169,7 +169,7 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Previous submitter to grade
      */
     public function getPrevSubmitter(Submitter $submitter) {
-        return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
+        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
             return $this->getHasSubmission($sub);
         });
     }
@@ -181,7 +181,7 @@ class GradingOrder extends AbstractModel {
      * @return Submitter Next submitter to grade
      */
     public function getNextSubmitter(Submitter $submitter) {
-        return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
+        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
             return $this->getHasSubmission($sub);
         });
 
@@ -214,8 +214,8 @@ class GradingOrder extends AbstractModel {
         // Query database to find out which users have not been completely graded
         $this->initUsersNotFullyGraded($component_id);
 
-        return $this->getNextSubmitterMatching($submitter, function(Submitter $sub) {
-            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+        return $this->getNextSubmitterMatching($submitter, function (Submitter $sub) {
+            return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
         });
     }
 
@@ -235,8 +235,8 @@ class GradingOrder extends AbstractModel {
         // Query database to find out which users have not been completely graded
         $this->initUsersNotFullyGraded($component_id);
 
-        return $this->getPrevSubmitterMatching($submitter, function(Submitter $sub) {
-            return in_array($sub->getId(), $this->not_fully_graded) AND $this->getHasSubmission($sub);
+        return $this->getPrevSubmitterMatching($submitter, function (Submitter $sub) {
+            return in_array($sub->getId(), $this->not_fully_graded) && $this->getHasSubmission($sub);
         });
     }
 
@@ -435,8 +435,12 @@ class GradingOrder extends AbstractModel {
      * @return GradedGradeable[] All graded gradeables for students, in the correct order
      */
     public function getSortedGradedGradeables() {
-        $iter = $this->core->getQueries()->getGradedGradeables([$this->gradeable],
-            $this->all_user_ids, $this->all_team_ids, [$this->getSectionKey(), 'team_id', 'user_id']);
+        $iter = $this->core->getQueries()->getGradedGradeables(
+            [$this->gradeable],
+            $this->all_user_ids,
+            $this->all_team_ids,
+            [$this->getSectionKey(), 'team_id', 'user_id']
+        );
 
         $gg_idx = [];
         $unsorted = [];
@@ -464,19 +468,19 @@ class GradingOrder extends AbstractModel {
      */
     public static function getGradingOrderMessage($sort, $direction) {
 
-        if($sort == 'first' AND $direction == 'ASC') {
+        if($sort == 'first' && $direction == 'ASC') {
             $msg = 'First Name Ascending';
-        } else if ($sort == 'first' AND $direction == 'DESC') {
+        } elseif ($sort == 'first' && $direction == 'DESC') {
             $msg = 'First Name Descending';
-        } else if ($sort == 'last' AND $direction == 'ASC') {
+        } elseif ($sort == 'last' && $direction == 'ASC') {
             $msg = 'Last Name Ascending';
-        } else if ($sort == 'last' AND $direction == 'DESC') {
+        } elseif ($sort == 'last' && $direction == 'DESC') {
             $msg = 'Last Name Descending';
-        } else if ($sort == 'id' AND $direction == 'ASC') {
+        } elseif ($sort == 'id' && $direction == 'ASC') {
             $msg = 'ID Ascending';
-        } else if ($sort == 'id' AND $direction == 'DESC') {
+        } elseif ($sort == 'id' && $direction == 'DESC') {
             $msg = 'ID Descending';
-        } else if ($sort == 'random') {
+        } elseif ($sort == 'random') {
             $msg = 'Randomized';
         } else {
             $msg = false;

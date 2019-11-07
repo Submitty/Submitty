@@ -5,7 +5,7 @@ namespace tests\app\libraries\database;
 use app\libraries\database\SqliteDatabase;
 
 class SqliteDatabaseTester extends \PHPUnit\Framework\TestCase {
-    function testMemorySqliteDSN() {
+    public function testMemorySqliteDSN() {
         $database = new SqliteDatabase(array('memory' => true));
         $this->assertEquals("sqlite::memory:", $database->getDSN());
     }

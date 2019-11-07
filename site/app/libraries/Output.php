@@ -1,6 +1,7 @@
 <?php
 
 namespace app\libraries;
+
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\libraries\FileUtils;
@@ -94,10 +95,10 @@ class Output {
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function(string $path, string $title): string {
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
             $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
             list($mime_type, $mime_subtype) = explode('/', mime_content_type($path), 2);
             if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
@@ -315,8 +316,8 @@ HTML;
         $this->useFooter(false);
         $this->useHeader(false);
         $this->output_buffer = $contents;
-        header("Content-Type: ".$filetype);
-        header("Content-Disposition: attachment; filename=".$filename);
+        header("Content-Type: " . $filetype);
+        header("Content-Disposition: attachment; filename=" . $filename);
         header("Content-Length: " . strlen($contents));
     }
 
@@ -472,7 +473,7 @@ HTML;
         return $this->getOutput();
     }
 
-    public function addInternalCss($file, $folder='css') {
+    public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
 
@@ -484,7 +485,7 @@ HTML;
         $this->css->add($url);
     }
 
-    public function addInternalJs($file, $folder='js') {
+    public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
 
@@ -498,7 +499,7 @@ HTML;
 
     public function timestampResource($file, $folder) {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        return $this->core->getConfig()->getBaseUrl().$folder."/".$file.(($timestamp !== 0) ? "?v={$timestamp}" : "");
+        return $this->core->getConfig()->getBaseUrl() . $folder . "/" . $file . (($timestamp !== 0) ? "?v={$timestamp}" : "");
     }
 
     /**
@@ -513,7 +514,7 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function addBreadcrumb($string, $url=null, $external_link=false) {
+    public function addBreadcrumb($string, $url = null, $external_link = false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
     }
 
