@@ -892,7 +892,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
-
     }
 
     /**

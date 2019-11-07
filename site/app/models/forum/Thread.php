@@ -41,7 +41,6 @@ class Thread extends AbstractModel {
         setPostId($details['post_id']);
         setParentId($details['parent_id']);
         setThreadId($details['thread_id']);
-
     }
 
     public function getFirstPost(): Post {

@@ -140,7 +140,6 @@ class NotificationFactory {
             $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
-
     }
 
     // ***********************************HELPERS***********************************
@@ -209,7 +208,6 @@ class NotificationFactory {
             // so to calculate the number of notifications we must use flattened notifications
             $this->core->getQueries()->insertNotifications($flattened_notifications, count($flattened_notifications) / 5);
         }
-
     }
 
     /**
@@ -240,6 +238,5 @@ class NotificationFactory {
         if (!empty($flattened_emails)) {
             $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 3);
         }
-
     }
 }

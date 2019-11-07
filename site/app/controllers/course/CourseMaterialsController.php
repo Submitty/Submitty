@@ -204,8 +204,6 @@ class CourseMaterialsController extends AbstractController {
                 return "Failed to write to file {$fp}";
             }
         }
-
-
     }
 
     /**

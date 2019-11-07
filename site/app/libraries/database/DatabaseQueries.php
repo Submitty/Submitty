@@ -1817,7 +1817,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
                                    VALUES(?,?,?,current_timestamp + interval '336 hours')",
             array($session_id, $user_id, $csrf_token)
         );
-
     }
 
     /**
@@ -1928,7 +1927,6 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
             $this->course_db->query("DELETE FROM teams AS t
               WHERE team_id=?", array($team_id));
         }
-
     }
 
     /**
@@ -2912,7 +2910,6 @@ AND gc_id IN (
         }
         $this->course_db->query($query, $params);
         return $this->rowsToArray($this->course_db->rows());
-
     }
 
     /*
@@ -2940,7 +2937,6 @@ AND gc_id IN (
         $this->course_db->query("
             INSERT INTO notifications(component, metadata, content, created_at, from_user_id, to_user_id)
             VALUES " . $value_param_string, $flattened_notifications);
-
     }
 
     /**
@@ -3051,7 +3047,6 @@ AND gc_id IN (
             AS active
             FROM courses_users WHERE user_id=? AND course=? AND semester=?", array($user_id, $course, $semester));
         return $this->submitty_db->row()['active'];
-
     }
 
     public function checkIsInstructorInCourse($user_id, $course, $semester) {
@@ -3120,7 +3115,6 @@ AND gc_id IN (
         $regrade_id = $regrade_request->getId();
         $this->course_db->query("DELETE FROM regrade_discussion WHERE regrade_id = ?", $regrade_id);
         $this->course_db->query("DELETE FROM regrade_requests WHERE id = ?", $regrade_id);
-
     }
     public function deleteGradeable($g_id) {
         $this->course_db->query("DELETE FROM gradeable WHERE g_id=?", array($g_id));

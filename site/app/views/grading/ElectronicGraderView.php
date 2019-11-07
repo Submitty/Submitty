@@ -348,7 +348,6 @@ HTML;
 			</script>
 HTML;
         return $return;
-
     }
 
 
