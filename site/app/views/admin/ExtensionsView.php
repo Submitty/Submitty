@@ -32,7 +32,9 @@ class ExtensionsView extends AbstractView {
                                           'user_lastname' => $user->getDisplayedLastName(),
                                           'late_day_exceptions' => $user->getLateDayExceptions());
         }
-        if (empty($current_exceptions)) $current_exceptions = null;
+        if (empty($current_exceptions)) {
+            $current_exceptions = null;
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
             "gradeables" => $gradeables,

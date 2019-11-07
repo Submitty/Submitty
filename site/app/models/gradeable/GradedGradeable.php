@@ -159,8 +159,9 @@ class GradedGradeable extends AbstractModel {
      */
     public function getGradeInquiryByGcId($gc_id) {
         foreach ($this->regrade_requests as $grade_inquiry) {
-            if ($grade_inquiry->getGcId() == $gc_id)
+            if ($grade_inquiry->getGcId() == $gc_id) {
                 return $grade_inquiry;
+            }
         }
         return null;
     }

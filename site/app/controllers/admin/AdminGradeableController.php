@@ -1047,8 +1047,9 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
-        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE)
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             return null;
+        }
 
         // Refresh the configuration file with updated information
         // See 'make_assignments_txt_file.py' and grade_item.py for where these properties are used

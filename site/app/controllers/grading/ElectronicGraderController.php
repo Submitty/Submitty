@@ -315,7 +315,9 @@ class ElectronicGraderController extends AbstractController {
         $total_submissions = 0;
         if (count($total_users) > 0) {
             foreach ($total_users as $key => $value) {
-                if ($key == 'NULL') continue;
+                if ($key == 'NULL') {
+                    continue;
+                }
                 $total_submissions += $value;
             }
             if ($peer) {
@@ -330,7 +332,9 @@ class ElectronicGraderController extends AbstractController {
                     'graders' => array()
                 );
                 foreach($total_users as $key => $value) {
-                    if($key == 'NULL') continue;
+                    if($key == 'NULL') {
+                        continue;
+                    }
                     $sections['all']['total_components'] += $value * $num_components * $peer_grade_set;
                     $sections['all']['graded_components'] += isset($graded_components[$key]) ? $graded_components[$key] : 0;
                 }
@@ -732,7 +736,9 @@ class ElectronicGraderController extends AbstractController {
         }
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'grading', 'details']);
-        if ($view !== '') $return_url .= "?view={$view}";
+        if ($view !== '') {
+            $return_url .= "?view={$view}";
+        }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
@@ -2226,9 +2232,11 @@ class ElectronicGraderController extends AbstractController {
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable->getId(), $sections, $section_key, $gradeable->isTeamAssignment());
         }
 
-        foreach ($graded_components as $key => $value)
+        foreach ($graded_components as $key => $value) {
             $total_graded += intval($value);
-        foreach ($total_users as $key => $value)
+        }
+        foreach ($total_users as $key => $value) {
             $total_total += $value * $num_components;
+        }
     }
 }

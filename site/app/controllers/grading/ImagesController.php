@@ -30,9 +30,9 @@ class ImagesController extends AbstractController {
             return;
         }
 
-        if ($user_group !== USER::GROUP_LIMITED_ACCESS_GRADER)
+        if ($user_group !== USER::GROUP_LIMITED_ACCESS_GRADER) {
             $grader_sections = array();  //reset grader section to nothing so permission for every image
-        else {
+        } else {
             if (empty($grader_sections)) {
                 return;
             }

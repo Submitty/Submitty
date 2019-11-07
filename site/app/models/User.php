@@ -336,7 +336,9 @@ class User extends AbstractModel {
                 return preg_match("~^[a-zA-Z'`\-\.\(\) ]{0,30}$~", $data) === 1;
             case 'user_email':
                 // emails are allowed to be the empty string...
-                if ($data === "") return true;
+                if ($data === "") {
+                    return true;
+                }
                 // -- or ---
                 // Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
                 return preg_match("~^[^(),:;<>@\\\"\[\]]+@(?!\-)[a-zA-Z0-9\-]+(?<!\-)(\.[a-zA-Z0-9]+)+$~", $data) === 1;

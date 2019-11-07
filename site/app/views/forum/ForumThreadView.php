@@ -599,10 +599,12 @@ class ForumThreadView extends AbstractView {
                 $used_active = true;
                 $activeThreadTitle = ($display_thread_ids ? "({$thread['id']}) " : '') . $thread["title"];
                 $activeThread = $thread;
-                if ($thread["pinned"])
+                if ($thread["pinned"]) {
                     $activeThreadAnnouncement = true;
-                if ($thread_id_p == -1)
+                }
+                if ($thread_id_p == -1) {
                     $thread_id_p = $thread["id"];
+                }
             }
             if (!$this->core->getQueries()->viewedThread($current_user, $thread["id"])) {
                 $class .= " new_thread";
@@ -636,8 +638,9 @@ class ForumThreadView extends AbstractView {
             }
             if (strlen($thread["title"]) > 40) {
                 //Fix ... appearing
-                if (empty($titleDisplay))
+                if (empty($titleDisplay)) {
                     $titleDisplay .= substr($thread['title'], 0, 30);
+                }
                 $titleDisplay .= "...";
             }
             $titleDisplay = ($display_thread_ids ? "({$thread['id']}) " : '') . $titleDisplay;

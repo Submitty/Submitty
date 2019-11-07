@@ -52,8 +52,9 @@ class CourseMaterialsView extends AbstractView {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
 
-                        if ($isShareToOther == '1' && $release_date > $now_date_time)
+                        if ($isShareToOther == '1' && $release_date > $now_date_time) {
                             $isShareToOther = '0';
+                        }
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
                     }
