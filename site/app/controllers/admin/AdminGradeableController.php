@@ -743,10 +743,18 @@ class AdminGradeableController extends AbstractController {
 
             // Find which radio button is pressed and what host type to use
             $host_type = -1;
-            if      ($host_button === 'submitty-hosted')     { $host_type = 0; }
-            elseif ($host_button === 'submitty-hosted-url') { $host_type = 1; }
-            elseif ($host_button === 'public-github')       { $host_type = 2; }
-            elseif ($host_button === 'private-github')      { $host_type = 3; }
+            if ($host_button === 'submitty-hosted') {
+                $host_type = 0;
+            }
+            elseif ($host_button === 'submitty-hosted-url') {
+                $host_type = 1;
+            }
+            elseif ($host_button === 'public-github') {
+                $host_type = 2;
+            }
+            elseif ($host_button === 'private-github') {
+                $host_type = 3;
+            }
 
             $subdir = '';
             // Submitty hosted -> this gradeable subdirectory

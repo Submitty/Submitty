@@ -31,8 +31,10 @@ class ExceptionHandler {
     /**
      * This is a static class so it should never be instaniated or copied anywhere
      */
-    private function __construct() { }
-    private function __clone() { }
+    private function __construct() {
+    }
+    private function __clone() {
+    }
 
     /**
      * @param bool $boolean True/False to control whether we log/not log exceptions
