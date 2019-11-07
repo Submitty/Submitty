@@ -458,10 +458,11 @@ class MiscController extends AbstractController {
         $complete_count = 0;
         try{
             foreach(scandir($job_path) as $job){
-                if(strpos($job, 'bulk_upload_') !== false)
+                if(strpos($job, 'bulk_upload_') !== false) {
                     $found = true;
-                else
+                } else {
                     continue;
+                }
                 //remove 'bulk_upload_' and '.json' from job file name
                 $result[] = substr($job, 11, -5);
             }
@@ -470,11 +471,13 @@ class MiscController extends AbstractController {
             $sub_dirs = array_filter(glob($split_uploads . '/*'), 'is_dir');
             foreach ($sub_dirs as $dir) {
                 foreach (scandir($dir) as $file) {
-                    if(pathinfo($file)['extension'] !== "pdf")
+                    if(pathinfo($file)['extension'] !== "pdf") {
                         continue;
+                    }
 
-                    if(strpos($file, "_cover"))
+                    if(strpos($file, "_cover")) {
                         $complete_count++;
+                    }
                 }
             }
             $result = ['found' => $found, 'job_data' => $result, 'count' => $complete_count];

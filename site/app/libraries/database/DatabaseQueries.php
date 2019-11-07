@@ -1891,7 +1891,9 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     public function createTeam($g_id, $user_id, $registration_section, $rotating_section) {
         $this->course_db->query("SELECT COUNT(*) AS cnt FROM gradeable_teams");
         $team_id_prefix = strval($this->course_db->row()['cnt']);
-        if (strlen($team_id_prefix) < 5) $team_id_prefix = str_repeat("0", 5 - strlen($team_id_prefix)) . $team_id_prefix;
+        if (strlen($team_id_prefix) < 5) {
+            $team_id_prefix = str_repeat("0", 5 - strlen($team_id_prefix)) . $team_id_prefix;
+        }
         $team_id = "{$team_id_prefix}_{$user_id}";
 
         $params = array($team_id, $g_id, $registration_section, $rotating_section);
@@ -2088,7 +2090,9 @@ ORDER BY {$section_key}", $params);
             $return[$row[$section_key]] = intval($row['cnt']);
         }
         foreach ($sections as $section) {
-            if (!isset($return[$section])) $return[$section] = 0;
+            if (!isset($return[$section])) {
+                $return[$section] = 0;
+            }
         }
         ksort($return);
         return $return;
@@ -3075,7 +3079,9 @@ AND gc_id IN (
             $regrade_id = $this->course_db->getLastInsertId();
             $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
         } catch (DatabaseException $dbException) {
-            if ($this->course_db->inTransaction()) $this->course_db->rollback();
+            if ($this->course_db->inTransaction()) {
+                $this->course_db->rollback();
+            }
             throw $dbException;
         }
     }

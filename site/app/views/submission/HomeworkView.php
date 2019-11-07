@@ -326,10 +326,12 @@ class HomeworkView extends AbstractView {
             if (file_exists($path)) {
                 $json = json_decode(file_get_contents($path), true);
                 if (!is_null($json)) {
-                    if (isset($json["git_user_id"]))
+                    if (isset($json["git_user_id"])) {
                         $github_user_id = $json["git_user_id"];
-                    if (isset($json["git_repo_id"]))
+                    }
+                    if (isset($json["git_repo_id"])) {
                         $github_repo_id = $json["git_repo_id"];
+                    }
                 }
             }
         }
@@ -471,8 +473,9 @@ class HomeworkView extends AbstractView {
                 $cover_image_name = substr($filename, 0, -3) . "jpg";
                 $cover_image = [];
                 foreach ($cover_images as $img) {
-                    if($img['filename'] === $cover_image_name)
+                    if($img['filename'] === $cover_image_name) {
                         $cover_image = $img;
+                    }
                 }
                 $files[] = [
                     'clean_timestamp' => $clean_timestamp,
@@ -771,7 +774,9 @@ class HomeworkView extends AbstractView {
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
-                    if (empty($post)) break;
+                    if (empty($post)) {
+                        break;
+                    }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
                     $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());

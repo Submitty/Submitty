@@ -70,7 +70,9 @@ class AutoGradingView extends AbstractView {
 
             if ($gradeable->isTaGradeReleased()) {
                 foreach ($version_instance->getTestcases() as $testcase) {
-                    if (!$testcase->canView()) continue;
+                    if (!$testcase->canView()) {
+                        continue;
+                    }
                     if ($testcase->getTestcase()->isHidden()) {
                         $any_visible_hidden = true;
                         break;

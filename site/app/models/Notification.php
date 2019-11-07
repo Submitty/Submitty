@@ -165,16 +165,18 @@ class Notification extends AbstractModel {
             return "Less than a minute ago";
         } elseif($elapsed_time < 3600){
             $minutes = floor($elapsed_time / 60);
-            if($minutes == 1)
+            if($minutes == 1) {
                 return "1 minute ago";
-            else
+            } else {
                 return "{$minutes} minutes ago";
+            }
         } elseif($elapsed_time < 3600 * 24){
             $hours = floor($elapsed_time / 3600);
-            if($hours == 1)
+            if($hours == 1) {
                 return "1 hour ago";
-            else
+            } else {
                 return "{$hours} hours ago";
+            }
         } else {
             return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }

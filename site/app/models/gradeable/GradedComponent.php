@@ -86,8 +86,9 @@ class GradedComponent extends AbstractModel {
         $this->setGradedVersion($details['graded_version'] ?? 0);
         $this->setGradeTime($details['grade_time'] ?? $this->core->getDateTimeNow());
         $this->verifier_id = $details['verifier_id'] ?? '';
-        if($this->verifier_id !== '')
+        if($this->verifier_id !== '') {
             $this->verifier = $this->core->getQueries()->getUserById($this->verifier_id);
+        }
         $this->setVerifyTime($details['verify_time'] ?? '');
         // assign the default score if its not electronic (or rather not a custom mark)
         if ($component->getGradeable()->getType() === GradeableType::ELECTRONIC_FILE) {

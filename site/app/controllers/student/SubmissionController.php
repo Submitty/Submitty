@@ -943,7 +943,9 @@ class SubmissionController extends AbstractController {
                 $filename = $this_input->getFileName();
                 $dst = FileUtils::joinPaths($version_path, $filename);
 
-                if (count($answers) > 0)  $empty_inputs = false;
+                if (count($answers) > 0) {
+                    $empty_inputs = false;
+                }
 
                 // FIXME: add error checking
                 $file = fopen($dst, "w");
@@ -1512,16 +1514,19 @@ class SubmissionController extends AbstractController {
         $user_id_arr = is_dir($base_path) ? array_slice(scandir($base_path), 2) : [];
         for($i = 0; $i < count($user_id_arr); $i++) {
             $user_path = $base_path . $user_id_arr[$i];
-            if(!is_dir($user_path))
+            if(!is_dir($user_path)) {
                 continue;
+            }
             $files = scandir($user_path);
             $num_files = count($files) - 3;
             $json_path = $user_path . "/" . $num_files . "/bulk_upload_data.json";
-            if(!file_exists($json_path))
+            if(!file_exists($json_path)) {
                 continue;
+            }
             $user = $this->core->getQueries()->getUserById($user_id_arr[$i]);
-            if($user === null)
+            if($user === null) {
                 continue;
+            }
             $file_contents = FileUtils::readJsonFile($json_path);
             $users[$user_id_arr[$i]]["first_name"] = $user->getDisplayedFirstName();
             $users[$user_id_arr[$i]]["last_name"] = $user->getDisplayedLastName();
