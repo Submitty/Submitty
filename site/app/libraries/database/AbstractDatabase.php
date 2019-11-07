@@ -234,10 +234,10 @@ abstract class AbstractDatabase {
             if (isset($columns[$col])) {
                 $column = $columns[$col];
                 if ($column['native_type'] === 'integer' && $column['pdo_type'] !== \PDO::PARAM_INT) {
-                    $value = (integer) $value;
+                    $value = (int) $value;
                 }
                 elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== \PDO::PARAM_BOOL) {
-                    $value = (boolean) $value;
+                    $value = (bool) $value;
                 }
                 $result[$col] = $value;
             }

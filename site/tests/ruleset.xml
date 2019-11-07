@@ -32,7 +32,6 @@
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>
         <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMiddle"/>
-        <exclude name="PSR12.Keywords.ShortFormTypeKeywords.LongFound" />
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
