@@ -149,10 +149,10 @@ class ConfigurationController extends AbstractController {
             // If a custom_customization.json does not exist, then check for the presence of a regular one
             if (!$customization_json->doesCustomCustomizationExist()) {
                 // Attempt to populate it from the customization.json in the course rainbow_grades directory
+                // If no file exists do not allow user to enable this check mark until one is supplied
                 try {
                     $customization_json->loadFromJsonFile();
                 }
-                // If no file exists do not allow user to enable this check mark until one is supplied
                 catch (\Exception $e) {
                     return Response::JsonOnlyResponse(
                         JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
