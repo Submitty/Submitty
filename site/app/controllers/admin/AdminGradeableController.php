@@ -26,7 +26,8 @@ class AdminGradeableController extends AbstractController {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
             $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             // If the gradeable can't be found, redirect to new page
             $this->newPage();
         }
@@ -360,9 +361,11 @@ class AdminGradeableController extends AbstractController {
         try {
             $this->updateRubric($gradeable, $_POST['values']);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -443,7 +446,8 @@ class AdminGradeableController extends AbstractController {
         }
         try {
             $file_iter = new \RecursiveDirectoryIterator($folder_path, \RecursiveDirectoryIterator::SKIP_DOTS);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return false;
         }
         while ($file_iter->valid()) {
@@ -488,7 +492,8 @@ class AdminGradeableController extends AbstractController {
 
             try {
                 $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
@@ -645,9 +650,11 @@ class AdminGradeableController extends AbstractController {
             $this->updateGraders($gradeable, $_POST);
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail('Error setting graders' . $e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -676,7 +683,8 @@ class AdminGradeableController extends AbstractController {
                 $this->core->addErrorMessage($build_result);
             }
             $this->redirectToEdit($gradeable_id);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
             $this->core->redirect($this->core->buildCourseUrl());
         }
@@ -903,9 +911,11 @@ class AdminGradeableController extends AbstractController {
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess($response_props);
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
             $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1004,7 +1014,8 @@ class AdminGradeableController extends AbstractController {
                     explode('_', $prop))
                 );
                 $gradeable->$setter_name($post_val);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
             }
@@ -1015,7 +1026,8 @@ class AdminGradeableController extends AbstractController {
             try {
                 $gradeable->setDates($dates);
                 $updated_properties = $gradeable->getDateStrings(false);
-            } catch (ValidationException $e) {
+            }
+            catch (ValidationException $e) {
                 $errors = array_merge($errors, $e->getDetails());
             }
         }
@@ -1319,7 +1331,8 @@ class AdminGradeableController extends AbstractController {
         try {
             $arrs = $gradeable->exportComponents();
             $this->core->getOutput()->renderFile(json_encode($arrs, JSON_PRETTY_PRINT), $gradeable->getId() . '_components.json');
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
             $this->core->redirect($url);
         }
@@ -1354,9 +1367,11 @@ class AdminGradeableController extends AbstractController {
             // Save to the database
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }

@@ -376,7 +376,8 @@ class DatabaseQueries {
             $this->course_db->query("INSERT INTO posts (thread_id, parent_id, author_user_id, content, timestamp, anonymous, deleted, endorsed_by, type, has_attachment, render_markdown) VALUES (?, ?, ?, ?, current_timestamp, ?, ?, ?, ?, ?, ?)", array($thread_id, $parent_post, $user, $content, $anonymous, 0, null, $type, $hasAttachment, $markdown));
             $this->course_db->query("SELECT MAX(id) as max_id from posts where thread_id=? and author_user_id=?", array($thread_id, $user));
             $this->visitThread($user, $thread_id);
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }
@@ -503,7 +504,8 @@ class DatabaseQueries {
 
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
             $this->course_db->rollback();
         }
 
@@ -641,7 +643,8 @@ class DatabaseQueries {
             $this->course_db->query("INSERT INTO forum_posts_history(post_id, edit_author, content, edit_timestamp) SELECT id, ?, content, current_timestamp FROM posts WHERE id = ?", array($user, $post_id));
             $this->course_db->query("UPDATE notifications SET content = substring(content from '.+?(?=from)') || 'from ' || ? where metadata::json->>'thread_id' = ? and metadata::json->>'post_id' = ?", array(ForumUtils::getDisplayName($anon, $this->getDisplayUserInfoFromUserId($original_creator)), $this->getParentPostId($post_id), $post_id));
             $this->course_db->commit();
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
             $this->course_db->rollback();
             return false;
         } return true;
@@ -656,7 +659,8 @@ class DatabaseQueries {
                 $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $category_id));
             }
             $this->course_db->commit();
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
             $this->course_db->rollback();
             return false;
         } return true;
@@ -2753,7 +2757,8 @@ AND gc_id IN (
 
             $this->course_db->commit();
             return true;
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
              $this->course_db->rollback();
         }
         return false;
@@ -3089,7 +3094,8 @@ AND gc_id IN (
             $this->course_db->query("INSERT INTO regrade_requests(g_id, timestamp, $submitter_col, status, gc_id) VALUES (?, current_timestamp, ?, ?, ?)", $params);
             $regrade_id = $this->course_db->getLastInsertId();
             $this->insertNewRegradePost($regrade_id, $sender->getId(), $initial_message);
-        } catch (DatabaseException $dbException) {
+        }
+        catch (DatabaseException $dbException) {
             if ($this->course_db->inTransaction()) {
                 $this->course_db->rollback();
             }

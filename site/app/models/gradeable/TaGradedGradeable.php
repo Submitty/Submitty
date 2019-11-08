@@ -379,7 +379,8 @@ class TaGradedGradeable extends AbstractModel {
         else {
             try {
                 $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }

@@ -331,7 +331,8 @@ HTML;
     public function renderTwigTemplate(string $filename, array $context = []): string {
         try {
             return $this->twig->render($filename, $context);
-        } catch (\Twig_Error $e) {
+        }
+        catch (\Twig_Error $e) {
             throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
         }
     }

@@ -94,7 +94,8 @@ class DateUtils {
         if (gettype($date) === 'string') {
             try {
                 $date = new \DateTime($date, $time_zone);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
             }
         }

@@ -430,7 +430,8 @@ class Gradeable extends AbstractModel {
                 return new AutogradingConfig($this->core, $details);
             }
             return null;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             // Don't throw an error, just don't make any data
             return null;
         }
@@ -448,7 +449,8 @@ class Gradeable extends AbstractModel {
             if (isset($dates[$date]) && $dates[$date] !== null) {
                 try {
                     $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getConfig()->getTimezone());
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     $parsedDates[$date] = null;
                 }
             }
@@ -1100,7 +1102,8 @@ class Gradeable extends AbstractModel {
         try {
             // Asserts that this date information is valid after changing this property
             $this->setDates($this->getDates());
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
             // Reset to the old value if validation fails
             $this->regrade_allowed = $old;
 
@@ -1133,7 +1136,8 @@ class Gradeable extends AbstractModel {
         try {
             // Asserts that this date information is valid after changing this property
             $this->setDates($this->getDates());
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
             // Reset to the old value if validation fails
             $this->ta_grading = $old;
 

@@ -277,7 +277,8 @@ class GradedComponent extends AbstractModel {
         else {
             try {
                 $this->grade_time = DateUtils::parseDateTime($grade_time, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }
@@ -344,7 +345,8 @@ class GradedComponent extends AbstractModel {
         else {
             try {
                 $this->verify_time = DateUtils::parseDateTime($verify_time, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }

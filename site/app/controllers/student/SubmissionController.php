@@ -52,7 +52,8 @@ class SubmissionController extends AbstractController {
                 return $gradeable;
             }
             return null;
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return null;
         }
     }
@@ -504,7 +505,8 @@ class SubmissionController extends AbstractController {
                 $leader_user = $this->core->getQueries()->getUserById($leader);
                 try {
                     $gradeable->createTeam($leader_user, $members);
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
                     return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
                 }

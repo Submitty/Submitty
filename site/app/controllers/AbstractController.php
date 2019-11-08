@@ -46,11 +46,13 @@ abstract class AbstractController {
         // Get the gradeable
         try {
             return $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid gradeable_id parameter');
             }
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Failed to load gradeable');
             }
@@ -81,7 +83,8 @@ abstract class AbstractController {
         $component_id = intval($component_id);
         try {
             return $gradeable->getComponent($component_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid component_id for this gradeable');
             }
@@ -112,7 +115,8 @@ abstract class AbstractController {
         $mark_id = intval($mark_id);
         try {
             return $component->getMark($mark_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid mark_id for this component');
             }
@@ -143,7 +147,8 @@ abstract class AbstractController {
                 return false;
             }
             return $submitter_id;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Error getting user id from anon_id parameter');
             }
@@ -174,7 +179,8 @@ abstract class AbstractController {
                 return false;
             }
             return $graded_gradeable;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonError('Failed to load Gradeable grade');
             }
@@ -266,7 +272,8 @@ abstract class AbstractController {
         $autocheck_index = intval($autocheck_index);
         try {
             return $testcase->getAutocheck($autocheck_index);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             if ($render_json) {
                 $this->core->getOutput()->renderJsonFail('Invalid autocheck index parameter');
             }

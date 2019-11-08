@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a5212c236c3fcd978e239e23f2f1729d",
+    "content-hash": "71bfc0abe5508dcd0c1563a24567b9f9",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -1944,16 +1944,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.2.5",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "b76bbc3c51f22c570648de48e8c2d941ed5e2cf2"
+                "reference": "9a9981c347c5c49d6dfe5cf826bb882b824080dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/b76bbc3c51f22c570648de48e8c2d941ed5e2cf2",
-                "reference": "b76bbc3c51f22c570648de48e8c2d941ed5e2cf2",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/9a9981c347c5c49d6dfe5cf826bb882b824080dc",
+                "reference": "9a9981c347c5c49d6dfe5cf826bb882b824080dc",
                 "shasum": ""
             },
             "require": {
@@ -1961,7 +1961,7 @@
                 "php": ">=7.0"
             },
             "require-dev": {
-                "ircmaxell/php-yacc": "0.0.4",
+                "ircmaxell/php-yacc": "0.0.5",
                 "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0"
             },
             "bin": [
@@ -1970,7 +1970,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -1992,7 +1992,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2019-10-25T18:33:07+00:00"
+            "time": "2019-11-08T13:50:10+00:00"
         },
         {
             "name": "ocramius/package-versions",
@@ -3788,16 +3788,16 @@
         },
         {
             "name": "submitty/php-codesniffer",
-            "version": "2.2.2",
+            "version": "2.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/submitty-php-codesniffer.git",
-                "reference": "b9aef1fe78e26b8c2890bd69960503d2ce29b419"
+                "reference": "bdca80b5cb059b1e72ee8fd43ccb7653e86023c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/b9aef1fe78e26b8c2890bd69960503d2ce29b419",
-                "reference": "b9aef1fe78e26b8c2890bd69960503d2ce29b419",
+                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/bdca80b5cb059b1e72ee8fd43ccb7653e86023c5",
+                "reference": "bdca80b5cb059b1e72ee8fd43ccb7653e86023c5",
                 "shasum": ""
             },
             "require": {
@@ -3830,7 +3830,7 @@
                 }
             ],
             "description": "Submitty PHP CodeSniffer Standard",
-            "time": "2019-11-08T10:36:55+00:00"
+            "time": "2019-11-08T13:08:44+00:00"
         },
         {
             "name": "symfony/console",

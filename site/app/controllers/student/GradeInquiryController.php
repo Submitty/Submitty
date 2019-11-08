@@ -52,11 +52,13 @@ class GradeInquiryController extends AbstractController {
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getErrorResponse($e->getMessage())
             );
@@ -112,11 +114,13 @@ class GradeInquiryController extends AbstractController {
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getErrorResponse($e->getMessage())
             );
@@ -185,11 +189,13 @@ class GradeInquiryController extends AbstractController {
             return Response::JsonOnlyResponse(
                 JsonResponse::getSuccessResponse()
             );
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse($e->getMessage())
             );
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getErrorResponse($e->getMessage())
             );

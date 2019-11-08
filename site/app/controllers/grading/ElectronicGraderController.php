@@ -104,7 +104,8 @@ class ElectronicGraderController extends AbstractController {
         try {
             $results = $this->removeEmpty($autocheck, $option, $which);
             $this->core->getOutput()->renderJsonSuccess($results);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -184,9 +185,11 @@ class ElectronicGraderController extends AbstractController {
             }
             $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -637,7 +640,8 @@ class ElectronicGraderController extends AbstractController {
             $members = $this->core->getQueries()->getUsersById(array_slice($members, 1));
             try {
                 $gradeable->createTeam($leader, $members);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized ($leader_id): {$e->getMessage()}");
             }
         }
@@ -781,7 +785,8 @@ class ElectronicGraderController extends AbstractController {
             try {
                 $gradeable->createTeam($leader, $users, $reg_section, $rot_section);
                 $this->core->addSuccessMessage("Created New Team {$team_id}");
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 $this->core->addErrorMessage("Team may not have been properly initialized: {$e->getMessage()}");
                 $this->core->redirect($return_url);
             }
@@ -1081,9 +1086,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $results = $this->getGradeableRubric($gradeable, $grader);
             $this->core->getOutput()->renderJsonSuccess($results);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1131,9 +1138,11 @@ class ElectronicGraderController extends AbstractController {
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->core->getOutput()->renderJsonSuccess($component->toArray());
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1179,9 +1188,11 @@ class ElectronicGraderController extends AbstractController {
                 $response_data = $this->getGradedGradeable($ta_graded_gradeable, $grader);
             }
             $this->core->getOutput()->renderJsonSuccess($response_data);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1333,9 +1344,11 @@ class ElectronicGraderController extends AbstractController {
                 !$silent_edit
             );
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1477,9 +1490,11 @@ class ElectronicGraderController extends AbstractController {
             $component->setPeer($peer);
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1514,9 +1529,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveComponentOrder($gradeable, $order);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1576,9 +1593,11 @@ class ElectronicGraderController extends AbstractController {
             }
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1638,9 +1657,11 @@ class ElectronicGraderController extends AbstractController {
             $component->addMark('No Credit', 0.0, false);
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess(['component_id' => $component->getId()]);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1676,9 +1697,11 @@ class ElectronicGraderController extends AbstractController {
             $gradeable->deleteComponent($component);
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1739,9 +1762,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveMark($mark, $points, $title, $publish);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1796,9 +1821,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveMarkOrder($component, $order);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1869,7 +1896,8 @@ class ElectronicGraderController extends AbstractController {
                     $can_view_hidden
                 )
             );
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1921,9 +1949,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $mark = $this->addNewMark($component, $title, $points, $publish);
             $this->core->getOutput()->renderJsonSuccess(['mark_id' => $mark->getId()]);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -1971,9 +2001,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->deleteMark($mark);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -2022,9 +2054,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $this->saveOverallComment($ta_graded_gradeable, $comment);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -2106,9 +2140,11 @@ class ElectronicGraderController extends AbstractController {
                 $response_data = $graded_component->toArray();
             }
             $this->core->getOutput()->renderJsonSuccess($response_data);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -2187,9 +2223,11 @@ class ElectronicGraderController extends AbstractController {
             // Once we've parsed the inputs and checked permissions, perform the operation
             $results = $this->getMarkStats($mark, $grader);
             $this->core->getOutput()->renderJsonSuccess($results);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }

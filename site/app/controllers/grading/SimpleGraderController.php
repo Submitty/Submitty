@@ -102,7 +102,8 @@ class SimpleGraderController extends AbstractController {
     public function gradePage($gradeable_id, $view = null, $sort = null) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return Response::WebOnlyResponse(
                 new WebResponse('Error', 'noGradeable')
             );
