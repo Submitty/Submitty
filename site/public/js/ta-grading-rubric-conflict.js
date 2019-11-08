@@ -112,7 +112,7 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                         popup.hide();
                         resolve();
                     }
-else {
+                    else {
                         showNextConflict();
                     }
                 };
@@ -132,7 +132,7 @@ else {
                                         alert('Could not delete mark: ' + err.message);
                                     });
                             }
-else {
+                            else {
                                 // If the mark was deleted from the server, but we want to keep our changes,
                                 //  we need to re-add the mark
                                 if (isMarkServerDeleted(id)) {
@@ -141,7 +141,7 @@ else {
                                             mark.id = data.mark_id;
                                         });
                                 }
-else {
+                                else {
                                     return ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish);
                                 }
                             }

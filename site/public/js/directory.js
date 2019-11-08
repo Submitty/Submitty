@@ -8,7 +8,7 @@ function newDownloadForm() {
         if ($(this).val() === 'NULL') {
             $(this).prop('checked', false);
         }
-else {
+        else {
             $(this).prop('checked', true);
         }
     });

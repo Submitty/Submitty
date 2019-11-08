@@ -203,7 +203,7 @@ function remapSetLS(mapName, code) {
     if (lsKeymap === null) {
         lsKeymap = {};
     }
-else {
+    else {
         try {
             lsKeymap = JSON.parse(lsKeymap);
         } catch (e) {

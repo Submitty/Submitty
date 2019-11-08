@@ -68,7 +68,7 @@ $(document).ready(function() {
         if ($("#room-seating-gradeable-id").val()) {
             showEmailSeatingOption();
         }
-else {
+        else {
             hideEmailSeatingOption();
         }
     }

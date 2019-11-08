@@ -26,7 +26,7 @@ document.getElementById('content-wrapper').addEventListener('scroll', function (
         okToRender = true;
         renderedPages.push(visiblePageNum);
     }
-else {
+    else {
         okToRender = false;
     }
 

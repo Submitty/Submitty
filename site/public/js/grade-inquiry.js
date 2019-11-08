@@ -24,7 +24,7 @@ function onComponentTabClicked(tab) {
     if ($(this).data("component_id") !== component_id) {
       $(this).hide();
     }
-else {
+    else {
       $(this).show();
     }
   });

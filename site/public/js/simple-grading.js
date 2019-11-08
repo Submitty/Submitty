@@ -282,7 +282,7 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     if (history.length > 11) {
         history.splice(1, 2);
     }
-else {
+    else {
         history[0] = history.length-1; // increment to latest new_scores
     }
 
@@ -531,14 +531,14 @@ function setupNumericTextCells() {
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff");
                                                 }
-else {
+                                                else {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
                                                 }
 
                                                 if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
                                                 }
-else {
+                                                else {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
                                                 }
 
@@ -573,7 +573,7 @@ else {
                 }
             }
         }
-else {
+        else {
             var f = $('#csvUpload');
             f.replaceWith(f = f.clone(true));
         }

@@ -43,12 +43,12 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         list_white_spaces['newline'] = '&#9166;';
         var option = 'unicode'
     }
-else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
+    else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
         var option = 'escape'
     }
-else {
+    else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
@@ -63,7 +63,7 @@ else {
             alert("Error loading diff: " + data.message);
             return false;
         }
-else if (data.status === 'error') {
+        else if (data.status === 'error') {
             alert("Internal server error: " + data.message);
             return false;
         }
@@ -124,7 +124,7 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-show").show();
     }
-else{
+    else{
         $("#show_char_"+index).toggle();
         var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
@@ -1042,7 +1042,7 @@ function check_server(url) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
             }
-else {
+        else {
                 checkRefreshPage(url);
             }
         }
@@ -1201,7 +1201,7 @@ function changeName(element, user, visible_username, anon){
         icon.className = "fas fa-eye";
         icon.title = "Show full user information";
     }
-else {
+    else {
         if(anon) {
             new_element.style.color = "grey";
             new_element.style.fontStyle = "italic";
@@ -1354,7 +1354,7 @@ function enableTabsInTextArea(jQuerySelector) {
             controls.eq(controls.index(this) + 1).focus();
             return false;
         }
-else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
+        else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1436,7 +1436,7 @@ function refreshOnResponseOverriddenGrades(json) {
     if(json['data']['users'].length === 0){
         $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
     }
-else {
+    else {
         json['data']['users'].forEach(function(elem){
             var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
             var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];
