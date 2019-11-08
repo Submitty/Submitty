@@ -265,8 +265,8 @@ class ElectronicGraderController extends AbstractController {
             }
             $num_components = count($gradeable->getNonPeerComponents());
         }
-        //grading by rotating section
         else {
+            //grading by rotating section
             if (!$this->core->getAccess()->canI("grading.electronic.status.full")) {
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable_id, $this->core->getUser()->getId());
             }
@@ -281,6 +281,7 @@ class ElectronicGraderController extends AbstractController {
                 $graders = $this->core->getQueries()->getGradersForRotatingSections($gradeable_id, $sections);
             }
         }
+
         //Check if this is a team project or a single-user project
         if ($gradeable->isTeamAssignment()) {
             $num_submitted = $this->core->getQueries()->getSubmittedTeamCountByGradingSections($gradeable_id, $sections, 'registration_section');
@@ -288,6 +289,7 @@ class ElectronicGraderController extends AbstractController {
         else {
             $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($gradeable_id, $sections, $section_key);
         }
+
         if (count($sections) > 0) {
             if ($gradeable->isTeamAssignment()) {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($gradeable_id, $sections, $section_key);

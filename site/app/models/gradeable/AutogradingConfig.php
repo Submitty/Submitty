@@ -198,11 +198,10 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-                // If programming language is set then this is a codebox
+                // If programming language is set then this is a codebox, else regular textbox
                 if (isset($actual_input[$i]['programming_language'])) {
                     $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
                 }
-                // Else regular textbox
                 else {
                     $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
                 }
@@ -236,13 +235,13 @@ class AutogradingConfig extends AbstractModel {
         if (isset($cell['markdown_string'])) {
             return $cell['markdown_string'];
         }
-        // Else if markdown_file is set then read the file and return its contents
         elseif (isset($cell['markdown_file'])) {
+            // Else if markdown_file is set then read the file and return its contents
             // TODO: Implement reading from markdown_file and passing that along
             throw new NotImplementedException("Reading from a markdown_file is not yet implemented.");
         }
-        // Else something unexpected happened
         else {
+            // Else something unexpected happened
             throw new \InvalidArgumentException("An error occured parsing notebook data.\n" .
                 "Markdown configuration may only specify one of 'markdown_string' or 'markdown_file'");
         }

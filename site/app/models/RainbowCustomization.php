@@ -237,8 +237,8 @@ class RainbowCustomization extends AbstractModel {
 
             return (object) $sectionsFromFile;
         }
-        // RCJSON was null so return database sections as default
         else {
+            // RCJSON was null so return database sections as default
             // Collect sections out of the database
             return (object) $sections;
         }

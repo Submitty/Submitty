@@ -524,12 +524,12 @@ class Access {
                 if ($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
                     return false;
                 }
-                // only students with a non-null registration section should be able to view courses (and only active==1 courses)
                 elseif ($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                    // only students with a non-null registration section should be able to view courses (and only active==1 courses)
                     return false;
                 }
-                // no one can view courses with status greater than 2
                 elseif ($course_status > 2) {
+                    // no one can view courses with status greater than 2
                     return false;
                 }
             }

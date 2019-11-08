@@ -269,52 +269,44 @@ class GradedGradeable extends AbstractModel {
         $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
 
         foreach ($newNotebook as $notebookKey => $notebookVal) {
-            // Handle if the notebook cell type is short_answer
-            if (
-                isset($notebookVal['type'])
-                && $notebookVal['type'] == "short_answer"
-            ) {
-                // If no previous submissions set string to default initial_value
-                if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
-                    $recentSubmission = $notebookVal['initial_value'];
-                }
-                // Else there has been a previous submission try to get it
-                else {
-                    try {
-                        // Try to get the most recent submission
-                        $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
-                    }
-                    catch (AuthorizationException $e) {
-                        // If the user lacked permission then just set to default instructor provided string
+            if (isset($notebookVal['type'])) {
+                if ($notebookVal['type'] == "short_answer") {
+                    // If no previous submissions set string to default initial_value
+                    if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
                         $recentSubmission = $notebookVal['initial_value'];
                     }
-                }
-
-                // Add field to the array
-                $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
-            }
-
-            // Handle if notebook cell type is multiple_choice
-            elseif (
-                isset($notebookVal['type'])
-                && $notebookVal['type'] == "multiple_choice"
-            ) {
-                // If no previous submissions do nothing
-                if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
-                    continue;
-                }
-                // Else there has been a previous submission try to get it
-                else {
-                    try {
-                        // Try to get the most recent submission
-                        $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
-
-                        // Add field to the array
-                        $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                    else {
+                        // Else there has been a previous submission try to get it
+                        try {
+                            // Try to get the most recent submission
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+                        }
+                        catch (AuthorizationException $e) {
+                            // If the user lacked permission then just set to default instructor provided string
+                            $recentSubmission = $notebookVal['initial_value'];
+                        }
                     }
-                    catch (AuthorizationException $e) {
-                        // If failed to get the most recent submission then skip
+
+                    // Add field to the array
+                    $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                }
+                elseif ($notebookVal['type'] == "multiple_choice") {
+                    // If no previous submissions do nothing, else there has been, so try and get it
+                    if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
                         continue;
+                    }
+                    else {
+                        try {
+                            // Try to get the most recent submission
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+
+                            // Add field to the array
+                            $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                        }
+                        catch (AuthorizationException $e) {
+                            // If failed to get the most recent submission then skip
+                            continue;
+                        }
                     }
                 }
             }
