@@ -848,7 +848,7 @@ class ForumThreadView extends AbstractView {
         $post_button = [];
 
         if ($this->core->getUser()->getGroup() <= 3 || $post['author_user_id'] === $current_user) {
-            if (!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading() )) {
+            if (!($this->core->getQueries()->isThreadLocked($thread_id) != 1 || $this->core->getUser()->accessFullGrading())) {
             }
             else {
                 if ($deleted && $this->core->getUser()->getGroup() <= 3) {
