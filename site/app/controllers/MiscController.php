@@ -481,7 +481,8 @@ class MiscController extends AbstractController {
             }
             $result = ['found' => $found, 'job_data' => $result, 'count' => $complete_count];
             return $this->core->getOutput()->renderJsonSuccess($result);
-        }catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
