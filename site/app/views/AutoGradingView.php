@@ -182,10 +182,10 @@ class AutoGradingView extends AbstractView {
                     }
                     else {
                         $check["actual"] = [
-                        "type" => "text",
-                        "title" => $actual_title,
-                        "show_popup" => $this->autoShouldDisplayPopup($actual_display),
-                        "src" => $actual_display,
+                            "type" => "text",
+                            "title" => $actual_title,
+                            "show_popup" => $this->autoShouldDisplayPopup($actual_display),
+                            "src" => $actual_display,
                         ];
                     }
                 }
@@ -203,10 +203,10 @@ class AutoGradingView extends AbstractView {
                 }
                 elseif ($diff_viewer->hasDisplayExpected()) {
                     $check["expected"] = [
-                    "type" => "text",
-                    "title" => $expected_title,
-                    "show_popup" => $this->autoShouldDisplayPopup($expected_display),
-                    "src" => $expected_display
+                        "type" => "text",
+                        "title" => $expected_title,
+                        "show_popup" => $this->autoShouldDisplayPopup($expected_display),
+                        "src" => $expected_display
                     ];
                 }
 
@@ -214,10 +214,10 @@ class AutoGradingView extends AbstractView {
                 $difference_title = "Difference {$description}";
                 if ($difference_image != "") {
                     $check["difference"] = [
-                    "type" => "image",
-                    "title" => $difference_title,
-                    "show_popup" => false,
-                    "src" => $this->autoGetImageSrc($difference_image)
+                        "type" => "image",
+                        "title" => $difference_title,
+                        "show_popup" => false,
+                        "src" => $this->autoGetImageSrc($difference_image)
                     ];
                 }
 
