@@ -210,7 +210,7 @@ VALUES (?,?,?,?,?,?)", $params);
      * q.v. Github Issue #3273
      *
      * @link https://github.com/Submitty/Submitty/issues/3273
-     * @param app/models/User $user User data object
+     * @param User $user User data object
      * @param string $semester
      * @param string $course
      */
