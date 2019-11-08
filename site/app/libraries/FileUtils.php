@@ -482,16 +482,16 @@ class FileUtils {
         return $words_detected;
     }
 
-    public static function checkZipFileStatus($file){
+    public static function checkZipFileStatus($file) {
         $zip = new \ZipArchive();
         //open file with additional checks
         $res = $zip->open($file, \ZipArchive::CHECKCONS);
         $err = "";
 
-        if ($res !== True){
+        if ($res !== true) {
             switch ($res) {
                 case \ZipArchive::ER_NOENT:
-                    $err = "File does not exist " . $filename ;
+                    $err = "File does not exist " . $filename;
                     break;
                 case \ZipArchive::ER_NOZIP:
                     $err = "File not a zip archive";
@@ -512,11 +512,10 @@ class FileUtils {
                     $err = "Unknown error " . $res;
             }
 
-            return ['success' => False, 'error' => $err, 'err_code' => $res];
+            return ['success' => false, 'error' => $err, 'err_code' => $res];
         }
 
-        return ['success' => True, 'error' => 'OK', 'err_code' => \ZipArchive::ER_OK];
-
+        return ['success' => true, 'error' => 'OK', 'err_code' => \ZipArchive::ER_OK];
     }
 
     /**
@@ -542,17 +541,18 @@ class FileUtils {
             $name = $files['name'][$i];
             $tmp_name = $files['tmp_name'][$i];
             $type = mime_content_type($tmp_name);
-            
+
             $zip_status = FileUtils::checkZipFileStatus($tmp_name);
             $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
 
-            $is_zip = False;
+            $is_zip = false;
 
             //check if its a zip file or we got a bad zip file
-            if ($zip_status['success']){
-                $is_zip = True;
-            }else if($zip_status['err_code'] != \ZipArchive::ER_NOZIP){
-                $is_zip = True;
+            if ($zip_status['success']) {
+                $is_zip = true;
+            }
+            elseif ($zip_status['err_code'] != \ZipArchive::ER_NOZIP) {
+                $is_zip = true;
                 $err_msg = $zip_status['error'];
             }
 
@@ -571,8 +571,8 @@ class FileUtils {
             }
 
             //if zip file check files inside
-            if($is_zip && !FileUtils::checkFileInZipName($tmp_name) ){
-                $err_msg = "Invalid filename within zip file"; 
+            if ($is_zip && !FileUtils::checkFileInZipName($tmp_name)) {
+                $err_msg = "Invalid filename within zip file";
             }
 
             $success = $err_msg === "No error.";
