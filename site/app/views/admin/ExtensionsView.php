@@ -26,13 +26,15 @@ class ExtensionsView extends AbstractView {
 
         $users = $this->core->getQueries()->getUsersWithExtensions($current_gid);
         $current_exceptions = array();
-        foreach($users as $user) {
+        foreach ($users as $user) {
             $current_exceptions[] = array('user_id' => $user->getId(),
                                           'user_firstname' => $user->getDisplayedFirstName(),
                                           'user_lastname' => $user->getDisplayedLastName(),
                                           'late_day_exceptions' => $user->getLateDayExceptions());
         }
-        if (empty($current_exceptions)) $current_exceptions = null;
+        if (empty($current_exceptions)) {
+            $current_exceptions = null;
+        }
 
         return $this->core->getOutput()->renderTwigTemplate("admin/Extensions.twig", [
             "gradeables" => $gradeables,

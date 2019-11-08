@@ -27,13 +27,14 @@ class Submitter extends AbstractModel {
     public function __construct(Core $core, $team_or_user) {
         parent::__construct($core);
 
-        if($team_or_user === null) {
+        if ($team_or_user === null) {
             throw new \InvalidArgumentException('Team or user must not be null');
         }
 
-        if($team_or_user instanceof Team || $team_or_user instanceof User) {
+        if ($team_or_user instanceof Team || $team_or_user instanceof User) {
             $this->team_or_user = $team_or_user;
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Team or user must be a Team or a User');
         }
     }
@@ -92,7 +93,7 @@ class Submitter extends AbstractModel {
             ? $this->getTeam()->hasMember($user->getId())
             : $this->getUser()->getId() === $user->getId();
     }
-    
+
     /**
      * Gets the anonymous id of the user/team
      * @return string The anonymous id of the submitter

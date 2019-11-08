@@ -20,8 +20,11 @@ use app\exceptions\CurlException;
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
         // Check for $this->user_id and $this->>password to be non empty
-        if (empty($this->user_id) || empty($this->password) ||
-            $this->core->getQueries()->getSubmittyUser($this->user_id) === null) {
+        if (
+            empty($this->user_id)
+            || empty($this->password)
+            || $this->core->getQueries()->getSubmittyUser($this->user_id) === null
+        ) {
             return false;
         }
 
