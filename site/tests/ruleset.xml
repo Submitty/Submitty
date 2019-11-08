@@ -11,7 +11,6 @@
     <exclude-pattern>../app/models/Gradeable.php</exclude-pattern>
 
     <rule ref="SubmittyStandard">
-        <exclude name="SubmittyStandard.ControlStructures.StroustrupStructure.Found" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
 
@@ -24,12 +23,6 @@
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.LineIndent" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />

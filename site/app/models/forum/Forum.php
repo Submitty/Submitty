@@ -25,21 +25,22 @@ class Forum extends AbstractModel {
 
         $pushFunction = null;
 
-        if($isThread) {
+        if ($isThread) {
             $verify = $this->validateThreadData($data, true);
             //$pushFunction = new $this->forum_db->pushThread;
-        } else {
+        }
+        else {
             $verify = $this->validatePostData($data, true, false);
             //$pushFunction = new $this->forum_db->pushPost;
         }
 
-        if(!$verify[0]) {
+        if (!$verify[0]) {
             return false;
         }
 
         $result = $verify[1];
 
-        if($isThread && $data['email_announcement']) {
+        if ($isThread && $data['email_announcement']) {
             $this->sendEmailAnnouncement($result);
         }
 
@@ -52,7 +53,7 @@ class Forum extends AbstractModel {
     public function pinThread($thread_id, $toggle) {
         $user = $this->core->getUser()->getId();
 
-        if(!$this->core->getQueries()->threadExists($thread_id)) {
+        if (!$this->core->getQueries()->threadExists($thread_id)) {
             return false;
         }
 
@@ -63,7 +64,7 @@ class Forum extends AbstractModel {
     }
 
     public function getEditContent($post_id) {
-        if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
+        if ($this->checkPostEditAccess($post_id) && !empty($post_id)) {
             //This will return a Post obj also forum queries...
             $post = $this->core->getQueries()->getPost($post_id);
             $output = array();
@@ -74,7 +75,7 @@ class Forum extends AbstractModel {
             $output['anon'] = $post->getIsAnonymous();
             $output['change_anon'] = $this->modifyAnonymous($post->getAuthor());
             $output['user'] = $output['anon'] ? 'Anonymous' : $post->getAuthor();
-            if(isset($_POST["thread_id"])) {
+            if (isset($_POST["thread_id"])) {
                 $this->getThreadContent($post->getThreadId(), $output);
             }
             return $output;
@@ -88,7 +89,7 @@ class Forum extends AbstractModel {
         $class_list = $this->core->getQueries()->getEmailListWithIds();
         $formatted_body = "An Instructor/TA made an announcement in the Submitty discussion forum:\n\n" . $thread->getContent();
 
-        foreach($class_list as $user) {
+        foreach ($class_list as $user) {
             $user_id = $user['user_id'];
             $user_email = $user['user_email'];
             $user_group = $user['user_group'];
@@ -119,11 +120,17 @@ class Forum extends AbstractModel {
         //Validate the post data prior to thread data
         $goodPost = $this->validatePostData($data, false, true);
 
-        if(!$goodPost[0] ||
-            empty($data['title']) || empty($data['status']) ||
-            empty($data['announcement']) || empty($data['categories']) ||
-            empty($data['email_announcement']) || $data['parent_id'] !== -1 ||
-            !$this->isValidCategories($this->core->getQueries()->getCategories(), $data['categories']) || (strlen($data['content']) > 5000)  ){
+        if (
+            !$goodPost[0]
+            || empty($data['title'])
+            || empty($data['status'])
+            || empty($data['announcement'])
+            || empty($data['categories'])
+            || empty($data['email_announcement'])
+            || $data['parent_id'] !== -1
+            || !$this->isValidCategories($this->core->getQueries()->getCategories(), $data['categories'])
+            || (strlen($data['content']) > 5000)
+        ) {
             return [false, null];
         }
 
@@ -132,10 +139,15 @@ class Forum extends AbstractModel {
 
     private function validatePostData(array $data, bool $createObject, bool $isThread): array {
 
-        if(empty($data['content']) || empty($data['anon']) ||
-            empty($data['thread_id']) || empty($data['parent_id']) ||
-            (!$isThread && !$this->core->getQueries()->existsThread($data['thread_id'])) ||
-            (!$isThread && !$this->core->getQueries()->existsPost($data['thread_id'], $data['parent_id'])) || (strlen($data['content']) > 5000) ) {
+        if (
+            empty($data['content'])
+            || empty($data['anon'])
+            || empty($data['thread_id'])
+            || empty($data['parent_id'])
+            || (!$isThread && !$this->core->getQueries()->existsThread($data['thread_id']))
+            || (!$isThread && !$this->core->getQueries()->existsPost($data['thread_id'], $data['parent_id']))
+            || (strlen($data['content']) > 5000)
+        ) {
             return [false, null];
         }
 

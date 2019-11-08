@@ -88,7 +88,7 @@ class Output {
             'debug' => $debug
         ]);
 
-        if($debug){
+        if ($debug) {
             $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         }
 
@@ -114,7 +114,7 @@ HTML;
         if ($full_load) {
             $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
                 ->setTimezone($this->core->getConfig()->getTimezone());
-            if($this->core->getConfig()->wrapperEnabled()) {
+            if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
                     $namespace = 'site_uploads'
@@ -303,7 +303,8 @@ HTML;
 
         if ($success === true) {
             return $this->renderJsonSuccess($message);
-        } else {
+        }
+        else {
             return $this->renderJsonFail($message);
         }
     }
@@ -345,7 +346,8 @@ HTML;
     public function renderTwigOutput(string $filename, array $context = []): void {
         if ($this->buffer_output) {
             $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
-        } else {
+        }
+        else {
             echo $this->renderTwigTemplate($filename, $context);
         }
     }
@@ -363,7 +365,7 @@ HTML;
         if (!Utils::startsWith($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
-        if(!isset($this->loaded_views[$class])) {
+        if (!isset($this->loaded_views[$class])) {
             /** @noinspection PhpUndefinedMethodInspection */
             $this->loaded_views[$class] = new $class($this->core, $this);
         }
@@ -391,7 +393,8 @@ HTML;
     protected function renderFooter() {
         if ($this->use_footer) {
             return $this->controller->footer();
-        } else {
+        }
+        else {
             return '';
         }
     }

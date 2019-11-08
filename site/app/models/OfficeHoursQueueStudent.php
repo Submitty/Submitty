@@ -82,9 +82,10 @@ class OfficeHoursQueueStudent extends AbstractModel {
     }
 
     public function getTimeWaitingInQueue() {
-        if($this->status  == 2){
+        if ($this->status  == 2) {
             $diff = strtotime($this->time_helped_iso) - strtotime($this->time_in_iso);
-        }else{
+        }
+        else {
             $diff = strtotime($this->time_out_iso) - strtotime($this->time_in_iso);
         }
         $h = $diff / 3600 % 24;

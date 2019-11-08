@@ -71,7 +71,8 @@ class GradingOrder extends AbstractModel {
         //Get that user's grading sections
         if ($all) {
             $this->sections = $gradeable->getAllGradingSections();
-        } else {
+        }
+        else {
             $this->sections = $gradeable->getGradingSectionsForUser($user);
         }
 
@@ -89,7 +90,8 @@ class GradingOrder extends AbstractModel {
                 foreach ($submitters as $submitter) {
                     $this->all_team_ids[] = $submitter->getId();
                 }
-            } else {
+            }
+            else {
                 foreach ($submitters as $submitter) {
                     $this->all_user_ids[] = $submitter->getId();
                 }
@@ -123,7 +125,8 @@ class GradingOrder extends AbstractModel {
                 $keyFn = function (Submitter $a) {
                     if ($a->isTeam()) {
                         return $a->getId();
-                    } else {
+                    }
+                    else {
                         return $a->getUser()->getDisplayedFirstName();
                     }
                 };
@@ -132,7 +135,8 @@ class GradingOrder extends AbstractModel {
                 $keyFn = function (Submitter $a) {
                     if ($a->isTeam()) {
                         return $a->getId();
-                    } else {
+                    }
+                    else {
                         return $a->getUser()->getDisplayedLastName();
                     }
                 };
@@ -192,7 +196,7 @@ class GradingOrder extends AbstractModel {
      * @param $component_id
      */
     private function initUsersNotFullyGraded($component_id) {
-        if(is_null($this->not_fully_graded)) {
+        if (is_null($this->not_fully_graded)) {
             $this->not_fully_graded = $this->core->getQueries()->getUsersNotFullyGraded($this->gradeable, $component_id);
         }
     }
@@ -250,14 +254,15 @@ class GradingOrder extends AbstractModel {
     public function getPrevSubmitterMatching(Submitter $submitter, callable $fn) {
 
         // If $submitter is in one of our sections, then get the $submitters index in the GradingOrder
-        if($this->containsSubmitter($submitter)) {
+        if ($this->containsSubmitter($submitter)) {
             $index = $this->getSubmitterIndex($submitter);
             if ($index === false) {
                 return null;
             }
 
         // Else $submitter is not in one of our sections so set $index to number of submitters in our sections
-        } else {
+        }
+        else {
             $count = 0;
 
             foreach ($this->section_submitters as $section) {
@@ -289,14 +294,15 @@ class GradingOrder extends AbstractModel {
     public function getNextSubmitterMatching(Submitter $submitter, callable $fn) {
 
         // If $submitter is in one of our sections, then get the $submitters index in the GradingOrder
-        if($this->containsSubmitter($submitter)) {
+        if ($this->containsSubmitter($submitter)) {
             $index = $this->getSubmitterIndex($submitter);
             if ($index === false) {
                 return null;
             }
 
         // Else $submitter is not in one of our sections so set $index to -1
-        } else {
+        }
+        else {
             $index = -1;
         }
 
@@ -448,7 +454,8 @@ class GradingOrder extends AbstractModel {
             //Should never happen, but better to be safe
             if ($idx === false) {
                 $unsorted[] = $gg;
-            } else {
+            }
+            else {
                 $gg_idx[$idx] = $gg;
             }
         }
@@ -467,21 +474,28 @@ class GradingOrder extends AbstractModel {
      */
     public static function getGradingOrderMessage($sort, $direction) {
 
-        if($sort == 'first' && $direction == 'ASC') {
+        if ($sort == 'first' && $direction == 'ASC') {
             $msg = 'First Name Ascending';
-        } elseif ($sort == 'first' && $direction == 'DESC') {
+        }
+        elseif ($sort == 'first' && $direction == 'DESC') {
             $msg = 'First Name Descending';
-        } elseif ($sort == 'last' && $direction == 'ASC') {
+        }
+        elseif ($sort == 'last' && $direction == 'ASC') {
             $msg = 'Last Name Ascending';
-        } elseif ($sort == 'last' && $direction == 'DESC') {
+        }
+        elseif ($sort == 'last' && $direction == 'DESC') {
             $msg = 'Last Name Descending';
-        } elseif ($sort == 'id' && $direction == 'ASC') {
+        }
+        elseif ($sort == 'id' && $direction == 'ASC') {
             $msg = 'ID Ascending';
-        } elseif ($sort == 'id' && $direction == 'DESC') {
+        }
+        elseif ($sort == 'id' && $direction == 'DESC') {
             $msg = 'ID Descending';
-        } elseif ($sort == 'random') {
+        }
+        elseif ($sort == 'random') {
             $msg = 'Randomized';
-        } else {
+        }
+        else {
             $msg = false;
         }
 

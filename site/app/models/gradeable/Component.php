@@ -154,8 +154,8 @@ class Component extends AbstractModel {
      * @throws \InvalidArgumentException If the provided mark id isn't part of this component
      */
     public function getMark($mark_id) {
-        foreach($this->marks as $mark) {
-            if($mark->getId() === $mark_id) {
+        foreach ($this->marks as $mark) {
+            if ($mark->getId() === $mark_id) {
                 return $mark;
             }
         }
@@ -226,7 +226,8 @@ class Component extends AbstractModel {
         foreach (self::point_properties as $property) {
             if (is_numeric($points[$property])) {
                 $parsedPoints[$property] = floatval($points[$property]);
-            } else {
+            }
+            else {
                 $parsedPoints[$property] = null;
             }
         }
@@ -315,9 +316,17 @@ class Component extends AbstractModel {
         // Get the implied deleted marks from this operation and make sure that we aren't
         //  deleting any marks that are in use.
         $deleted_marks = array_udiff($this->marks, $marks, Utils::getCompareByReference());
-        if (in_array(true, array_map(function (Mark $mark) {
-                return $mark->anyReceivers();
-        }, $deleted_marks))) {
+        if (
+            in_array(
+                true,
+                array_map(
+                    function (Mark $mark) {
+                        return $mark->anyReceivers();
+                    },
+                    $deleted_marks
+                )
+            )
+        ) {
             throw new \InvalidArgumentException('Call to setMarks implied deletion of marks with receivers');
         }
 
@@ -371,7 +380,7 @@ class Component extends AbstractModel {
      */
     private function deleteMarkInner(Mark $mark, bool $force = false) {
         // Don't delete if the mark has receivers (and we aren't forcing)
-        if($mark->anyReceivers() && !$force) {
+        if ($mark->anyReceivers() && !$force) {
             throw new \InvalidArgumentException('Attempt to delete a mark with receivers!');
         }
 
@@ -422,7 +431,8 @@ class Component extends AbstractModel {
     private function setIdInternal($id) {
         if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Component Id must be a non-negative integer');
         }
     }

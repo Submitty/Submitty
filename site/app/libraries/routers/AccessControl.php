@@ -94,15 +94,17 @@ class AccessControl {
      */
     public function setRole($role) {
         $role = strtoupper($role);
-        if (in_array(
-            $role,
-            [
-                "INSTRUCTOR",
-                "FULL_ACCESS_GRADER",
-                "LIMITED_ACCESS_GRADER",
-                "STUDENT"
-            ]
-        )) {
+        if (
+            in_array(
+                $role,
+                [
+                    "INSTRUCTOR",
+                    "FULL_ACCESS_GRADER",
+                    "LIMITED_ACCESS_GRADER",
+                    "STUDENT"
+                ]
+            )
+        ) {
             $this->role = $role;
         }
         else {

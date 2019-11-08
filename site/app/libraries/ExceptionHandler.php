@@ -71,7 +71,7 @@ class ExceptionHandler {
             $display_message = $exception->displayMessage();
             $log_exception = $exception->logException();
         }
-        
+
         $trace_string = array();
         foreach ($exception->getTrace() as $elem => $frame) {
             $trace_string[] = sprintf(
@@ -106,16 +106,17 @@ class ExceptionHandler {
         if ($is_base_exception) {
             /** @type BaseException $exception */
             $extra = $exception->getDetails();
-            if(count($extra) > 0) {
+            if (count($extra) > 0) {
                 $message .= "Extra Details:\n";
                 foreach ($extra as $key => $value) {
                     $message .= "\t" . $key . ":";
-                    if(is_array($value)) {
+                    if (is_array($value)) {
                         $message .= "\n";
                         foreach ($value as $kk => $vv) {
                             $message .= "\t\t" . $vv . "\n";
                         }
-                    } else {
+                    }
+                    else {
                         $message .= " " . $value . "\n";
                     }
                 }
@@ -139,7 +140,7 @@ An exception was thrown. Please contact an administrator about what you were doi
 HTML;
         }
     }
-    
+
     /**
      * Parse the arguments from the stack trace into type appropriate representation for the stack trace. We
      * may want to look into expanding the $args when they're an Array, but for now, this is probably fine.

@@ -87,26 +87,38 @@ class GradeableList extends AbstractModel {
                     if ($gradeable->getGradeStartDate() < $this->core->getDateTimeNow() && $this->core->getUser()->accessGrading()) {
                         // Put in 'grading' category only if user is a grader
                         $this->grading_gradeables[$gradeable->getId()] = $gradeable;
-                    } else {
+                    }
+                    else {
                         $this->open_gradeables[$gradeable->getId()] = $gradeable;
                     }
-                } else {
+                }
+                else {
                     // If there is no due date and no student submission, it should
                     //  automatically show up in the 'Grading' category
                     $this->grading_gradeables[$gradeable->getId()] = $gradeable;
                 }
             }
-            elseif ((($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading()) ||
-                    $gradeable->getType() !== GradeableType::ELECTRONIC_FILE) &&
-                    $gradeable->getGradeStartDate() <= $this->now) {
+            elseif (
+                (
+                    ($gradeable->getType() === GradeableType::ELECTRONIC_FILE && $gradeable->isTaGrading())
+                    || $gradeable->getType() !== GradeableType::ELECTRONIC_FILE
+                )
+                && $gradeable->getGradeStartDate() <= $this->now
+            ) {
                 $this->grading_gradeables[$gradeable->getId()] = $gradeable;
             }
-            elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
-                $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getSubmissionDueDate() <= $this->now) {
+            elseif (
+                $gradeable->getType() === GradeableType::ELECTRONIC_FILE
+                && $gradeable->getSubmissionOpenDate() <= $this->now
+                && $gradeable->getSubmissionDueDate() <= $this->now
+            ) {
                 $this->closed_gradeables[$gradeable->getId()] = $gradeable;
             }
-            elseif ($gradeable->getType() === GradeableType::ELECTRONIC_FILE &&
-                $gradeable->getSubmissionOpenDate() <= $this->now && $gradeable->getTaViewStartDate() <= $this->now) {
+            elseif (
+                $gradeable->getType() === GradeableType::ELECTRONIC_FILE
+                && $gradeable->getSubmissionOpenDate() <= $this->now
+                && $gradeable->getTaViewStartDate() <= $this->now
+            ) {
                 $this->open_gradeables[$gradeable->getId()] = $gradeable;
             }
             elseif ($this->core->getUser()->accessGrading() && $gradeable->getTaViewStartDate() <= $this->now) {
@@ -201,9 +213,11 @@ class GradeableList extends AbstractModel {
             if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
                 continue;
             }
-            if ($this->core->getUser()->accessAdmin() ||
-                ($gradeable->getTaViewStartDate() <= $this->now && $this->core->getUser()->accessGrading()) ||
-                $gradeable->getSubmissionOpenDate() <= $this->now) {
+            if (
+                $this->core->getUser()->accessAdmin()
+                || ($gradeable->getTaViewStartDate() <= $this->now && $this->core->getUser()->accessGrading())
+                || $gradeable->getSubmissionOpenDate() <= $this->now
+            ) {
                 $return[$gradeable->getId()] = $gradeable;
             }
         }

@@ -53,10 +53,12 @@ class HomeworkView extends AbstractView {
         // showing submission if user is full grader or student can submit
         if ($this->core->getUser()->accessFullGrading()) {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-        } elseif ($gradeable->isStudentSubmit()) {
+        }
+        elseif ($gradeable->isStudentSubmit()) {
             if ($gradeable->canStudentSubmit()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-            } else {
+            }
+            else {
                 $return .= $this->renderSubmitNotAllowedBox();
             }
         }
@@ -79,7 +81,8 @@ class HomeworkView extends AbstractView {
         $active_version = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getActiveVersion() : 0;
         if ($submission_count === 0) {
             $return .= $this->renderNoSubmissionBox($graded_gradeable);
-        } else {
+        }
+        else {
             $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
@@ -91,10 +94,12 @@ class HomeworkView extends AbstractView {
             && $gradeable->isRegradeOpen()
             && $submission_count !== 0;
 
-        if ($gradeable->isTaGradeReleased()
+        if (
+            $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $submission_count !== 0
-            && $active_version !== 0) {
+            && $active_version !== 0
+        ) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
@@ -179,9 +184,13 @@ class HomeworkView extends AbstractView {
             $new_late_charged = max(0, $would_be_days_late - $extensions);
 
             // if unsubmitted, or submitted but still in the late days allowed window
-            if ($active_version < 1 ||
-                ($new_late_charged <= $late_days_remaining &&
-                    $new_late_charged <= $late_days_allowed)) {
+            if (
+                $active_version < 1
+                || (
+                    $new_late_charged <= $late_days_remaining
+                    && $new_late_charged <= $late_days_allowed
+                )
+            ) {
                 // PRINT WOULD BE HOW MANY DAYS LATE
                 $messages[] = ['type' => 'would_late', 'info' => [
                     'late' => $would_be_days_late
@@ -275,8 +284,7 @@ class HomeworkView extends AbstractView {
         if (!$gradeable->isVcs()) {
             // Prepare notebook image data for displaying
             foreach ($notebook as $cell) {
-                if (isset($cell['type']) && $cell['type'] == "image")
-                {
+                if (isset($cell['type']) && $cell['type'] == "image") {
                     $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
@@ -296,7 +304,7 @@ class HomeworkView extends AbstractView {
                 }
             }
 
-            if($version_instance !== null) {
+            if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
                     foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
@@ -304,7 +312,8 @@ class HomeworkView extends AbstractView {
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
                             $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                        } else {
+                        }
+                        else {
                             $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
                         }
 
@@ -427,13 +436,13 @@ class HomeworkView extends AbstractView {
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
-                if($filename === 'decoded.json'){
+                if ($filename === 'decoded.json') {
                     $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
                 //get the cover image if it exists
-                if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
+                if (strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg') {
                     $corrected_filename = rawurlencode(htmlspecialchars($filename));
                     $url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
                         'dir' => 'split_pdf',
@@ -446,8 +455,11 @@ class HomeworkView extends AbstractView {
                         'url' => $url,
                     ];
                 }
-                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' ||
-                    pathinfo($filename)['extension'] === "jpg") {
+                if (
+                    strpos($filename, 'cover') === false
+                    || pathinfo($filename)['extension'] === 'json'
+                    || pathinfo($filename)['extension'] === "jpg"
+                ) {
                     continue;
                 }
                 // get the full filename for PDF popout
@@ -473,7 +485,7 @@ class HomeworkView extends AbstractView {
                 $cover_image_name = substr($filename, 0, -3) . "jpg";
                 $cover_image = [];
                 foreach ($cover_images as $img) {
-                    if($img['filename'] === $cover_image_name) {
+                    if ($img['filename'] === $cover_image_name) {
                         $cover_image = $img;
                     }
                 }
@@ -490,9 +502,10 @@ class HomeworkView extends AbstractView {
         }
 
         for ($i = 0; $i < count($files); $i++) {
-            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)) {
                 continue;
-            }elseif(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+            }
+            elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
                 $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
 
@@ -501,22 +514,24 @@ class HomeworkView extends AbstractView {
             $id = '';
 
             //decoded.json may be read before the assoicated data is written, check if key exists first
-            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
-                if(array_key_exists('id', $data)){
+            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                if (array_key_exists('id', $data)) {
                     $id = $data['id'];
                     $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
-                }else{
+                }
+                else {
                     //set the blank id as invalid for now, after a page refresh it will recorrect
                     $id = '';
                     $is_valid = false;
                 }
-                if(array_key_exists('page_count', $data)){
+                if (array_key_exists('page_count', $data)) {
                     $page_count = $data['page_count'];
                 }
-            }else{
+            }
+            else {
                 $is_valid = true;
                 $id = '';
-                if(array_key_exists('page_count', $bulk_upload_data)){
+                if (array_key_exists('page_count', $bulk_upload_data)) {
                     $page_count = $bulk_upload_data['page_count'];
                 }
             }
@@ -630,7 +645,7 @@ class HomeworkView extends AbstractView {
                 ]);
             }
 
-            if($version_instance->isQueued()) {
+            if ($version_instance->isQueued()) {
                 $param = array_merge($param, [
                     'queue_pos' => $version_instance->getQueuePosition(),
                     'queue_total' => $this->core->getGradingQueue()->getQueueCount()
@@ -801,7 +816,8 @@ class HomeworkView extends AbstractView {
                     ];
                     // add grade inquiry to grade inquiries array
                     $grade_inquiries_twig_array[$gc_id] = $grade_inquiry_twig_object;
-                } else {
+                }
+                else {
                     $grade_inquiries_twig_array[0]['id'] = $grade_inquiry->getId();
                     $grade_inquiries_twig_array[0]['gc_id'] = $gc_id;
                     $grade_inquiries_twig_array[0]['status'] = $grade_inquiry->getStatus();

@@ -25,13 +25,13 @@ class AutogradingConfigController extends AbstractController {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $all_files = FileUtils::getAllFiles($target_dir);
         $all_paths = array();
-        foreach($all_files as $file){
+        foreach ($all_files as $file) {
             $all_paths[] = $file['path'];
         }
         $inuse_config = array();
-        foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
-            foreach($all_paths as $path){
-                if($gradeable->getAutogradingConfigPath() === $path){
+        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
+            foreach ($all_paths as $path) {
+                if ($gradeable->getAutogradingConfigPath() === $path) {
                     $inuse_config[] = $path;
                 }
             }
@@ -70,7 +70,7 @@ class AutogradingConfigController extends AbstractController {
         $target_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload");
         $counter = count(scandir($target_dir)) - 1;
         $try_dir = FileUtils::joinPaths($target_dir, $counter);
-        while(is_dir($try_dir)){
+        while (is_dir($try_dir)) {
             $counter++;
             $try_dir = FileUtils::joinPaths($target_dir, $counter);
         }
@@ -114,11 +114,13 @@ class AutogradingConfigController extends AbstractController {
      */
     public function renameConfig() {
         $config_file_path = $_POST['curr_config_name'] ?? null;
-        if($config_file_path == null){
+        if ($config_file_path == null) {
             $this->core->addErrorMessage("Unable to find file");
-        } elseif (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+        }
+        elseif (strpos($config_file_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false) {
             $this->core->addErrorMessage("This action can't be completed.");
-        } else {
+        }
+        else {
             $new_name = $_POST['new_config_name'] ?? "";
             if ($new_name === "") {
                 $this->core->addErrorMessage("Could not rename upload because no name was entered.");
@@ -128,9 +130,10 @@ class AutogradingConfigController extends AbstractController {
             }
             else {
                 $new_dir = FileUtils::joinPaths(dirname($config_file_path, 1), $new_name);
-                if(rename($config_file_path, $new_dir)){
+                if (rename($config_file_path, $new_dir)) {
                     $this->core->addSuccessMessage("Successfully renamed file");
-                } else {
+                }
+                else {
                     $this->core->addErrorMessage("Directory already exist, please choose another name.");
                 }
             }
@@ -147,22 +150,26 @@ class AutogradingConfigController extends AbstractController {
     public function deleteConfig() {
         $config_path = $_POST['config_path'] ?? null;
         $in_use = false;
-        foreach($this->core->getQueries()->getGradeableConfigs(null) as $gradeable){
-            if($gradeable->getAutogradingConfigPath() === $config_path){
+        foreach ($this->core->getQueries()->getGradeableConfigs(null) as $gradeable) {
+            if ($gradeable->getAutogradingConfigPath() === $config_path) {
                 $in_use = true;
                 break;
             }
         }
         if ($config_path == null) {
             $this->core->addErrorMessage("Selecting config failed.");
-        } elseif (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false){
+        }
+        elseif (strpos($config_path, FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "config_upload")) === false) {
             $this->core->addErrorMessage("This action can't be completed.");
-        } elseif ($in_use){
+        }
+        elseif ($in_use) {
             $this->core->addErrorMessage("This config is currently in use.");
-        } else {
-            if(FileUtils::recursiveRmdir($config_path)){
+        }
+        else {
+            if (FileUtils::recursiveRmdir($config_path)) {
                 $this->core->addSuccessMessage("The config folder has been succesfully deleted");
-            } else {
+            }
+            else {
                 $this->core->addErrorMessage("Deleting config failed.");
             }
         }

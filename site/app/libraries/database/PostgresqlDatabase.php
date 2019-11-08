@@ -63,9 +63,10 @@ class PostgresqlDatabase extends AbstractDatabase {
     public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null) {
         $text = trim($text);
 
-        if(empty($text) || $text[0] != "{") {
+        if (empty($text) || $text[0] != "{") {
             return array();
-        } elseif(is_string($text)) {
+        }
+        elseif (is_string($text)) {
             $return = array();
             $element = "";
             $in_string = false;
@@ -93,10 +94,12 @@ class PostgresqlDatabase extends AbstractDatabase {
                     if ($text[$i + 1] === "\\") {
                         $element .= "\\";
                         $i++;
-                    } elseif ($text[$i + 1] === "\"") {
+                    }
+                    elseif ($text[$i + 1] === "\"") {
                         $element .= "\"";
                         $i++;
-                    } else {
+                    }
+                    else {
                         $element .= $text[$i];
                     }
                 }

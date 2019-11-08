@@ -155,7 +155,7 @@ class UsersController extends AbstractController {
             }
         }
 
-        foreach($this->core->getQueries()->getAllGraders() as $grader) {
+        foreach ($this->core->getQueries()->getAllGraders() as $grader) {
             $grader_id = $grader->getId();
             if (array_key_exists($grader_id, $new_registration_information)) {
                 $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
@@ -419,8 +419,8 @@ class UsersController extends AbstractController {
                 $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
                 $json = file_get_contents($fp);
                 $jsonArray = json_decode($json, true);
-                foreach ($jsonArray as $key => $value){
-                    if(isset($value['sections'])){
+                foreach ($jsonArray as $key => $value) {
+                    if (isset($value['sections'])) {
                         $sections = $value['sections'];
                         if ($key = array_search($_POST['delete_reg_section'], $sections) !== false) {
                             $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  This section is referenced in course materials");
@@ -679,22 +679,27 @@ class UsersController extends AbstractController {
                 if ($output === null) {
                     $this->core->addErrorMessage("Error parsing JSON response: " . json_last_error_msg());
                     $this->core->redirect($return_url);
-                } elseif ($output['error'] === true) {
+                }
+                elseif ($output['error'] === true) {
                     $this->core->addErrorMessage("Error parsing xlsx to csv: " . $output['error_message']);
                     $this->core->redirect($return_url);
-                } elseif ($output['success'] !== true) {
+                }
+                elseif ($output['success'] !== true) {
                     $this->core->addErrorMessage("Error on response on parsing xlsx: " . curl_error($ch));
                     $this->core->redirect($return_url);
                 }
 
                 curl_close($ch);
-            } else {
+            }
+            else {
                 $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
-        } elseif ($content_type === 'text/csv' && $mime_type === 'text/plain') {
+        }
+        elseif ($content_type === 'text/csv' && $mime_type === 'text/plain') {
             $csv_file = $tmp_name;
-        } else {
+        }
+        else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
         }
@@ -757,7 +762,7 @@ class UsersController extends AbstractController {
          */
         $row4_validation_function = function () use ($list_type, &$vals) {
             //$row[4] is different based on classlist vs graderlist
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     //student
                     if (isset($vals[4]) && strtolower($vals[4]) === "null") {
@@ -783,7 +788,7 @@ class UsersController extends AbstractController {
          * @return string
          */
         $get_user_registration_or_group_function = function ($user) use ($list_type) {
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     return $user->getRegistrationSection();
                 case "graderlist":
@@ -797,7 +802,7 @@ class UsersController extends AbstractController {
          * Closure to set a user's registration_section or group_id based on $list_type)
          */
         $set_user_registration_or_group_function = function (&$user) use ($list_type, &$row) {
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                     // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
@@ -820,7 +825,7 @@ class UsersController extends AbstractController {
          */
         $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
             try {
-                switch($action) {
+                switch ($action) {
                     case 'insert':
                         //User must first exist in Submitty before being enrolled to a course.
                         //$uploaded_data[0] = authentication ID.
@@ -849,7 +854,7 @@ class UsersController extends AbstractController {
          * @return string
          */
         $set_return_url_action_function = function () use ($list_type) {
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     return "users";
                 case "graderlist":
@@ -873,9 +878,9 @@ class UsersController extends AbstractController {
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_rows = array();
-        foreach($uploaded_data as $row_num => $vals) {
+        foreach ($uploaded_data as $row_num => $vals) {
             // Blacklist validation.  Validation fails if any test resolves as false.
-            switch(false) {
+            switch (false) {
                 // Bounds check to ensure minimum required number of rows is present.
                 case count($vals) >= 5:
                     // Username must contain only lowercase alpha, numbers, underscores, hyphens
@@ -916,9 +921,9 @@ class UsersController extends AbstractController {
         $existing_users = $this->core->getQueries()->getAllUsers();
         $users_to_add = array();
         $users_to_update = array();
-        foreach($uploaded_data as $row) {
+        foreach ($uploaded_data as $row) {
             $exists = false;
-            foreach($existing_users as $i => $existing_user) {
+            foreach ($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
                     // Validate if this user has any data to update.
                     // Did student registration section or grader group change?
@@ -940,7 +945,7 @@ class UsersController extends AbstractController {
         // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach($users_to_add as $uploaded_data) {
+        foreach ($users_to_add as $uploaded_data) {
             $user = new User($this->core);
             $user->setId($uploaded_data[0]);
             $user->setLegalFirstName($uploaded_data[1]);
@@ -960,7 +965,7 @@ class UsersController extends AbstractController {
         }
 
         // Existing users update
-        foreach($users_to_update as $row) {
+        foreach ($users_to_update as $row) {
             $user = $this->core->getQueries()->getUserById($row[0]);
             //Update registration section (student) or group (grader)
             $set_user_registration_or_group_function($user);
@@ -971,7 +976,7 @@ class UsersController extends AbstractController {
 
         //Special case to move students to the NULL section with a classlist upload.
         if ($list_type === "classlist" && isset($_POST['move_missing'])) {
-            foreach($existing_users as $existing_user) {
+            foreach ($existing_users as $existing_user) {
                 if (!is_null($existing_user->getRegistrationSection())) {
                     $existing_user->setRegistrationSection(null);
                     $insert_or_update_user_function('update', $existing_user);

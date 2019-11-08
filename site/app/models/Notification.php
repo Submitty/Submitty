@@ -126,7 +126,7 @@ class Notification extends AbstractModel {
 
     public static function getThreadIdIfExists($metadata_json) {
         $metadata = json_decode($metadata_json, true);
-        if(is_null($metadata)) {
+        if (is_null($metadata)) {
             return null;
         }
         $thread_id = $metadata['thread_id'] ?? -1;
@@ -142,7 +142,7 @@ class Notification extends AbstractModel {
     public static function textShortner($message) {
         $max_length = 40;
         $message = str_replace("\n", " ", $message);
-        if(strlen($message) > $max_length) {
+        if (strlen($message) > $max_length) {
             $message = substr($message, 0, $max_length - 3) . "...";
         }
         return $message;
@@ -161,23 +161,28 @@ class Notification extends AbstractModel {
     public function getNotifyTime() {
         $elapsed_time = $this->getElapsedTime();
         $actual_time = $this->getCreatedAt();
-        if($elapsed_time < 60){
+        if ($elapsed_time < 60) {
             return "Less than a minute ago";
-        } elseif($elapsed_time < 3600){
+        }
+        elseif ($elapsed_time < 3600) {
             $minutes = floor($elapsed_time / 60);
-            if($minutes == 1) {
+            if ($minutes == 1) {
                 return "1 minute ago";
-            } else {
+            }
+            else {
                 return "{$minutes} minutes ago";
             }
-        } elseif($elapsed_time < 3600 * 24){
+        }
+        elseif ($elapsed_time < 3600 * 24) {
             $hours = floor($elapsed_time / 3600);
-            if($hours == 1) {
+            if ($hours == 1) {
                 return "1 hour ago";
-            } else {
+            }
+            else {
                 return "{$hours} hours ago";
             }
-        } else {
+        }
+        else {
             return date_format(DateUtils::parseDateTime($actual_time, $this->core->getConfig()->getTimezone()), "n/j g:i A");
         }
     }

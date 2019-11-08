@@ -26,7 +26,7 @@ class ExtensionsView extends AbstractView {
 
         $users = $this->core->getQueries()->getUsersWithExtensions($current_gid);
         $current_exceptions = array();
-        foreach($users as $user) {
+        foreach ($users as $user) {
             $current_exceptions[] = array('user_id' => $user->getId(),
                                           'user_firstname' => $user->getDisplayedFirstName(),
                                           'user_lastname' => $user->getDisplayedLastName(),

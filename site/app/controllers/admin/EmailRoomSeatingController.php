@@ -63,13 +63,13 @@ Please email your instructor with any questions or concerns.';
 
         $class_list = $this->core->getQueries()->getEmailListWithIds();
 
-        foreach($class_list as $user) {
+        foreach ($class_list as $user) {
             $user_id = $user['user_id'];
 
             $room_seating_file = FileUtils::joinPaths($seating_assignments_path, "$user_id.json");
             $room_seating_json = FileUtils::readJsonFile($room_seating_file);
 
-            if($room_seating_json === false){
+            if ($room_seating_json === false) {
                 continue;
             }
 
@@ -100,7 +100,7 @@ Please email your instructor with any questions or concerns.';
             'seat' => 'exam_seat',
         ];
 
-        foreach($replaces as $key => $variable) {
+        foreach ($replaces as $key => $variable) {
             $message = str_replace('{$' . $variable . '}', $data[$key] ?? 'SEE INSTRUCTOR', $message);
         }
 
