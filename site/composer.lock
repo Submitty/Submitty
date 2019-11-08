@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "944290c16a13ac3495aba8164ab1496f",
+    "content-hash": "71bfc0abe5508dcd0c1563a24567b9f9",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -3788,16 +3788,16 @@
         },
         {
             "name": "submitty/php-codesniffer",
-            "version": "2.2.1",
+            "version": "2.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/submitty-php-codesniffer.git",
-                "reference": "c181432f47ef05103d0a41094f8b9daa740422a3"
+                "reference": "bdca80b5cb059b1e72ee8fd43ccb7653e86023c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/c181432f47ef05103d0a41094f8b9daa740422a3",
-                "reference": "c181432f47ef05103d0a41094f8b9daa740422a3",
+                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/bdca80b5cb059b1e72ee8fd43ccb7653e86023c5",
+                "reference": "bdca80b5cb059b1e72ee8fd43ccb7653e86023c5",
                 "shasum": ""
             },
             "require": {
@@ -3830,7 +3830,7 @@
                 }
             ],
             "description": "Submitty PHP CodeSniffer Standard",
-            "time": "2019-11-01T19:49:08+00:00"
+            "time": "2019-11-08T13:08:44+00:00"
         },
         {
             "name": "symfony/console",
