@@ -438,7 +438,7 @@
             disableElementChildren('#vcs_submitty_set_url_content', false);
             $('#vcs_submitty_url').prop('required', true);
         }
-else {
+        else {
             $('#vcs_submitty_url').prop('required', false);
         }
     }
@@ -463,7 +463,7 @@ else {
         if($('#yes_late_submission').is(':checked')) {
             lateSubmissionParts.show();
         }
-else {
+        else {
             lateSubmissionParts.hide();
         }
         updateDateDisplay();
@@ -531,13 +531,13 @@ else {
             if ($(this).val() === 'scanned_exam') {
                 scannedExam.val('true');
             }
-else {
+            else {
                 scannedExam.val('false');
                 if ($(this).val() === 'vcs') {
                     vcs.val('true');
                     $('#repository').show();
                 }
-else {
+                else {
                 }
             }
             vcs.change();

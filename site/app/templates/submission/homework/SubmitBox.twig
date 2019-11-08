@@ -93,10 +93,10 @@
                     $('#radio-bulk').prop('checked', true);
                     $('#bulk_progress_box').prop('hidden', false);
                 }
-else if(sessionStorage.getItem('radio-student')){
+                else if(sessionStorage.getItem('radio-student')){
                     $('#radio-student').prop('checked',true);
                 }
-else{
+                else{
                     $('#radio-normal').prop('checked',true);
                 }
                 //load if bulkupload with qr codes selected or not
@@ -123,7 +123,7 @@ else{
                     $('#pdf-submit-button').show();
                     $('#bulk_progress_box').prop('hidden', false);
                 }
-else{
+                else{
                      $('#bulk_progress_box').prop('hidden', true);
                 }
                 if($('#use-qr').is(':checked')){
@@ -623,7 +623,7 @@ else{
                             if(option == 2){
                                 merge_previous = true;
                             }
-else if(option == 3){
+                            else if(option == 3){
                                 merge_previous = true;
                                 clobber = true;
                             }
@@ -631,7 +631,7 @@ else if(option == 3){
                             makeSubmission(user_id,response['data']['highest_version'], false, "", "", "", merge_previous,clobber);
                         }
                     }
-else{
+                    else{
                         makeSubmission(user_id, response['data']['highest_version'], false, "", "", "");
                     }
                 });
