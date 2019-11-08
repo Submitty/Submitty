@@ -1618,7 +1618,39 @@ ORDER BY g.sections_rotating_id, g.user_id", $params);
      * @return array
      */
     public function getGradeablesRotatingGraderHistory($gradeable_id) {
-        throw new NotImplementedException();
+        $params = [$gradeable_id];
+        $this->course_db->query("
+            SELECT
+            gu.g_id, gu.user_id, gu.user_group, gr.sections_rotating_id, g_grade_start_date
+            FROM (
+            SELECT g.g_id, u.user_id, u.user_group, g_grade_start_date
+            FROM (SELECT user_id, user_group FROM users WHERE user_group BETWEEN 1 AND 3) AS u
+            CROSS JOIN (
+              SELECT
+                DISTINCT g.g_id,
+                g_grade_start_date
+              FROM gradeable AS g
+              LEFT JOIN
+                grading_rotating AS gr ON g.g_id = gr.g_id
+              WHERE g_grader_assignment_method = 0 OR g.g_id = ?
+            ) AS g
+            ) as gu
+            LEFT JOIN (
+            SELECT
+              g_id, user_id, json_agg(sections_rotating_id) as sections_rotating_id
+            FROM
+              grading_rotating
+            GROUP BY g_id, user_id
+            ) AS gr ON gu.user_id=gr.user_id AND gu.g_id=gr.g_id
+            ORDER BY user_group, user_id, g_grade_start_date", $params
+        );
+        $rows = $this->course_db->rows();
+        $modified_rows = [];
+        foreach($rows as $row) {
+            $row['sections_rotating_id'] = json_decode($row['sections_rotating_id']);
+            $modified_rows[] = $row;
+        }
+        return $modified_rows;
     }
 
     /**

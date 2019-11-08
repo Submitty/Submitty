@@ -25,7 +25,7 @@ class DatabaseFactoryTester extends BaseUnitTest {
         $factory = new DatabaseFactory($driver);
         $this->assertInstanceOf(PostgresqlDatabase::class, $factory->getDatabase(array()));
         /** @noinspection PhpParamsInspection */
-        $this->assertInstanceOf(PostgresqlDatabaseQueries::class, $factory->getQueries($this->createMockCore()));
+        $this->assertInstanceOf(DatabaseQueries::class, $factory->getQueries($this->createMockCore()));
     }
 
     public function testDatabaseFactorySqlite() {
