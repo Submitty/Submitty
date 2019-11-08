@@ -4,7 +4,7 @@ namespace app\controllers\grading;
 
 use app\controllers\AbstractController;
 use app\libraries\FileUtils;
-use app\models\user;
+use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Utils;
 
@@ -15,7 +15,7 @@ class ImagesController extends AbstractController {
     public function viewImagesPage() {
         $user_group = $this->core->getUser()->getGroup();
         $images_course_path = $this->core->getConfig()->getCoursePath();
-        $images_path = Fileutils::joinPaths($images_course_path,"uploads/student_images");
+        $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
         $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
         if ($user_group === USER::GROUP_STUDENT || (($user_group === USER::GROUP_FULL_ACCESS_GRADER || $user_group === USER::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
@@ -30,8 +30,9 @@ class ImagesController extends AbstractController {
             return;
         }
 
-        if ($user_group !== USER::GROUP_LIMITED_ACCESS_GRADER)
+        if ($user_group !== USER::GROUP_LIMITED_ACCESS_GRADER) {
             $grader_sections = array();  //reset grader section to nothing so permission for every image
+        }
         else {
             if (empty($grader_sections)) {
                 return;
@@ -46,7 +47,7 @@ class ImagesController extends AbstractController {
      * @Route("/{_semester}/{_course}/student_photos/upload")
      */
     public function ajaxUploadImagesFiles() {
-        if(!$this->core->getUser()->accessAdmin()) {
+        if (!$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);
         }
 
@@ -65,12 +66,12 @@ class ImagesController extends AbstractController {
 
         $status = Fileutils::validateUploadedFiles($_FILES["files1"]);
         //check if we couldn't validate the uploaded files
-        if(array_key_exists("failed", $status)){
+        if (array_key_exists("failed", $status)) {
             return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
 
         foreach ($status as $stat) {
-            if($stat['success'] === false){
+            if ($stat['success'] === false) {
                 return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
             }
         }
@@ -87,18 +88,18 @@ class ImagesController extends AbstractController {
             $uploaded_files[1]["is_zip"] = array();
             for ($j = 0; $j < $count_item; $j++) {
                 if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
-                    if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
+                    if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = true;
                     $file_size += FileUtils::getZipSize($uploaded_files[1]["tmp_name"][$j]);
                 }
                 else {
                     if (FileUtils::isValidFileName($uploaded_files[1]["name"][$j]) === false) {
-                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name ".$uploaded_files[1]["name"][$j].".", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your file name " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     elseif (!FileUtils::isValidImage($uploaded_files[1]["tmp_name"][$j])) {
-                        return $this->core->getOutput()->renderResultMessage("Error: ".$uploaded_files[1]['name'][$j]." is not a valid image file.", false);
+                        return $this->core->getOutput()->renderResultMessage("Error: " . $uploaded_files[1]['name'][$j] . " is not a valid image file.", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = false;
                     $file_size += $uploaded_files[1]["size"][$j];
@@ -108,7 +109,7 @@ class ImagesController extends AbstractController {
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         if ($file_size > $max_size) {
-            return $this->core->getOutput()->renderResultMessage("File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+            return $this->core->getOutput()->renderResultMessage("File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.", false);
         }
 
         // creating uploads/student_images directory
@@ -140,11 +141,11 @@ class ImagesController extends AbstractController {
                         // so we have that string hardcoded, otherwise we can just get the status string as
                         // normal.
                         $error_message = ($res == 19) ? "Invalid or uninitialized Zip object" : $zip->getStatusString();
-                        return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: ".$error_message.".", false);
+                        return $this->core->getOutput()->renderResultMessage("Could not properly unpack zip file. Error message: " . $error_message . ".", false);
                     }
                 }
                 else {
-                    if ($this->core->isTesting() || is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
+                    if (is_uploaded_file($uploaded_files[1]["tmp_name"][$j])) {
                         $dst = FileUtils::joinPaths($upload_img_path, $uploaded_files[1]["name"][$j]);
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
                             return $this->core->getOutput()->renderResultMessage("Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);

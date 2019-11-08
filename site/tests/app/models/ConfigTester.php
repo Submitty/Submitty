@@ -112,7 +112,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => "",
-                'auto_rainbow_grades' => false
+                'auto_rainbow_grades' => false,
+                'queue_enabled' => true,
             )
         );
 
@@ -134,11 +135,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_user' => '',
             'email_password' => '',
             'email_sender' => 'submitty@myuniversity.edu',
-            'email_reply_to'=> 'submitty_do_not_reply@myuniversity.edu',
+            'email_reply_to' => 'submitty_do_not_reply@myuniversity.edu',
             'email_server_hostname' => 'localhost',
             'email_server_port' => 25
         );
-        $config = array_replace($config,$extra);
+        $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
 
         // Create version json
@@ -147,9 +148,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "short_installed_commit" => "d150131c",
             "most_recent_git_tag" => "v19.07.00"
         );
-        $config = array_replace($config,$extra);
+        $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
-
     }
 
     public function testConfig() {
@@ -168,8 +168,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
-        $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
-        $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals($this->temp_dir . "/courses/s17/csci0000", $config->getCoursePath());
+        $this->assertEquals($this->temp_dir . "/logs", $config->getLogPath());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
@@ -201,8 +201,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayCustomMessage());
         $this->assertFalse($config->keepPreviousFiles());
         $this->assertFalse($config->displayRainbowGradesSummary());
-        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
-            $config->getCourseJsonPath());
+        $this->assertEquals(
+            FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
+            $config->getCourseJsonPath()
+        );
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
@@ -214,8 +216,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
             'submitty_path' => $this->temp_dir,
-            'course_path' => $this->temp_dir.'/courses/s17/csci0000',
-            'submitty_log_path' => $this->temp_dir.'/logs',
+            'course_path' => $this->temp_dir . '/courses/s17/csci0000',
+            'submitty_log_path' => $this->temp_dir . '/logs',
             'log_exceptions' => true,
             'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
@@ -223,7 +225,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
-            'course_json_path' => $this->temp_dir.'/courses/s17/csci0000/config/config.json',
+            'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
@@ -263,7 +265,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => "",
-                    'auto_rainbow_grades' => false
+                    'auto_rainbow_grades' => false,
+                    'queue_enabled' => true,
                 ]
             ],
             'course_loaded' => true,
@@ -283,7 +286,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
             'latest_commit' => 'd150131c',
-            'latest_tag' => 'v19.07.00'
+            'latest_tag' => 'v19.07.00',
+            'queue_enabled' => true,
         );
         $actual = $config->toArray();
 
@@ -456,7 +460,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id',
+                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id', 'queue_enabled'
             ],
         ];
         $return = array();
@@ -492,7 +496,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 $exception->getMessage()
             );
         }
-
     }
 
     public function testInvalidTimezone() {

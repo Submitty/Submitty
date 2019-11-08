@@ -1,6 +1,5 @@
 <?php
 
-
 namespace tests\app\libraries\routers;
 
 use app\libraries\routers\AccessControl;
@@ -8,7 +7,6 @@ use tests\BaseUnitTest;
 use app\models\User;
 use app\libraries\routers\WebRouter;
 use Symfony\Component\HttpFoundation\Request;
-
 
 class AccessControlTester extends BaseUnitTest {
     private $semester = 'test_semester';
@@ -35,13 +33,13 @@ class AccessControlTester extends BaseUnitTest {
      */
     public function testAccess(
         $endpoint,
-        $method="GET",
-        $params=[],
+        $method = "GET",
+        $params = [],
         $min_role = User::LEVEL_USER,
         $min_permission = ['course.view'],
         $logged_in = true
     ) {
-        for ($role = User::GROUP_STUDENT; $role > $min_role; $role --) {
+        for ($role = User::GROUP_STUDENT; $role > $min_role; $role--) {
             $core = $this->getAccessTestCore($role, $min_permission, $logged_in);
             $request = Request::create(
                 $endpoint,

@@ -7,7 +7,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 
-
 class ImagesView extends AbstractView {
     /**
      * @param User[] $students
@@ -37,7 +36,7 @@ class ImagesView extends AbstractView {
         foreach ($dir as $fileinfo) {
             if (!$fileinfo->isDot() && !$fileinfo->isDir()) {
                 $expected_image = $fileinfo->getPathname();
-                $mime_subtype = explode('/', FileUtils::getMimeType($expected_image), 2)[1];
+                $mime_subtype = explode('/', mime_content_type($expected_image), 2)[1];
                 if (FileUtils::isValidImage($expected_image)) {
                     $img_name = $fileinfo->getBasename('.' . $fileinfo->getExtension());
                     if ($img_name === "error_image") {
@@ -57,7 +56,7 @@ class ImagesView extends AbstractView {
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
+        $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
 
         $this->core->getOutput()->disableBuffer();
         return $this->core->getOutput()->renderTwigTemplate("grading/Images.twig", [

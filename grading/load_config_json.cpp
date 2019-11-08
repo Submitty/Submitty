@@ -289,7 +289,14 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         }
       }
 
-      if(this_testcase["use_router"] && router_container == -1){
+      if(this_testcase[container_type].size() <= 2 && this_testcase["use_router"]){
+        // If there are only two containers specified, make sure that neither is the router.
+        // The router MUST go between at least two containers.
+        assert(router_container == -1);
+      }
+
+      // If we are using the router, and it isn't specified, and this testcase is a valid candidate for a router (2 or more containers specified).
+      if(this_testcase["use_router"] && router_container == -1 && this_testcase[container_type].size() > 1){
         nlohmann::json insert_router = nlohmann::json::object();
         insert_router["outgoing_connections"] = nlohmann::json::array();
         insert_router["commands"] = nlohmann::json::array();

@@ -8,6 +8,9 @@
         <testsuite name="Unit Tests">
             <directory suffix="Tester.php">app</directory>
         </testsuite>
+        <testsuite name="phpstan extension">
+            <directory suffix="Tester.php">phpstan</directory>
+        </testsuite>
     </testsuites>
 
     <filter>
@@ -16,6 +19,7 @@
             <exclude>
                 <directory suffix=".php">../app/views</directory>
             </exclude>
+            <directory suffix=".php">phpstan</directory>
         </whitelist>
     </filter>
 

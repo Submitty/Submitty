@@ -1,18 +1,18 @@
 <?php
+
 namespace app\views;
 
 use app\authentication\DatabaseAuthentication;
 use app\models\User;
 
-
-
 class HomePageView extends AbstractView {
-
-
-    /*
-    *@param List of courses the student is in.
-    */
-    public function showHomePage(User $user, $unarchived_courses = array(), $archived_courses = array(), $change_name_text) {
+    /**
+     * @param User $user
+     * @param array $unarchived_courses
+     * @param array $archived_courses
+     * @param string $change_name_text
+     */
+    public function showHomePage(User $user, $unarchived_courses, $archived_courses, $change_name_text) {
         $statuses = array();
         $course_types = [$unarchived_courses, $archived_courses];
         $rank_titles = [
@@ -22,11 +22,11 @@ class HomePageView extends AbstractView {
             User::GROUP_STUDENT                 => "Student:"
         ];
 
-        foreach($course_types as $course_type) {
+        foreach ($course_types as $course_type) {
             $ranks = array();
 
             //Create rank lists
-            for ($i = 1; $i < 5; $i++){
+            for ($i = 1; $i < 5; $i++) {
                 $ranks[$i] = [];
                 $ranks[$i]["title"] = $rank_titles[$i];
                 $ranks[$i]["courses"] = [];
@@ -39,7 +39,7 @@ class HomePageView extends AbstractView {
             }
 
             //Filter any ranks with no courses
-            $ranks = array_filter($ranks, function($rank) {
+            $ranks = array_filter($ranks, function ($rank) {
                 return count($rank["courses"]) > 0;
             });
             $statuses[] = $ranks;
