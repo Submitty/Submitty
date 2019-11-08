@@ -2,16 +2,13 @@
 
 namespace app\libraries\database;
 
-use \PDO;
-use \PDOException;
-
 use app\exceptions\DatabaseException;
 use app\libraries\Utils;
 
 abstract class AbstractDatabase {
 
     /**
-     * @var PDO
+     * @var \PDO
      */
     protected $link = null;
 
@@ -80,7 +77,7 @@ abstract class AbstractDatabase {
      *
      * @return array
      */
-    abstract public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null);
+    abstract public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null);
     abstract public function fromPHPToDatabaseArray($array);
 
     /**
@@ -98,19 +95,19 @@ abstract class AbstractDatabase {
             $this->all_queries = array();
             try {
                 if (isset($this->username) && isset($this->password)) {
-                    $this->link = new PDO($this->getDSN(), $this->username, $this->password);
+                    $this->link = new \PDO($this->getDSN(), $this->username, $this->password);
                 }
-                else if (isset($this->username)) {
-                    $this->link = new PDO($this->getDSN(), $this->username);
+                elseif (isset($this->username)) {
+                    $this->link = new \PDO($this->getDSN(), $this->username);
                 }
                 else {
-                    $this->link = new PDO($this->getDSN());
+                    $this->link = new \PDO($this->getDSN());
                 }
 
-                $this->link->setAttribute(PDO::ATTR_EMULATE_PREPARES, $this->emulate_prepares);
-                $this->link->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+                $this->link->setAttribute(\PDO::ATTR_EMULATE_PREPARES, $this->emulate_prepares);
+                $this->link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
             }
-            catch (PDOException $pdoException) {
+            catch (\PDOException $pdoException) {
                 throw new DatabaseException($pdoException->getMessage());
             }
         }
@@ -143,7 +140,7 @@ abstract class AbstractDatabase {
      *
      * @return boolean true if query suceeded, else false.
      */
-    public function query($query, $parameters=array()) {
+    public function query($query, $parameters = array()) {
         try {
             $this->query_count++;
             $this->all_queries[] = array($query, $parameters);
@@ -152,8 +149,11 @@ abstract class AbstractDatabase {
             $lower = trim(strtolower($query));
 
             $this->row_count = null;
-            if (Utils::startsWith($lower, 'update') || Utils::startsWith($lower, 'delete')
-                || Utils::startsWith($lower, 'insert')) {
+            if (
+                Utils::startsWith($lower, 'update')
+                || Utils::startsWith($lower, 'delete')
+                || Utils::startsWith($lower, 'insert')
+            ) {
                 $this->row_count = $statement->rowCount();
             }
             elseif (Utils::startsWith($lower, 'select')) {
@@ -171,7 +171,7 @@ abstract class AbstractDatabase {
                 $this->row_count = count($this->results);
             }
         }
-        catch (PDOException $pdoException) {
+        catch (\PDOException $pdoException) {
             throw new DatabaseException($pdoException->getMessage(), $query, $parameters);
         }
 
@@ -192,7 +192,7 @@ abstract class AbstractDatabase {
      *
      * @throws \app\exceptions\DatabaseException
      */
-    public function queryIterator($query, $parameters=array(), $callback=null) {
+    public function queryIterator($query, $parameters = array(), $callback = null) {
         $lower = trim(strtolower($query));
         if (!Utils::startsWith($lower, "select")) {
             return $this->query($query, $parameters);
@@ -205,7 +205,7 @@ abstract class AbstractDatabase {
             $this->row_count = null;
             return new DatabaseRowIterator($statement, $this, $callback);
         }
-        catch (PDOException $exception) {
+        catch (\PDOException $exception) {
             throw new DatabaseException($exception->getMessage(), $query, $parameters);
         }
     }
@@ -236,11 +236,11 @@ abstract class AbstractDatabase {
         foreach ($result as $col => $value) {
             if (isset($columns[$col])) {
                 $column = $columns[$col];
-                if ($column['native_type'] === 'integer' && $column['pdo_type'] !== PDO::PARAM_INT) {
-                    $value = (integer) $value;
+                if ($column['native_type'] === 'integer' && $column['pdo_type'] !== \PDO::PARAM_INT) {
+                    $value = (int) $value;
                 }
-                elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== PDO::PARAM_BOOL) {
-                    $value = (boolean) $value;
+                elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== \PDO::PARAM_BOOL) {
+                    $value = (bool) $value;
                 }
                 $result[$col] = $value;
             }
@@ -282,7 +282,7 @@ abstract class AbstractDatabase {
      * @return array
      */
     public function row() {
-        if($this->results != null && count($this->results) > 0) {
+        if ($this->results != null && count($this->results) > 0) {
             return array_shift($this->results);
         }
         else {
@@ -297,7 +297,7 @@ abstract class AbstractDatabase {
      * @return array
      */
     public function rows() {
-        if($this->results !== null && count($this->results) > 0) {
+        if ($this->results !== null && count($this->results) > 0) {
             return $this->results;
         }
         else {
@@ -338,8 +338,8 @@ abstract class AbstractDatabase {
      */
     public function getPrintQueries() {
         $print = [];
-        foreach($this->all_queries as $query) {
-            foreach($query[1] as $parameter) {
+        foreach ($this->all_queries as $query) {
+            foreach ($query[1] as $parameter) {
                 $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
             }
             $print[] = $query[0];

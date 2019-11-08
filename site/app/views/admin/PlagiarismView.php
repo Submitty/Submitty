@@ -1,4 +1,5 @@
 <?php
+
 namespace app\views\admin;
 
 use app\views\AbstractView;
@@ -27,12 +28,12 @@ HTML;
 
             $delete_form_action = $this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'delete']);
 
-            if(file_exists($course_path."/lichen/ranking/".$id.".txt")) {
-                $timestamp = date("F d Y H:i:s.",filemtime($course_path."/lichen/ranking/".$id.".txt"));
-                $students = array_diff(scandir($course_path."/lichen/concatenated/".$id), array('.', '..'));
-                $submissions =0;
-                foreach($students as $student) {
-                    $submissions += count(array_diff(scandir($course_path."/lichen/concatenated/".$id."/".$student), array('.', '..')));
+            if (file_exists($course_path . "/lichen/ranking/" . $id . ".txt")) {
+                $timestamp = date("F d Y H:i:s.", filemtime($course_path . "/lichen/ranking/" . $id . ".txt"));
+                $students = array_diff(scandir($course_path . "/lichen/concatenated/" . $id), array('.', '..'));
+                $submissions = 0;
+                foreach ($students as $student) {
+                    $submissions += count(array_diff(scandir($course_path . "/lichen/concatenated/" . $id . "/" . $student), array('.', '..')));
                 }
                 $students = count($students);
             }
@@ -41,12 +42,12 @@ HTML;
                 $students = "N/A";
                 $submissions = "N/A";
             }
-            $night_rerun_status= "";
-            if($nightly_rerun_info[$id] ==true) {
+            $night_rerun_status = "";
+            if ($nightly_rerun_info[$id] == true) {
                 $night_rerun_status = "checked";
             }
 
-            #lichen job in queue for this gradeable but processing not started
+            // lichen job in queue for this gradeable but processing not started
             if (file_exists("/var/local/submitty/daemon_job_queue/lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
                 $return .= <<<HTML
         <tr style="color:grey;">
@@ -66,9 +67,8 @@ HTML;
         </tr>
 HTML;
             }
-
-            #lichen job in processing stage for this gradeable but not completed
-            else if (file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
+            elseif (file_exists("/var/local/submitty/daemon_job_queue/PROCESSING_lichen__" . $semester . "__" . $course . "__" . $id . ".json")) {
+                // lichen job in processing stage for this gradeable but not completed
                 $return .= <<<HTML
         <tr style="color:green;">
             <td>$title
@@ -87,12 +87,11 @@ HTML;
         </tr>
 HTML;
             }
-
-            #no lichen job
             else {
-                $ranking_file_path= "/var/local/submitty/courses/".$semester."/".$course."/lichen/ranking/".$id.".txt";
-                if(file_get_contents($ranking_file_path) == "") {
-                    $matches_and_topmatch= "0 students matched, N/A top match";
+                // no lichen job
+                $ranking_file_path = "/var/local/submitty/courses/" . $semester . "/" . $course . "/lichen/ranking/" . $id . ".txt";
+                if (file_get_contents($ranking_file_path) == "") {
+                    $matches_and_topmatch = "0 students matched, N/A top match";
 
                     $return .= <<<HTML
         <tr>
@@ -101,11 +100,11 @@ HTML;
 HTML;
                 }
                 else {
-                    $content =file_get_contents($ranking_file_path);
+                    $content = file_get_contents($ranking_file_path);
                     $content = trim(str_replace(array("\r", "\n"), '', $content));
                     $rankings = preg_split('/ +/', $content);
-                    $rankings = array_chunk($rankings,3);
-                    $matches_and_topmatch = count($rankings)." students matched, ".$rankings[0][0]." top match";
+                    $rankings = array_chunk($rankings, 3);
+                    $matches_and_topmatch = count($rankings) . " students matched, " . $rankings[0][0] . " top match";
 
                     $return .= <<<HTML
         <tr>
@@ -150,7 +149,7 @@ HTML;
 </script>
 HTML;
         #refresh page ensures atleast one refresh of lichen mainpage when delete , rerun , edit or new configuration is saved.
-        if($refresh_page == "REFRESH_ME") {
+        if ($refresh_page == "REFRESH_ME") {
             $return .= <<<HTML
 <script type="text/javascript">
     var last_data= "REFRESH_ME";
@@ -162,7 +161,7 @@ HTML;
         return $return;
     }
 
-    public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title , $rankings) {
+    public function showPlagiarismResult($semester, $course, $gradeable_id, $gradeable_title, $rankings) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('codemirror', 'codemirror.js'));
@@ -426,7 +425,7 @@ HTML;
         return $return;
     }
 
-    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles = null, $prior_term_gradeables, $saved_config = null) {
+    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config) {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
@@ -434,51 +433,51 @@ HTML;
         $course = $this->core->getConfig()->getCourse();
 
         #default values for the form
-        $gradeable_id="";
-        $all_version="checked";
-        $active_version="";
-        $all_files="checked";
-        $regex_matching_files="";
-        $regex="";
-        $language =["python"=>"selected", "java"=>"", "plaintext"=>"", "cpp"=>""];
-        $provided_code="";
-        $no_provided_code="checked";
-        $provided_code_filename="";
-        $threshold="5";
-        $sequence_length="10";
-        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables'])+1 : 1;
-        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions'])+1 : 1;
-        $ignore="";
-        $no_ignore="checked";
+        $gradeable_id = "";
+        $all_version = "checked";
+        $active_version = "";
+        $all_files = "checked";
+        $regex_matching_files = "";
+        $regex = "";
+        $language = ["python" => "selected", "java" => "", "plaintext" => "", "cpp" => ""];
+        $provided_code = "";
+        $no_provided_code = "checked";
+        $provided_code_filename = "";
+        $threshold = "5";
+        $sequence_length = "10";
+        $prior_term_gradeables_number = $saved_config['prev_term_gradeables'] ? count($saved_config['prev_term_gradeables']) + 1 : 1;
+        $ignore_submission_number = $saved_config['ignore_submissions'] ? count($saved_config['ignore_submissions']) + 1 : 1;
+        $ignore = "";
+        $no_ignore = "checked";
 
 
         #values which are in saved configuration
-        if($new_or_edit == "edit") {
+        if ($new_or_edit == "edit") {
             $gradeable_id = $saved_config['gradeable'];
-            $all_version = ($saved_config['version'] == "all_version")?"checked":"";
-            $active_version = ($saved_config['version'] == "active_version")?"checked":"";
-            if($saved_config['file_option'] == "matching_regex") {
-                $all_files="";
-                $regex_matching_files="checked";
-                $regex=$saved_config['regex'];
+            $all_version = ($saved_config['version'] == "all_version") ? "checked" : "";
+            $active_version = ($saved_config['version'] == "active_version") ? "checked" : "";
+            if ($saved_config['file_option'] == "matching_regex") {
+                $all_files = "";
+                $regex_matching_files = "checked";
+                $regex = $saved_config['regex'];
             }
             $language[$saved_config['language']] = "selected";
 
-            if($saved_config["instructor_provided_code"] == true) {
+            if ($saved_config["instructor_provided_code"] == true) {
                 $provided_code_filename_array = (array_diff(scandir($saved_config["instructor_provided_code_path"]), array(".", "..")));
-                foreach($provided_code_filename_array as $filename) {
-                    $provided_code_filename= $filename;
+                foreach ($provided_code_filename_array as $filename) {
+                    $provided_code_filename = $filename;
                 }
-                $provided_code="checked";
-                $no_provided_code="";
+                $provided_code = "checked";
+                $no_provided_code = "";
             }
 
             $threshold = $saved_config['threshold'];
             $sequence_length = $saved_config['sequence_length'];
 
-            if(count($saved_config['ignore_submissions']) > 0) {
-                $ignore="checked";
-                $no_ignore="";
+            if (count($saved_config['ignore_submissions']) > 0) {
+                $ignore = "checked";
+                $no_ignore = "";
             }
         }
 
@@ -498,7 +497,7 @@ HTML;
                 <div style="width:20%;float:left">Select Gradeable:</div>
                 <div style="width:70%;float:right">
 HTML;
-        if($new_or_edit == "new") {
+        if ($new_or_edit == "new") {
             $return .= <<<HTML
                     <select name="gradeable_id">
 HTML;
@@ -513,8 +512,7 @@ HTML;
                     </select>
 HTML;
         }
-
-        else if($new_or_edit == "edit") {
+        elseif ($new_or_edit == "edit") {
             $title = '';
             if (isset($saved_config['gradeable']) && $saved_config['gradeable'] !== null) {
                 $title = $this->core->getQueries()->getGradeableConfig($saved_config['gradeable'])->getTitle();
@@ -536,7 +534,7 @@ HTML;
                     <label for="code_provided_id">Yes</label><br />
                     <input type="file" name="provided_code_file">
 HTML;
-        if($new_or_edit == "edit" && $saved_config["instructor_provided_code"]) {
+        if ($new_or_edit == "edit" && $saved_config["instructor_provided_code"]) {
             $return .= <<<HTML
                     <br />
                     <font size="-1">Current Provided Code: $provided_code_filename</font>
@@ -598,8 +596,8 @@ HTML;
                 <div style="width:20%;float:left">Prior Terms Gradeables:</div>
                 <div style="width:70%;float:right;overflow:auto;" name= "prev_gradeable_div">
 HTML;
-        $count=0;
-        if($new_or_edit == "edit") {
+        $count = 0;
+        if ($new_or_edit == "edit") {
             foreach ($saved_config['prev_term_gradeables'] as $saved_prev_term_gradeable_path) {
                 $saved_prev_sem = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[3]);
                 $saved_prev_course = strrev((explode("/", strrev($saved_prev_term_gradeable_path)))[2]);
@@ -609,8 +607,8 @@ HTML;
                     <select name="prev_sem_{$count}">
                         <option value="">None</option>
 HTML;
-                foreach($prior_term_gradeables as $sem => $sem_courses) {
-                    if( $sem == $saved_prev_sem) {
+                foreach ($prior_term_gradeables as $sem => $sem_courses) {
+                    if ($sem == $saved_prev_sem) {
                         $return .= <<<HTML
                         <option value="{$sem}" selected>$sem</option>
 HTML;
@@ -626,8 +624,8 @@ HTML;
                         <option value="">None</option>
 HTML;
 
-                foreach($prior_term_gradeables[$saved_prev_sem] as $sem_course => $course_gradeables) {
-                    if( $sem_course == $saved_prev_course) {
+                foreach ($prior_term_gradeables[$saved_prev_sem] as $sem_course => $course_gradeables) {
+                    if ($sem_course == $saved_prev_course) {
                         $return .= <<<HTML
                         <option value="{$sem_course}" selected>$sem_course</option>
 HTML;
@@ -643,8 +641,8 @@ HTML;
                     <select name="prev_gradeable_{$count}">
                         <option value="">None</option>
 HTML;
-                foreach($prior_term_gradeables[$saved_prev_sem][$saved_prev_course] as $course_gradeable) {
-                    if( $course_gradeable == $saved_prev_gradeable) {
+                foreach ($prior_term_gradeables[$saved_prev_sem][$saved_prev_course] as $course_gradeable) {
+                    if ($course_gradeable == $saved_prev_gradeable) {
                         $return .= <<<HTML
                         <option value="{$course_gradeable}" selected>$course_gradeable</option>
 HTML;
@@ -696,8 +694,8 @@ HTML;
                     <label for="ignore_id">Yes</label><br />
 HTML;
 
-        $count=0;
-        if($new_or_edit == "edit") {
+        $count = 0;
+        if ($new_or_edit == "edit") {
             foreach ($saved_config['ignore_submissions'] as $saved_ignore_submission) {
                 $return .= <<<HTML
                     <input type="text" name="ignore_submission_{$count}" value="{$saved_ignore_submission}"/><br />

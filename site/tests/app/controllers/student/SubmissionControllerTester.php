@@ -2,7 +2,7 @@
 
 namespace tests\app\controllers\student;
 
-use \ZipArchive;
+use ZipArchive;
 use app\controllers\student\SubmissionController;
 use app\exceptions\IOException;
 use app\libraries\Core;
@@ -251,9 +251,9 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string $content
      * @param int    $part
      */
-    private function addUploadFile($filename, $content="", $part=1) {
-        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part), true, 0777);
-        $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part, $filename);
+    private function addUploadFile($filename, $content = "", $part = 1) {
+        FileUtils::createDir(FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part), true, 0777);
+        $filepath = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part, $filename);
         if (file_put_contents($filepath, $content) === false) {
             throw new IOException("Could not write file to {$filepath}");
         }
@@ -273,16 +273,16 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param array  $files
      * @param int    $part
      */
-    private function addUploadZip($zip_name, $files, $part=1) {
-        $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part'.$part);
+    private function addUploadZip($zip_name, $files, $part = 1) {
+        $part_path = FileUtils::joinPaths($this->config['tmp_path'], 'files', 'part' . $part);
         $root_path = FileUtils::joinPaths($part_path, $zip_name);
         FileUtils::createDir($root_path, true, 0777);
-        $zip_path =  FileUtils::joinPaths($part_path, $zip_name.'.zip');
+        $zip_path =  FileUtils::joinPaths($part_path, $zip_name . '.zip');
         $zip = new ZipArchive();
         $zip->open($zip_path, ZipArchive::CREATE || ZipArchive::OVERWRITE);
         $this->createZip($files, $zip, $root_path);
         $zip->close();
-        $_FILES["files{$part}"]['name'][] = $zip_name.'.zip';
+        $_FILES["files{$part}"]['name'][] = $zip_name . '.zip';
         $_FILES["files{$part}"]['type'][] = mime_content_type($zip_path);
         $_FILES["files{$part}"]['size'][] = filesize($zip_path);
         $_FILES["files{$part}"]['tmp_name'][] = $zip_path;
@@ -302,7 +302,7 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @param string      $dir
      * @param string|null $root_dir
      */
-    private function createZip($files, $zip, $dir, $root_dir=null) {
+    private function createZip($files, $zip, $dir, $root_dir = null) {
         if ($root_dir === null) {
             $root_dir = $dir;
         }
@@ -416,10 +416,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $this->assertEquals(".submit.timestamp", $iter->getFilename());
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertTrue(in_array($iter->getFilename(), array('part1', 'part2')));
                 $files[$iter->getFilename()] = array();
                 $iter2 = $iter->getChildren();
@@ -428,7 +428,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $files[$iter->getFilename()][$iter2->getFilename()] = file_get_contents($iter2->getPathname());
                     }
                     else {
@@ -486,10 +486,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $filenames[] = $iter->getFilename();
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("testDir", $iter->getFilename());
                 $iter2 = $iter->getChildren();
                 while ($iter2 !== "" && $iter2->getFilename() !== "") {
@@ -497,7 +497,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $this->assertEquals("test1.txt", $iter2->getFilename());
                     }
                     else {
@@ -825,7 +825,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -892,7 +892,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
-
     }
 
     /**
@@ -948,14 +947,14 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("folder with spaces", $iter->getFilename());
                 foreach (new \FilesystemIterator($iter->getPathname()) as $iter2) {
                     $this->assertTrue($iter2->isFile());
                     $this->assertEquals("filename with spaces2.txt", $iter2->getFilename());
                 }
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -987,7 +986,7 @@ class SubmissionControllerTester extends BaseUnitTest {
         sort($files);
         $this->assertEquals(array('.submit.VCS_CHECKOUT', '.submit.timestamp'), $files);
         $touch_file = implode("__", array($this->config['semester'], $this->config['course'], "test", "testUser", "1"));
-        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__".$touch_file));
+        $this->assertFileExists(FileUtils::joinPaths($this->config['tmp_path'], "to_be_graded_queue", "VCS__" . $touch_file));
     }
 
     public function testEmptyPost() {
@@ -1104,7 +1103,7 @@ class SubmissionControllerTester extends BaseUnitTest {
     }
 
     public function testErrorPreviousFilesFirstVersion() {
-        $_POST['previous_files'] = json_encode(array(0=>array('test.txt')));
+        $_POST['previous_files'] = json_encode(array(0 => array('test.txt')));
 
         $controller = new SubmissionController($this->core);
         $return = $controller->ajaxUploadSubmission('test');
@@ -1213,8 +1212,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail', "An error should have happened");
-        $this->assertEquals("File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
-            $return['message']);
+        $this->assertEquals(
+            "File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
+            $return['message']
+        );
         $this->assertFalse($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));
@@ -1228,7 +1229,7 @@ class SubmissionControllerTester extends BaseUnitTest {
             $this->fail('cannot open the file');
         }
         $stat = fstat($fh);
-        ftruncate($fh, $stat['size']-1);
+        ftruncate($fh, $stat['size'] - 1);
         fclose($fh);
 
         $controller = new SubmissionController($this->core);
@@ -1680,5 +1681,4 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertTrue($return['refresh']);
         $this->assertEquals("REFRESH_ME", $return['string']);
     }
-
 }

@@ -322,7 +322,8 @@
                         var json = JSON.parse(data);
                         if(json['status'] == 'fail') {
                             var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['message'] + '</div>';
-                        }else {
+                        }
+                        else {
                             var message ='<div class="inner-message alert alert-success" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onclick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + json['data'] + '</div>';
                         }
                     } catch(err) {

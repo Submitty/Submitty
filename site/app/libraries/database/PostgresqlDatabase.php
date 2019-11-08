@@ -2,7 +2,6 @@
 
 namespace app\libraries\database;
 
-
 class PostgresqlDatabase extends AbstractDatabase {
     protected $host;
     protected $port;
@@ -19,7 +18,7 @@ class PostgresqlDatabase extends AbstractDatabase {
      * port
      * dbname
      */
-    public function __construct($connection_params=array()) {
+    public function __construct($connection_params = array()) {
         parent::__construct($connection_params);
         if (isset($connection_params['host'])) {
             $this->host = $connection_params['host'];
@@ -45,7 +44,7 @@ class PostgresqlDatabase extends AbstractDatabase {
             $params[] = "dbname={$this->dbname}";
         }
 
-        return 'pgsql:'.implode(';', $params);
+        return 'pgsql:' . implode(';', $params);
     }
 
     /**
@@ -61,12 +60,13 @@ class PostgresqlDatabase extends AbstractDatabase {
      *
      * @return array PHP array representation
      */
-    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start=0, &$end=null) {
+    public function fromDatabaseToPHPArray($text, $parse_bools = false, $start = 0, &$end = null) {
         $text = trim($text);
 
-        if(empty($text) || $text[0] != "{") {
+        if (empty($text) || $text[0] != "{") {
             return array();
-        } else if(is_string($text)) {
+        }
+        elseif (is_string($text)) {
             $return = array();
             $element = "";
             $in_string = false;
@@ -78,41 +78,43 @@ class PostgresqlDatabase extends AbstractDatabase {
                 if (!$in_array && !$in_string && $ch === "{") {
                     $in_array = true;
                 }
-                else if (!$in_string && $ch === "{") {
+                elseif (!$in_string && $ch === "{") {
                     $return[] = $this->fromDatabaseToPHPArray($text, $parse_bools, $i, $i);
                 }
-                else if (!$in_string && $ch === "}") {
+                elseif (!$in_string && $ch === "}") {
                     $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
                     $end = $i;
                     return $return;
                 }
-                else if (($ch === '"' || $ch === "'") && !$in_string) {
+                elseif (($ch === '"' || $ch === "'") && !$in_string) {
                     $in_string = true;
                     $quot = $ch;
                 }
-                else if ($in_string && $ch == "\\" && strlen($text) > $i) {
-                    if ($text[$i+1] === "\\") {
+                elseif ($in_string && $ch == "\\" && strlen($text) > $i) {
+                    if ($text[$i + 1] === "\\") {
                         $element .= "\\";
                         $i++;
-                    } else if ($text[$i+1] === "\"") {
+                    }
+                    elseif ($text[$i + 1] === "\"") {
                         $element .= "\"";
                         $i++;
-                    } else {
+                    }
+                    else {
                         $element .= $text[$i];
                     }
                 }
-                else if (!$in_string && $ch === "\\") {
+                elseif (!$in_string && $ch === "\\") {
                     //Insert literal \
                     $element .= $text[$i];
                 }
-                else if ($in_string && $ch === $quot) {
+                elseif ($in_string && $ch === $quot) {
                     $in_string = false;
                     $have_string = true;
                 }
-                else if (!$in_string && $ch === " ") {
+                elseif (!$in_string && $ch === " ") {
                     continue;
                 }
-                else if (!$in_string && $ch === ",") {
+                elseif (!$in_string && $ch === ",") {
                     $this->parsePGArrayValue($element, $have_string, $parse_bools, $return);
                     $have_string = false;
                     $element = "";
@@ -139,7 +141,7 @@ class PostgresqlDatabase extends AbstractDatabase {
         if ($have_string) {
             $return[] = $element;
         }
-        else if (strlen($element) > 0) {
+        elseif (strlen($element) > 0) {
             if (is_numeric($element)) {
                 $return[] = ($element + 0);
             }
@@ -148,7 +150,7 @@ class PostgresqlDatabase extends AbstractDatabase {
                 if ($parse_bools && in_array($lower, array("true", "t", "false", "f"))) {
                     $return[] = ($lower === "true" || $lower === "t") ? true : false;
                 }
-                else if ($lower == "null") {
+                elseif ($lower == "null") {
                     $return[] = null;
                 }
                 else {
@@ -179,21 +181,21 @@ class PostgresqlDatabase extends AbstractDatabase {
             if ($e === null) {
                 $elements[] = "null";
             }
-            else if (is_array($e)) {
+            elseif (is_array($e)) {
                 $elements[] = $this->fromPHPToDatabaseArray($e);
             }
-            else if (is_string($e)) {
+            elseif (is_string($e)) {
                 //Turn every \ into \\ that's either preceding a " another \ or the end
-                $elements[] = '"'. str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) .'"';
+                $elements[] = '"' . str_replace('"', '\"', preg_replace('/\\\\(?=["\\\\]|$)/', '\\\\\\\\', $e)) . '"';
             }
-            else if (is_bool($e)) {
+            elseif (is_bool($e)) {
                 $elements[] = ($e === true) ? "true" : "false";
             }
             else {
                 $elements[] = "{$e}";
             }
         }
-        $text = "{".implode(", ", $elements)."}";
+        $text = "{" . implode(", ", $elements) . "}";
         return $text;
     }
 

@@ -92,9 +92,11 @@
                 if(sessionStorage.getItem('radio-bulk')){
                     $('#radio-bulk').prop('checked', true);
                     $('#bulk_progress_box').prop('hidden', false);
-                }else if(sessionStorage.getItem('radio-student')){
+                }
+                else if(sessionStorage.getItem('radio-student')){
                     $('#radio-student').prop('checked',true);
-                }else{
+                }
+                else{
                     $('#radio-normal').prop('checked',true);
                 }
                 //load if bulkupload with qr codes selected or not
@@ -120,7 +122,8 @@
                 if ($("#radio-bulk").is(":checked")) {
                     $('#pdf-submit-button').show();
                     $('#bulk_progress_box').prop('hidden', false);
-                }else{
+                }
+                else{
                      $('#bulk_progress_box').prop('hidden', true);
                 }
                 if($('#use-qr').is(':checked')){
@@ -333,7 +336,7 @@
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                                value="{{ choice.value }}"
-                                               onclick="handle_input_keypress();" 
+                                               onclick="handle_input_keypress();"
                                         />
                                         {{ choice.description | markdown }}
                                     </label>
@@ -349,13 +352,13 @@
 
                                 {{ self.render_testcase_messages(cell, testcase_messages) }}
 
-                                {% for choice in cell.choices %}                                      
+                                {% for choice in cell.choices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         <input type="radio"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                                value="{{ choice.value }}"
-                                               onclick="handle_input_keypress();" 
+                                               onclick="handle_input_keypress();"
                                         />
                                         {{ choice.description | markdown }}
                                     </label>
@@ -511,7 +514,7 @@
 </div>
 
 {% if core.getUser().accessFullGrading() %}
-    {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
+    {% include 'submission/homework/PreviousSubmissionForm.twig' %}
     {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
@@ -590,10 +593,10 @@
             }
             // bulk upload
             if ($("#radio-bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", 
-                            {{ max_post_size }}, 
+                handleBulk("{{ gradeable_id }}",
+                            {{ max_post_size }},
                             {{ max_file_size }},
-                            num_pages, use_qr, qr_prefix, qr_suffix 
+                            num_pages, use_qr, qr_prefix, qr_suffix
                           );
             }
             // no user id entered, upload for whoever is logged in
@@ -619,14 +622,16 @@
 
                             if(option == 2){
                                 merge_previous = true;
-                            } else if(option == 3){
+                            }
+                            else if(option == 3){
                                 merge_previous = true;
                                 clobber = true;
                             }
 
                             makeSubmission(user_id,response['data']['highest_version'], false, "", "", "", merge_previous,clobber);
                         }
-                    }else{
+                    }
+                    else{
                         makeSubmission(user_id, response['data']['highest_version'], false, "", "", "");
                     }
                 });

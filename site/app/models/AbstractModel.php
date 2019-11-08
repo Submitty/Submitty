@@ -1,7 +1,7 @@
 <?php
 
-
 namespace app\models;
+
 use app\libraries\Core;
 use app\libraries\Utils;
 
@@ -14,7 +14,7 @@ use app\libraries\Utils;
  */
 abstract class AbstractModel {
 
-    static protected $properties = array();
+    protected static $properties = array();
 
     /** @var Core */
     protected $core;
@@ -52,7 +52,7 @@ abstract class AbstractModel {
      * @param $check_property
      * @return mixed
      */
-    protected function parseObject($object, $check_property=true) {
+    protected function parseObject($object, $check_property = true) {
         if (is_object($object)) {
             if (is_a($object, 'app\Models\AbstractModel') || is_subclass_of($object, 'app\Models\AbstractModel')) {
                 /** @noinspection PhpUndefinedMethodInspection */
@@ -62,7 +62,7 @@ abstract class AbstractModel {
                 $return = get_class($object);
             }
         }
-        else if (is_array($object)) {
+        elseif (is_array($object)) {
             $return = array();
             foreach ($object as $key => $value) {
                 if (is_numeric($key) || (!$check_property || isset(static::$properties[get_class($this)][$key]))) {
@@ -145,7 +145,7 @@ abstract class AbstractModel {
             return $this->$property_name === true;
         }
 
-        throw new \BadMethodCallException('Call to undefined method '.__CLASS__.'::'.$name.'()');
+        throw new \BadMethodCallException('Call to undefined method ' . __CLASS__ . '::' . $name . '()');
     }
 
     /**
@@ -158,9 +158,9 @@ abstract class AbstractModel {
      *
      * @return string
      */
-    private function convertName($name, $prefix_length=3) {
+    private function convertName($name, $prefix_length = 3) {
         $regex_func = function ($matches) {
-            return "_".strtolower($matches[0]);
+            return "_" . strtolower($matches[0]);
         };
         $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, $prefix_length))));
         return $name;

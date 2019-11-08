@@ -27,7 +27,7 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false ) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -53,10 +53,12 @@ class HomeworkView extends AbstractView {
         // showing submission if user is full grader or student can submit
         if ($this->core->getUser()->accessFullGrading()) {
             $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-        } else if ($gradeable->isStudentSubmit()) {
+        }
+        elseif ($gradeable->isStudentSubmit()) {
             if ($gradeable->canStudentSubmit()) {
                 $return .= $this->renderSubmitBox($gradeable, $graded_gradeable, $version_instance, $late_days_use);
-            } else {
+            }
+            else {
                 $return .= $this->renderSubmitNotAllowedBox();
             }
         }
@@ -79,7 +81,8 @@ class HomeworkView extends AbstractView {
         $active_version = $auto_graded_gradeable !== null ? $auto_graded_gradeable->getActiveVersion() : 0;
         if ($submission_count === 0) {
             $return .= $this->renderNoSubmissionBox($graded_gradeable);
-        } else {
+        }
+        else {
             $return .= $this->renderVersionBox($graded_gradeable, $version_instance, $show_hidden_testcases);
         }
 
@@ -91,14 +94,16 @@ class HomeworkView extends AbstractView {
             && $gradeable->isRegradeOpen()
             && $submission_count !== 0;
 
-        if ($gradeable->isTaGradeReleased()
+        if (
+            $gradeable->isTaGradeReleased()
             && $gradeable->isTaGrading()
             && $submission_count !== 0
-            && $active_version !== 0) {
+            && $active_version !== 0
+        ) {
             $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
-            $return .= $this->renderRegradeBox($graded_gradeable,$can_inquiry);
+            $return .= $this->renderRegradeBox($graded_gradeable, $can_inquiry);
         }
         return $return;
     }
@@ -151,7 +156,7 @@ class HomeworkView extends AbstractView {
                     'remaining' => $late_days_remaining
                 ]];
             } // BAD STATUS - AUTO ZERO BECAUSE TOO MANY LATE DAYS USED ON THIS ASSIGNMENT
-            else if ($active_days_charged > $late_days_allowed) {
+            elseif ($active_days_charged > $late_days_allowed) {
                 $error = true;
                 $messages[] = ['type' => 'too_many_used', 'info' => [
                     'late' => $active_days_late,
@@ -175,15 +180,17 @@ class HomeworkView extends AbstractView {
         // ------------------------------------------------------------
         // (IF LATE) PRINT LATE DAY INFORMATION
         if ($would_be_days_late > 0) {
-
             // HOW MANY DAYS LATE...  MINUS EXTENSIONS?
             $new_late_charged = max(0, $would_be_days_late - $extensions);
 
             // if unsubmitted, or submitted but still in the late days allowed window
-            if ($active_version < 1 ||
-                ($new_late_charged <= $late_days_remaining &&
-                    $new_late_charged <= $late_days_allowed)) {
-
+            if (
+                $active_version < 1
+                || (
+                    $new_late_charged <= $late_days_remaining
+                    && $new_late_charged <= $late_days_allowed
+                )
+            ) {
                 // PRINT WOULD BE HOW MANY DAYS LATE
                 $messages[] = ['type' => 'would_late', 'info' => [
                     'late' => $would_be_days_late
@@ -197,7 +204,7 @@ class HomeworkView extends AbstractView {
                     $error = true;
                     $messages[] = ['type' => 'would_get_zero'];
                 } // SUBMISSION NOW WOULD BE BAD STATUS -- EXCEEDS LIMIT FOR THIS ASSIGNMENT
-                else if ($new_late_charged > $late_days_allowed) {
+                elseif ($new_late_charged > $late_days_allowed) {
                     $messages[] = ['type' => 'would_too_many_used', 'info' => [
                         'allowed' => $late_days_allowed
                     ]];
@@ -205,8 +212,8 @@ class HomeworkView extends AbstractView {
                     $messages[] = ['type' => 'would_get_zero'];
                 } // SUBMISSION NOW WOULD BE LATE
                 else {
-                    $new_late_charged = max(0,$would_be_days_late-$active_days_late - $extensions);
-                    $new_late_days_remaining = $late_days_remaining-$new_late_charged;
+                    $new_late_charged = max(0, $would_be_days_late - $active_days_late - $extensions);
+                    $new_late_days_remaining = $late_days_remaining - $new_late_charged;
                     $messages[] = ['type' => 'would_allowed', 'info' => [
                         'charged' => $new_late_charged,
                         'remaining' => $new_late_days_remaining
@@ -251,7 +258,7 @@ class HomeworkView extends AbstractView {
             $active_version_instance = $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance();
         }
         $active_days_late =  $active_version_instance !== null ? $active_version_instance->getDaysLate() : 0;
-        $days_to_be_charged = $would_be_days_late-$active_days_late;
+        $days_to_be_charged = $would_be_days_late - $active_days_late;
         $old_files = [];
         $display_version = 0;
 
@@ -275,11 +282,9 @@ class HomeworkView extends AbstractView {
 
         $image_data = [];
         if (!$gradeable->isVcs()) {
-
             // Prepare notebook image data for displaying
             foreach ($notebook as $cell) {
-                if (isset($cell['type']) && $cell['type'] == "image")
-                {
+                if (isset($cell['type']) && $cell['type'] == "image") {
                     $image_name = $cell['image'];
                     $imgPath = FileUtils::joinPaths(
                         $this->core->getConfig()->getCoursePath(),
@@ -299,7 +304,7 @@ class HomeworkView extends AbstractView {
                 }
             }
 
-            if($version_instance !== null) {
+            if ($version_instance !== null) {
                 $display_version = $version_instance->getVersion();
                 for ($i = 1; $i <= $gradeable->getAutogradingConfig()->getNumParts(); $i++) {
                     foreach ($version_instance->getPartFiles($i)['submissions'] as $file) {
@@ -307,7 +312,8 @@ class HomeworkView extends AbstractView {
                         // $escape_quote_filename = str_replace('\'','\\\'',$file['name']);
                         if (substr($file['relative_name'], 0, strlen("part{$i}/")) === "part{$i}/") {
                             $escape_quote_filename = str_replace('\'', '\\\'', substr($file['relative_name'], strlen("part{$i}/")));
-                        } else {
+                        }
+                        else {
                             $escape_quote_filename = str_replace('\'', '\\\'', $file['relative_name']);
                         }
 
@@ -329,10 +335,12 @@ class HomeworkView extends AbstractView {
             if (file_exists($path)) {
                 $json = json_decode(file_get_contents($path), true);
                 if (!is_null($json)) {
-                    if (isset($json["git_user_id"]))
+                    if (isset($json["git_user_id"])) {
                         $github_user_id = $json["git_user_id"];
-                    if (isset($json["git_repo_id"]))
+                    }
+                    if (isset($json["git_repo_id"])) {
                         $github_repo_id = $json["git_repo_id"];
+                    }
                 }
             }
         }
@@ -349,7 +357,7 @@ class HomeworkView extends AbstractView {
 
         // instructors can access this page even if they aren't on a team => don't create errors
         $my_team = $graded_gradeable !== null ? $graded_gradeable->getSubmitter()->getTeam() : "";
-        $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(),$my_team) : "";
+        $my_repository = $graded_gradeable !== null ? $gradeable->getRepositoryPath($this->core->getUser(), $my_team) : "";
         $notebook_data = $graded_gradeable !== null ? $graded_gradeable->getUpdatedNotebook() : array();
         $testcase_messages = $version_instance !== null ? $version_instance->getTestcaseMessages() : array();
 
@@ -428,13 +436,13 @@ class HomeworkView extends AbstractView {
         foreach ($all_directories as $timestamp => $content) {
             $dir_files = $content['files'];
             foreach ($dir_files as $filename => $details) {
-                if($filename === 'decoded.json'){
+                if ($filename === 'decoded.json') {
                     $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
                 }
                 $clean_timestamp = str_replace('_', ' ', $timestamp);
                 $path = rawurlencode(htmlspecialchars($details['path']));
                 //get the cover image if it exists
-                if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
+                if (strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg') {
                     $corrected_filename = rawurlencode(htmlspecialchars($filename));
                     $url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
                         'dir' => 'split_pdf',
@@ -447,8 +455,11 @@ class HomeworkView extends AbstractView {
                         'url' => $url,
                     ];
                 }
-                if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' ||
-                    pathinfo($filename)['extension'] === "jpg") {
+                if (
+                    strpos($filename, 'cover') === false
+                    || pathinfo($filename)['extension'] === 'json'
+                    || pathinfo($filename)['extension'] === "jpg"
+                ) {
                     continue;
                 }
                 // get the full filename for PDF popout
@@ -471,11 +482,12 @@ class HomeworkView extends AbstractView {
                 $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
                 //decode the filename after to display correctly for users
                 $filename_full = rawurldecode($filename_full);
-                $cover_image_name = substr($filename,0,-3) . "jpg";
+                $cover_image_name = substr($filename, 0, -3) . "jpg";
                 $cover_image = [];
                 foreach ($cover_images as $img) {
-                    if($img['filename'] === $cover_image_name)
+                    if ($img['filename'] === $cover_image_name) {
                         $cover_image = $img;
+                    }
                 }
                 $files[] = [
                     'clean_timestamp' => $clean_timestamp,
@@ -490,9 +502,10 @@ class HomeworkView extends AbstractView {
         }
 
         for ($i = 0; $i < count($files); $i++) {
-            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)) {
                 continue;
-            }else if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+            }
+            elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
                 $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
             }
 
@@ -501,22 +514,24 @@ class HomeworkView extends AbstractView {
             $id = '';
 
             //decoded.json may be read before the assoicated data is written, check if key exists first
-            if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
-                if(array_key_exists('id', $data)){
+            if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
+                if (array_key_exists('id', $data)) {
                     $id = $data['id'];
                     $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
-                }else{
+                }
+                else {
                     //set the blank id as invalid for now, after a page refresh it will recorrect
                     $id = '';
                     $is_valid = false;
                 }
-                if(array_key_exists('page_count', $data)){
+                if (array_key_exists('page_count', $data)) {
                     $page_count = $data['page_count'];
                 }
-            }else{
+            }
+            else {
                 $is_valid = true;
                 $id = '';
-                if(array_key_exists('page_count', $bulk_upload_data)){
+                if (array_key_exists('page_count', $bulk_upload_data)) {
                     $page_count = $bulk_upload_data['page_count'];
                 }
             }
@@ -630,7 +645,7 @@ class HomeworkView extends AbstractView {
                 ]);
             }
 
-            if($version_instance->isQueued()) {
+            if ($version_instance->isQueued()) {
                 $param = array_merge($param, [
                     'queue_pos' => $version_instance->getQueuePosition(),
                     'queue_total' => $this->core->getGradingQueue()->getQueueCount()
@@ -702,8 +717,13 @@ class HomeworkView extends AbstractView {
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
-            $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults',
-                $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles());
+            $rendered_ta_results = $this->core->getOutput()->renderTemplate(
+                'AutoGrading',
+                'showTAResults',
+                $graded_gradeable->getTaGradedGradeable(),
+                $regrade_available,
+                $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles()
+            );
         }
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
@@ -769,7 +789,9 @@ class HomeworkView extends AbstractView {
                 // format posts
                 $posts = [];
                 foreach ($grade_inquiry_posts[$grade_inquiry->getId()] as $post) {
-                    if (empty($post)) break;
+                    if (empty($post)) {
+                        break;
+                    }
                     $is_staff = $this->core->getQueries()->isStaffPost($post['user_id']);
                     $name = $this->core->getQueries()->getUserById($post['user_id'])->getDisplayedFirstName();
                     $date = DateUtils::parseDateTime($post['timestamp'], $this->core->getConfig()->getTimezone());
@@ -794,7 +816,8 @@ class HomeworkView extends AbstractView {
                     ];
                     // add grade inquiry to grade inquiries array
                     $grade_inquiries_twig_array[$gc_id] = $grade_inquiry_twig_object;
-                } else {
+                }
+                else {
                     $grade_inquiries_twig_array[0]['id'] = $grade_inquiry->getId();
                     $grade_inquiries_twig_array[0]['gc_id'] = $gc_id;
                     $grade_inquiries_twig_array[0]['status'] = $grade_inquiry->getStatus();
@@ -804,7 +827,7 @@ class HomeworkView extends AbstractView {
         }
         // sort by most recent posts
         if (!empty($grade_inquiries_twig_array)) {
-            usort($grade_inquiries_twig_array[0]['posts'], function ($a,$b) {
+            usort($grade_inquiries_twig_array[0]['posts'], function ($a, $b) {
                 return strtotime($a['date']) - strtotime($b['date']);
             });
         }
@@ -831,7 +854,7 @@ class HomeworkView extends AbstractView {
             'make_request_post_url' => $make_regrade_post_url,
             'has_submission' => $graded_gradeable->hasSubmission(),
             'submitter_id' => $graded_gradeable->getSubmitter()->getId(),
-            'g_id' =>$graded_gradeable->getGradeable()->getId(),
+            'g_id' => $graded_gradeable->getGradeable()->getId(),
             'regrade_message' => $regrade_message,
             'can_inquiry' => $can_inquiry,
             'is_grading' => $this->core->getUser()->accessGrading(),

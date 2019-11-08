@@ -12,7 +12,6 @@ use app\libraries\response\WebResponse;
 use app\models\User;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-
 //Enable us to throw, catch, and handle exceptions as needed.
 use app\exceptions\ValidationException;
 use app\exceptions\DatabaseException;
@@ -147,8 +146,8 @@ class UsersController extends AbstractController {
         $new_registration_information = array();
 
         foreach ($_POST as $key => $value) {
-            $key_array = explode("_",$key,2);
-            if (!array_key_exists($key_array[0],$new_registration_information)) {
+            $key_array = explode("_", $key, 2);
+            if (!array_key_exists($key_array[0], $new_registration_information)) {
                 $new_registration_information[$key_array[0]] = array();
             }
             if ($key_array[1] != 'all') {
@@ -156,9 +155,9 @@ class UsersController extends AbstractController {
             }
         }
 
-        foreach($this->core->getQueries()->getAllGraders() as $grader) {
+        foreach ($this->core->getQueries()->getAllGraders() as $grader) {
             $grader_id = $grader->getId();
-            if (array_key_exists($grader_id,$new_registration_information)) {
+            if (array_key_exists($grader_id, $new_registration_information)) {
                 $grader->setGradingRegistrationSections($new_registration_information[$grader_id]);
             }
             else {
@@ -205,7 +204,7 @@ class UsersController extends AbstractController {
         //uses more thorough course information if it exists, if not uses database information
         $user_information = array();
         foreach ($user_ids as $user_id) {
-            $already_in_course = array_key_exists($user_id,$course_users);
+            $already_in_course = array_key_exists($user_id, $course_users);
             $user = $already_in_course ? $course_users[$user_id] : $submitty_users[$user_id];
             $user_information[$user_id] = array(
                 'already_in_course' => $already_in_course,
@@ -230,7 +229,7 @@ class UsersController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/users", methods={"POST"})
      */
-    public function updateUser($type='users') {
+    public function updateUser($type = 'users') {
         $return_url = $this->core->buildCourseUrl([$type]) . '#user-' . $_POST['user_id'];
         $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
         $_POST['user_id'] = trim($_POST['user_id']);
@@ -245,18 +244,18 @@ class UsersController extends AbstractController {
 
         $error_message = "";
         //Username must contain only lowercase alpha, numbers, underscores, hyphens
-        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"".strip_tags($_POST['user_id'])."\"<br>";
+        $error_message .= User::validateUserData('user_id', trim($_POST['user_id'])) ? "" : "Error in username: \"" . strip_tags($_POST['user_id']) . "\"<br>";
         //First and Last name must be alpha characters, white-space, or certain punctuation.
-        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"".strip_tags($_POST['user_firstname'])."\"<br>";
-        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"".strip_tags($_POST['user_lastname'])."\"<br>";
+        $error_message .= User::validateUserData('user_legal_firstname', trim($_POST['user_firstname'])) ? "" : "Error in first name: \"" . strip_tags($_POST['user_firstname']) . "\"<br>";
+        $error_message .= User::validateUserData('user_legal_lastname', trim($_POST['user_lastname'])) ? "" : "Error in last name: \"" . strip_tags($_POST['user_lastname']) . "\"<br>";
         //Check email address for appropriate format. e.g. "user@university.edu", "user@cs.university.edu", etc.
-        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"".strip_tags($_POST['user_email'])."\"<br>";
+        $error_message .= User::validateUserData('user_email', trim($_POST['user_email'])) ? "" : "Error in email: \"" . strip_tags($_POST['user_email']) . "\"<br>";
         //Preferred first name must be alpha characters, white-space, or certain punctuation.
         if (!empty($_POST['user_preferred_firstname']) && trim($_POST['user_preferred_firstname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"".strip_tags($_POST['user_preferred_firstname'])."\"<br>";
+            $error_message .= User::validateUserData('user_preferred_firstname', trim($_POST['user_preferred_firstname'])) ? "" : "Error in preferred first name: \"" . strip_tags($_POST['user_preferred_firstname']) . "\"<br>";
         }
         if (!empty($_POST['user_preferred_lastname']) && trim($_POST['user_preferred_lastname']) !== "") {
-            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"".strip_tags($_POST['user_preferred_lastname'])."\"<br>";
+            $error_message .= User::validateUserData('user_preferred_lastname', trim($_POST['user_preferred_lastname'])) ? "" : "Error in preferred last name: \"" . strip_tags($_POST['user_preferred_lastname']) . "\"<br>";
         }
 
         //Database password cannot be blank, no check on format
@@ -265,7 +264,7 @@ class UsersController extends AbstractController {
         }
 
         if (!empty($error_message)) {
-            $this->core->addErrorMessage($error_message." Contact your sysadmin if this should not cause an error.");
+            $this->core->addErrorMessage($error_message . " Contact your sysadmin if this should not cause an error.");
             $this->core->redirect($return_url);
         }
 
@@ -348,10 +347,9 @@ class UsersController extends AbstractController {
                     continue;
                 }
                 if ($gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
-                    AdminGradeableController::enqueueGenerateRepos($semester,$course,$g_id);
+                    AdminGradeableController::enqueueGenerateRepos($semester, $course, $g_id);
                 }
             }
-
         }
         $this->core->redirect($return_url);
     }
@@ -367,11 +365,11 @@ class UsersController extends AbstractController {
         //Adds "invisible" sections: rotating sections that exist but have no students assigned to them
         $sections_with_students = array();
         foreach ($non_null_counts as $rows) {
-            array_push($sections_with_students,$rows['rotating_section']);
+            array_push($sections_with_students, $rows['rotating_section']);
         }
         for ($i = 1; $i <= $this->core->getQueries()->getMaxRotatingSection(); $i++) {
-            if ( !in_array($i,$sections_with_students) ) {
-                array_push($non_null_counts,[
+            if (!in_array($i, $sections_with_students)) {
+                array_push($non_null_counts, [
                     "rotating_section" => $i,
                     "count" => 0
                 ]);
@@ -380,8 +378,15 @@ class UsersController extends AbstractController {
 
         $null_counts = $this->core->getQueries()->getCountNullUsersRotatingSections();
         $max_section = $this->core->getQueries()->getMaxRotatingSection();
-        $this->core->getOutput()->renderOutput(array('admin', 'Users'), 'sectionsForm', $students, $reg_sections,
-            $non_null_counts, $null_counts, $max_section);
+        $this->core->getOutput()->renderOutput(
+            array('admin', 'Users'),
+            'sectionsForm',
+            $students,
+            $reg_sections,
+            $non_null_counts,
+            $null_counts,
+            $max_section
+        );
     }
 
     /**
@@ -407,15 +412,15 @@ class UsersController extends AbstractController {
                 $_SESSION['request'] = $_POST;
             }
         }
-        else if (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
+        elseif (isset($_POST['delete_reg_section']) && $_POST['delete_reg_section'] !== "") {
             if (User::validateUserData('registration_section', $_POST['delete_reg_section'])) {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
                 // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
                 $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
                 $json = file_get_contents($fp);
                 $jsonArray = json_decode($json, true);
-                foreach ($jsonArray as $key => $value){
-                    if(isset($value['sections'])){
+                foreach ($jsonArray as $key => $value) {
+                    if (isset($value['sections'])) {
                         $sections = $value['sections'];
                         if ($key = array_search($_POST['delete_reg_section'], $sections) !== false) {
                             $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  This section is referenced in course materials");
@@ -423,7 +428,7 @@ class UsersController extends AbstractController {
                         }
                     }
                 }
-                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);        
+                $num_del_sections = $this->core->getQueries()->deleteRegistrationSection($_POST['delete_reg_section']);
                 if ($num_del_sections === 0) {
                     $this->core->addErrorMessage("Section {$_POST['delete_reg_section']} not removed.  Section must exist and be empty of all users/graders.");
                 }
@@ -450,12 +455,12 @@ class UsersController extends AbstractController {
             $this->core->addErrorMessage("Must select one of the four options for setting up rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_POST['sort_type'] === "drop_null") {
+        elseif ($_POST['sort_type'] === "drop_null") {
             $this->core->getQueries()->setNonRegisteredUsersRotatingSectionNull();
             $this->core->addSuccessMessage("Non registered students removed from rotating sections");
             $this->core->redirect($return_url);
         }
-        else if ($_POST['sort_type'] === "drop_all") {
+        elseif ($_POST['sort_type'] === "drop_all") {
             $this->core->getQueries()->setAllUsersRotatingSectionNull();
             $this->core->getQueries()->setAllTeamsRotatingSectionNull();
             $this->core->addSuccessMessage("All students removed from rotating sections");
@@ -494,20 +499,19 @@ class UsersController extends AbstractController {
             foreach ($reg_sections as $row) {
                 $test = $row['sections_registration_id'];
                 if (isset($_POST[$test])) {
-                    array_push($exclude_sections,$_POST[$row['sections_registration_id']]);
+                    array_push($exclude_sections, $_POST[$row['sections_registration_id']]);
                 }
             }
             //remove people who should not be added to rotating sections
             for ($j = 0; $j < count($users_with_reg_section);) {
-                for ($i = 0;$i < count($exclude_sections);++$i) {
+                for ($i = 0; $i < count($exclude_sections); ++$i) {
                     if ($users_with_reg_section[$j]->getRegistrationSection() == $exclude_sections[$i]) {
-                        array_splice($users_with_reg_section,$j,1);
+                        array_splice($users_with_reg_section, $j, 1);
                         $j--;
                         break;
                     }
                 }
                 ++$j;
-
             }
             for ($i = 0; $i < count($users);) {
                 $found_in = false;
@@ -558,7 +562,7 @@ class UsersController extends AbstractController {
             if ($max_section === null) {
                 $this->core->addErrorMessage("No rotating sections have been added to the system, cannot use fewest");
             }
-            else if ($max_section != $section_count) {
+            elseif ($max_section != $section_count) {
                 $this->core->addErrorMessage("Cannot use a different number of sections when setting up via fewest");
                 $this->core->redirect($return_url);
             }
@@ -662,7 +666,7 @@ class UsersController extends AbstractController {
                 $xlsx_tmp = basename($xlsx_file);
                 $csv_tmp = basename($csv_file);
                 $ch = curl_init();
-                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl()."xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
+                curl_setopt($ch, CURLOPT_URL, $this->core->getConfig()->getCgiUrl() . "xlsx_to_csv.cgi?xlsx_file={$xlsx_tmp}&csv_file={$csv_tmp}");
                 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
                 $output = curl_exec($ch);
 
@@ -673,25 +677,29 @@ class UsersController extends AbstractController {
 
                 $output = json_decode($output, true);
                 if ($output === null) {
-                    $this->core->addErrorMessage("Error parsing JSON response: ".json_last_error_msg());
+                    $this->core->addErrorMessage("Error parsing JSON response: " . json_last_error_msg());
                     $this->core->redirect($return_url);
-                } else if ($output['error'] === true) {
-                    $this->core->addErrorMessage("Error parsing xlsx to csv: ".$output['error_message']);
+                }
+                elseif ($output['error'] === true) {
+                    $this->core->addErrorMessage("Error parsing xlsx to csv: " . $output['error_message']);
                     $this->core->redirect($return_url);
-                } else if ($output['success'] !== true) {
-                    $this->core->addErrorMessage("Error on response on parsing xlsx: ".curl_error($ch));
+                }
+                elseif ($output['success'] !== true) {
+                    $this->core->addErrorMessage("Error on response on parsing xlsx: " . curl_error($ch));
                     $this->core->redirect($return_url);
                 }
 
                 curl_close($ch);
-            } else {
+            }
+            else {
                 $this->core->addErrorMessage("Did not properly recieve spreadsheet. Contact your sysadmin.");
                 $this->core->redirect($return_url);
             }
-
-        } else if ($content_type === 'text/csv' && $mime_type === 'text/plain') {
+        }
+        elseif ($content_type === 'text/csv' && $mime_type === 'text/plain') {
             $csv_file = $tmp_name;
-        } else {
+        }
+        else {
             $this->core->addErrorMessage("Must upload xlsx or csv");
             $this->core->redirect($return_url);
         }
@@ -754,7 +762,7 @@ class UsersController extends AbstractController {
          */
         $row4_validation_function = function () use ($list_type, &$vals) {
             //$row[4] is different based on classlist vs graderlist
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     //student
                     if (isset($vals[4]) && strtolower($vals[4]) === "null") {
@@ -780,11 +788,11 @@ class UsersController extends AbstractController {
          * @return string
          */
         $get_user_registration_or_group_function = function ($user) use ($list_type) {
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     return $user->getRegistrationSection();
                 case "graderlist":
-                    return (string)$user->getGroup();
+                    return (string) $user->getGroup();
                 default:
                     throw new ValidationException("Unknown classlist", array($list_type, '$get_user_registration_or_group_function'));
             }
@@ -794,7 +802,7 @@ class UsersController extends AbstractController {
          * Closure to set a user's registration_section or group_id based on $list_type)
          */
         $set_user_registration_or_group_function = function (&$user) use ($list_type, &$row) {
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     // Registration section has to exist, or a DB exception gets thrown on INSERT or UPDATE.
                     // ON CONFLICT clause in DB query prevents thrown exceptions when registration section already exists.
@@ -817,7 +825,7 @@ class UsersController extends AbstractController {
          */
         $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
             try {
-                switch($action) {
+                switch ($action) {
                     case 'insert':
                         //User must first exist in Submitty before being enrolled to a course.
                         //$uploaded_data[0] = authentication ID.
@@ -846,7 +854,7 @@ class UsersController extends AbstractController {
          * @return string
          */
         $set_return_url_action_function = function () use ($list_type) {
-            switch($list_type) {
+            switch ($list_type) {
                 case "classlist":
                     return "users";
                 case "graderlist":
@@ -870,9 +878,9 @@ class UsersController extends AbstractController {
         $pref_firstname_idx = $use_database ? 6 : 5;
         $pref_lastname_idx = $pref_firstname_idx + 1;
         $bad_rows = array();
-        foreach($uploaded_data as $row_num => $vals) {
+        foreach ($uploaded_data as $row_num => $vals) {
             // Blacklist validation.  Validation fails if any test resolves as false.
-            switch(false) {
+            switch (false) {
                 // Bounds check to ensure minimum required number of rows is present.
                 case count($vals) >= 5:
                     // Username must contain only lowercase alpha, numbers, underscores, hyphens
@@ -891,10 +899,10 @@ class UsersController extends AbstractController {
                     // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                     // Automatically validate if not set (this field is optional).
                 case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):
-                case !isset($vals[$pref_lastname_idx])  || User::validateUserData('user_preferred_lastname',  $vals[$pref_lastname_idx] ):
+                case !isset($vals[$pref_lastname_idx]) || User::validateUserData('user_preferred_lastname', $vals[$pref_lastname_idx]):
                     // Validation failed somewhere.  Record which row failed.
                     // $row_num is zero based.  ($row_num+1) will better match spreadsheet labeling.
-                    $bad_rows[] = ($row_num+1);
+                    $bad_rows[] = ($row_num + 1);
                     break;
             }
         }
@@ -913,9 +921,9 @@ class UsersController extends AbstractController {
         $existing_users = $this->core->getQueries()->getAllUsers();
         $users_to_add = array();
         $users_to_update = array();
-        foreach($uploaded_data as $row) {
+        foreach ($uploaded_data as $row) {
             $exists = false;
-            foreach($existing_users as $i => $existing_user) {
+            foreach ($existing_users as $i => $existing_user) {
                 if ($row[0] === $existing_user->getId()) {
                     // Validate if this user has any data to update.
                     // Did student registration section or grader group change?
@@ -937,7 +945,7 @@ class UsersController extends AbstractController {
         // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach($users_to_add as $uploaded_data) {
+        foreach ($users_to_add as $uploaded_data) {
             $user = new User($this->core);
             $user->setId($uploaded_data[0]);
             $user->setLegalFirstName($uploaded_data[1]);
@@ -957,7 +965,7 @@ class UsersController extends AbstractController {
         }
 
         // Existing users update
-        foreach($users_to_update as $row) {
+        foreach ($users_to_update as $row) {
             $user = $this->core->getQueries()->getUserById($row[0]);
             //Update registration section (student) or group (grader)
             $set_user_registration_or_group_function($user);
@@ -968,7 +976,7 @@ class UsersController extends AbstractController {
 
         //Special case to move students to the NULL section with a classlist upload.
         if ($list_type === "classlist" && isset($_POST['move_missing'])) {
-            foreach($existing_users as $existing_user) {
+            foreach ($existing_users as $existing_user) {
                 if (!is_null($existing_user->getRegistrationSection())) {
                     $existing_user->setRegistrationSection(null);
                     $insert_or_update_user_function('update', $existing_user);

@@ -131,7 +131,7 @@ SELECT * FROM test");
     }
 
     public function testTransactionCommitOnDisconnect() {
-        $db = FileUtils::joinPaths(sys_get_temp_dir(), uniqid().".sq3");
+        $db = FileUtils::joinPaths(sys_get_temp_dir(), uniqid() . ".sq3");
         $database = new SqliteDatabase(array('path' => $db));
         $database->connect();
         $this->setupDatabase($database);

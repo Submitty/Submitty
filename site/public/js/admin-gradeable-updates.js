@@ -266,9 +266,11 @@ function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, er
             setGradeableUpdateComplete();
             if (response.status === 'success') {
                 successCallback(response.data);
-            } else if (response.status === 'fail') {
+            }
+            else if (response.status === 'fail') {
                 errorCallback(response.message, response.data);
-            } else {
+            }
+            else {
                 alert('Internal server error');
                 console.error(response.message);
             }
@@ -421,7 +423,8 @@ function saveRubric(redirect = true) {
                 if (redirect) {
                     window.location.replace(buildCourseUrl(['gradeable', $('#g_id').val(), 'update']) + '?nav_tab=2');
                 }
-            } else {
+            }
+            else {
                 errors['rubric'] = response.message;
                 updateErrorMessage();
                 alert('Error saving rubric, you may have tried to delete a component with grades.  Refresh the page');
@@ -484,7 +487,8 @@ function saveGraders() {
                 alert('Error saving graders!');
                 console.error(response.message);
                 errors['graders'] = '';
-            } else {
+            }
+            else {
                 delete errors['graders'];
             }
             updateErrorMessage();
