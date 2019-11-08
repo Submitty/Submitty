@@ -28,8 +28,10 @@ class Logger {
     /**
      * Don't allow usage of this class outside a static context
      */
-    private function __construct() { }
-    private function __clone() { }
+    private function __construct() {
+    }
+    private function __clone() {
+    }
 
 
     /**
@@ -119,7 +121,7 @@ class Logger {
         $filename = static::getFilename();
         $log_message = static::getTimestamp();
         $log_message .= " - ";
-        switch($level) {
+        switch ($level) {
             case 0:
                 $log_message .= "DEBUG";
                 break;

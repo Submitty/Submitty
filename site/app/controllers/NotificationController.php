@@ -135,7 +135,7 @@ class NotificationController extends AbstractController {
 
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff($this->selections, array_keys($new_settings));
-            foreach(array_values($values_not_sent) as $value) {
+            foreach (array_values($values_not_sent) as $value) {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);

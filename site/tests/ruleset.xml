@@ -11,39 +11,18 @@
     <exclude-pattern>../app/models/Gradeable.php</exclude-pattern>
 
     <rule ref="SubmittyStandard">
-        <exclude name="SubmittyStandard.ControlStructures.StroustrupStructure.Found" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.NotSnakeCase" />
         <exclude name="SubmittyStandard.NamingConventions.ValidVariableName.MemberNotSnakeCase" />
 
         <exclude name="Generic.Arrays.DisallowLongArraySyntax.Found" />
         <exclude name="Generic.CodeAnalysis.ForLoopWithTestFunctionCall.NotAllowed" />
-        <exclude name="Generic.ControlStructures.InlineControlStructure.NotAllowed" />
         <exclude name="Generic.Files.LineLength.TooLong" />
-        <exclude name="Generic.Formatting.SpaceAfterCast.NoSpace" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.NotCamelCaps" />
         <exclude name="Generic.NamingConventions.CamelCapsFunctionName.ScopeNotCamelCaps" />
         <exclude name="Generic.NamingConventions.UpperCaseConstantName.ClassConstantNotUpperCase" />
 
         <exclude name="PSR1.Methods.CamelCapsMethodName.NotCamelCaps" />
 
-        <exclude name="PSR2.Methods.FunctionCallSignature.ContentAfterOpenBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.Indent" />
-        <exclude name="PSR2.Methods.FunctionClosingBrace.SpacingBeforeClose" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceAfterOpenBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeOpenBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.SpaceBeforeCloseBracket" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.CloseBracketLine" />
-        <exclude name="PSR2.Methods.FunctionCallSignature.MultipleArguments" />
-
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisIndent" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpacingAfterOpenBrace" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.LineIndent" />
-        <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMixed"/>
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.CloseParenthesisLine" />
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.FirstExpressionLine"/>
-        <exclude name="PSR12.ControlStructures.ControlStructureSpacing.SpaceBeforeCloseBrace" />
-        <exclude name="PSR12.ControlStructures.BooleanOperatorPlacement.FoundMiddle"/>
-        <exclude name="PSR12.Keywords.ShortFormTypeKeywords.LongFound" />
         <exclude name="PSR12.Properties.ConstantVisibility.NotFound" />
 
         <exclude name="Squiz.Arrays.ArrayBracketSpacing.SpaceAfterBracket" />
@@ -51,20 +30,10 @@
         <exclude name="Squiz.Classes.ValidClassName.NotCamelCaps" />
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
-        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterFirst" />
-        <exclude name="Squiz.ControlStructures.ForLoopDeclaration.NoSpaceAfterSecond" />
-        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceBeforeArrow" />
-        <exclude name="Squiz.ControlStructures.ForEachLoopDeclaration.NoSpaceAfterArrow" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
         <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
-        <exclude name="Squiz.Scope.MethodScope.Missing" />
-        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingAfterOpen" />
-        <excldue name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-        <exclude name="Squiz.WhiteSpace.ControlStructureSpacing.SpacingBeforeClose" />
-        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.ContentBefore" />
-        <exclude name="Squiz.WhiteSpace.ScopeClosingBrace.Indent" />
 
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaFunctionCall" />
         <exclude name="SlevomatCodingStandard.Classes.ModernClassNameReference.ClassNameReferencedViaMagicConstant" />

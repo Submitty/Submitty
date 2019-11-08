@@ -892,7 +892,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
-
     }
 
     /**
@@ -1213,8 +1212,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail', "An error should have happened");
-        $this->assertEquals("File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
-            $return['message']);
+        $this->assertEquals(
+            "File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
+            $return['message']
+        );
         $this->assertFalse($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));

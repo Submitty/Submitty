@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3cca7e1d9f846bcb39b48e7564ac7115",
+    "content-hash": "2159fbd2c46f17c1ec0f7a7b12fca519",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -545,16 +545,16 @@
         },
         {
             "name": "symfony/config",
-            "version": "v4.3.5",
+            "version": "v4.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/config.git",
-                "reference": "0acb26407a9e1a64a275142f0ae5e36436342720"
+                "reference": "f4ee0ebb91b16ca1ac105aa39f9284f3cac19a15"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/config/zipball/0acb26407a9e1a64a275142f0ae5e36436342720",
-                "reference": "0acb26407a9e1a64a275142f0ae5e36436342720",
+                "url": "https://api.github.com/repos/symfony/config/zipball/f4ee0ebb91b16ca1ac105aa39f9284f3cac19a15",
+                "reference": "f4ee0ebb91b16ca1ac105aa39f9284f3cac19a15",
                 "shasum": ""
             },
             "require": {
@@ -605,7 +605,7 @@
             ],
             "description": "Symfony Config Component",
             "homepage": "https://symfony.com",
-            "time": "2019-09-19T15:51:53+00:00"
+            "time": "2019-10-30T13:18:51+00:00"
         },
         {
             "name": "symfony/filesystem",
@@ -659,16 +659,16 @@
         },
         {
             "name": "symfony/http-foundation",
-            "version": "v4.3.5",
+            "version": "v4.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "76590ced16d4674780863471bae10452b79210a5"
+                "reference": "38f63e471cda9d37ac06e76d14c5ea2ec5887051"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/76590ced16d4674780863471bae10452b79210a5",
-                "reference": "76590ced16d4674780863471bae10452b79210a5",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/38f63e471cda9d37ac06e76d14c5ea2ec5887051",
+                "reference": "38f63e471cda9d37ac06e76d14c5ea2ec5887051",
                 "shasum": ""
             },
             "require": {
@@ -710,7 +710,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2019-10-04T19:48:13+00:00"
+            "time": "2019-10-30T12:58:49+00:00"
         },
         {
             "name": "symfony/mime",
@@ -1007,16 +1007,16 @@
         },
         {
             "name": "symfony/routing",
-            "version": "v4.3.5",
+            "version": "v4.3.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "3b174ef04fe66696524efad1e5f7a6c663d822ea"
+                "reference": "63a9920cc86fcc745e5ea254e362f02b615290b9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/3b174ef04fe66696524efad1e5f7a6c663d822ea",
-                "reference": "3b174ef04fe66696524efad1e5f7a6c663d822ea",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/63a9920cc86fcc745e5ea254e362f02b615290b9",
+                "reference": "63a9920cc86fcc745e5ea254e362f02b615290b9",
                 "shasum": ""
             },
             "require": {
@@ -1079,7 +1079,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2019-10-04T20:57:10+00:00"
+            "time": "2019-10-30T12:58:49+00:00"
         },
         {
             "name": "twig/twig",
@@ -1152,24 +1152,24 @@
     "packages-dev": [
         {
             "name": "composer/xdebug-handler",
-            "version": "1.3.3",
+            "version": "1.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/composer/xdebug-handler.git",
-                "reference": "46867cbf8ca9fb8d60c506895449eb799db1184f"
+                "reference": "cbe23383749496fe0f373345208b79568e4bc248"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/composer/xdebug-handler/zipball/46867cbf8ca9fb8d60c506895449eb799db1184f",
-                "reference": "46867cbf8ca9fb8d60c506895449eb799db1184f",
+                "url": "https://api.github.com/repos/composer/xdebug-handler/zipball/cbe23383749496fe0f373345208b79568e4bc248",
+                "reference": "cbe23383749496fe0f373345208b79568e4bc248",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.3.2 || ^7.0",
+                "php": "^5.3.2 || ^7.0 || ^8.0",
                 "psr/log": "^1.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.5"
+                "phpunit/phpunit": "^4.8.35 || ^5.7 || 6.5 - 8"
             },
             "type": "library",
             "autoload": {
@@ -1187,12 +1187,12 @@
                     "email": "john-stevenson@blueyonder.co.uk"
                 }
             ],
-            "description": "Restarts a process without xdebug.",
+            "description": "Restarts a process without Xdebug.",
             "keywords": [
                 "Xdebug",
                 "performance"
             ],
-            "time": "2019-05-27T17:52:04+00:00"
+            "time": "2019-11-06T16:40:04+00:00"
         },
         {
             "name": "dealerdirect/phpcodesniffer-composer-installer",
@@ -1944,16 +1944,16 @@
         },
         {
             "name": "nikic/php-parser",
-            "version": "v4.2.5",
+            "version": "v4.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nikic/PHP-Parser.git",
-                "reference": "b76bbc3c51f22c570648de48e8c2d941ed5e2cf2"
+                "reference": "9a9981c347c5c49d6dfe5cf826bb882b824080dc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/b76bbc3c51f22c570648de48e8c2d941ed5e2cf2",
-                "reference": "b76bbc3c51f22c570648de48e8c2d941ed5e2cf2",
+                "url": "https://api.github.com/repos/nikic/PHP-Parser/zipball/9a9981c347c5c49d6dfe5cf826bb882b824080dc",
+                "reference": "9a9981c347c5c49d6dfe5cf826bb882b824080dc",
                 "shasum": ""
             },
             "require": {
@@ -1961,7 +1961,7 @@
                 "php": ">=7.0"
             },
             "require-dev": {
-                "ircmaxell/php-yacc": "0.0.4",
+                "ircmaxell/php-yacc": "0.0.5",
                 "phpunit/phpunit": "^6.5 || ^7.0 || ^8.0"
             },
             "bin": [
@@ -1970,7 +1970,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "4.2-dev"
+                    "dev-master": "4.3-dev"
                 }
             },
             "autoload": {
@@ -1992,7 +1992,7 @@
                 "parser",
                 "php"
             ],
-            "time": "2019-10-25T18:33:07+00:00"
+            "time": "2019-11-08T13:50:10+00:00"
         },
         {
             "name": "ocramius/package-versions",
@@ -2903,16 +2903,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "8.4.2",
+            "version": "8.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "a142a7e66c0ea7b5b6c04ee27f08d10d1137cd9b"
+                "reference": "67f9e35bffc0dd52d55d565ddbe4230454fd6a4e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a142a7e66c0ea7b5b6c04ee27f08d10d1137cd9b",
-                "reference": "a142a7e66c0ea7b5b6c04ee27f08d10d1137cd9b",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/67f9e35bffc0dd52d55d565ddbe4230454fd6a4e",
+                "reference": "67f9e35bffc0dd52d55d565ddbe4230454fd6a4e",
                 "shasum": ""
             },
             "require": {
@@ -2982,7 +2982,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2019-10-28T10:39:51+00:00"
+            "time": "2019-11-06T09:42:23+00:00"
         },
         {
             "name": "psr/container",
@@ -3788,16 +3788,16 @@
         },
         {
             "name": "submitty/php-codesniffer",
-            "version": "2.2.1",
+            "version": "2.2.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Submitty/submitty-php-codesniffer.git",
-                "reference": "c181432f47ef05103d0a41094f8b9daa740422a3"
+                "reference": "bdca80b5cb059b1e72ee8fd43ccb7653e86023c5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/c181432f47ef05103d0a41094f8b9daa740422a3",
-                "reference": "c181432f47ef05103d0a41094f8b9daa740422a3",
+                "url": "https://api.github.com/repos/Submitty/submitty-php-codesniffer/zipball/bdca80b5cb059b1e72ee8fd43ccb7653e86023c5",
+                "reference": "bdca80b5cb059b1e72ee8fd43ccb7653e86023c5",
                 "shasum": ""
             },
             "require": {
@@ -3830,7 +3830,7 @@
                 }
             ],
             "description": "Submitty PHP CodeSniffer Standard",
-            "time": "2019-11-01T19:49:08+00:00"
+            "time": "2019-11-08T13:08:44+00:00"
         },
         {
             "name": "symfony/console",

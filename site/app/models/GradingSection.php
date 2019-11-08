@@ -42,7 +42,7 @@ class GradingSection extends AbstractModel {
     public function __construct(Core $core, bool $registration, $name, $graders, $users, $teams) {
         parent::__construct($core);
         $this->registration = $registration;
-        $this->name = $name !== null ? (string)$name : null;
+        $this->name = $name !== null ? (string) $name : null;
         $this->graders = $graders;
         $this->users = $users;
         $this->teams = $teams;
@@ -87,11 +87,13 @@ class GradingSection extends AbstractModel {
             return array_map(function (User $user) {
                 return new Submitter($this->core, $user);
             }, $this->users);
-        } elseif ($this->teams !== null) {
+        }
+        elseif ($this->teams !== null) {
             return array_map(function (Team $team) {
                 return new Submitter($this->core, $team);
             }, $this->teams);
-        } else {
+        }
+        else {
             //No users, no teams, this section is empty!
             return [];
         }

@@ -25,7 +25,8 @@ document.getElementById('content-wrapper').addEventListener('scroll', function (
     if (renderedPages.indexOf(visiblePageNum) == -1){
         okToRender = true;
         renderedPages.push(visiblePageNum);
-    } else {
+    }
+    else {
         okToRender = false;
     }
 

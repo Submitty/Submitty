@@ -52,9 +52,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
-        if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true){
+        if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true) {
             $core->method('getDateTimeNow')->willReturn(new \DateTime('2001-01-01', $config->getTimezone()));
-        }else{
+        }
+        else {
             $core->method('getDateTimeNow')->willReturnCallback(function () use ($config) {
                 return new \DateTime('now', $config->getTimezone());
             });
@@ -98,23 +99,27 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $user->method('getId')->willReturn("testUser");
             if (isset($user_config['access_grading'])) {
                 $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
-            } else {
+            }
+            else {
                 $user->method('accessGrading')->willReturn(false);
             }
             if (isset($user_config['access_full_grading'])) {
                 $user->method('accessFullGrading')->willReturn($user_config['access_full_grading'] == true);
-            } else {
+            }
+            else {
                 $user->method('accessFullGrading')->willReturn(false);
             }
             if (isset($user_config['access_admin'])) {
                 $user->method('accessAdmin')->willReturn($user_config['access_admin'] == true);
-            } else {
+            }
+            else {
                 $user->method('accessAdmin')->willReturn(false);
             }
 
             if (isset($user_config['access_faculty'])) {
                 $user->method('accessFaculty')->willReturn($user_config['access_faculty'] == true);
-            } else {
+            }
+            else {
                 $user->method('accessFaculty')->willReturn(false);
             }
 
