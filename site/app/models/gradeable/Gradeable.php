@@ -430,7 +430,8 @@ class Gradeable extends AbstractModel {
                 return new AutogradingConfig($this->core, $details);
             }
             return null;
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             // Don't throw an error, just don't make any data
             return null;
         }
@@ -448,10 +449,12 @@ class Gradeable extends AbstractModel {
             if (isset($dates[$date]) && $dates[$date] !== null) {
                 try {
                     $parsedDates[$date] = DateUtils::parseDateTime($dates[$date], $this->core->getConfig()->getTimezone());
-                } catch (\Exception $e) {
+                }
+                catch (\Exception $e) {
                     $parsedDates[$date] = null;
                 }
-            } else {
+            }
+            else {
                 $parsedDates[$date] = null;
             }
         }
@@ -507,12 +510,15 @@ class Gradeable extends AbstractModel {
             if (!$this->isStudentSubmit()) {
                 if ($this->isTaGrading()) {
                     $result = self::date_properties_elec_exam;
-                } else {
+                }
+                else {
                     $result = self::date_properties_bare;
                 }
-            } elseif ($this->isTaGrading()) {
+            }
+            elseif ($this->isTaGrading()) {
                 $result = self::date_properties_elec_ta;
-            } else {
+            }
+            else {
                 $result = self::date_properties_elec_no_ta;
             }
 
@@ -526,7 +532,8 @@ class Gradeable extends AbstractModel {
             if ($this->isTaGrading() && $this->core->getConfig()->isRegradeEnabled() && $this->isRegradeAllowed()) {
                 $result[] = 'regrade_request_date';
             }
-        } else {
+        }
+        else {
             $result = self::date_properties_simple;
         }
         return $result;
@@ -572,7 +579,7 @@ class Gradeable extends AbstractModel {
                 }
 
                 // Don't coerce a date on the black list
-                if(in_array($property, $black_list)) {
+                if (in_array($property, $black_list)) {
                     continue;
                 }
 
@@ -692,7 +699,7 @@ class Gradeable extends AbstractModel {
      * @return array An array (indexed by user id) of arrays of section ids
      */
     public function getRotatingGraderSections() {
-        if($this->rotating_grader_sections === null) {
+        if ($this->rotating_grader_sections === null) {
             $this->setRotatingGraderSections($this->core->getQueries()->getRotatingSectionsByGrader($this->id));
             $this->rotating_grader_sections_modified = false;
         }
@@ -704,7 +711,7 @@ class Gradeable extends AbstractModel {
      * @return AutogradingConfig|null returns null if loading from the disk fails
      */
     public function getAutogradingConfig() {
-        if($this->autograding_config === null) {
+        if ($this->autograding_config === null) {
             $this->autograding_config = $this->loadAutogradingConfig();
         }
         return $this->autograding_config;
@@ -834,7 +841,8 @@ class Gradeable extends AbstractModel {
         // Disallow the 0 group (this may catch some potential bugs with instructors not being able to edit gradeables)
         if ($group > 0 && $group <= 4) {
             $this->min_grading_group = $group;
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Grading group must be an integer larger than 0');
         }
         $this->modified = true;
@@ -847,7 +855,8 @@ class Gradeable extends AbstractModel {
     public function setTeamSizeMax(int $max_team_size) {
         if ($max_team_size >= 0) {
             $this->team_size_max = intval($max_team_size);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Max team size must be a non-negative integer!');
         }
         $this->modified = true;
@@ -869,7 +878,8 @@ class Gradeable extends AbstractModel {
     public function setPeerGradingSet(int $peer_grading_set) {
         if ($peer_grading_set >= 0) {
             $this->peer_grade_set = intval($peer_grading_set);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Peer grade set must be a non-negative integer!');
         }
         $this->modified = true;
@@ -890,9 +900,17 @@ class Gradeable extends AbstractModel {
         // Get the implied deleted components from this operation and ensure we aren't deleting any
         //  components that have grades already
         $deleted_components = array_udiff($this->components, $components, Utils::getCompareByReference());
-        if (in_array(true, array_map(function (Component $component) {
-            return $component->anyGrades();
-        }, $deleted_components))) {
+        if (
+            in_array(
+                true,
+                array_map(
+                    function (Component $component) {
+                        return $component->anyGrades();
+                    },
+                    $deleted_components
+                )
+            )
+        ) {
             throw new \InvalidArgumentException('Call to setComponents implied deletion of component with grades');
         }
 
@@ -971,7 +989,7 @@ class Gradeable extends AbstractModel {
      */
     private function deleteComponentInner(Component $component, bool $force = false) {
         // Don't delete if the component has grades (and we aren't forcing)
-        if($component->anyGrades() && !$force) {
+        if ($component->anyGrades() && !$force) {
             throw new \InvalidArgumentException('Attempt to delete a component with grades!');
         }
 
@@ -1050,17 +1068,18 @@ class Gradeable extends AbstractModel {
         $num_sections = $this->core->getQueries()->getNumberRotatingSections();
 
         $parsed_graders_sections = [];
-        foreach($rotating_grader_sections as $user => $grader_sections) {
-            if($grader_sections !== null) {
-                if(!is_array($grader_sections)) {
+        foreach ($rotating_grader_sections as $user => $grader_sections) {
+            if ($grader_sections !== null) {
+                if (!is_array($grader_sections)) {
                     throw new \InvalidArgumentException('Rotating grader section for grader was not array');
                 }
                 // Parse each section array into strings
                 $parsed_sections = [];
-                foreach($grader_sections as $section) {
+                foreach ($grader_sections as $section) {
                     if ((is_int($section) || ctype_digit($section)) && intval($section) > 0 && intval($section) <= $num_sections) {
                         $parsed_sections[] = intval($section);
-                    } else {
+                    }
+                    else {
                         throw new \InvalidArgumentException('Grading section must be a positive integer no more than the number of rotating sections!');
                     }
                 }
@@ -1083,7 +1102,8 @@ class Gradeable extends AbstractModel {
         try {
             // Asserts that this date information is valid after changing this property
             $this->setDates($this->getDates());
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
             // Reset to the old value if validation fails
             $this->regrade_allowed = $old;
 
@@ -1116,7 +1136,8 @@ class Gradeable extends AbstractModel {
         try {
             // Asserts that this date information is valid after changing this property
             $this->setDates($this->getDates());
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
             // Reset to the old value if validation fails
             $this->ta_grading = $old;
 
@@ -1163,7 +1184,7 @@ class Gradeable extends AbstractModel {
      * @return Team[]
      */
     public function getTeams() {
-        if($this->teams === null) {
+        if ($this->teams === null) {
             $this->teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
         }
         return $this->teams;
@@ -1182,7 +1203,7 @@ class Gradeable extends AbstractModel {
      * @return bool True if any manual grades exist
      */
     public function anyManualGrades() {
-        if($this->any_manual_grades === null) {
+        if ($this->any_manual_grades === null) {
             $this->any_manual_grades = $this->core->getQueries()->getGradeableHasGrades($this->getId());
         }
         return $this->any_manual_grades;
@@ -1193,7 +1214,7 @@ class Gradeable extends AbstractModel {
      * @return bool
      */
     public function anySubmissions() {
-        if($this->any_submissions === null) {
+        if ($this->any_submissions === null) {
             // Until we find a submission, assume there are none
             $this->any_submissions = false;
             if ($this->type === GradeableType::ELECTRONIC_FILE) {
@@ -1347,17 +1368,20 @@ class Gradeable extends AbstractModel {
         if ($this->isGradeByRegistration()) {
             if (!$grader->accessFullGrading()) {
                 $sections = $grader->getGradingRegistrationSections();
-            } else {
+            }
+            else {
                 $sections = $this->core->getQueries()->getRegistrationSections();
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_registration_id'];
                 }
             }
             $section_key = 'registration_section';
-        } else {
+        }
+        else {
             if (!$grader->accessFullGrading()) {
                 $sections = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $grader->getId());
-            } else {
+            }
+            else {
                 $sections = $this->core->getQueries()->getRotatingSections();
                 foreach ($sections as $i => $section) {
                     $sections[$i] = $section['sections_rotating_id'];
@@ -1371,7 +1395,8 @@ class Gradeable extends AbstractModel {
                 $total_users = $this->core->getQueries()->getTotalTeamCountByGradingSections($this->getId(), $sections, $section_key);
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByTeamGradingSections($this->getId(), $sections, $section_key);
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedTeamCountByGradingSections($this->getId(), $sections, $section_key);
-            } else {
+            }
+            else {
                 $total_users = $this->core->getQueries()->getTotalUserCountByGradingSections($sections, $section_key);
                 $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($this->getId(), $sections, $section_key, $this->isTeamAssignment());
                 $num_submitted = $this->core->getQueries()->getTotalSubmittedUserCountByGradingSections($this->getId(), $sections, $section_key);
@@ -1472,7 +1497,7 @@ class Gradeable extends AbstractModel {
      */
     public function getTaPoints() {
         $total = 0.0;
-        foreach($this->getComponents() as $component) {
+        foreach ($this->getComponents() as $component) {
             $total += $component->getMaxValue();
         }
         return $total;
@@ -1488,7 +1513,8 @@ class Gradeable extends AbstractModel {
             $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
             //TODO: Peer grading team assignments
             return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
-        } else {
+        }
+        else {
             $users = [];
             $teams = [];
 
@@ -1504,7 +1530,8 @@ class Gradeable extends AbstractModel {
                         /** @var Team $team */
                         $teams[$team->getRegistrationSection()][] = $team;
                     }
-                } else {
+                }
+                else {
                     foreach ($section_names as $section) {
                         $users[$section] = [];
                     }
@@ -1515,7 +1542,8 @@ class Gradeable extends AbstractModel {
                     }
                 }
                 $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
-            } else {
+            }
+            else {
                 $section_names = $this->core->getQueries()->getRotatingSectionsForGradeableAndUser($this->getId(), $user->getId());
 
                 if ($this->isTeamAssignment()) {
@@ -1527,7 +1555,8 @@ class Gradeable extends AbstractModel {
                         /** @var Team $team */
                         $teams[$team->getRotatingSection()][] = $team;
                     }
-                } else {
+                }
+                else {
                     foreach ($section_names as $section) {
                         $users[$section] = [];
                     }
@@ -1575,7 +1604,8 @@ class Gradeable extends AbstractModel {
                     /** @var Team $team */
                     $teams[$team->getRegistrationSection()][] = $team;
                 }
-            } else {
+            }
+            else {
                 $all_users = $this->core->getQueries()->getAllUsers();
                 foreach ($all_users as $user) {
                     /** @var User $user */
@@ -1587,14 +1617,16 @@ class Gradeable extends AbstractModel {
                 $section_names[$i] = $section['sections_registration_id'];
             }
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
-        } else {
+        }
+        else {
             if ($this->isTeamAssignment()) {
                 $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
                 foreach ($all_teams as $team) {
                     /** @var Team $team */
                     $teams[$team->getRotatingSection()][] = $team;
                 }
-            } else {
+            }
+            else {
                 $all_users = $this->core->getQueries()->getAllUsers();
                 foreach ($all_users as $user) {
                     /** @var User $user */
@@ -1654,12 +1686,14 @@ class Gradeable extends AbstractModel {
         // Inherit rotating/registration section from leader if not provided
         if ($registration_section === '') {
             $registration_section = $leader->getRegistrationSection();
-        } elseif($registration_section === 'NULL') {
+        }
+        elseif ($registration_section === 'NULL') {
             $registration_section = null;
         }
         if ($rotating_section < 0) {
             $rotating_section = $leader->getRotatingSection();
-        } elseif ($rotating_section === 0) {
+        }
+        elseif ($rotating_section === 0) {
             $rotating_section = null;
         }
 
@@ -1708,10 +1742,12 @@ class Gradeable extends AbstractModel {
     public function getRepositoryPath(User $user, Team $team = null) {
         if (strpos($this->getVcsSubdirectory(), '://') !== false || substr($this->getVcsSubdirectory(), 0, 1) === '/') {
             $vcs_path = $this->getVcsSubdirectory();
-        } else {
+        }
+        else {
             if (strpos($this->core->getConfig()->getVcsBaseUrl(), '://')) {
                 $vcs_path = rtrim($this->core->getConfig()->getVcsBaseUrl(), '/') . '/' . $this->getVcsSubdirectory();
-            } else {
+            }
+            else {
                 $vcs_path = FileUtils::joinPaths($this->core->getConfig()->getVcsBaseUrl(), $this->getVcsSubdirectory());
             }
         }
@@ -1752,7 +1788,7 @@ class Gradeable extends AbstractModel {
      */
     public function hasOverriddenGrades(Submitter $submitter) {
         $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(), $submitter->getId());
-        if($userWithOverriddenGrades === null){
+        if ($userWithOverriddenGrades === null) {
             return false;
         }
         return true;

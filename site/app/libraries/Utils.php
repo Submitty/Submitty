@@ -21,7 +21,7 @@ class Utils {
         if (!is_array($haystack) || !is_string($needle)) {
             return null;
         }
-        foreach($haystack as $key => $value) {
+        foreach ($haystack as $key => $value) {
             if (is_array($value)) {
                 $haystack[$key] = Utils::stripStringFromArray($needle, $value);
             }
@@ -116,7 +116,7 @@ class Utils {
      * @return mixed|null
      */
     public static function getFirstArrayElement(array $array) {
-        foreach($array as $value) {
+        foreach ($array as $value) {
             return $value;
         }
         return null;
@@ -225,7 +225,8 @@ class Utils {
 
         if ($result > 1.0 && $clamp === true) {
             return 1.0;
-        } elseif ($result < 0.0 && $clamp === true) {
+        }
+        elseif ($result < 0.0 && $clamp === true) {
             return 0.0;
         }
         return $result;
@@ -262,7 +263,7 @@ class Utils {
             ];
 
             if ($students_version !== null) {
-                if($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
+                if ($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
                     if ($students_version[$student->getId()] !== 0) {
                         $student_entry['label'] .= ' (' . $students_version[$student->getId()] . ' Prev Submission)';
                     }

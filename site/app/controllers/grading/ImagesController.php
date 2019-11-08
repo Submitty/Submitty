@@ -32,7 +32,8 @@ class ImagesController extends AbstractController {
 
         if ($user_group !== USER::GROUP_LIMITED_ACCESS_GRADER) {
             $grader_sections = array();  //reset grader section to nothing so permission for every image
-        } else {
+        }
+        else {
             if (empty($grader_sections)) {
                 return;
             }
@@ -46,7 +47,7 @@ class ImagesController extends AbstractController {
      * @Route("/{_semester}/{_course}/student_photos/upload")
      */
     public function ajaxUploadImagesFiles() {
-        if(!$this->core->getUser()->accessAdmin()) {
+        if (!$this->core->getUser()->accessAdmin()) {
             return $this->core->getOutput()->renderResultMessage("You have no permission to access this page", false);
         }
 
@@ -65,12 +66,12 @@ class ImagesController extends AbstractController {
 
         $status = Fileutils::validateUploadedFiles($_FILES["files1"]);
         //check if we couldn't validate the uploaded files
-        if(array_key_exists("failed", $status)){
+        if (array_key_exists("failed", $status)) {
             return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
 
         foreach ($status as $stat) {
-            if($stat['success'] === false){
+            if ($stat['success'] === false) {
                 return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
             }
         }
@@ -87,7 +88,7 @@ class ImagesController extends AbstractController {
             $uploaded_files[1]["is_zip"] = array();
             for ($j = 0; $j < $count_item; $j++) {
                 if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
-                    if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                    if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
                         return $this->core->getOutput()->renderResultMessage("Error: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                     }
                     $uploaded_files[1]["is_zip"][$j] = true;

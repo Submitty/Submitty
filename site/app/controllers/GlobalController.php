@@ -214,7 +214,8 @@ class GlobalController extends AbstractController {
                         "id" => "nav-sidebar-photos",
                         "icon" => "fa-id-card"
                     ]);
-                } elseif (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
+                }
+                elseif (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
@@ -345,7 +346,7 @@ class GlobalController extends AbstractController {
         $day = $now['mday'];
 
         $duck_img = 'moorthy_duck.png';
-        if($month === 10 && ($day >= 27 && $day <= 31)){
+        if ($month === 10 && ($day >= 27 && $day <= 31)) {
             //halloween
             $duck_img = 'moorthy_halloween.png';
         }

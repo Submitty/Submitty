@@ -32,7 +32,8 @@ class LateDaysTester extends BaseUnitTest {
             $auto_graded_version->method('getDaysLate')->willReturn(DateUtils::calculateDayDiff($due_date, $submission_date));
             $auto_graded_gradeable->method('getActiveVersionInstance')->willReturn($auto_graded_version);
             $auto_graded_gradeable->method('hasActiveVersion')->willReturn(true);
-        } else {
+        }
+        else {
             $auto_graded_gradeable->method('getActiveVersionInstance')->willReturn(null);
             $auto_graded_gradeable->method('hasActiveVersion')->willReturn(false);
         }

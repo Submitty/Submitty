@@ -79,7 +79,7 @@ class TeamControllerTester extends BaseUnitTest {
         $gradeable = $this->createMockModel(Gradeable::class);
         $gradeable->method('getId')->willReturn("test");
         $gradeable->method('getTitle')->willReturn("Test Gradeable");
-        if($is_team){
+        if ($is_team) {
             $gradeable->method('isTeamAssignment')->willReturn(true);
         }
 

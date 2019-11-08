@@ -87,7 +87,8 @@ class TaGradedGradeable extends AbstractModel {
                     $graders[$graded_component->getGrader()->getId()] = $graded_component->getGrader();
                 }
             }
-        } else {
+        }
+        else {
             /** @var GradedComponentContainer $container */
             foreach ($this->graded_component_containers as $container) {
                 $details['graded_components'][$container->getComponent()->getId()] = $container->toArray();
@@ -179,13 +180,15 @@ class TaGradedGradeable extends AbstractModel {
             $v = $container->getGradedVersion();
             if ($v !== false && $strict !== true) {
                 return $v;
-            } elseif ($v === false) {
+            }
+            elseif ($v === false) {
                 return false;
             }
 
             if ($version === false) {
                 $version = $v;
-            } elseif ($version !== $v) {
+            }
+            elseif ($version !== $v) {
                 return false;
             }
         }
@@ -251,7 +254,7 @@ class TaGradedGradeable extends AbstractModel {
     public function getPercentGraded() {
         $running_percent = 0.0;
         /** @var GradedComponentContainer $container */
-        foreach($this->graded_component_containers as $container) {
+        foreach ($this->graded_component_containers as $container) {
             $running_percent += $container->getPercentGraded();
         }
         return Utils::safeCalcPercent($running_percent, count($this->graded_component_containers), false);
@@ -293,7 +296,8 @@ class TaGradedGradeable extends AbstractModel {
     public function setIdFromDatabase($id) {
         if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Id must be a non-negative integer');
         }
         // Reset the modified flag since this gets called once saved to db or constructor
@@ -345,7 +349,8 @@ class TaGradedGradeable extends AbstractModel {
 
             // Clear the container for this component
             $container->setGradedComponents([]);
-        } else {
+        }
+        else {
             // Otherwise, only delete the component with the provided grader
             $deleted_component = $container->removeGradedComponent($grader);
             if ($deleted_component !== null) {
@@ -370,10 +375,12 @@ class TaGradedGradeable extends AbstractModel {
     public function setUserViewedDate($user_viewed_date) {
         if ($user_viewed_date === null) {
             $this->user_viewed_date = null;
-        } else {
+        }
+        else {
             try {
                 $this->user_viewed_date = DateUtils::parseDateTime($user_viewed_date, $this->core->getConfig()->getTimezone());
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid date string format');
             }
         }
@@ -395,7 +402,7 @@ class TaGradedGradeable extends AbstractModel {
     public function getGraders() {
         $graders = [];
         /** @var GradedComponentContainer $container */
-        foreach($this->graded_component_containers as $container) {
+        foreach ($this->graded_component_containers as $container) {
             $graders = array_merge($graders, $container->getGraders());
         }
         return $graders;
@@ -408,7 +415,7 @@ class TaGradedGradeable extends AbstractModel {
     public function getVisibleGraders() {
         $graders = [];
         /** @var GradedComponentContainer $container */
-        foreach($this->graded_component_containers as $container) {
+        foreach ($this->graded_component_containers as $container) {
             $graders = array_merge($graders, $container->getVisibleGraders());
         }
         return $graders;

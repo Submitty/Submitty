@@ -52,10 +52,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);
         $files = array();
-        if ($zip->open($filename_full, ZipArchive::CREATE) === true){
+        if ($zip->open($filename_full, ZipArchive::CREATE) === true) {
             $lev = "";
-            for($i = 0; $i < $depth; $i++){
-                for($j = 0; $j < $num_files; $j++){
+            for ($i = 0; $i < $depth; $i++) {
+                for ($j = 0; $j < $num_files; $j++) {
                     $fname = "test" . $j . ".txt";
                     $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname, "w");
                     $zip->addFile($this->config['course_path'] . $lev . "/" . $fname);

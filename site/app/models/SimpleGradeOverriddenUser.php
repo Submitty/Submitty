@@ -45,7 +45,7 @@ class SimpleGradeOverriddenUser extends AbstractModel {
             $this->preferred_first_name = $details['user_preferred_firstname'];
             $this->displayed_first_name = $details['user_preferred_firstname'];
         }
-        else{
+        else {
             $this->displayed_first_name = $details['user_firstname'];
         }
 
@@ -54,15 +54,15 @@ class SimpleGradeOverriddenUser extends AbstractModel {
             $this->preferred_last_name = $details['user_preferred_lastname'];
             $this->displayed_last_name = $details['user_preferred_lastname'];
         }
-        else{
+        else {
             $this->displayed_last_name = $details['user_lastname'];
         }
 
-        if(isset($details['marks'])){
+        if (isset($details['marks'])) {
             $this->marks = $details['marks'];
         }
 
-        if(isset($details['comment'])){
+        if (isset($details['comment'])) {
             $this->comment = $details['comment'];
         }
     }

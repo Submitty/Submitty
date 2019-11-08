@@ -26,7 +26,8 @@ class SubmissionMultipleChoice extends AbstractGradeableInput {
 
         if ($details["allow_multiple"] == true) {
             $this->allow_multiple = true;
-        } else {
+        }
+        else {
             $this->allow_multiple = false;
         }
 

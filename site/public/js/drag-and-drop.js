@@ -91,7 +91,7 @@ function dropWithMultipleZips(e){
     }
 }
 
-// show progressbar when uploading files 
+// show progressbar when uploading files
 function progress(e){
     var progressBar = document.getElementById("loading-bar");
 
@@ -104,7 +104,7 @@ function progress(e){
         progressBar.value = e.loaded;
         let perc = (e.loaded * 100)/e.total;
         $("#loading-bar-percentage").html(perc.toFixed(2) + " %");
-    }  
+    }
 }
 
 function get_part_number(e){
@@ -259,7 +259,8 @@ function setButtonStatus() {
         $("#startnew").prop("disabled", true);
         if (empty_inputs) {
             $("#submit").prop("disabled", true);
-        } else {
+        }
+        else {
             $("#submit").prop("disabled", false);
         }
     }
@@ -424,7 +425,8 @@ function validateUserId(csrf_token, gradeable_id, user_id){
                 response = JSON.parse(response);
                 if(response['status'] === 'success'){
                     resolve(response);
-                }else{
+                }
+                else {
                     reject(response);
                 }
             },
@@ -474,10 +476,12 @@ function displayPreviousSubmissionOptions(callback){
         if($("#instructor-submit-option-new").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "0");
             option = 1;
-        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-1").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "1");
             option = 2;
-        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-2").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "2");
             option = 3;
         }
@@ -489,9 +493,11 @@ function displayPreviousSubmissionOptions(callback){
     closer_btn.on('click', function() {
         if($("#instructor-submit-option-new").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "0");
-        }else if($("#instructor-submit-option-merge-1").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-1").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "1");
-        }else if($("#instructor-submit-option-merge-2").is(":checked")) {
+        }
+        else if($("#instructor-submit-option-merge-2").is(":checked")) {
             localStorage.setItem("instructor-submit-option", "2");
         }
         form.css("display", "none");
@@ -505,7 +511,8 @@ function displayPreviousSubmissionOptions(callback){
     var radio_idx;
     if(localStorage.getItem("instructor-submit-option") === null) {
         radio_idx = 0;
-    }else {
+    }
+    else {
         radio_idx = parseInt(localStorage.getItem("instructor-submit-option"));
     }
     form.find('input:radio')[radio_idx].checked = true;
@@ -525,37 +532,47 @@ function displayPreviousSubmissionOptions(callback){
                 if(current_btn === 0){
                     $("#instructor-submit-option-merge-1").focus();
                     $("#instructor-submit-option-merge-1").css({"outline" : "2px solid #C1E0FF"});
-                }else if(current_btn === 1){
+                }
+                else if(current_btn === 1){
                     $("#instructor-submit-option-merge-2").focus();
                     $("#instructor-submit-option-merge-2").css({"outline" : "2px solid #C1E0FF"});
-                }else if(current_btn === 2){
+                }
+                else if(current_btn === 2){
                     closer_btn.focus();
-                }else if(current_btn === 3){
+                }
+                else if(current_btn === 3){
                     submit_btn.focus();
-                }else if(current_btn === 4){
+                }
+                else if(current_btn === 4){
                     $("#instructor-submit-option-new").focus();
                     $("#instructor-submit-option-new").css({"outline" : "2px solid #C1E0FF"});
                 }
                 current_btn = (current_btn == 4) ? 0 : current_btn + 1;
-            }else if(e.keyCode === 27){
+            }
+            else if(e.keyCode === 27){
                 //close the modal box on escape
                 closer_btn.click();
-            }else if(e.keyCode === 13){
+            }
+            else if(e.keyCode === 13){
                 //on enter update whatever the user is focussing on
                 //uncheck everything and then recheck the desired button to make sure it actually updates
                 if(current_btn === 1){
                     $('input[name=instructor-submit]').prop('checked', false);
                     $("#instructor-submit-option-merge-1").prop('checked', true);
-                }else if(current_btn === 2){
+                }
+                else if(current_btn === 2){
                     $('input[name=instructor-submit]').prop('checked', false);
                     $("#instructor-submit-option-merge-2").prop('checked', true);
-                }else if(current_btn === 0){
+                }
+                else if(current_btn === 0){
                     $('input[name=instructor-submit]').prop('checked', false);
                     $("#instructor-submit-option-new").prop('checked', true);
-                }else if(current_btn === 3){
+                }
+                else if(current_btn === 3){
                     //close the modal if the close button is selected
                     closer_btn.click();
-                }else if(current_btn === 4){
+                }
+                else if(current_btn === 4){
                     submit_btn.click();
                 }
             }
@@ -624,7 +641,8 @@ function deleteSplitItem(csrf_token, gradeable_id, path) {
                 response = JSON.parse(response);
                 if (response['status'] === 'success') {
                     resolve(response);
-                }else {
+                }
+                else {
                     reject(response);
                 }
             },
@@ -691,14 +709,14 @@ function handleBulk(gradeable_id, max_file_size, max_post_size, num_pages, use_q
             total_size += file_array[i][j].size;
 
             if (total_size >= max_file_size){
-                alert("ERROR! Uploaded file(s) exceed max file size.\n" + 
+                alert("ERROR! Uploaded file(s) exceed max file size.\n" +
                       "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
                 $("#submit").prop("disabled", false);
                 return;
             }
 
              if (total_size >= max_post_size){
-                alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" + 
+                alert("ERROR! Uploaded file(s) exceed max PHP POST size.\n" +
                       "Please visit https://submitty.org/sysadmin/system_customization for configuration instructions.");
                 $("#submit").prop("disabled", false);
                 return;
@@ -774,7 +792,8 @@ function gatherInputAnswersByType(type){
             key = this_input_answer.id;
             var editor = this_input_answer.querySelector(".CodeMirror").CodeMirror;
             value = editor.getValue();
-        }else{
+        }
+        else{
             key = this_input_answer.name;
             value = this_input_answer.value;
         }

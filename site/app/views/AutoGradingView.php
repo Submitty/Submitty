@@ -84,7 +84,7 @@ class AutoGradingView extends AbstractView {
                 ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         // testcases should only be visible if autograding is complete
-        if(!$incomplete_autograding) {
+        if (!$incomplete_autograding) {
             foreach ($version_instance->getTestcases() as $testcase) {
                 if ($testcase->canView()) {
                     $num_visible_testcases++;
@@ -149,7 +149,8 @@ class AutoGradingView extends AbstractView {
                         "path" => $file_path
                     ])
                 ];
-            } else {
+            }
+            else {
                 $check = [
                     "messages" => $autocheck->getMessages(),
                     "description" => $description
@@ -169,15 +170,17 @@ class AutoGradingView extends AbstractView {
                         "show_popup" => false,
                         "src" => $this->autoGetImageSrc($actual_image),
                     ];
-                } elseif ($diff_viewer->hasDisplayActual()) {
-                    if($autocheck->isDisplayAsSequenceDiagram()){
+                }
+                elseif ($diff_viewer->hasDisplayActual()) {
+                    if ($autocheck->isDisplayAsSequenceDiagram()) {
                         $check["actual"] = [
                             "type" => "sequence_diagram",
                             "title" => $actual_title,
                             "show_popup" => $this->autoShouldDisplayPopup($actual_display),
                             "src" => file_get_contents($diff_viewer->getActualFilename())
                         ];
-                    }else{
+                    }
+                    else {
                         $check["actual"] = [
                             "type" => "text",
                             "title" => $actual_title,
@@ -197,7 +200,8 @@ class AutoGradingView extends AbstractView {
                         "show_popup" => false,
                         "src" => $this->autoGetImageSrc($expected_image)
                     ];
-                } elseif ($diff_viewer->hasDisplayExpected()) {
+                }
+                elseif ($diff_viewer->hasDisplayExpected()) {
                     $check["expected"] = [
                         "type" => "text",
                         "title" => $expected_title,
@@ -304,7 +308,8 @@ class AutoGradingView extends AbstractView {
         // Special messages for peer / mentor-only grades
         if ($gradeable->isPeerGrading()) {
             $grader_names = ['Graded by Peer(s)'];
-        } elseif (count($grader_names) === 0) {
+        }
+        elseif (count($grader_names) === 0) {
             // Non-peer assignment with only limited access graders
             $grader_names = ['Course Staff'];
         }
@@ -371,13 +376,13 @@ class AutoGradingView extends AbstractView {
         }, $gradeable->getComponents());
 
         $uploaded_pdfs = [];
-        foreach($uploaded_files['submissions'] as $file){
-            if(array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf"){
+        foreach ($uploaded_files['submissions'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
                 $uploaded_pdfs[] = $file;
             }
         }
-        foreach($uploaded_files['checkout'] as $file){
-            if(array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf"){
+        foreach ($uploaded_files['checkout'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -386,22 +391,22 @@ class AutoGradingView extends AbstractView {
         //trying something
         $gradeable_id = $gradeable->getId();
         $id = $this->core->getUser()->getId();
-        if($gradeable->isTeamAssignment()){
+        if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotated_file_names = [];
-        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
+        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if(is_file($annotation_path)) {
+            if (is_file($annotation_path)) {
                 $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
                 foreach ($dir_iter as $fileinfo) {
                     if (!$fileinfo->isDot()) {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = $pdf_info[0];
-                        if(file_get_contents($fileinfo->getPathname()) != ""){
+                        if (file_get_contents($fileinfo->getPathname()) != "") {
                             $pdf_id = $pdf_id . '.pdf';
                             $annotated_file_names[] = $pdf_id;
                         }
@@ -411,9 +416,10 @@ class AutoGradingView extends AbstractView {
         }
 
         // for bulk uploads only show PDFs
-        if ($gradeable->isScannedExam()){
+        if ($gradeable->isScannedExam()) {
             $files = $uploaded_pdfs;
-        }else{
+        }
+        else {
             $files = array_merge($files['submissions'], $files['checkout']);
         }
 

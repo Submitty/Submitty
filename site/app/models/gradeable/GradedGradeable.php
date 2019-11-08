@@ -197,8 +197,8 @@ class GradedGradeable extends AbstractModel {
      * @return int The number of late days the user has for this gradeable
      */
     public function getLateDayException($user = null) {
-        if($user === null) {
-            if($this->gradeable->isTeamAssignment()) {
+        if ($user === null) {
+            if ($this->gradeable->isTeamAssignment()) {
                 throw new \InvalidArgumentException('Must provide user if team assignment');
             }
             return $this->late_day_exceptions[$this->submitter->getId()] ?? 0;
@@ -237,10 +237,11 @@ class GradedGradeable extends AbstractModel {
      * @return float max(0.0, auto_score + ta_score)
      */
     public function getTotalScore() {
-        if ($this->hasOverriddenGrades()){
+        if ($this->hasOverriddenGrades()) {
             $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
             return floatval(max(0.0, $userWithOverriddenGrades->getMarks()));
-        } else {
+        }
+        else {
             return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
         }
     }
@@ -248,7 +249,7 @@ class GradedGradeable extends AbstractModel {
     public function getOverriddenComment() {
         $overridden_comment = "";
         $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
-        if ($userWithOverriddenGrades !== null){
+        if ($userWithOverriddenGrades !== null) {
             $overridden_comment = $userWithOverriddenGrades->getComment();
         }
         return $overridden_comment;
@@ -268,57 +269,44 @@ class GradedGradeable extends AbstractModel {
         $newNotebook = $this->getGradeable()->getAutogradingConfig()->getNotebook();
 
         foreach ($newNotebook as $notebookKey => $notebookVal) {
-            // Handle if the notebook cell type is short_answer
-            if(isset($notebookVal['type']) &&
-               $notebookVal['type'] == "short_answer") {
-                // If no previous submissions set string to default initial_value
-                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
-                {
-                    $recentSubmission = $notebookVal['initial_value'];
-                }
-                // Else there has been a previous submission try to get it
-                else
-                {
-                    try
-                    {
-                        // Try to get the most recent submission
-                        $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
-                    }
-                    catch (AuthorizationException $e)
-                    {
-                        // If the user lacked permission then just set to default instructor provided string
+            if (isset($notebookVal['type'])) {
+                if ($notebookVal['type'] == "short_answer") {
+                    // If no previous submissions set string to default initial_value
+                    if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
                         $recentSubmission = $notebookVal['initial_value'];
                     }
-                }
-
-                // Add field to the array
-                $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
-            }
-
-            // Handle if notebook cell type is multiple_choice
-            elseif(isset($notebookVal['type']) &&
-                    $notebookVal['type'] == "multiple_choice")
-            {
-                // If no previous submissions do nothing
-                if($this->getAutoGradedGradeable()->getHighestVersion() == 0)
-                {
-                    continue;
-                }
-                // Else there has been a previous submission try to get it
-                else
-                {
-                    try
-                    {
-                        // Try to get the most recent submission
-                        $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
-
-                        // Add field to the array
-                        $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                    else {
+                        // Else there has been a previous submission try to get it
+                        try {
+                            // Try to get the most recent submission
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+                        }
+                        catch (AuthorizationException $e) {
+                            // If the user lacked permission then just set to default instructor provided string
+                            $recentSubmission = $notebookVal['initial_value'];
+                        }
                     }
-                    catch (AuthorizationException $e)
-                    {
-                        // If failed to get the most recent submission then skip
+
+                    // Add field to the array
+                    $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                }
+                elseif ($notebookVal['type'] == "multiple_choice") {
+                    // If no previous submissions do nothing, else there has been, so try and get it
+                    if ($this->getAutoGradedGradeable()->getHighestVersion() == 0) {
                         continue;
+                    }
+                    else {
+                        try {
+                            // Try to get the most recent submission
+                            $recentSubmission = $this->getRecentSubmissionContents($notebookVal['filename']);
+
+                            // Add field to the array
+                            $newNotebook[$notebookKey]['recent_submission'] = $recentSubmission;
+                        }
+                        catch (AuthorizationException $e) {
+                            // If failed to get the most recent submission then skip
+                            continue;
+                        }
                     }
                 }
             }
@@ -359,14 +347,12 @@ class GradedGradeable extends AbstractModel {
         $isAuthorized = $this->core->getAccess()->canI('path.read', ["dir" => "submissions", "path" => $complete_file_path]);
 
         // If user lacks permission to get the submission contents throw Auth exception
-        if(!$isAuthorized)
-        {
+        if (!$isAuthorized) {
             throw new AuthorizationException("The user lacks permissions to access this data.");
         }
 
         // If desired file does not exist in the most recent submission directory throw exception
-        if(!file_exists($complete_file_path))
-        {
+        if (!file_exists($complete_file_path)) {
             throw new FileNotFoundException("Unable to locate submission file.");
         }
 
@@ -374,8 +360,7 @@ class GradedGradeable extends AbstractModel {
         $file_contents = file_get_contents($complete_file_path);
 
         // If file_contents is False an error has occured
-        if($file_contents === false)
-        {
+        if ($file_contents === false) {
             throw new IOException("An error occurred retrieving submission contents.");
         }
 

@@ -34,7 +34,7 @@ class Thread extends AbstractModel {
 
     public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
-        if(empty($details)) {
+        if (empty($details)) {
             return;
         }
 

@@ -293,7 +293,7 @@ class User extends AbstractModel {
     }
 
     public function getAnonId() {
-        if($this->anon_id === null) {
+        if ($this->anon_id === null) {
             $alpha = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
             $anon_ids = $this->core->getQueries()->getAllAnonIds();
             $alpha_length = strlen($alpha) - 1;
@@ -306,7 +306,7 @@ class User extends AbstractModel {
                     /** @noinspection PhpUnhandledExceptionInspection */
                     $random .= $alpha[random_int(0, $alpha_length)];
                 }
-            } while(in_array($random, $anon_ids));
+            } while (in_array($random, $anon_ids));
             $this->anon_id = $random;
             $this->core->getQueries()->updateUser($this, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse());
         }
@@ -322,7 +322,7 @@ class User extends AbstractModel {
      */
     public static function validateUserData($field, $data) {
 
-        switch($field) {
+        switch ($field) {
             case 'user_id':
                  //Username / user_id must contain only lowercase alpha, numbers, underscores, hyphens
                 return preg_match("~^[a-z0-9_\-]+$~", $data) === 1;

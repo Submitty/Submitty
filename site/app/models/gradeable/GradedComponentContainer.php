@@ -231,7 +231,8 @@ class GradedComponentContainer extends AbstractModel {
         $graders = count($this->graded_components);
         if ($graders === $required_graders) {
             return true;
-        } else {
+        }
+        else {
             /** @var GradedComponent $graded_component */
             foreach ($this->graded_components as $graded_component) {
                 // TODO: should this be full access?
@@ -323,9 +324,10 @@ class GradedComponentContainer extends AbstractModel {
         foreach ($this->graded_components as $graded_component) {
             $grader = $graded_component->getGrader();
             $verifier_id = $graded_component->getVerifierId();
-            if($grader->accessFullGrading()) {
+            if ($grader->accessFullGrading()) {
                 $visible_graders[$grader->getId()] = $grader;
-            } elseif($verifier_id != '') {
+            }
+            elseif ($verifier_id != '') {
                 $visible_graders[$verifier_id] = $graded_component->getVerifier();
             }
         }

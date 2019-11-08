@@ -32,7 +32,7 @@ class SimpleGraderController extends AbstractController {
         if ($sort === "id") {
             $sort_by = "u.user_id";
         }
-        elseif($sort === "first"){
+        elseif ($sort === "first") {
             $sort_by = "coalesce(NULLIF(u.user_preferred_firstname, ''), u.user_firstname)";
         }
         else {
@@ -102,7 +102,8 @@ class SimpleGraderController extends AbstractController {
     public function gradePage($gradeable_id, $view = null, $sort = null) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-        } catch(\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             return Response::WebOnlyResponse(
                 new WebResponse('Error', 'noGradeable')
             );
@@ -129,7 +130,8 @@ class SimpleGraderController extends AbstractController {
 
         if ($gradeable->isGradeByRegistration()) {
             $grading_count = count($this->core->getUser()->getGradingRegistrationSections());
-        } else {
+        }
+        else {
             $grading_count = count($this->core->getQueries()->getRotatingSectionsForGradeableAndUser($gradeable->getId(), $this->core->getUser()->getId()));
         }
         //Can you show all
@@ -141,9 +143,10 @@ class SimpleGraderController extends AbstractController {
 
         //Checks to see if the Grader has access to all users in the course,
         //Will only show the sections that they are graders for if not TA or Instructor
-        if($show_all) {
+        if ($show_all) {
             $sections = $gradeable->getAllGradingSections();
-        } else {
+        }
+        else {
             $sections = $gradeable->getGradingSectionsForUser($this->core->getUser());
         }
 
@@ -159,7 +162,8 @@ class SimpleGraderController extends AbstractController {
 
         if ($gradeable->isGradeByRegistration()) {
             $section_key = "registration_section";
-        } else {
+        }
+        else {
             $section_key = "rotating_section";
         }
 
@@ -205,11 +209,13 @@ class SimpleGraderController extends AbstractController {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid gradeable ID")
             );
-        } elseif ($user === null) {
+        }
+        elseif ($user === null) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Invalid user ID")
             );
-        } elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
+        }
+        elseif (!isset($_POST['scores']) || empty($_POST['scores'])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse("Didn't submit any scores")
             );
@@ -236,9 +242,12 @@ class SimpleGraderController extends AbstractController {
 
                 if ($component->isText()) {
                     $component_grade->setComment($data);
-                } else {
-                    if ($component->getUpperClamp() < $data ||
-                        !is_numeric($data)) {
+                }
+                else {
+                    if (
+                        $component->getUpperClamp() < $data
+                        || !is_numeric($data)
+                    ) {
                         return Response::JsonOnlyResponse(
                             JsonResponse::getFailResponse("Save error: score must be a number less than the upper clamp")
                         );
@@ -293,10 +302,10 @@ class SimpleGraderController extends AbstractController {
         }
 
         /** @var GradedGradeable $graded_gradeable */
-        foreach($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
+        foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $users, null) as $graded_gradeable) {
             for ($j = 0; $j < $arr_length; $j++) {
                 $username = $graded_gradeable->getSubmitter()->getId();
-                if($username !== $data_array[$j][0]) {
+                if ($username !== $data_array[$j][0]) {
                     continue;
                 }
 
@@ -318,17 +327,18 @@ class SimpleGraderController extends AbstractController {
                     $value_temp_str = $value_str . $index1;
                     $status_temp_str = $status_str . $index1;
                     if (isset($data_array[$j][$index2])) {
-                        if ($component->isText()){
+                        if ($component->isText()) {
                             $component_grade->setComment($data_array[$j][$index2]);
                             $component_grade->setGradeTime($this->core->getDateTimeNow());
                             $temp_array[$value_temp_str] = $data_array[$j][$index2];
                             $temp_array[$status_temp_str] = "OK";
                         }
-                        else{
-                            if($component->getUpperClamp() < $data_array[$j][$index2]){
+                        else {
+                            if ($component->getUpperClamp() < $data_array[$j][$index2]) {
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
                                 $temp_array[$status_temp_str] = "ERROR";
-                            } else {
+                            }
+                            else {
                                 $component_grade->setScore($data_array[$j][$index2]);
                                 $component_grade->setGradeTime($this->core->getDateTimeNow());
                                 $temp_array[$value_temp_str] = $data_array[$j][$index2];
@@ -340,7 +350,7 @@ class SimpleGraderController extends AbstractController {
                     $index2++;
 
                     //skips the index of the total points in the csv file
-                    if($index1 == $num_numeric) {
+                    if ($index1 == $num_numeric) {
                         $index2++;
                     }
                 }

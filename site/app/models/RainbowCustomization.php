@@ -55,12 +55,10 @@ class RainbowCustomization extends AbstractModel {
         // If it fails then set to null, will be used to load defaults later
         $this->RCJSON = new RainbowCustomizationJSON($this->core);
 
-        try
-        {
+        try {
             $this->RCJSON->loadFromJsonFile();
         }
-        catch(\Exception $e)
-        {
+        catch (\Exception $e) {
             $this->RCJSON = null;
         }
     }
@@ -68,12 +66,12 @@ class RainbowCustomization extends AbstractModel {
     public function buildCustomization() {
 
         //This function should examine the DB(?) / a file(?) and if customization settings already exist, use them. Otherwise, populate with defaults.
-        foreach (self::syllabus_buckets as $bucket){
+        foreach (self::syllabus_buckets as $bucket) {
             $this->customization_data[$bucket] = [];
         }
 
         $gradeables = $this->core->getQueries()->getGradeableConfigs(null);
-        foreach ($gradeables as $gradeable){
+        foreach ($gradeables as $gradeable) {
             //XXX: 'none (for practice only)' we want to truncate to just 'none', otherwise use full bucket name
             $bucket = $gradeable->getSyllabusBucket() == "none (for practice only)" ? "none" : $gradeable->getSyllabusBucket();
             /*if(!isset($this->customization_data[$bucket])){
@@ -88,7 +86,7 @@ class RainbowCustomization extends AbstractModel {
 
             $max_score = $gradeable->getTAPoints();
             //If the gradeable has autograding points, load the config and add the non-extra-credit autograder total
-            if ($gradeable->hasAutogradingConfig()){
+            if ($gradeable->hasAutogradingConfig()) {
                 $last_index = count($this->customization_data[$bucket]) - 1;
                 $max_score += $gradeable->getAutogradingConfig()->getTotalNonExtraCredit();
             }
@@ -101,13 +99,11 @@ class RainbowCustomization extends AbstractModel {
         }
 
         // Determine which 'buckets' exist in the customization.json
-        if(!is_null($this->RCJSON))
-        {
+        if (!is_null($this->RCJSON)) {
             $json_gradeables = $this->RCJSON->getGradeables();
 
             // Place those buckets in $this->used_buckets
-            foreach ($json_gradeables as $json_gradeable)
-            {
+            foreach ($json_gradeables as $json_gradeable) {
                 $this->used_buckets[] = $json_gradeable->type;
             }
         }
@@ -132,14 +128,12 @@ class RainbowCustomization extends AbstractModel {
     public function getBucketPercentages() {
         $retArray = [];
 
-        if(!is_null($this->RCJSON))
-        {
+        if (!is_null($this->RCJSON)) {
             $json_gradeables = $this->RCJSON->getGradeables();
 
             $sum = 0;
 
-            foreach ($json_gradeables as $json_gradeable)
-            {
+            foreach ($json_gradeables as $json_gradeable) {
                 // Get percentage, cast back to whole number integer
                 $retArray[$json_gradeable->type] = (int) ($json_gradeable->percent * 100);
 
@@ -191,8 +185,7 @@ class RainbowCustomization extends AbstractModel {
             $usedDisplayBenchmarks = [];
 
         // Add data into retArray
-        foreach ($displayBenchmarks as $displayBenchmark)
-        {
+        foreach ($displayBenchmarks as $displayBenchmark) {
             in_array($displayBenchmark, $usedDisplayBenchmarks) ? $isUsed = true : $isUsed = false;
 
             // Add benchmark to return array
@@ -220,16 +213,14 @@ class RainbowCustomization extends AbstractModel {
         $sections = [];
 
         // Configure sections
-        foreach($db_sections as $section)
-        {
+        foreach ($db_sections as $section) {
             $key = $section['sections_registration_id'];
 
             $sections[$key] = $key;
         }
 
         // If RCJSON is not null then load it
-        if(!is_null($this->RCJSON))
-        {
+        if (!is_null($this->RCJSON)) {
             // Get sections from the file
             $sectionsFromFile = (array) $this->RCJSON->getSection();
 
@@ -238,19 +229,16 @@ class RainbowCustomization extends AbstractModel {
             $sectionsFromFileCount = count($sectionsFromFile);
             $sectionsCount = count($sections);
 
-            if($sectionsFromFileCount != $sectionsCount)
-            {
-                for($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++)
-                {
+            if ($sectionsFromFileCount != $sectionsCount) {
+                for ($i = $sectionsFromFileCount + 1; $i <= $sectionsCount; $i++) {
                     $sectionsFromFile[$i] = (string) $i;
                 }
             }
 
             return (object) $sectionsFromFile;
         }
-        // RCJSON was null so return database sections as default
-        else
-        {
+        else {
+            // RCJSON was null so return database sections as default
             // Collect sections out of the database
             return (object) $sections;
         }
@@ -265,34 +253,26 @@ class RainbowCustomization extends AbstractModel {
         $form_json = $_POST['json_string'];
         $form_json = json_decode($form_json);
 
-        if(isset($form_json->display_benchmark))
-        {
-            foreach($form_json->display_benchmark as $benchmark)
-            {
+        if (isset($form_json->display_benchmark)) {
+            foreach ($form_json->display_benchmark as $benchmark) {
                 $this->RCJSON->addDisplayBenchmarks($benchmark);
             }
         }
 
-        if(isset($form_json->section))
-        {
-            foreach($form_json->section as $key => $value)
-            {
+        if (isset($form_json->section)) {
+            foreach ($form_json->section as $key => $value) {
                 $this->RCJSON->addSection((string) $key, $value);
             }
         }
 
-        if(isset($form_json->gradeables))
-        {
-            foreach ($form_json->gradeables as $gradeable)
-            {
+        if (isset($form_json->gradeables)) {
+            foreach ($form_json->gradeables as $gradeable) {
                 $this->RCJSON->addGradeable($gradeable);
             }
         }
 
-        if(isset($form_json->messages))
-        {
-            foreach ($form_json->messages as $message)
-            {
+        if (isset($form_json->messages)) {
+            foreach ($form_json->messages as $message) {
                 $this->RCJSON->addMessage($message);
             }
         }

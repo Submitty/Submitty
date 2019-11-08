@@ -121,7 +121,7 @@ class Logger {
         $filename = static::getFilename();
         $log_message = static::getTimestamp();
         $log_message .= " - ";
-        switch($level) {
+        switch ($level) {
             case 0:
                 $log_message .= "DEBUG";
                 break;

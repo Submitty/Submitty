@@ -23,21 +23,17 @@ class CourseMaterial extends AbstractModel {
         // Get path to the meta data json
         $meta_data_json = $core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-        if(!is_file($meta_data_json))
-        {
+        if (!is_file($meta_data_json)) {
             throw new FileNotFoundException('Unable to locate the course_materials_file_data.json file');
         }
 
         $meta_data = json_decode(file_get_contents($meta_data_json));
 
         // If file path does not exist as key in $meta_data then it has not been released
-        if(!property_exists($meta_data, $path_to_file))
-        {
+        if (!property_exists($meta_data, $path_to_file)) {
             return false;
         }
-        // Else key does exist
-        else
-        {
+        else {
             $current_time = new \DateTime('now');
             $release_time = \DateTime::createFromFormat('Y-m-d H:i:s', $meta_data->$path_to_file->release_datetime);
 
@@ -47,7 +43,7 @@ class CourseMaterial extends AbstractModel {
             return $retVal;
         }
     }
-    
+
      /**
      * Determine if a course materials file can be viewed by the current user's section
      *
@@ -66,23 +62,19 @@ class CourseMaterial extends AbstractModel {
         // Get path to the meta data json
         $meta_data_json = $core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
 
-        if(!is_file($meta_data_json))
-        {
+        if (!is_file($meta_data_json)) {
             throw new FileNotFoundException('Unable to locate the course_materials_file_data.json file');
         }
 
         $meta_data = json_decode(file_get_contents($meta_data_json));
 
         // If file path does not exist as key in $meta_data then it has not been released
-        if(!property_exists($meta_data, $path_to_file))
-        {
+        if (!property_exists($meta_data, $path_to_file)) {
             return false;
         }
-        // Else key does exist
-        else
-        {
+        else {
             $current_user_group = $current_user->getGroup();
-            if (!isset($meta_data->$path_to_file->sections)){
+            if (!isset($meta_data->$path_to_file->sections)) {
                 $retVal = true;
                 return $retVal;
             }
