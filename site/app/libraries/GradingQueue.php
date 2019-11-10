@@ -52,7 +52,8 @@ class GradingQueue {
             if (is_file($fqp)) {
                 if (strpos($file, self::GRADING_FILE_PREFIX) !== false) {
                     $grading_files[] = $file;
-                } else {
+                }
+                else {
                     $queue_files[] = $file;
 
                     // Also, record the last modified of each item
@@ -73,7 +74,7 @@ class GradingQueue {
      * Loads the queue if it hasn't already been loaded yet
      */
     private function ensureLoadedQueue() {
-        if($this->queue_files === null) {
+        if ($this->queue_files === null) {
             $this->reloadQueue();
         }
     }
@@ -101,18 +102,18 @@ class GradingQueue {
 
         // First, check if its being graded
         $grading_status = array_search($grading_queue_file, $this->grading_files, true);
-        if($grading_status !== false) {
+        if ($grading_status !== false) {
             return self::GRADING;
         }
 
         // Then, check its position in the queue
         $queue_status = array_search($queue_file, $this->queue_files, true);
-        if($queue_status === false) {
+        if ($queue_status === false) {
             // Also check for the vcs queue file, which will soon be converted into a regular queue file
             $queue_status = array_search($vcs_queue_file, $this->queue_files, true);
         }
 
-        if($queue_status !== false) {
+        if ($queue_status !== false) {
             // Convert from 0-indexed array since 0 is self::GRADING
             return $queue_status + 1;
         }

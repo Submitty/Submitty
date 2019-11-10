@@ -7,7 +7,8 @@ function newDownloadForm() {
     $("#download-form input:checkbox").each(function() {
         if ($(this).val() === 'NULL') {
             $(this).prop('checked', false);
-        } else {
+        }
+        else {
             $(this).prop('checked', true);
         }
     });

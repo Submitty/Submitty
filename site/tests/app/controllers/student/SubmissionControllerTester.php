@@ -416,10 +416,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $this->assertEquals(".submit.timestamp", $iter->getFilename());
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertTrue(in_array($iter->getFilename(), array('part1', 'part2')));
                 $files[$iter->getFilename()] = array();
                 $iter2 = $iter->getChildren();
@@ -428,7 +428,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $files[$iter->getFilename()][$iter2->getFilename()] = file_get_contents($iter2->getPathname());
                     }
                     else {
@@ -486,10 +486,10 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $filenames[] = $iter->getFilename();
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("testDir", $iter->getFilename());
                 $iter2 = $iter->getChildren();
                 while ($iter2 !== "" && $iter2->getFilename() !== "") {
@@ -497,7 +497,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                         $iter2->next();
                         continue;
                     }
-                    else if ($iter2->isFile()) {
+                    elseif ($iter2->isFile()) {
                         $this->assertEquals("test1.txt", $iter2->getFilename());
                     }
                     else {
@@ -825,7 +825,7 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -892,7 +892,6 @@ class SubmissionControllerTester extends BaseUnitTest {
         }
         sort($files);
         $this->assertEquals(array('.submit.timestamp', 'test.txt', 'test2.txt'), $files);
-
     }
 
     /**
@@ -948,14 +947,14 @@ class SubmissionControllerTester extends BaseUnitTest {
                 $iter->next();
                 continue;
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 $this->assertEquals("folder with spaces", $iter->getFilename());
                 foreach (new \FilesystemIterator($iter->getPathname()) as $iter2) {
                     $this->assertTrue($iter2->isFile());
                     $this->assertEquals("filename with spaces2.txt", $iter2->getFilename());
                 }
             }
-            else if ($iter->isFile()) {
+            elseif ($iter->isFile()) {
                 $files[] = $iter->getFilename();
             }
             else {
@@ -1213,8 +1212,10 @@ class SubmissionControllerTester extends BaseUnitTest {
         $return = $controller->ajaxUploadSubmission('test');
 
         $this->assertTrue($return['status'] == 'fail', "An error should have happened");
-        $this->assertEquals("File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
-            $return['message']);
+        $this->assertEquals(
+            "File(s) uploaded too large.  Maximum size is 1000 kb. Uploaded file(s) was 10240 kb.",
+            $return['message']
+        );
         $this->assertFalse($return['status'] == 'success');
         $tmp = FileUtils::joinPaths($this->config['course_path'], "submissions", "test", "testUser", "1");
         $this->assertFalse(is_dir($tmp));

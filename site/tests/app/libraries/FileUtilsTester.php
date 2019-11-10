@@ -464,7 +464,6 @@ STRING;
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
         $_FILES["files{$part}"]['error'][] = $err;
-
     }
 
     public function testvalidateUploadedFilesGood() {
@@ -474,17 +473,19 @@ STRING;
 
         $stat = FileUtils::validateUploadedFiles($_FILES["files1"]);
 
-        $this->assertCount(2, $stat );
-        $this->assertEquals($stat[0],
+        $this->assertCount(2, $stat);
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'foo.txt',
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' => 100,
              'is_zip' => false,
              'success' => true
-            ]);
+            ]
+        );
 
-          $this->assertEquals($stat[1],
+        $this->assertEquals($stat[1],
             ['name' => 'foo2.txt',
              'type' => 'text/plain',
              'error' => 'No error.',
@@ -492,7 +493,6 @@ STRING;
              'is_zip' => false,
              'success' => true
             ]);
-    }
 
     public function testvalidateUploadedFilesBad() {
         FileUtils::createDir($this->path);
@@ -500,7 +500,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(1, $stat);
-        $this->assertEquals($stat[0],
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'bad.txt',
              'type' => 'text/plain',
              'error' => 'The file was only partially uploaded',
@@ -514,7 +515,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(2, $stat);
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'bad2.txt',
              'type' => 'text/plain',
              'error' => 'No file was uploaded.',
@@ -532,7 +534,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(6, $stat);
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'bad2.txt',
              'type' => 'text/plain',
              'error' => 'No file was uploaded.',
@@ -542,7 +545,8 @@ STRING;
              ]
         );
 
-        $this->assertEquals($stat[2],
+        $this->assertEquals(
+            $stat[2],
             ['name' => 'bad3.txt',
              'type' => 'text/plain',
              'error' => 'Unknown error code.',
@@ -556,7 +560,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files2"]);
 
         $this->assertCount(7, $stat);
-        $this->assertEquals($stat[6],
+        $this->assertEquals(
+            $stat[6],
             ['name' => '\?<>.txt',
              'type' => 'text/plain',
              'error' => 'Invalid filename',
@@ -573,7 +578,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
 
         $this->assertCount(1, $stat);
-        $this->assertEquals($stat[0],
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'big.txt',
              'type' => 'text/plain',
              'error' => 'File "big.txt" too large got (2.0000953674316MB)',
@@ -587,7 +593,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files3"]);
 
         $this->assertCount(2, $stat);
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'just_big_enough.txt',
              'type' => 'text/plain',
              'error' => 'No error.',
@@ -601,11 +608,11 @@ STRING;
     public function testvalidateUploadedFilesFail() {
         $stat = FileUtils::validateUploadedFiles(null);
         $this->assertArrayHasKey("failed", $stat);
-        $this->assertEquals($stat["failed"], "No files sent to validate" );
+        $this->assertEquals($stat["failed"], "No files sent to validate");
 
         $stat = FileUtils::validateUploadedFiles([]);
         $this->assertArrayHasKey("failed", $stat);
-        $this->assertEquals($stat["failed"], "No files sent to validate" );
+        $this->assertEquals($stat["failed"], "No files sent to validate");
     }
 
     public function testvalidateUploadedFilesZipGood() {

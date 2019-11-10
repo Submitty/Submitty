@@ -62,7 +62,7 @@ abstract class AbstractModel {
                 $return = get_class($object);
             }
         }
-        else if (is_array($object)) {
+        elseif (is_array($object)) {
             $return = array();
             foreach ($object as $key => $value) {
                 if (is_numeric($key) || (!$check_property || isset(static::$properties[get_class($this)][$key]))) {
