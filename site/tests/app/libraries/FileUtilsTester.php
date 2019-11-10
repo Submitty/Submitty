@@ -448,13 +448,18 @@ STRING;
 
     private function buildFakeFile($filename, $part = 1, $err = 0, $size = 100) {
         $file_path = FileUtils::joinpaths($this->path, $filename);
-        file_put_contents($file_path, str_repeat(' ', $size));
+
+        //zip files will already exist
+        if(!file_exists($file_path)){
+            file_put_contents($file_path, str_repeat(' ', $size));
+        }
 
         $_FILES["files{$part}"]['name'][] = $filename;
         $_FILES["files{$part}"]['type'][] = mime_content_type($file_path);
         $_FILES["files{$part}"]['size'][] = filesize($file_path);
 
         $tmpname = FileUtils::joinPaths($this->path, Utils::generateRandomString() . $filename);
+
         copy($file_path, $tmpname);
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
@@ -475,6 +480,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' => 100,
+             'is_zip' => false,
              'success' => true
             ]);
 
@@ -483,6 +489,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' => 100,
+             'is_zip' => false,
              'success' => true
             ]);
     }
@@ -498,6 +505,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'The file was only partially uploaded',
              'size' => 100,
+             'is_zip' => false,
              'success' => false
              ]
         );
@@ -511,6 +519,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'No file was uploaded.',
              'size' => 100,
+             'is_zip' => false,
              'success' => false
              ]
         );
@@ -528,6 +537,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'No file was uploaded.',
              'size' => 100,
+             'is_zip' => false,
              'success' => false
              ]
         );
@@ -537,6 +547,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'Unknown error code.',
              'size' => 100,
+             'is_zip' => false,
              'success' => false
              ]
         );
@@ -550,6 +561,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'Invalid filename',
              'size' => 100,
+             'is_zip' => false,
              'success' => false
              ]
         );
@@ -566,6 +578,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'File "big.txt" too large got (2.0000953674316MB)',
              'size' => 100 + Utils::returnBytes(ini_get('upload_max_filesize')),
+             'is_zip' => false,
              'success' => false
              ]
         );
@@ -579,6 +592,7 @@ STRING;
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' =>  Utils::returnBytes(ini_get('upload_max_filesize')),
+             'is_zip' => false,
              'success' => true
              ]
         );
@@ -592,6 +606,53 @@ STRING;
         $stat = FileUtils::validateUploadedFiles([]);
         $this->assertArrayHasKey("failed", $stat);
         $this->assertEquals($stat["failed"], "No files sent to validate" );
+    }
+
+    public function testvalidateUploadedFilesZipGood() {
+        FileUtils::createDir($this->path);
+        $zip = new \ZipArchive();
+        $zip->open(FileUtils::joinPaths($this->path, 'test.zip'), \ZipArchive::CREATE);
+        $zip->addFromString('testfile', "file test");
+        $zip->close();
+
+        $this->buildFakeFile('test.zip', 4);
+        $stat = FileUtils::validateUploadedFiles($_FILES["files4"]);
+
+        $this->assertCount(1, $stat);
+        $this->assertEquals($stat[0],
+            ['name' => 'test.zip',
+             'type' => 'application/zip',
+             'error' => 'No error.',
+             'size' => 9,
+             'is_zip' => true,
+             'success' => true
+            ]
+        );
+
+    }
+
+    public function testvalidateUploadedFilesZipBad() {
+        FileUtils::createDir($this->path);
+        $zip = new \ZipArchive();
+        $zip->open(FileUtils::joinPaths($this->path, 'tes<>t.zip'), \ZipArchive::CREATE);
+        $zip->addFromString('test222', "file test");
+        $zip->addFromString('testttt>', "bad name");
+        $zip->close();
+
+        $this->buildFakeFile('tes<>t.zip', 4);
+        $stat = FileUtils::validateUploadedFiles($_FILES["files4"]);
+
+        $this->assertCount(1, $stat);
+        $this->assertEquals(
+            ['name' => 'tes<>t.zip',
+             'type' => 'application/zip',
+             'error' => 'Invalid filename',
+             'size' => 17,
+             'is_zip' => true,
+             'success' => false
+            ], $stat[0]
+        );
+
     }
 
     private function getAllFilesSetup(): void {

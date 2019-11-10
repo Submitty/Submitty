@@ -480,41 +480,16 @@ class FileUtils {
         return $words_detected;
     }
 
-    public static function checkZipFileStatus($file){
+    /**
+     * Attempt to open a zip archive and return the response
+     *
+     * @param string $file Path to the zip archive
+     * @return bool | int returns true on success or an error code otherwise
+     */
+    public static function getZipFileStatus($file) {
         $zip = new \ZipArchive();
         //open file with additional checks
-        $res = $zip->open($file, \ZipArchive::CHECKCONS);
-        $err = "";
-
-        if ($res !== True){
-            switch ($res) {
-                case \ZipArchive::ER_NOENT:
-                    $err = "File does not exist " . $filename ;
-                    break;
-                case \ZipArchive::ER_NOZIP:
-                    $err = "File not a zip archive";
-                    break;
-                case \ZipArchive::ER_COMPNOTSUPP:
-                    $err = "Compression method not supported";
-                    break;
-                case \ZipArchive::ER_INTERNAL:
-                    $err = "Internel Error";
-                    break;
-                case \ZipArchive::ER_INCONS:
-                    $err = "Zip archive inconsistent";
-                    break;
-                case \ZipArchive::ER_CRC:
-                    $err = "Failed to check file integrity (CRC fail)";
-                    break;
-                default:
-                    $err = "Unknown error " . $res;
-            }
-
-            return ['success' => False, 'error' => $err, 'err_code' => $res];
-        }
-
-        return ['success' => True, 'error' => 'OK', 'err_code' => \ZipArchive::ER_OK];
-
+        return $zip->open($file, \ZipArchive::CHECKCONS);
     }
 
     /**
@@ -523,7 +498,7 @@ class FileUtils {
      * @param array $files - should be in the same format as the $_FILES[] variable
      * @return array representing the status of each file
      * e.g. array('name' => 'foo.txt','type' => 'application/octet-stream', 'error' =>
-     *            'success','size' => 100, 'success' => true)
+     *            'success','size' => 100, 'is_zip' => false, 'success' => true)
      * if $files is null returns failed => no files sent to validate
      */
     public static function validateUploadedFiles($files) {
@@ -541,17 +516,22 @@ class FileUtils {
             $tmp_name = $files['tmp_name'][$i];
             $type = mime_content_type($tmp_name);
             
-            $zip_status = FileUtils::checkZipFileStatus($tmp_name);
-            $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
+            $zip_status = FileUtils::getZipFileStatus($tmp_name);
+            $errors = [ErrorMessages::uploadErrors($files['error'][$i])];
 
-            $is_zip = False;
-
-            //check if its a zip file or we got a bad zip file
-            if ($zip_status['success']){
-                $is_zip = True;
-            }else if($zip_status['err_code'] != \ZipArchive::ER_NOZIP){
-                $is_zip = True;
-                $err_msg = $zip_status['error'];
+            //check if its a zip file
+            $is_zip = $type === 'application/zip';
+            if ($is_zip) {
+                $zip_status = FileUtils::getZipFileStatus($tmp_name);
+                if ($zip_status !== \ZipArchive::ER_OK) {
+                    $errors[] = ErrorMessages::getZipErrorMessage($zip_status);
+                }
+                else {
+                    $size = FileUtils::getZipSize($tmp_name);
+                    if (!FileUtils::checkFileInZipName($tmp_name)) {
+                        $errors[] = "Invalid filename within zip file";
+                    }
+                }
             }
 
             //for zip files use the size of the contents in case it gets extracted
@@ -560,27 +540,33 @@ class FileUtils {
             //manually check against set size limit
             //incase the max POST size is greater than max file size
             if($size > $max_size){
-                $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
+                $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }
 
             //check filename
             if (!FileUtils::isValidFileName($name)) {
-                $err_msg = "Invalid filename";
+                $errors[] = "Invalid filename";
             }
 
-            //if zip file check files inside
-            if($is_zip && !FileUtils::checkFileInZipName($tmp_name) ){
-                $err_msg = "Invalid filename within zip file"; 
+            $errors = array_unique($errors);
+            $success = true;
+            foreach ($errors as $err) {
+                if($err !== 'No error.')
+                    $success = false;
             }
 
-            $success = $err_msg === "No error.";
+            //something went wrong, remove the 'No error. msg'
+            if (!$success && ($key = array_search('No error.', $errors)) !== false) {
+                unset($errors[$key]);
+            }
+
             $ret[] = [
                 'name' => $name,
                 'type' => $type,
-                'error' => $err_msg,
+                'error' => implode(" ", $errors),
                 'size' => $size,
+                'is_zip' => $is_zip,
                 'success' => $success,
-                'is_zip' => $is_zip
             ];
         }
 
