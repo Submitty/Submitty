@@ -3654,12 +3654,7 @@ AND gc_id IN (
      *
      * @param array $notifications
      */
-<<<<<<< HEAD
-    public function insertNotifications(array $flattened_notifications, int $notification_count)
-    {
-=======
     public function insertNotifications(array $flattened_notifications, int $notification_count) {
->>>>>>> 62e6b9845bd373d8b4ea76e7929c026f4f43c0e2
         // PDO Placeholders
         $row_string = "(?, ?, ?, current_timestamp, ?, ?)";
         $value_param_string = implode(', ', array_fill(0, $notification_count, $row_string));
