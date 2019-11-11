@@ -70,6 +70,18 @@ class DatabaseFactory {
      * @return DatabaseQueries
      */
     public function getQueries(Core $core) {
+<<<<<<< HEAD
         return new DatabaseQueries($core);
+=======
+        switch ($this->driver) {
+            case 'pgsql':
+            case 'postgres':
+            case 'postgresql':
+                return new PostgresqlDatabaseQueries($core);
+                break;
+            default:
+                return new DatabaseQueries($core);
+        }
+>>>>>>> 62e6b9845bd373d8b4ea76e7929c026f4f43c0e2
     }
 }

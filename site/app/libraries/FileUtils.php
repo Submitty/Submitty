@@ -28,7 +28,7 @@ class FileUtils {
      * @param bool   $flatten
      * @return array
      */
-    public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
+    public static function getAllFiles(string $dir, array $skip_files = [], bool $flatten = false): array {
         $skip_files = array_map(function ($str) {
             return strtolower($str);
         }, $skip_files);
@@ -60,7 +60,7 @@ class FileUtils {
                         $return[$entry] = ['files' => $temp, 'path' => $path];
                     }
                 }
-                else if (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
+                elseif (is_file($path) && !in_array(strtolower($entry), $disallowed_files)) {
                     // add file to array
                     $return[$entry] = [
                         'name' => $entry,
@@ -130,7 +130,7 @@ class FileUtils {
                     copy($iter->getPathname(), FileUtils::joinPaths($dst, strtolower($iter->getFilename())));
                 }
             }
-            else if ($iter->isDir()) {
+            elseif ($iter->isDir()) {
                 if (in_array(strtolower($iter->getFilename()), FileUtils::IGNORE_FOLDERS)) {
                     continue;
                 }
@@ -244,7 +244,7 @@ class FileUtils {
             if ($handle = opendir($path)) {
                 while (false !== ($entry = readdir($handle))) {
                     $file = "{$path}/{$entry}";
-                    if(is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
+                    if (is_dir($file) && !in_array(strtolower($entry), $disallowed_folders)) {
                         $return[] = $entry;
                     }
                 }
@@ -312,10 +312,10 @@ class FileUtils {
      */
     public static function checkFileInZipName($zipname) {
         $zip = zip_open($zipname);
-        if(is_resource(($zip))) {
+        if (is_resource(($zip))) {
             while ($inner_file = zip_read($zip)) {
                 $fname = zip_entry_name($inner_file);
-                if(FileUtils::isValidFileName($fname) === false) {
+                if (FileUtils::isValidFileName($fname) === false) {
                     return false;
                 }
             }
@@ -336,11 +336,13 @@ class FileUtils {
         }
         else {
             foreach (str_split($filename) as $char) {
-                if ($char == "'" ||
-                    $char == '"' ||
-                    $char == "\\" ||
-                    $char == "<" ||
-                    $char == ">") {
+                if (
+                    $char == "'"
+                    || $char == '"'
+                    || $char == "\\"
+                    || $char == "<"
+                    || $char == ">"
+                ) {
                     return false;
                 }
             }
@@ -392,7 +394,7 @@ class FileUtils {
      * @param $filename
      * @return null|string
      */
-    public static function getContentType($filename){
+    public static function getContentType($filename) {
         if ($filename === null) {
             return null;
         }
@@ -461,7 +463,7 @@ class FileUtils {
         $file_contents = @file_get_contents($file);
 
         // Check for failure
-        if($file_contents == false) {
+        if ($file_contents == false) {
             throw new FileReadException('Unable to either locate or read the file contents');
         }
 
@@ -471,7 +473,7 @@ class FileUtils {
         foreach ($words as $word) {
             $word_was_found = strpos($file_contents, $word);
 
-            if($word_was_found) {
+            if ($word_was_found) {
                 $words_detected = true;
                 break;
             }
@@ -510,7 +512,7 @@ class FileUtils {
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
-            if($size > $max_size){
+            if ($size > $max_size) {
                 $err_msg = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }
 

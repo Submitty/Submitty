@@ -89,5 +89,4 @@ class Button extends AbstractModel {
     public function hasOnclick() {
         return !($this->getOnclick() == null);
     }
-
 }

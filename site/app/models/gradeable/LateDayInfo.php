@@ -136,7 +136,8 @@ class LateDayInfo extends AbstractModel {
             case self::STATUS_NO_ACTIVE_VERSION:
                 if ($this->graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                     return 'Cancelled Submission';
-                } else {
+                }
+                else {
                     return 'No Submission';
                 }
             case self::STATUS_GOOD:
@@ -147,7 +148,8 @@ class LateDayInfo extends AbstractModel {
                 $days_late = $this->getDaysLate();
                 if ($days_late > $this->late_days_remaining) {
                     return 'Bad (too many late days used this term)';
-                } else {
+                }
+                else {
                     return 'Bad (too many late days used on this assignment)';
                 }
             default:

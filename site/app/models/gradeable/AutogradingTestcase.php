@@ -57,8 +57,7 @@ class AutogradingTestcase extends AbstractModel {
         $this->testcase_label = $testcase['testcase_label'] ?? '';
     }
 
-    public function getTestcaseLabel()
-    {
+    public function getTestcaseLabel() {
         return $this->testcase_label;
     }
 

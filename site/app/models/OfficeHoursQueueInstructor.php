@@ -38,19 +38,19 @@ class OfficeHoursQueueInstructor extends AbstractModel {
         $this->code = $code;
     }
 
-    public function getEntries(){
+    public function getEntries() {
         return $this->entries;
     }
 
-    public function getEntriesHelped(){
+    public function getEntriesHelped() {
         return $this->entries_helped;
     }
 
-    public function isQueueOpen(){
+    public function isQueueOpen() {
         return $this->queue_open;
     }
 
-    public function getCode(){
+    public function getCode() {
         return $this->code;
     }
 }

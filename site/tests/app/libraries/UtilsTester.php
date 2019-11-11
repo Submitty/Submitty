@@ -3,7 +3,7 @@
 namespace tests\app\libraries;
 
 use app\libraries\Core;
-use \app\libraries\Utils;
+use app\libraries\Utils;
 use app\models\User;
 
 class UtilsTester extends \PHPUnit\Framework\TestCase {

@@ -37,9 +37,9 @@ class SimpleStat extends AbstractModel {
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = null;
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
-        if(isset($details['gc_id'])) {
+        if (isset($details['gc_id'])) {
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];

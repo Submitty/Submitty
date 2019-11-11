@@ -1,6 +1,5 @@
 <?php
 
-
 namespace tests\app\exceptions;
 
 use app\exceptions\FileNotFoundException;

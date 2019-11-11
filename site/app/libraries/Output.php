@@ -88,14 +88,14 @@ class Output {
             'debug' => $debug
         ]);
 
-        if($debug){
+        if ($debug) {
             $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         }
 
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (... $args) {
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
@@ -114,7 +114,7 @@ HTML;
         if ($full_load) {
             $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
                 ->setTimezone($this->core->getConfig()->getTimezone());
-            if($this->core->getConfig()->wrapperEnabled()) {
+            if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
                     $namespace = 'site_uploads'
@@ -303,7 +303,8 @@ HTML;
 
         if ($success === true) {
             return $this->renderJsonSuccess($message);
-        } else {
+        }
+        else {
             return $this->renderJsonFail($message);
         }
     }
@@ -330,7 +331,8 @@ HTML;
     public function renderTwigTemplate(string $filename, array $context = []): string {
         try {
             return $this->twig->render($filename, $context);
-        } catch (\Twig_Error $e) {
+        }
+        catch (\Twig_Error $e) {
             throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
         }
     }
@@ -345,7 +347,8 @@ HTML;
     public function renderTwigOutput(string $filename, array $context = []): void {
         if ($this->buffer_output) {
             $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
-        } else {
+        }
+        else {
             echo $this->renderTwigTemplate($filename, $context);
         }
     }
@@ -363,7 +366,7 @@ HTML;
         if (!Utils::startsWith($class, "app\\views")) {
             $class = "app\\views\\{$class}View";
         }
-        if(!isset($this->loaded_views[$class])) {
+        if (!isset($this->loaded_views[$class])) {
             /** @noinspection PhpUndefinedMethodInspection */
             $this->loaded_views[$class] = new $class($this->core, $this);
         }
@@ -391,7 +394,8 @@ HTML;
     protected function renderFooter() {
         if ($this->use_footer) {
             return $this->controller->footer();
-        } else {
+        }
+        else {
             return '';
         }
     }
@@ -473,7 +477,7 @@ HTML;
         return $this->getOutput();
     }
 
-    public function addInternalCss($file, $folder='css') {
+    public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
 
@@ -485,7 +489,7 @@ HTML;
         $this->css->add($url);
     }
 
-    public function addInternalJs($file, $folder='js') {
+    public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
 
@@ -514,7 +518,7 @@ HTML;
         $this->use_footer = $bool;
     }
 
-    public function addBreadcrumb($string, $url=null, $external_link=false) {
+    public function addBreadcrumb($string, $url = null, $external_link = false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
     }
 

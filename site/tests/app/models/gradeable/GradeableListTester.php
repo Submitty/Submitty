@@ -15,50 +15,148 @@ class GradeableListTester extends BaseUnitTest {
     public function testFullList() {
         $core = $this->getCore();
         $gradeables = array();
-        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable($core, "01_future_homework_no_ta",
-            GradeableType::ELECTRONIC_FILE, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['02_future_homework'] = $this->mockGradeable($core, "02_future_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['03_open_homework'] = $this->mockGradeable($core, "03_open_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['04_closed_homework'] = $this->mockGradeable($core, "04_closed_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['05_grading_homework'] = $this->mockGradeable($core, "05_grading_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '9999-01-01');
-        $gradeables['06_graded_homework'] = $this->mockGradeable($core, "06_graded_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-01-01');
+        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
+            $core,
+            "01_future_homework_no_ta",
+            GradeableType::ELECTRONIC_FILE,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['02_future_homework'] = $this->mockGradeable(
+            $core,
+            "02_future_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['03_open_homework'] = $this->mockGradeable(
+            $core,
+            "03_open_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['04_closed_homework'] = $this->mockGradeable(
+            $core,
+            "04_closed_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['05_grading_homework'] = $this->mockGradeable(
+            $core,
+            "05_grading_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '9999-01-01'
+        );
+        $gradeables['06_graded_homework'] = $this->mockGradeable(
+            $core,
+            "06_graded_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-01-01'
+        );
 
-        $gradeables['11_future_numeric_no_ta'] = $this->mockGradeable($core, "11_future_numeric_no_ta",
-            GradeableType::NUMERIC_TEXT, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['12_future_numeric'] = $this->mockGradeable($core, "12_future_numeric",
-            GradeableType::NUMERIC_TEXT, '1000-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['13_grading_numeric'] = $this->mockGradeable($core, "13_grading_numeric",
-            GradeableType::NUMERIC_TEXT, '1000-01-01', '1001-01-01', '9997-01-01', '1003-01-01',
-            '9999-01-01');
-        $gradeables['14_graded_numeric'] = $this->mockGradeable($core, "14_graded_numeric",
-            GradeableType::NUMERIC_TEXT, '1000-01-01', '1001-01-01', '1002-01-01', '1003-03-01',
-            '1004-02-01');
+        $gradeables['11_future_numeric_no_ta'] = $this->mockGradeable(
+            $core,
+            "11_future_numeric_no_ta",
+            GradeableType::NUMERIC_TEXT,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['12_future_numeric'] = $this->mockGradeable(
+            $core,
+            "12_future_numeric",
+            GradeableType::NUMERIC_TEXT,
+            '1000-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['13_grading_numeric'] = $this->mockGradeable(
+            $core,
+            "13_grading_numeric",
+            GradeableType::NUMERIC_TEXT,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-01-01',
+            '9999-01-01'
+        );
+        $gradeables['14_graded_numeric'] = $this->mockGradeable(
+            $core,
+            "14_graded_numeric",
+            GradeableType::NUMERIC_TEXT,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-03-01',
+            '1004-02-01'
+        );
 
-        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable($core, "07_future_checkpoint_no_ta",
-            GradeableType::CHECKPOINTS, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['08_future_checkpoint'] = $this->mockGradeable($core, "08_future_checkpoint",
-            GradeableType::CHECKPOINTS, '1000-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['09_grading_lab'] = $this->mockGradeable($core, "09_grading_lab",
-            GradeableType::CHECKPOINTS, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01');
-        $gradeables['10_graded_lab'] = $this->mockGradeable($core, "10_graded_lab",
-            GradeableType::CHECKPOINTS, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-03-01');
+        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable(
+            $core,
+            "07_future_checkpoint_no_ta",
+            GradeableType::CHECKPOINTS,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['08_future_checkpoint'] = $this->mockGradeable(
+            $core,
+            "08_future_checkpoint",
+            GradeableType::CHECKPOINTS,
+            '1000-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['09_grading_lab'] = $this->mockGradeable(
+            $core,
+            "09_grading_lab",
+            GradeableType::CHECKPOINTS,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-02-01',
+            '9999-01-01'
+        );
+        $gradeables['10_graded_lab'] = $this->mockGradeable(
+            $core,
+            "10_graded_lab",
+            GradeableType::CHECKPOINTS,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-03-01'
+        );
 
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(true);
@@ -116,27 +214,76 @@ class GradeableListTester extends BaseUnitTest {
     public function testSubmittableHasDueAdmin() {
         $gradeables = array();
         $core = $this->getCore();
-        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable($core, "01_future_homework_no_ta",
-            GradeableType::ELECTRONIC_FILE, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['02_future_homework'] = $this->mockGradeable($core, "02_future_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['03_open_homework'] = $this->mockGradeable($core, "03_open_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['04_closed_homework'] = $this->mockGradeable($core, "04_closed_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['05_grading_homework'] = $this->mockGradeable($core, "05_grading_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '9999-01-01');
-        $gradeables['06_graded_homework'] = $this->mockGradeable($core, "06_graded_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-01-01');
-        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable($core, "07_future_checkpoint_no_ta",
-            GradeableType::CHECKPOINTS, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
+        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
+            $core,
+            "01_future_homework_no_ta",
+            GradeableType::ELECTRONIC_FILE,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['02_future_homework'] = $this->mockGradeable(
+            $core,
+            "02_future_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['03_open_homework'] = $this->mockGradeable(
+            $core,
+            "03_open_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['04_closed_homework'] = $this->mockGradeable(
+            $core,
+            "04_closed_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['05_grading_homework'] = $this->mockGradeable(
+            $core,
+            "05_grading_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '9999-01-01'
+        );
+        $gradeables['06_graded_homework'] = $this->mockGradeable(
+            $core,
+            "06_graded_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-01-01'
+        );
+        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable(
+            $core,
+            "07_future_checkpoint_no_ta",
+            GradeableType::CHECKPOINTS,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(true);
 
@@ -147,27 +294,76 @@ class GradeableListTester extends BaseUnitTest {
     public function testSubmittableHasDueGrader() {
         $gradeables = array();
         $core = $this->getCore(false);
-        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable($core, "01_future_homework_no_ta",
-            GradeableType::ELECTRONIC_FILE, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['02_future_homework'] = $this->mockGradeable($core, "02_future_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['03_open_homework'] = $this->mockGradeable($core, "03_open_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['04_closed_homework'] = $this->mockGradeable($core, "04_closed_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['05_grading_homework'] = $this->mockGradeable($core, "05_grading_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '9999-01-01');
-        $gradeables['06_graded_homework'] = $this->mockGradeable($core, "06_graded_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-01-01');
-        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable($core, "07_future_checkpoint_no_ta",
-            GradeableType::CHECKPOINTS, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
+        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
+            $core,
+            "01_future_homework_no_ta",
+            GradeableType::ELECTRONIC_FILE,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['02_future_homework'] = $this->mockGradeable(
+            $core,
+            "02_future_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['03_open_homework'] = $this->mockGradeable(
+            $core,
+            "03_open_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['04_closed_homework'] = $this->mockGradeable(
+            $core,
+            "04_closed_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['05_grading_homework'] = $this->mockGradeable(
+            $core,
+            "05_grading_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '9999-01-01'
+        );
+        $gradeables['06_graded_homework'] = $this->mockGradeable(
+            $core,
+            "06_graded_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-01-01'
+        );
+        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable(
+            $core,
+            "07_future_checkpoint_no_ta",
+            GradeableType::CHECKPOINTS,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
 
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(true);
@@ -179,27 +375,76 @@ class GradeableListTester extends BaseUnitTest {
     public function testSubmittableHasDueStudent() {
         $gradeables = array();
         $core = $this->getCore(false, false);
-        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable($core, "01_future_homework_no_ta",
-            GradeableType::ELECTRONIC_FILE, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['02_future_homework'] = $this->mockGradeable($core, "02_future_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['03_open_homework'] = $this->mockGradeable($core, "03_open_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['04_closed_homework'] = $this->mockGradeable($core, "04_closed_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['05_grading_homework'] = $this->mockGradeable($core, "05_grading_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '9999-01-01');
-        $gradeables['06_graded_homework'] = $this->mockGradeable($core, "06_graded_homework",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-01-01');
-        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable($core, "07_future_checkpoint_no_ta",
-            GradeableType::CHECKPOINTS, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
+        $gradeables['01_future_homework_no_ta'] = $this->mockGradeable(
+            $core,
+            "01_future_homework_no_ta",
+            GradeableType::ELECTRONIC_FILE,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['02_future_homework'] = $this->mockGradeable(
+            $core,
+            "02_future_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['03_open_homework'] = $this->mockGradeable(
+            $core,
+            "03_open_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['04_closed_homework'] = $this->mockGradeable(
+            $core,
+            "04_closed_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['05_grading_homework'] = $this->mockGradeable(
+            $core,
+            "05_grading_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '9999-01-01'
+        );
+        $gradeables['06_graded_homework'] = $this->mockGradeable(
+            $core,
+            "06_graded_homework",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-01-01'
+        );
+        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable(
+            $core,
+            "07_future_checkpoint_no_ta",
+            GradeableType::CHECKPOINTS,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
 
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(true);
@@ -211,15 +456,45 @@ class GradeableListTester extends BaseUnitTest {
     public function testSubmittableNoDueGrader() {
         $gradeables = array();
         $core = $this->getCore(false);
-        $gradeables['01_future_no_due'] = $this->mockGradeable($core, "01_future_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01', true, true, false);
-        $gradeables['02_grading_no_due'] = $this->mockGradeable($core, "02_grading_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, true, false);
-        $gradeables['03_ta_submit_no_due'] = $this->mockGradeable($core, "03_ta_submit_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, false, false);
+        $gradeables['01_future_no_due'] = $this->mockGradeable(
+            $core,
+            "01_future_no_due",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01',
+            true,
+            true,
+            false
+        );
+        $gradeables['02_grading_no_due'] = $this->mockGradeable(
+            $core,
+            "02_grading_no_due",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-02-01',
+            '9999-01-01',
+            true,
+            true,
+            false
+        );
+        $gradeables['03_ta_submit_no_due'] = $this->mockGradeable(
+            $core,
+            "03_ta_submit_no_due",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-02-01',
+            '9999-01-01',
+            true,
+            false,
+            false
+        );
 
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(false);
@@ -257,21 +532,71 @@ class GradeableListTester extends BaseUnitTest {
         $core = $this->GetCore(false, false);
 
         $gradeables = array();
-        $gradeables['01_no_submit_no_due'] = $this->mockGradeable($core, "01_no_submit_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, true, false);
-        $gradeables['02_submitted_no_due'] = $this->mockGradeable($core, "02_submitted_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, true, false);
-        $gradeables['03_ta_submit_no_due'] = $this->mockGradeable($core, "03_ta_submit_no_due",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '9997-01-01', '1003-02-01',
-            '9999-01-01', true, false, false);
-        $gradeables['04_no_submit_grades_released'] = $this->mockGradeable($core, "04_no_submit_grades_released",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-01-01', true, true, false);
-        $gradeables['05_submitted_grades_released'] = $this->mockGradeable($core, "05_submitted_grades_released",
-            GradeableType::ELECTRONIC_FILE, '1000-01-01', '1001-01-01', '1002-01-01', '1003-01-01',
-            '1004-01-01', true, true, false);
+        $gradeables['01_no_submit_no_due'] = $this->mockGradeable(
+            $core,
+            "01_no_submit_no_due",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-02-01',
+            '9999-01-01',
+            true,
+            true,
+            false
+        );
+        $gradeables['02_submitted_no_due'] = $this->mockGradeable(
+            $core,
+            "02_submitted_no_due",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-02-01',
+            '9999-01-01',
+            true,
+            true,
+            false
+        );
+        $gradeables['03_ta_submit_no_due'] = $this->mockGradeable(
+            $core,
+            "03_ta_submit_no_due",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '9997-01-01',
+            '1003-02-01',
+            '9999-01-01',
+            true,
+            false,
+            false
+        );
+        $gradeables['04_no_submit_grades_released'] = $this->mockGradeable(
+            $core,
+            "04_no_submit_grades_released",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-01-01',
+            true,
+            true,
+            false
+        );
+        $gradeables['05_submitted_grades_released'] = $this->mockGradeable(
+            $core,
+            "05_submitted_grades_released",
+            GradeableType::ELECTRONIC_FILE,
+            '1000-01-01',
+            '1001-01-01',
+            '1002-01-01',
+            '1003-01-01',
+            '1004-01-01',
+            true,
+            true,
+            false
+        );
 
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->will($this->onConsecutiveCalls(false, true, false, false, true));
@@ -311,9 +636,16 @@ class GradeableListTester extends BaseUnitTest {
     public function testNoSubmittableGradeables() {
         $core = $this->getCore();
         $gradeables = array();
-        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable($core, "07_future_checkpoint_no_ta",
-            GradeableType::CHECKPOINTS, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
+        $gradeables['07_future_checkpoint_no_ta'] = $this->mockGradeable(
+            $core,
+            "07_future_checkpoint_no_ta",
+            GradeableType::CHECKPOINTS,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(true);
 
@@ -325,12 +657,26 @@ class GradeableListTester extends BaseUnitTest {
         $core = $this->getCore();
 
         $gradeables = array();
-        $gradeables['01_electronic'] = $this->mockGradeable($core, "01_electronic",
-            GradeableType::ELECTRONIC_FILE, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
-        $gradeables['02_checkpoint'] = $this->mockGradeable($core, "02_checkpoint",
-            GradeableType::CHECKPOINTS, '9995-01-01', '9996-01-01', '9997-01-01', '9998-01-01',
-            '9999-01-01');
+        $gradeables['01_electronic'] = $this->mockGradeable(
+            $core,
+            "01_electronic",
+            GradeableType::ELECTRONIC_FILE,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
+        $gradeables['02_checkpoint'] = $this->mockGradeable(
+            $core,
+            "02_checkpoint",
+            GradeableType::CHECKPOINTS,
+            '9995-01-01',
+            '9996-01-01',
+            '9997-01-01',
+            '9998-01-01',
+            '9999-01-01'
+        );
 
         $this->mockGetGradeables($core, $gradeables);
         $core->getQueries()->method('getHasSubmission')->willReturn(true);

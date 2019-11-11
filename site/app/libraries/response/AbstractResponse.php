@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\libraries\response;
 
 use app\libraries\Core;

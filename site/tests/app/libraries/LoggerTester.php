@@ -2,9 +2,9 @@
 
 namespace tests\app\libraries;
 
-use \app\libraries\Logger;
-use \app\libraries\Utils;
-use \app\libraries\FileUtils;
+use app\libraries\Logger;
+use app\libraries\Utils;
+use app\libraries\FileUtils;
 
 class LoggerTester extends \PHPUnit\Framework\TestCase {
     private $error;
@@ -103,7 +103,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals($log_path, Logger::getLogPath());
     }
 
-    public function testTALog(){
+    public function testTALog() {
         $_SERVER['REMOTE_ADDR'] = "127.0.0.1";
         $_SERVER['HTTP_USER_AGENT'] = "PHPUnit";
         $logging_params = array("course_semester" => "test_semester",
@@ -165,7 +165,7 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
      *
      * This function checks if date and time given equals the current time
      */
-    public function assertTimeEqualsCurrent($date, $time){
+    public function assertTimeEqualsCurrent($date, $time) {
         $current_date = getdate(time());
         $this->assertEquals(Utils::pad($current_date['mon']), $date[0], "Month is not right");
         $this->assertEquals(Utils::pad($current_date['mday']), $date[1], "Day is not right");
@@ -173,5 +173,4 @@ class LoggerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals(Utils::pad($current_date['hours']), $time[0], "Hours place is not right");
         $this->assertEquals(Utils::pad($current_date['minutes']), $time[1], "Minutes place is not right");
     }
-
 }

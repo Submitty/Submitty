@@ -46,9 +46,12 @@ class AutoGradedTestcase extends AbstractModel {
             foreach ($details['autochecks'] as $idx => $autocheck) {
                 $index = "id_{$testcase->getIndex()}_{$idx}";
                 $this->autochecks[$idx] = new GradeableAutocheck(
-                    $this->core, $autocheck,
+                    $this->core,
+                    $autocheck,
                     $this->core->getConfig()->getCoursePath(),
-                    $results_path, $results_public_path, $index
+                    $results_path,
+                    $results_public_path,
+                    $index
                 );
             }
         }
@@ -61,7 +64,8 @@ class AutoGradedTestcase extends AbstractModel {
             /*
             $this->points = min(max(0, $this->points), $testcase->getPoints());
             */
-        } else if ($testcase->getPoints() < 0) {
+        }
+        elseif ($testcase->getPoints() < 0) {
             // PENALTY TESTCASE
             // TODO: ADD ERROR <--(what does this mean)?
             $this->points = min(max($testcase->getPoints(), $this->points), 0);
@@ -118,7 +122,7 @@ class AutoGradedTestcase extends AbstractModel {
     }
 
     /** @internal */
-    public function setView(){
+    public function setView() {
         throw new \BadFunctionCallException('Setters disabled for AutoGradedTestcase');
     }
 

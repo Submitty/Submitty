@@ -1,4 +1,6 @@
-<?php declare(strict_types = 1);
+<?php
+
+declare(strict_types=1);
 
 namespace tests\utils;
 
@@ -35,9 +37,11 @@ class NullOutput extends Output {
         $this->renderTwigTemplate($filename, $context);
     }
 
-    protected function renderHeader() {}
+    protected function renderHeader() {
+    }
 
-    protected function renderFooter() {}
+    protected function renderFooter() {
+    }
 
     public function bufferOutput() {
         return $this->buffer_output;

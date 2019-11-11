@@ -14,7 +14,7 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $use_database=false) {
+    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $use_database = false) {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
@@ -42,7 +42,7 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database=false) {
+    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false) {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
         $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('table.css');
@@ -85,7 +85,7 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function userForm($reg_sections, $rot_sections, $action, $use_database=false) {
+    public function userForm($reg_sections, $rot_sections, $action, $use_database = false) {
         return $this->core->getOutput()->renderTwigTemplate("admin/users/UserForm.twig", [
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,

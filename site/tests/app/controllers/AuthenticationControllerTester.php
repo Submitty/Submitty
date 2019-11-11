@@ -21,7 +21,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_SERVER['HTTP_USER_AGENT'] = 'test';
     }
 
-    private function getAuthenticationCore($authenticate=false, $queries=[]) {
+    private function getAuthenticationCore($authenticate = false, $queries = []) {
         $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $queries);
         $auth = $this->createMock(AbstractAuthentication::class);
         $auth->method('setUserId')->willReturn(null);

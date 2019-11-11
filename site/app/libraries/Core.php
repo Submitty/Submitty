@@ -82,13 +82,13 @@ class Core {
         $this->access = new Access($this);
 
         // initialize our alert queue if it doesn't exist
-        if(!isset($_SESSION['messages'])) {
+        if (!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
 
         // initialize our alert types if one of them doesn't exist
         foreach (array('error', 'notice', 'success') as $key) {
-            if(!isset($_SESSION['messages'][$key])) {
+            if (!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
         }
@@ -126,10 +126,10 @@ class Core {
         if (!empty($semester) && !empty($course)) {
             $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
             $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
-            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
+            if (file_exists($course_json_path) && is_readable($course_json_path)) {
                 $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
-            else{
+            else {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
                   $semester . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
@@ -211,8 +211,11 @@ class Core {
             throw new \Exception("Need to load the config before we can initialize the grading queue");
         }
 
-        $this->grading_queue = new GradingQueue($this->config->getSemester(),
-            $this->config->getCourse(), $this->config->getSubmittyPath());
+        $this->grading_queue = new GradingQueue(
+            $this->config->getSemester(),
+            $this->config->getCourse(),
+            $this->config->getSubmittyPath()
+        );
     }
 
     /**
@@ -485,7 +488,7 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token=null) {
+    public function checkCsrfToken($csrf_token = null) {
         if ($csrf_token === null) {
             return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
         }
@@ -501,7 +504,7 @@ class Core {
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
+    public function buildUrl($parts = array()) {
         $url = $this->getConfig()->getBaseUrl() . implode("/", $parts);
         return $url;
     }
@@ -516,7 +519,7 @@ class Core {
      *
      * @return string
      */
-    public function buildCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts = array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
@@ -533,7 +536,6 @@ class Core {
         if (!$this->testing) {
             die();
         }
-
     }
 
     /**
@@ -565,23 +567,29 @@ class Core {
      *
      * @return string
      */
-    public function getDisplayedCourseName(){
+    public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
         }
-        else{
+        else {
             return $this->getConfig()->getCourse();
         }
     }
 
-    public function getFullSemester(){
+    public function getFullSemester() {
         $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== ""){
+        if ($this->getConfig()->getSemester() !== "") {
             $arr1 = str_split($semester);
             $semester = "";
-            if($arr1[0] == "f")  $semester .= "Fall ";
-            else if($arr1[0] == "s")  $semester .= "Spring ";
-            else if ($arr1[0] == "u") $semester .= "Summer ";
+            if ($arr1[0] == "f") {
+                $semester .= "Fall ";
+            }
+            elseif ($arr1[0] == "s") {
+                $semester .= "Spring ";
+            }
+            elseif ($arr1[0] == "u") {
+                $semester .= "Summer ";
+            }
 
             $semester .= "20" . $arr1[1] . $arr1[2];
         }
