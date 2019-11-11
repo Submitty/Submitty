@@ -2248,7 +2248,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
     /**
      * Return Team object for team whith given Team ID
      * @param string $team_id
-     * @return \app\models\Team
+     * @return \app\models\Team|null
      */
     public function getTeamById($team_id) {
         $this->course_db->query("
@@ -2274,7 +2274,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)", array($g_id, $user_id, $team_id, $version, $
      * Return Team object for team which the given user belongs to on the given gradeable
      * @param string $g_id
      * @param string $user_id
-     * @return \app\models\Team
+     * @return \app\models\Team|null
      */
     public function getTeamByGradeableAndUser($g_id, $user_id) {
         $this->course_db->query("
@@ -4915,7 +4915,7 @@ AND gc_id IN (
     /**
      * Gets all GradedGradeable's associated with each Gradeable.  If
      *  Note: The users' teams will be included in the search
-     * @param \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
+     * @param \app\models\gradeable\Gradeable[] $gradeables The gradeable(s) to retrieve data for
      * @param string[]|string|null $users The id(s) of the user(s) to get data for
      * @param string[]|string|null $teams The id(s) of the team(s) to get data for
      * @param string[]|string|null $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
