@@ -173,11 +173,11 @@ class GradedGradeable extends AbstractModel {
     public function getActiveGradeInquiryCount() {
         if (!$this->gradeable->isGradeInquiryPerComponentAllowed()) {
             return array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
-                return $carry + is_null($grade_inquiry->getGcId()) && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0;
+                return $carry + (is_null($grade_inquiry->getGcId()) && $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0);
             });
         }
         return array_reduce($this->regrade_requests, function ($carry, RegradeRequest $grade_inquiry) {
-            return $carry + $grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0;
+            return $carry + ($grade_inquiry->getStatus() == RegradeRequest::STATUS_ACTIVE ? 1 : 0);
         });
     }
 
