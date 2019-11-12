@@ -94,14 +94,12 @@ class ForumThreadView extends AbstractView {
         }
 
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("forum/searchResults.twig", [
             "buttons" => $buttons,
             "count_threads" => count($threads),
             "threads" => $thread_list,
             "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
         ]);
-
-        return $return;
     }
 
     /** Shows Forums thread splash page, including all posts
@@ -934,7 +932,7 @@ class ForumThreadView extends AbstractView {
             $GLOBALS['post_box_id'] = $post_box_id = isset($GLOBALS['post_box_id']) ? $GLOBALS['post_box_id'] + 1 : 1;
         }
 
-        $return = [
+        return [
             "classes" => $classes,
             "post_id" => $post_id,
             "reply_level" => $reply_level,
@@ -962,8 +960,6 @@ class ForumThreadView extends AbstractView {
             "parent_id" => $post_id,
             "render_markdown" => $markdown
         ];
-
-        return $return;
     }
 
     public function createThread($category_colors) {
@@ -1006,7 +1002,7 @@ class ForumThreadView extends AbstractView {
         $thread_exists = $this->core->getQueries()->threadExists();
         $manage_categories_url = $this->core->buildCourseUrl(['forum', 'categories']);
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("forum/createThread.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
             "buttons" => $buttons,
@@ -1017,8 +1013,6 @@ class ForumThreadView extends AbstractView {
             "email_enabled" => $this->core->getConfig()->isEmailEnabled(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
         ]);
-
-        return $return;
     }
 
     public function showCategories($category_colors) {
@@ -1065,15 +1059,13 @@ class ForumThreadView extends AbstractView {
             "thread_exists" => $thread_exists
         ];
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/ShowCategories.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("forum/ShowCategories.twig", [
             "categories" => $categories,
             "category_colors" => $category_colors,
             "forumBarData" => $forumBarData,
             "csrf_token" => $this->core->getCsrfToken(),
             "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
         ]);
-
-        return $return;
     }
 
     public function statPage($users) {
@@ -1141,12 +1133,10 @@ class ForumThreadView extends AbstractView {
             ];
         }
 
-        $return = $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
+        return $this->core->getOutput()->renderTwigTemplate("forum/StatPage.twig", [
             "forumBarData" => $forumBarData,
             "userData" => $userData,
             "search_url" => $this->core->buildCourseUrl(['forum', 'search'])
         ]);
-
-        return $return;
     }
 }

@@ -137,8 +137,7 @@ class GradedComponentContainer extends AbstractModel {
 
         // Grades exist for component, so get the only one
         if ($grades_exist) {
-            $graded_component = $this->graded_components[0];
-            return $graded_component;
+            return $this->graded_components[0];
         }
 
         // Grades don't exist, but generate one (at zero index of array)

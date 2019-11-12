@@ -435,12 +435,11 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
-                $token = (string) TokenManager::generateApiToken(
+                return (string) TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id),
                     $this->getConfig()->getBaseUrl(),
                     $this->getConfig()->getSecretSession()
                 );
-                return $token;
             }
         }
         catch (\Exception $e) {
@@ -505,8 +504,7 @@ class Core {
      * @return string
      */
     public function buildUrl($parts = array()) {
-        $url = $this->getConfig()->getBaseUrl() . implode("/", $parts);
-        return $url;
+        return $this->getConfig()->getBaseUrl() . implode("/", $parts);
     }
 
     /**
