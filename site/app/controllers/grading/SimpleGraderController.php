@@ -45,7 +45,7 @@ class SimpleGraderController extends AbstractController {
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl())
             );
-        };
+        }
 
         $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
 
