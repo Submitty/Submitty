@@ -71,7 +71,6 @@
         }
         $(function() {
             $("#submit-materials").click(function(e){ // Submit button
-
                 var sections = [];
                 var cmTime = document.getElementById("upload_picker").value;
                 var cb = $("input#expand_zip_checkbox");
@@ -96,13 +95,11 @@
                     sections = null;
                 }
                 var cmPath = document.getElementById('cm_path').innerHTML;
-
                 var requestedPath = document.getElementById("input-provide-full-path").value;
                 makeSubmission(expandZip, hideFromStudents, cmPath, requestedPath,cmTime, sections);
                 e.stopPropagation();
             });
         });
-
         flatpickr('#upload_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
@@ -116,7 +113,6 @@
                                 {
                                     label: "End of time"
                                 }
-
                             ],
                             onClick: (index, fp) => {
                                 let date;
@@ -131,7 +127,6 @@
                                         date = new Date("9998-01-01 00:00:00");
                                         fp.setDate(date,true);
                                         break;
-
                                 }
                             }
                         }
