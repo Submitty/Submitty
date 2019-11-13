@@ -90,7 +90,8 @@ class Mark extends AbstractModel {
     private function setIdInternal($id) {
         if ((is_int($id) || ctype_digit($id)) && intval($id) >= 0) {
             $this->id = intval($id);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Mark Id must be a non-negative integer');
         }
     }
@@ -118,7 +119,8 @@ class Mark extends AbstractModel {
     public function setPoints($points) {
         if (is_numeric($points)) {
             $this->points = $this->getComponent()->getGradeable()->roundPointValue($points);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Mark points must be a number!');
         }
         $this->modified = true;

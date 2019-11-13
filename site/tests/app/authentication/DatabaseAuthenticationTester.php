@@ -35,7 +35,6 @@ class DatabaseAuthenticationTester extends BaseUnitTest {
         $this->assertEquals('test', $auth->getUserId());
         $auth->setPassword('test');
         $this->assertTrue($auth->authenticate());
-
     }
 
     public function testInvalidUser() {

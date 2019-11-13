@@ -61,7 +61,7 @@ class LateController extends AbstractController {
                 );
             }
             else {
-                for ($i = 0; $i < count($data); $i++){
+                for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateLateDays($data[$i][0], $data[$i][1], $data[$i][2], $csv_option);
                 }
                 $this->core->addSuccessMessage("Late days have been updated");
@@ -78,7 +78,7 @@ class LateController extends AbstractController {
                 );
             }
 
-            if (!isset($_POST['datestamp']) ||  (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
+            if (!isset($_POST['datestamp']) || (\DateTime::createFromFormat('Y-m-d', $_POST['datestamp']) === false)) {
                 $error = "Datestamp must be Y-m-d";
                 $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
@@ -141,7 +141,7 @@ class LateController extends AbstractController {
                 );
             }
             else {
-                for ($i = 0; $i < count($data); $i++){
+                for ($i = 0; $i < count($data); $i++) {
                     $this->core->getQueries()->updateExtensions($data[$i][0], $data[$i][1], $data[$i][2]);
                 }
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
@@ -173,7 +173,8 @@ class LateController extends AbstractController {
                         JsonResponse::getFailResponse($error)
                     );
                 }
-            } else {
+            }
+            else {
                 $error = "You must specify a number of late days or a new due date for the student";
                 $this->core->addErrorMessage($error);
                 return Response::JsonOnlyResponse(
@@ -185,7 +186,7 @@ class LateController extends AbstractController {
             $simple_late_user = null;
             $no_change = false;
             if (!$no_change) {
-                foreach($users_with_exceptions as $user) {
+                foreach ($users_with_exceptions as $user) {
                     if ($user->getId() == $_POST['user_id']) {
                         $simple_late_user = $user;
                         $no_change = $simple_late_user->getLateDayExceptions() == $late_days;
@@ -194,39 +195,44 @@ class LateController extends AbstractController {
                 }
             }
             if (($simple_late_user == null && intval($late_days) == 0) || $no_change) {
-                $this->core->addNoticeMessage("User already has " . $late_days ." extensions; no changes made");
+                $this->core->addNoticeMessage("User already has " . $late_days . " extensions; no changes made");
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
 
             $team = $this->core->getQueries()->getTeamByGradeableAndUser($_POST['g_id'], $_POST['user_id']);
             //0 is for single submission, 1 is for team submission
             $option = isset($_POST['option']) ? $_POST['option'] : -1;
-            if($team != NULL && $team->getSize() > 1){
-                if($option == 0){
+            if ($team != null && $team->getSize() > 1) {
+                if ($option == 0) {
                     $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
-                } else if($option == 1){
+                }
+                elseif ($option == 1) {
                     $team_member_ids = explode(", ", $team->getMemberList());
-                    for($i = 0; $i < count($team_member_ids); $i++) {
+                    for ($i = 0; $i < count($team_member_ids); $i++) {
                         $this->core->getQueries()->updateExtensions($team_member_ids[$i], $_POST['g_id'], $late_days);
                     }
                     $this->core->addSuccessMessage("Extensions have been updated");
                     return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
-                } else {
+                }
+                else {
                     $team_member_ids = explode(", ", $team->getMemberList());
                     $team_members = array();
-                    for($i = 0; $i < count($team_member_ids); $i++){
+                    for ($i = 0; $i < count($team_member_ids); $i++) {
                         $team_members[$team_member_ids[$i]] = $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedFirstName() . " " .
                             $this->core->getQueries()->getUserById($team_member_ids[$i])->getDisplayedLastName();
                     }
-                    $popup_html = $this->core->getOutput()->renderTwigTemplate("admin/users/MoreExtensions.twig",
-                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]);
+                    $popup_html = $this->core->getOutput()->renderTwigTemplate(
+                        "admin/users/MoreExtensions.twig",
+                        ['g_id' => $_POST['g_id'], 'member_list' => $team_members]
+                    );
                     return Response::JsonOnlyResponse(
                         JsonResponse::getSuccessResponse(['is_team' => true, 'popup' => $popup_html])
                     );
                 }
-            } else {
+            }
+            else {
                 $this->core->getQueries()->updateExtensions($_POST['user_id'], $_POST['g_id'], $late_days);
                 $this->core->addSuccessMessage("Extensions have been updated");
                 return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
@@ -237,10 +243,10 @@ class LateController extends AbstractController {
     /**
      * @return Response
      */
-    private function getLateDays(){
+    private function getLateDays() {
         $users = $this->core->getQueries()->getUsersWithLateDays();
         $user_table = array();
-        foreach($users as $user){
+        foreach ($users as $user) {
             $user_table[] = array('user_id' => $user->getId(),'user_firstname' => $user->getDisplayedFirstName(), 'user_lastname' => $user->getDisplayedLastName(), 'late_days' => $user->getAllowedLateDays(), 'datestamp' => $user->getSinceTimestamp(), 'late_day_exceptions' => $user->getLateDayExceptions());
         }
         return Response::JsonOnlyResponse(
@@ -270,10 +276,10 @@ class LateController extends AbstractController {
             $data = null;
             return false;
         }
-        foreach($rows as $row) {
+        foreach ($rows as $row) {
             $fields = explode(',', $row);
             //Remove any extraneous whitespace at beginning/end of all fields.
-            $fields = array_map(function($k) {
+            $fields = array_map(function ($k) {
                 return trim($k);
             }, $fields);
 
@@ -312,7 +318,7 @@ class LateController extends AbstractController {
 
     private function validateHomework($id) {
         $g_ids = $this->core->getQueries()->getAllElectronicGradeablesIds();
-        foreach($g_ids as $index => $value) {
+        foreach ($g_ids as $index => $value) {
             if ($id === $value['g_id']) {
                 return true;
             }

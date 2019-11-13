@@ -58,6 +58,7 @@ use app\libraries\Utils;
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method string|null getVerifiedSubmittyAdminUser()
+ * @method bool isQueueEnabled()
  */
 
 class Config extends AbstractModel {
@@ -211,6 +212,8 @@ class Config extends AbstractModel {
     protected $secret_session;
     /** @property @var string|null */
     protected $verified_submitty_admin_user = null;
+    /** @property @var bool */
+    protected $queue_enabled;
 
     /**
      * Config constructor.
@@ -224,7 +227,7 @@ class Config extends AbstractModel {
 
     public function loadMasterConfigs($config_path) {
         if (!is_dir($config_path)) {
-            throw new ConfigException("Could not find config directory: ". $config_path, true);
+            throw new ConfigException("Could not find config directory: " . $config_path, true);
         }
         $this->config_path = $config_path;
         // Load config details from the master config file
@@ -286,33 +289,33 @@ class Config extends AbstractModel {
             $this->system_message = strval($submitty_json['system_message']);
         }
 
-        $this->base_url = rtrim($this->base_url, "/")."/";
+        $this->base_url = rtrim($this->base_url, "/") . "/";
 
-        if (!empty($submitty_json['cgi_url'])){
-            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/")."/";
+        if (!empty($submitty_json['cgi_url'])) {
+            $this->cgi_url = rtrim($submitty_json['cgi_url'], "/") . "/";
         }
         else {
-            $this->cgi_url = $this->base_url."cgi-bin/";
+            $this->cgi_url = $this->base_url . "cgi-bin/";
         }
 
         if (empty($submitty_json['vcs_url'])) {
             $this->vcs_url = $this->base_url . '{$vcs_type}/';
         }
         else {
-            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/').'/';
+            $this->vcs_url = rtrim($submitty_json['vcs_url'], '/') . '/';
         }
 
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
-        foreach(array('submitty_path', 'submitty_log_path') as $path) {
+        foreach (array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
 
-        foreach(array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
+        foreach (array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
@@ -323,13 +326,13 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
         }
 
-        foreach(['session'] as $key) {
+        foreach (['session'] as $key) {
             $var = "secret_{$key}";
             $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
             if (empty($secrets_json[$key])) {
                 throw new ConfigException("Missing secret var: {$key}");
             }
-            else if (strlen($secrets_json[$key]) < 32) {
+            elseif (strlen($secrets_json[$key]) < 32) {
                 // enforce a minimum 32 bytes for the secrets
                 throw new ConfigException("Secret {$key} is too weak. It should be at least 32 bytes.");
             }
@@ -347,8 +350,10 @@ class Config extends AbstractModel {
         if (!$version_json) {
             throw new ConfigException("Could not find version file: {$this->config_path}/version.json");
         }
-        if (!isset($version_json['most_recent_git_tag']) ||
-            !isset($version_json['short_installed_commit'])) {
+        if (
+            !isset($version_json['most_recent_git_tag'])
+            || !isset($version_json['short_installed_commit'])
+        ) {
             throw new ConfigException("Error parsing version information: {$this->config_path}/version.json");
         }
         $this->latest_tag = $version_json['most_recent_git_tag'];
@@ -366,12 +371,12 @@ class Config extends AbstractModel {
         $this->course_path = FileUtils::joinPaths($this->getSubmittyPath(), "courses", $semester, $course);
 
         if (!file_exists($course_json_path)) {
-            throw new ConfigException("Could not find course config file: ".$course_json_path, true);
+            throw new ConfigException("Could not find course config file: " . $course_json_path, true);
         }
         $this->course_json_path = $course_json_path;
         $this->course_json = json_decode(file_get_contents($course_json_path), true);
         if ($this->course_json === null) {
-            throw new ConfigException("Error parsing the config file: ".json_last_error_msg());
+            throw new ConfigException("Error parsing the config file: " . json_last_error_msg());
         }
 
         if (!isset($this->course_json['database_details']) || !is_array($this->course_json['database_details'])) {
@@ -385,7 +390,7 @@ class Config extends AbstractModel {
             'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
             'display_custom_message', 'room_seating_gradeable_id', 'course_email', 'vcs_base_url', 'vcs_type',
             'private_repository', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message',
-            'auto_rainbow_grades'
+            'auto_rainbow_grades', 'queue_enabled'
         ];
         $this->setConfigValues($this->course_json, 'course_details', $array);
 
@@ -393,12 +398,12 @@ class Config extends AbstractModel {
             $this->vcs_base_url = $this->vcs_url . $this->semester . '/' . $this->course;
         }
 
-        $this->vcs_base_url = rtrim($this->vcs_base_url, "/")."/";
+        $this->vcs_base_url = rtrim($this->vcs_base_url, "/") . "/";
 
         if (isset($this->course_json['hidden_details'])) {
             $this->hidden_details = $this->course_json['hidden_details'];
             if (isset($this->course_json['hidden_details']['course_url'])) {
-                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/")."/";
+                $this->base_url = rtrim($this->course_json['hidden_details']['course_url'], "/") . "/";
             }
         }
 
@@ -407,7 +412,7 @@ class Config extends AbstractModel {
         }
 
         $array = array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor');
+            'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', "queue_enabled");
         foreach ($array as $key) {
             $this->$key = ($this->$key == true) ? true : false;
         }
@@ -430,7 +435,7 @@ class Config extends AbstractModel {
 
         foreach ($keys as $key) {
             if (!isset($config[$section][$key])) {
-              throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration json file");
+                throw new ConfigException("Missing config setting '{$section}.{$key}' in configuration json file");
             }
             $this->$key = $config[$section][$key];
         }
@@ -438,6 +443,20 @@ class Config extends AbstractModel {
 
     public function isSubmittyAdminUserVerified() {
         return !empty($this->verified_submitty_admin_user);
+    }
+
+    public function isSubmittyAdminUserInCourse() {
+        $submitty_admin_user = $this->verified_submitty_admin_user;
+        if ($submitty_admin_user === "") {
+            return false;
+        }
+        $course = $this->getCourse();
+        $semester = $this->getSemester();
+        return $this->core->getQueries()->checkIsInstructorInCourse(
+            $submitty_admin_user,
+            $course,
+            $semester
+        );
     }
 
     /**
