@@ -31,6 +31,7 @@ class LateDays extends AbstractModel {
      * @param Core $core
      * @param User $user
      * @param GradedGradeable[] $graded_gradeables An array of only GradedGradeables
+     * @param array|null $late_day_updates
      */
     public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null) {
         parent::__construct($core);

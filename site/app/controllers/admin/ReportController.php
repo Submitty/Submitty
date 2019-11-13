@@ -243,10 +243,12 @@ class ReportController extends AbstractController {
         //Gradeable iterator will append one gradeable score per loop pass.
         $user_graded_gradeables = [];
 
-        $mem = memory_get_usage();
         $all_late_days = [];
         foreach ($this->core->getQueries()->getLateDayUpdates(null) as $row) {
-            $all_late_days[$row['user_id']] = $row;
+            if (!isset($all_late_days[$row['user_id']])) {
+                $all_late_days[$row['user_id']] = [];
+            }
+            $all_late_days[$row['user_id']][] = $row;
         }
 
         $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
