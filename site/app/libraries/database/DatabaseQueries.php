@@ -80,11 +80,11 @@ class DatabaseQueries {
     /**
      * Gets a user from the submitty database given a user_id.
      *
-     * @param $user_id
+     * @param string $user_id
      *
      * @return User
      */
-    public function getSubmittyUser($user_id) {
+    public function getSubmittyUser(string $user_id) {
         $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
@@ -108,11 +108,11 @@ class DatabaseQueries {
     /**
      * Gets some user's api key from the submitty database given a user_id.
      *
-     * @param $user_id
+     * @param string $user_id
      *
      * @return string | null
      */
-    public function getSubmittyUserApiKey($user_id) {
+    public function getSubmittyUserApiKey(string $user_id) {
         $this->submitty_db->query("SELECT api_key FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['api_key'] : null;
     }
@@ -120,7 +120,7 @@ class DatabaseQueries {
     /**
      * Refreshes some user's api key from the submitty database given a user_id.
      *
-     * @param $user_id
+     * @param string $user_id
      */
     public function refreshUserApiKey($user_id) {
         $this->submitty_db->query("UPDATE users SET api_key=encode(gen_random_bytes(16), 'hex') WHERE user_id=?", array($user_id));
@@ -129,15 +129,14 @@ class DatabaseQueries {
     /**
      * Gets a user from their api key.
      *
-     * @param $api_key
+     * @param string $api_key
      *
      * @return string | null
      */
-    public function getSubmittyUserByApiKey($api_key) {
+    public function getSubmittyUserByApiKey(string $api_key) {
         $this->submitty_db->query("SELECT user_id FROM users WHERE api_key=?", array($api_key));
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : null;
     }
-
 
     /**
      * Gets a user from the database given a user_id.
@@ -401,15 +400,15 @@ WHERE status = 1"
     /**
      * Order: Favourite and Announcements => Announcements only => Favourite only => Others
      *
-     * @param  array(int)    categories_ids     Filter threads having atleast provided categories
-     * @param  array(int)    thread_status      Filter threads having thread status among            $thread_status
-     * @param  bool          unread_threads     Filter threads to show only unread threads
-     * @param  bool          show_deleted       Consider deleted threads
-     * @param  bool          show_merged_thread Consider merged threads
-     * @param  string        current_user       user_id of currrent user
-     * @param  int           blockNumber        Index of window of thread list(-1 for last)
-     * @param  int           thread_id          If blockNumber is not known, find it using thread_id
-     * @return array('block_number' => int, 'threads' => array(threads))    Ordered filtered threads
+     * @param  int[]    $categories_ids     Filter threads having atleast provided categories
+     * @param  int[]    $thread_status      Filter threads having thread status among            $thread_status
+     * @param  bool     $unread_threads     Filter threads to show only unread threads
+     * @param  bool     $show_deleted       Consider deleted threads
+     * @param  bool     $show_merged_thread Consider merged threads
+     * @param  string   $current_user       user_id of currrent user
+     * @param  int      $blockNumber        Index of window of thread list(-1 for last)
+     * @param  int      $thread_id          If blockNumber is not known, find it using thread_id
+     * @return array    Ordered filtered threads - array('block_number' => int, 'threads' => array(threads))
      */
     public function loadThreadBlock($categories_ids, $thread_status, $unread_threads, $show_deleted, $show_merged_thread, $current_user, $blockNumber, $thread_id) {
         $blockSize = 30;
@@ -703,8 +702,8 @@ WHERE status = 1"
      *
      * @param  integer      $post_id
      * @param  integer      $thread_id
-     * @param  integer(0/1) $newStatus - 1 implies deletion and 0 as undeletion
-     * @return boolean - Is first post of thread
+     * @param  integer      $newStatus - 1 implies deletion and 0 as undeletion
+     * @return boolean|null Is first post of thread
      */
     public function setDeletePostStatus($post_id, $thread_id, $newStatus) {
         $this->course_db->query("SELECT parent_id from posts where id=?", array($post_id));
@@ -876,7 +875,7 @@ WHERE semester=? AND course=? AND user_id=?",
     /**
      * Gets whether a gradeable exists already
      *
-     * @param $g_id the gradeable id to check for
+     * @param string $g_id the gradeable id to check for
      *
      * @return bool
      */
@@ -884,7 +883,6 @@ WHERE semester=? AND course=? AND user_id=?",
         $this->course_db->query('SELECT EXISTS (SELECT g_id FROM gradeable WHERE g_id= ?)', array($g_id));
         return $this->course_db->row()['exists'] ?? false; // This shouldn't happen, but let's assume false
     }
-
 
     public function getGradeableVersionHasAutogradingResults($g_id, $version, $user_id, $team_id) {
         $query = "SELECT * FROM electronic_gradeable_data WHERE g_id=? AND g_version=? AND ";
@@ -1500,8 +1498,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
      * Finds the number of users who has a non NULL last_viewed_time for team assignments
      * NULL times represent unviewed, non-null represent the user has viewed the latest version already
      *
-     * @param  $gradeable
-     * @param  $sections
+     * @param  Gradeable $gradeable
+     * @param  array $sections
      * @return integer
      */
     public function getNumUsersWhoViewedTeamAssignmentBySection($gradeable, $sections) {
@@ -1533,8 +1531,8 @@ SELECT round((AVG(g_score) + AVG(autograding)),2) AS avg_score, round(stddev_pop
     }
 
     /**
-     * @param  $gradeable_id
-     * @param  $team_id
+     * @param  string $gradeable_id
+     * @param  string $team_id
      * @return integer
      */
     public function getActiveVersionForTeam($gradeable_id, $team_id) {
@@ -1786,7 +1784,7 @@ ORDER BY rotating_section"
     /**
      * Gets rotating sections of each grader for a gradeable
      *
-     * @param  $gradeable_id
+     * @param  string $gradeable_id
      * @return array An array (indexed by user id) of arrays of section numbers
      */
     public function getRotatingSectionsByGrader($gradeable_id) {
@@ -1985,7 +1983,7 @@ ORDER BY user_id ASC"
     /**
      * Gets all user_ids that are on a team for a given gradeable
      *
-     * @param   $gradeable
+     * @param   Gradeable $gradeable
      * @returns string[]
      */
     public function getUsersOnTeamsForGradeable($gradeable) {
@@ -2012,11 +2010,11 @@ ORDER BY user_id ASC"
      * code and the grading scripts have no concept of it. This will either update or insert the row in
      * electronic_gradeable_version for the given gradeable and student.
      *
-     * @param $g_id
-     * @param $user_id
-     * @param $team_id
-     * @param $version
-     * @param $timestamp
+     * @param string $g_id
+     * @param string|null $user_id
+     * @param string|null $team_id
+     * @param int    $version
+     * @param string $timestamp
      */
     public function insertVersionDetails($g_id, $user_id, $team_id, $version, $timestamp) {
         $this->course_db->query(
@@ -2057,10 +2055,10 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * only be run directly if we know that the row exists (so when changing the active version for example) as
      * otherwise it'll throw an exception as it does not do error checking on if the row exists.
      *
-     * @param $g_id
-     * @param $user_id
-     * @param $team_id
-     * @param $version
+     * @param string      $g_id
+     * @param string|null $user_id
+     * @param string|null $team_id
+     * @param int         $version
      */
     public function updateActiveVersion($g_id, $user_id, $team_id, $version) {
         if ($user_id === null) {
@@ -2177,8 +2175,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Finds the viewed time for a specific user on a team.
      * Assumes team_ids are unique (cannot be used for 2 different gradeables)
      *
-     * @param $team_id
-     * @param $user_id
+     * @param string $team_id
+     * @param string $user_id
      */
     public function getTeamViewedTime($team_id, $user_id) {
         $this->course_db->query("SELECT last_viewed_time FROM teams WHERE team_id = ? and user_id=?", array($team_id,$user_id));
@@ -2189,8 +2187,8 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Updates the viewed time to now for a specific user on a team.
      * Assumes team_ids are unique (cannot be used for 2 different gradeables)
      *
-     * @param $team_id
-     * @param $user_id
+     * @param string $team_id
+     * @param string $user_id
      */
     public function updateTeamViewedTime($team_id, $user_id) {
         $this->course_db->query(
@@ -2203,7 +2201,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Updates the viewed time to NULL for all users on a team.
      * Assumes team_ids are unique (cannot be used for 2 different gradeables)
      *
-     * @param $team_id
+     * @param string $team_id
      */
     public function clearTeamViewedTime($team_id) {
         $this->course_db->query(
@@ -2216,7 +2214,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Finds all teams for a gradeable and creates a map for each with key => user_id ; value => last_viewed_tim
      * Assumes team_ids are unique (cannot be used for 2 different gradeables)
      *
-     * @param  $gradeable
+     * @param  Gradeable $gradeable
      * @return array
      */
     public function getAllTeamViewedTimesForGradeable($gradeable) {
@@ -2244,7 +2242,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     /**
      * @todo: write phpdoc
      *
-     * @param $session_id
+     * @param string $session_id
      *
      * @return array
      */
@@ -2294,7 +2292,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
     /**
      * Remove a session associated with a given session_id
      *
-     * @param $session_id
+     * @param string $session_id
      */
     public function removeSessionById($session_id) {
         $this->submitty_db->query("DELETE FROM sessions WHERE session_id=?", array($session_id));
@@ -2540,7 +2538,7 @@ VALUES(?, ?, ?, ?, 0, 0, 0, 0, ?)",
      * Return an array of team_ids for a gradeable that have at least one user in the team
      *
      * @param  string $g_id
-     * @return [ team ids ]
+     * @return string[] team ids
      */
     public function getTeamsWithMembersFromGradeableID($g_id) {
         $team_map = $this->core->getQueries()->getTeamIdsAllGradeables();
@@ -2869,7 +2867,7 @@ ORDER BY gt.{$section_key}",
      *
      * @param  string $gradeable_id
      * @param  string $user_id
-     * @return SimpleGradeOverriddenUser[]
+     * @return SimpleGradeOverriddenUser|null
      */
     public function getAUserWithOverriddenGrades($gradeable_id, $user_id) {
         $this->course_db->query(
@@ -3042,8 +3040,7 @@ ORDER BY gt.{$section_key}",
      * An active course may be accessed by all users
      *
      * @param  string $user_id
-     * @param  string $submitty_path
-     * @return array - unarchived courses (and their details) accessible by $user_id
+     * @return array unarchived courses (and their details) accessible by $user_id
      */
     public function getUnarchivedCoursesById($user_id) {
         $this->submitty_db->query(
@@ -3081,8 +3078,7 @@ ORDER BY u.user_group ASC,
      * Inactive courses may only be accessed by the instructor
      *
      * @param  string $user_id
-     * @param  string $submitty_path
-     * @return array - archived courses (and their details) accessible by $user_id
+     * @return array archived courses (and their details) accessible by $user_id
      */
     public function getArchivedCoursesById($user_id) {
         $this->submitty_db->query(
@@ -3510,8 +3506,8 @@ AND gc_id IN (
     /**
      * Gets the user's row in the notification settings table
      *
-     * @param string $column
-     * @param string $user_id
+     * @param string[] $user_ids
+     * @return array
      */
     public function getUsersNotificationSettings(array $user_ids) {
         $params = $user_ids;
@@ -3550,8 +3546,8 @@ AND gc_id IN (
     /**
      * returns all authors who want to be notified if a post has been made in a thread they have posted in
      *
-     * @param  $thread_id
-     * @param  $column    ("reply_in_thread" or "reply_in_thread_email")
+     * @param  int $thread_id
+     * @param  string $column    ("reply_in_thread" or "reply_in_thread_email")
      * @return array
      */
     public function getAllThreadAuthors($thread_id, $column) {
@@ -3584,7 +3580,8 @@ AND gc_id IN (
     /**
      * Sends notifications to all recipients
      *
-     * @param array $notifications
+     * @param array $flattened_notifications
+     * @param int   $notification_count
      */
     public function insertNotifications(array $flattened_notifications, int $notification_count) {
         // PDO Placeholders
@@ -3621,7 +3618,7 @@ AND gc_id IN (
      *
      * @param  string $user_id
      * @param  bool   $show_all
-     * @return array(Notification)
+     * @return Notification[]
      */
     public function getUserNotifications($user_id, $show_all) {
         if ($show_all) {
@@ -4188,8 +4185,8 @@ AND gc_id IN (
      * Gets a single GradedGradeable associated with the provided gradeable and
      *  submitter.  Note: The user's team for this gradeable will be retrived if provided
      *
-     * @param  \app\models\gradeable\Gradeable $gradeable
-     * @param  Submitter|null                  $submitter The submitter to get data for
+     * @param  Gradeable $gradeable
+     * @param  Submitter                  $submitter The submitter to get data for
      * @return GradedGradeable|null The GradedGradeable or null if none found
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
@@ -4205,10 +4202,10 @@ AND gc_id IN (
      *  both $users and $teams are null, then everyone will be retrieved.
      *  Note: The users' teams will be included in the search
      *
-     * @param  \app\models\gradeable\Gradeable[] The gradeable(s) to retrieve data for
-     * @param  string[]|string|null                                                    $users     The id(s) of the user(s) to get data for
-     * @param  string[]|string|null                                                    $teams     The id(s) of the team(s) to get data for
-     * @param  string[]|string|null                                                    $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
+     * @param  \app\models\gradeable\Gradeable[] $gradeables The gradeable(s) to retrieve data for
+     * @param  string[]|string|null              $users     The id(s) of the user(s) to get data for
+     * @param  string[]|string|null              $teams     The id(s) of the team(s) to get data for
+     * @param  string[]|string|null              $sort_keys An ordered list of keys to sort by (i.e. `user_id` or `g_id DESC`)
      * @return \Iterator Iterator to access each GradeableData
      * @throws \InvalidArgumentException If any GradedGradeable or GradedComponent fails to construct
      */
@@ -5100,7 +5097,7 @@ AND gc_id IN (
     /**
      * Gives true if thread is locked
      *
-     * @param  $thread_id
+     * @param  int $thread_id
      * @return bool
      */
     public function isThreadLocked($thread_id) {
@@ -5119,7 +5116,7 @@ AND gc_id IN (
      * If a component_id is passed in, then the list of returned users will be limited to users with
      * that specific component ungraded
      *
-     * @param  Gradeable\Gradeable $gradeable
+     * @param  Gradeable $gradeable
      * @return array
      */
     public function getUsersNotFullyGraded(Gradeable $gradeable, $component_id = "-1") {
@@ -5356,9 +5353,9 @@ AND gc_id IN (
 
         // If one array is blank, and the other is null or also blank, don't get anything
         if (
-            $users === [] && $teams === null
-            || $users === null && $teams === []
-            || $users === [] && $teams === []
+            ($users === [] && $teams === null)
+            || ($users === null && $teams === [])
+            || ($users === [] && $teams === [])
         ) {
             return new \EmptyIterator();
         }
@@ -5665,9 +5662,7 @@ AND gc_id IN (
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
-            /**
- * @var Gradeable $gradeable
-*/
+            /** @var Gradeable $gradeable */
             $gradeable = $gradeables_by_id[$row['g_id']];
 
             // Get the submitter
@@ -5711,7 +5706,7 @@ AND gc_id IN (
                 $gradeable,
                 new Submitter($this->core, $submitter),
                 [
-                'late_day_exceptions' => $late_day_exceptions
+                    'late_day_exceptions' => $late_day_exceptions
                 ]
             );
             $ta_graded_gradeable = null;
