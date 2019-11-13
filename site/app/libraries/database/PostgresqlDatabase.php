@@ -132,10 +132,10 @@ class PostgresqlDatabase extends AbstractDatabase {
      * Method that given an element figures out how to add it to the $return array whether it's a string, a numeric,
      * a null, a boolean, or an unquoted string
      *
-     * @param string $element     element to analyze
-     * @param bool   $have_string do we have a quoted element (using either ' or " characters around the string)
-     * @param bool   $parse_bools set to true to convert "true"/"false" to booleans instead of strings
-     * @param array  &$return     this is the array being built to contain the parsed PG array
+     * @param int|string $element     element to analyze
+     * @param bool       $have_string do we have a quoted element (using either ' or " characters around the string)
+     * @param bool       $parse_bools set to true to convert "true"/"false" to booleans instead of strings
+     * @param array      $return     this is the array being built to contain the parsed PG array
      */
     private function parsePGArrayValue($element, $have_string, $parse_bools, &$return) {
         if ($have_string) {
