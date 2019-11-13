@@ -40,18 +40,7 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     public function toArray() {
-        $details = parent::toArray();
-
-        // Uncomment this block if we want to serialize the scores
-//        $visible_percent = $this->getVisiblePercent();
-//        $visible_percent = is_nan($visible_percent) ? 0 : $visible_percent;
-//        $details['visible_score'] = $visible_percent;
-//
-//        $total_score = $this->getTotalPercent();
-//        $total_score = is_nan($total_score) ? 0 : $total_score;
-//        $details['total_score'] = $total_score;
-
-        return $details;
+        return parent::toArray();
     }
 
     /**

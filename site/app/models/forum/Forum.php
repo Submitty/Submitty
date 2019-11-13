@@ -58,9 +58,7 @@ class Forum extends AbstractModel {
         }
 
         //Will use forum queries
-        $query_execute = $this->core->getQueries()->addPinnedThread($user, $thread_id, $toggle);
-
-        return $query_execute;
+        return $this->core->getQueries()->addPinnedThread($user, $thread_id, $toggle);
     }
 
     public function getEditContent($post_id) {

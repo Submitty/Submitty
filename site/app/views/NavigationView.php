@@ -368,15 +368,13 @@ class NavigationView extends AbstractView {
             }
         }
 
-        $button = new Button($this->core, [
+        return new Button($this->core, [
             "title" => $team_button_text,
             "subtitle" => $team_display_date,
             "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'team']),
             "class" => "btn {$team_button_type} btn-nav",
             "name" => "team-btn"
         ]);
-
-        return $button;
     }
 
     /**
@@ -400,13 +398,11 @@ class NavigationView extends AbstractView {
 
         //Button types that override any other buttons
         if (!$gradeable->hasAutogradingConfig()) {
-            $button = new Button($this->core, [
+            return new Button($this->core, [
                 "title" => "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh",
                 "disabled" => true,
                 "class" => "btn btn-default btn-nav"
             ]);
-
-            return $button;
         }
 
         if ($graded_gradeable !== null) {
@@ -562,7 +558,7 @@ class NavigationView extends AbstractView {
             }
         }
 
-        $button = new Button($this->core, [
+        return new Button($this->core, [
             "title" => $title,
             "subtitle" => $display_date,
             "href" => $href,
@@ -571,8 +567,6 @@ class NavigationView extends AbstractView {
             "class" => "btn {$class} btn-nav btn-nav-submit",
             "name" => "submit-btn"
         ]);
-
-        return $button;
     }
 
     /**
@@ -607,24 +601,20 @@ class NavigationView extends AbstractView {
         //Button types that override any other buttons
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
             if (!$gradeable->hasAutogradingConfig()) {
-                $button = new Button($this->core, [
+                return new Button($this->core, [
                     "title" => "Need to run BUILD_{$this->core->getConfig()->getCourse()}.sh",
                     "disabled" => true,
                     "class" => "btn btn-default btn-nav"
                 ]);
-
-                return $button;
             }
 
             if ($gradeable->anyActiveRegradeRequests()) {
                 //Open grade inquiries
-                $button = new Button($this->core, [
+                return new Button($this->core, [
                     "title" => "REGRADE",
                     "class" => "btn btn-danger btn-nav btn-nav-grade",
                     "href" => $href
                 ]);
-
-                return $button;
             }
         }
 
@@ -691,7 +681,7 @@ class NavigationView extends AbstractView {
             }
         }
 
-        $button = new Button($this->core, [
+        return new Button($this->core, [
             "title" => $title,
             "subtitle" => $date_text,
             "href" => $href,
@@ -699,8 +689,6 @@ class NavigationView extends AbstractView {
             "class" => "btn btn-nav btn-nav-grade {$class}",
             "name" => "grade-btn"
         ]);
-
-        return $button;
     }
 
     /**
@@ -708,14 +696,13 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getEditButton(Gradeable $gradeable) {
-        $button = new Button($this->core, [
+        return new Button($this->core, [
             "title" => "Edit Gradeable Configuration",
             "href" => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'update']),
             "class" => "fas fa-pencil-alt black-btn",
             "title_on_hover" => true,
             "aria_label" => "edit gradeable {$gradeable->getTitle()}"
         ]);
-        return $button;
     }
 
         /**
@@ -723,7 +710,7 @@ class NavigationView extends AbstractView {
      * @return Button|null
      */
     private function getDeleteButton(Gradeable $gradeable) {
-        $button = new Button($this->core, [
+        return new Button($this->core, [
             "title" => "Delete Gradeable",
             "href" => "javascript:newDeleteGradeableForm('" .
                 $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'delete'])
@@ -732,7 +719,6 @@ class NavigationView extends AbstractView {
             "title_on_hover" => true,
             "aria_label" => "Delete {$gradeable->getTitle()}"
         ]);
-        return $button;
     }
 
     /**

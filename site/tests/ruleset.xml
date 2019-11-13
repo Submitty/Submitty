@@ -57,8 +57,6 @@
         <exclude name="SlevomatCodingStandard.PHP.TypeCast.InvalidCastUsed" />
         <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing.WhitespaceBeforeColon" />
         <exclude name="SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable" />
-        <exclude name="SlevomatCodingStandard.Variables.UselessVariable.UselessVariable" />
-        <exclude name="SlevomatCodingStandard.Variables.DuplicateAssignmentToVariable.DuplicateAssignment" />
     </rule>
 
     <rule ref="PSR1.Files.SideEffects.FoundWithSymbols">

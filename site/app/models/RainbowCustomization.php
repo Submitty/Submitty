@@ -161,9 +161,7 @@ class RainbowCustomization extends AbstractModel {
     }
 
     public function getMessages() {
-        $messages = !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
-
-        return $messages;
+        return !is_null($this->RCJSON) ? $this->RCJSON->getMessages() : [];
     }
 
     /**
