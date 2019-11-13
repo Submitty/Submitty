@@ -5357,9 +5357,9 @@ AND gc_id IN (
 
         // If one array is blank, and the other is null or also blank, don't get anything
         if (
-            $users === [] && $teams === null
-            || $users === null && $teams === []
-            || $users === [] && $teams === []
+            ($users === [] && $teams === null)
+            || ($users === null && $teams === [])
+            || ($users === [] && $teams === [])
         ) {
             return new \EmptyIterator();
         }
@@ -5666,9 +5666,7 @@ AND gc_id IN (
 
 
         $constructGradedGradeable = function ($row) use ($gradeables_by_id) {
-            /**
- * @var Gradeable $gradeable
-*/
+            /** @var Gradeable $gradeable */
             $gradeable = $gradeables_by_id[$row['g_id']];
 
             // Get the submitter
@@ -5712,7 +5710,7 @@ AND gc_id IN (
                 $gradeable,
                 new Submitter($this->core, $submitter),
                 [
-                'late_day_exceptions' => $late_day_exceptions
+                    'late_day_exceptions' => $late_day_exceptions
                 ]
             );
             $ta_graded_gradeable = null;
