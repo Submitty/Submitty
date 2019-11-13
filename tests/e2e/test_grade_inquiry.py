@@ -1,5 +1,6 @@
 from .base_testcase import BaseTestCase
 import os
+import unittest
 class TestGradeInquiry(BaseTestCase):
     def __init__(self, testname):
         super().__init__(testname, log_in=False)
@@ -33,10 +34,9 @@ class TestGradeInquiry(BaseTestCase):
         self.driver.find_element_by_id("nav-sidebar-submitty").click()
 
     # TA GRADING INTERFACE TESTS
+    # travis should not run this
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_normal_submission_grade_inquiry_panel(self):
-        # travis should not run this
-        if "TRAVIS_BUILD_DIR" in os.environ and os.environ["TRAVIS_BUILD_DIR"] is not None:
-            return
         gradeable_id = 'grades_released_homework'
         grade_inquiry_deadline_date = "9998-01-01 00:00:00"
 
@@ -56,12 +56,9 @@ class TestGradeInquiry(BaseTestCase):
         assert len(buttons) == 1
         assert buttons[0].text == "Submit Grade Inquiry"
 
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_no_submission_grade_inquiry_panel(self):
-        # travis should not run this
-        if "TRAVIS_BUILD_DIR" in os.environ and os.environ["TRAVIS_BUILD_DIR"] is not None:
-            return
         gradeable_id = 'grades_released_homework'
-
         # login as instructor
         self.log_in(user_id='instructor')
         self.click_class('sample')
@@ -81,11 +78,9 @@ class TestGradeInquiry(BaseTestCase):
         buttons = self.driver.find_elements_by_xpath("//button[contains(@class,'gi-submit')]")
         assert len(buttons) == 0
 
-     # STUDENT SUBMISSION TESTS
+    # STUDENT SUBMISSION TESTS
+    @unittest.skipUnless(os.environ.get('TRAVIS_BUILD_DIR') is None, "cannot run in Travis-CI")
     def test_normal_submission_student_grade_inquiry_box(self):
-        # travis should not run this
-        if "TRAVIS_BUILD_DIR" in os.environ and os.environ["TRAVIS_BUILD_DIR"] is not None:
-            return
         gradeable_id = 'grades_released_homework'
         grade_inquiry_deadline_date = "9998-01-01 00:00:00"
 
