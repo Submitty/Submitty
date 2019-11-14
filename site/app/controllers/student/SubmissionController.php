@@ -10,6 +10,7 @@ use app\libraries\Logger;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
@@ -127,8 +128,134 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->addInternalCss('grade-inquiry.css');
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
+
+                // Query for values here before moving to the view
+                $students_full = [];
+                if ($this->core->getUser()->accessGrading()) {
+                    $students = $this->core->getQueries()->getAllUsers();
+                    $student_ids = array();
+                    foreach ($students as $student) {
+                        $student_ids[] = $student->getId();
+                    }
+
+                    $students_version = array();
+                    foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                        /** @var GradedGradeable $gg */
+                        $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
+                    }
+                    $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
+                }
+
+                $all_directories = $gradeable->getSplitPdfFiles();
+                $files = [];
+                $cover_images = [];
+                $count = 1;
+                $count_array = array();
+                $bulk_upload_data = [];
+                foreach ($all_directories as $timestamp => $content) {
+                    $dir_files = $content['files'];
+                    foreach ($dir_files as $filename => $details) {
+                        if($filename === 'decoded.json'){
+                            $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                        }
+                        $clean_timestamp = str_replace('_', ' ', $timestamp);
+                        $path = rawurlencode(htmlspecialchars($details['path']));
+                        //get the cover image if it exists
+                        if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
+                            $corrected_filename = rawurlencode(htmlspecialchars($filename));
+                            $url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                                    'dir' => 'split_pdf',
+                                    'file' => $corrected_filename,
+                                    'path' => $path,
+                                    'ta_grading' => 'false'
+                                ]);
+                            $cover_images[] = [
+                                'filename' => $corrected_filename,
+                                'url' => $url,
+                            ];
+                        }
+                        if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' ||
+                            pathinfo($filename)['extension'] === "jpg") {
+                            continue;
+                        }
+                        // get the full filename for PDF popout
+                        // add 'timestamp / full filename' to count_array so that path to each filename is to the full PDF, not the cover
+                        $filename = rawurlencode(htmlspecialchars($filename));
+                        $url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                                'dir' => 'split_pdf',
+                                'file' => $filename,
+                                'path' => $path,
+                                'ta_grading' => 'false'
+                            ]);
+                        $filename_full = str_replace('_cover.pdf', '.pdf', $filename);
+                        $path_full = str_replace('_cover.pdf', '.pdf', $path);
+                        $url_full = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                                'dir' => 'uploads',
+                                'file' => $filename_full,
+                                'path' => $path_full,
+                                'ta_grading' => 'false'
+                            ]);
+                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
+                        //decode the filename after to display correctly for users
+                        $filename_full = rawurldecode($filename_full);
+                        $cover_image_name = substr($filename,0,-3) . "jpg";
+                        $cover_image = [];
+                        foreach ($cover_images as $img) {
+                            if($img['filename'] === $cover_image_name)
+                                $cover_image = $img;
+                        }
+                        $files[] = [
+                            'clean_timestamp' => $clean_timestamp,
+                            'filename_full' => $filename_full,
+                            'filename' => $filename,
+                            'url' => $url,
+                            'url_full' => $url_full,
+                            'cover_image' => $cover_image
+                        ];
+                        $count++;
+                    }
+                }
+
+                $is_valid = true;
+
+                for ($i = 0; $i < count($files); $i++) {
+                    if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+                        continue;
+                    }else if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+                        $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                    }
+
+                    $page_count = 0;
+                    $id = '';
+
+                    //decoded.json may be read before the assoicated data is written, check if key exists first
+                    if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+                        if(array_key_exists('id', $data)){
+                            $id = $data['id'];
+                            $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
+                        }else{
+                            //set the blank id as invalid for now, after a page refresh it will recorrect
+                            $id = '';
+                            $is_valid = false;
+                        }
+                        if(array_key_exists('page_count', $data)){
+                            $page_count = $data['page_count'];
+                        }
+                    }else{
+                        $is_valid = true;
+                        $id = '';
+                        if(array_key_exists('page_count', $bulk_upload_data)){
+                            $page_count = $bulk_upload_data['page_count'];
+                        }
+                    }
+
+                    $files[$i] += ['page_count' => $page_count,
+                        'id' => $id,
+                        'valid' => $is_valid ];
+                }
+
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $students_full, $is_valid, $count_array, $files, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
