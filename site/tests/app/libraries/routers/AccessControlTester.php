@@ -41,7 +41,7 @@ class AccessControlTester extends BaseUnitTest {
         $min_permission = ['course.view'],
         $logged_in = true
     ) {
-        for ($role = User::GROUP_STUDENT; $role > $min_role; $role --) {
+        for ($role = User::GROUP_STUDENT; $role > $min_role; $role--) {
             $core = $this->getAccessTestCore($role, $min_permission, $logged_in);
             $request = Request::create(
                 $endpoint,

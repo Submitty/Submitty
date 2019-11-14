@@ -4,13 +4,15 @@ use app\libraries\FileUtils;
 
 class PDFView extends AbstractView {
     /**
+     * adds to our buffer a twig output of either student view or grader view.
+     *
      * @param $gradeable_id
      * @param $user_id
      * @param $filename
      * @param $annotation_jsons
      * @param $is_student
      *
-     * @return a twig output of either student view or grader view.
+     * @return void
      */
     public function showPDFEmbedded($params){
         $this->core->getOutput()->useFooter(false);
@@ -21,7 +23,7 @@ class PDFView extends AbstractView {
         $localcss = array();
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdf_embedded.css'), 'css');
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.css'), 'vendor');
-        
+
         $localjs = array();
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');

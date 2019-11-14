@@ -4,6 +4,7 @@ namespace app\models\forum;
 
 use app\libraries\ForumUtils;
 use app\models\AbstractModel;
+use app\models\Email;
 
 /**
  * Class Forum
@@ -12,9 +13,9 @@ use app\models\AbstractModel;
  * This contains a forum specific database object
  */
 class Forum extends AbstractModel {
-    
+
     private $forum_db = null;
-    
+
     public function __construct($core) {
         parent::__construct($core);
         //$this->forum_db = $forum_db;
@@ -64,7 +65,7 @@ class Forum extends AbstractModel {
 
     public function getEditContent($post_id) {
         if($this->checkPostEditAccess($post_id) && !empty($post_id)) {
-            
+
             //This will return a Post obj also forum queries...
             $post = $this->core->getQueries()->getPost($post_id);
             $output = array();
@@ -120,10 +121,10 @@ class Forum extends AbstractModel {
 
         //Validate the post data prior to thread data
         $goodPost = $this->validatePostData($data, false, true);
-        
+
         if( !$goodPost[0] ||
             empty($data['title']) || empty($data['status']) ||
-            empty($data['announcement']) || empty($data['categories']) || 
+            empty($data['announcement']) || empty($data['categories']) ||
             empty($data['email_announcement']) || $data['parent_id'] !== -1 ||
             !$this->isValidCategories($this->core->getQueries()->getCategories(), $data['categories']) || (strlen($data['content']) > 5000)  ){
             return [false, null];
@@ -135,7 +136,7 @@ class Forum extends AbstractModel {
 
     private function validatePostData(Array $data, bool $createObject, bool $isThread) : Array {
 
-        if( empty($data['content']) || empty($data['anon']) || 
+        if( empty($data['content']) || empty($data['anon']) ||
             empty($data['thread_id']) || empty($data['parent_id']) ||
             (!$isThread && !$this->core->getQueries()->existsThread($data['thread_id'])) ||
             (!$isThread && !$this->core->getQueries()->existsPost($data['thread_id'], $data['parent_id'])) || (strlen($data['content']) > 5000) ) {

@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+namespace tests\app\libraries\response;
+
 use app\libraries\Core;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\RedirectResponse;

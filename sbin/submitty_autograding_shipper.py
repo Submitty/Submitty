@@ -128,10 +128,7 @@ def update_worker_json(name, entry):
     else:
         #try to establish an ssh connection to the host
         try:
-            ssh = paramiko.SSHClient()
-            ssh.get_host_keys()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-            ssh.connect(hostname = host, username = user, timeout=5)
+            ssh = establish_ssh_connection(None, user, host, only_try_once = True)
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: could not ssh to {0}@{1} due to following error: {2}".format(user, host,str(e)))
@@ -158,6 +155,31 @@ def update_worker_json(name, entry):
             sftp.close()
             ssh.close()
             return success
+
+def establish_ssh_connection(my_name, user, host, only_try_once = False):
+    """
+    Returns a connected paramiko ssh session.
+    Tries to connect until a connection is established, unless only_try_once
+    is set to true. If only_try_once is true, raise whatever connection error is thrown.
+    """
+    connected = False
+    ssh = None
+    retry_delay = .1
+    while not connected:
+        ssh = paramiko.SSHClient()
+        ssh.get_host_keys()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        try:
+            ssh.connect(hostname = host, username = user, timeout=10)
+            connected = True
+        except:
+            if only_try_once:
+                raise
+            time.sleep(retry_delay)
+            retry_relay = min(10, retry_delay * 2)
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=f"{my_name} Could not establish connection with {user}@{host} going to re-try.")
+            autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
+    return ssh
 
 # ==================================================================================
 def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_grade):
@@ -203,15 +225,12 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             print("ERROR: could not move files due to the following error: {0}".format(e))
             return False
     else:
+        sftp = ssh = None
         try:
             user, host = which_machine.split("@")
-            ssh = paramiko.SSHClient()
-            ssh.get_host_keys()
-            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-            ssh.connect(hostname = host, username = user, timeout=5)
+            ssh = establish_ssh_connection(my_name, user, host)
             sftp = ssh.open_sftp()
-
             sftp.put(autograding_zip_tmp,autograding_zip)
             sftp.put(submission_zip_tmp,submission_zip)
             with open(todo_queue_file, 'w') as outfile:
@@ -226,8 +245,10 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
             print("Could not move files due to the following error: {0}".format(e))
             success = False
         finally:
-            sftp.close()
-            ssh.close()
+            if sftp:
+                sftp.close()
+            if ssh:
+                ssh.close()
             os.remove(autograding_zip_tmp)
             os.remove(submission_zip_tmp)
             return success
@@ -274,14 +295,10 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
           local_done_queue_file = target_done_queue_file
           local_results_zip = target_results_zip
     else:
-        user, host = which_machine.split("@")
-        ssh = paramiko.SSHClient()
-        ssh.get_host_keys()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
+        ssh = sftp = fd1 = fd2 = local_done_queue_file = local_results_zip = None
         try:
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,message=f'connecting to {user}@{host}')
-            ssh.connect(hostname = host, username = user)
+            user, host = which_machine.split("@")
+            ssh = establish_ssh_connection(which_machine, user, host)
             sftp = ssh.open_sftp()
             fd1, local_done_queue_file = tempfile.mkstemp()
             fd2, local_results_zip     = tempfile.mkstemp()
@@ -293,17 +310,14 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             sftp.remove(target_results_zip)
             success = True
         #This is the normal case (still grading on the other end) so we don't need to print anything.
-        except socket.timeout:
+        except (socket.timeout, TimeoutError) as e:
             success = False
         except FileNotFoundError:
-            try:
-                os.remove(local_results_zip)
-            except Exception as e:
-                pass
-            try:
-                os.remove(local_done_queue_file)
-            except Exception as e:
-                pass
+            # Remove results files
+            for var in [local_results_zip, local_done_queue_file]:
+                if var:
+                    with contextlib.suppress(FileNotFoundError):
+                        os.remove(var)
             success = False
         #In this more general case, we do want to print what the error was.
         #TODO catch other types of exception as we identify them.
@@ -311,26 +325,28 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message="ERROR: Could not retrieve the file from the foreign machine "+str(e))
             print("ERROR: Could not retrieve the file from the foreign machine.\nERROR: {0}".format(e))
-            try:
-                os.remove(local_results_zip)
-            except Exception as e:
-                pass
-            try:
-                os.remove(local_done_queue_file)
-            except Exception as e:
-                pass
+
+            # Remove results files
+            for var in [local_results_zip, local_done_queue_file]:
+                if var:
+                    with contextlib.suppress(FileNotFoundError):
+                        os.remove(var)
+
             success = False
         finally:
-            try:
-                os.close(fd1)
-                os.close(fd2)
-            except Exception as e:
-                pass
-            try:
-                sftp.close()
-            except Exception as e:
-                pass
-            ssh.close()
+            # Close SSH connections
+            for var in [sftp, ssh]:
+                if var:
+                    var.close()
+
+            # Close file descriptors
+            for var in [fd1, fd2]:
+                if var:
+                    try:
+                        os.close(var)
+                    except Exception:
+                        pass
+
             if not success:
                 return False
     # archive the results of grading
@@ -374,7 +390,12 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
         # prepare the job
         shipper_counter=0
 
-        prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
+        #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
+        while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
+            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR going to re-try prepare_job: " + queue_file)
+
+        prep_job_success = True
+        
         if not prep_job_success:
             print (my_name, " ERROR unable to prepare job: ", queue_file)
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR unable to prepare job: " + queue_file)

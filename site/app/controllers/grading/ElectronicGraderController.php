@@ -447,7 +447,9 @@ class ElectronicGraderController extends AbstractController {
 
         $student_ids = [];
         foreach ($section_submitters as $section) {
-            $student_ids = array_merge($student_ids, array_map(function(Submitter $submitter) { return $submitter->getId(); }, $section));
+            $student_ids = array_merge($student_ids, array_map(function(Submitter $submitter) {
+                return $submitter->getId();
+            }, $section));
         }
 
         $show_empty_teams = $this->core->getAccess()->canI("grading.electronic.details.show_empty_teams");

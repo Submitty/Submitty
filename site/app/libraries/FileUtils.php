@@ -28,7 +28,9 @@ class FileUtils {
      * @return array
      */
     public static function getAllFiles(string $dir, array $skip_files=[], bool $flatten=false): array {
-        $skip_files = array_map(function($str) { return strtolower($str); }, $skip_files);
+        $skip_files = array_map(function($str) {
+            return strtolower($str);
+        }, $skip_files);
 
         // we ignore these files and folders as they're "junk" folders that are
         // not really useful in the context of our application that potentially

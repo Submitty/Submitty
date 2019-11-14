@@ -109,11 +109,15 @@ class GradingOrder extends AbstractModel {
      */
     public function sort($type, $direction) {
         //Function to turn submitters into "keys" that are sorted (like python's list.sort)
-        $keyFn = function(Submitter $a) { return $a->getId(); };
+        $keyFn = function(Submitter $a) {
+            return $a->getId();
+        };
 
         switch ($type) {
             case "id":
-                $keyFn = function(Submitter $a) { return $a->getId(); };
+                $keyFn = function(Submitter $a) {
+                    return $a->getId();
+                };
                 break;
             case "first":
                 $keyFn = function(Submitter $a) {
@@ -319,7 +323,7 @@ class GradingOrder extends AbstractModel {
 
         //Iterate through all sections and their submitters to find this one
         foreach ($this->section_submitters as $name => $section) {
-            for ($i = 0; $i < count($section); $i ++) {
+            for ($i = 0; $i < count($section); $i++) {
                 $testSub = $section[$i];
 
                 //Found them
@@ -327,7 +331,7 @@ class GradingOrder extends AbstractModel {
                     return $count;
                 }
 
-                $count ++;
+                $count++;
             }
         }
         return false;
@@ -481,4 +485,3 @@ class GradingOrder extends AbstractModel {
         return $msg === false ? '' : "$msg Order";
     }
 }
-

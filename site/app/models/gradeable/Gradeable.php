@@ -589,8 +589,8 @@ class Gradeable extends AbstractModel {
         // Blacklist the dates checked by validation
         $black_list = $this->getDateValidationSet();
 
-		// First coerce in the forward direction, then in the reverse direction
-		return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
+        // First coerce in the forward direction, then in the reverse direction
+        return $coerce_dates(array_reverse(self::date_validated_properties), $black_list,
             $coerce_dates(self::date_validated_properties, $black_list, $dates,
                 function (\DateTime $val, \DateTime $cmp) {
                     return $val < $cmp;

@@ -115,10 +115,10 @@
 <div class="form-group row thread-attachment-container">
     {% if post_box_id %}
         <span class="inline-block">
-            {# uploadID and input_fileID required for drag-and-drop.js #}
+            {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
-                <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
             </div>
         </span>

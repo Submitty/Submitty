@@ -2451,25 +2451,14 @@ function openComponentGrading(component_id) {
  * @return {void}
  */
 function scrollToPage(page_num){
-    let files = $('.openable-element-submissions');
+    let files = $(".openable-element-submissions");
     for(let i = 0; i < files.length; i++){
-        let zoom = parseInt(localStorage.getItem('scale')) || 1;
         if(files[i].innerText.trim() == "upload.pdf"){
-            let page1 = $(".page").filter(":first");
-            // default to 0 if no pages
-            let page_height = 0;
-            let page_margin_top = 0;
-            let page_margin_bot = 0;
-            if (page1.length) {
-                //get css attr, remove 'px' :
-                page_height = parseInt(page1.css("height").slice(0, -2));
-                page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
-                page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
-            }
-            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once
-            let scrollY = (page_num-1)*(page_height+page_margin_bot)+page_margin_top;
+            let page = $("#pageContainer" + page_num);
             if($("#file_view").is(":visible")){
-                $('#file_content').animate({scrollTop: scrollY}, 500);
+                if(page.length) {
+                    $('#file_content').animate({scrollTop: page[0].offsetTop}, 500);
+                }
             } else {
                 expandFile("upload.pdf", files[i].getAttribute("file-url"), page_num-1);
             }

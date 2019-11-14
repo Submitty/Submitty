@@ -8,9 +8,10 @@ from selenium.webdriver import ActionChains
 from .base_testcase import BaseTestCase
 import time
 
+
 class TestForum(BaseTestCase):
-    def __init__(self,testname):
-        super().__init__(testname,user_id="instructor", user_password="instructor", user_name="Quinn")
+    def __init__(self, testname):
+        super().__init__(testname, user_id="instructor", user_password="instructor", user_name="Quinn")
 
     def init_and_enable_discussion(self):
         self.click_class('sample')
@@ -47,11 +48,13 @@ class TestForum(BaseTestCase):
     def select_categories(self, categories_list):
         assert '/threads/new' in self.driver.current_url
         for category, set_it in categories_list:
-            category_button = self.driver.find_element_by_xpath("//a[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
+            category_button = self.driver.find_element_by_xpath(
+                "//a[contains(@class,'cat-buttons') and contains(string(),'{}')]".format(category))
             if ('cat-selected' in category_button.get_attribute('class')) ^ set_it:
                 category_button.click()
 
-    def create_thread(self, title, first_post, ignore_if_exists = False, upload_attachment = False, categories_list = [("Question",True)]):
+    def create_thread(self, title, first_post, ignore_if_exists=False, upload_attachment=False,
+                      categories_list=[("Question", True)]):
         assert '/forum' in self.driver.current_url
         if ignore_if_exists and self.thread_exists(title):
             return
@@ -95,10 +98,11 @@ class TestForum(BaseTestCase):
             thread_count = new_thread_count
         return len(self.driver.find_elements_by_xpath(target_xpath)) > 0
 
-    def view_thread(self, title, return_info = False):
+    def view_thread(self, title, return_info=False):
         assert '/threads' in self.driver.current_url
         assert self.thread_exists(title)
-        div = self.driver.find_element_by_xpath("//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
+        div = self.driver.find_element_by_xpath(
+            "//div[contains(@class, 'thread_box') and contains(string(),'{}')]".format(title))
         if return_info:
             categories = []
             for element in div.find_elements(By.XPATH, ".//span[contains(@class, 'label_forum')]"):
@@ -106,30 +110,36 @@ class TestForum(BaseTestCase):
             return {'categories': categories}
         div.click()
         self.wait_after_ajax()
-        thread_title = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h2[contains(string(),'{}')]".format(title))
+        thread_title = self.driver.find_elements_by_xpath(
+            "//div[contains(@class, 'post_box') and contains(@class, 'first_post')]/h2[contains(string(),'{}')]".format(
+                title))
         assert len(thread_title) > 0
         thread_title_with_id = thread_title[0].text.strip()
-        thread_title_pos = thread_title_with_id.index(')')+2
+        thread_title_pos = thread_title_with_id.index(')') + 2
         assert thread_title_with_id[thread_title_pos:] == title.strip()
 
-    def find_posts(self, content, must_exists = True, move_to_thread = None, check_attachment = None):
+    def find_posts(self, content, must_exists=True, move_to_thread=None, check_attachment=None):
         if move_to_thread is not None:
             self.view_thread(move_to_thread)
-        posts = self.driver.find_elements_by_xpath("//div[contains(@class, 'post_box') and contains(string(),'{}')]".format(content))
+        posts_selector = "//div[contains(@class, 'post_box') and contains(string(),'{}')]"
+        posts = self.driver.find_elements_by_xpath(posts_selector.format(content))
         if must_exists:
             assert len(posts) > 0
         if check_attachment is not None:
             posts[0].find_element(By.XPATH, ".//a[starts-with(@id, 'button_attachments_')]").click()
             self.wait_after_ajax()
+            self.wait_for_element(
+                (By.XPATH, (posts_selector + "//div[contains(@class, 'attachment-well')]").format(content))
+            )
             attachmentSrc = posts[0].find_elements(By.XPATH, ".//img[contains(@src, '{}')]".format(check_attachment))
             assert len(attachmentSrc) > 0
         return posts
 
-    def reply_and_test(self, post_content, newcontent, first_post, upload_attachment = False):
+    def reply_and_test(self, post_content, newcontent, first_post, upload_attachment=False):
         attachment_file = None
         post = self.find_posts(post_content)[0]
         post_id = post.get_attribute("id")
-        edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1] #Last One
+        edit_form = self.driver.find_elements_by_xpath("//input[@value='{}' and @name='parent_id']/..".format(post_id))[-1]  # Last One
         text_area = edit_form.find_element(By.XPATH, ".//textarea")
         upload_button = edit_form.find_element(By.XPATH, ".//input[@type='file']")
         submit_button = edit_form.find_element(By.XPATH, ".//input[@type='submit']")
@@ -144,14 +154,14 @@ class TestForum(BaseTestCase):
         if upload_attachment:
             attachment_file = self.upload_attachment(upload_button)
 
-        x = submit_button.location['x'] + (submit_button.size['width']/2)
-        y = submit_button.location['y'] + (submit_button.size['height']/2)
+        x = submit_button.location['x'] + (submit_button.size['width'] / 2)
+        y = submit_button.location['y'] + (submit_button.size['height'] / 2)
 
         hover = ActionChains(self.driver).move_to_element(submit_button).perform()
         submit_button.click()
         self.wait_after_ajax()
         # Test existence only
-        self.find_posts(newcontent, must_exists = True, check_attachment = attachment_file)
+        self.find_posts(newcontent, must_exists=True, check_attachment=attachment_file)
         return attachment_file
 
     def delete_thread(self, title):
@@ -168,7 +178,7 @@ class TestForum(BaseTestCase):
         urllib.request.urlretrieve(image_url, tf)
         return tf
 
-    def merge_threads(self, child_thread_title, parent_thread_title, press_cancel = False):
+    def merge_threads(self, child_thread_title, parent_thread_title, press_cancel=False):
         self.view_thread(child_thread_title)
         merge_threads_div = self.driver.find_element_by_id("merge-threads")
         self.driver.find_element_by_xpath("//a[contains(text(),'Merge Threads')]").click()
@@ -180,7 +190,8 @@ class TestForum(BaseTestCase):
         else:
             submit_button = merge_threads_div.find_element(By.XPATH, ".//input[@value='Merge Thread']")
             possible_parents = merge_threads_div.find_element(By.XPATH, ".//a[@class='chosen-single']").click()
-            self.driver.find_element(By.XPATH, ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
+            self.driver.find_element(By.XPATH,
+                                     ".//li[contains(normalize-space(.), '{}')]".format(parent_thread_title)).click()
             if press_cancel:
                 cancel_button.click()
             else:
@@ -197,14 +208,14 @@ class TestForum(BaseTestCase):
         self.init_and_enable_discussion()
         for upload_attachment in [False, True]:
             assert not self.thread_exists(title)
-            attachment = self.create_thread(title, content, upload_attachment = upload_attachment)
+            attachment = self.create_thread(title, content, upload_attachment=upload_attachment)
 
-            self.find_posts(content, must_exists = True, check_attachment = attachment)
+            self.find_posts(content, must_exists=True, check_attachment=attachment)
             self.view_thread(title)
-            self.find_posts(content, must_exists = True)
-            self.reply_and_test(content, reply_content1, first_post = True, upload_attachment = upload_attachment)
-            self.reply_and_test(reply_content1, reply_content2, first_post = False)
-            self.reply_and_test(reply_content2, reply_content3, first_post = False, upload_attachment = upload_attachment)
+            self.find_posts(content, must_exists=True)
+            self.reply_and_test(content, reply_content1, first_post=True, upload_attachment=upload_attachment)
+            self.reply_and_test(reply_content1, reply_content2, first_post=False)
+            self.reply_and_test(reply_content2, reply_content3, first_post=False, upload_attachment=upload_attachment)
 
             assert self.thread_exists(title)
             self.delete_thread(title)
@@ -223,31 +234,31 @@ class TestForum(BaseTestCase):
         reply2 = "E2E Reply 2 E2E"
         reply3 = "E2E Reply 3 E2E"
 
-        content1_attachment = self.create_thread(title1, content1, upload_attachment = True)
-        self.reply_and_test(content1, reply1, first_post = True)
+        content1_attachment = self.create_thread(title1, content1, upload_attachment=True)
+        self.reply_and_test(content1, reply1, first_post=True)
         self.create_thread(title2, content2)
-        reply2_attachment = self.reply_and_test(content2, reply2, first_post = True, upload_attachment = True)
+        reply2_attachment = self.reply_and_test(content2, reply2, first_post=True, upload_attachment=True)
         self.create_thread(title3, content3)
-        self.reply_and_test(content3, reply3, first_post = True)
+        self.reply_and_test(content3, reply3, first_post=True)
 
         # Not Merging
         self.merge_threads(title1, None)
-        self.merge_threads(title2, title1, press_cancel = True)
+        self.merge_threads(title2, title1, press_cancel=True)
 
-        self.find_posts(content1, must_exists = True, move_to_thread = title1, check_attachment = content1_attachment)
-        self.find_posts(reply1, must_exists = True, move_to_thread = title1)
-        self.find_posts(reply2, must_exists = True, move_to_thread = title2, check_attachment = reply2_attachment)
-        self.find_posts(reply3, must_exists = True, move_to_thread = title3)
+        self.find_posts(content1, must_exists=True, move_to_thread=title1, check_attachment=content1_attachment)
+        self.find_posts(reply1, must_exists=True, move_to_thread=title1)
+        self.find_posts(reply2, must_exists=True, move_to_thread=title2, check_attachment=reply2_attachment)
+        self.find_posts(reply3, must_exists=True, move_to_thread=title3)
 
         # Merging success
-        self.merge_threads(title2, title1, press_cancel = False)
+        self.merge_threads(title2, title1, press_cancel=False)
 
-        self.find_posts(content1, must_exists = True, move_to_thread = title1, check_attachment = content1_attachment)
-        self.find_posts(reply1, must_exists = True)
-        self.find_posts(content2, must_exists = True)
-        self.find_posts(reply2, must_exists = True, check_attachment = reply2_attachment)
-        self.find_posts(content3, must_exists = True, move_to_thread = title3)
-        self.find_posts(reply3, must_exists = True)
+        self.find_posts(content1, must_exists=True, move_to_thread=title1, check_attachment=content1_attachment)
+        self.find_posts(reply1, must_exists=True)
+        self.find_posts(content2, must_exists=True)
+        self.find_posts(reply2, must_exists=True, check_attachment=reply2_attachment)
+        self.find_posts(content3, must_exists=True, move_to_thread=title3)
+        self.find_posts(reply3, must_exists=True)
         assert not self.thread_exists(title2)
 
         # Cleanup
@@ -267,13 +278,16 @@ class TestForum(BaseTestCase):
         # Check multiple categories
         assert not self.thread_exists(title1)
         assert not self.thread_exists(title2)
-        self.create_thread(title1, content1, categories_list = [('Question', True), ('Comment', False), ('Tutorials', True)])
-        self.create_thread(title2, content2, categories_list = [('Question', False), ('Comment', True), ('Tutorials', False)])
+        self.create_thread(title1, content1,
+                           categories_list=[('Question', True), ('Comment', False), ('Tutorials', True)])
+        self.create_thread(title2, content2,
+                           categories_list=[('Question', False), ('Comment', True), ('Tutorials', False)])
         # Creation Failed
-        self.create_thread(title3, content3, categories_list = [('Question', False), ('Comment', False), ('Tutorials', False)])
+        self.create_thread(title3, content3,
+                           categories_list=[('Question', False), ('Comment', False), ('Tutorials', False)])
 
-        info1 = self.view_thread(title1, return_info = True)
-        info2 = self.view_thread(title2, return_info = True)
+        info1 = self.view_thread(title1, return_info=True)
+        info2 = self.view_thread(title2, return_info=True)
         assert set(info1['categories']) == set(["Question", "Tutorials"])
         assert set(info2['categories']) == set(["Comment"])
         self.delete_thread(title1)
@@ -285,12 +299,12 @@ class TestForum(BaseTestCase):
         list_title = []
         list_content = []
         # Creation of 22 thread and then deleting them will be slow
-        for i in range(0,22):
+        for i in range(0, 22):
             list_title.append("E2E Sample Title {} E2E".format(i))
             list_content.append("E2E Sample Content {} E2E".format(i))
 
         # Create Threads
-        for title,content in zip(list_title, list_content):
+        for title, content in zip(list_title, list_content):
             assert not self.thread_exists(title)
             self.create_thread(title, content)
 
@@ -305,6 +319,8 @@ class TestForum(BaseTestCase):
             self.delete_thread(title)
             assert not self.thread_exists(title)
 
+
 if __name__ == "__main__":
     import unittest
+
     unittest.main()

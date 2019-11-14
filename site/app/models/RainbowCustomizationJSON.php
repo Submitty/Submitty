@@ -40,7 +40,7 @@ class RainbowCustomizationJSON extends AbstractModel
     ];
 
     public function __construct(Core $main_core) {
-        $this->core = $main_core;
+        parent::__construct($main_core);
 
         // Items that must be initialized as objects
         // This is done so json_encode will properly encode the item when converting to json

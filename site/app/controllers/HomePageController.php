@@ -58,11 +58,11 @@ class HomePageController extends AbstractController {
             $newLastName = trim($_POST['user_lastname_change']);
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
             if ($user->validateUserData('user_preferred_firstname', $newFirstName) === true && $user->validateUserData('user_preferred_lastname', $newLastName) === true) {
-				$user->setPreferredFirstName($newFirstName);
-				$user->setPreferredLastName($newLastName);
-				//User updated flag tells auto feed to not clobber some of the user's data.
-				$user->setUserUpdated(true);
-				$this->core->getQueries()->updateUser($user);
+                $user->setPreferredFirstName($newFirstName);
+                $user->setPreferredLastName($newLastName);
+                //User updated flag tells auto feed to not clobber some of the user's data.
+                $user->setUserUpdated(true);
+                $this->core->getQueries()->updateUser($user);
             }
             else {
                 $this->core->addErrorMessage("Preferred names must not exceed 30 chars.  Letters, spaces, hyphens, apostrophes, periods, parentheses, and backquotes permitted.");

@@ -6,16 +6,17 @@
 
 
     <center>
-        <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
-        <script>
-            //inserts file path into title show what folder you are editing
-            window.onclick = function() {
-                var rD = document.getElementById("release_title");
-                var folderPath =rD.dataset.path;
-                document.getElementById("release_title").innerHTML = folderPath;
-            }
-        </script>
-
+        <label for="date_to_release">
+            <b>Change the release date for all contents in <span id="release_title" data-path="" ></span>: </b>
+            <script>
+                //inserts file path into title show what folder you are editing
+                window.onclick = function() {
+                    var rD = document.getElementById("release_title");
+                    var folderPath =rD.dataset.path;
+                    document.getElementById("release_title").innerHTML = folderPath;
+                }
+            </script>
+        </label>
     <br/>
     <br/>
     <input name="release_date" id="date_to_release" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00' data-fp=" " onChange="getNewDateTime('date_to_release')"/>
@@ -123,7 +124,7 @@
                             onClick: (index, fp) => {
                                 let date;
                                 switch (index) {
-                                    case 0: 
+                                    case 0:
                                         updateToServerTime(fp);
                                         break;
                                     case 1:
@@ -153,4 +154,3 @@
     <input name="submit" class="btn btn-primary" id="submit_time" type="submit" value="Submit" data-iden=" " data-inDir=' ' onclick="confirmReleaseDate()"/>
 
 {% endblock %}
-
