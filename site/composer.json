@@ -22,7 +22,7 @@
     "erusev/parsedown": "1.7.3",
     "lcobucci/jwt": "3.3.1",
     "symfony/routing": "4.3.8",
-    "symfony/config": "4.3.6",
+    "symfony/config": "4.3.8",
     "symfony/http-foundation": "4.3.8",
     "doctrine/annotations": "1.8.0",
     "doctrine/cache": "1.9.1",
