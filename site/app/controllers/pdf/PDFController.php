@@ -41,7 +41,7 @@ class PDFController extends AbstractController {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = implode('_', array_slice($pdf_info, 0, -1));
-                        $grader_id = $pdf_info[count($pdf_info)-1];
+                        $grader_id = $pdf_info[count($pdf_info) - 1];
                         if ($pdf_id . '.pdf' === $filename) {
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
@@ -142,7 +142,7 @@ class PDFController extends AbstractController {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
                         $pdf_id = implode('_', array_slice($pdf_info, 0, -1));
-                        $grader_id = $pdf_info[count($pdf_info)-1];
+                        $grader_id = $pdf_info[count($pdf_info) - 1];
                         if ($pdf_id . '.pdf' === $filename) {
                             $annotation_jsons[$grader_id] = file_get_contents($fileinfo->getPathname());
                         }
