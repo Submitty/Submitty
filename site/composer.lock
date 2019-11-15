@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3f7b7ca84b7f58a57d847e4219575250",
+    "content-hash": "a3a9cdd0b73a0acacfabeb8799f43056",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
@@ -133,16 +133,16 @@
         },
         {
             "name": "doctrine/cache",
-            "version": "v1.8.1",
+            "version": "1.9.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/cache.git",
-                "reference": "d4374ae95b36062d02ef310100ed33d78738d76c"
+                "reference": "89a5c76c39c292f7798f964ab3c836c3f8192a55"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/cache/zipball/d4374ae95b36062d02ef310100ed33d78738d76c",
-                "reference": "d4374ae95b36062d02ef310100ed33d78738d76c",
+                "url": "https://api.github.com/repos/doctrine/cache/zipball/89a5c76c39c292f7798f964ab3c836c3f8192a55",
+                "reference": "89a5c76c39c292f7798f964ab3c836c3f8192a55",
                 "shasum": ""
             },
             "require": {
@@ -153,7 +153,7 @@
             },
             "require-dev": {
                 "alcaeus/mongo-php-adapter": "^1.1",
-                "doctrine/coding-standard": "^4.0",
+                "doctrine/coding-standard": "^6.0",
                 "mongodb/mongodb": "^1.1",
                 "phpunit/phpunit": "^7.0",
                 "predis/predis": "~1.0"
@@ -164,7 +164,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.8.x-dev"
+                    "dev-master": "1.9.x-dev"
                 }
             },
             "autoload": {
@@ -198,13 +198,21 @@
                     "email": "schmittjoh@gmail.com"
                 }
             ],
-            "description": "Caching library offering an object-oriented API for many cache backends",
-            "homepage": "https://www.doctrine-project.org",
+            "description": "PHP Doctrine Cache library is a popular cache implementation that supports many different drivers such as redis, memcache, apc, mongodb and others.",
+            "homepage": "https://www.doctrine-project.org/projects/cache.html",
             "keywords": [
+                "abstraction",
+                "apcu",
                 "cache",
-                "caching"
+                "caching",
+                "couchdb",
+                "memcached",
+                "php",
+                "redis",
+                "riak",
+                "xcache"
             ],
-            "time": "2019-10-28T09:31:32+00:00"
+            "time": "2019-11-15T14:31:57+00:00"
         },
         {
             "name": "doctrine/lexer",
