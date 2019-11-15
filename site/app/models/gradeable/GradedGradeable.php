@@ -42,7 +42,6 @@ class GradedGradeable extends AbstractModel {
     /** @property @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
     protected $overridden_grades = false;
 
-
     /**
      * GradedGradeable constructor.
      * @param Core $core
@@ -377,7 +376,7 @@ class GradedGradeable extends AbstractModel {
 
     public function hasOverriddenGrades() {
         if ($this->overridden_grades === false) {
-            $this->overridden_grades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->getId(), $this->submitter->getId());
+            $this->overridden_grades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable_id, $this->submitter->getId());
         }
         return $this->overridden_grades !== null;
     }
