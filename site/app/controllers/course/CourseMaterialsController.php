@@ -17,7 +17,7 @@ class CourseMaterialsController extends AbstractController {
         $this->core->getOutput()->renderOutput(
             ['course', 'CourseMaterials'],
             'listCourseMaterials',
-            $user = $this->core->getUser()
+            $this->core->getUser()
         );
     }
 
