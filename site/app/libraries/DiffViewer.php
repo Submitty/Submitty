@@ -540,8 +540,7 @@ class DiffViewer {
                 $html .= "\t</div>\n";
             }
         }
-        $html .= "</div></div>\n";
-        return $html;
+        return $html . "</div></div>\n";
     }
 
     public function getWhiteSpaces() {

@@ -386,7 +386,7 @@ HTML;
     }
 
     public function deletePlagiarismResultAndConfigForm() {
-        $return = <<<HTML
+        return <<<HTML
     <div class="popup-form"  style="display: none;" id="delete-plagiarism-result-and-config-form">
         <form name="delete" method="post" action="">
             <div class="popup-box">
@@ -414,15 +414,13 @@ HTML;
         $(".popup-window").draggable();
     </script>
 HTML;
-        return $return;
     }
 
     public function plagiarismPopUpToShowMatches() {
-        $return = <<<HTML
+        return <<<HTML
     <ul id="popup_to_show_matches_id" tabindex="0" class="ui-menu ui-widget ui-widget-content ui-autocomplete ui-front" style="display: none;top:0px;left:0px;width:auto;" >
     </ul>
 HTML;
-        return $return;
     }
 
     public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config) {
@@ -705,7 +703,7 @@ HTML;
         }
 
 
-        $return .= <<<HTML
+        return $return . <<<HTML
                     <input type="text" name="ignore_submission_{$count}" />
                 </div><br />
                 <div style="width:70%;float:right">
@@ -738,7 +736,5 @@ HTML;
     });
 </script>
 HTML;
-
-        return $return;
     }
 }
