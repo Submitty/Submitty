@@ -500,7 +500,25 @@ class DatabaseQueries {
 
         try {
             //insert data
-            $this->course_db->query("INSERT INTO threads (title, created_by, pinned, status, deleted, merged_thread_id, merged_post_id, is_visible, lock_thread_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", array($title, $user, $prof_pinned, $status, 0, -1, -1, true, $lock_thread_date));
+            $this->course_db->query("INSERT INTO threads (
+            title, 
+            created_by, 
+            pinned,
+            status,
+            deleted,
+            merged_thread_id,
+            merged_post_id,
+            is_visible, lock_thread_date)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?,?)", 
+               array($title,
+                     $user,
+                     $prof_pinned,
+                     $status,
+                     0,
+                     -1,
+                     -1,
+                     true,
+                     $lock_thread_date));
 
             //retrieve generated thread_id
             $this->course_db->query("SELECT MAX(id) as max_id from threads where title=? and created_by=?", array($title, $user));
@@ -546,7 +564,9 @@ class DatabaseQueries {
 
     public function addPinnedThread($user_id, $thread_id, $added) {
         if ($added) {
-            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) VALUES (?,?)", array($user_id, $thread_id));
+            $this->course_db->query("INSERT INTO student_favorites(user_id, thread_id) 
+                                      VALUES (?,?)",
+                                      array($user_id, $thread_id));
         }
         else {
             $this->course_db->query("DELETE FROM student_favorites where user_id=? and thread_id=?", array($user_id, $thread_id));
@@ -575,7 +595,33 @@ class DatabaseQueries {
     }
 
     public function searchThreads($searchQuery) {
-        $this->course_db->query("SELECT post_content, p_id, p_author, thread_id, thread_title, author, pin, anonymous, timestamp_post FROM (SELECT t.id as thread_id, t.title as thread_title, p.id as p_id, t.created_by as author, t.pinned as pin, p.timestamp as timestamp_post, p.content as post_content, p.anonymous, p.author_user_id as p_author, to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, threads t JOIN (SELECT thread_id, timestamp from posts where parent_id = -1) p2 ON p2.thread_id = t.id where t.id = p.thread_id and p.deleted=false and t.deleted=false) p_doc where p_doc.document @@ plainto_tsquery(:q) ORDER BY timestamp_post DESC", array(':q' => $searchQuery));
+        $this->course_db->query("SELECT 
+                                        post_content, 
+                                        p_id, p_author, 
+                                        thread_id, 
+                                        thread_title, 
+                                        author, 
+                                        pin, 
+                                        anonymous, 
+                                        timestamp_post 
+                                 FROM (SELECT
+                                             t.id as thread_id, 
+                                             t.title as thread_title, 
+                                             p.id as p_id, 
+                                             t.created_by as author, 
+                                             t.pinned as pin, 
+                                             p.timestamp as timestamp_post, 
+                                             p.content as post_content,
+                                             p.anonymous, 
+                                             p.author_user_id as p_author, 
+                                             to_tsvector(p.content) || to_tsvector(t.title) as document from posts p, 
+                                             threads t JOIN (SELECT 
+                                                                    thread_id, 
+                                                                    timestamp from posts 
+                                                                    WHERE parent_id = -1) p2 ON p2.thread_id = t.id 
+                                                                           WHERE t.id = p.thread_id AND p.deleted=false AND t.deleted=false) p_doc 
+                                                                           WHERE p_doc.document @@ plainto_tsquery(:q) 
+                                      ORDER BY timestamp_post DESC", array(':q' => $searchQuery));
         return $this->course_db->rows();
     }
 
@@ -585,7 +631,11 @@ class DatabaseQueries {
     }
 
     public function visitThread($current_user, $thread_id) {
-        $this->course_db->query("INSERT INTO viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) ON CONFLICT (thread_id, user_id) DO UPDATE SET timestamp = current_timestamp", array($thread_id, $current_user));
+        $this->course_db->query("INSERT INTO 
+                                             viewed_responses(thread_id,user_id,timestamp) VALUES(?, ?, current_timestamp) 
+                                             ON CONFLICT (thread_id, user_id) 
+                                             DO UPDATE SET timestamp = current_timestamp",
+                                                            array($thread_id, $current_user));
     }
     /**
      * Set delete status for given post and all descendant
@@ -653,10 +703,21 @@ class DatabaseQueries {
     public function editThread($thread_id, $thread_title, $categories_ids, $status, $lock_thread_date) {
         try {
             $this->course_db->beginTransaction();
-            $this->course_db->query("UPDATE threads SET title = ?, status = ?, lock_thread_date = ? WHERE id = ?", array($thread_title, $status,$lock_thread_date, $thread_id));
+            $this->course_db->query("UPDATE threads 
+                                     SET 
+                                     title = ?, 
+                                     status = ?,
+                                     lock_thread_date = ? 
+                                              WHERE id = ?",
+                                                    array($thread_title, $status,$lock_thread_date, $thread_id));
             $this->course_db->query("DELETE FROM thread_categories WHERE thread_id = ?", array($thread_id));
             foreach ($categories_ids as $category_id) {
-                $this->course_db->query("INSERT INTO thread_categories (thread_id, category_id) VALUES (?, ?)", array($thread_id, $category_id));
+                $this->course_db->query("INSERT INTO 
+                                          thread_categories (
+                                          thread_id, 
+                                          category_id)
+                                             VALUES (?, ?)",
+                                               array($thread_id, $category_id));
             }
             $this->course_db->commit();
         }
@@ -749,7 +810,8 @@ class DatabaseQueries {
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if ($user_id != null) {
-            $query = "SELECT * FROM late_days WHERE user_id";
+            $query = "SELECT * FROM late_days
+              WHERE user_id";
             if (is_array($user_id)) {
                 $query .= ' IN ' . $this->createParamaterList(count($user_id));
                 $params = $user_id;
@@ -784,7 +846,7 @@ class DatabaseQueries {
                 $orderBy
             );
             $values = $this->createParamaterList(count($sections));
-            $this->course_db->query("SELECT * FROM users AS u WHERE registration_section IN {$values} ORDER BY {$orderBy}", $sections);
+            $this->course_db->query("SELECT * FROM users  AS u WHERE registration_section IN {$values} ORDER BY {$orderBy}", $sections);
             foreach ($this->course_db->rows() as $row) {
                 $return[] = new User($this->core, $row);
             }
