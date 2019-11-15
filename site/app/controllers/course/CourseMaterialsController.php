@@ -280,13 +280,26 @@ class CourseMaterialsController extends AbstractController {
             $requested_path = $_POST['requested_path'];
         }
         
+        $sections_exploded = null;
+        
+        if(!(is_null($sections))){
+            $sections_exploded = @explode(",", $sections);
+            if($sections_exploded == null){
+                $sections_exploded = [];
+            }
+        }
+        
+        $release_time ="";
+        if(isset($_POST['release_time'])){
+            $release_time = $_POST['release_time'];
+        }
+        
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
         $checked = $json[$dst]['checked'];
-        $release_datetime = $json[$dst]['release_datetime'];
-        $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_datetime, 'sections' => $sections, 'hide_from_students' => "on");
+        $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
         FileUtils::writeJsonFile($fp,$json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
      }

@@ -8,67 +8,64 @@
                 Do you want to restrict this course material to some sections?
             </p>
             <label class = "radio">
-                <input id = "all_Sections_Showing" name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()" checked>
+                <input id = "all_Sections_Showing_No" name="show_Some_Section_Selection_Edit" type = "radio" onchange="toggleRegistrationSectionsEdit()" checked>
                 No
             </label>
             <label class = "radio">
-                <input name="show_Some_Section_Selection" type = "radio" onchange="toggleRegistrationSections()">
+                <input id = "all_Sections_Showing_Yes" name="show_Some_Section_Selection_Edit" type = "radio" onchange="toggleRegistrationSectionsEdit()">
                 Yes
             </label>
-            <div id = "show_Some_Section_Selection" style="display: block">
+            <div id = "show_Some_Section_Selection_Edit" style="display: none">
             {% for section in reg_sections %}
                 <tr>
-                    <td>Section {{ section['sections_registration_id'] }}</td>
-                    <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                    <span class = "inline">
+                        <td>
+                            Section {{ section['sections_registration_id'] }}
+                            <input id="section-edit-{{section['sections_registration_id']}}" type="checkbox" value="off"/>
+                        </td>
+                    </span>
                 </tr>
             {% endfor %}
             </div>
             <script type="text/javascript">
-                function toggleRegistrationSections(){
-                    $("#show_Some_Section_Selection").toggle();
+                function toggleRegistrationSectionsEdit(){
+                    $("#show_Some_Section_Selection_Edit").toggle();
                 } 
             </script>
         </label>
-        <label id="edit_dt">
+        <label id="upload_dt">
             <p>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </p>
             <input id="edit_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
         </label>
         <label>
-            <input id="expand-zip-checkbox" type="checkbox" value="off"/>
-            Unzip zip files (Note: If checked, will replace all folders/files)
-        </label>
-        <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
             Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-        <p>Total files cannot exceed 10 mb or 10240 kb.</p>
     </div>
     <script type="text/javascript">
         function submitEdit(){ // Submit button
-                console.log("TEST1");
-                var sections = [];
+                var sectionsEdit = [];
+                var cmTime = document.getElementById("edit_picker").value;
                 var requestedPath = document.getElementById("material-edit-form").getAttribute("data-directory");
-                console.log($("#hide-materials-checkbox-edit").is(':checked'));
                 var hideFromStudents = 'off';
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
                 }
-                var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 
+                var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 reg_sectionArray.forEach(function(element){
-                    var currentSection = '#section-' +element['sections_registration_id']
-                    if  ($(currentSection).is(':checked'))  {
-                        sections.push(element['sections_registration_id']);
+                    var currentSectionEdit = '#section-edit-' +element['sections_registration_id']
+                    if  ($(currentSectionEdit).is(':checked'))  {
+                        sectionsEdit.push(element['sections_registration_id']);
                     }
                 });
-                
-                if(document.getElementById('show_Some_Section_Selection').style.display == "none"){
-                    sections = null;
+                if({{ reg_sections|json_encode|raw }} == null || $("#all_Sections_Showing_No").is(':checked') == true){
+                    sectionsEdit = null;
                 }
-                handleEditCourseMaterials(hideFromStudents, requestedPath, sections);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
         };
         
         flatpickr('#edit_picker', {

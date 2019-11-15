@@ -975,7 +975,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if(sections !== null){
         formData.append('sections', sections);
     }
-    console.log(requested_path);
     var target_path = cmPath; // this one has slash at the end.
     if (requested_path && requested_path.trim().length) {
         target_path = cmPath + requested_path;
@@ -1027,7 +1026,6 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
     if (filesToBeAdded == false){
         return;
     }
-    console.log(submit_url);
     $.ajax({
         url: submit_url,
         data: formData,
@@ -1061,19 +1059,19 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
  * @param csrf_token
  */
 
-function handleEditCourseMaterials(hide_from_students, requested_path, sections) {
-    console.log("TESTInEdit");
+function handleEditCourseMaterials(csrf_token, hide_from_students, requested_path, sectionsEdit, cmTime) {
     var edit_url = buildCourseUrl(['course_materials', 'edit']);
-    console.log(edit_url);
     var return_url = buildCourseUrl(['course_materials']);
     var formData = new FormData();
-
+    formData.append('csrf_token', csrf_token);
     formData.append('hide_from_students', hide_from_students);
     formData.append('requested_path', requested_path);
-    if(sections !== null){
-        formData.append('sections', sections);
+    formData.append('release_time',cmTime);
+    
+    if(sectionsEdit !== null){
+        formData.append('sections', sectionsEdit);
     }
-
+    
     $.ajax({
         url: edit_url,
         data: formData,

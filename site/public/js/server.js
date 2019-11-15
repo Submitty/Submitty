@@ -221,30 +221,36 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students) {
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
 
-    //let url = buildCourseUrl(["course_materials", "edit"]) + "?path=" + path;
-    //$('.popup-form').css('display', 'none');
-    console.log(this_hide_from_students);
     var form = $("#edit-course-materials-form");
+    $("#edit_picker", form).prop('value',release_time);
+    
     if(this_hide_from_students == "on"){
-        $("#hide-materials-checkbox", form).prop('checked',true);
+        $("#hide-materials-checkbox-edit", form).prop('checked',true);
     }
+    
     else{
-        $("#hide-materials-checkbox", form).prop('checked',false);
+        $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
+    
+    $('#show_Some_Section_Selection_Edit :checkbox:enabled').prop('checked', false);
+    
     if(this_file_section != null){
         for(let index = 0; index < this_file_section.length; ++index){
-            console.log(this_file_section[index]);
-            $("#section-" + this_file_section[index], form).prop('checked',true);
+            $("#section-edit-" + this_file_section[index], form).prop('checked',true);
         }
+        $("#all_Sections_Showing_No", form).prop('checked',false);
+        $("#all_Sections_Showing_Yes", form).prop('checked',true);
+        $("#show_Some_Section_Selection_Edit", form).show();
+    }
+    else{
+        $("#show_Some_Section_Selection_Edit", form).hide();
+        $("#all_Sections_Showing_Yes", form).prop('checked',false);
+        $("#all_Sections_Showing_No", form).prop('checked',true);
     }
     $("#material-edit-form", form).attr('data-directory', dir);
     form.css("display", "block");
-    //$('[name="edit-course-material-message"]', form).html('');
-    //$('[name="edit-course-material-message"]', form).append('<b>'+file_name+'</b>');
-    //$('[name="edit-confirmation"]', form).attr('action', url);
-    //form.css("display", "block");
 }
 
 function setFolderRelease(changeActionVariable,releaseDates,id,inDir){

@@ -35,8 +35,12 @@
             <div id = "show_Some_Section_Selection" style="display: none">
             {% for section in reg_sections %}
                 <tr>
-                    <td>Section {{ section['sections_registration_id'] }}</td>
-                    <td><input id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/></td>
+                    <span class = "inline">
+                        <td>
+                            Section&nbsp;{{section['sections_registration_id']}}
+                            <input class = "inline" id="section-{{ section['sections_registration_id'] }}" type="checkbox" value="off"/>
+                        </td>
+                    </span>
                 </tr>
             {% endfor %}
             </div>
@@ -141,7 +145,6 @@
     <script type="text/javascript">
         createArray(1);
         var dropzone = document.getElementById("upload1");
-        dropzone.addEventListener("click", clicked_on_box, false);
         dropzone.addEventListener("dragenter", draghandle, false);
         dropzone.addEventListener("dragover", draghandle, false);
         dropzone.addEventListener("dragleave", draghandle, false);
