@@ -2178,16 +2178,6 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
-			message: "#^Cannot call method getMarks\\(\\) on array\\<app\\\\models\\\\SimpleGradeOverriddenUser\\>\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
-			message: "#^Cannot call method getComment\\(\\) on array\\<app\\\\models\\\\SimpleGradeOverriddenUser\\>\\.$#"
-			count: 1
-			path: app/models/gradeable/GradedGradeable.php
-
-		-
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected TOKEN_IDENTIFIER at offset 87$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
