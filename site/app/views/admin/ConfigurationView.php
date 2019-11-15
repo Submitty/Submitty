@@ -5,7 +5,7 @@ namespace app\views\admin;
 use app\views\AbstractView;
 
 class ConfigurationView extends AbstractView {
-    public function viewConfig($fields, $gradeable_seating_options, $categories, $email_enabled, $csrf_token) {
+    public function viewConfig($fields, $gradeable_seating_options, $categories, $csrf_token) {
         $this->output->addInternalJs("configuration.js");
         $this->output->addInternalCss("configuration.css");
         $this->output->addBreadcrumb('Course Settings');
