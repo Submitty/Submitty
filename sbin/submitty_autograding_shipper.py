@@ -27,7 +27,7 @@ with open(os.path.join(CONFIG_PATH, 'submitty.json')) as open_file:
 SUBMITTY_DATA_DIR = OPEN_JSON['submitty_data_dir']
 SUBMITTY_INSTALL_DIR = OPEN_JSON['submitty_install_dir']
 AUTOGRADING_LOG_PATH = OPEN_JSON['autograding_log_path']
-AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['autograding_log_path'], 'stack_traces')
+AUTOGRADING_STACKTRACE_PATH = os.path.join(OPEN_JSON['site_log_path'], 'autograding_stack_traces')
 
 with open(os.path.join(CONFIG_PATH, 'submitty_users.json')) as open_file:
     OPEN_JSON = json.load(open_file)
