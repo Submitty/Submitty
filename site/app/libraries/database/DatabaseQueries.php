@@ -745,7 +745,6 @@ class DatabaseQueries {
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
-
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if ($user_id != null) {
@@ -2310,6 +2309,34 @@ ORDER BY gt.{$section_key}", $params);
           AND u.user_id=?", array($gradeable_id,$user_id));
 
           return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverriddenUser($this->core, $this->course_db->row()) : null;
+    }
+
+    public function getAllOverriddenGrades() {
+        $query = <<<SQL
+SELECT
+    u.user_id,
+    g.g_id,
+    u.user_firstname,
+    u.user_preferred_firstname,
+    u.user_lastname,
+    g.marks,
+    g.comment
+FROM users as u
+FULL OUTER JOIN grade_override as g
+    ON u.user_id=g.user_id
+WHERE g.marks IS NOT NULL
+ORDER BY user_id ASC
+SQL;
+        $this->course_db->query($query);
+
+        $return = array();
+        foreach ($this->course_db->rows() as $row) {
+            if (!isset($return[$row['user_id']])) {
+                $return[$row['user_id']] = [];
+            }
+            $return[$row['user_id']][$row['g_id']] = new SimpleGradeOverriddenUser($this->core, $row);
+        }
+        return $return;
     }
 
     /**

@@ -3,12 +3,8 @@
 namespace app\controllers\admin;
 
 use app\controllers\AbstractController;
-use app\exceptions\FileReadException;
-use app\libraries\Core;
-use app\libraries\DateUtils;
 use app\libraries\FileUtils;
 use app\libraries\GradeableType;
-use app\libraries\Output;
 use app\libraries\routers\AccessControl;
 use app\models\gradeable\AutoGradedGradeable;
 use app\models\gradeable\Gradeable;
@@ -19,7 +15,6 @@ use app\models\gradeable\Mark;
 use app\models\gradeable\Submitter;
 use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
-use app\models\GradeSummary;
 use app\models\RainbowCustomization;
 use app\exceptions\ValidationException;
 
@@ -32,6 +27,8 @@ class ReportController extends AbstractController {
 
     const MAX_AUTO_RG_WAIT_TIME = 45;       // Time in seconds a call to autoRainbowGradesStatus should
                                             // wait for the job to complete before timing out and returning failure
+
+    private $all_overrides = [];
 
     /**
      * @Route("/{_semester}/{_course}/reports")
@@ -134,7 +131,7 @@ class ReportController extends AbstractController {
         ];
 
         // Generate the reports
-        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function ($a, $b, $c) {
+        $rows = $this->generateReportInternal($g_sort_keys, $gg_sort_keys, function (User $a, array $b, LateDays $c) {
             return $this->generateCSVRow($a, $b, $c);
         });
 
@@ -148,6 +145,7 @@ class ReportController extends AbstractController {
                 $csv .= implode(',', $row) . PHP_EOL;
             }
         }
+
         //Send csv data to file download.  Filename: "{course}_csvreport_{date/time stamp}.csv"
         $this->core->getOutput()->renderFile($csv, $this->core->getConfig()->getCourse() . "_csvreport_" . date("ymdHis") . ".csv");
     }
@@ -214,11 +212,14 @@ class ReportController extends AbstractController {
             /** @var Gradeable $g */
             if ($g->isTeamAssignment()) {
                 // if the user doesn't have a team, MAKE THE USER A SUBMITTER
-                $ggs[] = $team_graded_gradeables[$g->getId()][$user->getId()] ?? $this->genDummyGradedGradeable($g, new Submitter($this->core, $user));
+                $graded_gradeable = $team_graded_gradeables[$g->getId()][$user->getId()] ?? $this->genDummyGradedGradeable($g, new Submitter($this->core, $user));
             }
             else {
-                $ggs[] = $user_graded_gradeables[$g->getId()];
+                $graded_gradeable = $user_graded_gradeables[$g->getId()];
             }
+
+            $graded_gradeable->setOverriddenGrades($this->all_overrides[$graded_gradeable->getSubmitter()->getId()][$graded_gradeable->getGradeableId()] ?? null);
+            $ggs[] = $graded_gradeable;
         }
         return $ggs;
     }
@@ -242,10 +243,20 @@ class ReportController extends AbstractController {
         //Gradeable iterator will append one gradeable score per loop pass.
         $user_graded_gradeables = [];
 
+        $all_late_days = [];
+        foreach ($this->core->getQueries()->getLateDayUpdates(null) as $row) {
+            if (!isset($all_late_days[$row['user_id']])) {
+                $all_late_days[$row['user_id']] = [];
+            }
+            $all_late_days[$row['user_id']][] = $row;
+        }
+
+        $this->all_overrides = $this->core->getQueries()->getAllOverriddenGrades();
+
         // Method to call the callback with the required parameters
-        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) {
+        $call_callback = function ($all_gradeables, User $current_user, $user_graded_gradeables, $team_graded_gradeables, $per_user_callback) use ($all_late_days) {
             $ggs = $this->mergeGradedGradeables($all_gradeables, $current_user, $user_graded_gradeables, $team_graded_gradeables);
-            $late_days = new LateDays($this->core, $current_user, $ggs);
+            $late_days = new LateDays($this->core, $current_user, $ggs, $all_late_days[$current_user->getId()] ?? []);
             return $per_user_callback($current_user, $ggs, $late_days);
         };
         foreach ($this->core->getQueries()->getGradedGradeables($user_gradeables, null, null, $graded_gradeable_sort_keys) as $gg) {
@@ -271,7 +282,7 @@ class ReportController extends AbstractController {
                 if (!isset($results[$u->getId()])) {
                     // This user had no results, so generate results
                     $ggs = $this->mergeGradedGradeables($all_gradeables, $u, [], $team_graded_gradeables);
-                    $late_days = new LateDays($this->core, $u, $ggs);
+                    $late_days = new LateDays($this->core, $u, $ggs, $all_late_days[$u->getId()] ?? []);
                     $results[$current_user->getId()] = $per_user_callback($u, $ggs, $late_days);
                 }
             }
