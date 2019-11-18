@@ -84,16 +84,9 @@ def log_message(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", 
         elapsed_time = -1
     elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time < 0 else "sec"
-    with open(autograding_log_file, 'a') as myfile:
-        try:
-            fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
-            print("%s | %6s | %5s | %11s | %-75s | %-6s %9s %3s | %s"
-                  % (easy_to_read_date, job_id, batch_string, which_untrusted,
-                     jobname, timelabel, elapsed_time_string, time_unit, message),
-                  file=myfile)
-            fcntl.flock(myfile, fcntl.LOCK_UN)
-        except:
-            print("Could not gain a lock on the log file.")
+    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}", 
+             f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}", message)
+    write_to_log(autograding_log_file, parts)
 
 
 def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted="", jobname="", timelabel="", elapsed_time=-1, trace=""):
@@ -108,17 +101,30 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
         elapsed_time = -1
     elapsed_time_string = "" if elapsed_time < 0 else '{:9.3f}'.format(elapsed_time)
     time_unit = "" if elapsed_time < 0 else "sec"
-    with open(autograding_log_file, 'a') as myfile:
+    parts = (easy_to_read_date, f"{job_id:>6s}", f"{batch_string:>5s}", f"{which_untrusted:>11s}", 
+             f"{jobname:75s}", f"{timelabel:6s} {elapsed_time_string:>9s} {time_unit:>3s}\n", trace)
+    write_to_log(autograding_log_file, parts)
+
+
+def log_container_meta(log_path, event="", name="", container="", time=0):
+    """ Given a log file, create or append container meta data to a log file. """
+
+    now = dateutils.get_current_time()
+    easy_to_read_date = dateutils.write_submitty_date(now, True)
+    time_unit = "sec"
+    parts = (easy_to_read_date, name, container, event, f"{time:.3f}", time_unit)
+    write_to_log(log_path, parts)
+
+
+def write_to_log(log_path, message):
+    """ Given a log file, create or append message to log file"""
+    with open(log_path, 'a') as log_file:
         try:
-            fcntl.flock(myfile,fcntl.LOCK_EX | fcntl.LOCK_NB)
-            print("%s | %6s | %5s | %11s | %-75s | %-6s %9s %3s |\n%s"
-                  % (easy_to_read_date, job_id, batch_string, which_untrusted,
-                     jobname, timelabel, elapsed_time_string, time_unit, trace),
-                  file=myfile)
-            fcntl.flock(myfile, fcntl.LOCK_UN)
+            fcntl.flock(log_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            print(' | '.join((str(x) for x in message)), file=log_file)
+            fcntl.flock(log_file, fcntl.LOCK_UN)
         except:
             print("Could not gain a lock on the log file.")
-
 
 
 # ==================================================================================
