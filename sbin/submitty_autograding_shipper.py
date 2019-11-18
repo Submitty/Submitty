@@ -392,7 +392,7 @@ def grade_queue_file(my_name, which_machine,which_untrusted,queue_file):
 
         #prep_job_success = prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file)
         while not prepare_job(my_name,which_machine, which_untrusted, my_dir, queue_file):
-            autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=str(my_name)+" ERROR going to re-try prepare_job: " + queue_file)
+            time.sleep(5)
 
         prep_job_success = True
         
