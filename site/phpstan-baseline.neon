@@ -1188,6 +1188,11 @@ parameters:
 			path: app/models/SimpleLateUser.php
 
 		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool is this a component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/SimpleStat.php
+
+		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var string Title of gradeable or component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
 			count: 1
 			path: app/models/SimpleStat.php
@@ -1224,11 +1229,6 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var bool Does this component use peer grading\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
-			count: 1
-			path: app/models/SimpleStat.php
-
-		-
-			message: "#^PHPDoc tag @property has invalid value \\(@var bool is this a component\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
 			count: 1
 			path: app/models/SimpleStat.php
 
@@ -2173,11 +2173,18 @@ parameters:
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
+			message: "#^PHPDoc tag @property has invalid value \\(@var bool\\|null\\|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+			count: 1
+			path: app/models/gradeable/GradedGradeable.php
+
+		-
+
 			message: "#^PHPDoc tag @param has invalid value \\(\\$gc_id int Gradeable Component id\\)\\: Unexpected token \"\\$gc_id\", expected TOKEN_IDENTIFIER at offset 95$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
 
 		-
+
 			message: "#^PHPDoc tag @param has invalid value \\(\\$filename Name of the file to collect the data out of\\)\\: Unexpected token \"\\$filename\", expected TOKEN_IDENTIFIER at offset 87$#"
 			count: 1
 			path: app/models/gradeable/GradedGradeable.php
@@ -2376,3 +2383,5 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
+
+

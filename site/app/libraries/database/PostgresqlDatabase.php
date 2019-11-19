@@ -195,8 +195,7 @@ class PostgresqlDatabase extends AbstractDatabase {
                 $elements[] = "{$e}";
             }
         }
-        $text = "{" . implode(", ", $elements) . "}";
-        return $text;
+        return "{" . implode(", ", $elements) . "}";
     }
 
     public function convertBoolean($value) {

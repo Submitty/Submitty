@@ -902,7 +902,6 @@ WHERE semester=? AND course=? AND user_id=?",
         return '(' . implode(',', array_fill(0, $len, '?')) . ')';
     }
 
-
     // Moved from class LateDaysCalculation on port from TAGrading server.  May want to incorporate late day information into gradeable object rather than having a separate query
     public function getLateDayUpdates($user_id) {
         if ($user_id != null) {
@@ -2889,6 +2888,34 @@ ORDER BY gt.{$section_key}",
           return ($this->course_db->getRowCount() > 0) ? new SimpleGradeOverriddenUser($this->core, $this->course_db->row()) : null;
     }
 
+    public function getAllOverriddenGrades() {
+        $query = <<<SQL
+SELECT
+    u.user_id,
+    g.g_id,
+    u.user_firstname,
+    u.user_preferred_firstname,
+    u.user_lastname,
+    g.marks,
+    g.comment
+FROM users as u
+FULL OUTER JOIN grade_override as g
+    ON u.user_id=g.user_id
+WHERE g.marks IS NOT NULL
+ORDER BY user_id ASC
+SQL;
+        $this->course_db->query($query);
+
+        $return = array();
+        foreach ($this->course_db->rows() as $row) {
+            if (!isset($return[$row['user_id']])) {
+                $return[$row['user_id']] = [];
+            }
+            $return[$row['user_id']][$row['g_id']] = new SimpleGradeOverriddenUser($this->core, $row);
+        }
+        return $return;
+    }
+
     /**
      * "Upserts" a given user's late days allowed effective at a given time.
      *
@@ -3340,8 +3367,7 @@ AND gc_id IN (
         else {
             $this->course_db->query("SELECT posts.*, fph.edit_timestamp FROM posts {$history_query} WHERE thread_id=? AND {$query_delete} {$query_filter_on_user} ORDER BY timestamp ASC", array_reverse($param_list));
         }
-        $result_rows = $this->course_db->rows();
-        return $result_rows;
+        return $this->course_db->rows();
     }
 
     public function getRootPostOfNonMergedThread($thread_id, &$title, &$message) {
@@ -3353,8 +3379,7 @@ AND gc_id IN (
         }
         $title = $result_rows[0]['title'] . "\n";
         $this->course_db->query("SELECT id FROM posts where thread_id = ? and parent_id = -1", array($thread_id));
-        $root_post = $this->course_db->rows()[0]['id'];
-        return $root_post;
+        return $this->course_db->rows()[0]['id'];
     }
 
     public function mergeThread($parent_thread_id, $child_thread_id, &$message, &$child_root_post) {
@@ -3744,8 +3769,7 @@ AND gc_id IN (
 
     public function getRegradeRequestStatus($user_id, $gradeable_id) {
         $row = $this->course_db->query("SELECT * FROM regrade_requests WHERE user_id = ? AND g_id = ? ", array($user_id, $gradeable_id));
-        $result = ($this->course_db->row()) ? $row['status'] : 0;
-        return $result;
+        return ($this->course_db->row()) ? $row['status'] : 0;
     }
 
 
@@ -5204,8 +5228,7 @@ AND gc_id IN (
         $in_queue_sc = OfficeHoursQueueInstructor::STATUS_CODE_IN_QUEUE;
         $this->course_db->query("SELECT COUNT(*) FROM queue where status = ? and entry_id <= ?", array($in_queue_sc,$row['entry_id']));
         $position_in_queue = $this->course_db->rows()[0]['count'];
-        $oh_queue = new OfficeHoursQueueStudent($this->core, $row['entry_id'], $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
-        return $oh_queue;
+        return new OfficeHoursQueueStudent($this->core, $row['entry_id'], $this->core->getUser()->getId(), $row['name'], $row['status'], $num_in_queue, $position_in_queue, $row['time_in'], $row['time_helped'], $row['time_out'], $row['removed_by']);
     }
 
     public function removeUserFromQueue($entry_id, $remover) {
@@ -5235,8 +5258,7 @@ AND gc_id IN (
 
     public function isQueueOpen() {
         $this->course_db->query("SELECT open FROM queue_settings LIMIT 1");
-        $queue_open = $this->course_db->rows()[0]['open'];
-        return $queue_open;
+        return $this->course_db->rows()[0]['open'];
     }
 
     public function getQueueCode() {
@@ -5271,8 +5293,7 @@ AND gc_id IN (
             $index = $index + 1;
         }
 
-        $oh_queue_instr = new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $this->isQueueOpen(), $this->getQueueCode());
-        return $oh_queue_instr;
+        return new OfficeHoursQueueInstructor($this->core, $needs_help, $already_helped, $this->isQueueOpen(), $this->getQueueCode());
     }
 
     public function isValidCode($code) {
