@@ -1,0 +1,54 @@
+{
+  "resource_limits": {
+    "RLIMIT_CPU": 180
+  },
+  "autograding_method": "docker",
+  "container_options": {
+    "use_router": false
+  },
+  "autograding": {
+    "submission_to_runner": ["**/*.py", "**/*.txt","**/*.sql"],
+    "work_to_details": ["**/*.txt"]
+  },
+  "testcases": [
+    {
+      "title": "Queries",
+      "points": 15,
+      "validation": [
+        {
+          "method": "diff",
+          "description": "One",
+          "deduction": 0.1,
+          "actual_file": "main/1-result.txt",
+          "expected_file": "1-expected.txt"
+        },
+        {
+          "method": "diff",
+          "description": "Two",
+          "deduction": 0.1,
+          "actual_file": "main/2-result.txt",
+          "expected_file": "2-expected.txt"
+        },
+        {
+          "method": "diff",
+          "description": "Three",
+          "deduction": 0.1,
+          "actual_file": "main/3-result.txt",
+          "expected_file": "3-expected.txt"
+        }
+      ],
+      "containers": [
+        {
+          "server": true,
+          "container_name": "db_example_postgres",
+          "container_image": "goofykubers/example_db_autograding:latest"
+        },
+        {
+          "container_name": "main",
+          "container_image": "submittyrpi/csci4380:latest",
+          "commands": ["python3 sql_runner.py"]
+        }
+      ]
+    }
+  ]
+}
