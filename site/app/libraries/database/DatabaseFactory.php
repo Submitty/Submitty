@@ -51,10 +51,8 @@ class DatabaseFactory {
             case 'postgres':
             case 'postgresql':
                 return new PostgresqlDatabase($connection_params);
-                break;
             case 'sqlite':
                 return new SqliteDatabase($connection_params);
-                break;
             default:
                 throw new NotImplementedException("Database not implemented for driver: {$this->driver}");
         }
@@ -75,7 +73,6 @@ class DatabaseFactory {
             case 'postgres':
             case 'postgresql':
                 return new PostgresqlDatabaseQueries($core);
-                break;
             default:
                 return new DatabaseQueries($core);
         }
