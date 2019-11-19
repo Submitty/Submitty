@@ -12,7 +12,6 @@ use app\libraries\routers\AccessControl;
 use app\models\Email;
 use Symfony\Component\Routing\Annotation\Route;
 
-
 /**
  * Class EmailRoomSeatingController
  * @package app\controllers\admin
@@ -20,8 +19,7 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class EmailRoomSeatingController extends AbstractController {
     const DEFAULT_EMAIL_SUBJECT = 'Seating Assignment for {$gradeable_id}';
-    const DEFAULT_EMAIL_BODY =
-'Hello,
+    const DEFAULT_EMAIL_BODY = 'Hello,
 
 Listed below is your seating assignment for the upcoming exam {$gradeable_id} on {$exam_date} at {$exam_time}.
 
@@ -41,7 +39,7 @@ Please email your instructor with any questions or concerns.';
      * @Route("/{_semester}/{_course}/email_room_seating")
      * @return Response
      */
-    public function renderEmailTemplate(){
+    public function renderEmailTemplate() {
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'EmailRoomSeating'],
@@ -65,13 +63,13 @@ Please email your instructor with any questions or concerns.';
 
         $class_list = $this->core->getQueries()->getEmailListWithIds();
 
-        foreach($class_list as $user) {
+        foreach ($class_list as $user) {
             $user_id = $user['user_id'];
 
             $room_seating_file = FileUtils::joinPaths($seating_assignments_path, "$user_id.json");
             $room_seating_json = FileUtils::readJsonFile($room_seating_file);
 
-            if($room_seating_json === false){
+            if ($room_seating_json === false) {
                 continue;
             }
 
@@ -102,14 +100,12 @@ Please email your instructor with any questions or concerns.';
             'seat' => 'exam_seat',
         ];
 
-        foreach($replaces as $key => $variable) {
-        	if(isset($data[$key])) {
-        		$message = str_replace('{$' . $variable . '}', $data[$key], $message);
-        	}
+        foreach ($replaces as $key => $variable) {
+            $message = str_replace('{$' . $variable . '}', $data[$key] ?? 'SEE INSTRUCTOR', $message);
         }
 
-		$message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+        $message = str_replace('{$course_name}', $this->core->getConfig()->getCourse(), $message);
+
         return $message;
     }
-
 }

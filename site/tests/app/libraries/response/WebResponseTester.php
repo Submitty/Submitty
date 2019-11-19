@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace tests\app\libraries\response;
 
@@ -6,7 +8,6 @@ use app\libraries\Core;
 use app\libraries\response\WebResponse;
 use app\models\Config;
 use PHPUnit\Framework\TestCase;
-
 
 class WebResponseTester extends TestCase {
     public function testWebResponse() {

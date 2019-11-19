@@ -7,7 +7,6 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -16,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
  * to set it from inside of php to make sure the group read & execute
  * permissions aren't lost for newly created files & directories.
 */
-umask (0027);
+umask(0027);
 
 session_start();
 /*
@@ -27,7 +26,7 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$loader = require_once(__DIR__.'/../vendor/autoload.php');
+$loader = require_once(__DIR__ . '/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $request = Request::createFromGlobals();
@@ -53,7 +52,7 @@ function exception_handler($throwable) {
             $message = htmlentities($message, ENT_QUOTES);
         }
     }
-    
+
     $core->getOutput()->showException($message);
 }
 set_exception_handler("exception_handler");
@@ -61,7 +60,7 @@ set_exception_handler("exception_handler");
 function error_handler() {
     $error = error_get_last();
     if ($error['type'] === E_ERROR) {
-        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file 
+        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file
         " . $error['file'] . " on line " . $error['line']));
     }
 }
@@ -102,7 +101,7 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
-if($core->getConfig()->isDebug()) {
+if ($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
 }
 else {
@@ -116,6 +115,9 @@ if (empty($_COOKIE['submitty_token'])) {
 
 $is_api = explode('/', $request->getPathInfo())[1] === 'api';
 if ($is_api) {
+    if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
+        $_POST = json_decode(file_get_contents('php://input'), true);
+    }
     $response = WebRouter::getApiResponse($request, $core);
 }
 else {

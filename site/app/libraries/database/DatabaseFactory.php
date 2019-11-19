@@ -79,6 +79,5 @@ class DatabaseFactory {
             default:
                 return new DatabaseQueries($core);
         }
-
     }
 }

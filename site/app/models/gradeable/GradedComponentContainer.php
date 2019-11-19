@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
@@ -138,8 +137,7 @@ class GradedComponentContainer extends AbstractModel {
 
         // Grades exist for component, so get the only one
         if ($grades_exist) {
-            $graded_component = $this->graded_components[0];
-            return $graded_component;
+            return $this->graded_components[0];
         }
 
         // Grades don't exist, but generate one (at zero index of array)
@@ -232,7 +230,8 @@ class GradedComponentContainer extends AbstractModel {
         $graders = count($this->graded_components);
         if ($graders === $required_graders) {
             return true;
-        } else {
+        }
+        else {
             /** @var GradedComponent $graded_component */
             foreach ($this->graded_components as $graded_component) {
                 // TODO: should this be full access?
@@ -324,10 +323,12 @@ class GradedComponentContainer extends AbstractModel {
         foreach ($this->graded_components as $graded_component) {
             $grader = $graded_component->getGrader();
             $verifier_id = $graded_component->getVerifierId();
-            if($grader->accessFullGrading())
+            if ($grader->accessFullGrading()) {
                 $visible_graders[$grader->getId()] = $grader;
-            else if($verifier_id != '')
+            }
+            elseif ($verifier_id != '') {
                 $visible_graders[$verifier_id] = $graded_component->getVerifier();
+            }
         }
         return $visible_graders;
     }

@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 
 /**
@@ -88,5 +89,4 @@ class Button extends AbstractModel {
     public function hasOnclick() {
         return !($this->getOnclick() == null);
     }
-
 }
