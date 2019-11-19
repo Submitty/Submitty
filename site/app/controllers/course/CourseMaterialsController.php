@@ -283,10 +283,8 @@ class CourseMaterialsController extends AbstractController {
         $sections_exploded = null;
         
         if(!(is_null($sections))){
-            $sections_exploded = @explode(",", $sections);
-            if($sections_exploded == null){
-                $sections_exploded = [];
-            }
+            $sections_exploded = [];
+            $sections_exploded = explode(",", $sections);
         }
         
         $release_time ="";
@@ -460,10 +458,8 @@ class CourseMaterialsController extends AbstractController {
                         foreach ($zfiles as $zfile) {
                             $path = FileUtils::joinPaths( $upload_path, $zfile );
                             if(!(is_null($sections))){
-                                $sections_exploded = @explode(",", $sections);
-                                if($sections_exploded == null){
-                                    $sections_exploded = [];
-                                }
+                                $sections_exploded = [];
+                                $sections_exploded = explode(",", $sections);
                                 $json[$path] = [
                                     'checked' => '1',
                                     'release_datetime' => $release_time,
@@ -487,10 +483,8 @@ class CourseMaterialsController extends AbstractController {
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
                         }else{
                             if(!(is_null($sections))){
-                                $sections_exploded = @explode(",", $sections);
-                                if($sections_exploded == null){
-                                    $sections_exploded = [];
-                                }
+                                $sections_exploded = [];
+                                $sections_exploded = explode(",", $sections);
                                 $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
                             }
                             else{

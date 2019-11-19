@@ -105,17 +105,19 @@
                 <label for="latest-events">Share to student on</label>
                 <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
                 {% if not(this_file_section is null) %}
-                    {% if this_hide_from_students == "on" %}
-                        <label>Sections (Hidden): 
-                        {{this_file_section|join(',')}}
-                        </label>
-                    {% else %}
                         <label>Sections: 
                         {{this_file_section|join(',')}}
                         </label>
                     {% endif %}
                     
                 {% endif %}
+                
+                {% if this_hide_from_students == "on" %}
+                    <label>Sections (Hidden): 
+                    {{this_file_section|join(',')}}
+                    </label>
+                {% else %}
+                
                 <script>
 
                     function determineRelease(inputID){
