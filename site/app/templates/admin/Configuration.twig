@@ -219,7 +219,7 @@
 
         <div id="email-seating-assignment-label" class="option-desc option-title config-row">
             Customize an email to send to each students
-            {% if not fields['email_enabled'] %}
+            {% if not email_enabled %}
                 <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
             {% else %}
                 <button id="email-seating-assignment" class="option-alt bare-button">
