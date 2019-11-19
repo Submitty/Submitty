@@ -412,7 +412,7 @@ class UsersController extends AbstractController {
                 // DELETE trigger function in master DB will catch integrity violation exceptions (such as FK violations when users/graders are still enrolled in section).
                 // $num_del_sections indicates how many DELETEs were performed.  0 DELETEs means either the section didn't exist or there are users still enrolled.
                 $json = FileUtils::readJsonFile(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'uploads', 'course_materials_file_data.json'));
-                foreach ($jsonArray as $key => $value){
+                foreach ($json as $key => $value){
                     if(isset($value['sections'])){
                         $sections = $value['sections'];
                         if ($key = array_search($_POST['delete_reg_section'], $sections) !== false) {
