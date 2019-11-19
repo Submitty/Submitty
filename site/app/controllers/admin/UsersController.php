@@ -839,7 +839,6 @@ class UsersController extends AbstractController {
                         break;
                     default:
                         throw new ValidationException("Unknown DB operation", array($action, '$insert_or_update_user_function'));
-                        break;
                 }
             }
             catch (DatabaseException $e) {

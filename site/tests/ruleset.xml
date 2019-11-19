@@ -31,7 +31,6 @@
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
-        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
 
