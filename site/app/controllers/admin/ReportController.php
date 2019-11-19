@@ -237,7 +237,7 @@ class ReportController extends AbstractController {
         $results = [];
 
         // get all gradeables and cache team graded gradeables
-        list($all_gradeables, $user_gradeables, $team_gradeables) = $this->getSplitGradeables($gradeable_sort_keys);
+        [$all_gradeables, $user_gradeables, $team_gradeables] = $this->getSplitGradeables($gradeable_sort_keys);
         $team_graded_gradeables = $this->cacheTeamGradedGradeables($team_gradeables);
 
         //Gradeable iterator will append one gradeable score per loop pass.

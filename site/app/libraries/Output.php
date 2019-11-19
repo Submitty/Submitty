@@ -100,7 +100,7 @@ class Output {
         }, ["is_safe" => ["html"]]));
         $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
             $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
-            list($mime_type, $mime_subtype) = explode('/', mime_content_type($path), 2);
+            [$mime_type, $mime_subtype] = explode('/', mime_content_type($path), 2);
             if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
                 // Read image path, convert to base64 encoding
                 $image_data = base64_encode(file_get_contents($path));
