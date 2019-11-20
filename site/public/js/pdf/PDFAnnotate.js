@@ -52,7 +52,7 @@ function render() {
             documentId = 'toy_eb'.pdf;
             let pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
-            pdfjsLib.getDocument({data: pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({data: pdfData}).promise.then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
 
                 let viewer = document.getElementById('viewer');
