@@ -29,7 +29,7 @@ class DatabaseRowIterator implements \Iterator {
      * @param AbstractDatabase $database
      * @param null|callable    $callback
      */
-    public function __construct(\PDOStatement $statement, $database, $callback=null) {
+    public function __construct(\PDOStatement $statement, $database, $callback = null) {
         $this->statement = $statement;
         $this->database = $database;
         $this->columns = $this->database->getColumnData($this->statement);

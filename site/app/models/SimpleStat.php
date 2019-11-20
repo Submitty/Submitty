@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 
 /**
@@ -17,7 +18,7 @@ use app\libraries\Core;
 
  */
 class SimpleStat extends AbstractModel {
-    /** @ property @var bool is this a component */
+    /** @property @var bool is this a component */
     protected $component = true;
     /** @property @var string Title of gradeable or component */
     protected $title = "";
@@ -36,9 +37,9 @@ class SimpleStat extends AbstractModel {
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = null;
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
-        if(isset($details['gc_id'])) {
+        if (isset($details['gc_id'])) {
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];

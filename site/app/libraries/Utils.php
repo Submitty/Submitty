@@ -21,7 +21,7 @@ class Utils {
         if (!is_array($haystack) || !is_string($needle)) {
             return null;
         }
-        foreach($haystack as $key => $value) {
+        foreach ($haystack as $key => $value) {
             if (is_array($value)) {
                 $haystack[$key] = Utils::stripStringFromArray($needle, $value);
             }
@@ -116,7 +116,7 @@ class Utils {
      * @return mixed|null
      */
     public static function getFirstArrayElement(array $array) {
-        foreach($array as $value) {
+        foreach ($array as $value) {
             return $value;
         }
         return null;
@@ -158,7 +158,7 @@ class Utils {
      *
      * @return bool true if successfully able to set the cookie, else false
      */
-    public static function setCookie(string $name, $data, int $expire=0): bool {
+    public static function setCookie(string $name, $data, int $expire = 0): bool {
         if (is_array($data)) {
             $data = json_encode($data);
         }
@@ -182,7 +182,7 @@ class Utils {
             (substr($filename, -4) == ".gif");
     }
 
-    public static function checkUploadedImageFile($id){
+    public static function checkUploadedImageFile($id) {
         if (isset($_FILES[$id])) {
             foreach ($_FILES[$id]['tmp_name'] as $file_name) {
                 if (file_exists($file_name)) {
@@ -225,7 +225,8 @@ class Utils {
 
         if ($result > 1.0 && $clamp === true) {
             return 1.0;
-        } else if ($result < 0.0 && $clamp === true) {
+        }
+        elseif ($result < 0.0 && $clamp === true) {
             return 0.0;
         }
         return $result;
@@ -262,7 +263,7 @@ class Utils {
             ];
 
             if ($students_version !== null) {
-                if($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
+                if ($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
                     if ($students_version[$student->getId()] !== 0) {
                         $student_entry['label'] .= ' (' . $students_version[$student->getId()] . ' Prev Submission)';
                     }
@@ -311,7 +312,6 @@ class Utils {
     */
     public static function formatBytes(string $format, int $bytes): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
-        return ($bytes / pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
+        return ($bytes / pow(1024, floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
-
 }

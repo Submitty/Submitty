@@ -1,8 +1,6 @@
 <?php
 
-
 namespace app\controllers;
-
 
 use app\libraries\FileUtils;
 use app\libraries\Utils;
@@ -20,7 +18,7 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
 
         $breadcrumbs = $this->core->getOutput()->getBreadcrumbs();
         $css = $this->core->getOutput()->getCss();
@@ -37,7 +35,6 @@ class GlobalController extends AbstractController {
 
         $sidebar_buttons = [];
         if ($this->core->userLoaded()) {
-
             if ($this->core->getConfig()->isCourseLoaded()) {
                 if ($this->core->getConfig()->getCourseHomeUrl() != "") {
                     $sidebar_buttons[] = new Button($this->core, [
@@ -217,7 +214,8 @@ class GlobalController extends AbstractController {
                         "id" => "nav-sidebar-photos",
                         "icon" => "fa-id-card"
                     ]);
-                } else if (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
+                }
+                elseif (count($any_images_files) !== 0 && $this->core->getUser()->accessGrading()) {
                     $sections = $this->core->getUser()->getGradingRegistrationSections();
                     if (!empty($sections) || $this->core->getUser()->getGroup() !== User::GROUP_LIMITED_ACCESS_GRADER) {
                         $at_least_one_grader_link = true;
@@ -232,7 +230,7 @@ class GlobalController extends AbstractController {
                 }
             }
 
-            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true ) {
+            if ($this->core->getUser()->accessGrading() && $at_least_one_grader_link === true) {
                 $sidebar_buttons[] = new Button($this->core, [
                     "class" => "nav-row short-line"
                 ]);
@@ -348,7 +346,7 @@ class GlobalController extends AbstractController {
         $day = $now['mday'];
 
         $duck_img = 'moorthy_duck.png';
-        if($month === 10 && ($day >= 27 && $day <= 31)  ){
+        if ($month === 10 && ($day >= 27 && $day <= 31)) {
             //halloween
             $duck_img = 'moorthy_halloween.png';
         }
@@ -367,7 +365,7 @@ class GlobalController extends AbstractController {
                 'file' => pathinfo($file, PATHINFO_FILENAME),
                 'csrf_token' => $this->core->getCsrfToken()
             ]);
-        },  $wrapper_files);
+        }, $wrapper_files);
         // Get additional links to display in the global footer.
         $footer_links = [];
         $footer_links_json_file = FileUtils::joinPaths($this->core->getConfig()->getConfigPath(), "footer_links.json");
@@ -444,5 +442,4 @@ class GlobalController extends AbstractController {
 
         return true;
     }
-
 }

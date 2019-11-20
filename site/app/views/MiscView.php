@@ -1,6 +1,7 @@
 <?php
 
 namespace app\views;
+
 use app\libraries\FileUtils;
 
 class MiscView extends AbstractView {

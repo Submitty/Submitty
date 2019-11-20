@@ -2,7 +2,6 @@
 
 namespace tests\app\libraries\database;
 
-
 use app\libraries\database\PostgresqlDatabase;
 
 class PostgresqlDatabaseTester extends \PHPUnit\Framework\TestCase {

@@ -3,10 +3,10 @@
 namespace tests\app\libraries;
 
 use app\exceptions\AuthenticationException;
-use \app\exceptions\BaseException;
-use \app\libraries\ExceptionHandler;
-use \app\libraries\FileUtils;
-use \app\libraries\Logger;
+use app\exceptions\BaseException;
+use app\libraries\ExceptionHandler;
+use app\libraries\FileUtils;
+use app\libraries\Logger;
 use app\libraries\Utils;
 
 class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
@@ -62,7 +62,7 @@ class ExceptionHandlerTester extends \PHPUnit\Framework\TestCase {
             $this->authenticate("test", "test");
             $this->fail("Should have thrown exception");
         }
-        catch(AuthenticationException $e) {
+        catch (AuthenticationException $e) {
             ExceptionHandler::setDisplayExceptions(true);
             $message = ExceptionHandler::handleException($e);
             $this->assertRegExp("/Stack Trace:\n#0 (.*)\/site\/tests\/app\/libraries\/ExceptionHandlerTester\.php\(62\): tests\\\app\\\libraries\\\ExceptionHandlerTester\-\>authenticate\(\)\n/", $message);

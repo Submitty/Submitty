@@ -21,7 +21,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         $_SERVER['HTTP_USER_AGENT'] = 'test';
     }
 
-    private function getAuthenticationCore($authenticate=false, $queries=[]) {
+    private function getAuthenticationCore($authenticate = false, $queries = []) {
         $core = $this->createMockCore(['semester' => 'f18', 'course' => 'test'], null, $queries);
         $auth = $this->createMock(AbstractAuthentication::class);
         $auth->method('setUserId')->willReturn(null);
@@ -232,7 +232,7 @@ class AuthenticationControllerTester extends BaseUnitTest {
         unset($_POST['user_id']);
         $_POST['no_redirect'] = true;
         $_POST['password'] = 'test';
-        $core = $core = $this->getAuthenticationCore();
+        $core = $this->getAuthenticationCore();
         $controller = new AuthenticationController($core);
         $response = $controller->checkLogin()->json_response->json;
         $this->assertEquals(['status' => 'fail', 'message' => 'Cannot leave user id or password blank'], $response);

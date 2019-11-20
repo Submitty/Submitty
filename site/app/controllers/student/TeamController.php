@@ -66,7 +66,7 @@ class TeamController extends AbstractController {
 
         if ($gradeable->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
         }
 
         $this->core->redirect($return_url);
@@ -172,7 +172,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null){
+        if ($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null) {
             // If a student with this id is in the null section...
             // (make this look the same as a non-existant student so as not to
             // reveal information about dropped students)
@@ -200,7 +200,7 @@ class TeamController extends AbstractController {
         $subject = "New Team Invitation: " . $graded_gradeable->getGradeable()->getTitle();
         $content = "You have received a new invitation to join a team from $user_id";
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'sender_id' => $user_id];
-        $this->core->getNotificationFactory()->onTeamEvent($event,[$invite_id]);
+        $this->core->getNotificationFactory()->onTeamEvent($event, [$invite_id]);
 
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
@@ -265,7 +265,7 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $team_members = $accept_team->getMembers();
         // send notification to team members that user joined
         $metadata =  json_encode(
@@ -368,9 +368,9 @@ class TeamController extends AbstractController {
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
-        $this->core->getQueries()->addToSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->addToSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**
@@ -392,9 +392,9 @@ class TeamController extends AbstractController {
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**

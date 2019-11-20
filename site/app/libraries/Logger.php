@@ -28,8 +28,10 @@ class Logger {
     /**
      * Don't allow usage of this class outside a static context
      */
-    private function __construct() { }
-    private function __clone() { }
+    private function __construct() {
+    }
+    private function __clone() {
+    }
 
 
     /**
@@ -47,7 +49,7 @@ class Logger {
      *
      * @param string $message
      */
-    public static function debug($message="") {
+    public static function debug($message = "") {
         Logger::logError(Logger::DEBUG, $message);
     }
 
@@ -56,7 +58,7 @@ class Logger {
      *
      * @param string $message
      */
-    public static function info($message="") {
+    public static function info($message = "") {
         Logger::logError(Logger::INFO, $message);
     }
 
@@ -65,7 +67,7 @@ class Logger {
      *
      * @param string $message
      */
-    public static function warn($message="") {
+    public static function warn($message = "") {
         Logger::logError(Logger::WARN, $message);
     }
 
@@ -74,7 +76,7 @@ class Logger {
      *
      * @param string $message
      */
-    public static function error($message="") {
+    public static function error($message = "") {
         Logger::logError(Logger::ERROR, $message);
     }
 
@@ -83,7 +85,7 @@ class Logger {
      *
      * @param string $message
      */
-    public static function fatal($message="") {
+    public static function fatal($message = "") {
         Logger::logError(Logger::FATAL, $message);
     }
 
@@ -111,7 +113,7 @@ class Logger {
      *     4. Fatal Error
      * @param $message: message to log to the file
      */
-    private static function logError($level=0, $message="") {
+    private static function logError($level = 0, $message = "") {
         if (static::$log_path === null) {
             return;
         }
@@ -119,7 +121,7 @@ class Logger {
         $filename = static::getFilename();
         $log_message = static::getTimestamp();
         $log_message .= " - ";
-        switch($level) {
+        switch ($level) {
             case 0:
                 $log_message .= "DEBUG";
                 break;
@@ -209,7 +211,7 @@ class Logger {
      *
      * @param $params All the params in a key-value array
      */
-    public static function logTAGrading($params){
+    public static function logTAGrading($params) {
         $log_message[] = $params['course_semester'];
         $log_message[] = $params['course_name'];
         $log_message[] = $params['gradeable_id'];

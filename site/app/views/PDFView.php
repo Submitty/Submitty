@@ -1,5 +1,7 @@
 <?php
+
 namespace app\views;
+
 use app\libraries\FileUtils;
 
 class PDFView extends AbstractView {
@@ -14,7 +16,7 @@ class PDFView extends AbstractView {
      *
      * @return void
      */
-    public function showPDFEmbedded($params){
+    public function showPDFEmbedded($params) {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         $pdf_url = $this->core->buildCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);

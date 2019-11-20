@@ -7,7 +7,6 @@ use app\libraries\Logger;
 use app\libraries\Utils;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -16,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
  * to set it from inside of php to make sure the group read & execute
  * permissions aren't lost for newly created files & directories.
 */
-umask (0027);
+umask(0027);
 
 session_start();
 /*
@@ -102,7 +101,7 @@ date_default_timezone_set($core->getConfig()->getTimezone()->getName());
 
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
-if($core->getConfig()->isDebug()) {
+if ($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
 }
 else {
