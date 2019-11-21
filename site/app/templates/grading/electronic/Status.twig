@@ -262,39 +262,34 @@
                     var modeCount = 0;
                     var rangeT = 0;
 
-                    var xValueT = [];
+                    var xValueT = [{{ bTA | join(',') }}];
+                    xValueT.sort((a, b) => a - b);
                     var yValue = [];
                     var yValue2 = [];
-                    var xValueSorted = [];
+                    var xValueSorted = Array.from(new Set(xValueT));
                     var xBuckets = [];
 
-                    {% for b in bTA %}
-                        xValueT.push({{ b }});
-                        if(!xValueSorted.includes({{ b }})){
-                            xValueSorted.push({{ b }});
-                        }
-                        if(xValueT[xValueT.length-1]>maxT){
-                            maxT = {{ b }};
-                        }
-                        if(xValueT[xValueT.length-1]<minT){
-                            minT = {{ b }};
-                        }
-                    {% endfor %}
-
-                    if(maxT!=0&&minT!=50){
-                        rangeT = maxT-minT;
+                    if (xValueSorted.length > 0) {
+                        minT = xValueSorted[0];
+                        maxT = xValueSorted[xValueSorted.length-1];
+                        rangeT = maxT - minT;
                     }
+
                     var bucketSize = Math.floor(rangeT/10);
                     mode=fillBuckets(rangeT,bucketSize,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
                     xValueSorted.sort((a,b)=>a-b);
-                    var len = xValueSorted.length;
 
-                    len = len/2;
-                    len = Math.ceil(len);
-                    if(xValueSorted.length>0){
-                        median = xValueSorted[xValueSorted.length-len];
+                    if (xValueT.length > 0) {
+                        let pivot = Math.floor((xValueT.length - 1) / 2);
+                        if (xValueT.length % 2 === 0) {
+                            median = (xValueT[pivot] + xValueT[pivot+1]) / 2;
+                        }
+                        else {
+                            median = xValueT[pivot];
+                        }
                     }
-                    if(maxT==0&&minT==50){
+
+                    if (maxT==0 && minT==50) {
                         minT=0;
                     }
 
@@ -642,7 +637,7 @@
                             {% if team_assignment %}
                                 <br/>
                                 <b>Number of teams where at least one member viewed their grade:</b> {{ viewed_grade }} / {{ viewed_total }} ({{ viewed_percent }}%)
-								<b>Number of students who have viewed their grade:</b> 
+								<b>Number of students who have viewed their grade:</b>
 									{{ individual_viewed_grade }} / {{ total_students_submitted }} ({{ individual_viewed_percent }}%)
                             {% else %}
                                 <br/>
