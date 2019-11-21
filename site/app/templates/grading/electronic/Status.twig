@@ -266,20 +266,12 @@
                     xValueT.sort((a, b) => a - b);
                     var yValue = [];
                     var yValue2 = [];
-                    var xValueSorted = Array.from(new Set(xValueT));
                     var xBuckets = [];
 
-                    if (xValueSorted.length > 0) {
-                        minT = xValueSorted[0];
-                        maxT = xValueSorted[xValueSorted.length-1];
-                        rangeT = maxT - minT;
-                    }
-
-                    var bucketSize = Math.floor(rangeT/10);
-                    mode=fillBuckets(rangeT,bucketSize,betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
-                    xValueSorted.sort((a,b)=>a-b);
-
                     if (xValueT.length > 0) {
+                        minT = xValueT[0];
+                        maxT = xValueT[xValueT.length-1];
+                        rangeT = maxT - minT;
                         let pivot = Math.floor((xValueT.length - 1) / 2);
                         if (xValueT.length % 2 === 0) {
                             median = (xValueT[pivot] + xValueT[pivot+1]) / 2;
@@ -288,6 +280,9 @@
                             median = xValueT[pivot];
                         }
                     }
+
+                    var bucketSize = Math.floor(rangeT/10);
+                    mode= fillBuckets(rangeT, bucketSize, betterBuckets, xValueT, yValue, xBuckets, mode, modeCount, maxT, minT);
 
                     if (maxT==0 && minT==50) {
                         minT=0;
@@ -474,39 +469,29 @@
                         var xValue = [];
                         var yValue = [];
                         var xBuckets = [];
-                        var xValueSorted = [];
 
-
-                        {% for b in bAuto %}
-
-                            xValue.push({{ b }});
-                            if(!xValueSorted.includes({{ b }})){
-                                xValueSorted.push({{ b }});
+                        xValue = [{{ bAuto | join(',') }}]
+                        xValue.sort((a, b) => a - b);
+                        if (xValue.length > 0) {
+                            minA = xValue[0];
+                            maxA = xValue[xValue.length - 1];
+                            let pivot = Math.floor((xValue.length - 1) / 2);
+                            if (xValue.length % 2 === 0) {
+                                median = (xValue[pivot] + xValue[pivot+1]) / 2;
                             }
-                            if(xValue[xValue.length-1]>maxA){
-                                maxA = {{ b }};
+                            else {
+                                median = xValue[pivot];
                             }
-                            if(xValue[xValue.length-1]<minA){
-                                minA = {{ b }};
-                            }
-                        {% endfor %}
+                        }
 
-                       if(maxA!=0&&minA!=50){
+                        if (maxA!=0 && minA!=50) {
                             rangeA = maxA-minA;
                         }
 
                         var bucketSize = Math.floor(rangeA/10);
                         mode=fillBuckets(rangeA,bucketSize,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA);
-                        xValueSorted.sort((a,b)=>a-b);
 
-                        var len = xValueSorted.length;
-
-                        len = len/2;
-                        len = Math.ceil(len);
-                        if(xValueSorted.length>0){
-                            median = xValueSorted[xValueSorted.length-len];
-                        }
-                        if(minA==50&&maxA==0){
+                        if (minA==50 && maxA==0) {
                             minA=0;
                         }
 
