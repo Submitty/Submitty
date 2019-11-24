@@ -48,7 +48,7 @@ class ErrorMessages {
      */
     public static function getZipErrorMessage($res) {
        
-        if($res === true){
+        if ($res === true) {
             return "No error.";
         }
 

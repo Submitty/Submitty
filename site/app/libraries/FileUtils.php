@@ -533,19 +533,6 @@ class FileUtils {
                         $errors[] = "Invalid filename within zip file";
                     }
                 }
-
-            $zip_status = FileUtils::checkZipFileStatus($tmp_name);
-            $err_msg = ErrorMessages::uploadErrors($files['error'][$i]);
-
-            $is_zip = false;
-
-            //check if its a zip file or we got a bad zip file
-            if ($zip_status['success']) {
-                $is_zip = true;
-            }
-            elseif ($zip_status['err_code'] != \ZipArchive::ER_NOZIP) {
-                $is_zip = true;
-                $err_msg = $zip_status['error'];
             }
 
             //for zip files use the size of the contents in case it gets extracted
@@ -553,7 +540,7 @@ class FileUtils {
 
             //manually check against set size limit
             //incase the max POST size is greater than max file size
-            if($size > $max_size){
+            if ($size > $max_size) {
                 $errors[] = "File \"" . $name . "\" too large got (" . Utils::formatBytes("mb", $size) . ")";
             }
 
@@ -565,13 +552,15 @@ class FileUtils {
             $errors = array_unique($errors);
             $success = true;
             foreach ($errors as $err) {
-                if($err !== 'No error.')
+                if ($err !== 'No error.') {
                     $success = false;
+                }
             }
 
             //something went wrong, remove the 'No error. msg'
             if (!$success && ($key = array_search('No error.', $errors)) !== false) {
                 unset($errors[$key]);
+            }
 
 
             $ret[] = [

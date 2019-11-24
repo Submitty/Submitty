@@ -485,14 +485,17 @@ STRING;
             ]
         );
 
-        $this->assertEquals($stat[1],
+        $this->assertEquals(
+            $stat[1],
             ['name' => 'foo2.txt',
              'type' => 'text/plain',
              'error' => 'No error.',
              'size' => 100,
              'is_zip' => false,
              'success' => true
-            ]);
+            ]
+        );
+    }
 
     public function testvalidateUploadedFilesBad() {
         FileUtils::createDir($this->path);
@@ -626,7 +629,8 @@ STRING;
         $stat = FileUtils::validateUploadedFiles($_FILES["files4"]);
 
         $this->assertCount(1, $stat);
-        $this->assertEquals($stat[0],
+        $this->assertEquals(
+            $stat[0],
             ['name' => 'test.zip',
              'type' => 'application/zip',
              'error' => 'No error.',
@@ -635,7 +639,6 @@ STRING;
              'success' => true
             ]
         );
-
     }
 
     public function testvalidateUploadedFilesZipBad() {
@@ -646,8 +649,8 @@ STRING;
         $zip->addFromString('testttt>', "bad name");
         $zip->close();
 
-        $this->buildFakeFile('tes<>t.zip', 4);
-        $stat = FileUtils::validateUploadedFiles($_FILES["files4"]);
+        $this->buildFakeFile('tes<>t.zip', 5);
+        $stat = FileUtils::validateUploadedFiles($_FILES["files5"]);
 
         $this->assertCount(1, $stat);
         $this->assertEquals(
@@ -657,9 +660,9 @@ STRING;
              'size' => 17,
              'is_zip' => true,
              'success' => false
-            ], $stat[0]
+            ],
+            $stat[0]
         );
-
     }
 
     private function getAllFilesSetup(): void {
