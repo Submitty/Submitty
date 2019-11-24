@@ -138,22 +138,26 @@
             if(parts[i].length > 1 && parts[i].includes('-')){
                 //handle range
                 tmp = parts[i].split('-');
-                if (tmp.length != 2)  
+                if (tmp.length != 2){ 
                     continue;
+                }
 
                 start = parseInt(tmp[0]);
                 end = parseInt(tmp[1]);
 
-                if (isNaN(start) || isNaN(end) || start < 0 || end < start)
+                if (isNaN(start) || isNaN(end) || start < 0 || end < start){
                     continue;
+                }
 
-                for(var j = start; j <= end; j++)
+                for(var j = start; j <= end; j++){
                     ret.push(j);
+                }
 
             }else{
                 val = parseInt(parts[i]);
-                if (isNaN(val) || val < 0)
+                if (isNaN(val) || val < 0){
                     continue;
+                }
 
                 ret.push( val );
             }
