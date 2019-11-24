@@ -39,6 +39,8 @@ class GradedGradeable extends AbstractModel {
     /** @property @var array The late day exceptions indexed by user id */
     protected $late_day_exceptions = [];
 
+    /** @property @var bool|null|SimpleGradeOverriddenUser Does this graded gradeable have overridden grades */
+    protected $overridden_grades = false;
 
     /**
      * GradedGradeable constructor.
@@ -236,8 +238,7 @@ class GradedGradeable extends AbstractModel {
      */
     public function getTotalScore() {
         if ($this->hasOverriddenGrades()) {
-            $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
-            return floatval(max(0.0, $userWithOverriddenGrades->getMarks()));
+            return floatval(max(0.0, $this->overridden_grades->getMarks()));
         }
         else {
             return floatval(max(0.0, $this->getTaGradingScore() + $this->getAutoGradingScore()));
@@ -246,9 +247,8 @@ class GradedGradeable extends AbstractModel {
 
     public function getOverriddenComment() {
         $overridden_comment = "";
-        $userWithOverriddenGrades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable->getId(), $this->submitter->getId());
-        if ($userWithOverriddenGrades !== null) {
-            $overridden_comment = $userWithOverriddenGrades->getComment();
+        if ($this->hasOverriddenGrades()) {
+            $overridden_comment = $this->overridden_grades->getComment();
         }
         return $overridden_comment;
     }
@@ -373,7 +373,10 @@ class GradedGradeable extends AbstractModel {
     }
 
     public function hasOverriddenGrades() {
-        return $this->gradeable->hasOverriddenGrades($this->submitter);
+        if ($this->overridden_grades === false) {
+            $this->overridden_grades = $this->core->getQueries()->getAUserWithOverriddenGrades($this->gradeable_id, $this->submitter->getId());
+        }
+        return $this->overridden_grades !== null;
     }
     /* Intentionally Unimplemented accessor methods */
 
