@@ -450,7 +450,7 @@ STRING;
         $file_path = FileUtils::joinpaths($this->path, $filename);
 
         //zip files will already exist
-        if(!file_exists($file_path)){
+        if (!file_exists($file_path)) {
             file_put_contents($file_path, str_repeat(' ', $size));
         }
 
