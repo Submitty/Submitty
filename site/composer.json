@@ -21,7 +21,7 @@
     "aptoma/twig-markdown": "3.2.0",
     "erusev/parsedown": "1.7.3",
     "lcobucci/jwt": "3.3.1",
-    "symfony/routing": "4.3.8",
+    "symfony/routing": "4.4.0",
     "symfony/config": "4.4.0",
     "symfony/http-foundation": "4.4.0",
     "doctrine/annotations": "1.8.0",
