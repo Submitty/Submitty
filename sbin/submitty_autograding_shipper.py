@@ -689,6 +689,10 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         # skip items that are already being graded
         if (just_file[0:8]=="GRADING_"):
             continue
+
+        if (just_file[0:5]=="VCS__"):
+            continue
+
         grading_file = os.path.join(folder,"GRADING_"+just_file)
         if grading_file in files:
             continue
