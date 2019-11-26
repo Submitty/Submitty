@@ -41,7 +41,7 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->course_config = FileUtils::joinPaths($this->test_dir, 'course.json');
         file_put_contents(
             $this->course_config,
-            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","keep_previous_files":false,"display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"regrade_enabled":false,"regrade_message":"Regrade Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false}}'
+            '{"database_details":{"dbname":"submitty_f19_sample"},"course_details":{"course_name":"Submitty Sample","course_home_url":"","default_hw_late_days":0,"default_student_late_days":0,"zero_rubric_grades":false,"upload_message":"Hit Submit","keep_previous_files":false,"display_rainbow_grades_summary":false,"display_custom_message":false,"course_email":"Please contact your TA or instructor to submit a grade inquiry.","vcs_base_url":"","vcs_type":"git","private_repository":"","forum_enabled":true,"regrade_enabled":false,"regrade_message":"Regrade Message","seating_only_for_instructor":false,"room_seating_gradeable_id":"","auto_rainbow_grades":false, "queue_enabled": false}}'
         );
         FileUtils::createDir(FileUtils::joinPaths($this->test_dir, 'courses', 'f19', 'sample', 'reports', 'seating'), true);
         foreach ($seating_dirs as $dir) {
@@ -100,26 +100,38 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'regrade_enabled'                => false,
             'regrade_message'                => 'Regrade Message',
             'private_repository'             => '',
-            'room_seating_options'           => [
-                [
-                    'g_id' => "",
-                    'g_title' => "--None--"
-                ]
-            ],
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
-            'submitty_admin_user'            => 'submitty-admin',
-            'submitty_admin_user_verified'   => true,
-            'submitty_admin_user_in_course'  => true,
             'auto_rainbow_grades'            => false,
-            'email_enabled'                  => true
+            'queue_enabled'                  => false
+        ];
+
+        $gradeable_seating_options = [
+            [
+                'g_id' => "",
+                'g_title' => "--None--"
+            ]
+        ];
+        $admin_user = [
+            'user_id' => 'submitty-admin',
+            'verified' => true,
+            'in_course' => true
         ];
 
         $this->assertNotNull($response->json_response);
-        $this->assertEquals(['status' => 'success', 'data' => $expected], $response->json_response->json);
+        $json_expected = [
+            'status' => 'success',
+            'data' => [
+                'config' => $expected,
+                'gradeable_seating_options' => $gradeable_seating_options,
+                'email_enabled' => true,
+                'submitty_admin_user' => $admin_user
+            ]
+        ];
+        $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
     }
 
     public function testViewConfigurationWithSeatingCharts(): void {
@@ -166,30 +178,44 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
             'regrade_enabled'                => false,
             'regrade_message'                => 'Regrade Message',
             'private_repository'             => '',
-            'room_seating_options'           => [
-                [
-                    'g_id' => "",
-                    'g_title' => "--None--"
-                ],
-                [
-                    'g_id' => 'test2',
-                    'g_title' => 'Test 2'
-                ]
-            ],
             'room_seating_gradeable_id'      => '',
             'seating_only_for_instructor'    => false,
-            'submitty_admin_user'            => 'submitty-admin',
-            'submitty_admin_user_verified'   => true,
-            'submitty_admin_user_in_course'  => true,
             'auto_rainbow_grades'            => false,
-            'email_enabled'                  => true
+            'queue_enabled'                  => false
+        ];
+
+        $gradeable_seating_options = [
+            [
+                'g_id' => "",
+                'g_title' => "--None--"
+            ],
+            [
+                'g_id' => 'test2',
+                'g_title' => 'Test 2'
+            ]
+        ];
+        $admin_user = [
+            'user_id' => 'submitty-admin',
+            'verified' => true,
+            'in_course' => true
         ];
 
         $this->assertNotNull($response->json_response);
-        $this->assertEquals(['status' => 'success', 'data' => $expected], $response->json_response->json);
+        $json_expected = [
+            'status' => 'success',
+            'data' => [
+                'config' => $expected,
+                'gradeable_seating_options' => $gradeable_seating_options,
+                'email_enabled' => true,
+                'submitty_admin_user' => $admin_user
+            ]
+        ];
+
+        $this->assertNotNull($response->json_response);
+        $this->assertEquals($json_expected, $response->json_response->json);
         $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
         $this->assertEquals('viewConfig', $response->web_response->view_function);
-        $this->assertEquals([$expected, false], $response->web_response->parameters);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
     }
 
     public function testUpdateConfigurationNoName() {

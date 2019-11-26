@@ -4,10 +4,8 @@ namespace app\models;
 
 use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
-use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
 
 /**
  * Class Config
@@ -443,20 +441,6 @@ class Config extends AbstractModel {
 
     public function isSubmittyAdminUserVerified() {
         return !empty($this->verified_submitty_admin_user);
-    }
-
-    public function isSubmittyAdminUserInCourse() {
-        $submitty_admin_user = $this->verified_submitty_admin_user;
-        if ($submitty_admin_user === "") {
-            return false;
-        }
-        $course = $this->getCourse();
-        $semester = $this->getSemester();
-        return $this->core->getQueries()->checkIsInstructorInCourse(
-            $submitty_admin_user,
-            $course,
-            $semester
-        );
     }
 
     /**
