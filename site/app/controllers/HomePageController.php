@@ -93,12 +93,12 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user_id);
-        $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user_id);
+        $unarchived_courses = $this->core->getQueries()->getCoursesById($user_id, true);
+        $archived_courses = $this->core->getQueries()->getCoursesById($user_id, false);
 
         // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
-        $course_filter_callback = function(Course $course) use ($user_id, $as_instructor) {
+        $course_filter_callback = function (Course $course) use ($user_id, $as_instructor) {
             return $as_instructor ?
                 $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
                 :

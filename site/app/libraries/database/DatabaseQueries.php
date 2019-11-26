@@ -3075,10 +3075,10 @@ SQL;
      * this function.
      *
      * @param string $user_id
-     * @param boolean $unarchived set to false to retrieve archived courses.
-     * @return array - (un)archived courses (and their details) accessible by $user_id
+     * @param boolean $unarchived true: retrieve unarchived courses, false: retrieve archived courses
+     * @return array (un)archived courses (and their details) accessible by $user_id
      */
-    public function getUnarchivedCoursesById($user_id, $unarchived = true) {
+    public function getCoursesById($user_id, $unarchived) {
         $course_status = $unarchived ?
             "WHERE u.user_id=? AND c.status=1" :
             "WHERE u.user_id=? AND c.status=2 AND u.user_group=1";
@@ -3097,20 +3097,6 @@ SQL;
             $return[] = $course;
         }
         return $return;
-    }
-
-    /**
-     * Retrieves all archived courses (and details) that are accessible by $user_id
-     *
-     * Due to almost all common code, this function has been condensed into
-     * getUnarchivedCoursesById().
-     *
-     * @see self::getUnarchivesCoursesById()
-     * @param string $user_id
-     * @return array - archived courses (and their details) accessible by $user_id
-     */
-    public function getArchivedCoursesById($user_id) {
-        return self::getUnarchivedCoursesById($user_id, false);
     }
 
     public function getCourseStatus($semester, $course) {

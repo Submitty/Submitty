@@ -32,37 +32,6 @@ class CourseTester extends BaseUnitTest {
         $this->assertEquals($array, $course->toArray());
     }
 
-    public function longSemesterDataProvider() {
-        return [
-            ['s18', 'Spring 2018'],
-            ['s22', 'Spring 2022'],
-            ['f18', 'Fall 2018'],
-            ['f32', 'Fall 2032'],
-            ['u18', 'Summer 2018'],
-            ['u12', 'Summer 2012'],
-            ['g18', 'g18'],
-            ['ss18', 'ss18'],
-            ['fs18', 'fs18'],
-            ['us18', 'us18']
-        ];
-    }
-
-    /**
-     * @dataProvider longSemesterDataProvider
-     * @param $short
-     * @param $expected_long
-     */
-    public function testLongSemester($short, $expected_long) {
-        $details = [
-            'semester' => $short,
-            'course' => 'csci0000'
-        ];
-        $course = new Course($this->createMockCore(), $details);
-        $this->assertEquals($short, $course->getSemester());
-        $this->assertEquals('csci0000', $course->getTitle());
-        $this->assertEquals($expected_long, $course->getLongSemester());
-    }
-
     public function testLoadDisplayName() {
         $temp_dir = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $config_path = FileUtils::joinPaths($temp_dir, 'courses', 's18', 'csci1000', 'config');
