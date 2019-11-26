@@ -149,11 +149,11 @@ def main(args):
         # save whatever is left
         prepended_index = str(i).zfill(3)
         output_filename = '{}_{}.pdf'.format(filename[:-4], prepended_index)
-        output[output_filename]['id'] = data
-        output[output_filename]['page_count'] = page_count
+        output[prev_file]['id'] = data
+        output[prev_file]['page_count'] = page_count
         logger.write_to_json(json_file, output)
 
-        with open(output_filename, 'wb') as out:
+        with open(prev_file, 'wb') as out:
             pdf_writer.write(out)
         # write the buffer to the log file, so everything is on one line
         logger.write_to_log(log_file_path, buff)
