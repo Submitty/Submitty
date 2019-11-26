@@ -725,7 +725,7 @@ def get_job(my_name,which_machine,my_capabilities,which_untrusted,overall_lock):
         grading_file = os.path.join(folder, "GRADING_" + my_job)
         # create the grading file
         with open(os.path.join(grading_file), "w") as queue_file:
-            json.dump({"untrusted": which_untrusted}, queue_file)
+            json.dump({"untrusted": which_untrusted, "machine": which_machine}, queue_file)
 
     overall_lock.release()
 
