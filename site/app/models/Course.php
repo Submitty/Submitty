@@ -9,16 +9,19 @@ use app\libraries\FileUtils;
  * Class Course
  * Holds basic information about courses. Used on homepage.
  * @method string getSemester()
+ * @method string getSemesterName()
  * @method string getTitle()
  * @method string getDisplayName()
   */
 class Course extends AbstractModel {
-     
-    /** @property @var string the semester in which the course is taking place." */
+
+    /** @property string $semester the semester (or term) code in which the course is taking place. */
     protected $semester;
-    /** @property @var the proper title of the course. */
+    /** @property string $semester_name the name of the semester (or term). aka "Long Semester". */
+    protected $semester_name;
+    /** @property string $title the proper title of the course. */
     protected $title;
-    /** @property @var the display name of the course */
+    /** @property string $display_name the display name of the course */
     protected $display_name;
 
     /**
@@ -29,9 +32,10 @@ class Course extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->semester = $details['semester'];
-        $this->title = $details['course'];
-        $this->display_name = "";
+        $this->semester      = $details['semester'];
+        $this->semester_name = $details['term_name'];
+        $this->title         = $details['course'];
+        $this->display_name  = "";
     }
 
     public function loadDisplayName() {
@@ -54,18 +58,7 @@ class Course extends AbstractModel {
     }
 
     public function getLongSemester() {
-        if (strlen($this->semester) == 3) {
-            if (strtolower($this->semester[0]) === 'f') {
-                return "Fall 20" . substr($this->semester, 1, 2);
-            }
-            elseif (strtolower($this->semester[0]) === 's') {
-                return "Spring 20" . substr($this->semester, 1, 2);
-            }
-            elseif (strtolower($this->semester[0]) === 'u') {
-                return "Summer 20" . substr($this->semester, 1, 2);
-            }
-        }
-        return $this->semester;
+        return $this->semester_name;
     }
 
     public function getCapitalizedTitle() {
@@ -74,10 +67,10 @@ class Course extends AbstractModel {
 
     public function getCourseInfo() {
         return [
-            "semester" => $this->semester,
-            "title" => $this->title,
-            "display_name" => $this->display_name,
-            "display_semester" => $this->getLongSemester()
+            "semester"         => $this->semester,
+            "title"            => $this->title,
+            "display_name"     => $this->display_name,
+            "display_semester" => $this->semester_name
         ];
     }
 }

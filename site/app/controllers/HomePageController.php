@@ -96,22 +96,18 @@ class HomePageController extends AbstractController {
         $unarchived_courses = $this->core->getQueries()->getUnarchivedCoursesById($user_id);
         $archived_courses = $this->core->getQueries()->getArchivedCoursesById($user_id);
 
-        // Filter out any courses a student has dropped so they do not appear on the homepage.
+        // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
-
-        $unarchived_courses = array_filter($unarchived_courses, function (Course $course) use ($user_id, $as_instructor) {
+        $course_filter_callback = function(Course $course) use ($user_id, $as_instructor) {
             return $as_instructor ?
                 $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
                 :
                 $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
-        });
+        };
 
-        $archived_courses = array_filter($archived_courses, function (Course $course) use ($user_id, $as_instructor) {
-            return $as_instructor ?
-                $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
-                :
-                $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
-        });
+        // Run course filters so students who have dropped do not appear on the homepage.
+        $unarchived_courses = array_filter($unarchived_courses, $course_filter_callback);
+        $archived_courses = array_filter($archived_courses, $course_filter_callback);
 
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([

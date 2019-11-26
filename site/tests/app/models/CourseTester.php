@@ -11,6 +11,7 @@ class CourseTester extends BaseUnitTest {
     public function testCourse() {
         $details = [
             'semester' => 's18',
+            'term_name' => 'Spring 2018',
             'course' => 'csci1000'
         ];
         $course = new Course($this->createMockCore(), $details);
@@ -19,9 +20,11 @@ class CourseTester extends BaseUnitTest {
         $this->assertEquals('csci1000', $course->getTitle());
         $this->assertEquals('CSCI1000', $course->getCapitalizedTitle());
         $this->assertEquals('', $course->getDisplayName());
+        $this->assertEquals('Spring 2018', $course->getSemesterName());
 
         $array = [
             'semester' => 's18',
+            'semester_name' => 'Spring 2018',
             'title' => 'csci1000',
             'display_name' => '',
             'modified' => false

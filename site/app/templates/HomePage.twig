@@ -8,7 +8,12 @@
                 {% for rank in ranks %}
                     <h2>As {{ rank.title }}</h2>
                     <ul id="course-list" class="bare-list">
+                        {% set display_semester = '' %}
                         {% for course in rank.courses %}
+                            {% if display_semester != course.display_semester %}
+                                {% set display_semester = course.display_semester %}
+                                <h3> {{ display_semester }} </h3>
+                            {% endif %}
                             <li>
                                 <a id="{{ course['semester'] }}_{{ course['title'] }}" class="btn btn-primary btn-block btn-course" href="{{ core.buildUrl([course['semester'], course['title']]) }}">
                                     {{ course['display_semester'] }} &nbsp; &nbsp;
