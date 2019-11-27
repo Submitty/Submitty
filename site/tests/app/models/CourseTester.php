@@ -48,9 +48,9 @@ class CourseTester extends BaseUnitTest {
             $this->assertEquals('Test Course', $course->getDisplayName());
             $array = [
                 'semester' => 's18',
+                'semester_name' => 'Spring 2018',
                 'title' => 'csci1000',
                 'display_name' => 'Test Course',
-                'modified' => false
             ];
             $this->assertEquals($array, $course->toArray());
         }
