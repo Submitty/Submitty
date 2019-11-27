@@ -828,21 +828,7 @@ parameters:
 			path: app/models/Config.php
 
 		-
-			message: "#^PHPDoc tag @property has invalid value \\(@var string the semester in which the course is taking place\\.\"\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
-			count: 1
-			path: app/models/Course.php
 
-		-
-			message: "#^PHPDoc tag @property has invalid value \\(@var the proper title of the course\\.\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
-			message: "#^PHPDoc tag @property has invalid value \\(@var the display name of the course\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
-			count: 1
-			path: app/models/Course.php
-
-		-
 			message: "#^Class app\\\\models\\\\User referenced with incorrect case\\: app\\\\models\\\\user\\.$#"
 			count: 2
 			path: app/models/CourseMaterial.php
@@ -2383,5 +2369,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
-
