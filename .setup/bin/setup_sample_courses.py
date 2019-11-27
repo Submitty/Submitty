@@ -166,21 +166,21 @@ def main():
                               user_email=user.email,
                               last_updated=NOW.strftime("%Y-%m-%d %H:%M:%S%z"))
 
-    #INSERT term into terms table, based on today's date.
+    # INSERT term into terms table, based on today's date.
     today = datetime.today()
-    year = str(today.year)[-2:]
+    year = str(today.year)
     if today.month < 7:
-        term_id = "s" + year
-        term_name = "Spring 20" + year
-        term_start = "01/02/20" + year
-        term_end = "06/30/20" + year
+        term_id    = "s" + year[-2:]
+        term_name  = "Spring " + year
+        term_start = "01/02/" + year
+        term_end   = "06/30/" + year
     else:
-        term_id = "f" + year
-        term_name = "Fall 20" + year
-        term_start = "07/01/20" + year
-        term_end = "12/23/20" + year
+        term_id    = "f" + year[-2:]
+        term_name  = "Fall " + year
+        term_start = "07/01/" + year
+        term_end   = "12/23/" + year
 
-    terms_table = Table('terms', submitty_metadata, autoload=True)
+    terms_table = Table("terms", submitty_metadata, autoload=True)
     submitty_conn.execute(terms_table.insert(),
                           term_id    = term_id,
                           name       = term_name,
