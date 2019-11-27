@@ -17,23 +17,22 @@ DATABASE_PASS=$(jq -r '.database_password' ${CONF_DIR}/database.json)
 PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -lqt | cut -d \| -f 1 | grep -qw submitty
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Submitty master database doesn't exist."
-    exit
+    exit 1
 fi
 
-# Ensure that tables exist within Submitty Master DB.
-sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms','courses','courses_users','sessions','users');"
+# Ensure that terms table exists within Submitty Master DB.
+sql="SELECT count(*) FROM pg_tables WHERE schemaname='public' AND tablename IN ('terms');"
 table_count=`PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -tAc "${sql}"`
-if [[ $table_count -ne "5" ]] ; then
+if [[ $table_count -ne "1" ]] ; then
     echo "ERROR: Submitty Master DB is invalid."
-    exit
+    exit 1
 fi
 
 # Check that there are exactly 4 command line arguments.
 if [[ $# -ne "4" ]] ; then
-    echo "ERROR: Usage, wrong number of arguments"
-    echo "   create_course.sh  <term>  <name of term>  <start date>  <end date>"
-    echo "   When entering <name of term>, be sure to escape white space with '\'."
-    echo "   Dates must be in 'MM/DD/YYYY' format."
+    echo "Usage: create_course.sh  <term>  '<name of term>'  <start date>  <end date>"
+    echo "  <name of term> must be properly escaped."
+    echo "  <start date> and <end date> must be in 'MM/DD/YYYY' format."
     exit 1
 fi
 
@@ -42,10 +41,10 @@ name=$2
 start=$3
 end=$4
 
-# Check that start and end dates are properly formatted.
+# Validate that start and end dates are properly formatted.
 regex='^(0[0-9]|1[0-2])/(0[0-9]|[1-2][0-9]|3[0-1])/20[0-9]{2}$'
 
-if ! [[ "$start" =~ $regex ]] ; then
+if ! [[ $start =~ $regex ]] ; then
     echo "ERROR: Start date '${start}' invalid.  Use format 'MM/DD/YYYY'."
     exit 1
 fi
@@ -55,7 +54,7 @@ if ! [[ $end =~ $regex ]] ; then
     exit 1
 fi
 
-# Check that start and end dates are actual calendar dates.
+# Validate that start and end dates are actual calendar dates.
 date -d $start > /dev/null 2>&1
 if [[ $? -ne "0" ]] ; then
     echo "ERROR: Start date '${start}' invalid.  Not a calendar date."
@@ -67,3 +66,16 @@ if [[ $? -ne "0" ]] ; then
     echo "ERROR: End date '${end}' invalid.  Not a calendar date."
     exit 1
 fi
+
+# INSERT new term into master DB
+PGPASSWORD=${DATABASE_PASS} psql -h ${DATABASE_HOST} -U ${DATABASE_USER} -d submitty -qc "
+INSERT INTO terms (term_id, name, start_date, end_date)
+VALUES ('${semester}', '${name}', '${start}', '${end}');"
+
+if [[ $? -ne "0" ]] ; then
+    echo "ERROR: Failed to INSERT new term into master DB."
+    exit 1
+fi
+
+echo "'${semester}' term has been INSERTed into the master DB."
+echo "You may now create courses for the '${semester}' term."
