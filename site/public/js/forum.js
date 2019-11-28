@@ -1205,7 +1205,7 @@ if (!Array.prototype.toggleElement) {
     Object.defineProperty(Array.prototype, 'toggleElement', {
         value: function(element, comparer) {
             var index = this.inArray(comparer);
-            if ((typeof(index) == "boolean" && !index) || (typeof(index) == "int" && index === 0)) {
+            if ((typeof(index) == "boolean" && !index) || (typeof(index) == "number" && index === 0)) {
                 this.push(element);
             }
             else {
