@@ -35,6 +35,24 @@
     height: 150px;
 }
 
+.fileUploadTable {
+    border: none;
+    border-collapse: collapse;
+    text-align: left;
+    margin: 40px auto;
+  }
+.fileUploadTable td {
+    border: none;
+    padding: 15px 20px;
+}
+.fileUploadTable td:nth-child(even){
+    text-align: right;
+}
+  
+.fileUploadTable tr:hover {
+    background: #d1d1d1;
+}
+
 #submit {
     margin-right: 100px;
 }
