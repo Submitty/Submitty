@@ -40,11 +40,13 @@
     border-collapse: collapse;
     text-align: left;
     margin: 40px auto;
-  }
+}
+
 .fileUploadTable td {
     border: none;
     padding: 15px 20px;
 }
+
 .fileUploadTable td:nth-child(even){
     text-align: right;
 }
