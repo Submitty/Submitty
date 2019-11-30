@@ -82,10 +82,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     public function testCourseMaterialsUpload() {
-        /*$this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
-        */
+
         $controller = new CourseMaterialsController($this->core);
 
         $name = "foo.txt";
@@ -121,10 +121,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     public function testZipCourseUpload() {
-        /*$this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
-        */
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -164,10 +164,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
      * @runInSeparateProcess
      */
     public function testModifyCourseMaterials() {
-        /*$this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
-        */
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -239,10 +238,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
      * @runInSeparateProcess
      */
     public function testDeleteCourseMaterial() {
-        /*$this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
-        */
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -269,10 +268,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     public function testModifyCourseMaterialsPermission() {
-        /*$this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+        $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
-        */
+
         $controller = new CourseMaterialsController($this->core);
 
         $_FILES = array();
@@ -300,10 +299,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
     }
 
     public function testRequestedPathUpload() {
-         /*$this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
+         $this->getFunctionMock('app\controllers\course', 'is_uploaded_file')
             ->expects($this->any())
             ->willReturn(true);
-        */
+
         $controller = new CourseMaterialsController($this->core);
         $_FILES = array();
         $_POST['requested_path'] = 'foo/foo2';

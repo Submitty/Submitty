@@ -326,28 +326,28 @@ class CourseMaterialsController extends AbstractController {
             $requested_path = $_POST['requested_path'];
         }
 
-        $release_time ="";
-        if(isset($_POST['release_time'])){
+        $release_time = "";
+        if (isset($_POST['release_time'])) {
             $release_time = $_POST['release_time'];
         }
 
         $sections = null;
-        if(isset($_POST['sections'])){
+        if (isset($_POST['sections'])) {
             $sections = $_POST['sections'];
         }
-        
+
         $hide_from_students = null;
-        if(isset($_POST['hide_from_students'])){
+        if (isset($_POST['hide_from_students'])) {
             $hide_from_students = $_POST['hide_from_students'];
         }
-        
-        if(empty($sections) && !is_null($sections)){
+
+        if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
 
         //Check if the datetime is correct
-        if(\DateTime::createFromFormat ( 'Y-m-d H:i:s', $release_time ) === FALSE){
-          return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
+        if (\DateTime::createFromFormat('Y-m-d H:i:s', $release_time) === false) {
+            return $this->core->getOutput()->renderResultMessage("ERROR: Improperly formatted date", false);
         }
 
 
@@ -369,21 +369,21 @@ class CourseMaterialsController extends AbstractController {
         }
 
         $status = FileUtils::validateUploadedFiles($_FILES["files1"]);
-        if(array_key_exists("failed", $status)){
+        if (array_key_exists("failed", $status)) {
             return $this->core->getOutput()->renderResultMessage("Failed to validate uploads " . $status["failed"], false);
         }
 
         $file_size = 0;
         foreach ($status as $stat) {
             $file_size += $stat['size'];
-            if($stat['success'] === false){
+            if ($stat['success'] === false) {
                 return $this->core->getOutput()->renderResultMessage("Error " . $stat['error'], false);
             }
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
         if ($file_size > $max_size) {
-            return $this->core->getOutput()->renderResultMessage("ERROR: File(s) uploaded too large.  Maximum size is ".($max_size/1024)." kb. Uploaded file(s) was ".($file_size/1024)." kb.", false);
+            return $this->core->getOutput()->renderResultMessage("ERROR: File(s) uploaded too large.  Maximum size is " . ($max_size / 1024) . " kb. Uploaded file(s) was " . ($file_size / 1024) . " kb.", false);
         }
 
         // creating uploads/course_materials directory
@@ -410,8 +410,8 @@ class CourseMaterialsController extends AbstractController {
                     $is_zip_file = false;
 
                     if (mime_content_type($uploaded_files[1]["tmp_name"][$j]) == "application/zip") {
-                        if(FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
-                            return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside ".$uploaded_files[1]["name"][$j].".", false);
+                        if (FileUtils::checkFileInZipName($uploaded_files[1]["tmp_name"][$j]) === false) {
+                            return $this->core->getOutput()->renderResultMessage("ERROR: You may not use quotes, backslashes or angle brackets in your filename for files inside " . $uploaded_files[1]["name"][$j] . ".", false);
                         }
                         $is_zip_file = true;
                     }
@@ -421,9 +421,9 @@ class CourseMaterialsController extends AbstractController {
                         //get the file names inside the zip to write to the JSON file
 
                         $zip = new \ZipArchive();
--                       $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
+                        $res = $zip->open($uploaded_files[1]["tmp_name"][$j]);
 
-                        if(!$res){
+                        if (!$res) {
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to open zip archive", false);
                         }
 
@@ -433,7 +433,7 @@ class CourseMaterialsController extends AbstractController {
                         for ($i = 0; $i < $zip->numFiles; $i++) {
                             $entries[] = $zip->getNameIndex($i);
                         }
-                        $entries = array_filter($entries, function($entry) use ($disallowed_folders, $disallowed_files) {
+                        $entries = array_filter($entries, function ($entry) use ($disallowed_folders, $disallowed_files) {
                             $name = strtolower($entry);
                             foreach ($disallowed_folders as $folder) {
                                 if (Utils::startsWith($folder, $name)) {
@@ -449,17 +449,19 @@ class CourseMaterialsController extends AbstractController {
                             }
                             return true;
                         });
-                        $zfiles = array_filter($entries, function($entry) {
+                        $zfiles = array_filter($entries, function ($entry) {
                             return substr($entry, -1) !== '/';
                         });
 
                         $zip->extractTo($upload_path, $entries);
 
                         foreach ($zfiles as $zfile) {
-                            $path = FileUtils::joinPaths( $upload_path, $zfile );
-                            if(!(is_null($sections))){
-                                $sections_exploded = [];
-                                $sections_exploded = explode(",", $sections);
+                            $path = FileUtils::joinPaths($upload_path, $zfile);
+                            if (!(is_null($sections))) {
+                                $sections_exploded = @explode(",", $sections);
+                                if ($sections_exploded == null) {
+                                    $sections_exploded = [];
+                                }
                                 $json[$path] = [
                                     'checked' => '1',
                                     'release_datetime' => $release_time,
@@ -467,8 +469,7 @@ class CourseMaterialsController extends AbstractController {
                                     'hide_from_students' => $hide_from_students
                                 ];
                             }
-                            
-                            else{
+                            else {
                                 $json[$path] = [
                                     'checked' => '1',
                                     'release_datetime' => $release_time,
@@ -477,17 +478,19 @@ class CourseMaterialsController extends AbstractController {
                             }
                         }
                     }
-                    else
-                    {
+                    else {
                         if (!@copy($uploaded_files[1]["tmp_name"][$j], $dst)) {
                             return $this->core->getOutput()->renderResultMessage("ERROR: Failed to copy uploaded file {$uploaded_files[1]["name"][$j]} to current location.", false);
-                        }else{
-                            if(!(is_null($sections))){
-                                $sections_exploded = [];
-                                $sections_exploded = explode(",", $sections);
+                        }
+                        else {
+                            if (!(is_null($sections))) {
+                                $sections_exploded = @explode(",", $sections);
+                                if ($sections_exploded == null) {
+                                    $sections_exploded = [];
+                                }
                                 $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
                             }
-                            else{
+                            else {
                                 $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'hide_from_students' => $hide_from_students);
                             }
                         }
