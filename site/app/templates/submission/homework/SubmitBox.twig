@@ -364,7 +364,9 @@
                                     </label>
                                 {% endfor %}
                             {% endif %}
-                        </fieldset>
+                        </fieldset>                    
+
+                        
 
                         {# Create reset to recent submission button #}
                         <button type="button" id="mc_{{ num_multiple_choice }}_clear_button" class="btn btn-primary mc-clear">Clear</button>
@@ -398,11 +400,16 @@
                         </script>
 
                         {% set num_multiple_choice = num_multiple_choice + 1 %}
+                    {# Handle if cell is submit button #}
+
+                    {% elseif cell.type == "submit_button" %}
+                        <button type="button" id="submit" class="btn btn-success">Submit</button>
+
 
                     {% endif %}
-
                 </div>
 
+                    
             {% endfor %}
 
         </div>

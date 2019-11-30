@@ -304,6 +304,11 @@ int main(int argc, char *argv[]) {
           out_notebook_cell["choices"] = choices;
           out_notebook_cell["allow_multiple"] = allow_multiple;
       }
+      
+      else if (type == "submit_button") {
+        
+      }
+      
 
       // Else unknown type was passed in throw exception
       else{

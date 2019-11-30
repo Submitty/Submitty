@@ -38,6 +38,14 @@
         },
         {
             "type": "markdown",
+            "markdown_string": "Counts as one submission:"
+        },
+        {
+            "type": "submit_button"
+        },
+
+        {
+            "type": "markdown",
             "markdown_string": "Multiple choice select one:"
         },
         {
@@ -65,6 +73,15 @@
                 {"value": "5", "description": "five"}
             ],
             "allow_multiple": true
+    
+        },
+        {
+            "type": "markdown",
+            "markdown_string": "Counts as one submission:"
+        },
+
+        {
+            "type": "submit_button"
         },
         {
           "type": "markdown",
