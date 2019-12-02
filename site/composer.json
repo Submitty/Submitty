@@ -25,7 +25,7 @@
     "symfony/config": "4.4.1",
     "symfony/http-foundation": "4.4.1",
     "doctrine/annotations": "1.8.0",
-    "doctrine/cache": "1.9.1",
+    "doctrine/cache": "1.10.0",
     "php-ds/php-ds": "1.2.0"
   },
   "require-dev": {
