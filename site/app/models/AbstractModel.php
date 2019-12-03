@@ -84,17 +84,17 @@ abstract class AbstractModel {
             $doc_comment = $property->getDocComment();
             $prop_name = $property->getName();
             if ($doc_comment !== false) {
-                if (strpos($doc_comment, '@prop-write')) {
+                if (strpos($doc_comment, ' @prop-write ')) {
                     static::$properties[$class_name][$prop_name] = [
                         'write_only' => true,
                     ];
                 }
-                elseif (strpos($doc_comment, '@prop-read')) {
+                elseif (strpos($doc_comment, ' @prop-read ')) {
                     static::$properties[$class_name][$prop_name] = [
                         'read_only' => true,
                     ];
                 }
-                elseif (strpos($doc_comment, '@prop')) {
+                elseif (strpos($doc_comment, ' @prop ') || strpos($doc_comment, ' @property ')) {
                     static::$properties[$class_name][$prop_name] = [
                     ];
                 }
