@@ -212,7 +212,7 @@ function deleteFiles(part) {
     if(previous_files.length != 0){
         previous_files[part-1] = [];
     }
-    var dropzone = document.getElementById("fileUploadTable" + part);
+    var dropzone = document.getElementById("file-upload-table-" + part);
     var labels = dropzone.getElementsByClassName("label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
@@ -288,7 +288,7 @@ function setButtonStatus() {
 // LABELS FOR SELECTED FILES
 //========================================================================================
 function removeLabel(filename, part){
-    var dropzone = document.getElementById("fileUploadTable" + part);
+    var dropzone = document.getElementById("file-upload-table-" + part);
     var labels = dropzone.getElementsByClassName("label");
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
@@ -313,31 +313,32 @@ function addLabel(filename, filesize, part, previous){
 
     uploadRowElement.appendChild(fileDataElement);
     uploadRowElement.appendChild(fileTrashElement);
+
     // styling
-    uploadRowElement.children[1].onmouseover = function(e){
+    fileTrashElement.onmouseover = function(e){
         e.stopPropagation();
         this.style.color = "#FF3933";
     };
-    uploadRowElement.children[1].onmouseout = function(e){
+    fileTrashElement.onmouseout = function(e){
         e.stopPropagation();
         this.style.color = "black";
     };
     // remove file and label-row in table on click event
-    uploadRowElement.children[1].onclick = function(e){
+    fileTrashElement.onclick = function(e){
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
 
     // FOR VPAT if trash can has focus and key is pressed it will delete item
-    uploadRowElement.children[1].onkeypress = function(e){
+    fileTrashElement.onkeypress = function(e){
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
 
     // adding the file in `table` in the parent div 
-    var fileTable = document.getElementById("fileUploadTable" + part);
+    var fileTable = document.getElementById("file-upload-table-" + part);
     // Uncomment if want buttons for emptying single bucket
     // var deletebutton = document.getElementById("delete" + part);
     fileTable.appendChild(uploadRowElement);
