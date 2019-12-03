@@ -52,7 +52,7 @@ function render() {
             documentId = 'toy_eb'.pdf;
             let pdfData = JSON.parse(data);
             pdfData = atob(pdfData);
-            pdfjsLib.getDocument({data: pdfData}).then((pdf) => {
+            pdfjsLib.getDocument({data: pdfData}).promise.then((pdf) => {
                 RENDER_OPTIONS.pdfDocument = pdf;
 
                 let viewer = document.getElementById('viewer');
@@ -64,7 +64,7 @@ function render() {
                 }
 
                 PDFAnnotate.UI.renderPage(1, RENDER_OPTIONS).then(([pdfPage, annotations]) => {
-                    let viewport = pdfPage.getViewport(RENDER_OPTIONS.scale, RENDER_OPTIONS.rotate);
+                    let viewport = pdfPage.getViewport({scale: RENDER_OPTIONS.scale, rotation: RENDER_OPTIONS.rotate});
                     PAGE_HEIGHT = viewport.height;
                 });
             });

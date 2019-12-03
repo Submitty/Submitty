@@ -14,6 +14,18 @@ use ReflectionException;
 class BaseUnitTest extends \PHPUnit\Framework\TestCase {
     protected static $mock_builders = [];
 
+    /**
+     * This array stores whether or not a mocked method was called.
+     * This is useful in places where all you care about is that
+     * the method was called. An example would be the case of a
+     * database query being called from a controller and you
+     * don't really care what was passed to the view. Only that the
+     * database gets called.
+     *
+     * @var bool[]
+     */
+    protected $mocked_methods = [];
+
     /** @noinspection PhpDocSignatureInspection */
     /**
      * Creates a mocked the Core object predefining things with known values so that we don't have to do this
@@ -89,7 +101,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
 
         $mock_queries = $this->createMock(DatabaseQueries::class);
         foreach ($queries as $method => $value) {
-            $mock_queries->method($method)->willReturn($value);
+            $this->mocked_methods[$method] = false;
+            $mock_queries->method($method)->will($this->returnCallback(function () use ($method, $value) {
+                $this->mocked_methods[$method] = true;
+                return $value;
+            }));
         }
         $core->method('getQueries')->willReturn($mock_queries);
 
@@ -201,5 +217,15 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         $method->setAccessible(true);
 
         return $method->invokeArgs($object, $parameters);
+    }
+
+    /**
+     * Checks whether a mocked method was called or not
+     *
+     * @param string $method
+     * @return bool
+     */
+    public function assertMethodCalled(string $method): bool {
+        return array_key_exists($method, $this->mocked_methods) && $this->mocked_methods[$method];
     }
 }

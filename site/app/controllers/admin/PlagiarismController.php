@@ -642,9 +642,8 @@ class PlagiarismController extends AbstractController {
         return $color_info;
     }
 
-    public function getDisplayForCode($file_name, $color_info) {
-        $content = file_get_contents($file_name);
-        return $content;
+    public function getDisplayForCode(string $file_name, $color_info) {
+        return file_get_contents($file_name);
     }
 
     /**

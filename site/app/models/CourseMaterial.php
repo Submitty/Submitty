@@ -38,9 +38,7 @@ class CourseMaterial extends AbstractModel {
             $release_time = \DateTime::createFromFormat('Y-m-d H:i:s', $meta_data->$path_to_file->release_datetime);
 
             // If current time is greater than release time return true, else return false
-            $current_time > $release_time ? $retVal = true : $retVal = false;
-
-            return $retVal;
+            return $current_time > $release_time;
         }
     }
 
@@ -75,14 +73,11 @@ class CourseMaterial extends AbstractModel {
         else {
             $current_user_group = $current_user->getGroup();
             if (!isset($meta_data->$path_to_file->sections)) {
-                $retVal = true;
-                return $retVal;
+                return true;
             }
             $file_sections = $meta_data->$path_to_file->sections;
             $user_section = $current_user->getRegistrationSection();
-            ($current_user_group < 4 || in_array($user_section, $file_sections, true)) ? $retVal = true : $retVal = false;
-
-            return $retVal;
+            return ($current_user_group < 4 || in_array($user_section, $file_sections, true));
         }
     }
 }

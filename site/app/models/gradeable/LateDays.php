@@ -31,8 +31,9 @@ class LateDays extends AbstractModel {
      * @param Core $core
      * @param User $user
      * @param GradedGradeable[] $graded_gradeables An array of only GradedGradeables
+     * @param array|null $late_day_updates
      */
-    public function __construct(Core $core, User $user, array $graded_gradeables) {
+    public function __construct(Core $core, User $user, array $graded_gradeables, $late_day_updates = null) {
         parent::__construct($core);
         $this->user = $user;
 
@@ -51,7 +52,7 @@ class LateDays extends AbstractModel {
         });
 
         // Get the late day updates that the instructor will enter
-        $this->late_days_updates = $this->core->getQueries()->getLateDayUpdates($user->getId());
+        $this->late_days_updates = $late_day_updates ?? $this->core->getQueries()->getLateDayUpdates($user->getId());
 
         // Construct late days info for each gradeable
         foreach ($graded_gradeables as $graded_gradeable) {
