@@ -84,25 +84,24 @@ abstract class AbstractModel {
             $doc_comment = $property->getDocComment();
             $prop_name = $property->getName();
             if ($doc_comment !== false) {
-                if (strpos($doc_comment, ' @prop-write ')) {
+                if (preg_match("/ @prop\-write[\s]/", $doc_comment) === 1) {
                     static::$properties[$class_name][$prop_name] = [
                         'write_only' => true,
                     ];
                 }
-                elseif (strpos($doc_comment, ' @prop-read ')) {
+                elseif (preg_match("/ @prop\-read[\s]/", $doc_comment) === 1) {
                     static::$properties[$class_name][$prop_name] = [
                         'read_only' => true,
                     ];
                 }
-                elseif (strpos($doc_comment, ' @prop ') || strpos($doc_comment, ' @property ')) {
-                    static::$properties[$class_name][$prop_name] = [
-                    ];
+                elseif (preg_match("/ @(prop|property)[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [];
                 }
 
                 if (isset(static::$properties[$class_name][$prop_name])) {
                     $matches = [];
-                    preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
-                    if (count($matches) > 0) {
+                    preg_match("/@var (.+?)[ \n\*]/s", $property->getDocComment(), $matches);
+                    if (count($matches) > 0 && $matches[1][0] !== '@') {
                         static::$properties[$class_name][$prop_name]['type'] = $matches[1];
                     }
                 }

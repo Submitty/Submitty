@@ -58,6 +58,11 @@ use app\libraries\Utils;
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method bool isQueueEnabled()
+ * @method void setSemester(string $semester)
+ * @method void setCourse(string $course)
+ * @method void setCoursePath(string $course_path)
+ * @method void setSubmittyPath(string $submitty_path)
+ * @method void setDebug(bool $debug)
  */
 
 class Config extends AbstractModel {
