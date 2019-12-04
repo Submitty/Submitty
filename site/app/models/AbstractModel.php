@@ -2,6 +2,7 @@
 
 namespace app\models;
 
+use app\exceptions\PropertyAccessException;
 use app\libraries\Core;
 use app\libraries\Utils;
 
@@ -80,13 +81,29 @@ abstract class AbstractModel {
         $class = new \ReflectionClass($this);
         $class_name = get_class($this);
         foreach ($class->getProperties() as $property) {
-            $matches = array();
-            preg_match("/@property/s", $property->getDocComment(), $matches);
-            if (count($matches) > 0) {
-                static::$properties[$class_name][$property->getName()] = null;
-                preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
-                if (count($matches) > 0) {
-                    static::$properties[$class_name][$property->getName()] = $matches[1];
+            $doc_comment = $property->getDocComment();
+            $prop_name = $property->getName();
+            if ($doc_comment !== false) {
+                if (preg_match("/ @prop\-write[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [
+                        'write_only' => true,
+                    ];
+                }
+                elseif (preg_match("/ @prop\-read[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [
+                        'read_only' => true,
+                    ];
+                }
+                elseif (preg_match("/ @(prop|property)[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [];
+                }
+
+                if (isset(static::$properties[$class_name][$prop_name])) {
+                    $matches = [];
+                    preg_match("/@var (.+?)[ \n\*]/s", $property->getDocComment(), $matches);
+                    if (count($matches) > 0 && $matches[1][0] !== '@') {
+                        static::$properties[$class_name][$prop_name]['type'] = $matches[1];
+                    }
                 }
             }
         }
@@ -112,6 +129,9 @@ abstract class AbstractModel {
             $property_name = $this->convertName($name);
             $value = $arguments[0];
             if (isset(static::$properties[$class_name][$property_name])) {
+                if (isset(static::$properties[$class_name][$property_name]['read_only'])) {
+                    throw new PropertyAccessException("Cannot write to read-only property ${property_name}");
+                }
                 $type = static::$properties[$class_name][$property_name];
                 switch ($type) {
                     case 'int':
@@ -138,10 +158,24 @@ abstract class AbstractModel {
         }
         elseif (Utils::startsWith($name, "get")) {
             $property_name = $this->convertName($name);
+            if (
+                isset(static::$properties[$class_name][$property_name])
+                && isset(static::$properties[$class_name][$property_name]['write_only'])
+            ) {
+                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+            }
+
             return $this->$property_name;
         }
         elseif (Utils::startsWith($name, "is")) {
             $property_name = $this->convertName($name, 2);
+            if (
+                isset(static::$properties[$class_name][$property_name])
+                && isset(static::$properties[$class_name][$property_name]['write_only'])
+            ) {
+                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+            }
+
             return $this->$property_name === true;
         }
 
