@@ -41,7 +41,7 @@
         {
           "server": true,
           "container_name": "db_example_postgres",
-          "container_image": "goofykubers/example_db_autograding:latest"
+          "container_image": "goofykubers/example_db:latest"
         },
         {
           "container_name": "main",
