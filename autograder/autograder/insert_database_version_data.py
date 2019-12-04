@@ -1,22 +1,9 @@
 
 """
-This file is used to put submission details about a version into the database so that it can be
-easily and efficiently used by the PHP script. This needs (in the general case) read access to the
-DATA_DIR files for a course (both in config/ and results/ directory). The script should then also
-only be readable/executable by the DAEMON_USER as it does contain the database information and we
-do notwant some crafty student to try and get access to it. Thus the file should be owned by
-DAEMON_USER and the permissions set to 500.
-
-Main usage of the script is:
-./insert_database_version_data.py <semester> <course> <gradeable_id> <user_id> <version>
-
-which will fetch the data from the config/build and results/ directories to contruct the details
-about the student's submissions, inserting it into the database.
-
-However, you can directly pass in additional optional arguments to either override the student's
-point total in a category or if you're not using the files (via -n flag). Doing:
-./insert_database_version_data.py --help
-will explain how to do that.
+This module is used for inserting/updating autograding information into the DB.
+Generally, the site should be inserting an empty row into the DB for the autograding
+submission and then this script updates said row, but should be fault-tolerant to
+handle inserting the row if necessary.
 """
 import json
 import os
@@ -225,5 +212,3 @@ def get_result_details(semester, course, g_id, who_id, version):
             result_details['submission_time'] = '{}-{:02d}-{:02d} {:02d}:{:02d}:{:02d}' \
                 .format(a.year, a.month, a.day, a.hour, a.minute, a.second)
     return result_details
-
-
