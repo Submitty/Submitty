@@ -208,7 +208,7 @@ class Config extends AbstractModel {
     protected $auto_rainbow_grades;
     /** @property @var string */
     protected $secret_session;
-    /** @prop @var string|null */
+    /** @prop-read @var string|null */
     protected $verified_submitty_admin_user = null;
     /** @property @var bool */
     protected $queue_enabled;
