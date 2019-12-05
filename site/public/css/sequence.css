@@ -12,15 +12,15 @@ text.actor{
 
 }
 .positive-end{
-    content: "\f00c";
-    font-family: "Font Awesome 5 Free";
+    content: '\f00c';
+    font-family: 'Font Awesome 5 Free';
 }
 .messageLine1{
 
 }
 .negative-end{
-    content: "\f12a" ;
-    font-family: "Font Awesome 5 Free";
+    content: '\f12a' ;
+    font-family: 'Font Awesome 5 Free';
 }
 .labelText{
     word-wrap: break-word;
