@@ -22,8 +22,17 @@
 <br/>
 {% if show_post %}
     <div style="margin-bottom:10px;" class="form-group row position-relative">
-        <button id="link_btn" type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fas fa-link fa-1x"></i></button>
-        <button id="code_btn" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fas fa-code fa-1x"></i></button>
+        <div role="button" id="markdown_toggle_{{ post_box_id }}"
+        class="markdown-toggle {{ render_markdown?"markdown-active":"markdown-inactive" }}"
+        style="margin-right:10px;padding: unset;cursor: pointer; "
+        title="Render markdown" onclick="$('#markdown_buttons_{{ post_box_id }}').toggle(); $(this).toggleClass('markdown-active'); $('#markdown_input_{{ post_box_id }}').val($('#markdown_input_{{ post_box_id }}').val() == 0? '1':'0');$('#markdown-info-{{ post_box_id }}').toggleClass('disabled');"><i class="fab fa-markdown fa-2x"></i></div>
+        <input type="hidden" name="markdown_status" id="markdown_input_{{ post_box_id }}" value="{{ render_markdown?1:0 }}" />
+        <a target=_blank href="https://submitty.org/student/discussion_forum#formatting-a-post-using-markdown/"><i id="markdown-info-{{ post_box_id }}" style="font-style:normal;" class="far fa-question-circle disabled"></i></a>
+        &nbsp;&nbsp;
+        <span style="display: {{ render_markdown?"block":"none" }}" id="markdown_buttons_{{ post_box_id }}">
+            <button id="link_btn" type="button" title="Insert a link" onclick="addMarkdownCode(1, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" style="margin-right:10px;" class="btn btn-default">Link <i class="fas fa-link fa-1x"></i></button>
+            <button id="code_btn" title="Insert a code segment" type="button" onclick="addMarkdownCode(0, $(this).closest('.thread-post-form').find('[name=thread_post_content]'))" class="btn btn-default">Code <i class="fas fa-code fa-1x"></i></button>
+        </span>
     {% if show_merge_thread_button and core.getUser().accessGrading() %}
         <a class="btn btn-primary" id="merge-thread-btn" title="Merge Threads" onclick="$('#merge-threads').css('display', 'block');">Merge Threads</a>
     {% endif %}
@@ -39,7 +48,7 @@
                                         button: [
                                             {
                                                 label: "Now"
-                                            }, 
+                                            },
                                             {
                                                 label: "End of time"
                                             }
@@ -48,10 +57,10 @@
                                         onClick: (index, fp) => {
                                             let date;
                                             switch (index) {
-                                                case 0: 
+                                                case 0:
                                                     date = new Date();
                                                     break;
-                                                case 1: 
+                                                case 1:
                                                     date = new Date("9998-01-01 00:00:00");
                                                     break;
                                             }
@@ -72,7 +81,7 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea"></textarea>
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}" ></textarea>
     </div>
 <br/>
 {% endif %}
@@ -91,7 +100,7 @@
         <div id='categories-pick-list'>
 
         {% for category in categories %}
-            <a class="btn cat-buttons" cat-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
+            <a class="btn cat-buttons" data-color="{{ category.color }}" aria-labelledby="cat_label" style="word-wrap: break-word; background-color: {{ category.color }}; color: white; max-width: 350px; text-align: left !important; white-space: unset !important;">{{ category.category_desc }}
                 <input type="checkbox" name="cat[]" value="{{ category.category_id }}" aria-label="Category {{ category.category_desc }}">
             </a>
         {% endfor %}
@@ -106,10 +115,10 @@
 <div class="form-group row thread-attachment-container">
     {% if post_box_id %}
         <span class="inline-block">
-            {# uploadID and input_fileID required for drag-and-drop.js #}
+            {# uploadID and input-file + Index required for drag-and-drop.js #}
             <div class="upload_attachment_box cursor-pointer" id="upload{{ post_box_id }}">
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
-                <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input_file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
+                <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
             </div>
         </span>
@@ -141,6 +150,7 @@
 
                     // Attachments on Create Thread
                     var part = "{{ post_box_id }}";
+                    initializeDragAndDrop();
                     createArray(part);
                     $(".upload_attachment_box").each(function() {
                         this.addEventListener("click", clicked_on_box, false);

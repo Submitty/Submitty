@@ -50,7 +50,6 @@ Vagrant.configure(2) do |config|
     ubuntu.vm.box = 'bento/ubuntu-18.04'
     ubuntu.vm.network 'forwarded_port', guest: 5432, host: 16432
     ubuntu.vm.network 'private_network', ip: '192.168.56.111'
-    ubuntu.vm.network 'private_network', ip: '192.168.56.112'
   end
 
   config.vm.provider 'virtualbox' do |vb|

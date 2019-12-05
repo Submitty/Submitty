@@ -23,10 +23,10 @@
 }
 
 /* Push recent and clear buttons down a little bit and shrink them slightly */
-.notebook .sa_clear_reset,
-.notebook .codebox_clear_reset,
-.notebook .mc_recent,
-.notebook .mc_clear
+.notebook .sa-clear-reset,
+.notebook .codebox-clear-reset,
+.notebook .mc-recent,
+.notebook .mc-clear
 {
     margin-top: 7px;
     padding: 3px 6px;
@@ -40,8 +40,14 @@
     font-family: monospace;
 }
 
+fieldset.mc {
+    display: flex;
+    flex-direction: column;
+}
+
 /* Display notebook multiple choice descriptions on same line as radio button or checkbox */
-.mc > label > :first-child
+/* Input field is the first child */
+.mc > label > :nth-child(2)
 {
     display: inline;
 }
@@ -54,22 +60,36 @@
 }
 
 /* Style the color of notebook feedback messages */
-.notebook .feedback_msg_failure
+.notebook .feedback-msg-failure
 {
     color: var(--badge-backgroud-red);
 }
 
-.notebook .feedback_msg_warning
+.notebook .feedback-msg-warning
 {
     color: var(--standard-vibrant-orange);
 }
 
-.notebook .feedback_msg_info
+.notebook .feedback-msg-info
 {
     color: var(--standard-deep-blue);
 }
 
-.notebook .feedback_msg_success
+.notebook .feedback-msg-success
 {
     color: var(--standard-dark-green);
+}
+
+.short-answer {
+    max-width: 50em;
+}
+
+.sa-box {
+    display: block;
+}
+
+textarea.sa-box {
+    width: 60em; 
+    height: 100%; 
+    min-height: 110px;
 }

@@ -15,17 +15,6 @@ class NavigationController extends AbstractController {
         parent::__construct($core);
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'no_access':
-                $this->noAccess();
-                break;
-            default:
-                $this->navigationPage();
-                break;
-        }
-    }
-
     /**
      * @Route("/{_semester}/{_course}/no_access")
      */
@@ -45,7 +34,7 @@ class NavigationController extends AbstractController {
         $closed_gradeables_list = $gradeables_list->getClosedGradeables();
         $grading_gradeables_list = $gradeables_list->getGradingGradeables();
         $graded_gradeables_list = $gradeables_list->getGradedGradeables();
-        
+
         $sections_to_lists = [];
 
         $user = $this->core->getUser();
@@ -76,8 +65,8 @@ class NavigationController extends AbstractController {
         // Get a single array of the visible gradeables
         $visible_gradeables = [];
         $submit_everyone = [];
-        foreach($sections_to_lists as $gradeables) {
-            foreach($gradeables as $gradeable) {
+        foreach ($sections_to_lists as $gradeables) {
+            foreach ($gradeables as $gradeable) {
                 $visible_gradeables[] = $gradeable;
                 $submit_everyone[$gradeable->getId()] =
                     $this->core->getAccess()->canI('gradeable.submit.everyone', ['gradeable' => $gradeable]);
@@ -106,8 +95,11 @@ class NavigationController extends AbstractController {
         $user = $this->core->getUser();
 
         //Remove incomplete gradeables for non-instructors
-        if (!$user->accessAdmin() && $gradeable->getType() == GradeableType::ELECTRONIC_FILE &&
-            !$gradeable->hasAutogradingConfig()) {
+        if (
+            !$user->accessAdmin()
+            && $gradeable->getType() == GradeableType::ELECTRONIC_FILE
+            && !$gradeable->hasAutogradingConfig()
+        ) {
             return false;
         }
 

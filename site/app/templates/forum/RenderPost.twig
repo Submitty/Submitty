@@ -1,1 +1,1 @@
-{{ post_content | markdown }}
+{% if render_markdown %}{{ post_content | markdown }}{% else %}{{ post_content }}{% endif %}

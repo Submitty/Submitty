@@ -1,6 +1,5 @@
 /.idea/
 /output/
-/site/tests/report/
 /.vagrant/
 
 selenium*.jar
@@ -17,13 +16,15 @@ __pycache__/
 *.out
 *.synctex.gz
 .coverage
+coverage.xml
 
+/site/cache/
 /site/vendor/
 /site/node_modules/
 /site/public/vendor/
+/site/tests/report/
 /site/config/*
 !/site/config/course_template.json
-
 
 db_update.php
 .setup/data/random_users.txt

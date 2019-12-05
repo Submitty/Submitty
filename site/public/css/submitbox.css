@@ -1,0 +1,40 @@
+#gradeable-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#gradeable-info > * {
+    margin: 0;
+}
+
+#submission-form > * {
+    margin: 1.5em 0;
+}
+
+.github-id {
+    width: 16%;
+}
+
+.codebox {
+    border: 1px solid var(--standard-light-gray);
+}
+
+#upload-boxes {
+    display: table; 
+    border-spacing: 5px; 
+    width: 100%;
+}
+
+.upload-box {
+    cursor: pointer; 
+    text-align: center; 
+    border: dashed 2px var(--standard-light-gray);
+    display:table-cell; 
+    height: 150px;
+}
+
+#submit {
+    margin-right: 100px;
+}

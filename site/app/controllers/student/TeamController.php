@@ -3,16 +3,13 @@
 namespace app\controllers\student;
 
 use app\controllers\AbstractController;
+use app\controllers\admin\AdminGradeableController;
 use app\libraries\FileUtils;
 use Symfony\Component\Routing\Annotation\Route;
 
 class TeamController extends AbstractController {
-    public function run() {
-        return null;
-    }
-
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/new")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/new")
      */
     public function createNewTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -20,17 +17,17 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return $this->core->getOutput()->renderJsonFail("Invalid or missing gradeable id!");
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
             return $this->core->getOutput()->renderJsonFail($gradeable->getTitle() . " is not a team assignment");
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($graded_gradeable !== false) {
@@ -66,12 +63,18 @@ class TeamController extends AbstractController {
             $this->core->addErrorMEssage("Failed to write to team history to settings file");
             return $this->core->getOutput()->renderJsonFail("Failed to write to team history to settings file");
         }
+
+        if ($gradeable->isVcs()) {
+            $config = $this->core->getConfig();
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+        }
+
         $this->core->redirect($return_url);
         return $this->core->getOutput()->renderJsonSuccess();
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/leave")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/leave")
      */
     public function leaveTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -79,15 +82,15 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($graded_gradeable === false) {
@@ -121,7 +124,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/invitation/new", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/new", methods={"POST"})
      */
     public function sendInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -129,15 +132,15 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($graded_gradeable === false) {
@@ -169,7 +172,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null){
+        if ($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null) {
             // If a student with this id is in the null section...
             // (make this look the same as a non-existant student so as not to
             // reveal information about dropped students)
@@ -191,15 +194,17 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->sendTeamInvitation($team->getId(), $invite_id);
 
         // send invited user a notification
-        $metadata = json_encode(['url' => $this->core->buildNewCourseUrl([$gradeable_id,'team'])]);
-        $subject = "New Team Invitation: ".$graded_gradeable->getGradeable()->getTitle();
+        $metadata = json_encode(
+            ['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id,'team'])]
+        );
+        $subject = "New Team Invitation: " . $graded_gradeable->getGradeable()->getTitle();
         $content = "You have received a new invitation to join a team from $user_id";
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'sender_id' => $user_id];
-        $this->core->getNotificationFactory()->onTeamEvent($event,[$invite_id]);
+        $this->core->getNotificationFactory()->onTeamEvent($event, [$invite_id]);
 
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -215,7 +220,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/invitation/accept", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/accept", methods={"POST"})
      */
     public function acceptInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -223,15 +228,15 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($graded_gradeable !== false) {
@@ -256,22 +261,24 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        $team_members = $accept_team->getMembers();
+
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
-
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
+        $team_members = $accept_team->getMembers();
         // send notification to team members that user joined
-        $metadata =  json_encode(['url' => $this->core->buildNewCourseUrl([$gradeable_id,'team'])]);
-        $subject = "New Team Member: ".$gradeable->getTitle();
-        $content = "A new team member with the user name, $user_id, joined your team for gradeable, ".$gradeable->getTitle();
+        $metadata =  json_encode(
+            ['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team'])]
+        );
+        $subject = "New Team Member: " . $gradeable->getTitle();
+        $content = "A new team member with the user name, $user_id, joined your team for gradeable, " . $gradeable->getTitle();
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_joined', 'sender_id' => $user_id];
         $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
 
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $accept_team_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -287,7 +294,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/invitation/cancel", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/invitation/cancel", methods={"POST"})
      */
     public function cancelInvitation($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -295,15 +302,15 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
         if ($graded_gradeable === false) {
@@ -327,7 +334,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->cancelTeamInvitation($team->getId(), $cancel_id);
         $this->core->addSuccessMessage("Cancelled invitation to {$cancel_id}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -343,7 +350,7 @@ class TeamController extends AbstractController {
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/seek/new")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/new")
      */
     public function seekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -351,23 +358,23 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
-        $this->core->getQueries()->addToSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->addToSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team/seek/stop")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team/seek/stop")
      */
     public function stopSeekTeam($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -375,23 +382,23 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
-        $return_url = $this->core->buildNewCourseUrl([$gradeable_id, 'team']);
+        $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**
-     * @Route("/{_semester}/{_course}/{gradeable_id}/team")
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/team")
      */
     public function showPage($gradeable_id) {
         $user_id = $this->core->getUser()->getId();
@@ -399,12 +406,12 @@ class TeamController extends AbstractController {
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
         if ($gradeable === false) {
             $this->core->addErrorMessage('Invalid or missing gradeable id!');
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         if (!$gradeable->isTeamAssignment()) {
             $this->core->addErrorMessage("{$gradeable->getTitle()} is not a team assignment");
-            $this->core->redirect($this->core->buildNewCourseUrl());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);

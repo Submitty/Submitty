@@ -1,12 +1,15 @@
 <?php
 
 namespace app\libraries;
+
 use app\controllers\GlobalController;
 use app\exceptions\OutputException;
 use app\libraries\FileUtils;
 use app\models\Breadcrumb;
+use app\views\ErrorView;
 use Aptoma\Twig\Extension\MarkdownEngine\ParsedownEngine;
 use Aptoma\Twig\Extension\MarkdownExtension;
+use Ds\Set;
 
 /**
  * Class Output
@@ -26,12 +29,15 @@ class Output {
     private $output_buffer = "";
     private $breadcrumbs = array();
     private $loaded_views = array();
-    private $css = array();
-    private $js = array();
-    
+
+    /** @var Set */
+    private $css;
+    /** @var Set */
+    private $js;
+
     private $use_header = true;
     private $use_footer = true;
-    
+
     private $start_time;
 
     /** @var \Twig\Environment $twig */
@@ -44,12 +50,15 @@ class Output {
     /**
      * @var Core
      */
-    private $core;
-    
+    protected $core;
+
     public function __construct(Core $core) {
         $this->core = $core;
         $this->start_time = microtime(true);
         $this->controller = new GlobalController($core);
+
+        $this->css = new Set();
+        $this->js = new Set();
     }
 
     /**
@@ -79,19 +88,19 @@ class Output {
             'debug' => $debug
         ]);
 
-        if($debug){
+        if ($debug) {
             $this->twig->addExtension(new \Twig\Extension\DebugExtension());
         }
-        
+
 
         $this->twig->addGlobal("core", $this->core);
 
-        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function(... $args) {
+        $this->twig->addFunction(new \Twig\TwigFunction("render_template", function (...$args) {
             return call_user_func_array('self::renderTemplate', $args);
         }, ["is_safe" => ["html"]]));
-        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function(string $path, string $title): string {
+        $this->twig->addFunction(new \Twig\TwigFunction('base64_image', function (string $path, string $title): string {
             $valid_image_subtypes = ['png', 'jpg', 'jpeg', 'gif'];
-            list($mime_type, $mime_subtype) = explode('/', FileUtils::getMimeType($path), 2);
+            [$mime_type, $mime_subtype] = explode('/', mime_content_type($path), 2);
             if ($mime_type === "image" && in_array($mime_subtype, $valid_image_subtypes)) {
                 // Read image path, convert to base64 encoding
                 $image_data = base64_encode(file_get_contents($path));
@@ -105,7 +114,7 @@ HTML;
         if ($full_load) {
             $this->twig->getExtension(\Twig\Extension\CoreExtension::class)
                 ->setTimezone($this->core->getConfig()->getTimezone());
-            if($this->core->getConfig()->wrapperEnabled()) {
+            if ($this->core->getConfig()->wrapperEnabled()) {
                 $this->twig_loader->addPath(
                     FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'site'),
                     $namespace = 'site_uploads'
@@ -149,16 +158,16 @@ HTML;
      * using renderTemplate when you plan to then use that rendered View in
      * rendering another View
      */
-    public function renderOutput() {
+    public function renderOutput($view, string $function, ...$args) {
         if (!$this->render) {
             return null;
         }
 
         if ($this->buffer_output) {
-            $this->output_buffer .= call_user_func_array('self::renderTemplate', func_get_args());
+            $this->output_buffer .= $this->renderTemplate($view, $function, ...$args);
         }
         else {
-            echo call_user_func_array('self::renderTemplate', func_get_args());
+            $this->renderTemplate($view, $function, ...$args);
         }
     }
 
@@ -178,25 +187,27 @@ HTML;
      *
      * @return string
      */
-    public function renderTemplate() {
+    public function renderTemplate($view, string $function, ...$args) {
         if (!$this->render) {
             return null;
         }
 
-        if (func_num_args() < 2) {
-            throw new \InvalidArgumentException("Render requires at least two parameters (View, Function)");
+        if (is_array($view)) {
+            $view = implode("\\", $view);
         }
-        $args = func_get_args();
-        if (is_array($args[0])) {
-            $args[0] = implode("\\", $args[0]);
-        }
-        $func = call_user_func_array(array(static::getView($args[0]), $args[1]), array_slice($args, 2));
+        $func = call_user_func_array(array($this->getView($view), $function), $args);
         if ($func === false) {
-            throw new OutputException("Cannot find function '{$args[1]}' in requested view '{$args[0]}'");
+            throw new OutputException("Cannot find function '{$function}' in requested view '{$view}'");
         }
         return $func;
     }
-    
+
+    /**
+     * Please avoid using this function unless absolutely necessary.
+     * Please use renderJsonSuccess, renderJsonFail and renderJsonError
+     * instead to ensure JSON responses have consistent format.
+     * @param $json
+     */
     public function renderJson($json) {
         $this->output_buffer = json_encode($json, JSON_PRETTY_PRINT);
         $this->useFooter(false);
@@ -290,23 +301,24 @@ HTML;
             }
         }
 
-        if ($success == true) {
-            return $this->core->getOutput()->renderJsonSuccess($message);
-        } else {
-            return $this->core->getOutput()->renderJsonFail($message);
+        if ($success === true) {
+            return $this->renderJsonSuccess($message);
+        }
+        else {
+            return $this->renderJsonFail($message);
         }
     }
-    
+
     public function renderString($string) {
         $this->output_buffer .= $string;
     }
-    
+
     public function renderFile($contents, $filename, $filetype = "text/plain") {
         $this->useFooter(false);
         $this->useHeader(false);
         $this->output_buffer = $contents;
-        header("Content-Type: ".$filetype);
-        header("Content-Disposition: attachment; filename=".$filename);
+        header("Content-Type: " . $filetype);
+        header("Content-Disposition: attachment; filename=" . $filename);
         header("Content-Length: " . strlen($contents));
     }
 
@@ -316,10 +328,11 @@ HTML;
      * @param array $context Associative array of variables to pass into the Twig renderer
      * @return string Rendered page content
      */
-    public function renderTwigTemplate($filename, $context = []) {
+    public function renderTwigTemplate(string $filename, array $context = []): string {
         try {
             return $this->twig->render($filename, $context);
-        } catch (\Twig_Error $e) {
+        }
+        catch (\Twig_Error $e) {
             throw new OutputException("{$e->getMessage()} in {$e->getFile()}:{$e->getLine()}");
         }
     }
@@ -331,10 +344,11 @@ HTML;
      * @param string $filename Template file basename, file should be in site/app/templates
      * @param array $context Associative array of variables to pass into the Twig renderer
      */
-    public function renderTwigOutput($filename, $context = []) {
+    public function renderTwigOutput(string $filename, array $context = []): void {
         if ($this->buffer_output) {
             $this->output_buffer .= $this->renderTwigTemplate($filename, $context);
-        } else {
+        }
+        else {
             echo $this->renderTwigTemplate($filename, $context);
         }
     }
@@ -348,14 +362,16 @@ HTML;
      *
      * @return string
      */
-    private function getView($view) {
-        if(!isset($this->loaded_views[$view])) {
-            $class = "app\\views\\{$view}View";
+    private function getView($class) {
+        if (!Utils::startsWith($class, "app\\views")) {
+            $class = "app\\views\\{$class}View";
+        }
+        if (!isset($this->loaded_views[$class])) {
             /** @noinspection PhpUndefinedMethodInspection */
-            $this->loaded_views[$view] = new $class($this->core);
+            $this->loaded_views[$class] = new $class($this->core, $this);
         }
 
-        return $this->loaded_views[$view];
+        return $this->loaded_views[$class];
     }
 
     public function getOutput() {
@@ -366,7 +382,7 @@ HTML;
         return $return;
     }
 
-    private function renderHeader() {
+    protected function renderHeader() {
         if ($this->use_header) {
             return $this->controller->header();
         }
@@ -375,10 +391,11 @@ HTML;
         }
     }
 
-    private function renderFooter() {
+    protected function renderFooter() {
         if ($this->use_footer) {
             return $this->controller->footer();
-        } else {
+        }
+        else {
             return '';
         }
     }
@@ -427,7 +444,7 @@ HTML;
             $this->loadTwig(false);
         }
         /** @noinspection PhpUndefinedMethodInspection */
-        $exceptionPage = $this->getView("Error")->exceptionPage($exception);
+        $exceptionPage = $this->getView(ErrorView::class)->exceptionPage($exception);
         // @codeCoverageIgnore
         if ($die) {
             die($exceptionPage);
@@ -451,7 +468,7 @@ HTML;
      * @return string
      */
     public function showError($error = "", $die = true) {
-        $this->renderOutput("Error", "errorPage", $error);
+        $this->renderOutput(ErrorView::class, "errorPage", $error);
         // @codeCoverageIgnore
         if ($die) {
             die($this->getOutput());
@@ -459,20 +476,20 @@ HTML;
 
         return $this->getOutput();
     }
-    
-    public function addInternalCss($file, $folder='css') {
+
+    public function addInternalCss($file, $folder = 'css') {
         $this->addCss($this->timestampResource($file, $folder));
     }
-    
+
     public function addVendorCss($file) {
         $this->addCss($this->timestampResource($file, "vendor"));
     }
 
-    public function addCss($url) {
-        $this->css[] = $url;
+    public function addCss(string $url): void {
+        $this->css->add($url);
     }
 
-    public function addInternalJs($file, $folder='js') {
+    public function addInternalJs($file, $folder = 'js') {
         $this->addJs($this->timestampResource($file, $folder));
     }
 
@@ -480,15 +497,15 @@ HTML;
         $this->addJs($this->timestampResource($file, "vendor"));
     }
 
-    public function addJs($url) {
-        $this->js[] = $url;
+    public function addJs(string $url): void {
+        $this->js->add($url);
     }
 
     public function timestampResource($file, $folder) {
         $timestamp = filemtime(FileUtils::joinPaths(__DIR__, '..', '..', 'public', $folder, $file));
-        return $this->core->getConfig()->getBaseUrl().$folder."/".$file.(($timestamp !== 0) ? "?v={$timestamp}" : "");
+        return $this->core->getConfig()->getBaseUrl() . $folder . "/" . $file . (($timestamp !== 0) ? "?v={$timestamp}" : "");
     }
-    
+
     /**
      * Enable or disable whether to use the global header
      * @param bool $bool
@@ -496,12 +513,12 @@ HTML;
     public function useHeader($bool = true) {
         $this->use_header = $bool;
     }
-    
+
     public function useFooter($bool = true) {
         $this->use_footer = $bool;
     }
-    
-    public function addBreadcrumb($string, $url=null, $external_link=false) {
+
+    public function addBreadcrumb($string, $url = null, $external_link = false) {
         $this->breadcrumbs[] = new Breadcrumb($this->core, $string, $url, $external_link);
     }
 
@@ -519,14 +536,14 @@ HTML;
     /**
      * @return array
      */
-    public function getCss() {
+    public function getCss(): Set {
         return $this->css;
     }
 
     /**
      * @return array
      */
-    public function getJs() {
+    public function getJs(): Set {
         return $this->js;
     }
 
@@ -535,5 +552,13 @@ HTML;
      */
     public function getRunTime() {
         return (microtime(true) - $this->start_time);
+    }
+
+    public function buildUrl(string ...$parts): string {
+        return $this->core->buildUrl($parts);
+    }
+
+    public function buildCourseUrl(string ...$parts): string {
+        return $this->core->buildCourseUrl($parts);
     }
 }

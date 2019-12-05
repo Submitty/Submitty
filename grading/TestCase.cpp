@@ -102,6 +102,29 @@ void fileStatus(const std::string &filename, bool &fileExists, bool &fileEmpty) 
   }
 }
 
+std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filename){
+  struct stat st;
+  std::string expectedFolder;
+  std::string test_output_path = "test_output/";
+  std::string random_output_path = "random_output/" + tc.getPrefix();
+  if (stat((test_output_path + filename).c_str(), &st) >= 0) {
+    expectedFolder = test_output_path;
+  } else if (stat((random_output_path + filename).c_str(), &st) >= 0){
+    expectedFolder = random_output_path;
+  }
+  return expectedFolder;
+}
+
+std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std::string &id){
+  std::string expectedPath = getOutputContainingFolderPath(tc, filename);
+  std::string requiredPath ;
+  if (expectedPath.substr(0,11) == "test_output"){
+    requiredPath = expectedPath + id + "/"; 
+  } else if (expectedPath.substr(0,13) == "random_output") {
+    requiredPath = expectedPath;
+  }
+  return requiredPath;
+}
 
 bool getFileContents(const std::string &filename, std::string &file_contents) {
   std::ifstream file(filename);
@@ -161,7 +184,8 @@ bool openStudentFile(const TestCase &tc, const nlohmann::json &j, std::string &s
 bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &expected_file_contents,
                       std::vector<std::pair<TEST_RESULTS_MESSAGE_TYPE, std::string> > &messages) {
 
-  std::string filename = "test_output/" + j.value("expected_file","");
+  std::string filename = j.value("expected_file","");
+  filename = getOutputContainingFolderPath(tc, filename) + filename;
   if (filename == "") {
     messages.push_back(std::make_pair(MESSAGE_FAILURE,"ERROR!  EXPECTED FILENAME MISSING"));
     return false;
@@ -182,27 +206,27 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 // =================================================================================
 // =================================================================================
 
-TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json whole_config) const {
+TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json whole_config, const std::string& username) const {
   std::string method = grader.value("method","");
-  if      (method == "")                           { return NULL;                                                     }
-  else if (method == "JUnitTestGrader")            { return dispatch::JUnitTestGrader_doit(*this,grader);             }
-  else if (method == "EmmaInstrumentationGrader")  { return dispatch::EmmaInstrumentationGrader_doit(*this,grader);   }
-  else if (method == "MultipleJUnitTestGrader")    { return dispatch::MultipleJUnitTestGrader_doit(*this,grader);     }
-  else if (method == "EmmaCoverageReportGrader")   { return dispatch::EmmaCoverageReportGrader_doit(*this,grader);    }
-  else if (method == "JaCoCoCoverageReportGrader") { return dispatch::JaCoCoCoverageReportGrader_doit(*this,grader);  }
-  else if (method == "DrMemoryGrader")             { return dispatch::DrMemoryGrader_doit(*this,grader);              }
-  else if (method == "PacmanGrader")               { return dispatch::PacmanGrader_doit(*this,grader);                }
-  else if (method == "searchToken")                { return dispatch::searchToken_doit(*this,grader);                 }
-  else if (method == "intComparison")              { return dispatch::intComparison_doit(*this,grader);               }
-  else if (method == "diff")                       { return dispatch::diff_doit(*this,grader);                        }
-  else if (method == "fileExists")                 { return dispatch::fileExists_doit(*this,grader);                  }
-  else if (method == "warnIfNotEmpty")             { return dispatch::warnIfNotEmpty_doit(*this,grader);              }
-  else if (method == "warnIfEmpty")                { return dispatch::warnIfEmpty_doit(*this,grader);                 }
-  else if (method == "errorIfNotEmpty")            { return dispatch::errorIfNotEmpty_doit(*this,grader);             }
-  else if (method == "errorIfEmpty")               { return dispatch::errorIfEmpty_doit(*this,grader);                }
-  else if (method == "ImageDiff")                  { return dispatch::ImageDiff_doit(*this,grader, autocheck_number); }
-  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config);         }
-  else                                             { return custom_dispatch(grader);                                  }
+  if      (method == "")                           { return NULL;                                                       }
+  else if (method == "JUnitTestGrader")            { return dispatch::JUnitTestGrader_doit(*this,grader);               }
+  else if (method == "EmmaInstrumentationGrader")  { return dispatch::EmmaInstrumentationGrader_doit(*this,grader);     }
+  else if (method == "MultipleJUnitTestGrader")    { return dispatch::MultipleJUnitTestGrader_doit(*this,grader);       }
+  else if (method == "EmmaCoverageReportGrader")   { return dispatch::EmmaCoverageReportGrader_doit(*this,grader);      }
+  else if (method == "JaCoCoCoverageReportGrader") { return dispatch::JaCoCoCoverageReportGrader_doit(*this,grader);    }
+  else if (method == "DrMemoryGrader")             { return dispatch::DrMemoryGrader_doit(*this,grader);                }
+  else if (method == "PacmanGrader")               { return dispatch::PacmanGrader_doit(*this,grader);                  }
+  else if (method == "searchToken")                { return dispatch::searchToken_doit(*this,grader);                   }
+  else if (method == "intComparison")              { return dispatch::intComparison_doit(*this,grader);                 }
+  else if (method == "diff")                       { return dispatch::diff_doit(*this,grader);                          }
+  else if (method == "fileExists")                 { return dispatch::fileExists_doit(*this,grader);                    }
+  else if (method == "warnIfNotEmpty")             { return dispatch::warnIfNotEmpty_doit(*this,grader);                }
+  else if (method == "warnIfEmpty")                { return dispatch::warnIfEmpty_doit(*this,grader);                   }
+  else if (method == "errorIfNotEmpty")            { return dispatch::errorIfNotEmpty_doit(*this,grader);               }
+  else if (method == "errorIfEmpty")               { return dispatch::errorIfEmpty_doit(*this,grader);                  }
+  else if (method == "ImageDiff")                  { return dispatch::ImageDiff_doit(*this,grader, autocheck_number);   }
+  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config, username); }
+  else                                             { return custom_dispatch(grader);                                    }
 }
 
 // =================================================================================
@@ -250,10 +274,50 @@ std::vector<std::string> TestCase::getCommands() const {
   return stringOrArrayOfStrings(command_map, "commands");
 }
 
+
+std::vector<std::string> TestCase::getSolutionCommands() const {
+
+  //TODO potential point of failure
+  std::vector<nlohmann::json> containers = mapOrArrayOfMaps(this->_json, "solution_containers");
+
+  assert(containers.size() > 0);
+
+  if (this->CONTAINER_NAME == ""){
+    //TODO add back in if possible.
+    //assert(containers.size() == 1);
+    return stringOrArrayOfStrings(containers[0], "commands");
+  }
+
+  bool found = false;
+  nlohmann::json command_map;
+  //If we ARE running in a docker container, we must find the commands that are bound for us.
+  for(std::vector<nlohmann::json>::const_iterator it = containers.begin(); it != containers.end(); ++it) {
+    nlohmann::json::const_iterator val = it->find("container_name");
+    std::string curr_target = *val;
+    if(curr_target == this->CONTAINER_NAME){
+      found = true;
+      command_map = *it;
+      break;
+    }
+  }
+
+  if(!found){
+    std::cout << "ERROR: Could not find " << this->CONTAINER_NAME << " in the command map." << std::endl;
+    std::vector<std::string> empty;
+    return empty;
+  }
+
+  return stringOrArrayOfStrings(command_map, "commands");
+}
+
 // =================================================================================
 // =================================================================================
 // ACCESSORS
 
+std::vector <std::string> TestCase::getInputGeneratorCommands() const {
+    std::vector <std::string> commands = stringOrArrayOfStrings(_json, "input_generation_commands");
+    return commands;
+}
 
 std::string TestCase::getTitle() const {
   const nlohmann::json::const_iterator& itr = _json.find("title");
@@ -355,7 +419,7 @@ bool TestCase::ShowExecuteLogfile(const std::string &execute_logfile) const {
 // =================================================================================
 
 
-TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_config) const {
+TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_config, const std::string& username) const {
 
   // ALLOCATE SHARED MEMORY
   int memid;
@@ -383,7 +447,7 @@ TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_co
     // perform the validation (this might hang or crash)
     assert (j >= 0 && j < numFileGraders());
     nlohmann::json tcg = getGrader(j);
-    TestResults* answer_ptr = this->dispatch(tcg, j, complete_config);
+    TestResults* answer_ptr = this->dispatch(tcg, j, complete_config, username);
     assert (answer_ptr != NULL);
 
     // write answer to shared memory and terminate this process

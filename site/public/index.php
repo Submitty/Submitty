@@ -5,12 +5,8 @@ use app\libraries\Core;
 use app\libraries\ExceptionHandler;
 use app\libraries\Logger;
 use app\libraries\Utils;
-use app\libraries\Access;
-use app\libraries\TokenManager;
-use app\libraries\routers\ClassicRouter;
 use app\libraries\routers\WebRouter;
 use app\libraries\response\Response;
-
 use Doctrine\Common\Annotations\AnnotationRegistry;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -19,7 +15,7 @@ use Symfony\Component\HttpFoundation\Request;
  * to set it from inside of php to make sure the group read & execute
  * permissions aren't lost for newly created files & directories.
 */
-umask (0027);
+umask(0027);
 
 session_start();
 /*
@@ -30,13 +26,12 @@ session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-$loader = require_once(__DIR__.'/../vendor/autoload.php');
+$loader = require_once(__DIR__ . '/../vendor/autoload.php');
 AnnotationRegistry::registerLoader([$loader, 'loadClass']);
 
 $request = Request::createFromGlobals();
 
 $core = new Core();
-$core->setRouter(new ClassicRouter($_GET['url'] ?? ''));
 
 /**
  * Register custom expection and error handlers that will get run anytime our application
@@ -57,7 +52,7 @@ function exception_handler($throwable) {
             $message = htmlentities($message, ENT_QUOTES);
         }
     }
-    
+
     $core->getOutput()->showException($message);
 }
 set_exception_handler("exception_handler");
@@ -65,58 +60,12 @@ set_exception_handler("exception_handler");
 function error_handler() {
     $error = error_get_last();
     if ($error['type'] === E_ERROR) {
-        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file 
+        exception_handler(new BaseException("Fatal Error: " . $error['message'] . " in file
         " . $error['file'] . " on line " . $error['line']));
     }
 }
 register_shutdown_function("error_handler");
 
-$semester = '';
-$course = '';
-$is_api = False;
-
-if ($core->getRouter()->hasNext()) {
-    $first = $core->getRouter()->getNext();
-    if ($first === 'api') {
-        $is_api = True;
-        $semester = $core->getRouter()->getNext() ?? '';
-        $course = $core->getRouter()->getNext() ?? '';
-    }
-    elseif (in_array($first, ['authentication', 'home'])) {
-        $_REQUEST['component'] = $first;
-    }
-    else {
-        $semester = $first ?? '';
-        $course = $core->getRouter()->getNext() ?? '';
-    }
-}
-
-/*
- * Check that we have a semester and a course specified by the user and then that there's no
- * potential for path trickery by using basename which will return only the last part of a
- * given path (such that /../../test would become just test)
- */
-
-if (empty($_REQUEST['semester'])) {
-    $_REQUEST['semester'] = $semester;
-}
-
-if (empty($_REQUEST['course'])) {
-    $_REQUEST['course'] = $course;
-}
-
-
-// Sanitize the inputted semester & course to prevent directory attacks
-$semester = basename($_REQUEST['semester']);
-$course = basename($_REQUEST['course']);
-
-if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
-    $url = "http" . (($_SERVER['SERVER_PORT'] == 443) ? "s://" : "://") . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-    $url = str_replace("course={$_REQUEST['course']}", "course={$course}", $url);
-    $url = str_replace("semester={$_REQUEST['semester']}", "semester={$semester}", $url);
-    header("Location: {$url}");
-    exit();
-}
 /*
  * This sets up our Core (which in turn loads the config, database, etc.) for the application
  * and then we initialize our Output engine (as it requires Core to run) and then set the
@@ -124,219 +73,55 @@ if ($semester != $_REQUEST['semester'] || $course != $_REQUEST['course']) {
  */
 
 /** @noinspection PhpUnhandledExceptionInspection */
-$core->loadConfig($semester, $course);
-/** @noinspection PhpUnhandledExceptionInspection */
-$core->loadAuthentication();
-//Load Twig templating engine after the config is loaded but before any output is shown
-$core->getOutput()->loadTwig();
-/** @noinspection PhpUnhandledExceptionInspection */
-$core->loadGradingQueue();
-
-if($core->getConfig()->getInstitutionName() !== ""){
-    $core->getOutput()->addBreadcrumb($core->getConfig()->getInstitutionName(), null, $core->getConfig()->getInstitutionHomepage());
-}
-$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getBaseUrl());
-if($core->getConfig()->isCourseLoaded()){
-    $core->getOutput()->addBreadcrumb($core->getDisplayedCourseName(), $core->buildNewCourseUrl(), $core->getConfig()->getCourseHomeUrl());
-}
-
-date_default_timezone_set($core->getConfig()->getTimezone()->getName());
-
+$core->loadMasterConfig();
 Logger::setLogPath($core->getConfig()->getLogPath());
 ExceptionHandler::setLogExceptions($core->getConfig()->shouldLogExceptions());
 ExceptionHandler::setDisplayExceptions($core->getConfig()->isDebug());
 
 /** @noinspection PhpUnhandledExceptionInspection */
-$core->loadDatabases();
-
-if($core->getConfig()->isCourseLoaded() && $core->getConfig()->isForumEnabled()) {
-    $core->loadForum();
-}
+$core->loadMasterDatabase();
+/** @noinspection PhpUnhandledExceptionInspection */
+$core->loadAuthentication();
+//Load Twig templating engine after the config is loaded but before any output is shown
+$core->getOutput()->loadTwig();
 
 $core->getOutput()->setInternalResources();
 
+if ($core->getConfig()->getInstitutionName() !== "") {
+    $core->getOutput()->addBreadcrumb(
+        $core->getConfig()->getInstitutionName(),
+        null,
+        $core->getConfig()->getInstitutionHomepage()
+    );
+}
+
+$core->getOutput()->addBreadcrumb("Submitty", $core->getConfig()->getBaseUrl());
+
+date_default_timezone_set($core->getConfig()->getTimezone()->getName());
+
 // We only want to show notices and warnings in debug mode, as otherwise errors are important
 ini_set('display_errors', 1);
-if($core->getConfig()->isDebug()) {
+if ($core->getConfig()->isDebug()) {
     error_reporting(E_ALL);
-} else {
+}
+else {
     error_reporting(E_ERROR);
 }
 
-// Check if we have a saved cookie with a session id and then that there exists
-// a session with that id. If there is no session, then we delete the cookie.
-$logged_in = false;
-$cookie_key = 'submitty_session';
-if (isset($_COOKIE[$cookie_key])) {
-    try {
-        $token = TokenManager::parseSessionToken(
-            $_COOKIE[$cookie_key],
-            $core->getConfig()->getBaseUrl(),
-            $core->getConfig()->getSecretSession()
-        );
-        $session_id = $token->getClaim('session_id');
-        $expire_time = $token->getClaim('expire_time');
-        $logged_in = $core->getSession($session_id, $token->getClaim('sub'));
-        // make sure that the session exists and it's for the user they're claiming
-        // to be
-        if (!$logged_in) {
-            // delete cookie that's stale
-            Utils::setCookie($cookie_key, "", time() - 3600);
-        }
-        else {
-            if ($expire_time > 0) {
-                Utils::setCookie(
-                    $cookie_key,
-                    (string) TokenManager::generateSessionToken(
-                        $session_id,
-                        $token->getClaim('sub'),
-                        $core->getConfig()->getBaseUrl(),
-                        $core->getConfig()->getSecretSession()
-                    ),
-                    $expire_time
-                );
-            }
-        }
-    }
-    catch (\InvalidArgumentException $exc) {
-        // Invalid cookie data, delete it
-        Utils::setCookie($cookie_key, "", time() - 3600);
-    }
-}
-
-// check if the user has a valid jwt in the header
-$api_logged_in = false;
-$jwt = $request->headers->get("authorization");
-if (!empty($jwt)) {
-    try {
-        $token = TokenManager::parseApiToken(
-            $request->headers->get("authorization"),
-            $core->getConfig()->getBaseUrl(),
-            $core->getConfig()->getSecretSession()
-        );
-        $api_key = $token->getClaim('api_key');
-        $api_logged_in = $core->loadApiUser($api_key);
-    }
-    catch (\InvalidArgumentException $exc) {
-        $core->getOutput()->renderJsonFail("Invalid token.");
-        $core->getOutput()->displayOutput();
-        return;
-    }
-}
-
-// Prevent anyone who isn't logged in from going to any other controller than authentication
-if (!$logged_in) {
-    if ($_REQUEST['component'] != 'authentication') {
-        foreach ($_REQUEST as $key => $value) {
-            if ($key == "semester" || $key == "course") {
-                continue;
-            }
-            if ($value === "") {
-                continue;
-            }
-            if(isset($_REQUEST[$key])) {
-                $_REQUEST['old'][$key] = $value;
-            }
-            else if(substr($key, 0, 4) === "old_") {
-                $_REQUEST['old'][substr($key, 4)] = $value;
-                
-            }
-            unset($_REQUEST[$key]);
-        }
-        $_REQUEST['component'] = 'authentication';
-        $_REQUEST['page'] = 'login';
-    }
-}
-elseif ($core->getUser() === null) {
-    $core->loadSubmittyUser();
-    if ($_REQUEST['component'] !== 'authentication') {
-        $_REQUEST['component'] = 'navigation';
-        $_REQUEST['page'] = 'no_access';
-    }
-}
-else if ($core->getConfig()->isCourseLoaded()
-         && !$core->getAccess()->canI("course.view", ["semester" => $core->getConfig()->getSemester(), "course" => $core->getConfig()->getCourse()])
-         && $_REQUEST['component'] !== 'authentication') {
-
-    $_REQUEST['component'] = 'navigation';
-    $_REQUEST['page'] = 'no_access';
-}
-
 if (empty($_COOKIE['submitty_token'])) {
+    /** @noinspection PhpUnhandledExceptionInspection */
     Utils::setCookie('submitty_token', \Ramsey\Uuid\Uuid::uuid4()->toString());
 }
 
-if(!$core->getConfig()->isCourseLoaded()) {
-    if ($logged_in){
-        if (isset($_REQUEST['page']) && $_REQUEST['page'] === 'logout'){
-            $_REQUEST['component'] = 'authentication';
-        }
-        else {
-            $_REQUEST['component'] = 'home';
-        }
-    }
-    else {
-        $_REQUEST['component'] = 'authentication';
-    }
-}
-
-if (empty($_REQUEST['component']) && $core->getUser() !== null) {
-    if ($core->getConfig()->isCourseLoaded()) {
-        $_REQUEST['component'] = 'navigation';
-    }
-    else {
-        $_REQUEST['component'] = 'home';
-    }
-}
-
-/********************************************
-* END LOGIN CODE
-*********************************************/
-
-$supported_by_new_router = in_array($_REQUEST['component'], ['authentication', 'home', 'navigation']);
-
+$is_api = explode('/', $request->getPathInfo())[1] === 'api';
 if ($is_api) {
-    $response = WebRouter::getApiResponse($request, $core, $api_logged_in);
-}
-elseif (!$supported_by_new_router) {
-    switch($_REQUEST['component']) {
-        case 'admin':
-            $control = new app\controllers\AdminController($core);
-            $control->run();
-            break;
-        case 'misc':
-            $control = new app\controllers\MiscController($core);
-            $control->run();
-            break;
-        case 'student':
-            $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'submission':
-            $control = new app\controllers\StudentController($core);
-            $control->run();
-            break;
-        case 'forum':
-            $control = new app\controllers\forum\ForumController($core);
-            $control->run();
-            break;
-        case 'notification':
-            $control = new app\controllers\NotificationController($core);
-            $control->run();
-            break;
-        case 'pdf':
-            $control = new app\controllers\pdf\PDFController($core);
-            $control->run();
-            break;
-        default:
-            $control = new app\controllers\AuthenticationController($core, $logged_in);
-            $control->run();
-            break;
+    if (!empty($_SERVER['CONTENT_TYPE']) && Utils::startsWith($_SERVER['CONTENT_TYPE'], 'application/json')) {
+        $_POST = json_decode(file_get_contents('php://input'), true);
     }
-    $response = null;
+    $response = WebRouter::getApiResponse($request, $core);
 }
 else {
-    $response = WebRouter::getWebResponse($request, $core, $logged_in);
+    $response = WebRouter::getWebResponse($request, $core);
 }
 
 if ($response instanceof Response) {

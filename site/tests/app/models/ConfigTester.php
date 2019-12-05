@@ -45,7 +45,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $log_path = FileUtils::joinPaths($this->temp_dir, "logs");
 
         FileUtils::createDir($this->config_path);
-        FileUtils::createDir($course_path, 0777, true);
+        FileUtils::createDir($course_path, true, 0777);
         FileUtils::createDir(FileUtils::joinPaths($course_path, "config"));
         FileUtils::createDir($log_path);
         FileUtils::createDir(FileUtils::joinPaths($log_path, 'access'));
@@ -75,6 +75,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "cgi_url" => "",
             "institution_name" => "RPI",
             "username_change_text" => "Submitty welcomes all students.",
+            "course_code_requirements" => "Please follow your school's convention for course code.",
             "institution_homepage" => "https://rpi.edu",
             'system_message' => "Some system message"
         ];
@@ -111,7 +112,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'seating_only_for_instructor' => false,
                 'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                 'room_seating_gradeable_id' => "",
-                'auto_rainbow_grades' => false
+                'auto_rainbow_grades' => false,
+                'queue_enabled' => true,
             )
         );
 
@@ -133,11 +135,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_user' => '',
             'email_password' => '',
             'email_sender' => 'submitty@myuniversity.edu',
-            'email_reply_to'=> 'submitty_do_not_reply@myuniversity.edu',
+            'email_reply_to' => 'submitty_do_not_reply@myuniversity.edu',
             'email_server_hostname' => 'localhost',
             'email_server_port' => 25
         );
-        $config = array_replace($config,$extra);
+        $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "email.json"), $config);
 
         // Create version json
@@ -146,27 +148,28 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             "short_installed_commit" => "d150131c",
             "most_recent_git_tag" => "v19.07.00"
         );
-        $config = array_replace($config,$extra);
+        $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
-
     }
 
     public function testConfig() {
         $this->createConfigFile();
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
 
         $config->loadMasterConfigs($this->config_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
 
         $this->assertFalse($config->isDebug());
         $this->assertEquals("s17", $config->getSemester());
         $this->assertEquals("csci0000", $config->getCourse());
         $this->assertEquals("http://example.com/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/cgi-bin/", $config->getCgiUrl());
-        $this->assertEquals("http://example.com/index.php?", $config->getSiteUrl());
         $this->assertEquals($this->temp_dir, $config->getSubmittyPath());
-        $this->assertEquals($this->temp_dir."/courses/s17/csci0000", $config->getCoursePath());
-        $this->assertEquals($this->temp_dir."/logs", $config->getLogPath());
+        $this->assertEquals($this->temp_dir . "/courses/s17/csci0000", $config->getCoursePath());
+        $this->assertEquals($this->temp_dir . "/logs", $config->getLogPath());
         $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"), $config->getCgiTmpPath());
         $this->assertTrue($config->shouldLogExceptions());
         $this->assertEquals("pgsql", $config->getDatabaseDriver());
@@ -183,12 +186,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals("RPI", $config->getInstitutionName());
         $this->assertEquals("https://rpi.edu", $config->getInstitutionHomepage());
         $this->assertEquals("Submitty welcomes all students.", $config->getUsernameChangeText());
+        $this->assertEquals("Please follow your school's convention for course code.", $config->getCourseCodeRequirements());
         $this->assertEquals("Some system message", $config->getSystemMessage());
 
-        $config->loadCourseJson($this->course_json_path);
         $this->assertEquals(array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')), $config->getCourseDatabaseParams());
         $this->assertEquals("Test Course", $config->getCourseName());
-        $this->assertEquals("http://example.com/index.php?semester=s17&course=csci0000", $config->getSiteUrl());
         $this->assertEquals("", $config->getCourseHomeUrl());
         $this->assertEquals(0, $config->getDefaultHwLateDays());
         $this->assertEquals(0, $config->getDefaultStudentLateDays());
@@ -199,8 +201,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->assertFalse($config->displayCustomMessage());
         $this->assertFalse($config->keepPreviousFiles());
         $this->assertFalse($config->displayRainbowGradesSummary());
-        $this->assertEquals(FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
-            $config->getCourseJsonPath());
+        $this->assertEquals(
+            FileUtils::joinPaths($this->temp_dir, "courses", "s17", "csci0000", "config", "config.json"),
+            $config->getCourseJsonPath()
+        );
         $this->assertEquals('', $config->getRoomSeatingGradeableId());
         $this->assertFalse($config->displayRoomSeating());
         $this->assertEquals('LIW0RT5XAxOn2xjVY6rrLTcb6iacl4IDNRyPw58M0Kn0haQbHtNvPfK18xpvpD93', $config->getSecretSession());
@@ -211,10 +215,9 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course' => 'csci0000',
             'base_url' => 'http://example.com/',
             'cgi_url' => 'http://example.com/cgi-bin/',
-            'site_url' => 'http://example.com/index.php?semester=s17&course=csci0000',
             'submitty_path' => $this->temp_dir,
-            'course_path' => $this->temp_dir.'/courses/s17/csci0000',
-            'submitty_log_path' => $this->temp_dir.'/logs',
+            'course_path' => $this->temp_dir . '/courses/s17/csci0000',
+            'submitty_log_path' => $this->temp_dir . '/logs',
             'log_exceptions' => true,
             'cgi_tmp_path' => FileUtils::joinPaths($this->temp_dir, "tmp", "cgi"),
             'database_driver' => 'pgsql',
@@ -222,7 +225,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'course_database_params' => array_merge($db_params, array('dbname' => 'submitty_s17_csci0000')),
             'course_name' => 'Test Course',
             'config_path' => FileUtils::joinPaths($this->temp_dir, 'config'),
-            'course_json_path' => $this->temp_dir.'/courses/s17/csci0000/config/config.json',
+            'course_json_path' => $this->temp_dir . '/courses/s17/csci0000/config/config.json',
             'authentication' => 'PamAuthentication',
             'timezone' => 'DateTimeZone',
             'course_home_url' => '',
@@ -262,7 +265,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'seating_only_for_instructor' => false,
                     'regrade_message' => 'Warning: Frivolous grade inquiries may lead to grade deductions or lost late days',
                     'room_seating_gradeable_id' => "",
-                    'auto_rainbow_grades' => false
+                    'auto_rainbow_grades' => false,
+                    'queue_enabled' => true,
                 ]
             ],
             'course_loaded' => true,
@@ -274,6 +278,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'seating_only_for_instructor' => false,
             'room_seating_gradeable_id' => '',
             'username_change_text' => 'Submitty welcomes all students.',
+            'course_code_requirements' => "Please follow your school's convention for course code.",
             'vcs_url' => 'http://example.com/{$vcs_type}/',
             'wrapper_files' => [],
             'system_message' => 'Some system message',
@@ -281,12 +286,14 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
             'latest_commit' => 'd150131c',
-            'latest_tag' => 'v19.07.00'
+            'latest_tag' => 'v19.07.00',
+            'queue_enabled' => true,
         );
         $actual = $config->toArray();
 
         ksort($expected);
         ksort($actual);
+
         $this->assertEquals($expected, $actual);
     }
 
@@ -294,9 +301,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = array('hidden_details' => array('course_url' => 'http://example.com/course'));
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
-        $config->loadCourseJson($this->course_json_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
         $this->assertEquals("http://example.com/course/", $config->getBaseUrl());
         $this->assertEquals("http://example.com/course", $config->getHiddenDetails()['course_url']);
     }
@@ -304,7 +313,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     public function testDefaultTimezone() {
         $extra = ['timezone' => null];
         $this->createConfigFile($extra);
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
         $this->assertEquals("America/New_York", $config->getTimezone()->getName());
     }
@@ -313,7 +322,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['debugging_enabled' => true];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
         $this->assertTrue($config->isDebug());
     }
@@ -322,9 +331,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['driver' => 'sqlite'];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
-        $config->loadCourseJson($this->course_json_path);
         $this->assertEquals("sqlite", $config->getDatabaseDriver());
     }
 
@@ -332,7 +340,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['vcs_url' => 'https://some.vcs.url.com'];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "config");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
         $this->assertEquals("https://some.vcs.url.com/", $config->getVcsUrl());
     }
@@ -341,7 +349,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['cgi_url' => 'https://some.cgi.url.com'];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s19", "config");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
         $this->assertEquals("https://some.cgi.url.com/", $config->getCgiUrl());
     }
@@ -350,15 +358,17 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['course_details' => ['room_seating_gradeable_id' => 'test_id']];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "config");
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
-        $config->loadCourseJson($this->course_json_path);
+        $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+        $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+        $config->loadCourseJson("s17", "csci0000", $course_json_path);
         $this->assertEquals("test_id", $config->getRoomSeatingGradeableId());
         $this->assertTrue($config->displayRoomSeating());
     }
 
     public function testInvalidMasterConfigPath() {
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Could not find config directory: /invalid/path');
         $config->loadMasterConfigs('/invalid/path');
@@ -366,7 +376,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
 
     public function testConfigPathFile() {
         $this->createConfigFile();
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessageRegExp('/Could not find config directory: .*\/config\/database.json/');
         $config->loadMasterConfigs(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
@@ -375,7 +385,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     public function testMissingDatabaseJson() {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'database.json'));
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessageRegExp('/Could not find database config: .*\/config\/database.json/');
         $config->loadMasterConfigs($this->config_path);
@@ -384,32 +394,32 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
     public function testMissingSubmittyJson() {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'submitty.json'));
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessageRegExp('/Could not find submitty config: .*\/config\/submitty.json/');
         $config->loadMasterConfigs($this->config_path);
     }
 
     public function testInvalidCourseConfigPath() {
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Could not find course config file: /invalid/path');
-        $config->loadCourseJson("/invalid/path");
+        $config->loadCourseJson("s17", "csci0000", "/invalid/path");
     }
 
     public function testInvalidCourseConfigJson() {
         $this->createConfigFile();
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         file_put_contents(FileUtils::joinPaths($this->temp_dir, "test.txt"), "afds{}fasdf");
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Error parsing the config file: Syntax error');
-        $config->loadCourseJson(FileUtils::joinPaths($this->temp_dir, "test.txt"));
+        $config->loadCourseJson("s17", "csci1000", FileUtils::joinPaths($this->temp_dir, "test.txt"));
     }
 
     public function testMissingEmailJson() {
         $this->createConfigFile();
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'email.json'));
-        $config = new Config($this->core, "s17", "csci1000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessageRegExp('/Could not find email config: .*\/config\/email.json/');
         $config->loadMasterConfigs($this->config_path);
@@ -432,8 +442,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $extra = array($section => null);
             $this->createConfigFile($extra);
 
-            $config = new Config($this->core, "s17", "csci0000");
-            $config->loadCourseJson($this->course_json_path);
+            $config = new Config($this->core);
+            $config->loadMasterConfigs($this->config_path);
+            $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+            $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+            $config->loadCourseJson("s17", "csci0000", $course_json_path);
             $this->fail("Should have thrown ConfigException");
         }
         catch (ConfigException $exception) {
@@ -447,7 +460,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 'course_name', 'course_home_url', 'default_hw_late_days', 'default_student_late_days',
                 'zero_rubric_grades', 'upload_message', 'keep_previous_files', 'display_rainbow_grades_summary',
                 'display_custom_message', 'course_email', 'vcs_base_url', 'vcs_type', 'private_repository',
-                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id',
+                'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor', 'regrade_message', 'room_seating_gradeable_id', 'queue_enabled'
             ],
         ];
         $return = array();
@@ -470,8 +483,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             $extra = [$section => [$setting => null]];
             $this->createConfigFile($extra);
 
-            $config = new Config($this->core, "s17", "csci0000");
-            $config->loadCourseJson($this->course_json_path);
+            $config = new Config($this->core);
+            $config->loadMasterConfigs($this->config_path);
+            $course_path = FileUtils::joinPaths($config->getSubmittyPath(), "courses", "s17", "csci0000");
+            $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+            $config->loadCourseJson("s17", "csci0000", $course_json_path);
             $this->fail("Should have thrown ConfigException for {$section}.{$setting}");
         }
         catch (ConfigException $exception) {
@@ -480,14 +496,13 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 $exception->getMessage()
             );
         }
-
     }
 
     public function testInvalidTimezone() {
         $extra = ['timezone' => "invalid"];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Invalid Timezone identifier: invalid');
         $config->loadMasterConfigs($this->config_path);
@@ -497,7 +512,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['submitty_data_dir' => '/invalid'];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Invalid path for setting submitty_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
@@ -507,7 +522,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $extra = ['site_log_path' => '/invalid'];
         $this->createConfigFile($extra);
 
-        $config = new Config($this->core, "s17", "csci0000");
+        $config = new Config($this->core);
         $this->expectException(\app\exceptions\ConfigException::class);
         $this->expectExceptionMessage('Invalid path for setting submitty_log_path: /invalid');
         $config->loadMasterConfigs($this->config_path);
@@ -518,7 +533,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         unlink(FileUtils::joinPaths($this->temp_dir, 'config', 'secrets_submitty_php.json'));
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessageRegExp('/^Could not find secrets config: .*\/config\/secrets_submitty_php\.json$/');
-        $config = new Config($this->core, 's17', 'csci0000');
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -527,7 +542,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->createConfigFile($extra);
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage("Missing secret var: session");
-        $config = new Config($this->core, 's17', 'csci0000');
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
     }
 
@@ -537,7 +552,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         $this->expectException(ConfigException::class);
         $this->expectExceptionMessage('Secret session is too weak. It should be at least 32 bytes.');
 
-        $config = new Config($this->core, 's17', 'csci0000');
+        $config = new Config($this->core);
         $config->loadMasterConfigs($this->config_path);
     }
 }

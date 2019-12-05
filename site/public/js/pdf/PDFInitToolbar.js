@@ -2,7 +2,7 @@ if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
 
-let loaded = sessionStorage.getItem('toolbar_loaded');
+var loaded = sessionStorage.getItem('toolbar_loaded');
 window.onbeforeunload = function() {
     sessionStorage.removeItem('toolbar_loaded');
 };
@@ -81,7 +81,8 @@ window.onbeforeunload = function() {
                     PDFAnnotate.UI.enableText();
                     break;
             }
-        } else {
+        }
+        else {
             //For color and size select
             switch(option){
                 case 'pen':
@@ -104,13 +105,16 @@ window.onbeforeunload = function() {
         let zoom_flag = true;
         let zoom_level = window.RENDER_OPTIONS.scale;
         if(option == 'in'){
-            zoom_level += 1;
-        } else if(option == 'out'){
-            zoom_level -= 1;
-        } else {
+            zoom_level += 0.1;
+        }
+        else if(option == 'out'){
+            zoom_level -= 0.1;
+        }
+        else {
             if(custom_val != null){
                 zoom_level = custom_val/100;
-            } else {
+            }
+            else {
                 zoom_flag = false;
             }
             $('#zoom_selection').toggle();
@@ -139,7 +143,7 @@ window.onbeforeunload = function() {
 
     function saveFile(){
         let GENERAL_NFORMATION = window.GENERAL_INFORMATION;
-        let url = buildNewCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
+        let url = buildCourseUrl(['gradeable', GENERAL_NFORMATION['gradeable_id'], 'pdf', 'annotations']);
         let annotation_layer = localStorage.getItem(`${window.RENDER_OPTIONS.documentId}/${GENERAL_INFORMATION.grader_id}/annotations`);
         $.ajax({
             type: 'POST',
@@ -154,7 +158,8 @@ window.onbeforeunload = function() {
                 if(response.status == "success"){
                     $('#save_status').text("Saved");
                     $('#save_status').css('color', 'black');
-                } else {
+                }
+                else {
                     alert(data.message);
                 }
             },

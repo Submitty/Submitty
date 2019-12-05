@@ -5,12 +5,12 @@
 <div class="content">
 
     <script>
-        var year = {{ server_time['year'] }};
-        var month = {{ server_time['month'] }} - 1;
-        var day = {{ server_time['day'] }};
-        var hour = {{ server_time['hour'] }};
-        var minute = {{ server_time['minute'] }};
-        var second = {{ server_time['second'] }};
+        var year = parseInt("{{ server_time['year'] }}", 10);
+        var month = parseInt("{{ server_time['month'] }}", 10) - 1;
+        var day = parseInt("{{ server_time['day'] }}", 10);
+        var hour = parseInt("{{ server_time['hour'] }}", 10);
+        var minute = parseInt("{{ server_time['minute'] }}", 10);
+        var second = parseInt("{{ server_time['second'] }}", 10);
 
         server_time = new Date(year, month, day, hour, minute, second);
 
@@ -54,28 +54,30 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath,inDir) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath,inDir) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students) %}
     {# Files on top #}
+        {% for dir, path in files|filter((path,dir) => path is not iterable) %}
+            {% if userGroup != 4 or fileShares[path] == "1" %}
+                {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+            {% endif %}
+        {% endfor %}
 
-    {% for dir, path in files|filter((path,dir) => path is not iterable) %}
-        {% if userGroup != 4 or fileShares[path] == "1" %}
-            {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup,inDir) }}
-        {% endif %}
-    {% endfor %}
-
-    {# Directories underneath #}
-    {% for dir, path in files if path is iterable %}
-        {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir) }}
-    {% endfor %}
+        {# Directories underneath #}
+        {% for dir, path in files if path is iterable %}
+            {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+        {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup,inDir) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+    {% set this_file_section = file_sections[path] %}
+    {% set this_hide_from_students = hide_from_students[path] %}
+    {% if userGroup != 4 or this_file_section is null or (this_hide_from_students == "off" and user_section in this_file_section)%}
     <div>
         <div class="file-viewer">
 
@@ -83,17 +85,28 @@
             {{ dir }}&nbsp;
             {% set dirExtension = dir|split('.')|last|lower %}
             {% if '.' ~ dirExtension in ['.pdf', '.jpg', '.jpeg', '.c', '.cpp', '.s', '.twig', '.py', '.java', '.png', '.txt', '.h', '.html', '.php', '.js', '.sql', '.sh', '.md', '.csv', '.salsa', '.erl', '.oz', '.pl', '.hs', '.gif'] %}
-                 <a target="_blank" href="{{ core.getConfig().getSiteUrl() }}&component=misc&page=display_file&dir=course_materials&file={{ dir }}&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
+                 <a target="_blank" href="{{ display_file_url }}?dir=course_materials&path={{ path | url_encode }}"><i class="fas fa-window-restore" aria-hidden="true" title="Pop up the file in a new window"></i></a>
             {% endif %}
-            <a onclick='downloadFileWithAnyRole("{{ dir }}", "{{ path | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
+            <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>
-                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"
-                       onChange="setNewDateTime(this, '{{ path }}'), determineRelease('date_to_release_{{ id }}',changePermission('{{ path }}','1'))"/>
+                <input name="release_date" id="date_to_release_{{ id }}" class="date_picker" type="text" size="26"  value="{{ fileReleaseDates[path]}}"/>
+                {% if not(this_file_section is null) %}
+                    {% if this_hide_from_students == "on" %}
+                        <label>Sections (Hidden): 
+                        {{this_file_section|join(',')}}
+                        </label>
+                    {% else %}
+                        <label>Sections: 
+                        {{this_file_section|join(',')}}
+                        </label>
+                    {% endif %}
+                    
+                {% endif %}
                 <script>
-                    //this needs to be here so the boxes can be colored on load (will say it is not declared)
+
                     function determineRelease(inputID){
                         var now = server_time;
 
@@ -102,7 +115,6 @@
                         }
 
                         var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
                         var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
                         var currentDT = date+' '+time;
                         var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
@@ -124,16 +136,64 @@
 
                     }
                     document.getElementById('date_to_release_{{ id }}').style.backgroundColor= determineRelease('date_to_release_{{ id }}');
+
+                    flatpickr("#date_to_release_{{ id }}",{
+                    plugins: [ShortcutButtonsPlugin(
+                        {
+                            button: [
+                                {
+                                    label: "Now"
+                                },
+                                {
+                                    label: "Tomorrow"
+                                },
+                                {
+                                    label: "End of time"
+                                }
+
+                            ],
+                            onClick: (index, fp) => {
+                                let date;
+                                switch (index) {
+                                    case 0:
+                                        updateToServerTime(fp);
+                                        break;
+                                    case 1:
+                                        updateToTomorrowServerTime(fp);
+                                        break;
+                                    case 2:
+                                        date = new Date("9998-01-01");
+                                        fp.setDate(date,true);
+                                        break;
+
+                                }
+                            }
+                        }
+                    )],
+                    allowInput: true,
+                    enableTime: true,
+                    enableSeconds: true,
+                    time_24hr: true,
+                    dateFormat: "Y-m-d H:i:S",
+                    onOpen: handleTimeZones('{{ core.getConfig().getTimezone().getName() }}'),
+                    onClose: function() {
+                                            setNewDateTime('date_to_release_{{ id }}', '{{ path }}');
+                                            determineRelease('date_to_release_{{ id }}');
+                                            changePermission('{{ path }}','1');
+                                         }
+                    });
                 </script>
             {% endif %}
         </div>
         <div class="file-viewer-data" id="file_viewer_{{ id }}" style="margin-left:{{ indent * -15 }}px" data-file_name="{{ dir }}" data-file_url="{{ path }}"></div>
     </div>
+    {% endif %}
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
+        ) }}
     {% else %}
     <div>
 
@@ -160,7 +220,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
 
         </div>
     </div>
@@ -282,150 +342,9 @@
         }
     }
 
-    function setNewDateTime(me, path) {
-        // pass filename to server to record the new date and time of the file to be released
-        var newDateTime = $(me).val();
-        changeNewDateTime(path, newDateTime);
-
-        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: {csrf_token: csrfToken},
-            success: function(data) {
-                var now = JSON.parse(data);
-                now = new Date(parseInt(now.year),
-                    parseInt(now.month) - 1,
-                    parseInt(now.day),
-                    parseInt(now.hour),
-                    parseInt(now.minute),
-                    parseInt(now.second));
-
-                function pad(str){
-                    return ('0'+str).slice(-2);
-                }
-
-                var date = now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
-
-                var time = pad(now.getHours())+":"+pad(now.getMinutes())+":"+pad(now.getSeconds());
-                var currentDT = date+' '+time;
-                var neverDT = (now.getFullYear()+10)+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate())+' '+time;
-
-                //get the value in each file so the color can be assigned
-                //based on the time chosen
-                var fileDT = newDateTime;
-                //also custom colors for this page for readability
-                if(new Date(fileDT).getTime()<=new Date(currentDT).getTime()){
-                    me.style.backgroundColor = green;
-                    return green;
-                }
-                else if(new Date(fileDT).getTime()>=new Date(neverDT).getTime()){
-                    me.style.backgroundColor = red;
-                    return red;
-                }
-                else{
-                    me.style.backgroundColor = yellow;
-                    return yellow;
-                }
-            },
-            error: function(e) {
-                console.log("Error getting server time.");
-            }
-        });
-    }
-
-    function setChildNewDateTime(path, changeDate,handleData) {
-        //change the date and time of the subfiles in the folder with the time chosen for the whole
-        //folder (passed in)
-        var success;
-        success = false;
-        success  = changeFolderNewDateTime(path,changeDate,function (output) {
-            if(output){
-                success =true;
-                if(handleData){
-                    handleData(success);
-                }
-            }
-        });
-    }
-
-    function handleTimeZones() {
-
-        var url = buildUrl({'component': 'misc', 'page': 'get_server_time'});
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: {csrf_token: csrfToken},
-            success: function(data) {
-
-                // Collect server time
-                var server_time = JSON.parse(data);
-                server_time = new Date(parseInt(server_time.year),
-                    parseInt(server_time.month) - 1,
-                    parseInt(server_time.day),
-                    parseInt(server_time.hour),
-                    parseInt(server_time.minute),
-                    parseInt(server_time.second));
-
-                // Collect client time
-                var client_time = new Date();
-
-                // Calculate difference in minutes
-                var diff_in_minutes = Math.abs(server_time.valueOf() - client_time.valueOf());
-                diff_in_minutes = diff_in_minutes / 1000 / 60;
-
-                // If difference in minutes is greater than 10 minutes then append message to flatpickr
-                if(diff_in_minutes > 10) {
-                    $('.flatpickr-calendar').append('<p>Enter all times relative to the server timezone</p>');
-                    $('.flatpickr-calendar').append('<p>Server timezone: {{ core.getConfig().getTimezone().getName() }}</p>');
-                }
-            },
-            error: function(e) {
-                console.log("Error getting server time.");
-            }
-        });
-    }
-
-    $(document).ready(function() {
-        flatpickr(".date_picker", {
-            plugins: [ShortcutButtonsPlugin(
-                    {
-                        button: [
-                            {
-                                label: "Now"
-                            }, 
-                            {
-                                label: "End of time"
-                            }
-                        ],
-                        label: "or",
-                        onClick: (index, fp) => {
-                            let date;
-                            switch (index) {
-                                case 0: 
-                                    updateToServerTime(fp);
-                                    break;
-                                case 1: 
-                                    date = new Date("9998-01-01 00:00:00");
-                                    fp.setDate(date,true);
-                                    break;
-                            }
-                        }
-                    }
-                )],
-            allowInput: true,
-            enableTime: true,
-            enableSeconds: true,
-            time_24hr: true,
-            dateFormat: "Y-m-d H:i:S",
-            onOpen: handleTimeZones()
-        });
-    });
 </script>
 
 
 {% include('course/SetFolderReleaseForm.twig') %}
-{% include('course/UploadCourseMaterialsForm.twig') %}
+{% include 'course/UploadCourseMaterialsForm.twig' with {reg_sections: reg_sections} %}
 {% include('course/DeleteCourseMaterialForm.twig') %}

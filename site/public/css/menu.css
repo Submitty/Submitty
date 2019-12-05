@@ -4,6 +4,7 @@
     background: transparent;
     margin: 15px;
     padding: 6px 12px;
+    position: relative;
 }
 
 #mobile-menu {
@@ -80,14 +81,15 @@
     font-size: 31px;
 }
 
-.icon-title { 
-    flex: 1 0 auto;
+.icon-title {
+    /* commenting this out because the sidebar text was not wrapping */
+    /*flex: 1 0 auto;*/
 }
 
 #menu-button .notification-badge {
     position: absolute;
-    right: 0.5rem;
-    top: 0.5rem;
+    right: -10%;
+    top: -30%;
 }
 
 #mobile-menu .notification-badge {
@@ -97,6 +99,8 @@
     font-weight: bold;
     border-radius: 4px;
     height: 40px;
+    display: flex;
+    align-items: center;
 }
 
 @media (min-width: 541px) {

@@ -1,9 +1,18 @@
 {
     // NOTE: You will also need to update the php7.x-fpm and/or apache settings.
     // https://submitty.org/sysadmin/system_customization
-    
+
     // 100 mb maximum submission size
     "max_submission_size" : 100000000,
+
     "assignment_message" : "100 mb maximum total file upload.  \nNo automatic grading for this assignment.",
-    "testcases" : [ ] 
+
+    // no autograding
+    "testcases" : [ ],
+
+    // don't show students the version # or the submitted files box
+    // (they can still view and download pdf files from the active
+    // submission when manual TA grading is released)
+    "hide_submitted_files" : true,
+    "hide_version_and_test_details" : true
 }

@@ -51,14 +51,17 @@ nav a > i.f {
 #breadcrumbs {
     display: flex;
     width: 1px;
-    overflow-x: auto;
     flex: 1 1 auto;
-    white-space: nowrap;
+    flex-wrap: wrap;
 }
 
 #breadcrumbs > *:not(:last-child) {
     padding-right: 7px;
     display: none;
+}
+
+.external-breadcrumb {
+    padding-left: 7px;
 }
 
 #logout-button {
@@ -110,6 +113,12 @@ footer .footer-separator {
     padding: 0 8px;
 }
 
+@media (max-width: 541px) {
+    #moorthy-duck{
+        display: none;
+    }
+}
+
 @media (min-width: 541px) {
     #home-button, #logout-button {
         display: none;
@@ -134,8 +143,14 @@ footer .footer-separator {
         min-width: 450px;
         transform: translateX(-50%);
     }
+}
 
-    footer {
-        margin-top: -20px; /* 30px content padding and 10px footer padding */
-    }
+.loading-bar-wrapper{
+    padding-left: 3px;
+    margin-bottom: 5px;
+    display: none;
+}
+
+#loading-bar-percentage{
+    margin-left: 10px;
 }

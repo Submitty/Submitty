@@ -2,11 +2,11 @@ if (PDFAnnotate.default) {
   PDFAnnotate = PDFAnnotate.default;
 }
 
+var currentTool;
+var documentId = '';
+var PAGE_HEIGHT;
+var NUM_PAGES = 0;
 
-let currentTool;
-
-let documentId = '';
-let PAGE_HEIGHT;
 window.RENDER_OPTIONS = {
     documentId,
     userId: "",
@@ -23,7 +23,7 @@ window.GENERAL_INFORMATION = {
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'vendor/pdfjs/pdf.worker.min.js';
 
-let NUM_PAGES = 0;
+
 
 //For the student popup window, buildURL doesn't work because the context switched. Therefore, we need to pass in the url
 //as a parameter.
@@ -42,15 +42,15 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
     //TODO: Duplicate user_id in both RENDER_OPTIONS and GENERAL_INFORMATION, also grader_id = user_id in this context.
     window.RENDER_OPTIONS.userId = grader_id;
     if(url === ""){
-        url = buildUrl({'component': 'misc', 'page': 'base64_encode_pdf'});
+        url = buildCourseUrl(['gradeable', gradeable_id, 'encode_pdf']);
     }
     $.ajax({
         type: 'POST',
         url: url,
         data: {
-            gradeable_id: gradeable_id,
             user_id: user_id,
-            filename: file_name
+            filename: file_name,
+            csrf_token: csrfToken
         },
         success: (data) => {
             PDFAnnotate.setStoreAdapter(new PDFAnnotate.LocalUserStoreAdapter(GENERAL_INFORMATION.grader_id));
@@ -58,7 +58,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
 
             let pdfData;
             try {
-                pdfData = JSON.parse(data);
+                pdfData = JSON.parse(data)['data'];
                 pdfData = atob(pdfData);
             } catch (err){
                 alert("Something went wrong, please try again later.");
@@ -67,7 +67,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                 data: pdfData,
                 cMapUrl: '../../vendor/pdfjs/cmaps/',
                 cMapPacked: true
-            }).then((pdf) => {
+            }).promise.then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
                 $(viewer).on('touchstart touchmove', function(e){
@@ -86,27 +86,17 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                     PDFAnnotate.UI.renderPage(page_id, window.RENDER_OPTIONS).then(function(){
                         if (i == page_num) {
                             // scroll to page on load
-                            let zoom = parseInt(localStorage.getItem('scale')) || 1;
-                            let page1 = $(".page").filter(":first");
-                            //get css attr, remove 'px' : 
-                            let page_height = parseInt(page1.css("height").slice(0, -2));
-                            let page_margin_top = parseInt(page1.css("margin-top").slice(0, -2));
-                            let page_margin_bot = parseInt(page1.css("margin-bottom").slice(0, -2));
-                            // assuming margin-top < margin-bot: it overlaps on all pages but 1st so we add it once 
-                            let scrollY = zoom*(page_num)*(page_height+page_margin_bot)+page_margin_top;
-                            $('#file_content').animate({scrollTop: scrollY}, 500);
+                            let initialPage = $("#pageContainer" + page_id);
+                            if(initialPage.length) {
+                                $('#file_content').animate({scrollTop: initialPage[0].offsetTop}, 500);
+                            }
                         }
-                        document.getElementById('pageContainer'+page_id).addEventListener('mousedown', function(){
-                            //Makes sure the panel don't move when writing on it.
-                            $("#submission_browser").draggable('disable');
+                        document.getElementById('pageContainer'+page_id).addEventListener('pointerdown', function(){
                             let selected = $(".tool-selected");
                             if(selected.length != 0 && $(selected[0]).attr('value') != 'cursor'){
                                 $("#save_status").text("Changes not saved");
                                 $("#save_status").css("color", "red");
                             }
-                        });
-                        document.getElementById('pageContainer'+page_id).addEventListener('mouseup', function(){
-                            $("#submission_browser").draggable('enable');
                         });
                     });
                 }

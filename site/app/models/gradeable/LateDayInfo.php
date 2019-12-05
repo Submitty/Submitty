@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\models\AbstractModel;
 use app\models\User;
@@ -67,7 +66,8 @@ class LateDayInfo extends AbstractModel {
             'status' => $this->getStatus(),
             'late_days_remaining' => $this->late_days_remaining,
             'days_late' => $this->hasLateDaysInfo() ? $this->getDaysLate() : null,
-            'charged_late_days' => $this->hasLateDaysInfo() ? $this->getLateDaysCharged() : null
+            'charged_late_days' => $this->hasLateDaysInfo() ? $this->getLateDaysCharged() : null,
+            'grade_inquiries' => $this->graded_gradeable->getGradeInquiryCount()
         ];
     }
 
@@ -136,7 +136,8 @@ class LateDayInfo extends AbstractModel {
             case self::STATUS_NO_ACTIVE_VERSION:
                 if ($this->graded_gradeable->getAutoGradedGradeable()->hasSubmission()) {
                     return 'Cancelled Submission';
-                } else {
+                }
+                else {
                     return 'No Submission';
                 }
             case self::STATUS_GOOD:
@@ -147,7 +148,8 @@ class LateDayInfo extends AbstractModel {
                 $days_late = $this->getDaysLate();
                 if ($days_late > $this->late_days_remaining) {
                     return 'Bad (too many late days used this term)';
-                } else {
+                }
+                else {
                     return 'Bad (too many late days used on this assignment)';
                 }
             default:
@@ -185,5 +187,13 @@ class LateDayInfo extends AbstractModel {
             return 0;
         }
         return $this->graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getDaysLate();
+    }
+
+    /**
+     * Get number of grade inquiries pending and resolved for this gradeable
+     * @return int
+     */
+    public function getGradeInquiryCount() {
+        return $this->graded_gradeable->getGradeInquiryCount();
     }
 }

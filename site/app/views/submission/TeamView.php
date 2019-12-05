@@ -27,9 +27,10 @@ class TeamView extends AbstractView {
             foreach ($team->getMembers() as $teammate) {
                 $members[] = $this->core->getQueries()->getUserById($teammate);
             }
-        } else {
+        }
+        else {
             //Invites
-            foreach($teams as $t) {
+            foreach ($teams as $t) {
                 if ($t->sentInvite($user_id)) {
                     $invites_received[] = $t;
                 }
@@ -52,13 +53,13 @@ class TeamView extends AbstractView {
             "seekers" => $seekers,
             "invites_received" => $invites_received,
             "seeking_partner" => $seeking_partner,
-            "create_team_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'new']),
-            "leave_team_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'leave']),
-            "seek_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'seek', 'new']),
-            "stop_seek_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'seek', 'stop']),
-            "send_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'new']),
-            "accept_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'accept']),
-            "cancel_invitation_url" => $this->core->buildNewCourseUrl([$gradeable_id, 'team', 'invitation', 'cancel']),
+            "create_team_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'new']),
+            "leave_team_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'leave']),
+            "seek_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'new']),
+            "stop_seek_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'seek', 'stop']),
+            "send_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'new']),
+            "accept_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'accept']),
+            "cancel_invitation_url" => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team', 'invitation', 'cancel']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

@@ -31,29 +31,11 @@ class AuthenticationController extends AbstractController {
      * @param Core $core
      * @param bool $logged_in
      */
-    public function __construct(Core $core, $logged_in=false) {
+    public function __construct(Core $core, $logged_in = false) {
         parent::__construct($core);
         $this->logged_in = $logged_in;
     }
 
-    public function run() {
-        switch ($_REQUEST['page']) {
-            case 'logout':
-                $this->logout();
-                break;
-            case 'checklogin':
-                $this->checkLogin();
-                break;
-            case 'vcs_login':
-                $this->vcsLogin();
-                break;
-            case 'login':
-            default:
-                $this->loginForm();
-                break;
-        }
-    }
-    
     /**
      * Logs out the current user from the system. This is done by both deleting the current going
      * session from the database as well as invalidating the session id saved in the cookie. The latter
@@ -63,20 +45,24 @@ class AuthenticationController extends AbstractController {
      * @return Response
      */
     public function logout() {
-        Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
+        if ($this->core->removeCurrentSession()) {
+            Logger::logAccess($this->core->getUser()->getId(), $_COOKIE['submitty_token'], "logout");
+        }
+
         Utils::setCookie('submitty_session', '', time() - 3600);
         // Remove all history for checkpoint gradeables
-        foreach(array_keys($_COOKIE) as $cookie) {
+        foreach (array_keys($_COOKIE) as $cookie) {
             if (strpos($cookie, "_history") == strlen($cookie) - 8) { // '_history' is len 8
                 Utils::setCookie($cookie, '', time() - 3600);
             }
         }
-        $this->core->removeCurrentSession();
+
+
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewUrl(['authentication', 'login']))
+            new RedirectResponse($this->core->buildUrl(['authentication', 'login']))
         );
     }
-    
+
     /**
      * Display the login form to the user
      *
@@ -90,7 +76,7 @@ class AuthenticationController extends AbstractController {
             new WebResponse('Authentication', 'loginForm', $old)
         );
     }
-    
+
     /**
      * Checks the submitted login form via the configured "authentication" setting. Additionally, on successful
      * login, we want to redirect the user $_REQUEST the page they were attempting to goto before being sent to the
@@ -126,7 +112,7 @@ class AuthenticationController extends AbstractController {
         $this->core->getAuthentication()->setPassword($_POST['password']);
         if ($this->core->authenticate($_POST['stay_logged_in']) === true) {
             Logger::logAccess($_POST['user_id'], $_COOKIE['submitty_token'], "login");
-            $msg = "Successfully logged in as ".htmlentities($_POST['user_id']);
+            $msg = "Successfully logged in as " . htmlentities($_POST['user_id']);
 
             $this->core->addSuccessMessage($msg);
             return new Response(
@@ -171,6 +157,28 @@ class AuthenticationController extends AbstractController {
     }
 
     /**
+     * @Route("/api/token/invalidate", methods={"POST"})
+     *
+     * @return Response
+     */
+    public function invalidateToken() {
+        if (!isset($_POST['user_id']) || !isset($_POST['password'])) {
+            $msg = 'Cannot leave user id or password blank';
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+        $this->core->getAuthentication()->setUserId($_POST['user_id']);
+        $this->core->getAuthentication()->setPassword($_POST['password']);
+        $success = $this->core->invalidateJwt();
+        if ($success) {
+            return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse());
+        }
+        else {
+            $msg = "Could not login using that user id or password";
+            return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
+        }
+    }
+
+    /**
      * Handle stateless authentication for the VCS endpoints.
      *
      * This endpoint is unique from the other authentication methods in
@@ -182,8 +190,13 @@ class AuthenticationController extends AbstractController {
      * @return Response
      */
     public function vcsLogin() {
-        if (empty($_POST['user_id']) || empty($_POST['password']) || empty($_POST['gradeable_id'])
-            || empty($_POST['id']) || !$this->core->getConfig()->isCourseLoaded()) {
+        if (
+            empty($_POST['user_id'])
+            || empty($_POST['password'])
+            || empty($_POST['gradeable_id'])
+            || empty($_POST['id'])
+            || !$this->core->getConfig()->isCourseLoaded()
+        ) {
             $msg = 'Missing value for one of the fields';
             return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
@@ -199,7 +212,7 @@ class AuthenticationController extends AbstractController {
             $msg = "Could not find that user for that course";
             return Response::JsonOnlyResponse(JsonResponse::getFailResponse($msg));
         }
-        else if ($user->accessFullGrading()) {
+        elseif ($user->accessFullGrading()) {
             $msg = "Successfully logged in as {$_POST['user_id']}";
             return Response::JsonOnlyResponse(JsonResponse::getSuccessResponse(['message' => $msg, 'authenticated' => true]));
         }

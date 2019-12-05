@@ -1,6 +1,6 @@
 <?php
 
-namespace app;
+namespace app\models;
 
 use app\libraries\Core;
 use app\models\Email;
@@ -31,10 +31,10 @@ class NotificationFactory {
      */
     public function onNewAnnouncement(array $event) {
         $recipients = $this->core->getQueries()->getAllUsersIds();
-        $notifications = $this->createNotificationsArray($event,$recipients);
+        $notifications = $this->createNotificationsArray($event, $recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails =$this->createEmailsArray($event,$recipients);
+            $emails = $this->createEmailsArray($event, $recipients);
             $this->sendEmails($emails);
         }
     }
@@ -44,11 +44,15 @@ class NotificationFactory {
      */
     public function onNewThread(array $event) {
         $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads");
-        $notifications = $this->createNotificationsArray($event,$recipients);
+        $recipients[] = $this->core->getUser()->getId();
+        $recipients = array_unique($recipients);
+        $notifications = $this->createNotificationsArray($event, $recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
             $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
-            $emails =$this->createEmailsArray($event,$recipients);
+            $recipients[] = $this->core->getUser()->getId();
+            $recipients = array_unique($recipients);
+            $emails = $this->createEmailsArray($event, $recipients);
             $this->sendEmails($emails);
         }
     }
@@ -62,18 +66,22 @@ class NotificationFactory {
         $post_id = $event["post_id"];
         $thread_id = $event["thread_id"];
 
-        $parent_authors = $this->core->getQueries()->getAllParentAuthors($current_user_id,$post_id);
+        $parent_authors = $this->core->getQueries()->getAllParentAuthors($current_user_id, $post_id);
         $users_with_notification_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts");
-        $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread");
-        $notification_recipients = array_unique(array_merge($parent_authors, $users_with_notification_preference, $thread_authors_notification_preference));
-        $notifications = $this->createNotificationsArray($event,$notification_recipients);
+        $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id, "reply_in_post_thread");
+        $notification_recipients = array_merge($parent_authors, $users_with_notification_preference, $thread_authors_notification_preference);
+        $notification_recipients[] = $current_user_id;
+        $notification_recipients = array_unique($notification_recipients);
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
 
         if ($this->core->getConfig()->isEmailEnabled()) {
             $users_with_email_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts_email");
-            $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread_email");
-            $email_recipients = array_unique(array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference));
-            $emails =$this->createEmailsArray($event,$email_recipients);
+            $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id, "reply_in_post_thread_email");
+            $email_recipients = array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference);
+            $email_recipients[] = $current_user_id;
+            $email_recipients = array_unique($email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
     }
@@ -85,15 +93,17 @@ class NotificationFactory {
     public function onPostModified(array $event) {
         $notification_recipients = $this->core->getQueries()->getAllUsersWithPreference($event['preference']);
         $notification_recipients[] = $event['recipient'];
+        $notification_recipients[] = $this->core->getUser()->getId();
         $notification_recipients = array_unique($notification_recipients);
         $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
 
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'].'_email');
+            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'] . '_email');
             $email_recipients[] = $event['recipient'];
+            $email_recipients[] = $this->core->getUser()->getId();
             $email_recipients = array_unique($email_recipients);
-            $emails = $this->createEmailsArray($event,$email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
     }
@@ -105,13 +115,14 @@ class NotificationFactory {
      * @param array $recipients
      */
     public function onTeamEvent(array $event, array $recipients) {
-        $notification_recipients = array();
-        $email_recipients = array();
+        $current_user_id = $this->core->getUser()->getId();
+        $notification_recipients = [$current_user_id];
+        $email_recipients = [$current_user_id];
         $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
         foreach ($recipients as $recipient) {
-            $user_settings_row = array_filter($users_settings, function($v, $k) use ($recipient) {
+            $user_settings_row = array_values(array_filter($users_settings, function ($v) use ($recipient) {
                 return $v['user_id'] === $recipient;
-            }, ARRAY_FILTER_USE_BOTH);
+            }));
             if (!empty($user_settings_row)) {
                 $user_settings_row = $user_settings_row[0];
             }
@@ -119,17 +130,16 @@ class NotificationFactory {
             if ($user_settings[$event['type']]) {
                 $notification_recipients[] = $recipient;
             }
-            if ($user_settings[$event['type'].'_email']) {
+            if ($user_settings[$event['type'] . '_email']) {
                 $email_recipients[] = $recipient;
             }
         }
         $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails = $this->createEmailsArray($event,$email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
-
     }
 
     // ***********************************HELPERS***********************************
@@ -144,7 +154,7 @@ class NotificationFactory {
         $notifications = array();
         foreach ($recipients as $recipient) {
             $event['to_user_id'] = $recipient;
-            $notifications[] = Notification::createNotification($this->core,$event);
+            $notifications[] = Notification::createNotification($this->core, $event);
         }
         return $notifications;
     }
@@ -162,7 +172,7 @@ class NotificationFactory {
                 'subject' => $event['subject'],
                 'body' => $event['content']
             ];
-            $emails[] = new Email($this->core,$details);
+            $emails[] = new Email($this->core, $details);
         }
         return $emails;
     }
@@ -177,15 +187,27 @@ class NotificationFactory {
             return;
         }
 
-        // parameterize notification array
+        // parametrize notification array
+        $current_user = $this->core->getUser();
+        $flattened_notifications = [];
         foreach ($notifications as $notification) {
-            $flattened_notifications[] = $notification->getComponent();
-            $flattened_notifications[] = $notification->getNotifyMetadata();
-            $flattened_notifications[] = $notification->getNotifyContent();
-            $flattened_notifications[] = $notification->getNotifySource();
-            $flattened_notifications[] = $notification->getNotifyTarget();
+            // check if user is in the null section
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($notification->getNotifyTarget(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
+                continue;
+            }
+            if ($notification->getNotifyTarget() != $current_user->getId() || $current_user->getNotificationSetting('self_notification')) {
+                $flattened_notifications[] = $notification->getComponent();
+                $flattened_notifications[] = $notification->getNotifyMetadata();
+                $flattened_notifications[] = $notification->getNotifyContent();
+                $flattened_notifications[] = $notification->getNotifySource();
+                $flattened_notifications[] = $notification->getNotifyTarget();
+            }
         }
-        $this->core->getQueries()->insertNotifications($flattened_notifications,count($notifications));
+        if (!empty($flattened_notifications)) {
+            // some notifications may not have been added to the flattened notifications
+            // so to calculate the number of notifications we must use flattened notifications
+            $this->core->getQueries()->insertNotifications($flattened_notifications, count($flattened_notifications) / 5);
+        }
     }
 
     /**
@@ -199,12 +221,22 @@ class NotificationFactory {
         if (empty($emails)) {
             return;
         }
-        // parameterize email array
+        // parametrize email array
+        $current_user = $this->core->getUser();
+        $flattened_emails = [];
         foreach ($emails as $email) {
-            $flattened_emails[] = $email->getSubject();
-            $flattened_emails[] = $email->getBody();
-            $flattened_emails[] = $email->getUserId();
+            // check if user is in the null section
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
+                continue;
+            }
+            if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
+                $flattened_emails[] = $email->getSubject();
+                $flattened_emails[] = $email->getBody();
+                $flattened_emails[] = $email->getUserId();
+            }
         }
-        $this->core->getQueries()->insertEmails($flattened_emails,count($emails));
+        if (!empty($flattened_emails)) {
+            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 3);
+        }
     }
 }

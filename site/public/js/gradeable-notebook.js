@@ -79,7 +79,7 @@ $(document).ready(function () {
     });
 
     // Register click handler for codebox clear and recent buttons
-    $(".codebox_clear_reset").click(function() {
+    $(".codebox-clear-reset").click(function() {
 
         // Collect the id of the button and split it apart to find out which field it is bound to
         var items = this.id.split("_");
@@ -113,7 +113,7 @@ $(document).ready(function () {
     });
 
     // Register click handler for multiple choice buttons
-    $(".mc_clear, .mc_recent").click(function() {
+    $(".mc-clear, .mc-recent").click(function() {
 
         // Collect the id of the button and split it apart to find out which field it is bound to
         var items = this.id.split("_");
@@ -147,7 +147,7 @@ $(document).ready(function () {
     });
 
     // Setup click events for short answer buttons
-    $(".sa_clear_reset").click(function() {
+    $(".sa-clear-reset").click(function() {
 
         // Collect the id of the button and split it apart to find out which short answer it is bound to
         // and which action it preforms
@@ -178,7 +178,7 @@ $(document).ready(function () {
     });
 
     // Setup keyup event for short answer boxes
-    $(".sa_box").keyup(function() {
+    $(".sa-box").keyup(function() {
 
         var items = this.id.split("_");
 

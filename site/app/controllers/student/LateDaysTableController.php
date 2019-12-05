@@ -2,7 +2,6 @@
 
 namespace app\controllers\student;
 
-
 use app\controllers\AbstractController;
 use app\libraries\Core;
 use app\models\gradeable\LateDays;
@@ -10,14 +9,6 @@ use app\models\User;
 use Symfony\Component\Routing\Annotation\Route;
 
 class LateDaysTableController extends AbstractController {
-    public function run() {
-        switch ($_REQUEST['action']) {
-            default:
-                $this->showLateTablePage();
-                break;
-        }
-    }
-
     /**
      * Renders the output for the late days table for a user
      * @param Core $core
@@ -36,5 +27,4 @@ class LateDaysTableController extends AbstractController {
     public function showLateTablePage() {
         $this->core->getOutput()->renderOutput(array('LateDaysTable'), 'showLateTablePage', LateDays::fromUser($this->core, $this->core->getUser()));
     }
-
 }

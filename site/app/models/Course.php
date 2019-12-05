@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 use app\libraries\FileUtils;
 
@@ -33,7 +34,7 @@ class Course extends AbstractModel {
         $this->display_name = "";
     }
 
-    public function loadDisplayName(){
+    public function loadDisplayName() {
         $course_json_path = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
             "courses",
@@ -55,13 +56,13 @@ class Course extends AbstractModel {
     public function getLongSemester() {
         if (strlen($this->semester) == 3) {
             if (strtolower($this->semester[0]) === 'f') {
-                return "Fall 20".substr($this->semester,1,2);
+                return "Fall 20" . substr($this->semester, 1, 2);
             }
             elseif (strtolower($this->semester[0]) === 's') {
-                return "Spring 20".substr($this->semester,1,2);
+                return "Spring 20" . substr($this->semester, 1, 2);
             }
             elseif (strtolower($this->semester[0]) === 'u') {
-                return "Summer 20".substr($this->semester,1,2);
+                return "Summer 20" . substr($this->semester, 1, 2);
             }
         }
         return $this->semester;
@@ -75,8 +76,8 @@ class Course extends AbstractModel {
         return [
             "semester" => $this->semester,
             "title" => $this->title,
-            "display_name" => $this->display_name
+            "display_name" => $this->display_name,
+            "display_semester" => $this->getLongSemester()
         ];
     }
-
 }

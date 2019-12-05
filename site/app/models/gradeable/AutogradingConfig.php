@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\exceptions\NotImplementedException;
 use app\libraries\Core;
 use app\libraries\Utils;
@@ -82,7 +81,7 @@ class AutogradingConfig extends AbstractModel {
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
-        
+
         // Was there actually a config file to read from
         if ($details === null || $details === []) {
             throw new \InvalidArgumentException('Provided details were blank or null');
@@ -92,7 +91,8 @@ class AutogradingConfig extends AbstractModel {
         $this->max_submissions = intval($details['max_submissions'] ?? 0);
         if (isset($details['assignment_message'])) {
             $this->gradeable_message = $details['assignment_message'] ?? '';
-        } else if (isset($details['gradeable_message'])) {
+        }
+        elseif (isset($details['gradeable_message'])) {
             $this->gradeable_message = $details['gradeable_message'] ?? '';
         }
 
@@ -109,17 +109,20 @@ class AutogradingConfig extends AbstractModel {
 
                 // Accumulate only the positive points
                 $points = $testcase->getPoints();
-                if($points >= 0.0) {
+                if ($points >= 0.0) {
                     if ($testcase->isHidden()) {
                         if ($testcase->isExtraCredit()) {
                             $this->total_hidden_extra_credit += $points;
-                        } else {
+                        }
+                        else {
                             $this->total_hidden_non_extra_credit += $points;
                         }
-                    } else {
+                    }
+                    else {
                         if ($testcase->isExtraCredit()) {
                             $this->total_non_hidden_extra_credit += $points;
-                        } else {
+                        }
+                        else {
                             $this->total_non_hidden_non_extra_credit += $points;
                         }
                     }
@@ -142,16 +145,18 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->notebook
         $actual_input = array();
         if (isset($details['notebook'])) {
-
             // For each item in the notebook array inside the $details collect data and assign to variables in
             // $this->notebook
-            foreach ($details['notebook'] as $notebook_cell) {
+            for ($i = 0; $i < count($details['notebook']); $i++) {
+                $notebook_cell = $details['notebook'][$i];
+                $do_add = true;
 
                 // If cell is of markdown type then figure out if it is markdown_string or markdown_file and pass this
                 // markdown forward as 'data' as opposed to 'string' or 'file'
-                if(isset($notebook_cell['type']) &&
-                   $notebook_cell['type'] == 'markdown')
-                {
+                if (
+                    isset($notebook_cell['type'])
+                    && $notebook_cell['type'] === 'markdown'
+                ) {
                     $markdown = $this->getMarkdownData($notebook_cell);
 
                     // Remove string or file from $notebook_cell
@@ -160,15 +165,31 @@ class AutogradingConfig extends AbstractModel {
 
                     // Readd as data
                     $notebook_cell['markdown_data'] = $markdown;
+
+                    // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
+                    if ($i < count($details['notebook']) - 1) {
+                        $next_cell = &$details['notebook'][$i + 1];
+                        if (
+                            isset($next_cell['type'])
+                            && ($next_cell['type'] == 'short_answer' || $next_cell['type'] == 'multiple_choice')
+                        ) {
+                            $next_cell['label'] = $markdown;
+                            // Do not add current cell to notebook, since it is embedded in the label
+                            $do_add = false;
+                        }
+                    }
                 }
 
                 // Add this cell $this->notebook
-                array_push($this->notebook, $notebook_cell);
+                if ($do_add) {
+                    array_push($this->notebook, $notebook_cell);
+                }
 
                 // If cell is a type of input add it to the $actual_inputs array
-                if(isset($notebook_cell['type']) &&
-                   ($notebook_cell['type'] == 'short_answer' OR $notebook_cell['type'] == 'multiple_choice'))
-                {
+                if (
+                    isset($notebook_cell['type'])
+                    && ($notebook_cell['type'] === 'short_answer' || $notebook_cell['type'] === 'multiple_choice')
+                ) {
                     array_push($actual_input, $notebook_cell);
                 }
             }
@@ -177,20 +198,15 @@ class AutogradingConfig extends AbstractModel {
         // Setup $this->inputs
         for ($i = 0; $i < count($actual_input); $i++) {
             if ($actual_input[$i]['type'] == 'short_answer') {
-
-                // If programming language is set then this is a codebox
-                if(isset($actual_input[$i]['programming_language']))
-                {
+                // If programming language is set then this is a codebox, else regular textbox
+                if (isset($actual_input[$i]['programming_language'])) {
                     $this->inputs[$i] = new SubmissionCodeBox($this->core, $actual_input[$i]);
                 }
-                // Else regular textbox
-                else
-                {
+                else {
                     $this->inputs[$i] = new SubmissionTextBox($this->core, $actual_input[$i]);
-
                 }
-
-            } elseif ($actual_input[$i]['type'] == 'multiple_choice') {
+            }
+            elseif ($actual_input[$i]['type'] == 'multiple_choice') {
                 $this->inputs[$i] = new SubmissionMultipleChoice($this->core, $actual_input[$i]);
             }
         }
@@ -201,31 +217,31 @@ class AutogradingConfig extends AbstractModel {
         // Get all of the part names
         for ($i = 1; $i <= $num_parts; $i++) {
             $j = $i - 1;
-            if (isset($details['part_names']) && isset($details['part_names'][$j]) &&
-                trim($details['part_names'][$j]) !== "") {
+            if (
+                isset($details['part_names'])
+                && isset($details['part_names'][$j])
+                && trim($details['part_names'][$j]) !== ""
+            ) {
                 $this->part_names[$i] = $details['part_names'][$j];
-            } else {
+            }
+            else {
                 $this->part_names[$i] = "Part " . $i;
             }
         }
     }
 
-    private function getMarkdownData($cell)
-    {
+    private function getMarkdownData($cell) {
         // If markdown_string is set then just return that
-        if(isset($cell['markdown_string']))
-        {
+        if (isset($cell['markdown_string'])) {
             return $cell['markdown_string'];
         }
-        // Else if markdown_file is set then read the file and return its contents
-        else if(isset($cell['markdown_file']))
-        {
+        elseif (isset($cell['markdown_file'])) {
+            // Else if markdown_file is set then read the file and return its contents
             // TODO: Implement reading from markdown_file and passing that along
             throw new NotImplementedException("Reading from a markdown_file is not yet implemented.");
         }
-        // Else something unexpected happened
-        else
-        {
+        else {
+            // Else something unexpected happened
             throw new \InvalidArgumentException("An error occured parsing notebook data.\n" .
                 "Markdown configuration may only specify one of 'markdown_string' or 'markdown_file'");
         }
@@ -305,10 +321,12 @@ class AutogradingConfig extends AbstractModel {
      * @return bool
      */
     public function anyPoints() {
-        return max($this->total_hidden_non_extra_credit,
-                $this->total_non_hidden_non_extra_credit,
-                $this->total_hidden_extra_credit,
-                $this->total_non_hidden_extra_credit) > 0;
+        return max(
+            $this->total_hidden_non_extra_credit,
+            $this->total_non_hidden_non_extra_credit,
+            $this->total_hidden_extra_credit,
+            $this->total_non_hidden_extra_credit
+        ) > 0;
     }
 
     /**
@@ -317,8 +335,8 @@ class AutogradingConfig extends AbstractModel {
      */
     public function anyVisibleTestcases() {
         /** @var AutogradingTestcase $testcase */
-        foreach($this->testcases as $testcase) {
-            if(!$testcase->isHidden()) {
+        foreach ($this->testcases as $testcase) {
+            if (!$testcase->isHidden()) {
                 return true;
             }
         }

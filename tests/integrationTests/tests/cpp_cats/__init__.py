@@ -6,7 +6,6 @@ import os
 import glob
 import shutil
 
-
 ############################################################################
 # COPY THE ASSIGNMENT FROM THE SAMPLE ASSIGNMENTS DIRECTORIES
 
@@ -50,6 +49,12 @@ def cleanup(test):
     subprocess.call(["cp",
         os.path.join(SAMPLE_ASSIGNMENT_CONFIG, "test_output", "inst_output.txt"),
         os.path.join(test.testcase_path, "data", "test_output")])
+
+@testcase
+def schema_validation(test):
+    cleanup(test)
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def allCorrect(test):

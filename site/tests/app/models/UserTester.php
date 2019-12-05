@@ -22,7 +22,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -59,7 +59,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => "Bunyan",
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -87,7 +87,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -113,7 +113,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'user_lastname' => "Tester",
             'user_preferred_lastname' => null,
             'user_email' => "test@example.com",
-            'user_group' => 1,
+            'user_group' => User::GROUP_INSTRUCTOR,
+            'user_access_level' => User::LEVEL_FACULTY,
             'registration_section' => 1,
             'rotating_section' => null,
             'manual_registration' => false,
@@ -130,7 +131,8 @@ class UserTester extends \PHPUnit\Framework\TestCase {
             'email' => 'test@example.com',
             'legal_first_name' => 'User',
             'grading_registration_sections' => array(1,2),
-            'group' => 1,
+            'group' => User::GROUP_INSTRUCTOR,
+            'access_level' => User::LEVEL_FACULTY,
             'id' => 'test',
             'legal_last_name' => 'Tester',
             'loaded' => true,
@@ -153,6 +155,7 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'team_invite' => true,
                 'team_joined' => true,
                 'team_member_submission' => true,
+                'self_notification' => false,
                 'reply_in_post_thread_email' => false,
                 'merge_threads_email' => false,
                 'all_new_threads_email' => false,
@@ -160,7 +163,9 @@ class UserTester extends \PHPUnit\Framework\TestCase {
                 'all_modifications_forum_email' => false,
                 'team_invite_email' => true,
                 'team_joined_email' => true,
-                'team_member_submission_email' => true)
+                'team_member_submission_email' => true,
+                'self_notification_email' => false
+            )
         );
         $this->assertEquals($expected, $actual);
     }

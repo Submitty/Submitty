@@ -108,8 +108,8 @@ class RunAutoRainbowGrades(CourseJob):
         semester = self.job_details['semester']
         course = self.job_details['course']
 
-        path = '/usr/local/submitty/sbin/auto_rainbow_grades.py'
-        debug_output = '/var/local/submitty/courses/' + semester + '/' + course + '/rainbow_grades/auto_debug_output.txt'
+        path = os.path.join(INSTALL_DIR, 'sbin', 'auto_rainbow_grades.py')
+        debug_output = os.path.join(DATA_DIR, 'courses', semester, course, 'rainbow_grades', 'auto_debug_output.txt')
 
         try:
             with open(debug_output, "w") as file:
@@ -132,6 +132,28 @@ class BuildConfig(CourseGradeableJob):
                 subprocess.call([build_script, gradeable, "--clean"], stdout=output_file, stderr=output_file)
         except PermissionError:
             print("error, could not open "+output_file+" for writing")
+
+
+class RunGenerateRepos(CourseGradeableJob):
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        gradeable = self.job_details['gradeable']
+
+        gen_script = os.path.join(INSTALL_DIR,'bin','generate_repos.py')
+
+        today = datetime.datetime.now()
+        log_path = os.path.join(DATA_DIR, "logs", "vcs_generation")
+        datestring = "{:04d}{:02d}{:02d}.txt".format(today.year, today.month,today.day)
+        log_file_path = os.path.join(log_path, datestring)
+        current_time = today.strftime("%m/%d/%Y, %H:%M:%S")
+        try:
+            with open(log_file_path, "a") as output_file:
+                print ("At time: "+current_time, file=output_file)
+                output_file.flush()
+                subprocess.run(["sudo", gen_script, semester, course, gradeable], stdout=output_file, stderr=output_file)
+        except PermissionError:
+            print("error, could not open " + output_file + " for writing")
 
 
 class RunLichen(CourseGradeableJob):
@@ -298,3 +320,33 @@ class BulkUpload(CourseJob):
             pass
 
         os.chdir(current_path)
+
+
+# pylint: disable=abstract-method
+class CreateCourse(AbstractJob):
+    def validate_job_details(self):
+        for key in ['semester', 'course', 'head_instructor', 'base_course_semester', 'base_course_title']:
+            if key not in self.job_details or self.job_details[key] is None:
+                return False
+            if self.job_details[key] in ['', '.', '..']:
+                return False
+            if self.job_details[key] != os.path.basename(self.job_details[key]):
+                return False
+        return True
+
+    def run_job(self):
+        semester = self.job_details['semester']
+        course = self.job_details['course']
+        head_instructor = self.job_details['head_instructor']
+        base_course_semester = self.job_details['base_course_semester']
+        base_course_title = self.job_details['base_course_title']
+
+        base_group = Path(DATA_DIR, 'courses', base_course_semester, base_course_title).group()
+
+        log_file_path = Path(DATA_DIR, 'logs', 'course_creation', '{}_{}_{}_{}.txt'.format(
+            semester, course, head_instructor, base_group
+        ))
+
+        with log_file_path.open("w") as output_file:
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/create_course.sh", semester, course, head_instructor, base_group], stdout=output_file, stderr=output_file)
+            subprocess.run(["sudo", "/usr/local/submitty/sbin/adduser_course.py", head_instructor, semester, course], stdout=output_file, stderr=output_file)

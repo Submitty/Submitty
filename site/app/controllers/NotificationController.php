@@ -16,18 +16,19 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class NotificationController extends AbstractController {
 
-	const NOTIFICATION_SELECTIONS = [
-	    'merge_threads',
+    const NOTIFICATION_SELECTIONS = [
+        'merge_threads',
         'all_new_threads',
         'all_new_posts',
         'all_modifications_forum',
         'reply_in_post_thread',
         'team_invite',
         'team_joined',
-        'team_member_submission'
+        'team_member_submission',
+        'self_notification'
     ];
 
-	const EMAIL_SELECTIONS = [
+    const EMAIL_SELECTIONS = [
         'merge_threads_email',
         'all_new_threads_email',
         'all_new_posts_email',
@@ -36,22 +37,18 @@ class NotificationController extends AbstractController {
         'team_invite_email',
         'team_joined_email',
         'team_member_submission_email',
+        'self_notification_email'
     ];
 
-	protected $selections;
+    protected $selections;
 
-	public function __construct(Core $core) {
+    public function __construct(Core $core) {
         parent::__construct($core);
         $this->selections = self::NOTIFICATION_SELECTIONS;
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $this->selections = array_merge($this->selections,self::EMAIL_SELECTIONS);
+            $this->selections = array_merge($this->selections, self::EMAIL_SELECTIONS);
         }
     }
-
-    public function run() {
-        return null;
-    }
-
     /**
      * @param $show_all
      * @Route("/{_semester}/{_course}/notifications")
@@ -98,7 +95,7 @@ class NotificationController extends AbstractController {
     public function markNotificationAsSeen($nid) {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), $nid);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 
@@ -109,7 +106,7 @@ class NotificationController extends AbstractController {
     public function markAllNotificationsAsSeen() {
         $this->core->getQueries()->markNotificationAsSeen($this->core->getUser()->getId(), -1);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['notifications']))
+            new RedirectResponse($this->core->buildCourseUrl(['notifications']))
         );
     }
 
@@ -138,7 +135,7 @@ class NotificationController extends AbstractController {
 
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff($this->selections, array_keys($new_settings));
-            foreach(array_values($values_not_sent) as $value) {
+            foreach (array_values($values_not_sent) as $value) {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);

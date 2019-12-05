@@ -41,11 +41,11 @@ def main():
     if grade_generation_response.status_code == 200:
         grade_generation_response = grade_generation_response.json()
         if grade_generation_response["status"] == 'success':
-            print("Successfully generated grade reports for {}.{}".format(
+            print("Successfully generated grade summaries for {}.{}".format(
                 semester, course
             ))
         else:
-            print("ERROR: Failed to generate grade reports for {}.{}.".format(
+            print("ERROR: Failed to generate grade summaries for {}.{}.".format(
                 semester, course
             ), file=stderr)
             print("Reason:{}".format(

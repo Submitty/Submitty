@@ -27,13 +27,6 @@ class WrapperController extends AbstractController {
     ];
 
     /**
-     * @deprecated
-     */
-    public function run() {
-        return null;
-    }
-
-    /**
      * @Route("/{_semester}/{_course}/theme")
      * @return Response
      */
@@ -64,28 +57,28 @@ class WrapperController extends AbstractController {
         if (empty($_FILES) || !isset($_FILES['wrapper_upload'])) {
             $this->core->addErrorMessage("Upload failed: No file to upload");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+                new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
         $upload = $_FILES['wrapper_upload'];
 
-        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
+        if (!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+                new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
         if (!@copy($upload['tmp_name'], $location)) {
             $this->core->addErrorMessage("Upload failed: Could not copy file");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+                new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
-        $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
+        $this->core->addSuccessMessage("Uploaded " . $upload['name'] . " as " . $filename);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
     }
 
@@ -103,23 +96,22 @@ class WrapperController extends AbstractController {
             );
         }
 
-        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
+        if (!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Delete failed: Invalid filename");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+                new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
-        if(!@unlink($location)) {
+        if (!@unlink($location)) {
             $this->core->addErrorMessage("Deletion failed: Could not unlink file");
             return Response::RedirectOnlyResponse(
-                new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+                new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
-        $this->core->addSuccessMessage("Deleted ".$filename);
+        $this->core->addSuccessMessage("Deleted " . $filename);
         return Response::RedirectOnlyResponse(
-            new RedirectResponse($this->core->buildNewCourseUrl(['theme']))
+            new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
     }
-
 }

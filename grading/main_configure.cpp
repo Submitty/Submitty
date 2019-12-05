@@ -43,12 +43,12 @@ int main(int argc, char *argv[]) {
     std::cout << "USAGE: " << argv[0] << " [output_file]" << std::endl;
     return 0;
   }
+
   std::cout << "FILENAME " << argv[0] << std::endl;
   int total_nonec = 0;
   int total_ec = 0;
 
   int visible = 0;
-
   std::cout << "config.json.size " << config_json.size() << std::endl;
   nlohmann::json::iterator tc = config_json.find("testcases");
   
@@ -119,6 +119,7 @@ int main(int argc, char *argv[]) {
         << "!=" << AUTO_POINTS << end_red_text << "\n" << std::endl;
     return 1;
   }
+
   if (total_ec != EXTRA_CREDIT_POINTS) {
     std::cout << "\n" << start_red_text << "ERROR: Extra Credit Points do not match testcases." << total_ec 
         << "!=" << EXTRA_CREDIT_POINTS << end_red_text << "\n" << std::endl;
@@ -175,14 +176,12 @@ int main(int argc, char *argv[]) {
     ******************************************/
 
   nlohmann::json::iterator in_notebook_cells = config_json.find("notebook");
-  if (in_notebook_cells != config_json.end())
-  {
+  if (in_notebook_cells != config_json.end()){
 
     // Setup "notebook" items inside the 'j' json item that will be passed forward
     j["notebook"] = nlohmann::json::array();
 
-    for (int i = 0; i < in_notebook_cells->size(); i++)
-    {
+    for (int i = 0; i < in_notebook_cells->size(); i++){
       nlohmann::json out_notebook_cell;
       nlohmann::json in_notebook_cell = (*in_notebook_cells)[i];
 
@@ -193,15 +192,13 @@ int main(int argc, char *argv[]) {
 
       // Get testcase_ref if it exists
       std::string testcase_ref = in_notebook_cell.value("testcase_ref", "");
-      if(testcase_ref != "")
-      {
+      if(testcase_ref != ""){
         out_notebook_cell["testcase_ref"] = testcase_ref;
       }
 
       // Handle each specific note book cell type
       // Handle markdown data
-      if(type == "markdown")
-      {
+      if(type == "markdown"){
           // Get markdown items
           std::string markdown_string = in_notebook_cell.value("markdown_string", "");
           std::string markdown_file = in_notebook_cell.value("markdown_file", "");
@@ -213,19 +210,16 @@ int main(int argc, char *argv[]) {
                   );
 
           // Pass forward the item that was passed in
-          if(markdown_string != "")
-          {
+          if(markdown_string != ""){
               out_notebook_cell["markdown_string"] = markdown_string;
           }
-          else
-          {
+          else{
               out_notebook_cell["markdown_file"] = markdown_file;
           }
       }
 
       // Handle image data
-      else if(type == "image")
-      {
+      else if(type == "image"){
           // Get req image items
           std::string image = in_notebook_cell.value("image", "");
 
@@ -241,20 +235,17 @@ int main(int argc, char *argv[]) {
           out_notebook_cell["image"] = image;
           out_notebook_cell["alt_text"] = alt_text;
 
-          if(height > 0)
-          {
+          if(height > 0){
               out_notebook_cell["height"] = height;
           }
 
-          if(width > 0)
-          {
+          if(width > 0){
               out_notebook_cell["width"] = width;
           }
       }
 
       // Handle short_answer data
-      else if(type == "short_answer")
-      {
+      else if(type == "short_answer"){
           // Get req short_answer items
           std::string filename = in_notebook_cell.value("filename", "");
 
@@ -271,15 +262,13 @@ int main(int argc, char *argv[]) {
           out_notebook_cell["initial_value"] = initial_value;
           out_notebook_cell["rows"] = rows;
 
-          if(programming_language != "")
-          {
+          if(programming_language != ""){
               out_notebook_cell["programming_language"] = programming_language;
           }
       }
 
       // Handle multiple choice data
-      else if(type == "multiple_choice")
-      {
+      else if(type == "multiple_choice"){
           // Get req multiple choice items
           std::string filename = in_notebook_cell.value("filename", "");
 
@@ -290,8 +279,7 @@ int main(int argc, char *argv[]) {
           nlohmann::json choices = in_notebook_cell.value("choices", nlohmann::json::array());
 
           int num_of_choices = 0;
-          for (auto it = choices.begin(); it != choices.end(); ++it)
-          {
+          for (auto it = choices.begin(); it != choices.end(); ++it){
               // Reassign the value of this iteration to choice
               nlohmann::json choice = it.value();
 
@@ -318,8 +306,7 @@ int main(int argc, char *argv[]) {
       }
 
       // Else unknown type was passed in throw exception
-      else
-      {
+      else{
             throw "An unknown notebook cell 'type' was detected in the supplied config.json file. Build failed.";
       }
 
@@ -351,21 +338,18 @@ int main(int argc, char *argv[]) {
 
   std::ofstream init;
   init.open(argv[1], std::ios::out);
-
   if (!init.is_open()) {
     std::cout << "\n" << start_red_text << "ERROR: unable to open new file for initialization... Now Exiting" 
         << end_red_text << "\n" << std::endl;
     return 0;
   }
-
   init << j.dump(4) << std::endl;
-
   // -----------------------------------------------------------------------
   // Also, write out the config file with automatic defaults (for debugging)
   std::string complete_config_file = argv[1];
   int b_pos = complete_config_file.find("/build/build_");
+  // If we are not in the test suite
   if (b_pos != std::string::npos) {
-    // only do this for the regular usage, not for the test suite
     complete_config_file = complete_config_file.substr(0,b_pos) +
       "/complete_config/complete_config_"+ complete_config_file.substr(b_pos+13,complete_config_file.size()-b_pos-13);
     std::string mkdir_command = "mkdir -p " + complete_config_file.substr(0,b_pos) + "/complete_config/";
@@ -374,6 +358,17 @@ int main(int argc, char *argv[]) {
     complete_config.open(complete_config_file, std::ios::out);
     complete_config << config_json.dump(4) << std::endl;
   }
+  // If we are in the test suite
+  else{
+    int b_pos = complete_config_file.find("/data/");
+    if (b_pos != std::string::npos) {
+      complete_config_file = complete_config_file.substr(0,b_pos) +
+        "/assignment_config/complete_config.json";
+      std::ofstream complete_config;
+      complete_config.open(complete_config_file, std::ios::out);
+      complete_config << config_json.dump(4) << std::endl;
+    }
 
+  }
   return 0;
 }

@@ -1002,7 +1002,7 @@ TestResults* dispatch::errorIfEmpty_doit (const TestCase &tc, const nlohmann::js
 // ==============================================================================
 // ==============================================================================
 
-TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config){
+TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, const nlohmann::json& whole_config, const std::string& username){
 
   std::string command = j["command"];
   std::vector<nlohmann::json> actions;
@@ -1017,13 +1017,15 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   //Add the testcase prefix to j for use by the validator.
   nlohmann::json copy_j = j;
   copy_j["testcase_prefix"] = tc.getPrefix();
+  // Provide the student's username for customized grading.
+  copy_j["username"] = username;
   //Write out this validator config for use by the custom validator
   std::ofstream input_file(input_file_name);
   input_file << copy_j;
   input_file.close();
 
   command = command + " 1>" + output_file_name;
-  int ret = execute(command, 
+  int ret = execute(command,
                     actions, dispatcher_actions, execute_logfile, test_case_limits,
                     assignment_limits, whole_config, windowed, "NOT_A_WINDOWED_ASSIGNMENT");
   std::remove(input_file_name.c_str());
@@ -1077,6 +1079,14 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   }
   float score = result["data"]["score"];
 
+  // Clamp the score between 0 and 1
+  if(score > 1){
+    score = 1;
+  }
+  else if(score < 0){
+    score = 0;
+  }
+
   std::string message = "";
   if(result["data"]["message"].is_string()){
       message = result["data"]["message"];
@@ -1100,7 +1110,6 @@ TestResults* dispatch::custom_doit(const TestCase &tc, const nlohmann::json& j, 
   }else if(status_string == "success"){
     status = MESSAGE_SUCCESS;
   }//else it stays information.
-
   return new TestResults(score, {std::make_pair(status, message)});
 }
 

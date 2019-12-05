@@ -8,13 +8,11 @@ use app\exceptions\CurlException;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\AbstractDatabase;
 use app\libraries\database\DatabaseQueries;
-use app\libraries\routers\ClassicRouter;
 use app\models\Config;
 use app\models\forum\Forum;
 use app\models\User;
-use app\NotificationFactory;
-
-
+use app\models\NotificationFactory;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Class Core
@@ -40,6 +38,9 @@ class Core {
     /** @var SessionManager */
     private $session_manager;
 
+    /** @var DatabaseFactory */
+    private $database_factory;
+
     /** @var DatabaseQueries */
     private $database_queries;
 
@@ -61,13 +62,13 @@ class Core {
     /** @var Forum $forum */
     private $forum  = null;
 
-    /** @var ClassicRouter */
-    private $router;
-
     /** @var NotificationFactory */
     private $notification_factory;
     /** @var bool */
     private $redirect = true;
+
+    /** @var bool */
+    private $testing = false;
 
 
     /**
@@ -77,17 +78,17 @@ class Core {
      * need. This should be called first, then loadConfig() and then loadDatabases().
      */
     public function __construct() {
-        $this->output = new Output($this);
+        $this->setOutput(new Output($this));
         $this->access = new Access($this);
 
         // initialize our alert queue if it doesn't exist
-        if(!isset($_SESSION['messages'])) {
+        if (!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
 
         // initialize our alert types if one of them doesn't exist
         foreach (array('error', 'notice', 'success') as $key) {
-            if(!isset($_SESSION['messages'][$key])) {
+            if (!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
         }
@@ -118,18 +119,17 @@ class Core {
      * @param $course
      * @throws \Exception
      */
-    public function loadConfig($semester, $course) {
-        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
-
-        $this->config = new Config($this, $semester, $course);
-        $this->config->loadMasterConfigs($conf_path);
-
+    public function loadCourseConfig($semester, $course) {
+        if ($this->config === null) {
+            throw new \Exception("Master config has not been loaded");
+        }
         if (!empty($semester) && !empty($course)) {
-            $course_json_path = FileUtils::joinPaths($this->config->getCoursePath(), "config", "config.json");
-            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
-                $this->config->loadCourseJson($course_json_path);
+            $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
+            $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
+            if (file_exists($course_json_path) && is_readable($course_json_path)) {
+                $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
-            else{
+            else {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
                   $semester . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
@@ -139,13 +139,28 @@ class Core {
         }
     }
 
+    public function loadMasterConfig() {
+        $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
+
+        $this->setConfig(new Config($this));
+        $this->config->loadMasterConfigs($conf_path);
+    }
+
+    public function setConfig(Config $config): void {
+        $this->config = $config;
+    }
+
     public function loadAuthentication() {
-        $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
+        $auth_class = "\\app\\authentication\\" . $this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
-        $this->session_manager = new SessionManager($this);
+        $this->setSessionManager(new SessionManager($this));
+    }
+
+    public function setSessionManager(SessionManager $manager) {
+        $this->session_manager = $manager;
     }
 
     /**
@@ -156,21 +171,26 @@ class Core {
      *
      * @throws \Exception if we have not loaded the config yet
      */
-    public function loadDatabases() {
+    public function loadMasterDatabase() {
         if ($this->config === null) {
             throw new \Exception("Need to load the config before we can connect to the database");
         }
 
-        $database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
+        $this->database_factory = new DatabaseFactory($this->config->getDatabaseDriver());
 
-        $this->submitty_db = $database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
+        $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
+        $this->setQueries($this->database_factory->getQueries($this));
+    }
+
+    public function loadCourseDatabase() {
         if ($this->config->isCourseLoaded()) {
-            $this->course_db = $database_factory->getDatabase($this->config->getCourseDatabaseParams());
+            $this->course_db = $this->database_factory->getDatabase($this->config->getCourseDatabaseParams());
             $this->course_db->connect();
+
+            $this->database_queries = $this->database_factory->getQueries($this);
         }
-        $this->database_queries = $database_factory->getQueries($this);
     }
 
     public function loadForum() {
@@ -191,8 +211,11 @@ class Core {
             throw new \Exception("Need to load the config before we can initialize the grading queue");
         }
 
-        $this->grading_queue = new GradingQueue($this->config->getSemester(),
-            $this->config->getCourse(), $this->config->getSubmittyPath());
+        $this->grading_queue = new GradingQueue(
+            $this->config->getSemester(),
+            $this->config->getCourse(),
+            $this->config->getSubmittyPath()
+        );
     }
 
     /**
@@ -255,6 +278,10 @@ class Core {
         return $this->course_db;
     }
 
+    public function setQueries(DatabaseQueries $queries): void {
+        $this->database_queries = $queries;
+    }
+
     /**
      * @return DatabaseQueries
      */
@@ -269,29 +296,14 @@ class Core {
         return $this->forum;
     }
 
-    /**
-     * @param string $user_id
-     */
-    public function loadUser($user_id) {
+    public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        if(!$this->getConfig()->isCourseLoaded()){
-           $this->loadSubmittyUser();
-        }
-        else{
-            $this->user = $this->database_queries->getUserById($user_id);
-        }
+        $this->setUser($this->database_queries->getUserById($user_id));
     }
 
-    /**
-     * Loads the user from the main Submitty database. We should only use this function
-     * because we're accessing either a non-course specific page or we're trying to access
-     * a page of a course that the user does not have access to so $this->loadUser() fails.
-     */
-    public function loadSubmittyUser() {
-        if ($this->user_id !== null) {
-            $this->user = $this->database_queries->getSubmittyUser($this->user_id);
-        }
+    public function setUser(User $user): void {
+        $this->user = $user;
     }
 
     /**
@@ -348,6 +360,16 @@ class Core {
     }
 
     /**
+     * Remove the currently loaded session within the session manager, returning bool
+     * on whether this was done or not
+     *
+     * @return bool
+     */
+    public function removeCurrentSession(): bool {
+        return $this->session_manager->removeCurrentSession();
+    }
+
+    /**
      * Given an api_key (which should be coming from a parsed JWT), the database is queried to find
      * a user id that matches the api key, and let the core load the user.
      *
@@ -362,13 +384,6 @@ class Core {
         }
         $this->loadUser($user_id);
         return true;
-    }
-
-    /**
-     * Remove the currently loaded session within the session manager
-     */
-    public function removeCurrentSession() {
-        $this->session_manager->removeCurrentSession();
     }
 
     /**
@@ -420,12 +435,11 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
-                $token = (string) TokenManager::generateApiToken(
+                return (string) TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id),
                     $this->getConfig()->getBaseUrl(),
                     $this->getConfig()->getSecretSession()
                 );
-                return $token;
             }
         }
         catch (\Exception $e) {
@@ -440,6 +454,32 @@ class Core {
     }
 
     /**
+     * Invalidates user's token by refreshing user's api key.
+     *
+     * @return bool
+     *
+     * @throws AuthenticationException
+     */
+    public function invalidateJwt() {
+        $user_id = $this->authentication->getUserId();
+        try {
+            if ($this->authentication->authenticate()) {
+                $this->database_queries->refreshUserApiKey($user_id);
+                return true;
+            }
+        }
+        catch (\Exception $e) {
+            // We wrap all non AuthenticationExceptions so that they get specially processed in the
+            // ExceptionHandler to remove password details
+            if ($e instanceof AuthenticationException) {
+                throw $e;
+            }
+            throw new AuthenticationException($e->getMessage(), $e->getCode(), $e);
+        }
+        return false;
+    }
+
+    /**
      * Checks the inputted $csrf_token against the one that is loaded from the session table for the particular
      * signed in user.
      *
@@ -447,7 +487,7 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token=null) {
+    public function checkCsrfToken($csrf_token = null) {
         if ($csrf_token === null) {
             return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
         }
@@ -457,31 +497,14 @@ class Core {
     }
 
     /**
-     * Given some number of URL parameters (parts), build a URL for the site using those parts
-     *
-     * @param array  $parts
-     * @param string $hash
-     *
-     * @return string
-     */
-    public function buildUrl($parts=array(), $hash = null) {
-        $url = $this->getConfig()->getSiteUrl().((count($parts) > 0) ? "&".http_build_query($parts) : "");
-        if ($hash !== null) {
-            $url .= "#".$hash;
-        }
-        return $url;
-    }
-
-    /**
      * Given some URL parameters (parts), build a URL for the site using those parts.
      *
      * @param array  $parts
      *
      * @return string
      */
-    public function buildNewUrl($parts=array()) {
-        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
-        return $url;
+    public function buildUrl($parts = array()) {
+        return $this->getConfig()->getBaseUrl() . implode("/", $parts);
     }
 
     /**
@@ -494,21 +517,23 @@ class Core {
      *
      * @return string
      */
-    public function buildNewCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts = array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
-        return $this->buildNewUrl($parts);
+        return $this->buildUrl($parts);
     }
 
     /**
      * @param     $url
      * @param int $status_code
      */
-    public function redirect($url, $status_code = 302) {
+    public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
             return;
         }
-        header('Location: ' . $url, true, $status_code);
-        die();
+        header('Location: ' . $url, true, $http_response_code);
+        if (!$this->testing) {
+            die();
+        }
     }
 
     /**
@@ -530,7 +555,7 @@ class Core {
     public function getFullCourseName() {
         $course_name = strtoupper($this->getConfig()->getCourse());
         if ($this->getConfig()->getCourseName() !== "") {
-            $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
+            $course_name .= ": " . htmlentities($this->getConfig()->getCourseName());
         }
         return $course_name;
     }
@@ -540,25 +565,31 @@ class Core {
      *
      * @return string
      */
-    public function getDisplayedCourseName(){
+    public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
         }
-        else{
+        else {
             return $this->getConfig()->getCourse();
         }
     }
 
-    public function getFullSemester(){
+    public function getFullSemester() {
         $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== ""){
+        if ($this->getConfig()->getSemester() !== "") {
             $arr1 = str_split($semester);
             $semester = "";
-            if($arr1[0] == "f")  $semester .= "Fall ";
-            else if($arr1[0] == "s")  $semester .= "Spring ";
-            else if ($arr1[0] == "u") $semester .= "Summer ";
+            if ($arr1[0] == "f") {
+                $semester .= "Fall ";
+            }
+            elseif ($arr1[0] == "s") {
+                $semester .= "Spring ";
+            }
+            elseif ($arr1[0] == "u") {
+                $semester .= "Summer ";
+            }
 
-            $semester .= "20". $arr1[1]. $arr1[2];
+            $semester .= "20" . $arr1[1] . $arr1[2];
         }
         return $semester;
     }
@@ -566,8 +597,12 @@ class Core {
     /**
      * @return Output
      */
-    public function getOutput() {
+    public function getOutput(): Output {
         return $this->output;
+    }
+
+    public function setOutput(Output $output): void {
+        $this->output = $output;
     }
 
     /**
@@ -630,26 +665,94 @@ class Core {
         }
     }
 
-    public function setRouter(ClassicRouter $router) {
-        $this->router = $router;
-    }
-
-    public function getRouter(): ClassicRouter {
-        return $this->router;
-    }
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
-     * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
-     * ALWAYS returns FALSE we can mock to return TRUE for testing. It's probably not "best practices",
-     * and the proper way is using "phpt" files, but
-     *
+     * bypass via mocking or some other method (like is_uploaded_file).
      * @return bool
      */
-    public function isTesting() {
-        return false;
+    public function isTesting(): bool {
+        return $this->testing;
+    }
+
+    public function setTesting(bool $testing): void {
+        $this->testing = $testing;
     }
 
     public function getNotificationFactory() {
         return $this->notification_factory;
+    }
+
+    /**
+     * Check if we have a saved cookie with a session id and then that there exists
+     * a session with that id. If there is no session, then we delete the cookie.
+     * @return bool
+     */
+    public function isWebLoggedIn() {
+        $logged_in = false;
+        $cookie_key = 'submitty_session';
+        if (isset($_COOKIE[$cookie_key])) {
+            try {
+                $token = TokenManager::parseSessionToken(
+                    $_COOKIE[$cookie_key],
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                $session_id = $token->getClaim('session_id');
+                $expire_time = $token->getClaim('expire_time');
+                $logged_in = $this->getSession($session_id, $token->getClaim('sub'));
+                // make sure that the session exists and it's for the user they're claiming
+                // to be
+                if (!$logged_in) {
+                    // delete cookie that's stale
+                    Utils::setCookie($cookie_key, "", time() - 3600);
+                }
+                else {
+                    if ($expire_time > 0) {
+                        Utils::setCookie(
+                            $cookie_key,
+                            (string) TokenManager::generateSessionToken(
+                                $session_id,
+                                $token->getClaim('sub'),
+                                $this->getConfig()->getBaseUrl(),
+                                $this->getConfig()->getSecretSession()
+                            ),
+                            $expire_time
+                        );
+                    }
+                }
+            }
+            catch (\InvalidArgumentException $exc) {
+                // Invalid cookie data, delete it
+                Utils::setCookie($cookie_key, "", time() - 3600);
+            }
+        }
+        return $logged_in;
+    }
+
+    /**
+     * Check if the user has a valid jwt in the header.
+     *
+     * @param Request $request
+     * @return bool
+     */
+    public function isApiLoggedIn(Request $request) {
+        $logged_in = false;
+        $jwt = $request->headers->get("authorization");
+        if (!empty($jwt)) {
+            try {
+                $token = TokenManager::parseApiToken(
+                    $request->headers->get("authorization"),
+                    $this->getConfig()->getBaseUrl(),
+                    $this->getConfig()->getSecretSession()
+                );
+                $api_key = $token->getClaim('api_key');
+                $logged_in = $this->loadApiUser($api_key);
+            }
+            catch (\InvalidArgumentException $exc) {
+                return false;
+            }
+        }
+
+        return $logged_in;
     }
 }

@@ -5,9 +5,10 @@
     {%  include "forum/ForumBar.twig" with {
         "forum_bar_buttons_right" : buttons,
         "forum_bar_buttons_left" : [],
-        "show_threads" : False,
+        "show_threads" : false,
         "thread_exists" : thread_exists,
-        "show_more" : False
+        "show_more" : false,
+        "show_filter": false
     } %}
 
     <h3 class="create-thread-title"> Create Thread </h3>

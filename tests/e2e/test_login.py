@@ -56,6 +56,10 @@ class TestLogin(BaseTestCase):
         element = self.driver.find_element_by_class_name("content")
         self.assertEqual("You don't have access to this course.\nThis is sample for {:s}.\nIf you think this is a mistake, please contact your instructor to gain access.\nclick here to back to homepage and see your courses list.".format(self.full_semester), element.text)
 
+    def test_going_to_logout_when_not_logged_in(self):
+        self.get('/authentication/logout')
+        self.assertTrue(True)
+
 if __name__ == "__main__":
     import unittest
     unittest.main()

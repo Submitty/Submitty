@@ -257,6 +257,15 @@
                             "type": "failure"
                         }
                     ]
+                },
+                {
+                    "description" : "execute_logfile.txt",
+                    "messages" : [
+                        {
+                            "message" : "WARNING: This file should be empty",
+                            "type" : "warning"
+                        }
+                    ]
                 }
             ],
             "points_awarded": 0,

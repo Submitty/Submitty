@@ -200,26 +200,37 @@ function buildJSON(){
     return ret;
 }
 
+function showLogButton(responseData)
+{
+    $('#show_log_button').show();
+    $('#save_status_log').empty();
+    $('#save_status_log').append('<pre>' + responseData + '</pre>');
+}
+
 function checkAutoRGStatus()
 {
     // Send request
     $.getJSON({
         type: "POST",
-        url: buildNewCourseUrl(['auto_rg_status']),
+        url: buildCourseUrl(['reports', 'rainbow_grades_status']),
         data: {csrf_token: csrfToken},
         success: function (response) {
             if (response.status === 'success') {
 
                 $('#save_status').html('Rainbow grades successfully generated!');
+                showLogButton(response.data);
 
-            } else if (response.status === 'fail') {
+            }
+            else if (response.status === 'fail') {
 
                 $('#save_status').html('A failure occurred generating rainbow grades');
+                showLogButton(response.message);
 
-            } else {
+            }
+            else {
 
                 $('#save_status').html('Internal Server Error');
-                console.error(response.message);
+                console.log(response);
 
             }
         },
@@ -236,7 +247,7 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
     {
         $('#save_status').html('Saving...');
 
-        var url = buildNewCourseUrl(['rainbow_grades_customization']);
+        var url = buildCourseUrl(['reports', 'rainbow_grades_customization']);
 
         $.getJSON({
             type: "POST",
@@ -249,10 +260,12 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
                     // Call the server to see if auto_rainbow_grades has completed
                     checkAutoRGStatus();
                     //successCallback(response.data);
-                } else if (response.status === 'fail') {
+                }
+                else if (response.status === 'fail') {
                     $('#save_status').html('A failure occurred saving customization data');
                     //errorCallback(response.message, response.data);
-                } else {
+                }
+                else {
                     $('#save_status').html('Internal Server Error');
                     console.error(response.message);
                 }
@@ -318,4 +331,9 @@ $(document).ready(function () {
     var config = { attributes: true, childList: true, characterData: true };
     // pass in the target node, as well as the observer options
     observer.observe(target, config);
+
+    // Display auto rainbow grades log on button click
+    $('#show_log_button').click(function() {
+        $('#save_status_log').toggle();
+    })
 });

@@ -175,14 +175,6 @@ if [[ "$#" -ge 1 && $1 == "clean" ]] ; then
 
     echo -e "\nDeleting submitty installation directories, ${SUBMITTY_INSTALL_DIR}, for a clean installation\n"
 
-    # save the course index page
-    originalcurrentcourses=/usr/local/submitty/site/app/views/current_courses.php
-    if [ -f $originalcurrentcourses ]; then
-        mytempcurrentcourses=`mktemp`
-        echo "save this file! ${originalcurrentcourses} ${mytempcurrentcourses}"
-        mv ${originalcurrentcourses} ${mytempcurrentcourses}
-    fi
-
     rm -rf ${SUBMITTY_INSTALL_DIR}/site
     rm -rf ${SUBMITTY_INSTALL_DIR}/src
     rm -rf ${SUBMITTY_INSTALL_DIR}/bin
@@ -221,7 +213,7 @@ fi
 # Create the logs directories that exist on both primary & worker machines
 mkdir -p ${SUBMITTY_DATA_DIR}/logs
 mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding
-mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding/stack_traces
+mkdir -p ${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces
 # Create the logs directories that only exist on the primary machine
 if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/access
@@ -229,6 +221,9 @@ if [ "${WORKER}" == 0 ]; then
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/emails
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/site_errors
     mkdir -p ${SUBMITTY_DATA_DIR}/logs/ta_grading
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/course_creation
+  	mkdir -p ${SUBMITTY_DATA_DIR}/logs/vcs_generation
+    mkdir -p ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
 fi
 # ------------------------------------------------------------------------
 
@@ -246,19 +241,22 @@ if [ "${WORKER}" == 0 ]; then
     chmod  770                                        ${SUBMITTY_DATA_DIR}/vcs/git
 fi
 
-
 # ------------------------------------------------------------------------
 # Set owner/group of the top level logs directory
 chown root:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs
 # Set owner/group for logs directories that exist on both primary & work machines
 chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding
+chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/autograding_stack_traces
 # Set owner/group for logs directories that exist only on the primary machine
 if [ "${WORKER}" == 0 ]; then
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/access
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/bulk_uploads
     chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/emails
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/course_creation
+    chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/rainbow_grades
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/site_errors
     chown  -R ${PHP_USER}:${COURSE_BUILDERS_GROUP}    ${SUBMITTY_DATA_DIR}/logs/ta_grading
+	chown  -R ${DAEMON_USER}:${COURSE_BUILDERS_GROUP} ${SUBMITTY_DATA_DIR}/logs/vcs_generation
 fi
 # Set permissions of all files in the logs directories
 find ${SUBMITTY_DATA_DIR}/logs/ -type f -exec chmod 640 {} \;
@@ -425,6 +423,7 @@ chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_old_assignments.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/reupload_generate_csv.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 cp  ${SUBMITTY_REPOSITORY}/.setup/bin/track_git_version.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
+cp  ${SUBMITTY_REPOSITORY}/.setup/bin/init_auto_rainbow.py   ${SUBMITTY_INSTALL_DIR}/.setup/bin/
 chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chmod 700 ${SUBMITTY_INSTALL_DIR}/.setup/bin/reupload*
 chown root:root ${SUBMITTY_INSTALL_DIR}/.setup/bin/track_git_version.py
@@ -550,7 +549,21 @@ if [ ! -d "${nlohmann_dir}" ]; then
     git clone --depth 1 https://github.com/nlohmann/json.git ${nlohmann_dir}
 fi
 
+#####################################
+# Add read & traverse permissions for RainbowGrades and vendor repos
 
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/RainbowGrades -type f -exec chmod o+r {} \;
+
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type d -exec chmod o+rx {} \;
+find ${SUBMITTY_INSTALL_DIR}/GIT_CHECKOUT/vendor -type f -exec chmod o+r {} \;
+
+#####################################
+# Obtain API auth token for submitty-admin user
+if [ "${WORKER}" == 0 ]; then
+
+    python3 ${SUBMITTY_INSTALL_DIR}/.setup/bin/init_auto_rainbow.py
+fi
 #####################################
 # Build & Install Lichen Modules
 
@@ -574,6 +587,15 @@ echo -e "Completed installation of the Submitty version ${most_recent_git_tag//\
 #############################################################
 
 cat "${SUBMITTY_REPOSITORY}/.setup/submitty_crontab" | envsubst | cat - > "/etc/cron.d/submitty"
+
+################################################################################################################
+################################################################################################################
+# Allow course creation by daemon
+#############################################################
+
+cat ${SUBMITTY_REPOSITORY}/.setup/submitty_sudoers | envsubst | cat - > /etc/sudoers.d/submitty
+chmod 0440 /etc/sudoers.d/submitty
+chown root:root /etc/sudoers.d/submitty
 
 ################################################################################################################
 ################################################################################################################

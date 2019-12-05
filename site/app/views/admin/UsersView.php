@@ -14,9 +14,9 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $use_database=false) {
+    public function listStudents($sorted_students, $reg_sections, $rot_sections, $download_info, $use_database = false) {
         $this->core->getOutput()->addBreadcrumb('Manage Students');
-        $this->core->getOutput()->addInternalCss('studentlist.css');
+        $this->core->getOutput()->addInternalCss('directory.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalJs('userform.js');
@@ -27,8 +27,8 @@ class UsersView extends AbstractView {
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
-            'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
-            "return_url_upload_class_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
+            'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'users']),
+            "return_url_upload_class_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'classlist']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
         ]);
@@ -42,8 +42,10 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database=false) {
+    public function listGraders($graders_sorted, $reg_sections, $rot_sections, $download_info, $use_database = false) {
         $this->core->getOutput()->addBreadcrumb('Manage Graders');
+        $this->core->getOutput()->addInternalCss('directory.css');
+        $this->core->getOutput()->addInternalCss('table.css');
         $this->core->getOutput()->addInternalCss('userform.css');
         $this->core->getOutput()->addInternalJs('userform.js');
         $this->core->getOutput()->addInternalJs('directory.js');
@@ -67,9 +69,9 @@ class UsersView extends AbstractView {
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
             "use_database" => $use_database,
-            "return_url_upload_grader_list" => $this->core->buildNewCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
-            "return_url_assign_reg_sections" => $this->core->buildNewCourseUrl(['graders', 'assign_registration_sections']),
-            'update_url' => $this->core->buildNewCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
+            "return_url_upload_grader_list" => $this->core->buildCourseUrl(['users', 'upload']) . '?' . http_build_query(['list_type' => 'graderlist']),
+            "return_url_assign_reg_sections" => $this->core->buildCourseUrl(['graders', 'assign_registration_sections']),
+            'update_url' => $this->core->buildCourseUrl(['users']) . '?' . http_build_query(['type' => 'graders']),
             "csrf_token" => $this->core->getCsrfToken(),
             "download_info_json" => json_encode($download_info)
         ]);
@@ -83,7 +85,7 @@ class UsersView extends AbstractView {
      * @param bool   $use_database
      * @return string
      */
-    public function userForm($reg_sections, $rot_sections, $action, $use_database=false) {
+    public function userForm($reg_sections, $rot_sections, $action, $use_database = false) {
         return $this->core->getOutput()->renderTwigTemplate("admin/users/UserForm.twig", [
             "reg_sections" => $reg_sections,
             "rot_sections" => $rot_sections,
@@ -98,7 +100,7 @@ class UsersView extends AbstractView {
         foreach ($students as $student) {
             $registration = ($student->getRegistrationSection() === null) ? "NULL" : $student->getRegistrationSection();
             if (array_key_exists($registration, $reg_sections_count)) {
-                $reg_sections_count[$registration] = $reg_sections_count[$registration]+1;
+                $reg_sections_count[$registration] = $reg_sections_count[$registration] + 1;
             }
             else {
                 $reg_sections_count[$registration] = 1;
@@ -114,8 +116,8 @@ class UsersView extends AbstractView {
             "not_null_counts" => $not_null_counts,
             "null_counts" => $null_counts,
             "max_section" => $max_section,
-            "update_registration_sections_url" => $this->core->buildNewCourseUrl(['sections', 'registration']),
-            "update_rotating_sections_url" => $this->core->buildNewCourseUrl(['sections', 'rotating']),
+            "update_registration_sections_url" => $this->core->buildCourseUrl(['sections', 'registration']),
+            "update_rotating_sections_url" => $this->core->buildCourseUrl(['sections', 'rotating']),
             "csrf_token" => $this->core->getCsrfToken()
         ]);
     }

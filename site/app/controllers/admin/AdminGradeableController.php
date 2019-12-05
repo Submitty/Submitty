@@ -10,86 +10,25 @@ use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
 use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
-use http\Exception\InvalidArgumentException;
-use RecursiveIteratorIterator;
+use app\libraries\routers\AccessControl;
+use Symfony\Component\Routing\Annotation\Route;
 
+/**
+ * Class AdminGradeableController
+ * @package app\controllers\admin
+ * @AccessControl(role="INSTRUCTOR")
+ */
 class AdminGradeableController extends AbstractController {
-    public function run() {
-        switch ($_GET['action']) {
-            case 'view_gradeable_page':
-                $this->newPage();
-                break;
-            case 'upload_new_gradeable':
-                $this->createGradeableRequest();
-                break;
-            case 'edit_gradeable_page':
-                $this->editGradeableRequest();
-                break;
-            case 'update_gradeable':
-                $this->updateGradeableRequest();
-                break;
-            case 'update_gradeable_rubric':
-                // Other updates are happening real time,
-                //  but the rubric and the grader assignment need
-                //  to be updated separately
-                $this->updateRubricRequest();
-                break;
-            case 'update_gradeable_graders':
-                $this->updateGradersRequest();
-                break;
-            case 'upload_new_template':
-                $this->uploadNewTemplateRequest();
-                break;
-            case 'quick_link':
-                $this->quickLink();
-                break;
-            case 'delete_gradeable':
-                $this->deleteGradeable();
-                break;
-            case 'rebuild_assignment':
-                $this->rebuildAssignmentRequest();
-                break;
-            case 'check_refresh':
-                $this->checkRefresh();
-                break;
-            case 'export_components':
-                $this->exportComponentsRequest();
-                break;
-            case 'import_components':
-                $this->importComponents();
-                break;
-            default:
-                $this->newPage();
-                break;
-        }
-    }
-
-    /* Page load methods */
-
-    private function uploadNewTemplateRequest() {
-        $this->uploadNewTemplate($_GET['template_id']);
-    }
-
-    private function editGradeableRequest() {
-        try {
-            $gradeable = $this->core->getQueries()->getGradeableConfig($_REQUEST['id']);
-            $this->editPage($gradeable, $_GET['semester'], $_GET['course'], $_GET['nav_tab'] ?? 0);
-        } catch(\InvalidArgumentException $e) {
-            // If the gradeable can't be found, redirect to new page
-            $this->newPage();
-        }
-    }
-
     /**
-     * Pulls data from an existing gradeable to display the 'new' page with
-     * @param string $template_id The id of the gradeable to use as a template
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
      */
-    private function uploadNewTemplate($template_id) {
+    public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
-            $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
-            $this->newPage($template_gradeable);
-        } catch(\InvalidArgumentException $e) {
-            // If the template gradeable can't be found, redirect to new page
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
+        }
+        catch (\InvalidArgumentException $e) {
+            // If the gradeable can't be found, redirect to new page
             $this->newPage();
         }
     }
@@ -114,16 +53,15 @@ class AdminGradeableController extends AbstractController {
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
      * @param Gradeable $gradeable
+     * @Route("/{_semester}/{_course}/gradeable", methods={"GET"})
      */
-    private function newPage(Gradeable $gradeable = null) {
+    public function newPage($template_id = null) {
         $this->core->getOutput()->addBreadcrumb("New Gradeable");
 
+        $gradeable = $template_id ? $this->core->getQueries()->getGradeableConfig($template_id) : null;
+
         $template_list = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
-        $submit_url = $this->core->buildUrl([
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'upload_new_gradeable'
-        ]);
+        $submit_url = $this->core->buildCourseUrl(['gradeable']);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
@@ -142,7 +80,8 @@ class AdminGradeableController extends AbstractController {
             'vcs_base_url' => $vcs_base_url,
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
-            'gradeable_type_strings' => self::gradeable_type_strings
+            'gradeable_type_strings' => self::gradeable_type_strings,
+            'csrf_token' => $this->core->getCsrfToken()
         ]);
     }
 
@@ -151,7 +90,9 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
         // Serialize the components for numeric/checkpoint rubrics
-        $gradeable_components_enc = array_map(function(Component $c) {return $c->toArray(); }, $gradeable->getComponents());
+        $gradeable_components_enc = array_map(function (Component $c) {
+            return $c->toArray();
+        }, $gradeable->getComponents());
 
         // Construct history array, first indexed by user type, then by gradeable id
         $gradeable_section_history = [];
@@ -175,7 +116,7 @@ class AdminGradeableController extends AbstractController {
         // The current gradeable will always load its grader history,
         // but if it is grade by registration it should not be in $rotating_gradeables array
         if ($gradeable->getGraderAssignmentMethod() == Gradeable::REGISTRATION_SECTION) {
-            $current_g_id_key = array_search($gradeable->getId(),$rotating_gradeables);
+            $current_g_id_key = array_search($gradeable->getId(), $rotating_gradeables);
             unset($rotating_gradeables[$current_g_id_key]);
             $rotating_gradeables = array_values($rotating_gradeables);
         }
@@ -200,57 +141,56 @@ class AdminGradeableController extends AbstractController {
         $all_uploaded_configs = FileUtils::getAllFiles($uploaded_configs_dir);
         $all_uploaded_config_paths = array();
         foreach ($all_uploaded_configs as $file) {
-            $all_uploaded_config_paths[] = [ 'UPLOADED: '.substr($file['path'],strlen($uploaded_configs_dir)+1) , $file['path'] ];
+            $all_uploaded_config_paths[] = [ 'UPLOADED: ' . substr($file['path'], strlen($uploaded_configs_dir) + 1) , $file['path'] ];
         }
         // Configs stored in a private repository (specified in course config)
         $config_repo_string = $this->core->getConfig()->getPrivateRepository();
         $all_repository_config_paths = array();
         $repository_error_messages = array();
         $repo_id_number = 1;
-        foreach (explode(',',$config_repo_string) as $config_repo_name) {
+        foreach (explode(',', $config_repo_string) as $config_repo_name) {
             $config_repo_name = str_replace(' ', '', $config_repo_name);
             if ($config_repo_name == '') {
                 continue;
             }
             $directory_queue = array($config_repo_name);
-            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue,$repository_error_messages,$repo_id_number);
+            $repo_paths = $this->getValidPathsToConfigDirectories($directory_queue, $repository_error_messages, $repo_id_number);
             if (isset($repo_paths)) {
-                $all_repository_config_paths = array_merge($all_repository_config_paths,$repo_paths);
+                $all_repository_config_paths = array_merge($all_repository_config_paths, $repo_paths);
             }
             $repo_id_number++;
         }
-        usort($all_repository_config_paths, function($a,$b) { return $a[0] > $b[0]; } );
-
-        // Load output from build of config file
-        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
-        $build_script_output = is_file($build_script_output_file) ? file_get_contents($build_script_output_file) : null;
-        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_make_output.txt');
-        $make_output = is_file($make_out_dir) ? file_get_contents($make_out_dir) : null;
-        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable->getId(), 'log_cmake_output.txt');
-        $cmake_output = is_file($cmake_out_dir) ? file_get_contents($cmake_out_dir) : null;
-
-        $is_in_rebuild_queue = $this->isInRebuildQueue($gradeable->getId());
-
-        $check_refresh_url = $this->core->buildUrl([
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'check_refresh',
-            'id' => $gradeable->getId()
-        ]);
+        usort($all_repository_config_paths, function ($a, $b) {
+            return $a[0] > $b[0];
+        });
 
         $type_string = 'UNKNOWN';
-        if($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            if($gradeable->isScannedExam()) {
+        if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            if ($gradeable->isScannedExam()) {
                 $type_string = self::gradeable_type_strings['electronic_exam'];
-            } else if($gradeable->isVcs()) {
+            }
+            elseif ($gradeable->isVcs()) {
                 $type_string = self::gradeable_type_strings['electronic_hw_vcs'];
-            } else {
+            }
+            else {
                 $type_string = self::gradeable_type_strings['electronic_hw'];
             }
-        } else if($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        }
+        elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             $type_string = self::gradeable_type_strings['numeric'];
-        } else if($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        }
+        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             $type_string = self::gradeable_type_strings['checkpoint'];
+        }
+
+        //true if there are no students in any rotating sections.
+        //Can sometimes be true even if $num_rotating_sections > 0 (if no students are in any section)
+        $no_rotating_sections = true;
+        foreach ($this->core->getQueries()->getCountUsersRotatingSections() as $section) {
+            if ($section['rotating_section'] != null && $section['count'] > 0) {
+                $no_rotating_sections = false;
+                break;
+            }
         }
 
         // $this->inherit_teams_list = $this->core->getQueries()->getAllElectronicGradeablesWithBaseTeams();
@@ -283,6 +223,7 @@ class AdminGradeableController extends AbstractController {
             // Non-Gradeable-model data
             'gradeable_section_history' => $gradeable_section_history,
             'num_rotating_sections' => $num_rotating_sections,
+            'no_rotating_sections' => $no_rotating_sections,
             'rotating_gradeables' => $rotating_gradeables,
             'graders_from_usertypes' => $graders_from_usertypes,
             //'inherit_teams_list' => $inherit_teams_list
@@ -297,22 +238,15 @@ class AdminGradeableController extends AbstractController {
             'show_edit_warning' => $gradeable->anyManualGrades(),
 
             // Config selection data
-            'all_config_paths' => array_merge($default_config_paths,$all_uploaded_config_paths,$all_repository_config_paths),
+            'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
-            //build outputs
-            'build_script_output' => htmlentities($build_script_output),
-            'cmake_output' => htmlentities($cmake_output),
-            'make_output' => htmlentities($make_output),
-
-            // rebuild queue information
-            'is_in_rebuild_queue' => $is_in_rebuild_queue,
-            'check_refresh_url' => $check_refresh_url,
-
-            'upload_config_url' => $this->core->buildNewCourseUrl(['autograding_config'])
+            'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
+            'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
+            'csrf_token' => $this->core->getCsrfToken()
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
@@ -338,7 +272,8 @@ class AdminGradeableController extends AbstractController {
                     // Need to remove non-student users, or users in the NULL section
                     if ($user->getRegistrationSection() == null) {
                         unset($users[$key]);
-                    } else {
+                    }
+                    else {
                         $user_ids[] = $user->getId();
                         $grading[$user->getId()] = array();
                     }
@@ -396,14 +331,17 @@ class AdminGradeableController extends AbstractController {
             $mark0 = $this->newMark($component);
             $mark0->setTitle('No Credit');
             $component->setMarks([$mark0]);
-        } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+        }
+        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             $component->setTitle('Checkpoint 1');
             $component->setPoints(['lower_clamp' => 0, 'default' => 0, 'max_value' => 1, 'upper_clamp' => 1]);
-        } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        }
+        elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             // Add a new mark to the db if its electronic
             $mark = $this->newMark($component);
             $component->setMarks([$mark]);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Gradeable type invalid');
         }
 
@@ -411,20 +349,23 @@ class AdminGradeableController extends AbstractController {
         $gradeable->setComponents([$component]);
     }
 
-    private function updateRubricRequest() {
-        $gradeable_id = $_REQUEST['id'] ?? '';
-
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rubric", methods={"POST"})
+     */
+    public function updateRubricRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
         }
 
         try {
-            $this->updateRubric($gradeable, $_POST);
+            $this->updateRubric($gradeable, $_POST['values']);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -505,10 +446,11 @@ class AdminGradeableController extends AbstractController {
         }
         try {
             $file_iter = new \RecursiveDirectoryIterator($folder_path, \RecursiveDirectoryIterator::SKIP_DOTS);
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             return false;
         }
-        while($file_iter->valid()) {
+        while ($file_iter->valid()) {
             if ($file_iter->current()->getFilename() == 'config.json') {
                 return true;
             }
@@ -528,14 +470,14 @@ class AdminGradeableController extends AbstractController {
      * @param integer $repo_id_number
      * @return array
      */
-    private function getValidPathsToConfigDirectories($dir_queue,&$error_messages,$repo_id_number) {
+    private function getValidPathsToConfigDirectories($dir_queue, &$error_messages, $repo_id_number) {
         $repository_path = $dir_queue[0];
         $count = 0;
         $return_array = array();
 
-        while(count($dir_queue) != 0) {
+        while (count($dir_queue) != 0) {
             if ($count >= 1000) {
-                $error_messages[] = "Repository #".$repo_id_number." entered on the \"Course Settings\" is too large to parse.";
+                $error_messages[] = "Repository #" . $repo_id_number . " entered on the \"Course Settings\" is too large to parse.";
                 return array();
             }
 
@@ -544,22 +486,23 @@ class AdminGradeableController extends AbstractController {
             $dir_queue = array_values($dir_queue);
 
             if (!file_exists($dir) || !is_dir($dir)) {
-                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
 
             try {
                 $iter = new \RecursiveDirectoryIterator($dir, \RecursiveDirectoryIterator::SKIP_DOTS);
-            } catch(\Exception $e) {
-                $error_messages[] = "An error occured when parsing repository #".$repo_id_number." entered on the \"Course Settings\" page";
+            }
+            catch (\Exception $e) {
+                $error_messages[] = "An error occured when parsing repository #" . $repo_id_number . " entered on the \"Course Settings\" page";
                 return array();
             }
 
             if ($this->checkPathToConfigFile($dir)) {
-                $return_array[] = ["DIRECTORY ".$repo_id_number.": ".substr($dir,strlen($repository_path)),$dir];
+                $return_array[] = ["DIRECTORY " . $repo_id_number . ": " . substr($dir, strlen($repository_path)),$dir];
             }
             else {
-                while($iter->valid()) {
+                while ($iter->valid()) {
                     $file = $iter->current();
                     if ($file->isDir()) {
                         $dir_queue[] = $file->getPathname();
@@ -583,8 +526,9 @@ class AdminGradeableController extends AbstractController {
         // The electronic file mode is the least touched of them all since it will be replaced
         //  with a unified interface with TA grading and share a separate "rubric" controller for it.
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
-            throw new InvalidArgumentException('Attempt to update rubric using outdated method!');
-        } else if ($gradeable->getType() === GradeableType::CHECKPOINTS) {
+            throw new \InvalidArgumentException('Attempt to update rubric using outdated method!');
+        }
+        elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
             if (!isset($details['checkpoints'])) {
                 $details['checkpoints'] = [];
             }
@@ -610,7 +554,8 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($x);
                 $new_components[] = $component;
             }
-        } else if ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
+        }
+        elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
             if (!isset($details['numeric'])) {
                 $details['numeric'] = [];
             }
@@ -633,7 +578,8 @@ class AdminGradeableController extends AbstractController {
                 if ($old_component->isText() === true) {
                     $old_texts[] = $old_component;
                     $num_old_texts++;
-                } else {
+                }
+                else {
                     $old_numerics[] = $old_component;
                     $num_old_numerics++;
                 }
@@ -679,7 +625,8 @@ class AdminGradeableController extends AbstractController {
                 $component->setOrder($y + $z);
                 $new_components[] = $component;
             }
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException("Invalid gradeable type");
         }
 
@@ -690,9 +637,10 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
-    private function updateGradersRequest() {
-        $gradeable_id = $_REQUEST['id'] ?? '';
-
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/graders", methods={"POST"})
+     */
+    public function updateGradersRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
@@ -702,9 +650,11 @@ class AdminGradeableController extends AbstractController {
             $this->updateGraders($gradeable, $_POST);
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail('Error setting graders' . $e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -719,7 +669,10 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->updateGradeable($gradeable);
     }
 
-    private function createGradeableRequest() {
+    /**
+     * @Route("/{_semester}/{_course}/gradeable", methods={"POST"})
+     */
+    public function createGradeableRequest() {
         $gradeable_id = $_POST['id'] ?? '';
 
         try {
@@ -730,9 +683,10 @@ class AdminGradeableController extends AbstractController {
                 $this->core->addErrorMessage($build_result);
             }
             $this->redirectToEdit($gradeable_id);
-        } catch (\Exception $e) {
-            $this->core->addErrorMessage($e);
-            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
+        catch (\Exception $e) {
+            $this->core->addErrorMessage($e->getMessage());
+            $this->core->redirect($this->core->buildCourseUrl());
         }
     }
 
@@ -765,7 +719,7 @@ class AdminGradeableController extends AbstractController {
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
-        if ($details['gradeable_template'] !== '--None--') {
+        if (array_key_exists('gradeable_template', $details) && $details['gradeable_template'] !== '--None--') {
             $template_id = $details['gradeable_template'];
             $template_gradeable = $this->core->getQueries()->getGradeableConfig($template_id);
             if ($template_gradeable === null) {
@@ -777,8 +731,8 @@ class AdminGradeableController extends AbstractController {
             foreach ($template_property_names as $name) {
                 $gradeable_create_data[$name] = $template_data[$name];
             }
-
-        } else {
+        }
+        else {
             $non_template_property_values = [
                 'min_grading_group' => 1,
                 'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
@@ -810,10 +764,18 @@ class AdminGradeableController extends AbstractController {
 
             // Find which radio button is pressed and what host type to use
             $host_type = -1;
-            if      ($host_button === 'submitty-hosted')     { $host_type = 0; }
-            else if ($host_button === 'submitty-hosted-url') { $host_type = 1; }
-            else if ($host_button === 'public-github')       { $host_type = 2; }
-            else if ($host_button === 'private-github')      { $host_type = 3; }
+            if ($host_button === 'submitty-hosted') {
+                $host_type = 0;
+            }
+            elseif ($host_button === 'submitty-hosted-url') {
+                $host_type = 1;
+            }
+            elseif ($host_button === 'public-github') {
+                $host_type = 2;
+            }
+            elseif ($host_button === 'private-github') {
+                $host_type = 3;
+            }
 
             $subdir = '';
             // Submitty hosted -> this gradeable subdirectory
@@ -830,7 +792,8 @@ class AdminGradeableController extends AbstractController {
                 'vcs_host_type' => $host_type
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
-        } else {
+        }
+        else {
             $non_vcs_property_values = [
                 'vcs' => false,
                 'vcs_subdirectory' => '',
@@ -841,15 +804,14 @@ class AdminGradeableController extends AbstractController {
 
         // Electronic-only values
         if ($gradeable_type === GradeableType::ELECTRONIC_FILE) {
-
             $jsonThreads = json_encode('{}');
             $discussion_clicked = isset($details['discussion_based']) && ($details['discussion_based'] === 'true');
 
             //Validate user input for discussion threads
-            if($discussion_clicked) {
+            if ($discussion_clicked) {
                 $jsonThreads = array_map('intval', explode(',', $details['discussion_thread_id']));
-                foreach($jsonThreads as $thread) {
-                    if(!$this->core->getQueries()->existsThread($thread)) {
+                foreach ($jsonThreads as $thread) {
+                    if (!$this->core->getQueries()->existsThread($thread)) {
                         throw new \InvalidArgumentException('Invalid thread id specified.');
                     }
                 }
@@ -876,7 +838,8 @@ class AdminGradeableController extends AbstractController {
                 'peer_grade_set' => 0,
                 'late_submission_allowed' => true
             ]);
-        } else {
+        }
+        else {
             // Values for these electronic-only properties
             $gradeable_create_data = array_merge($gradeable_create_data, [
                 'team_assignment' => false,
@@ -925,24 +888,34 @@ class AdminGradeableController extends AbstractController {
         $this->core->getQueries()->createGradeable($gradeable); // creates the gradeable
 
         // start the build
-        return $this->enqueueBuild($gradeable);
+        $build_status = $this->enqueueBuild($gradeable);
+
+        $config = $this->core->getConfig();
+        if ($build_status == null && $gradeable->isVcs() && !$gradeable->isTeamAssignment()) {
+            $this->enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
+        }
+
+        return $build_status;
     }
 
-    private function updateGradeableRequest() {
-        $gradeable_id = $_REQUEST['id'] ?? '';
-
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"POST"})
+     */
+    public function updateGradeableRequest($gradeable_id) {
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
             return;
         }
-
+        unset($_POST['csrf_token']);
         try {
             $response_props = $this->updateGradeable($gradeable, $_POST);
             // Finally, send the requester back the information
             $this->core->getOutput()->renderJsonSuccess($response_props);
-        } catch (ValidationException $e) {
+        }
+        catch (ValidationException $e) {
             $this->core->getOutput()->renderJsonFail('See "data" for details', $e->getDetails());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }
@@ -971,6 +944,7 @@ class AdminGradeableController extends AbstractController {
             'peer_grading',
             'late_submission_allowed',
             'regrade_allowed',
+            'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
             'has_due_date'
@@ -1013,17 +987,18 @@ class AdminGradeableController extends AbstractController {
             }
 
             // Converts string array sep by ',' to json
-            if($prop === $discussion_ids) {
+            if ($prop === $discussion_ids) {
                 $post_val = array_map('intval', explode(',', $post_val));
-                foreach($post_val as $thread) {
-                    if(!$this->core->getQueries()->existsThread($thread)) {
+                foreach ($post_val as $thread) {
+                    if (!$this->core->getQueries()->existsThread($thread)) {
                         $errors[$prop] = 'Invalid thread id specified.';
                         break;
                     }
                 }
-                if(count($errors) == 0) {
+                if (count($errors) == 0) {
                     $post_val = json_encode($post_val);
-                } else {
+                }
+                else {
                     continue;
                 }
             }
@@ -1031,12 +1006,16 @@ class AdminGradeableController extends AbstractController {
             // Try to set the property
             try {
                 //convert the property name to a setter name
-                $setter_name = 'set' . implode('',
-                        array_map(function ($val) {
-                            return ucfirst($val);
-                        }, explode('_', $prop)));
+                $setter_name = 'set' . implode(
+                    '',
+                    array_map(function ($val) {
+                        return ucfirst($val);
+                    },
+                    explode('_', $prop))
+                );
                 $gradeable->$setter_name($post_val);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 // If something goes wrong, record it so we can tell the user
                 $errors[$prop] = $e->getMessage();
             }
@@ -1047,7 +1026,8 @@ class AdminGradeableController extends AbstractController {
             try {
                 $gradeable->setDates($dates);
                 $updated_properties = $gradeable->getDateStrings(false);
-            } catch (ValidationException $e) {
+            }
+            catch (ValidationException $e) {
                 $errors = array_merge($errors, $e->getDetails());
             }
         }
@@ -1058,10 +1038,13 @@ class AdminGradeableController extends AbstractController {
                 // TODO: what key should this get?
                 $errors['server'] = $result;
             }
+            else {
+                $updated_properties[] = 'rebuild_queued';
+            }
         }
 
         // Be strict.  Only apply database changes if there were no errors
-        if(count($errors) !== 0) {
+        if (count($errors) !== 0) {
             throw new ValidationException('', $errors);
         }
         $this->core->getQueries()->updateGradeable($gradeable);
@@ -1070,33 +1053,39 @@ class AdminGradeableController extends AbstractController {
         return $updated_properties;
     }
 
-    private function deleteGradeable() {
-        $g_id = $_REQUEST['id'];
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/delete", methods={"POST"})
+     */
+    public function deleteGradeable($gradeable_id) {
+        $gradeable = $this->tryGetGradeable($gradeable_id);
+        if ($gradeable == false) {
+            $this->core->addErrorMessage("Invalid gradeable id");
+            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
+        if (!$gradeable->canDelete()) {
+            $this->core->addErrorMessage("Gradeable " . $gradeable_id . " cannot be deleted.");
+            $this->core->redirect($this->core->buildNewCourseUrl());
+        }
 
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] != $this->core->getCsrfToken()) {
-            die("Invalid CSRF Token");
-        }
-        if (!$this->core->getUser()->accessAdmin()) {
-            die("Only admins can delete gradeable");
-        }
-        $this->core->getQueries()->deleteGradeable($g_id);
+        $this->core->getQueries()->deleteGradeable($gradeable_id);
 
         $course_path = $this->core->getConfig()->getCoursePath();
 
-        $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $g_id . ".json");
+        $file = FileUtils::joinPaths($course_path, "config", "form", "form_" . $gradeable_id . ".json");
         if ((file_exists($file)) && (!unlink($file))) {
-            die("Cannot delete form_{$g_id}.json");
+            die("Cannot delete form_{$gradeable_id}.json");
         }
 
         // this will cleanup the build files
-        $this->enqueueBuildFile($g_id);
+        $this->enqueueBuildFile($gradeable_id);
 
-        $this->core->redirect($this->core->buildNewCourseUrl());
+        $this->core->redirect($this->core->buildCourseUrl());
     }
 
     private function writeFormConfig(Gradeable $gradeable) {
-        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE)
+        if ($gradeable->getType() !== GradeableType::ELECTRONIC_FILE) {
             return null;
+        }
 
         // Refresh the configuration file with updated information
         // See 'make_assignments_txt_file.py' and grade_item.py for where these properties are used
@@ -1110,8 +1099,10 @@ class AdminGradeableController extends AbstractController {
         ];
 
         $fp = $this->core->getConfig()->getCoursePath() . '/config/form/form_' . $gradeable->getId() . '.json';
-        if ((!is_writable($fp) && file_exists($fp))
-            || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false) {
+        if (
+            (!is_writable($fp) && file_exists($fp))
+            || file_put_contents($fp, json_encode($jsonProperties, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES)) === false
+        ) {
             return "Failed to write to file {$fp}";
         }
         return null;
@@ -1131,8 +1122,30 @@ class AdminGradeableController extends AbstractController {
             "gradeable" => $g_id
         ];
 
-        if ((!is_writable($config_build_file) && file_exists($config_build_file))
-            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false) {
+        if (
+            (!is_writable($config_build_file) && file_exists($config_build_file))
+            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false
+        ) {
+            return "Failed to write to file {$config_build_file}";
+        }
+        return null;
+    }
+
+    public static function enqueueGenerateRepos($semester, $course, $g_id) {
+        // FIXME:  should use a variable intead of hardcoded top level path
+        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+
+        $config_build_data = [
+            "job" => "RunGenerateRepos",
+            "semester" => $semester,
+            "course" => $course,
+            "gradeable" => $g_id
+        ];
+
+        if (
+            (!is_writable($config_build_file) && file_exists($config_build_file))
+            || file_put_contents($config_build_file, json_encode($config_build_data, JSON_PRETTY_PRINT)) === false
+        ) {
             return "Failed to write to file {$config_build_file}";
         }
         return null;
@@ -1145,21 +1158,52 @@ class AdminGradeableController extends AbstractController {
         return $this->writeFormConfig($gradeable) ?? $this->enqueueBuildFile($gradeable->getId());
     }
 
-    private function rebuildAssignmentRequest() {
-        $g_id = $_REQUEST['id'];
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/rebuild")
+     */
+    public function rebuildGradeableRequest($gradeable_id) {
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $result = $this->enqueueBuild($gradeable);
         if ($result !== null) {
             die($result);
         }
-        $this->core->addSuccessMessage("Successfully added {$g_id} to the rebuild queue");
-        $this->core->redirect($this->core->buildUrl(array(
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'edit_gradeable_page',
-            'id' => $g_id,
-            'nav_tab' => '1'
-        )));
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
+     */
+    public function ajaxGetBuildLogs($gradeable_id) {
+        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
+        $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
+        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
+        $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
+        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
+        $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
+
+        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
+    }
+
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_status", methods={"GET"})
+     */
+    public function getBuildStatusOfGradeable($gradeable_id) {
+        $queued_filename = $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
+        $rebuilding_filename = 'PROCESSING_' . $this->core->getConfig()->getSemester() . '__' . $this->core->getConfig()->getCourse() . '__' . $gradeable_id . '.json';
+        $queued_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $queued_filename);
+        $rebuilding_path = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuilding_filename);
+
+        if (is_file($queued_path)) {
+            $status = 'queued';
+        }
+        elseif (is_file($rebuilding_path)) {
+            $status = 'processing';
+        }
+        else {
+            $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            $status = $gradeable->hasAutogradingConfig();
+        }
+        clearstatcache();
+        $this->core->getOutput()->renderJsonSuccess($status);
     }
 
     /**
@@ -1179,11 +1223,11 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
-    private function quickLink() {
-        $g_id = $_REQUEST['id'];
-        $action = $_REQUEST['quick_link_action'];
-
-        $gradeable = $this->core->getQueries()->getGradeableConfig($g_id);
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/quick_link")
+     */
+    public function openquickLink($gradeable_id, $action) {
+        $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
         $dates = $gradeable->getDates();
         $now = $this->core->getDateTimeNow();
         $message = "";
@@ -1194,43 +1238,52 @@ class AdminGradeableController extends AbstractController {
                 $this->shiftDates($dates, 'grade_released_date', $now);
                 $message .= "Released grades for ";
                 $success = true;
-            } else {
+            }
+            else {
                 $message .= "Grades already released for";
                 $success = false;
             }
-        } else if ($action === "open_ta_now") {
+        }
+        elseif ($action === "open_ta_now") {
             if ($dates['ta_view_start_date'] > $now) {
                 $this->shiftDates($dates, 'ta_view_start_date', $now);
                 $message .= "Opened TA access to ";
                 $success = true;
-            } else {
+            }
+            else {
                 $message .= "TA access already open for ";
                 $success = false;
             }
-        } else if ($action === "open_grading_now") {
+        }
+        elseif ($action === "open_grading_now") {
             if ($dates['grade_start_date'] > $now) {
                 $this->shiftDates($dates, 'grade_start_date', $now);
                 $message .= "Opened grading for ";
                 $success = true;
-            } else {
+            }
+            else {
                 $message .= "Grading already open for ";
                 $success = false;
             }
-        } else if ($action === "open_students_now") {
+        }
+        elseif ($action === "open_students_now") {
             if ($dates['submission_open_date'] > $now) {
                 $this->shiftDates($dates, 'submission_open_date', $now);
                 $message .= "Opened student access to ";
                 $success = true;
-            } else {
+            }
+            else {
                 $message .= "Student access already open for ";
                 $success = false;
             }
-        } else if ($action === "close_submissions") {
+        }
+        elseif ($action === "close_submissions") {
             if ($dates['submission_due_date'] > $now) {
                 $this->shiftDates($dates, 'submission_due_date', $now);
                 $message .= "Closed assignment ";
                 $success = true;
-            } else {
+            }
+            else {
                 $message .= "Grading already closed for ";
                 $success = false;
             }
@@ -1238,57 +1291,29 @@ class AdminGradeableController extends AbstractController {
         $gradeable->setDates($dates);
         $this->core->getQueries()->updateGradeable($gradeable);
         if ($success === true) {
-            $this->core->addSuccessMessage($message.$g_id);
-        } else if ($success === false) {
-            $this->core->addErrorMessage($message.$g_id);
-        } else {
-            $this->core->addErrorMessage("Failed to update status of ".$g_id);
+            $this->core->addSuccessMessage($message . $gradeable_id);
         }
-
-        $this->core->redirect($this->core->buildNewCourseUrl());
-    }
-
-    private function checkRefresh() {
-        $g_id = $_REQUEST['id'];
-        $this->core->getOutput()->useHeader(false);
-        $this->core->getOutput()->useFooter(false);
-        if(!$this->isInRebuildQueue($g_id)) {
-            $refresh_string = "REFRESH_ME";
-            $refresh_bool = true;
-            $this->core->addSuccessMessage("Finished rebuild of {$g_id}");
+        elseif ($success === false) {
+            $this->core->addErrorMessage($message . $gradeable_id);
         }
         else {
-            $refresh_string = "NO_REFRESH";
-            $refresh_bool = false;
+            $this->core->addErrorMessage("Failed to update status of " . $gradeable_id);
         }
-        $this->core->getOutput()->renderString($refresh_string);
-        return array('refresh' => $refresh_bool, 'string' => $refresh_string);
+
+        $this->core->redirect($this->core->buildCourseUrl());
     }
 
     private function redirectToEdit($gradeable_id) {
-        $url = $this->core->buildUrl([
-            'component' => 'admin',
-            'page' => 'admin_gradeable',
-            'action' => 'edit_gradeable_page',
-            'id' => $gradeable_id,
-            'nav_tab' => '-1']);
+        $url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']);
         header('Location: ' . $url);
-    }
-
-    private function isInRebuildQueue($gradeable_id) {
-        // Check the rebuild queue for the file indicating that a config rebuild is in process
-        $rebuild_filename = 'PROCESSING_'.$this->core->getConfig()->getSemester().'__'.$this->core->getConfig()->getCourse().'__'.$gradeable_id.'.json';
-        $daemon_queue_dir = FileUtils::joinPaths($this->core->getConfig()->getSubmittyPath(), 'daemon_job_queue', $rebuild_filename);
-        return is_file($daemon_queue_dir);
     }
 
     /**
      * Exports components to json and downloads for user
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/export")
      */
-    private function exportComponentsRequest() {
-        $url = $this->core->buildNewCourseUrl();
-
-        $gradeable_id = $_GET['gradeable_id'] ?? '';
+    public function exportComponentsRequest($gradeable_id) {
+        $url = $this->core->buildCourseUrl();
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id, false);
@@ -1306,7 +1331,8 @@ class AdminGradeableController extends AbstractController {
         try {
             $arrs = $gradeable->exportComponents();
             $this->core->getOutput()->renderFile(json_encode($arrs, JSON_PRETTY_PRINT), $gradeable->getId() . '_components.json');
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->addErrorMessage($e->getMessage());
             $this->core->redirect($url);
         }
@@ -1314,10 +1340,9 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Imports components from uploaded files into gradeable (single-depth array)
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/import", methods={"POST"})
      */
-    private function importComponents() {
-        $gradeable_id = $_GET['gradeable_id'] ?? '';
-
+    public function importComponents($gradeable_id) {
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
         if ($gradeable === false) {
@@ -1342,9 +1367,11 @@ class AdminGradeableController extends AbstractController {
             // Save to the database
             $this->core->getQueries()->updateGradeable($gradeable);
             $this->core->getOutput()->renderJsonSuccess();
-        } catch (\InvalidArgumentException $e) {
+        }
+        catch (\InvalidArgumentException $e) {
             $this->core->getOutput()->renderJsonFail($e->getMessage());
-        } catch (\Exception $e) {
+        }
+        catch (\Exception $e) {
             $this->core->getOutput()->renderJsonError($e->getMessage());
         }
     }

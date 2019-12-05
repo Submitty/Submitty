@@ -27,7 +27,6 @@
         }
         var loop = Math.ceil(range/increment);
         var tracking = min;
-        console.log(range," ",increment," ",loop);
         for(i = 0;i<loop;i++){
             betterBuckets.set(tracking,0);
             tracking+=increment;
@@ -62,8 +61,6 @@
             }
             yValue.push(value);
         }
-        console.log(xBuckets);
-        console.log(yValue);
         return mode;
     }
     function createNewBuckets(range,buckets,xValue,yValue,xBuckets,mode,modeCount,max,min) {
@@ -78,8 +75,6 @@
         {% if overall_average.getAverageScore() != "" %}
             if( bucketInputTotal.value !=''){
                 mode=fillBuckets(rangeT,parseInt(bucketInputTotal.value),betterBuckets,xValueT,yValue,xBuckets,mode,modeCount,maxT,minT);
-                console.log(xBuckets);
-                console.log(yValue);
                 var dataTotal=tracing(xBuckets,yValue);
                 Plotly.newPlot('myDiv', dataTotal, layout, {displayModeBar: false,displaylogo: false});
                 bucketInputTotal.value='';
@@ -113,7 +108,7 @@
     <h1>Status of {{ gradeable_title }}</h1>
 
     {% if rotating_sections_error %}
-        <div class='content' style="background-color:#e84848">
+        <div name="grader-warning-popup status">
             <p> WARNING: This page may be inaccurate.  <br />
                 This gradeable assigns graders by Rotating Section, but Rotating Sections are not set up properly. <br />
                 To fix Rotating Sections, go to the Manage Sections page. <br />
@@ -124,36 +119,39 @@
     {# Top buttons #}
     <div style="margin-top: 20px; vertical-align:bottom;">
         {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
-            <a class="btn btn-primary"
+            <a class="btn btn-primary" style="float: left"
                 {% if core.getUser().accessAdmin() or (core.getUser().getGradingRegistrationSections()|length == 0) %}
                     href="{{ details_view_all_url }}">
                 {% else %}
                     href="{{ details_url }}">
                 {% endif %}
 
-                Index of Grading Details for All Students
+                Grading Index
             </a>
+            <ul style="margin-left: 25px; margin-top: -5px; float: left">
+                <li>View Submissions</li>
+                {%  if team_assignment %}
+                    <li>Manage Teams</li>
+                {% endif %}
+                {% if component_averages|length != 0 %}
+                    <li>Manual Grading</li>
+                    <li>Grade Inquiries</li>
+                {% endif %}
+            </ul>
             {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
-                <a class="btn btn-primary"
-                   href="{{ grade_url }}">
-                    Grade Next Student
-                </a>
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id}) }}">
-                    Download Zip of All Assigned Students
-                </a>
-            {% endif %}
-            {% if core.getUser().accessFullGrading() and submitted_total %}
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'misc', 'page': 'download_all_assigned', 'dir': 'submissions', 'gradeable_id': gradeable_id, 'type': 'All'}) }}">
-                    Download Zip of All Students
-                </a>
-            {% endif %}
-            {% if core.getUser().accessFullGrading() %}
-                <a class="btn btn-primary"
-                   href="{{ core.buildUrl({'component': 'submission', 'action': 'stat_page', 'gradeable_id': gradeable_id}) }}">
-                    Bulk Upload Forensics
-                </a>
+                {% if overall_average == null or overall_average.getCount() == 0 %}
+                    {% if team_assignment %}
+                        <a class="btn btn-primary"
+                           href="{{ grade_url }}" style="float: right;">
+                            My Next Ungraded Team
+                        </a>
+                    {% else %}
+                        <a class="btn btn-primary"
+                           href="{{ grade_url }}" style="float: right;">
+                            My Next Ungraded Student
+                        </a>
+                    {% endif %}
+                {% endif %}
             {% endif %}
         {% endif %}
     </div>
@@ -168,11 +166,12 @@
         </div>
     {% else %}
         <div class = "tab">
-            <button class="btn btn-primary" type="button" onclick="openStat(event, 'numerical-data'), this.blur()" id="defaultOpen">Numerical Data</button>
-            <button class="btn btn-primary" type="button" id="btn-hist-tot" onclick="openStat(event, 'total-score-histogram'), this.blur()">Total Histogram</button>
-            <button class="btn btn-primary" type="button" id="btn-comp" onclick="openStat(event, 'component-averages'), this.blur()">Component Averages</button>
-            <button class="btn btn-primary" type="button" id="btn-hist-auto" onclick="openStat(event, 'autograding-score-histogram'), this.blur()">Autograding Histogram</button>
-
+            <div class =tab-bar-wrapper">
+                <a class="nav-bar normal-btn"  onclick="openStat(event, 'numerical-data'), this.blur()" id="defaultOpen">Data</a>
+                <a class="nav-bar normal-btn"  id="btn-hist-auto" onclick="openStat(event, 'autograding-score-histogram'), this.blur()">Autograding Histogram</a>
+                <a class="nav-bar normal-btn"  id="btn-comp" onclick="openStat(event, 'component-averages'), this.blur()">Manual Grading Component Averages</a>
+                <a class="nav-bar normal-btn"  id="btn-hist-tot" onclick="openStat(event, 'total-score-histogram'), this.blur()">Overall Histogram</a>
+            </div>
             {% set bTA = [] %}
             {% set tTA = [] %}
             {% set bAuto = [] %}
@@ -182,12 +181,19 @@
             {% set noActive = 0 %}
             {% set GradeInq = 0 %}
             {% set IncompGrading = 0 %}
+            {% set cancelledSub = 0 %}
             {# Iterate through all the Scores #}
             {% for ov in overall_scores %}
                 {# If Autograded, add the points to the array of autograded scores#}
                 {% if ov.getAutoGradedGradeable().getHighestVersion() != 0 %}
-                    {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
-                        {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
+                    {% if ov.getTaGradedGradeable.getGradedGradeable.getSubmitter().getRegistrationSection() != NULL %}
+                        {% if ov.getGradeable().getAutogradingConfig().getTotalNonExtraCredit() != 0  %}
+                            {% if ov.getAutoGradedGradeable().getTotalPoints() >=0 or ov.getAutoGradedGradeable().getTotalPoints() <0 %}
+                                {%  set bAuto = bAuto|merge( [ov.getAutoGradedGradeable().getTotalPoints() ]) %}
+                            {% else %}
+                                {% set cancelledSub = cancelledSub+1 %}
+                            {% endif %}
+                        {% endif %}
                     {% endif %}
                 {% else %}
 
@@ -230,13 +236,14 @@
                     {% endif %}
                 {% endif %}
             {% endfor %}
-            {% if overall_average == null or overall_average.getCount() == 0%}
+            {% if (overall_average == null or overall_average.getCount() == 0) and component_averages|length == 0%}
                 <script>
-                    document.getElementById("btn-hist-tot").disabled = true;
+                    document.getElementById("btn-hist-tot").className+= " disabled-btn";
+                    document.getElementById("btn-hist-tot").style.visibility = "hidden";
                 </script>
 
             {% else %}
-                <div id = "total-score-histogram" class = "tabcontent">
+                <div id = "total-score-histogram" class = "page-content">
                 {# Setup for Histogram of Total Scores #}
                     <br>
                     <input style='width: auto' type='text' id='bucket-size-total' name='bucket-val' value="" placeholder="Enter bucket size" />
@@ -329,28 +336,30 @@
                     Plotly.newPlot('myDiv', data, layout, {displayModeBar: false,displaylogo: false});
 
                 </script>
-                    <div id="mySmallDiv">
-                        <script>
-                            document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
-                            +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
-                            '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
-                            {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
-                        </script>
-                    </div>
-                {{ "\n"|nl2br }}
-                {{ mode }}
+                <div id="mySmallDiv">
+                    <script>
+                        document.write('<b>Mean: </b>'+{{ overall_average.getAverageScore() }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Mode: </b>'
+                        +mode+'&nbsp&nbsp&nbsp&nbsp'+'<b>Median: </b>'+median+'&nbsp&nbsp&nbsp&nbsp'+ '<b>Maximum: </b>'+maxT+
+                        '&nbsp&nbsp&nbsp&nbsp'+'<b>Minimum: </b>'+minT+'&nbsp&nbsp&nbsp&nbsp'+'<b>Standard Deviation: </b>'+
+                        {{ overall_average.getStandardDeviation()  }}+'&nbsp&nbsp&nbsp&nbsp'+'<b>Range: </b>'+rangeT);
+                    </script>
+                </div>
+                <br />
                 Version Conflicts: {{ VerConf }}
-                {{ "\n"|nl2br }}
+                <br />
                 No Submissions: {{ noSub }}
-                {{ "\n"|nl2br }}
+                <br />
                 No Active Versions: {{ noActive }}
-                {{ "\n"|nl2br }}
+                <br />
                 Grade Inquiries: {{ GradeInq }}
-                {{ "\n"|nl2br }}
+                <br />
                 Incomplete Grading: {{ IncompGrading }}
+                <br />
+                Cancelled Submissions: {{ cancelledSub }}
                 <br/>
                 <br/>
                 Double-click on the chart to zoom out
+                <hr>
             </div>
             {% endif %}
 
@@ -360,11 +369,12 @@
 
                 {% if component_averages|length == 0 %}
                     <script>
-                        document.getElementById("btn-comp").disabled = true;
+                        document.getElementById("btn-comp").className+= " disabled-btn";
+                        document.getElementById("btn-comp").style.visibility = "hidden";
                     </script>
                 {% else %}
 
-                <div id="component-averages" class="tabcontent">
+                <div id="component-averages" class="page-content">
 
                     <div id="myDiv2"><!-- Plotly chart will be drawn inside this DIV --></div>
                     <script>
@@ -437,18 +447,20 @@
                      <br/>
                     <br/>
                     Double-click on the chart to zoom out
+                    <hr>
                 </div>
                 {% endif %}
             {# Graph Setup for Autograding #}
 
                 {% if autograded_average == null or autograded_average.getCount() == 0 or bAuto|length == 0 %}
                     <script>
-                        document.getElementById("btn-hist-auto").disabled = true;
+                        document.getElementById("btn-hist-auto").className+= " disabled-btn";
+                        document.getElementById("btn-hist-auto").style.visibility = "hidden";
                     </script>
 
                 {% else %}
 
-                <div id="autograding-score-histogram" class="tabcontent">
+                <div id="autograding-score-histogram" class="page-content">
                     <br>
                     <input style='width: auto' type='text' id='bucket-size-auto' name='bucket-val' value="" placeholder="Enter bucket size" />
                     <input name = "sub-auto" class="btn btn-primary" id="submit_bucket_auto" type="submit" value="Submit Bucket Size for Auto" onclick="createNewBuckets(rangeA,buckets,xValue,yValue,xBuckets,mode,modeCount,maxA,minA)"/>
@@ -550,25 +562,27 @@
                         </script>
                     </div>
 
-                    {{ "\n"|nl2br }}
-                    {{ mode }}
+                    <br />
                     Version Conflicts: {{ VerConf }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     No Submissions: {{ noSub }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     No Active Versions: {{ noActive }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     Grade Inquiries: {{ GradeInq }}
-                    {{ "\n"|nl2br }}
+                    <br />
                     Incomplete Grading: {{ IncompGrading }}
+                    <br />
+                    Cancelled Submissions: {{ cancelledSub }}
                     <br/>
                     <br/>
                     Double-click on the chart to zoom out
+                    <hr>
                 </div>
                 {% endif %}
 
 
-            <div id="numerical-data" class="tabcontent">
+            <div id="numerical-data" class="page-content">
                 <div class = "row">
                     <div class = "box col-md-6">
                         {# LEFT CHUNK#}
@@ -636,10 +650,15 @@
                             {% endif %}
                         {% endif %}
 
-                        {% if core.getConfig().isRegradeEnabled() and not peer %}
+                        {% if regrade_allowed and not peer %}
                             <br/>
                             <br/>
-                            <b>Number of students who have unresolved grade inquiries:</b> {{ regrade_requests }}
+                            <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
+                            {% if grade_inquiry_per_component_allowed %}
+                                {% for component in component_averages %}
+                                    <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                                {% endfor %}
+                            {% endif %}
                         {% endif %}
                         {# LEFT CHUNK #}
                     </div>
@@ -708,6 +727,36 @@
             </div>
         </div>
     {% endif %}
+    <div style="margin-top: 20px;">
+        {% if graded_percentage != -1 or core.getUser().accessFullGrading() or peer %}
+            {% if core.getUser().getGradingRegistrationSections()|length != 0 %}
+                {%  if team_assignment %}
+                    <a class="btn btn-primary"
+                       href="{{ download_zip_url }}">
+                        Download Zip of Assigned Teams
+                    </a>
+                {% else %}
+                    <a class="btn btn-primary"
+                       href="{{ download_zip_url }}">
+                        Download Zip of Assigned Students
+                    </a>
+                {% endif %}
+
+            {% endif %}
+            {% if core.getUser().accessFullGrading() and submitted_total %}
+                <a class="btn btn-default"
+                   href="{{ download_zip_url }}?type=all">
+                    Download Zip of All Students
+                </a>
+            {% endif %}
+            {% if core.getUser().accessFullGrading() %}
+                <a class="btn btn-default"
+                   href="{{ bulk_stats_url }}"style="float: right">
+                    Bulk Upload Forensics
+                </a>
+            {% endif %}
+        {% endif %}
+    </div>
 </div>
 </body>
 {# Tab Buttons #}
@@ -718,23 +767,26 @@
         var i, tabcontent, tablinks;
 
         // Get all elements with class="tabcontent" and hide them
-        tabcontent = document.getElementsByClassName("tabcontent");
+        tabcontent = document.getElementsByClassName("page-content");
         for (i = 0; i < tabcontent.length; i++) {
             tabcontent[i].style.display = "none";
         }
 
 
         // Get all elements with class="btn btn-primary" and remove the class "active"
-        tablinks = document.getElementsByClassName("btn btn-primary");
+        tablinks = document.getElementsByClassName("nav-bar");
         for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].className = tablinks[i].className.replace(" active", "");
+            tablinks[i].className = tablinks[i].className.replace(" active-btn", "");
         }
 
         // Show the current tab, and add an "active" class to the button that opened the tab
         document.getElementById(statName).style.display = "block";
-        evt.currentTarget.className += " active";
+        evt.currentTarget.className += " active-btn";
 
     }
     // Get the element with id="defaultOpen" and click on it
-    document.getElementById("defaultOpen").click();
+    let defaultOpen = document.getElementById('defaultOpen');
+    if (defaultOpen) {
+        defaultOpen.click();
+    }
 </script>

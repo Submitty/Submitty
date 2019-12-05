@@ -12,18 +12,23 @@ use app\models\AbstractModel;
  *
  * @method \DateTime getTimestamp()
  * @method int getStatus()
+ * @method int getGcId()
  */
 class RegradeRequest extends AbstractModel {
+
+    const STATUS_RESOLVED = 0;
+    const STATUS_ACTIVE = -1;
 
     /** @var int The unique Id of this grade inquiry */
     private $id = 0;
     /** @property @var \DateTime The timestamp (readonly) of most recent update to $status */
     protected $timestamp = null;
     /** @property @var int The status of the grade inquiry */
-    protected $status = 0;
+    protected $status = self::STATUS_RESOLVED;
+    /** @property @var int|null The gradeable component that this grade inquiry is referencing */
+    protected $gc_id = null;
 
-    const STATUS_RESOLVED = 0;
-    const STATUS_ACTIVE = -1;
+
 
     public function __construct(Core $core, array $details) {
         parent::__construct($core);
@@ -32,6 +37,7 @@ class RegradeRequest extends AbstractModel {
         $this->setStatus($details['status']);
         $this->timestamp = DateUtils::parseDateTime($details['timestamp'], $this->core->getConfig()->getTimezone());
         $this->modified = false;
+        $this->gc_id = $details['gc_id'];
     }
 
     /**

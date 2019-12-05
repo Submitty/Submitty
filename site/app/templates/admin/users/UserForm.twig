@@ -1,37 +1,52 @@
 {% extends 'generic/Popup.twig' %}
 {% block popup_id %}edit-user-form{% endblock %}
-{% block title %}Edit User{% endblock %}
+{% block title %}
+	<div id="edit-grader-modal-title">Edit Grader</div> 
+	<div id="new-grader-modal-title">New Grader</div>
+	<div id="edit-student-modal-title">Edit Student</div> 
+	<div id="new-student-modal-title">New Student</div>
+{% endblock %}
 {% block body %}
     <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     <input type="hidden" name="edit_user" value="false" />
     <div id="edit-user-form">
-        <label for="user_id">
+		<label for="user-form-already-exists-error-message" class="red-message full-width">
+			<p id="user-form-already-exists-error-message">
+				User is already in this course. Click to edit:
+				<td>
+					<a id="redirect-link-icon" onclick="redirectToEdit();" aria-label="edit entered user">
+						<i class="fas fa-pencil-alt" aria-hidden="true"></i>
+					</a>
+				</td>
+			</p>
+		</label>
+		<label for="user_id">
             User ID:
-            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" />
+            <input class="readonly" type="text" name="user_id" id="user_id" readonly="readonly" placeholder="(Required)" autocomplete="off"/>
         </label>
         <label for="user_numeric_id">
             User Numeric ID:
-            <input type="text" name="user_numeric_id" id="user_numeric_id" />
+            <input type="text" name="user_numeric_id" id="user_numeric_id" placeholder="Digits Only (Optional)" />
         </label>
         <label for="user_firstname">
             Legal First Name:
-            <input type="text" name="user_firstname" id="user_firstname" />
+            <input type="text" name="user_firstname" id="user_firstname" placeholder="(Required)" />
         </label>
         <label for="user_preferred_firstname">
             Preferred First Name:
-            <input type="text" name="user_preferred_firstname" id="user_preferred_firstname" />
+            <input type="text" name="user_preferred_firstname" id="user_preferred_firstname" placeholder="(Optional)" />
         </label>
         <label for="user_lastname">
             Legal Last Name:
-            <input type="text" name="user_lastname" id="user_lastname" />
+            <input type="text" name="user_lastname" id="user_lastname" placeholder="(Required)" />
         </label>
         <label for="user_preferred_lastname">
             Preferred Last Name:
-            <input type="text" name="user_preferred_lastname" id="user_preferred_lastname" />
+            <input type="text" name="user_preferred_lastname" id="user_preferred_lastname" placeholder="(Optional)" />
         </label>
         <label for="user_email">
             Email:
-            <input type="text" name="user_email" id="user_email" />
+            <input type="text" name="user_email" id="user_email" placeholder="(Optional)" />
         </label>
         {% if use_database %}
             <label>
@@ -90,6 +105,6 @@
     </form>
 {% endblock %}
 {% block buttons %}
-    {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Submit" />
+    <a onclick="closeButton()" class="btn btn-default close-button">Close</a>
+    <input class="btn btn-primary" type="submit" value="Submit" id="user-form-submit" />
 {% endblock %}

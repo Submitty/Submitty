@@ -25,3 +25,11 @@
     flex-direction: column;
     margin: 6px 0;
 }
+
+input[type=text]:valid {
+    background-color: transparent;
+ }
+
+input[type=text]:invalid {
+    background-color: var(--alert-invalid-entry-pink);
+}

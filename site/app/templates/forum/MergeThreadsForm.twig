@@ -2,24 +2,29 @@
 {% block popup_id %}merge-threads{% endblock %}
 {% block title %}Merge Threads{% endblock %}
 {% block body %}
-        Merge current thread into
-        <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
+    <p>You may merge a thread and all of its posts into a chronologically earlier thread.<br/> Warning: This action is not reversible.</p>
+    {% if possibleMerges is empty %}
+        <p class="yellow-message">The selected thread is the chronologically oldest thread. No merge action is available.</p>
+    {% else %}
+        <div>
+            <p>Merge current thread into:<p>
+            <input type="hidden" id="merge_thread_child" name="merge_thread_child" value="{{ current_thread }}" data-ays-ignore="true">
+            <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
+            <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" aria-label="Select thread to merge into" data-ays-ignore="true">
+                {% for threads in possibleMerges %}
+                    <option value=({{ threads['id'] }})>({{ threads['id'] }}) {{ threads['title'] }}</option>
+                {% endfor %}
+            </select>
+            <script>
+                $(document).ready(function(){
+                    $(".chosen-select").chosen({ width: "100%" });
+                    $("#merge-threads .form-body").css("min-height", "inherit");
+                    $("#merge-threads .form-body").css('overflow-y', 'initial');
+                });
+            </script>
+        </div>
 
-        <input type="hidden" id="csrf_token" name="csrf_token" value="{{ csrf_token }}" data-ays-ignore="true"/>
-        <select class="chosen-select" id="merge_thread_parent" name="merge_thread_parent" aria-label="Select thread to merge into" data-ays-ignore="true">
-
-            {% for threads in possibleMerges %}
-                <option value=({{ threads['id'] }})>({{ threads['id'] }}) {{ threads['title'] }}</option>
-            {% endfor %}
-        </select>
-        <script>
-            $(document).ready(function(){
-                $(".chosen-select").chosen({ width: "210px" });
-                $("#merge-threads .form-body").css("min-height", "inherit");
-                $("#merge-threads .form-body").css('overflow-y', 'initial');
-            });
-
-        </script>
+    {% endif %}
 {% endblock %}
 {% block form %}
     <form method="post" action="{{ merge_url }}">
@@ -28,5 +33,6 @@
 {% endblock %}
 {% block buttons %}
     {{ block('close_button') }}
-    <input class="btn btn-primary" type="submit" value="Merge Thread" />
+
+    <input class="btn btn-primary" type="submit" value="Merge Thread" {{ possibleMerges is empty ? 'disabled' : '' }}/>
 {% endblock %}

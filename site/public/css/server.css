@@ -157,10 +157,21 @@ input[type="checkbox"]:checked:before {
     font-weight: 900
 }
 
-.helpicon::before {
+.fa-question-circle{
   font-family: 'Font Awesome 5 Free';
   content: "\f059";
-  color: var(--actionable-blue);
+  color: var(--external-link-blue);
+  font-weight: 300;
+  display: inline-block;
+}
+
+.fa-question-circle.disabled,
+.fa-question-circle[disabled],
+.disabled>.fa-question-circle,
+[disabled]>.fa-question-circle{
+  font-family: 'Font Awesome 5 Free';
+  color: var(--standard-light-gray);
+  content: "\f059";
   font-weight: 300;
   display: inline-block;
 }
@@ -1010,15 +1021,6 @@ div.full_height {
     margin-left: 5px;
 }
 
-.btn-nav {
-    width:100%;
-}
-
-.btn.btn-nav-submit, .btn.btn-nav-grade {
-    padding-top: 10px;
-    padding-bottom: 10px;
-}
-
 .td-open {
     width: 10%;
 }
@@ -1195,6 +1197,16 @@ div.full_height {
     display: inline-block;
 }
 
+[name^="grader-warning-popup"] {
+    background:var(--danger-red);
+    box-shadow: 0 2px 15px -5px var(--standard-light-gray);
+    border-radius: 3px;
+    overflow: auto;
+    margin: 10px;;
+    padding: 30px;
+    flex-grow: 1;
+}
+
 .fill-available {
     width: 100%;
     width: -webkit-fill-available;
@@ -1266,16 +1278,18 @@ div.full_height {
 
 /* from https://css-tricks.com/css3-progress-bars/ */
 .meter {
+    width: 100%;
     height: 10px;
-    position: relative;
     background: var(--standard-pale-gray);
     padding: 0px;
+    border-radius: 4px;
 }
+
 .meter > span {
     display: block;
     height: 100%;
     background-color: var(--good-green);
-    position: relative;
+    border-radius: 4px;
 }
 
 /*
@@ -1379,8 +1393,8 @@ end of styles used in the admin gradeable page
     color: var(--standard-vibrant-dark-blue)  /* dark blue */
 }
 
-.grader-invalid{
-   color: var(--standard-light-red);
+.grader-grade-inquiry {
+    color: var(--standard-light-red);
 }
 
 .grader-invalid{
@@ -1414,6 +1428,14 @@ end of styles used in the admin gradeable page
 .viewed-red-x {
     color: var(--badge-backgroud-red);
     font-size: 1.5em;
+}
+
+[name^="user_id_"]:valid {
+    background-color: transparent;
+}
+
+[name^="user_id_"] {
+    background-color: var(--alert-invalid-entry-pink);
 }
 
 /* color for nav page edit button for rebuild error on gradeable */
@@ -1618,17 +1640,18 @@ end of styles used in the admin gradeable page
     color: var(--alert-danger-red);
 }
 
-.black-btn, .black-btn > i.fas {
+.black-btn, .black-btn > i {
     color: #000 !important;
     border-color: #000 !important;
+    text-decoration: none;
 }
 
-.black-btn:hover, .black-btn > i.fas:hover {
+.black-btn:hover, .black-btn:hover > i, .black-btn > i:hover {
     color: #405E90 !important;
     border-color: #405E90 !important;
 }
 
-.black-btn:active, .black-btn > i.fas:active {
+.black-btn:active, .black-btn:active > i, .black-btn > i:active {
     color: var(--external-link-active) !important;
     border-color: var(--external-link-active) !important;
 }
@@ -1749,6 +1772,10 @@ header > * {
     text-align: left !important;
 }
 
+.hide {
+    display: none;
+}
+
 .bare-button {
     border: none;
     padding: 0;
@@ -1787,4 +1814,13 @@ header > * {
         width: min-content;
         width: -moz-min-content;
     }
+}
+
+.pre-wrap{
+    white-space: pre-wrap;
+}
+
+.pre_forum {
+    font-family: inherit;
+    max-width: 70vw;
 }

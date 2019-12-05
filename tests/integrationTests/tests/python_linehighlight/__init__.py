@@ -49,6 +49,10 @@ def initialize(test):
 
 ############################################################################
 
+@testcase
+def schema_validation(test):
+    config_path = os.path.join(test.testcase_path, 'assignment_config', 'complete_config.json')
+    test.validate_complete_config(config_path)
 
 @testcase
 def run_test(test):
