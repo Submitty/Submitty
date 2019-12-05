@@ -31,7 +31,7 @@ class AutoGradedGradeable extends AbstractModel {
     public function __construct(Core $core, GradedGradeable $graded_gradeable, array $details) {
         parent::__construct($core);
 
-        if($graded_gradeable === null) {
+        if ($graded_gradeable === null) {
             throw new \InvalidArgumentException('Graded gradeable cannot be null');
         }
         $this->setActiveVersion($details['active_version'] ?? 0);
@@ -40,18 +40,7 @@ class AutoGradedGradeable extends AbstractModel {
     }
 
     public function toArray() {
-        $details = parent::toArray();
-
-        // Uncomment this block if we want to serialize the scores
-//        $visible_percent = $this->getVisiblePercent();
-//        $visible_percent = is_nan($visible_percent) ? 0 : $visible_percent;
-//        $details['visible_score'] = $visible_percent;
-//
-//        $total_score = $this->getTotalPercent();
-//        $total_score = is_nan($total_score) ? 0 : $total_score;
-//        $details['total_score'] = $total_score;
-
-        return $details;
+        return parent::toArray();
     }
 
     /**
@@ -90,7 +79,8 @@ class AutoGradedGradeable extends AbstractModel {
     public function setActiveVersion($version) {
         if ((is_int($version) || ctype_digit($version)) && intval($version) >= 0) {
             $this->active_version = intval($version);
-        } else {
+        }
+        else {
             throw new \InvalidArgumentException('Active version must be a non-negative integer');
         }
         $this->modified = true;
@@ -165,7 +155,7 @@ class AutoGradedGradeable extends AbstractModel {
         }
         return $highest_version;
     }
-    
+
     /**
      * Gets if the submitter has a version selected for grading
      * @return bool

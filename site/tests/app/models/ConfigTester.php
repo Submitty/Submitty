@@ -150,7 +150,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
         );
         $config = array_replace($config, $extra);
         FileUtils::writeJsonFile(FileUtils::joinPaths($this->config_path, "version.json"), $config);
-
     }
 
     public function testConfig() {
@@ -497,7 +496,6 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                 $exception->getMessage()
             );
         }
-
     }
 
     public function testInvalidTimezone() {

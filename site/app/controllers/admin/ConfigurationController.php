@@ -77,70 +77,82 @@ class ConfigurationController extends AbstractController {
      * @return Response
      */
     public function updateConfiguration(): Response {
-        if(!isset($_POST['name'])) {
+        if (!isset($_POST['name'])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Name of config value not provided')
             );
         }
         $name = $_POST['name'];
 
-        if(!isset($_POST['entry'])) {
+        if (!isset($_POST['entry'])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Name of config entry not provided')
             );
         }
         $entry = $_POST['entry'];
 
-        if($name === "room_seating_gradeable_id") {
+        if ($name === "room_seating_gradeable_id") {
             $gradeable_seating_options = $this->getGradeableSeatingOptions();
             $gradeable_ids = array();
-            foreach($gradeable_seating_options as $option) {
+            foreach ($gradeable_seating_options as $option) {
                 $gradeable_ids[] = $option['g_id'];
             }
-            if(!in_array($entry, $gradeable_ids)) {
+            if (!in_array($entry, $gradeable_ids)) {
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Invalid gradeable chosen for seating')
                 );
             }
         }
-        elseif(in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
-            if(!ctype_digit($entry)) {
+        elseif (in_array($name, array('default_hw_late_days', 'default_student_late_days'))) {
+            if (!ctype_digit($entry)) {
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse('Must enter a number for this field')
                 );
             }
             $entry = intval($entry);
         }
-        elseif(in_array($name, array('zero_rubric_grades', 'keep_previous_files', 'display_rainbow_grades_summary',
-                                      'display_custom_message', 'forum_enabled', 'regrade_enabled', 'seating_only_for_instructor'))) {
+        elseif (
+            in_array(
+                $name,
+                [
+                    'zero_rubric_grades',
+                    'keep_previous_files',
+                    'display_rainbow_grades_summary',
+                    'display_custom_message',
+                    'forum_enabled',
+                    'regrade_enabled',
+                    'seating_only_for_instructor'
+                ]
+            )
+        ) {
             $entry = $entry === "true" ? true : false;
-        }elseif($name === 'queue_enabled'){
+        }
+        elseif ($name === 'queue_enabled') {
             $entry = $entry === "true" ? true : false;
             $this->core->getQueries()->genQueueSettings();
         }
-        elseif($name === 'upload_message') {
+        elseif ($name === 'upload_message') {
             $entry = nl2br($entry);
         }
-        elseif($name == "course_home_url") {
-            if(!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)){
+        elseif ($name == "course_home_url") {
+            if (!filter_var($entry, FILTER_VALIDATE_URL) && !empty($entry)) {
                 return Response::JsonOnlyResponse(
                     JsonResponse::getFailResponse($entry . ' is not a valid URL')
                 );
             }
         }
-        // Special validation for auto_rainbow_grades checkbox
-        elseif($name === 'auto_rainbow_grades') {
+        elseif ($name === 'auto_rainbow_grades') {
+            // Special validation for auto_rainbow_grades checkbox
             // Get a new customization json object
             $customization_json = new RainbowCustomizationJSON($this->core);
 
             // If a custom_customization.json does not exist, then check for the presence of a regular one
-            if(!$customization_json->doesCustomCustomizationExist())
-            {
+            if (!$customization_json->doesCustomCustomizationExist()) {
                 // Attempt to populate it from the customization.json in the course rainbow_grades directory
+                // If no file exists do not allow user to enable this check mark until one is supplied
                 try {
                     $customization_json->loadFromJsonFile();
                 }
-                // If no file exists do not allow user to enable this check mark until one is supplied
                 catch (\Exception $e) {
                     return Response::JsonOnlyResponse(
                         JsonResponse::getFailResponse(ConfigurationController::FAIL_AUTO_RG_MSG)
@@ -151,9 +163,9 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true" ? true : false;
         }
 
-        if($name === 'forum_enabled') {
-            if($entry == 1){
-                if($this->core->getAccess()->canI("forum.modify_category")) {
+        if ($name === 'forum_enabled') {
+            if ($entry == 1) {
+                if ($this->core->getAccess()->canI("forum.modify_category")) {
                     $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
                     $rows = $this->core->getQueries()->getCategories();
 
@@ -167,7 +179,7 @@ class ConfigurationController extends AbstractController {
         }
 
         $config_ini = $this->core->getConfig()->getCourseJson();
-        if(!isset($config_ini['course_details'][$name])) {
+        if (!isset($config_ini['course_details'][$name])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );

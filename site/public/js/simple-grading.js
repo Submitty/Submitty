@@ -44,7 +44,7 @@ function calcSimpleGraderStats(action) {
             var reg_section;                        // the registration section of the current user
             elems.each(function() {
                 if(action == "lab") {
-                    reg_section = $(this).parent().find("td:nth-child(2)").text();              // second child of parent has registration section as text   
+                    reg_section = $(this).parent().find("td:nth-child(2)").text();              // second child of parent has registration section as text
                     section = $(this).parent().parent().attr("id").split("-")[1];               // grandparent id has section
                 }
                 else if(action == "numeric") {
@@ -99,7 +99,7 @@ function calcSimpleGraderStats(action) {
             component_averages.push(sum/num_users);
             component_stddevs.push(Math.sqrt(Math.max(0, (sum_sqrs - sum**2 / num_users) / num_users)));
         }
-        
+
         // get the elements for the next component
         elems = $(elem_type + "[id^=cell-][id$=" + (++c).toString() + "]");
     }
@@ -115,7 +115,7 @@ function calcSimpleGraderStats(action) {
     }
 
     stddev = Math.sqrt(stddev);                                 // take sqrt of sum of squared stddevs to get total stddev
-    stats_popup.find("#avg-total").text(average.toFixed(2));    // set the display text of the proper average element 
+    stats_popup.find("#avg-total").text(average.toFixed(2));    // set the display text of the proper average element
     stats_popup.find("#stddev-total").text(stddev.toFixed(2));  // set the display text of the proper stddev element
 
 
@@ -159,9 +159,9 @@ function updateCheckpointCells(elems, scores, no_cookie) {
     }
 
     // keep track of changes
-    var new_scores = {}; 
+    var new_scores = {};
     var old_scores = {};
-    
+
     elems = $(elems);
     elems.each(function(idx, el) {
         var elem = $(el);
@@ -178,33 +178,33 @@ function updateCheckpointCells(elems, scores, no_cookie) {
         else if (scores && elem.data("id") in scores) {
             elem.data("score", scores[elem.data("id")]);
             set_new = true;
-        } 
+        }
         // if no score set, toggle through options
         else if (!scores) {
             if (elem.data("score") === 1.0) elem.data("score", 0.5);
             else if (elem.data("score") === 0.5) elem.data("score", 0);
             else elem.data("score", 1);
             set_new = true;
-        } 
-        
+        }
+
         if (set_new) {
             new_scores[elem.data("id")] = elem.data("score");
-    
+
             // update css to reflect score
             if (elem.data("score") === 1.0) elem.css("background-color", "#149bdf");
             else if (elem.data("score") === 0.5) elem.css("background-color", "#88d0f4");
             else elem.css("background-color", "");
-    
+
             // create border we can animate to reflect ajax status
             elem.css("border-right", "60px solid #ddd");
         }
     });
-    
+
     var parent = $(elems[0]).parent();
     var user_id = parent.data("user");
     var g_id = parent.data('gradeable');
 
-    // update cookie for undo/redo 
+    // update cookie for undo/redo
     if (!no_cookie) {
         generateCheckpointCookie(user_id, g_id, old_scores, new_scores);
     }
@@ -262,12 +262,12 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     // pointer should be the index of the current state in history. new_scores should be true for all leading up to that state
     // the pointer is bound by 1, history.length-1
     var history = getCheckpointHistory(g_id);
-    
+
     // erase future snapshots on write
     if (history[0] < history.length-1) {
         history = history.slice(0, history[0]);
     }
-    
+
     // write new student entry
     history.push([user_id, old_scores]);
     history.push([user_id, new_scores]);
@@ -281,10 +281,11 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     // keep max history of 5 entries (1 buffer for pointer, 5x2 for old/new)
     if (history.length > 11) {
         history.splice(1, 2);
-    } else {
+    }
+    else {
         history[0] = history.length-1; // increment to latest new_scores
     }
-    
+
     setCheckpointHistory(g_id, history);
 }
 
@@ -292,15 +293,15 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
 function checkpointRollTo(g_id, diff) {
     // grab history from cookie
     var history = getCheckpointHistory(g_id);
-    
-    var update_queue = []; 
+
+    var update_queue = [];
     var direction = Math.sign(diff);
     var pointer = history[0];
 
     // clamp to bounds
     if (pointer + diff < 1) diff = 1 - pointer;
     if (pointer + diff >= history.length) diff = history.length - 1 - pointer;
-    
+
     // if redoing and pointer is on an old_score, move pointer to next new_score
     if (direction>0 && pointer%2) {
         pointer += 1;
@@ -330,7 +331,7 @@ function checkpointRollTo(g_id, diff) {
     if (pointer >= history.length-1) {
         $("#checkpoint-redo").prop("disabled", true);
     }
-    
+
     //write new cookie
     history[0] = pointer;
     setCheckpointHistory(g_id, history);
@@ -393,10 +394,10 @@ function setupNumericTextCells() {
         else{
             elem.css("color", "");
         }
-        
+
         var row_num = elem.attr("id").split("-")[1];
         var row_el = $("tr#row-" + row_num);
-        
+
         var scores = {};
         var old_scores = {};
         var total = 0;
@@ -413,7 +414,7 @@ function setupNumericTextCells() {
 
             // save old value so we can verify data is not stale
             elem.data('origval', elem.val());
-            elem.attr('data-origval', elem.val());  
+            elem.attr('data-origval', elem.val());
         });
 
         row_el.find(".cell-total").each(function() {
@@ -431,7 +432,7 @@ function setupNumericTextCells() {
             function() {
                 elem.css("background-color", "#ffffff");                                     // change the color
                 elem.attr("value", this.value);                                              // Stores the new input value
-                row_el.children("td.option-small-output").each(function() {  
+                row_el.children("td.option-small-output").each(function() {
                     $(this).children(".option-small-box").each(function() {
                         $(this).attr("value", this.value);                                      // Finds the element that stores the total and updates it to reflect increase
                     });
@@ -529,13 +530,15 @@ function setupNumericTextCells() {
                                                 $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val(returned_data['data'][x][value_temp_str]);
                                                 if (returned_data['data'][x][status_temp_str] === "OK") {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ffffff");
-                                                } else {
+                                                }
+                                                else {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("background-color", "#ff7777");
                                                 }
 
                                                 if($('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).val() == 0) {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "#bbbbbb");
-                                                } else {
+                                                }
+                                                else {
                                                     $('#cell-'+$(this).parent().data("row")+'-'+(z-starting_index2)).css("color", "");
                                                 }
 
@@ -569,7 +572,8 @@ function setupNumericTextCells() {
                     }
                 }
             }
-        } else {
+        }
+        else {
             var f = $('#csvUpload');
             f.replaceWith(f = f.clone(true));
         }
@@ -598,7 +602,7 @@ function setupSimpleGrading(action) {
     }
 
     var dont_hotkey_focus = true; // set to allow toggling of focus on input element so we can use enter as hotkey
-    
+
     // prevent hotkey focus while already focused, so we dont override search functionality
     $("#student-search-input").focus(function(event) {
         dont_hotkey_focus = true;
@@ -614,25 +618,25 @@ function setupSimpleGrading(action) {
     // moves the selection to an adjacent cell
     function movement(direction){
         var prev_cell = $(".cell-grade:focus");
-        if(prev_cell.length) {         
+        if(prev_cell.length) {
             // ids have the format cell-ROW#-COL#
             var new_selector_array = prev_cell.attr("id").split("-");
             new_selector_array[1] = parseInt(new_selector_array[1]);
             new_selector_array[2] = parseInt(new_selector_array[2]);
-            
+
             // update row and col to get new val
             if (direction == "up") new_selector_array[1] -= 1;
             else if (direction == "down") new_selector_array[1] += 1;
             else if (direction == "left") new_selector_array[2] -= 1;
             else if (direction == "right") new_selector_array[2] += 1;
-            
+
             // get new cell
             var new_cell = $("#" + new_selector_array.join("-"));
             if (new_cell.length) {
                 prev_cell.blur();
                 new_cell.focus();
                 new_cell.select(); // used to select text in input cells
-                
+
                 if((direction == "up" || direction == "down") && !new_cell.isInViewport()) {
                     $('html, body').animate( { scrollTop: new_cell.offset().top - $(window).height()/2}, 50);
                 }
@@ -640,14 +644,14 @@ function setupSimpleGrading(action) {
         }
     }
 
-    // default key movement 
+    // default key movement
     $(document).on("keydown", function(event) {
         // if input cell selected, use this to check if cursor is in the right place
         var input_cell = $("input.cell-grade:focus");
 
         // if there is no selection OR there is a selection to the far left with 0 length
         if(event.keyCode == 37 && (!input_cell.length || (
-                input_cell[0].selectionStart == 0 && 
+                input_cell[0].selectionStart == 0 &&
                 input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
             event.preventDefault();
             movement("left");
@@ -658,7 +662,7 @@ function setupSimpleGrading(action) {
         }
         // if there is no selection OR there is a selection to the far right with 0 length
         else if(event.keyCode == 39 && (!input_cell.length || (
-                input_cell[0].selectionEnd == input_cell[0].value.length && 
+                input_cell[0].selectionEnd == input_cell[0].value.length &&
                 input_cell[0].selectionEnd - input_cell[0].selectionStart == 0))) {
             event.preventDefault();
             movement("right");
@@ -667,8 +671,8 @@ function setupSimpleGrading(action) {
             event.preventDefault();
             movement("down");
         }
-    });  
-    
+    });
+
     // register empty function locked event handlers for "enter" so they show up in the hotkeys menu
     registerKeyHandler({name: "Search", code: "Enter", locked: true}, function() {});
     // make arrow keys in lab section changeable now
@@ -780,7 +784,7 @@ function setupSimpleGrading(action) {
     });
 
     // the offset of the search bar: used to lock the search bar on scroll
-    var sticky_offset = $("#checkpoint-sticky").offset(); 
+    var sticky_offset = $("#checkpoint-sticky").offset();
 
     // used to reposition the search field when the window scrolls
     $(window).on("scroll", function(event) {
@@ -802,7 +806,7 @@ function setupSimpleGrading(action) {
     // check if the search field needs to be repositioned when the page is resized
     $(window).on("resize", function(event) {
         var settings_btn_offset = $("#settings-btn").offset();
-        sticky_offset = {  
+        sticky_offset = {
             top : settings_btn_offset.top,
         };
         if(sticky_offset.top < $(window).scrollTop()) {

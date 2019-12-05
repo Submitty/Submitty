@@ -3,7 +3,7 @@
 {% if show_more %}
 	<script>
 
-		$(document).ready(function() { 
+		$(document).ready(function() {
 
 			$('#{{ more_data[0]["filter_option"] }}').parent().removeClass("active");
 			$('#{{ more_data[0]["filter_option"] }}').addClass("active");
@@ -16,7 +16,8 @@
 
 			if('{{ more_data[0]["filter_option"] }}' === 'tree' && !deleteActive && !deleteMerge) {
 				$('#dropdownLabel').removeClass("active");
-			} else {
+			}
+			else {
 				$('#dropdownLabel').addClass("active");
 			}
 
@@ -72,7 +73,7 @@
 		{% endif %}
 
 		</div>
-		
+
 	<div class="col-4">
 
 		{% for button in forum_bar_buttons_right %}

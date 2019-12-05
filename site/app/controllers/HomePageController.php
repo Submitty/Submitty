@@ -33,8 +33,11 @@ class HomePageController extends AbstractController {
      */
     public function changePassword() {
         $user = $this->core->getUser();
-        if(!empty($_POST['new_password']) && !empty($_POST['confirm_new_password'])
-            && $_POST['new_password'] == $_POST['confirm_new_password']) {
+        if (
+            !empty($_POST['new_password'])
+            && !empty($_POST['confirm_new_password'])
+            && $_POST['new_password'] == $_POST['confirm_new_password']
+        ) {
             $user->setPassword($_POST['new_password']);
             $this->core->getQueries()->updateUser($user);
             $this->core->addSuccessMessage("Updated password");
@@ -53,7 +56,7 @@ class HomePageController extends AbstractController {
      */
     public function changeUserName() {
         $user = $this->core->getUser();
-        if(isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
+        if (isset($_POST['user_firstname_change']) && isset($_POST['user_lastname_change'])) {
             $newFirstName = trim($_POST['user_firstname_change']);
             $newLastName = trim($_POST['user_lastname_change']);
             // validateUserData() checks both for length (not to exceed 30) and for valid characters.
@@ -163,9 +166,11 @@ class HomePageController extends AbstractController {
             );
         }
 
-        if (!isset($_POST['course_semester']) ||
-            !isset($_POST['course_title']) ||
-            !isset($_POST['head_instructor'])) {
+        if (
+            !isset($_POST['course_semester'])
+            || !isset($_POST['course_title'])
+            || !isset($_POST['head_instructor'])
+        ) {
             $error = "Semester, course title or head instructor not set.";
             $this->core->addErrorMessage($error);
             return new Response(

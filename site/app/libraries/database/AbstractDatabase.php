@@ -149,8 +149,11 @@ abstract class AbstractDatabase {
             $lower = trim(strtolower($query));
 
             $this->row_count = null;
-            if (Utils::startsWith($lower, 'update') || Utils::startsWith($lower, 'delete')
-                || Utils::startsWith($lower, 'insert')) {
+            if (
+                Utils::startsWith($lower, 'update')
+                || Utils::startsWith($lower, 'delete')
+                || Utils::startsWith($lower, 'insert')
+            ) {
                 $this->row_count = $statement->rowCount();
             }
             elseif (Utils::startsWith($lower, 'select')) {
@@ -234,10 +237,10 @@ abstract class AbstractDatabase {
             if (isset($columns[$col])) {
                 $column = $columns[$col];
                 if ($column['native_type'] === 'integer' && $column['pdo_type'] !== \PDO::PARAM_INT) {
-                    $value = (integer) $value;
+                    $value = (int) $value;
                 }
                 elseif ($column['native_type'] === 'boolean' && $column['pdo_type'] !== \PDO::PARAM_BOOL) {
-                    $value = (boolean) $value;
+                    $value = (bool) $value;
                 }
                 $result[$col] = $value;
             }
@@ -279,7 +282,7 @@ abstract class AbstractDatabase {
      * @return array
      */
     public function row() {
-        if($this->results != null && count($this->results) > 0) {
+        if ($this->results != null && count($this->results) > 0) {
             return array_shift($this->results);
         }
         else {
@@ -294,7 +297,7 @@ abstract class AbstractDatabase {
      * @return array
      */
     public function rows() {
-        if($this->results !== null && count($this->results) > 0) {
+        if ($this->results !== null && count($this->results) > 0) {
             return $this->results;
         }
         else {
@@ -335,8 +338,8 @@ abstract class AbstractDatabase {
      */
     public function getPrintQueries() {
         $print = [];
-        foreach($this->all_queries as $query) {
-            foreach($query[1] as $parameter) {
+        foreach ($this->all_queries as $query) {
+            foreach ($query[1] as $parameter) {
                 $query[0] = preg_replace('/\?/', "'{$parameter}'", $query[0], 1);
             }
             $print[] = $query[0];

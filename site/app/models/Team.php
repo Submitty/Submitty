@@ -16,7 +16,7 @@ use app\models\gradeable\Gradeable;
  * @method User[] getInvitedUsers()
  */
 class Team extends AbstractModel {
-     
+
     /** @property @var string The id of this team of form "<unique number>_<creator user id>" */
     protected $id;
     /** @property @var integer rotating section (registration or rotating) of team creator */
@@ -51,11 +51,12 @@ class Team extends AbstractModel {
         $this->invited_user_ids = array();
         $this->member_users = array();
         $this->invited_users = array();
-        foreach($details['users'] as $user_details) {
+        foreach ($details['users'] as $user_details) {
             //If we have user details, get user objects
             if (array_key_exists('anon_id', $user_details)) {
                 $user = new User($core, $user_details);
-            } else {
+            }
+            else {
                 $user = null;
             }
             if ($user_details['state'] === 1) {
@@ -150,7 +151,7 @@ class Team extends AbstractModel {
     public function hasMember($user_id) {
         return in_array($user_id, $this->member_user_ids);
     }
-    
+
     /**
      * Get whether or not a given user invited to the team
      * @param string $user_id

@@ -55,7 +55,8 @@ function checkNumFilesForumUpload(input, post_id){
     if(input.files.length > 5){
         displayError('Max file upload size is 5. Please try again.');
         resetForumFileUploadAfterError(displayPostId);
-    } else {
+    }
+    else {
         if(!checkForumFileExtensions(input.files)){
             displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             resetForumFileUploadAfterError(displayPostId);
@@ -92,11 +93,13 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     if(files.length > 5){
         if(dynamic_check) {
             displayError('Max file upload size is 5. Please remove attachments accordingly.');
-        } else {
+        }
+        else {
             displayError('Max file upload size is 5. Please try again.');
         }
         return false;
-    } else {
+    }
+    else {
         if(!checkForumFileExtensions(files)){
             displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             return false;
@@ -266,7 +269,8 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
             document.getElementById('edit_thread_id').value = thread_id;
             if(change_anon) {
                 $('#thread_post_anon_edit').prop('checked', anon);
-            } else {
+            }
+            else {
                 $('label[for=Anon]').remove();
                 $('#thread_post_anon_edit').remove();
             }
@@ -308,7 +312,8 @@ function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_to
                 $("#thread_form").prop("ignore-cat",false);
                 $("#category-selection-container").show();
                 $("#thread_status").show();
-            } else {
+            }
+            else {
                 $("#title").prop('disabled', true);
                 $(".edit_thread").hide();
                 $('#label_lock_thread').hide();
@@ -374,7 +379,8 @@ function dynamicScrollLoadPage(element, atEnd) {
             if(count == 0) {
                 // Stop further loads
                 $(element).attr("next_page", 0);
-            } else {
+            }
+            else {
                 $(element).attr("next_page", parseInt(load_page) + 1);
                 arrow_down.show();
             }
@@ -393,7 +399,8 @@ function dynamicScrollLoadPage(element, atEnd) {
             if(count == 0) {
                 // Stop further loads
                 $(element).attr("prev_page", 0);
-            } else {
+            }
+            else {
                 var prev_page = parseInt(load_page) - 1;
                 $(element).attr("prev_page", prev_page);
                 if(prev_page >= 1) {
@@ -472,7 +479,8 @@ function dynamicScrollContentOnDemand(jElement, urlPattern, currentThreadId, cur
         if(isTop) {
             element.scrollTop = sensitivity;
             dynamicScrollLoadPage(element,false);
-        } else if(isBottom) {
+        }
+        else if(isBottom) {
             dynamicScrollLoadPage(element,true);
         }
 
@@ -503,7 +511,8 @@ function checkAreYouSureForm() {
         if(confirm("You have unsaved changes! Do you want to continue?")) {
             elements.trigger('reinitialize.areYouSure');
             return true;
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -561,7 +570,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
             if(loadFirstPage) {
                 $("#thread_list .fa-caret-up").hide();
                 $("#thread_list .fa-caret-down").show();
-            } else {
+            }
+            else {
                 $("#thread_list .fa-caret-up").show();
                 $("#thread_list .fa-caret-down").hide();
             }
@@ -585,7 +595,8 @@ function modifyThreadList(currentThreadId, currentCategoriesId, course, loadFirs
 function replyPost(post_id){
     if ( $('#'+ post_id + '-reply').css('display') == 'block' ){
         $('#'+ post_id + '-reply').css("display","none");
-    } else {
+    }
+    else {
         hideReplies();
         $('#'+ post_id + '-reply').css('display', 'block');
     }
@@ -604,7 +615,8 @@ function generateCodeMirrorBlocks(container_element) {
         var lineCount = editor0.lineCount();
         if (lineCount == 1) {
             editor0.setSize("100%", (editor0.defaultTextHeight() * 2) + "px");
-        } else {
+        }
+        else {
             //Default height for CodeMirror is 300px... 500px looks good
             var h = (editor0.defaultTextHeight()) * lineCount + 15;
             editor0.setSize("100%", (h > 500 ? 500 : h) + "px");
@@ -860,7 +872,8 @@ function refreshCategories() {
         if($(this).hasClass("btn-selected")) {
             $(this).removeClass("btn-selected");
             $(this).find("input[type='checkbox']").prop("checked", false);
-        } else {
+        }
+        else {
             $(this).addClass("btn-selected");
             $(this).find("input[type='checkbox']").prop("checked", true);
         }
@@ -877,7 +890,8 @@ function changeColorClass(){
   if($(this).hasClass("btn-selected")) {
     $(this).css("background-color",color);
     $(this).css("color","white");
-  } else {
+  }
+    else {
     $(this).css("background-color","white");
     $(this).css("color", color);
   }
@@ -1019,7 +1033,8 @@ function addMarkdownCode(type, divTitle){
     var insert = "";
     if(type == 1) {
         insert = "[display text](url)";
-    } else if(type == 0){
+    }
+    else if(type == 0){
         insert = "```" +
             "\ncode\n```";
     }
@@ -1048,7 +1063,8 @@ function sortTable(sort_element_index, reverse=false){
                     rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
                     switching=true;
                 }
-            } else {
+            }
+            else {
                 if(sort_element_index == 0 ? a.innerHTML>b.innerHTML : parseInt(a.innerHTML) < parseInt(b.innerHTML)){
                     rows[i].parentNode.insertBefore(rows[i+1],rows[i]);
                     switching=true;
@@ -1071,7 +1087,8 @@ function sortTable(sort_element_index, reverse=false){
     }
     if (reverse) {
         headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↑';
-    } else {
+    }
+    else {
         headers[sort_element_index].innerHTML = headers[sort_element_index].innerHTML + ' ↓';
     }
 }

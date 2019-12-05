@@ -64,8 +64,10 @@ class WebRouter {
             $logged_in = $core->isApiLoggedIn($request);
 
             // prevent user that is not logged in from going anywhere except AuthenticationController
-            if (!$logged_in &&
-                !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')) {
+            if (
+                !$logged_in
+                && !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')
+            ) {
                 return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
@@ -171,8 +173,10 @@ class WebRouter {
      * @throws \Exception
      */
     private function loadCourse() {
-        if (array_key_exists('_semester', $this->parameters) &&
-            array_key_exists('_course', $this->parameters)) {
+        if (
+            array_key_exists('_semester', $this->parameters)
+            && array_key_exists('_course', $this->parameters)
+        ) {
             $semester = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
 
@@ -181,7 +185,7 @@ class WebRouter {
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadGradingQueue();
 
-            if($this->core->getConfig()->isCourseLoaded()){
+            if ($this->core->getConfig()->isCourseLoaded()) {
                 $this->core->getOutput()->addBreadcrumb(
                     $this->core->getDisplayedCourseName(),
                     $this->core->buildCourseUrl(),
@@ -192,7 +196,7 @@ class WebRouter {
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
 
-            if($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
+            if ($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
                 /** @noinspection PhpUnhandledExceptionInspection */
                 $this->core->loadForum();
             }
@@ -213,19 +217,23 @@ class WebRouter {
                 )
             );
         }
-        elseif ($this->core->getConfig()->isCourseLoaded()
+        elseif (
+            $this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
-            && $this->parameters['_method'] !== 'noAccess') {
+            && $this->parameters['_method'] !== 'noAccess'
+        ) {
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['no_access']))
             );
         }
 
-        if(!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
-            if ($logged_in){
-                if ($this->parameters['_method'] !== 'logout' &&
-                    !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
+        if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
+            if ($logged_in) {
+                if (
+                    $this->parameters['_method'] !== 'logout'
+                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                ) {
                     return Response::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );
@@ -246,9 +254,10 @@ class WebRouter {
      * @return Response|bool
      */
     private function csrfCheck() {
-        if ($this->request->isMethod('POST') &&
-            !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
-            !$this->core->checkCsrfToken()
+        if (
+            $this->request->isMethod('POST')
+            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && !$this->core->checkCsrfToken()
         ) {
             $msg = "Invalid CSRF token.";
             $this->core->addErrorMessage($msg);

@@ -48,7 +48,7 @@ class SimpleLateUser extends AbstractModel {
             $this->preferred_first_name = $details['user_preferred_firstname'];
             $this->displayed_first_name = $details['user_preferred_firstname'];
         }
-        else{
+        else {
             $this->displayed_first_name = $details['user_firstname'];
         }
 
@@ -57,15 +57,15 @@ class SimpleLateUser extends AbstractModel {
             $this->preferred_last_name = $details['user_preferred_lastname'];
             $this->displayed_last_name = $details['user_preferred_lastname'];
         }
-        else{
+        else {
             $this->displayed_last_name = $details['user_lastname'];
         }
 
-        if(isset($details['allowed_late_days']) && isset($details['since_timestamp'])){
+        if (isset($details['allowed_late_days']) && isset($details['since_timestamp'])) {
             $this->allowed_late_days = $details['allowed_late_days'];
             $this->since_timestamp = DateUtils::parseDateTime($details['since_timestamp'], $this->core->getConfig()->getTimezone());
         }
-        if(isset($details['late_day_exceptions'])){
+        if (isset($details['late_day_exceptions'])) {
             $this->late_day_exceptions = $details['late_day_exceptions'];
         }
     }

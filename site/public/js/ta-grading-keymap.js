@@ -202,7 +202,8 @@ function remapSetLS(mapName, code) {
     var lsKeymap = localStorage.getItem("keymap");
     if (lsKeymap === null) {
         lsKeymap = {};
-    } else {
+    }
+    else {
         try {
             lsKeymap = JSON.parse(lsKeymap);
         } catch (e) {

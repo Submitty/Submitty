@@ -94,10 +94,12 @@ class DateUtils {
         if (gettype($date) === 'string') {
             try {
                 $date = new \DateTime($date, $time_zone);
-            } catch (\Exception $e) {
+            }
+            catch (\Exception $e) {
                 throw new \InvalidArgumentException('Invalid DateTime Format');
             }
-        } elseif (!($date instanceof \DateTime)) {
+        }
+        elseif (!($date instanceof \DateTime)) {
             throw new \InvalidArgumentException('Passed object was not a DateTime object or a date string');
         }
 
