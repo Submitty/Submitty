@@ -173,17 +173,15 @@ function isFolder(file){
 function addFile(file, part, check_duplicate_zip=true){
     var i = fileExists(file.name, part);
     if( i[0] == -1 ){    // file does not exist
-        // empty bucket if file is a zip and bucket is not empty
+        // When uploading a zip, we confirm with the user to empty the bucket and then only add the zip
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
             if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
-                // deleting all the current files
                 deleteFiles(part);
-                // upload the zip file only
                 file_array[part-1].push(file);
                 addLabel(file.name, (file.size/1024).toFixed(2), part, false);
             }
         }
-        else{
+        else {
             file_array[part-1].push(file);
             addLabel(file.name, (file.size/1024).toFixed(2), part, false);
         }
