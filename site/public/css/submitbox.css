@@ -44,7 +44,7 @@
 
 .file-upload-table td {
     border: none;
-    padding: 5px 10px;
+    padding: 1px 10px;
 }
 
 .file-upload-table td:nth-child(even){
