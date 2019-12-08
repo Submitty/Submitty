@@ -342,6 +342,8 @@ class DiffViewer {
             $combined = $split_str[$i];
             $start = $i;
             $has_diff = false;
+            // what entry in the diff array contains the range
+            // that is for this MB character (if any)
             $diff_idx = null;
             foreach ($diffs as $idx => $diff) {
                 if ($diff[0] <= $i && $i <= $diff[1]) {
@@ -353,6 +355,10 @@ class DiffViewer {
 
             while ($combined !== $mb_split_str[$j]) {
                 $i++;
+                // if we have not yet found our index, we
+                // recheck on each character as the range
+                // may start on any character in the byte
+                // sequence
                 if (!$has_diff) {
                     foreach ($diffs as $idx => $diff) {
                         if ($diff[0] <= $i && $i <= $diff[1]) {
@@ -364,6 +370,11 @@ class DiffViewer {
                 }
                 $combined .= $split_str[$i];
             }
+
+            // given that we have a diff range for this
+            // character, adjust the range such that it contains
+            // the start and end of the multibyte character if it
+            // does not already
             if ($has_diff) {
                 $diff = $diffs[$diff_idx];
                 if ($start < $diff[0]) {
