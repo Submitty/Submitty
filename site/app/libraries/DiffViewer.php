@@ -312,6 +312,19 @@ class DiffViewer {
             }
         }
 
+        for ($i = 0; $i < count($this->expected); $i++) {
+            if (
+                isset($this->diff[self::EXPECTED][$i])
+                && strlen($this->expected[$i] !== mb_strlen($this->expected[$i]))
+            ) {
+                $this->diff[self::EXPECTED][$i] = $this->validateDiff(
+                    $this->expected[$i],
+                    $this->diff[self::EXPECTED][$i],
+                    $i
+                );
+            }
+        }
+
         $this->built = true;
     }
 
