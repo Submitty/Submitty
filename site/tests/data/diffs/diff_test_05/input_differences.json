@@ -1,0 +1,268 @@
+{
+    "differences": [
+        {
+            "actual": {
+                "line": [
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 1
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 2
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 3
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 4
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            24,
+                            25,
+                            27
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 7
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 8
+                    },
+                    {
+                        "char_number": [
+                            24,
+                            29,
+                            30
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 10
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 11
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 12
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 13
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 14
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 15
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 16
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 17
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24,
+                            25,
+                            26
+                        ],
+                        "line_number": 18
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 19
+                    }
+                ],
+                "start": 1
+            },
+            "expected": {
+                "line": [
+                    {
+                        "char_number": [
+                            23,
+                            24,
+                            29,
+                            30
+                        ],
+                        "line_number": 1
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 2
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 3
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 4
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 5
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24,
+                            25,
+                            26
+                        ],
+                        "line_number": 6
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 7
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 8
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 9
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 10
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 11
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 12
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 13
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 14
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 15
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 16
+                    },
+                    {
+                        "char_number": [
+                            24
+                        ],
+                        "line_number": 17
+                    },
+                    {
+                        "char_number": [
+                            24,
+                            25,
+                            27
+                        ],
+                        "line_number": 18
+                    },
+                    {
+                        "char_number": [
+                            23,
+                            24
+                        ],
+                        "line_number": 19
+                    }
+                ],
+                "start": 1
+            }
+        }
+    ]
+}

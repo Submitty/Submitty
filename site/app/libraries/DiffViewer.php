@@ -298,7 +298,68 @@ class DiffViewer {
                 }
             }
         }
+
+        for ($i = 0; $i < count($this->actual); $i++) {
+            if (
+                isset($this->diff[self::ACTUAL][$i])
+                && strlen($this->actual[$i] !== mb_strlen($this->actual[$i]))
+            ) {
+                $this->diff[self::ACTUAL][$i] = $this->validateDiff(
+                    $this->actual[$i],
+                    $this->diff[self::ACTUAL][$i],
+                    $i
+                );
+            }
+        }
+
         $this->built = true;
+    }
+
+    private function validateDiff($line, $diffs) {
+        $split_str = str_split($line);
+        $mb_split_str = Utils::mb_str_split($line);
+        for ($i = 0, $j = 0; $i < strlen($line); $i++, $j++) {
+            if ($split_str[$i] === $mb_split_str[$j]) {
+                continue;
+            }
+            $combined = $split_str[$i];
+            $start = $i;
+            $has_diff = false;
+            $diff_idx = null;
+            foreach ($diffs as $idx => $diff) {
+                if ($diff[0] <= $i && $i <= $diff[1]) {
+                    $has_diff = true;
+                    $diff_idx = $idx;
+                    break;
+                }
+            }
+
+            while ($combined !== $mb_split_str[$j]) {
+                $i++;
+                if (!$has_diff) {
+                    foreach ($diffs as $idx => $diff) {
+                        if ($diff[0] <= $i && $i <= $diff[1]) {
+                            $has_diff = true;
+                            $diff_idx = $idx;
+                            break;
+                        }
+                    }
+                }
+                $combined .= $split_str[$i];
+            }
+            if ($has_diff) {
+                $diff = $diffs[$diff_idx];
+                if ($start < $diff[0]) {
+                    $diff[0] = $start;
+                }
+                if ($i > $diff[1]) {
+                    $diff[1] = $i;
+                }
+                $diffs[$diff_idx] = $diff;
+            }
+        }
+
+        return $diffs;
     }
 
     /**
