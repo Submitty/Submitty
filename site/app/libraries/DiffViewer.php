@@ -304,7 +304,7 @@ class DiffViewer {
                 isset($this->diff[self::ACTUAL][$i])
                 && strlen($this->actual[$i] !== mb_strlen($this->actual[$i]))
             ) {
-                $this->diff[self::ACTUAL][$i] = $this->validateDiff(
+                $this->diff[self::ACTUAL][$i] = $this->correctMbDiff(
                     $this->actual[$i],
                     $this->diff[self::ACTUAL][$i],
                     $i
@@ -317,10 +317,9 @@ class DiffViewer {
                 isset($this->diff[self::EXPECTED][$i])
                 && strlen($this->expected[$i] !== mb_strlen($this->expected[$i]))
             ) {
-                $this->diff[self::EXPECTED][$i] = $this->validateDiff(
+                $this->diff[self::EXPECTED][$i] = $this->correctMbDiff(
                     $this->expected[$i],
-                    $this->diff[self::EXPECTED][$i],
-                    $i
+                    $this->diff[self::EXPECTED][$i]
                 );
             }
         }
@@ -328,7 +327,12 @@ class DiffViewer {
         $this->built = true;
     }
 
-    private function validateDiff($line, $diffs) {
+    /**
+     * Given a line that contains multibyte characters and diff for that line,
+     * check if any of the diff ranges split a MB character, and if so, correct
+     * the diff.
+     */
+    private function correctMbDiff(string $line, array $diffs) {
         $split_str = str_split($line);
         $mb_split_str = Utils::mb_str_split($line);
         for ($i = 0, $j = 0; $i < strlen($line); $i++, $j++) {
