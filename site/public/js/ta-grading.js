@@ -692,7 +692,11 @@ function checkOpenComponentMark(index) {
 // expand all files in Submissions and Results section
 function openAll(click_class, class_modifier) {
     $("."+click_class + class_modifier).each(function(){
-        $(this).click();
+        // Check that the file is not a PDF before clicking on it
+        let innerText = Object.values($(this))[0].innerText;
+        if (innerText.slice(-4) !== ".pdf") {
+            $(this).click();
+        }
     });
 }
 function updateValue(obj, option1, option2) {
