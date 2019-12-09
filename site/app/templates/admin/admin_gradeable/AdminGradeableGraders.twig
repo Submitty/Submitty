@@ -9,10 +9,12 @@ Macros
         <tr class="{{ prefix }}">
             <th>{{ grader[1] ~ " " ~ grader[2] ~ "(" ~ grader[0] ~ ")" }}</th>
             <td><input type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
+                       aria-label="all rotating sections"
                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", 0)'/></td>
             {% for rs in section_numbers %}
                 <td><input type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
                         id="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
+                        aria-label="rotating section {{ rs }}"
                         onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", {{ rs }});'
                         {{ (rs in history[grader[0]][g_id]) ? 'checked' : '' }}/></td>
             {% endfor %}
