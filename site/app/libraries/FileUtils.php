@@ -145,10 +145,9 @@ class FileUtils {
      * off the string.
      */
     public static function getAllFilesTrimSearchPath(string $search_path, int $path_length): array {
-        $files = array_map(function ($entry) use ($path_length) {
+        return array_map(function ($entry) use ($path_length) {
             return substr($entry['path'], $path_length, strlen($entry['path']) - $path_length);
         }, array_values(FileUtils::getAllFiles($search_path, [], true)));
-        return $files;
     }
 
     /**

@@ -16,16 +16,16 @@
     }
   },
   "require": {
-    "twig/twig": "2.12.1",
-    "ramsey/uuid": "3.8.0",
+    "twig/twig": "2.12.2",
+    "ramsey/uuid": "3.9.1",
     "aptoma/twig-markdown": "3.2.0",
     "erusev/parsedown": "1.7.3",
     "lcobucci/jwt": "3.3.1",
-    "symfony/routing": "4.3.6",
-    "symfony/config": "4.3.6",
-    "symfony/http-foundation": "4.3.6",
+    "symfony/routing": "4.4.1",
+    "symfony/config": "4.4.1",
+    "symfony/http-foundation": "4.4.1",
     "doctrine/annotations": "1.8.0",
-    "doctrine/cache": "1.8.1",
+    "doctrine/cache": "1.10.0",
     "php-ds/php-ds": "1.2.0"
   },
   "require-dev": {
