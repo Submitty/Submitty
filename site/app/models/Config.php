@@ -58,6 +58,11 @@ use app\libraries\Utils;
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
  * @method bool isQueueEnabled()
+ * @method void setSemester(string $semester)
+ * @method void setCourse(string $course)
+ * @method void setCoursePath(string $course_path)
+ * @method void setSubmittyPath(string $submitty_path)
+ * @method void setDebug(bool $debug)
  */
 
 class Config extends AbstractModel {
@@ -288,7 +293,7 @@ class Config extends AbstractModel {
 
         $this->base_url = rtrim($this->base_url, "/") . "/";
 
-        if (!empty($submitty_json['cgi_url'])){
+        if (!empty($submitty_json['cgi_url'])) {
             $this->cgi_url = rtrim($submitty_json['cgi_url'], "/") . "/";
         }
         else {
@@ -305,14 +310,14 @@ class Config extends AbstractModel {
         $this->cgi_tmp_path = FileUtils::joinPaths($this->submitty_path, "tmp", "cgi");
 
         // Check that the paths from the config file are valid
-        foreach(array('submitty_path', 'submitty_log_path') as $path) {
+        foreach (array('submitty_path', 'submitty_log_path') as $path) {
             if (!is_dir($this->$path)) {
                 throw new ConfigException("Invalid path for setting {$path}: {$this->$path}");
             }
             $this->$path = rtrim($this->$path, "/");
         }
 
-        foreach(array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
+        foreach (array('autograding', 'access', 'site_errors', 'ta_grading') as $path) {
             if (!is_dir(FileUtils::joinPaths($this->submitty_log_path, $path))) {
                 throw new ConfigException("Missing log folder: {$path}");
             }
@@ -323,7 +328,7 @@ class Config extends AbstractModel {
             throw new ConfigException("Could not find secrets config: {$this->config_path}/secrets_submitty_php.json");
         }
 
-        foreach(['session'] as $key) {
+        foreach (['session'] as $key) {
             $var = "secret_{$key}";
             $secrets_json[$key] = trim($secrets_json[$key]) ?? '';
             if (empty($secrets_json[$key])) {
@@ -347,8 +352,10 @@ class Config extends AbstractModel {
         if (!$version_json) {
             throw new ConfigException("Could not find version file: {$this->config_path}/version.json");
         }
-        if (!isset($version_json['most_recent_git_tag']) ||
-            !isset($version_json['short_installed_commit'])) {
+        if (
+            !isset($version_json['most_recent_git_tag'])
+            || !isset($version_json['short_installed_commit'])
+        ) {
             throw new ConfigException("Error parsing version information: {$this->config_path}/version.json");
         }
         $this->latest_tag = $version_json['most_recent_git_tag'];
@@ -448,7 +455,7 @@ class Config extends AbstractModel {
             'config',
             'submitty_users.json'
         );
-        if(!is_file($users_file)) {
+        if (!is_file($users_file)) {
             throw new FileNotFoundException('Unable to locate the submity_users.json file');
         }
         $users_file_contents = json_decode(file_get_contents($users_file));

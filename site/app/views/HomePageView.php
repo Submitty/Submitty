@@ -22,11 +22,11 @@ class HomePageView extends AbstractView {
             User::GROUP_STUDENT                 => "Student:"
         ];
 
-        foreach($course_types as $course_type) {
+        foreach ($course_types as $course_type) {
             $ranks = array();
 
             //Create rank lists
-            for ($i = 1; $i < 5; $i++){
+            for ($i = 1; $i < 5; $i++) {
                 $ranks[$i] = [];
                 $ranks[$i]["title"] = $rank_titles[$i];
                 $ranks[$i]["courses"] = [];

@@ -45,7 +45,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $_FILES["files{$part}"]['tmp_name'][] = $tmpname;
         $_FILES["files{$part}"]['error'][] = 0;
-
     }
 
     private function buildFakeZipFile($name, $part = 1, $num_files = 1, $depth = 1) {
@@ -53,10 +52,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
 
         $filename_full = FileUtils::joinPaths($this->config['course_path'], $name);
         $files = array();
-        if ($zip->open($filename_full, ZipArchive::CREATE) === true){
+        if ($zip->open($filename_full, ZipArchive::CREATE) === true) {
             $lev = "";
-            for($i = 0; $i < $depth; $i++){
-                for($j = 0; $j < $num_files; $j++){
+            for ($i = 0; $i < $depth; $i++) {
+                for ($j = 0; $j < $num_files; $j++) {
                     $fname = "test" . $j . ".txt";
                     $tmpfile = fopen($this->config['course_path'] . $lev . "/" . $fname, "w");
                     $zip->addFile($this->config['course_path'] . $lev . "/" . $fname);
@@ -159,7 +158,6 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         ];
 
         $this->assertEquals($expected_files1, $f1);
-
     }
 
      /**

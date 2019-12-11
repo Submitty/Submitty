@@ -20,7 +20,7 @@ class DiffViewerTester extends \PHPUnit\Framework\TestCase {
         $diffs = array();
         foreach ($files as $file) {
             if (is_dir($dir . "/" . $file) && strpos($file, '.') === false) {
-                foreach($needed_files as $needed_file) {
+                foreach ($needed_files as $needed_file) {
                     if (!file_exists($dir . "/" . $file . "/" . $needed_file)) {
                         continue 2;
                     }

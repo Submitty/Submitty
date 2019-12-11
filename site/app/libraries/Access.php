@@ -345,18 +345,22 @@ class Access {
                 return false;
             }
             $group = User::GROUP_NONE;
-        } else {
+        }
+        else {
             $group = $user->getGroup();
         }
 
         //Check user group first
         if ($group === User::GROUP_STUDENT && !self::checkBits($checks, self::ALLOW_STUDENT)) {
             return false;
-        } elseif ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
+        }
+        elseif ($group === User::GROUP_LIMITED_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_LIMITED_ACCESS_GRADER)) {
             return false;
-        } elseif ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
+        }
+        elseif ($group === User::GROUP_FULL_ACCESS_GRADER && !self::checkBits($checks, self::ALLOW_FULL_ACCESS_GRADER)) {
             return false;
-        } elseif ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
+        }
+        elseif ($group === User::GROUP_INSTRUCTOR && !self::checkBits($checks, self::ALLOW_INSTRUCTOR)) {
             return false;
         }
 
@@ -380,7 +384,8 @@ class Access {
             if (array_key_exists("graded_gradeable", $args)) {
                 $graded_gradeable = $args["graded_gradeable"];
                 $gradeable = $graded_gradeable->getGradeable();
-            } else {
+            }
+            else {
                 $gradeable = $this->requireArg($args, "gradeable");
                 if ($gradeable === null) {
                     return false;
@@ -400,7 +405,7 @@ class Access {
                         &&
                         //Students are allowed to see this if its a peer graded assignment
                         !($group === User::GROUP_STUDENT && $gradeable->isPeerGrading())
-                       ) {
+                    ) {
                         //Otherwise, you're not allowed
                         $grading_checks = false;
                     }
@@ -419,7 +424,8 @@ class Access {
                     if (!$this->isSectionInGradingSections($gradeable, $args["section"], $user)) {
                         $grading_checks = false;
                     }
-                } else {
+                }
+                else {
                     //If graded gradeable is null then we're asking if we can grade anything in this gradeable, which we can.
                     // If a graded gradeable is passed then we need to make sure we can grade that specific graded gradeable.
                     if ($graded_gradeable !== null) {
@@ -515,15 +521,15 @@ class Access {
             if (self::checkBits($checks, self::CHECK_COURSE_STATUS)) {
                 $course_status = $this->core->getQueries()->getCourseStatus($semester, $course);
                 // only instructors should be able to access courses with status archived==2
-                if($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
+                if ($course_status === 2 && $group !== User::GROUP_INSTRUCTOR) {
                     return false;
                 }
-                // only students with a non-null registration section should be able to view courses (and only active==1 courses)
-                elseif($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                elseif ($group === User::GROUP_STUDENT && ($course_status !== 1 || $user->getRegistrationSection() === null)) {
+                    // only students with a non-null registration section should be able to view courses (and only active==1 courses)
                     return false;
                 }
-                // no one can view courses with status greater than 2
                 elseif ($course_status > 2) {
+                    // no one can view courses with status greater than 2
                     return false;
                 }
             }
@@ -578,7 +584,8 @@ class Access {
                     if ($section->containsTeam($graded_gradeable->getSubmitter()->getTeam())) {
                         return true;
                     }
-                } else {
+                }
+                else {
                     if ($section->containsUser($graded_gradeable->getSubmitter()->getUser())) {
                         return true;
                     }
@@ -621,7 +628,8 @@ class Access {
 
         if (!$gradeable->isPeerGrading()) {
             return false;
-        } else {
+        }
+        else {
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
             return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
@@ -666,7 +674,8 @@ class Access {
             if ($graded_gradeable->getSubmitter()->isTeam()) {
                 if ($submitter->isTeam()) {
                     return $graded_gradeable->getSubmitter()->getId() === $submitter->getId();
-                } else {
+                }
+                else {
                     return $graded_gradeable->getSubmitter()->getTeam()->hasMember($submitter->getId());
                 }
             }
@@ -734,7 +743,8 @@ class Access {
                                 return false;
                             }
                         }
-                    } else {
+                    }
+                    else {
                         $args["gradeable"] = $this->core->getQueries()->getGradeableConfig($value);
                     }
                     break;
@@ -746,11 +756,13 @@ class Access {
                             //If we already have a graded gradeable in the args, make sure this file
                             // actually belongs to it
                             $graded_gradeable = $args["graded_gradeable"];
-                        } elseif (array_key_exists("gradeable", $args)) {
+                        }
+                        elseif (array_key_exists("gradeable", $args)) {
                             $gradeable = $args["gradeable"];
                             $graded_gradeable = $this->core->getQueries()->getGradedGradeableForSubmitter($gradeable, $submitter);
                             $args["graded_gradeable"] = $graded_gradeable;
-                        } else {
+                        }
+                        else {
                             return false;
                         }
                         if ($graded_gradeable === null || !($graded_gradeable instanceof GradedGradeable)) {

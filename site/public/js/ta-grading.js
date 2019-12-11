@@ -242,7 +242,8 @@ function readCookies(){
                                 openDiv($(this).attr('id').split('_')[2]);
                             }
                         });
-                    } else {
+                    }
+                    else {
                         $(this).children('div[id^=div_viewer_]').each(function() {
                             if ($(this)[0].dataset.file_name == file_path[x]) {
                                 current = $(this);
@@ -315,7 +316,8 @@ function updateCookies(){
     var autoscroll = "on";
     if ($('#autoscroll_id').is(":checked")) {
         autoscroll = "on";
-    } else {
+    }
+    else {
         autoscroll = "off";
     }
     document.cookie = "autoscroll=" + autoscroll + "; path=/;";
@@ -335,7 +337,8 @@ function updateCookies(){
 function changeEditorStyle(newStyle){
     if(newStyle === 'style_light'){
         localStorage.setItem("codeDisplayStyle", "light");
-    } else {
+    }
+    else {
         localStorage.setItem("codeDisplayStyle", "dark");
     }
     window.location.reload();
@@ -355,7 +358,8 @@ function gotoPrevStudent(to_ungraded = false) {
         // Append extra get param
         window_location += '&component_id=' + getFirstOpenComponentId();
 
-    } else {
+    }
+    else {
         selector = "#prev-student";
         window_location = $(selector)[0].dataset.href
     }
@@ -385,7 +389,8 @@ function gotoNextStudent(to_ungraded = false) {
 
         // Append extra get param
         window_location += '&component_id=' + getFirstOpenComponentId();
-    } else {
+    }
+    else {
         selector = "#next-student";
         window_location = $(selector)[0].dataset.href
     }
@@ -566,18 +571,21 @@ registerKeyHandler({name: "Open Next Component", code: 'ArrowDown'}, function(e)
     if (isOverallCommentOpen()) {
         // Overall comment is open, so just close it
         closeOverallComment(true);
-    } else if (openComponentId === NO_COMPONENT_ID) {
+    }
+    else if (openComponentId === NO_COMPONENT_ID) {
         // No component is open, so open the first one
         let componentId = getComponentIdByOrder(0);
         toggleComponent(componentId, true).then(function () {
             scrollToComponent(componentId);
         });
-    } else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
+    }
+    else if (openComponentId === getComponentIdByOrder(numComponents - 1)) {
         // Last component is open, so open the general comment
         toggleOverallComment(true).then(function () {
             scrollToOverallComment();
         });
-    } else {
+    }
+    else {
         // Any other case, open the next one
         let nextComponentId = getNextComponentId(openComponentId);
         toggleComponent(nextComponentId, true).then(function () {
@@ -605,10 +613,12 @@ registerKeyHandler({name: "Open Previous Component", code: 'ArrowUp'}, function(
         toggleOverallComment(true).then(function () {
             scrollToOverallComment();
         });
-    } else if (openComponentId === getComponentIdByOrder(0)) {
+    }
+    else if (openComponentId === getComponentIdByOrder(0)) {
         // First component is open, so close it
         closeAllComponents(true);
-    } else {
+    }
+    else {
         // Any other case, open the previous one
         let prevComponentId = getPrevComponentId(openComponentId);
         toggleComponent(prevComponentId, true).then(function () {
@@ -690,7 +700,8 @@ function updateValue(obj, option1, option2) {
     obj.text(function(i, oldText){
         if(oldText.indexOf(option1) >= 0){
             newText = oldText.replace(option1, option2);
-        } else{
+        }
+        else {
             newText = oldText.replace(option2, option1);
         }
         return newText;
@@ -814,7 +825,8 @@ function findAllOpenedFiles(elem, current_path, path, stored_paths, first) {
         else {
             return [];
         }
-    } else {
+    }
+    else {
         current_path += "#$SPLIT#$" + path;
     }
 

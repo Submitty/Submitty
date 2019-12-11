@@ -10,7 +10,7 @@
     {% endfor %}
 
     {# TODO, eventually remove these form individual twig files and enable this one
-        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" /> 
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     #}
 
     {% for js_ref in js %}
@@ -32,12 +32,13 @@
                     duck.style.right = -280 + 'px';
 
                     resetDriver();
-                } else {
+                }
+                else {
                   pos++;
                   duck.style.right = pos + 'px';
                 }
             }
-        } 
+        }
 
         function resetDriver(){
             var duck = document.getElementById("duckdiv");
@@ -50,7 +51,8 @@
                 if (duck.style.right === '0px'){
                     clearInterval(id);
                     document.getElementById('moorthy-duck').onclick = function(){ducky();}
-                }else{
+                }
+                else {
                     pos ++;
                     duck.style.right = pos + 'px';
                 }
@@ -118,24 +120,24 @@
                         {% endfor %}
                     </div>
                 </div>
-                <div id="duckdiv" 
+                <div id="duckdiv"
                     {% if enable_banner %}
                         style="position:relative;top:-30px; right:12px;"
                 >
                     {% else %}
                 >
-                        <a target="_blank" aria-label="Learn more about Moorthy" 
-                        href="http://submitty.org/developer/rcos_moorthy" 
-                        style="padding-right:15px;" 
+                        <a target="_blank" aria-label="Learn more about Moorthy"
+                        href="http://submitty.org/developer/rcos_moorthy"
+                        style="padding-right:15px;"
                         >
                     {% endif %}
-                    <img id="moorthy-duck" 
-                         src="{{ base_url }}/img/{{ duck_img }}" 
-                         alt="Duck Moorthy!" 
-                         height = "50" 
+                    <img id="moorthy-duck"
+                         src="{{ base_url }}/img/{{ duck_img }}"
+                         alt="Duck Moorthy!"
+                         height = "50"
                          {% if enable_banner %}
-                            style="position:absolute; right: 10px;" 
-                            onclick="ducky();" 
+                            style="position:absolute; right: 10px;"
+                            onclick="ducky();"
                             tabindex="0"
                          {% endif %}
                     />
@@ -144,11 +146,11 @@
                     {% endif %}
 
                     {% if enable_banner %}
-                    <img id="submitty-banner" 
+                    <img id="submitty-banner"
                          src="{{ base_url }}/img/submitty-banner.png"
-                         alt="Happy Submitty Week!" 
-                         height="80" 
-                         style="position:absolute;right: -420px; top:-5px;display:none;" 
+                         alt="Happy Submitty Week!"
+                         height="80"
+                         style="position:absolute;right: -420px; top:-5px;display:none;"
                     />
                     {% endif %}
                 </div>

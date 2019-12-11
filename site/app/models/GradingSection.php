@@ -87,11 +87,13 @@ class GradingSection extends AbstractModel {
             return array_map(function (User $user) {
                 return new Submitter($this->core, $user);
             }, $this->users);
-        } elseif ($this->teams !== null) {
+        }
+        elseif ($this->teams !== null) {
             return array_map(function (Team $team) {
                 return new Submitter($this->core, $team);
             }, $this->teams);
-        } else {
+        }
+        else {
             //No users, no teams, this section is empty!
             return [];
         }

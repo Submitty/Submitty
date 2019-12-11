@@ -19,16 +19,16 @@ use app\libraries\Utils;
  * @method boolean getPublic()
  */
 class GradeableAutocheck extends AbstractModel {
-    
+
     /** @property @var string */
     protected $index;
-    
+
     /** @var DiffViewer DiffViewer instance to hold the student, instructor, and differences */
     protected $diff_viewer;
-    
+
     /** @property @var string Description to show for displaying the diff */
     protected $description = "";
-    
+
     /** @property @var array[] Message to show underneath the description for a diff */
     protected $messages = array();
 
@@ -55,23 +55,24 @@ class GradeableAutocheck extends AbstractModel {
         if (isset($details['description'])) {
             $this->description = Utils::prepareHtmlString($details['description']);
         }
-        
+
         if (isset($details['messages'])) {
             foreach ($details['messages'] as $message) {
                 $this->messages[] = array('message' => Utils::prepareHtmlString($message['message']),
                                             'type' => Utils::prepareHtmlString($message['type']));
             }
         }
-        
-        if(isset($details["display_as_sequence_diagram"])){
+
+        if (isset($details["display_as_sequence_diagram"])) {
             $this->display_as_sequence_diagram = $details["display_as_sequence_diagram"];
-        }else{
+        }
+        else {
             $this->display_as_sequence_diagram = false;
         }
 
         $actual_file = $expected_file = $difference_file = $image_difference = "";
 
-        if(isset($details["actual_file"])) {
+        if (isset($details["actual_file"])) {
             $this->public = (isset($details["results_public"]) && $details["results_public"]);
             $path = ($this->public ? $results_public_path : $results_path) . "/details/" . $details["actual_file"];
 
@@ -79,37 +80,43 @@ class GradeableAutocheck extends AbstractModel {
                 $actual_file = $path;
             }
         }
-    
-        
-    
-        if(isset($details["expected_file"])) {
-            if(substr($details["expected_file"], 0, 11) == "test_output"){
-                if(file_exists($course_path . "/" . $details["expected_file"])){
+
+
+
+        if (isset($details["expected_file"])) {
+            if (substr($details["expected_file"], 0, 11) == "test_output") {
+                if (file_exists($course_path . "/" . $details["expected_file"])) {
                     $expected_file = $course_path . "/" . $details["expected_file"];
-                } else {
+                }
+                else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }
-            } elseif(substr($details["expected_file"], 0, 13) == "random_output"){
-                if(file_exists($results_path . "/" . $details["expected_file"])){
+            }
+            elseif (substr($details["expected_file"], 0, 13) == "random_output") {
+                if (file_exists($results_path . "/" . $details["expected_file"])) {
                     $expected_file = $results_path . "/" . $details["expected_file"];
-                } else {
+                }
+                else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }
             // Try to find the file in the details directory. Do not print an error,
             // as the file is likely student generated.
-            } else {
-                if(file_exists($results_path . "/details/" . $details["expected_file"])){
+            }
+            else {
+                if (file_exists($results_path . "/details/" . $details["expected_file"])) {
                     $expected_file = $results_path . "/details/" . $details["expected_file"];
                 }
             }
         }
-        
-        if(isset($details["difference_file"]) && file_exists($results_path . "/details/" . $details["difference_file"])) {
+
+        if (isset($details["difference_file"]) && file_exists($results_path . "/details/" . $details["difference_file"])) {
             $difference_file = $results_path . "/details/" . $details["difference_file"];
         }
 
-        if(isset($details["image_difference_file"]) &&
-            file_exists($results_path . "/details/" . $details["image_difference_file"])) {
+        if (
+            isset($details["image_difference_file"])
+            && file_exists($results_path . "/details/" . $details["image_difference_file"])
+        ) {
             $this->index = $idx;
             $image_difference = $results_path . "/details/" . $details["image_difference_file"];
         }
