@@ -2539,10 +2539,9 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
         sequence = sequence
             .then(function () {
                 if(component.max_value == 0 && component.upper_clamp == 0 && component.lower_clamp < 0){
-                let mark_title = "No Penalty Points";
-                component.marks[0].title = mark_title;
-                $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Penalty Points";
-                //$('#mark-'+component.marks[0].id.toString()).find(':input').val(mark_title);
+                    let mark_title = "No Penalty Points";
+                    component.marks[0].title = mark_title;
+                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Penalty Points";
 
                 }
                 else if(component.max_value == 0 && component.upper_clamp > 0 && component.lower_clamp == 0){
