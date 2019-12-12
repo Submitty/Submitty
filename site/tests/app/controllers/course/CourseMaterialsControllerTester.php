@@ -101,7 +101,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $filename_full => [
                 "checked" => "1",
                 "release_datetime" => $_POST['release_time'],
-                'hide_from_students' => "off"
+                'hide_from_students' => null,
+                "order_num" => 0.0
             ]
         ];
         $this->assertEquals($expected_json, $json);
@@ -146,7 +147,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $expected_json1 = [
             'checked' => "1",
             'release_datetime' => $_POST['release_time'],
-            'hide_from_students' => "off"
+            'hide_from_students' => null,
+            "order_num" => 0.0
         ];
 
         $this->assertEquals($expected_json1, $json[$keys[1]]);
@@ -184,7 +186,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . "/" . $name => [
                 'checked' => "1",
                 'release_datetime' => $_POST['release_time'],
-                'hide_from_students' => "off"
+                'hide_from_students' => "off",
+                "order_num" => 0.0
             ]
         ];
 
@@ -204,7 +207,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . "/" . $name => [
                 'checked' => "1",
                 'release_datetime' => $new_date,
-                'hide_from_students' => "off"
+                'hide_from_students' => "off",
+                "order_num" => 0.0
             ]
         ];
 
@@ -227,9 +231,10 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->assertEquals(2, count($json));   //2 files
 
         $expected_json2 = [
-            'checked' => "1",
+            'checked' => '1',
             'release_datetime' => $new_date,
-            'hide_from_students' => "off"
+            'hide_from_students' => null,
+            "order_num" => 0.0
         ];
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
@@ -291,7 +296,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . '/' . $name => [
                 'checked' => "0",
                 'release_datetime' => $_POST['release_time'],
-                'hide_from_students' => "off"
+                'hide_from_students' => null,
+                "order_num" => 0.0
             ]
         ];
 
@@ -319,7 +325,8 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $filename_full => [
                 "checked" => "1",
                 "release_datetime" => $_POST['release_time'],
-                "hide_from_students" => "off"
+                "hide_from_students" => null,
+                "order_num" => 0.0
             ]
         ];
 
