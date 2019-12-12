@@ -219,16 +219,16 @@
 
         <div id="email-seating-assignment-label" class="option-desc option-title config-row">
             Customize an email to send to each students
+            {% if not email_enabled %}
+                <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
+            {% else %}
+                <button id="email-seating-assignment" class="option-alt bare-button">
+                    <a href="{{ email_room_seating_url }}" class="btn btn-primary">
+                        Email Seating Assignments
+                    </a>
+                </button>
+            {% endif %}
         </div>
-        {% if not email_enabled %}
-            <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
-        {% else %}
-            <button id="email-seating-assignment" class ="option-alt bare-button">
-                <a href="{{ email_room_seating_url }}" class="btn btn-primary">
-                    Email Seating Assignments
-                </a>
-            </button>
-        {% endif %}
 
         <div class="config-row checkbox-row">
             <input type="checkbox" name="display_custom_message" id="display-custom-message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />

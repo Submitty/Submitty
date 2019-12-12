@@ -300,7 +300,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         nlohmann::json insert_router = nlohmann::json::object();
         insert_router["outgoing_connections"] = nlohmann::json::array();
         insert_router["commands"] = nlohmann::json::array();
-        insert_router["commands"].push_back("python3 submitty_router.py");
+        insert_router["commands"].push_back("python3 -u submitty_router.py");
         insert_router["container_name"] = "router";
         insert_router["import_default_router"] = true;
         insert_router["container_image"] = "submitty/autograding-default:latest";
