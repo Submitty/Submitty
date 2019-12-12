@@ -29,12 +29,20 @@ class CourseMaterialsView extends AbstractView {
             $now_date_time = $core->getDateTimeNow();
             $no_json = array();
             usort($course_materials_array, function($a, $b) use ($expected_path, $json){
+                $order_num_a = 0.0;
+                $order_num_b = 0.0;
                 $expected_file_path_a = FileUtils::joinPaths($expected_path, $a);
                 $expected_file_path_b = FileUtils::joinPaths($expected_path, $b);
-                if($json[$expected_file_path_a]['order_num'] == $json[$expected_file_path_b]['order_num']){
+                if (isset($json[$expected_file_path_a]['order_num'])){
+                    $order_num_a = $json[$expected_file_path_a]['order_num'];
+                }
+                if (isset($json[$expected_file_path_b]['order_num'] )){
+                    $order_num_b = $json[$expected_file_path_b]['order_num'];
+                }
+                if($order_num_a == $order_num_b){
                     return strcmp($a, $b);
                 }
-                return $json[$expected_file_path_a]['order_num'] < $json[$expected_file_path_b]['order_num'];
+                return $order_num_a < $order_num_b;
             });
             foreach($course_materials_array as $file) {
 
