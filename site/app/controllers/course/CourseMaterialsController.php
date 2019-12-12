@@ -271,6 +271,11 @@ class CourseMaterialsController extends AbstractController {
             $hide_from_students = $_POST['hide_from_students'];
         }
         
+        $order_num = 0.0;
+        if(isset($_POST['order_num'])){
+            $order_num = $_POST['order_num'];
+        }
+        
         if(empty($sections) && !is_null($sections)){
             $sections = [];
         }
@@ -294,10 +299,13 @@ class CourseMaterialsController extends AbstractController {
         
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
+        if($order_num == null){
+            $order_num = 0.0;
+        }
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
         $checked = $json[$dst]['checked'];
-        $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+        $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'order_num'=>$order_num);
         FileUtils::writeJsonFile($fp,$json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
      }
@@ -340,6 +348,11 @@ class CourseMaterialsController extends AbstractController {
         if (isset($_POST['hide_from_students'])) {
             $hide_from_students = $_POST['hide_from_students'];
         }
+        
+        $order_num = null;
+        if (isset($_POST['order_num'])) {
+            $order_num = $_POST['order_num'];
+        }
 
         if (empty($sections) && !is_null($sections)) {
             $sections = [];
@@ -353,6 +366,15 @@ class CourseMaterialsController extends AbstractController {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
+
+        if($order_num == null){
+            $order_num = 0.0;
+            /*foreach ($json as $json_val){
+                if($order_num < $json_val['order_num']){
+                    $order_num = $json_val['order_num'] + 1.0;
+                }
+            }*/
+        }
 
         $n = strpos($requested_path, '..');
         if ($n !== false) {
@@ -466,14 +488,16 @@ class CourseMaterialsController extends AbstractController {
                                     'checked' => '1',
                                     'release_datetime' => $release_time,
                                     'sections' => $sections_exploded,
-                                    'hide_from_students' => $hide_from_students
+                                    'hide_from_students' => $hide_from_students,
+                                    'order_num' => $order_num
                                 ];
                             }
                             else {
                                 $json[$path] = [
                                     'checked' => '1',
                                     'release_datetime' => $release_time,
-                                    'hide_from_students' => $hide_from_students
+                                    'hide_from_students' => $hide_from_students,
+                                    'order_num' => $order_num
                                 ];
                             }
                         }
@@ -488,10 +512,10 @@ class CourseMaterialsController extends AbstractController {
                                 if ($sections_exploded == null) {
                                     $sections_exploded = [];
                                 }
-                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
+                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'order_num' => $order_num);
                             }
                             else {
-                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'hide_from_students' => $hide_from_students);
+                                $json[$dst] = array('checked' => '1', 'release_datetime' => $release_time, 'hide_from_students' => $hide_from_students, 'order_num' => $order_num);
                             }
                         }
                     }

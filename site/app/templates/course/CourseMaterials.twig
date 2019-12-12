@@ -54,35 +54,36 @@
         </ul>
     {% endif %}
     <div class="inner-container" id="file-container">
-        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+        {{ self.display_files(self, submissions, fileShares, fileReleaseDates, "s", 0, "submissions", userGroup, uploadFolderPath, inDir, display_file_url, user_section, file_sections, hide_from_students, order_nums) }}
 
     </div>
 </div>
 
-{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students) %}
+{% macro display_files(self, files, fileShares, fileReleaseDates, id, indent, title, userGroup, folderPath, inDir, display_file_url,user_section, file_sections, hide_from_students, order_nums) %}
     {# Files on top #}
         {% for dir, path in files|filter((path,dir) => path is not iterable) %}
             {% if userGroup != 4 or fileShares[path] == "1" %}
-                {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+                {{ self.display_file(self, dir, fileShares, fileReleaseDates, path, id ~ "f" ~ loop.index, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students,order_nums) }}
             {% endif %}
         {% endfor %}
 
         {# Directories underneath #}
         {% for dir, path in files if path is iterable %}
-            {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+            {{ self.display_dir(self, dir, fileShares, fileReleaseDates, path, id ~ "d" ~ loop.index, indent, title, userGroup, folderPath ~ '/' ~ dir,inDir, display_file_url, user_section, file_sections, hide_from_students, order_nums) }}
         {% endfor %}
 {% endmacro %}
 
 
-{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+{% macro display_file(self, dir, fileShares, fileReleaseDates, path, id, indent, title, userGroup, inDir, display_file_url, user_section, file_sections, hide_from_students, order_nums) %}
     {% set this_file_section = file_sections[path] %}
     {% set this_hide_from_students = hide_from_students[path] %}
+    {% set this_order_num = order_nums[path] %}
     <script>
-        function editCourseMaterialsInitialization(this_file_section, this_hide_from_students, dir, release_time){
+        function editCourseMaterialsInitialization(this_file_section, this_hide_from_students, this_order_num, dir, release_time){
             if (this_file_section != null){
-                newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time);
+                newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, this_order_num, release_time);
             } else{
-              newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, release_time); 
+              newEditCourseMaterialsForm(dir ,this_file_section, this_hide_from_students, this_order_num, release_time); 
             }
         }
     </script>
@@ -99,7 +100,7 @@
             <a onclick='downloadFile("{{ path | url_encode }}", "course_materials")'><i class="fas fa-download" aria-hidden="true" title="Download the file"></i></a>
             {% if userGroup == 1 %}
 
-               <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+               <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{this_order_num}}","{{ dir }}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                
                <a onclick='newDeleteCourseMaterialForm("{{ path | url_encode }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 <label for="latest-events">Share to student on</label>
@@ -117,6 +118,10 @@
                     {{this_file_section|join(',')}}
                     </label>
                 {% else %}
+                
+                <label>Order: 
+                    {{this_order_num}}
+                </label>
                 
                 <script>
 
@@ -203,9 +208,9 @@
     {% endif %}
 {% endmacro %}
 
-{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) %}
+{% macro display_dir(self, dir, fileShares, fileReleaseDates, contents, id, indent, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, order_nums) %}
     {% if indent == 0 %}
-        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students
+        {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, order_nums
         ) }}
     {% else %}
     <div>
@@ -218,7 +223,7 @@
             </a>
             <a onclick='downloadCourseMaterialZip("{{ dir }}", "{{ folderPath | url_encode }}")'><i class="fas fa-download" aria-hidden="true" title="Download the folder"></i></a>
             {% if userGroup == 1 %}
-                <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{dir}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
+                <a onclick='editCourseMaterialsInitialization({{this_file_section|json_encode|raw}}, "{{this_hide_from_students}}", "{{this_order_num}}", "{{dir}}", "{{ fileReleaseDates[path]}}")'> <i class="fas fa-pencil-alt black-btn" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                <a onclick='newDeleteCourseMaterialForm("{{ folderPath | url_encode  }}", "{{ dir }}");'> <i class="fas fa-trash" aria-hidden="true" style="font-size: 16px; margin: 5px;"></i></a>
                 {# button to choose release date for all files in folder and subfolders #}
                 <a onclick='setFolderRelease("{{ folderPath }}","{{ fileReleaseDates[folderPath] }}","{{ id }}",
@@ -234,7 +239,7 @@
 
             {# Recurse #}
 
-            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students) }}
+            {{ self.display_files(self, contents, fileShares, fileReleaseDates, id, indent + 1, title, userGroup, folderPath,inDir, display_file_url, user_section, file_sections, hide_from_students, order_nums) }}
 
         </div>
     </div>

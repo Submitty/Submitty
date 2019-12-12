@@ -221,7 +221,7 @@ function newUploadCourseMaterialsForm() {
 
 }
 
-function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
+function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, this_order_num, release_time) {
 
     var form = $("#edit-course-materials-form");
     $("#edit_picker", form).prop('value',release_time);
@@ -233,6 +233,8 @@ function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_stude
     else{
         $("#hide-materials-checkbox-edit", form).prop('checked',false);
     }
+    
+    $("#order-num-edit", form).val(this_order_num);
     
     $('#show_Some_Section_Selection_Edit :checkbox:enabled').prop('checked', false);
     

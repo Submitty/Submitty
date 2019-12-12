@@ -46,6 +46,10 @@
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
             Hide from students (Note: If checked, students will not be able to see course matierals, but can still access them via the URL)
         </label>
+        <label>
+            <input id="order-num-edit" type="number"/>
+            Order of this course material relative to the order course materials. Course materials are ordered highest to lowest. Defaults to 0.0.
+        </label>
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
     </div>
     <script type="text/javascript">
@@ -57,7 +61,7 @@
                 if  ($("#hide-materials-checkbox-edit").is(':checked'))  {
                     hideFromStudents = 'on';
                 }
-                
+                orderNum = $("#order-num-edit").val();
                 var reg_sectionArray = JSON.parse('{{ reg_sections|json_encode|raw }}');
                 reg_sectionArray.forEach(function(element){
                     var currentSectionEdit = '#section-edit-' +element['sections_registration_id']
@@ -68,7 +72,7 @@
                 if({{ reg_sections|json_encode|raw }} == null || $("#all_Sections_Showing_No").is(':checked') == true){
                     sectionsEdit = null;
                 }
-                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
+                handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, orderNum, requestedPath, sectionsEdit, cmTime);
         };
         
         flatpickr('#edit_picker', {

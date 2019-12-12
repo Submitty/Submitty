@@ -10,7 +10,7 @@ use app\libraries\FileUtils;
 use app\libraries\Utils;
 
 
-class CourseMaterialsView extends AbstractView {
+class CourseMaterialsView extends AbstractView { 
     /**
      * @param User $user
      */
@@ -23,12 +23,19 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp, &$file_sections, &$hide_from_students) {
+        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp, &$file_sections, &$hide_from_students, &$order_nums) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
             $no_json = array();
-
+            usort($course_materials_array, function($a, $b) use ($expected_path, $json){
+                $expected_file_path_a = FileUtils::joinPaths($expected_path, $a);
+                $expected_file_path_b = FileUtils::joinPaths($expected_path, $b);
+                if($json[$expected_file_path_a]['order_num'] == $json[$expected_file_path_b]['order_num']){
+                    return strcmp($a, $b);
+                }
+                return $json[$expected_file_path_a]['order_num'] < $json[$expected_file_path_b]['order_num'];
+            });
             foreach($course_materials_array as $file) {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
@@ -52,6 +59,10 @@ class CourseMaterialsView extends AbstractView {
                         if ( isset( $json[$expected_file_path]['hide_from_students'] ) ){
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
+                        
+                        if ( isset( $json[$expected_file_path]['order_num'] ) ){
+                            $order_nums[$expected_file_path] = $json[$expected_file_path]['order_num'];
+                        }
 
                        if ($isShareToOther == '1' && $release_date > $now_date_time)
                             $isShareToOther = '0';
@@ -65,6 +76,9 @@ class CourseMaterialsView extends AbstractView {
                         $release_date = $json['release_time'];
                         if ( isset( $json[$expected_file_path]['hide_from_students'] ) ){
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
+                        }
+                        if ( isset( $json[$expected_file_path]['order_num'] ) ){
+                            $order_nums[$expected_file_path] = $json[$expected_file_path]['order_num'];
                         }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
                         if ( isset( $json[$expected_file_path]['sections'] ) ){
@@ -137,6 +151,7 @@ class CourseMaterialsView extends AbstractView {
         $in_dir = array();
         $file_sections = array();
         $hide_from_students = array();
+        $order_nums = array();
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
@@ -148,7 +163,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp, $file_sections, $hide_from_students);
+        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp, $file_sections, $hide_from_students, $order_nums);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
@@ -182,7 +197,8 @@ class CourseMaterialsView extends AbstractView {
             "user_section" => $user_section,
             "reg_sections" => $reg_sections,
             "file_sections" => $file_sections,
-            "hide_from_students" => $hide_from_students
+            "hide_from_students" => $hide_from_students,
+            "order_nums" => $order_nums
         ]);
     }
 }
