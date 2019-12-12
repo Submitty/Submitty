@@ -9,6 +9,7 @@ import argparse
 import json
 import os
 from submitty_utils import dateutils
+import sys
 
 SUBMITTY_DATA_DIR = "/var/local/submitty"
 
