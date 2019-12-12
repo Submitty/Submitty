@@ -1,8 +1,8 @@
 <div id="gradeable_rubric">
-    How many numeric items? <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
+    <label for="numeric_num-items">How many numeric items?</label> <input style="width: 50px" id="numeric_num-items" name="num_numeric_items" type="text" value="0" class="int_val ignore" onchange="calculateTotalScore();"/>
     &emsp;&emsp;
 
-    How many text items? <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
+    <label for="numeric_num_text_items">How many text items?</label> <input style="width: 50px" id="numeric_num_text_items" name="num_text_items" type="text" value="0" class="int_val ignore"/>
     <br /> <br />
 
     <div class="multi-field-wrapper-numeric">
@@ -28,13 +28,13 @@
             <!-- This is a bit of a hack, but it works (^_^) -->
                 <tr class="multi-field" id="mult-field-0" style="display:none;">
                     <td>
-                        <input style="width: 200px" name="numeric_label_0" type="text" class="numeric_label" value="0" />
+                        <input style="width: 200px" name="numeric_label_0" type="text" aria-label="label for numeric item 0" class="numeric_label" value="0" />
                     </td>
                     <td>
-                        <input style="width: 60px" type="text" name="max_score_0" class="max_score" value="0" onchange="calculateTotalScore();"/>
+                        <input style="width: 60px" type="text" name="max_score_0" aria-label="max score for numeric item 0" class="max_score" value="0" onchange="calculateTotalScore();"/>
                     </td>
                     <td>
-                        <input type="checkbox" name="numeric_extra_0" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
+                        <input type="checkbox" name="numeric_extra_0" aria-label="is numeric item 0 counted as extra credit?" class="numeric_extra extra" value="" onchange="calculateTotalScore();"/>
                     </td>
                 </tr>
             </tbody>
@@ -50,7 +50,7 @@
             <!-- This is a bit of a hack, but it works (^_^) -->
                 <tr class="multi-field" id="mult-field-0" style="display:none;">
                     <td>
-                        <input style="width: 200px" name="text_label_0" type="text" class="text_label" value="0"/>
+                        <input style="width: 200px" name="text_label_0" aria-label="label for text item 0" type="text" class="text_label" value="0"/>
                     </td>
                 </tr>
             </tbody>
@@ -88,9 +88,9 @@
             var wrapper = $('.numerics-table');
             numNumeric++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numNumeric).find('.numeric_label').val(label).focus();
-            $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric).change(() => saveRubric(false));
-            $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric).change(() => saveRubric(false));
-            $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).val(max_score).change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('name', 'numeric_extra_' + numNumeric).attr('aria-label', 'is numeric item ' + numNumeric + ' counted as extra credit?').change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.numeric_label').attr('name', 'numeric_label_' + numNumeric).attr('aria-label', 'label for numeric item ' + numNumeric).change(() => saveRubric(false));
+            $('#mult-field-' + numNumeric, wrapper).find('.max_score').attr('name', 'max_score_' + numNumeric).attr('aria-label', 'max score for numeric item' + numNumeric).val(max_score).change(() => saveRubric(false));
             if (extra_credit) {
                 $('#mult-field-' + numNumeric, wrapper).find('.numeric_extra').attr('checked', true);
             }
@@ -109,8 +109,7 @@
             var wrapper = $('.text-table');
             numText++;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numText).find('.text_label').val(label).focus();
-            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).change(() => saveRubric(false));
-
+            $('#mult-field-' + numText, wrapper).find('.text_label').attr('name', 'text_label_' + numText).attr('aria-label', 'label for text item ' + numText).change(() => saveRubric(false));
             $('#mult-field-' + numText, wrapper).show();
         }
 
