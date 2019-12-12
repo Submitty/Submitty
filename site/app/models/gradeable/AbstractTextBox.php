@@ -2,7 +2,6 @@
 
 namespace app\models\gradeable;
 
-
 use app\libraries\Core;
 use app\models\gradeable\AbstractGradeableModel;
 
@@ -28,7 +27,8 @@ class AbstractTextBox extends AbstractGradeableInput {
         $this->row_count = $details['rows'];
         if ($details['type'] === "codebox") {
             $this->is_codebox = true;
-        } else {
+        }
+        else {
             $this->is_codebox = false;
         }
     }

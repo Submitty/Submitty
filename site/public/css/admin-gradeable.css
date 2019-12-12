@@ -75,7 +75,7 @@ a.nav-bar.normal-btn:hover {
 }
 
 a.nav-bar.disabled-btn {
-    color: var(--standard-medium-gray) ;
+    color: var(--standard-medium-dark-gray) ;
     cursor: default;
     border: none !important;
     pointer-events: none;

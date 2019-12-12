@@ -46,7 +46,7 @@ class NotificationController extends AbstractController {
         parent::__construct($core);
         $this->selections = self::NOTIFICATION_SELECTIONS;
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $this->selections = array_merge($this->selections,self::EMAIL_SELECTIONS);
+            $this->selections = array_merge($this->selections, self::EMAIL_SELECTIONS);
         }
     }
     /**
@@ -135,7 +135,7 @@ class NotificationController extends AbstractController {
 
         if ($this->validateNotificationSettings(array_keys($new_settings))) {
             $values_not_sent = array_diff($this->selections, array_keys($new_settings));
-            foreach(array_values($values_not_sent) as $value) {
+            foreach (array_values($values_not_sent) as $value) {
                 $new_settings[$value] = 'false';
             }
             $this->core->getQueries()->updateNotificationSettings($new_settings);

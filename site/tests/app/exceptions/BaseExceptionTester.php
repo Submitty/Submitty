@@ -2,7 +2,6 @@
 
 namespace tests\app\exceptions;
 
-
 use app\exceptions\BaseException;
 
 class BaseExceptionTester extends \PHPUnit\Framework\TestCase {

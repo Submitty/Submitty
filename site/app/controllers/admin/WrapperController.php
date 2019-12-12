@@ -62,7 +62,7 @@ class WrapperController extends AbstractController {
         }
         $upload = $_FILES['wrapper_upload'];
 
-        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
+        if (!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Upload failed: Invalid location");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
@@ -76,7 +76,7 @@ class WrapperController extends AbstractController {
             );
         }
 
-        $this->core->addSuccessMessage("Uploaded ".$upload['name']." as ".$filename);
+        $this->core->addSuccessMessage("Uploaded " . $upload['name'] . " as " . $filename);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
@@ -96,23 +96,22 @@ class WrapperController extends AbstractController {
             );
         }
 
-        if(!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
+        if (!isset($_POST['location']) || !in_array($_POST['location'], WrapperController::WRAPPER_FILES)) {
             $this->core->addErrorMessage("Delete failed: Invalid filename");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
-        if(!@unlink($location)) {
+        if (!@unlink($location)) {
             $this->core->addErrorMessage("Deletion failed: Could not unlink file");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['theme']))
             );
         }
 
-        $this->core->addSuccessMessage("Deleted ".$filename);
+        $this->core->addSuccessMessage("Deleted " . $filename);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['theme']))
         );
     }
-
 }

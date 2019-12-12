@@ -1,5 +1,5 @@
 $(document).ready(function() {
-  
+
     $("input,textarea,select").on("change", function() {
         var elem = this;
         let formData = new FormData();
@@ -46,7 +46,7 @@ $(document).ready(function() {
             }
         });
     });
-  
+
     function updateForumMessage() {
         $("#forum-enabled-message").toggle();
         $("#forum-category-warning").toggle();
@@ -67,7 +67,8 @@ $(document).ready(function() {
     function updateEmailSeatingOption() {
         if ($("#room-seating-gradeable-id").val()) {
             showEmailSeatingOption();
-        } else {
+        }
+        else {
             hideEmailSeatingOption();
         }
     }
