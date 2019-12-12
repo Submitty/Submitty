@@ -415,6 +415,8 @@ class TeamController extends AbstractController {
         }
 
         $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $user_id, false);
+        $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId()]);
+        $this->core->getOutput()->addBreadcrumb(" Manage Team For {$gradeable->getTitle()}", $gradeableUrl);
         $team = null;
         if ($graded_gradeable !== false) {
             $team = $graded_gradeable->getSubmitter()->getTeam();
