@@ -137,7 +137,7 @@ class SimpleGraderController extends AbstractController {
         //Can you show all
         $can_show_all = $this->core->getAccess()->canI("grading.simple.show_all");
         //Are you currently showing all
-        $show_all = ($view === 'all' || $grading_count === 0) && $can_show_all;
+        $show_all = ($view === 'all') && $can_show_all;
         //Should the button be shown
         $show_all_sections_button = $can_show_all;
 
