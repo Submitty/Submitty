@@ -154,3 +154,7 @@ footer .footer-separator {
 #loading-bar-percentage{
     margin-left: 10px;
 }
+
+.inner-message.alert.alert-error{
+    color: darkred;
+}
