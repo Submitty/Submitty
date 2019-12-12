@@ -56,7 +56,7 @@ class Email extends AbstractModel {
     //inject a "do not reply" note in the footer of the body
     //also adds a relevant url if one exists
     private function formatBody($body, $relevant_url = null) {
-        if (!is_null($relevant_url) ) {
+        if (!is_null($relevant_url)) {
             $body .= "\n\nClick here for more info: " . $relevant_url;
         }
         return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
