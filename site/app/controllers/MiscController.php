@@ -278,25 +278,23 @@ class MiscController extends AbstractController {
                     new \RecursiveDirectoryIterator($paths[$x]),
                     \RecursiveIteratorIterator::LEAVES_ONLY
                 );
-                $zip -> addEmptyDir($folder_names[$x]);
+                $zip->addEmptyDir($folder_names[$x]);
                 foreach ($files as $name => $file) {
                     // Skip directories (they would be added automatically)
                     if (!$file->isDir()) {
-                        // Get real and relative path for current file
-                        $filePath = $file->getRealPath();
-                        $relativePath = substr($filePath, strlen($paths[$x]) + 1);
+                        $file_path = $file->getRealPath();
+                        $relative_path = substr($file_path, strlen($paths[$x]) + 1);
 
-                        if ($this->core->getUser()->accessGrading()) {
-                            // Add current file to archive
-                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        // For scanned exams, the directories get polluted with the images of the split apart
+                        // pages, so we selectively only grab the PDFs there. For all other types,
+                        // we can grab all files regardless of type.
+                        if ($gradeable->isScannedExam()) {
+                            if (mime_content_type($file_path) === 'application/pdf') {
+                                $zip->addFile($file_path, $folder_names[$x] . '/' . $relative_path);
+                            }
                         }
-                        elseif (
-                            $gradeable->isScannedExam()
-                            && FileUtils::getContentType($filePath) === "application/pdf"
-                        ) {
-                            //If the user is a student, only get PDFs if this is a bulk upload gradeable
-                            // Add current file to archive
-                            $zip->addFile($filePath, $folder_names[$x] . "/" . $relativePath);
+                        else {
+                            $zip->addFile($file_path, $folder_names[$x] . "/" . $relative_path);
                         }
                     }
                 }
