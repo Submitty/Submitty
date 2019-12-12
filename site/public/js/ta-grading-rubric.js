@@ -883,8 +883,10 @@ function setRubricDOMElements(elements) {
  */
 function getComponentIdFromDOMElement(me) {
     if ($(me).hasClass('component')) {
+        console.log('element itself has id for comp', parseInt($(me).attr('data-component_id')));
         return parseInt($(me).attr('data-component_id'));
     }
+    console.log('element parent contain id for comp', parseInt($(me).parents('.component').attr('data-component_id')));
     return parseInt($(me).parents('.component').attr('data-component_id'));
 }
 
@@ -1832,7 +1834,16 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-    toggleComponent(getComponentIdFromDOMElement(me), false)
+  const componentId = getComponentIdFromDOMElement(me);
+  // If there is some custom message written for the student, prompt the TA before closing.
+  if($('#component-' + componentId).find('.mark-note-custom').val().trim().length > 1 ){
+    // dont do anything if TA chooses to cancel the action
+    if( !confirm("Note: Changes Made to the Student Message will be lost! Do you want to continue ? ")) {
+        return
+    }
+  }
+  // Go with normal flow otherwise
+  toggleComponent(componentId, false)
         .catch(function (err) {
             console.error(err);
             alert('Error closing component! ' + err.message);
@@ -1867,11 +1878,28 @@ function onComponentOrderChange() {
  * @param me DOM element of the cancel button
  */
 function onCancelOverallComment(me) {
-    toggleOverallComment(false)
-        .catch(function (err) {
+  // if the overall Comment is changed then prompt the TA for loss in comment
+  ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallComment) => {
+
+    if (getOverallCommentFromDOM() !== lastSavedOverallComment) {
+      if(confirm("Note:Changes Made to the Student Message will be lost! Do you want to continue ? ")){
+        toggleOverallComment(false)
+          .catch(function (err) {
             console.error(err);
             alert('Error closing overall comment! ' + err.message);
+          });
+      }
+    }
+    // The Overall Comment is same as the saved comment
+    else {
+      toggleOverallComment(false)
+        .catch(function (err) {
+          console.error(err);
+          alert('Error closing overall comment! ' + err.message);
         });
+    }
+  });
+
 }
 
 /**
@@ -2319,7 +2347,7 @@ function closeAllComponents(save_changes) {
 }
 
 /**
- * Toggles a the open/close state of a component
+ * Toggles the open/close state of a component
  * @param {int} component_id the component's id
  * @param {boolean} saveChanges
  * @return {Promise}
