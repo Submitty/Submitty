@@ -255,8 +255,11 @@ def prepare_job(my_name,which_machine,which_untrusted,next_directory,next_to_gra
 
     # log completion of job preparation
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    if "generate_output" not in obj:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    elif obj["generate_output"]:
+        item_name = os.path.join(obj["semester"],obj["course"],"generated_output",obj["gradeable"])
     is_batch = "regrade" in obj and obj["regrade"]
     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, jobname=item_name, which_untrusted=which_untrusted,
                                     is_batch=is_batch, message="Prepared job for " + which_machine)
@@ -269,8 +272,11 @@ def unpack_job(which_machine,which_untrusted,next_directory,next_to_grade):
 
     # variables needed for logging
     obj = packer_unpacker.load_queue_file_obj(JOB_ID,next_directory,next_to_grade)
-    partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
-    item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    if "generate_output" not in obj:
+        partial_path = os.path.join(obj["gradeable"],obj["who"],str(obj["version"]))
+        item_name = os.path.join(obj["semester"],obj["course"],"submissions",partial_path)
+    elif obj["generate_output"]:
+        item_name = os.path.join(obj["semester"],obj["course"],"generated_output")
     is_batch = "regrade" in obj and obj["regrade"]
 
     # verify the DAEMON_USER is running this script

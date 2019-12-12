@@ -20,7 +20,6 @@ from .execution_environments import jailed_sandbox, container_network
 
 
 class Testcase():
-
   def __init__(self, number, queue_obj, complete_config_obj, testcase_info, untrusted_user,
                is_vcs, is_batch_job, job_id, autograding_directory, previous_testcases, submission_string, 
                log_path, stack_trace_log_path, is_test_environment):
@@ -181,17 +180,32 @@ class Testcase():
     if not self.has_solution_commands:
       return
 
+    if "generate_output" not in self.queue_obj:
+      # If there is no random inputs then it will take from generated_output
+      if not self.has_input_generator_commands:
+        return  
+
     # Create directories, set permissions, and copy in files.
     self.secure_environment.setup_for_random_output(self.dependencies)
     with open(os.path.join(self.secure_environment.tmp_logs,"output_generator_log.txt"), 'a') as logfile:
-      arguments = [
-        self.queue_obj["gradeable"],
-        self.queue_obj["who"],
-        str(self.queue_obj["version"]),
-        self.submission_string,
-        '--testcase', str(self.number),
-        '--generation_type',str('output')
-      ]
+      if "generate_output" not in self.queue_obj:
+        arguments = [
+          self.queue_obj["gradeable"],
+          self.queue_obj["who"],
+          str(self.queue_obj["version"]),
+          self.submission_string,
+          '--testcase', str(self.number),
+          '--generation_type',str('output')
+        ]
+      elif self.queue_obj['generate_output']:
+        arguments = [
+          self.queue_obj["gradeable"],
+          'Generating Output',
+          '0',
+          '',
+          '--testcase', str(self.number),
+          '--generation_type',str('output')
+        ]
       
       try:
         # Generate random outputs for this testcase using our secure environment.

@@ -133,14 +133,6 @@ class SubmissionControllerTester extends BaseUnitTest {
      * @return \PHPUnit\Framework\MockObject\MockObject
      */
     private function createMockGradeable($num_parts = 1, $max_size = 1000000., $has_autograding_config = true, $student_view = true) {
-        if ($has_autograding_config) {
-            $details = [
-                'max_submission_size' => $max_size,
-                'part_names' => array_fill(0, $num_parts, "")
-            ];
-            $auto_grading_config = new AutogradingConfig($this->core, $details);
-        }
-
         $submission_open_date = new \DateTime("now", $this->core->getConfig()->getTimezone());
         if ($student_view) {
             $submission_open_date->sub(new \DateInterval('PT1H'));
@@ -190,6 +182,11 @@ class SubmissionControllerTester extends BaseUnitTest {
         ];
         $gradeable = new Gradeable($this->core, $details);
         if ($has_autograding_config) {
+            $autograding_details = [
+                'max_submission_size' => $max_size,
+                'part_names' => array_fill(0, $num_parts, "")
+            ];
+            $auto_grading_config = new AutogradingConfig($this->core, $autograding_details);
             $gradeable->setAutogradingConfig($auto_grading_config);
         }
         return $gradeable;

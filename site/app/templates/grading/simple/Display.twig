@@ -45,9 +45,9 @@
                 If nothing to grade, Instructor will see all sections
             #}
             {% if show_all_sections_button %}
-                <a 
+                <a
                     class="btn btn-default"
-                    href="{{ grading_url }}?view=all&sort={{ sort }}"
+                    href="{{ grading_url }}?view={{ view_all ? '' : 'all' }}&sort={{ sort }}"
                 >
                     {{ view_all ? "View Your Sections" : "View All Sections" }}
                 </a>
@@ -71,7 +71,7 @@
                 <input class="csvButtonUpload" type="file" id="csvUpload" accept=".csv, .txt">
             </label>
             <p>
-                The CSV file should be formatted as such: 
+                The CSV file should be formatted as such:
                 <br />
                 user id,first name,last name,grade1,grade2,...,total points earned,text1,text2,...
             </p>
@@ -87,17 +87,17 @@
                 <th width="20"></th>
                 <th width="70">Section</th>
                 <th width="90" style="text-align: left">
-                    <a href="{{ grading_url }}?view={{ view }}&sort=id">
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=id">
                         <span class="tooltiptext" title="sort by ID" aria-hidden="true">User ID </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
                 <th width="110" style="text-align: left">
-                    <a href="{{ grading_url }}?view={{ view }}&sort=first">
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=first">
                         <span class="tooltiptext" title="sort by First Name" aria-hidden="true">First Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>
                 <th width="110" style="text-align: left">
-                    <a href="{{ grading_url }}?view={{ view }}&sort=last">
+                    <a href="{{ grading_url }}?view={{ view_all ? 'all' : '' }}&sort=last">
                         <span class="tooltiptext" title="sort by Last Name" aria-hidden="true">Last Name </span><i class="fas fa-sort"></i>
                     </a>
                 </th>

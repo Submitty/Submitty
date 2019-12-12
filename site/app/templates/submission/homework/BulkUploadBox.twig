@@ -99,8 +99,9 @@
     //autofill data
     $(function(){
         $("#messages").empty();
-        if(sessionStorage.getItem("expected_count"))
-            document.getElementById("expected_pages_input").value = sessionStorage.getItem("expected_count");
+        if(sessionStorage.getItem("expected_count")){
+            document.getElementById("expected-pages-input").value = sessionStorage.getItem("expected_count");
+        }
 
         $("td > div :text").autocomplete({
             source: students_full
@@ -112,24 +113,80 @@
         $("#messages").empty();
     });
 
+    //gets the raw value entered in the expected page box
+    function getExpectedPageBoxVal(){
+        var expected_count_box = document.getElementById("expected-pages-input");
+        if (!expected_count_box){
+            return NaN;
+        }
+
+        return expected_count_box.value;
+    }
+
+    //parses the expected page box and returns a list of expected pages
+    //accepts multiple pages and also ranges, e.g 1-5,8,8-13
+    function parseExpectedPageBox(){
+        var expected_count = getExpectedPageBoxVal();
+        if ( isNaN(expected_count) || expected_count === "" || expected_count === null){
+            return NaN;
+        }
+
+        parts = expected_count.split(',');
+        ret = [];
+
+        for (var i = 0; i < parts.length; i++) {
+            if(parts[i].length > 1 && parts[i].includes('-')){
+                //handle range
+                tmp = parts[i].split('-');
+                if (tmp.length != 2){ 
+                    continue;
+                }
+
+                start = parseInt(tmp[0]);
+                end = parseInt(tmp[1]);
+
+                if (isNaN(start) || isNaN(end) || start < 0 || end < start){
+                    continue;
+                }
+
+                for(var j = start; j <= end; j++){
+                    ret.push(j);
+                }
+
+            }else{
+                val = parseInt(parts[i]);
+                if (isNaN(val) || val < 0){
+                    continue;
+                }
+
+                ret.push( val );
+            }
+        }
+
+        return ret;
+    }
+
     //highlight pages that don't match the expected, also save the expected page count in session storage
     function highlightPageCount(){
-        var expected_count = parseInt(document.getElementById("expected_pages_input").value);
-        if(expected_count == NaN || !expected_count)
+
+        expected_count = parseExpectedPageBox();
+
+        if (expected_count === [] || isNaN(expected_count) ){
             return;
+        }
 
         var pages = document.getElementsByClassName("pdf_page_count");
         for (var i = pages.length - 1; i >= 0; i--) {
-            if(parseInt(pages[i].innerHTML) !== expected_count && expected_count > 0)
+            if(expected_count.indexOf( parseInt(pages[i].innerHTML) ) === -1 ){
                 pages[i].style.backgroundColor = "#FF5722";
-            else
+            }else{
                 pages[i].style.backgroundColor = "";
+            }
         }
 
-        if(!sessionStorage.getItem("expected_count")){
-            sessionStorage.setItem("expected_count", expected_count);
-        }
-        sessionStorage.setItem("expected_count", expected_count);
+        //use the raw value entered by the user to prevent a conversion, e.g
+        //we don't want to store 1-3 as 1,2,3
+        sessionStorage.setItem("expected_count", getExpectedPageBoxVal());
     }
 
     function toggleButtons(index, disable){
@@ -137,16 +194,18 @@
         var delete_btn = document.getElementById("bulk_delete_" + String(index));
         var user_id_textarea = document.getElementById("bulk_user_id_" + String(index));
 
-        if(!submit_btn || !delete_btn || !user_id_textarea)
+        if(!submit_btn || !delete_btn || !user_id_textarea){
             return;
+        }
 
         submit_btn.disabled = disable;
         delete_btn.disabled = disable;
         user_id_textarea.disabled = disable;
 
         if(is_team_assignment){
-            for(var i = 1; i < max_team_size; i++)
+            for(var i = 1; i < max_team_size; i++){
                 document.getElementById("bulk_user_id_" + String(index) + "[" + String(i) + "]").disabled = disable;
+            }
         }
     }
 
@@ -165,18 +224,21 @@
     //if the user presses 'enter' try and make a submission as if hitting the submit button
     function uploadOnEnter(index, e = null){
         key = window.event ? window.event.keyCode : e.keyCode;
-        if(key === 13)
+        if(key === 13){
             uploadSplit(index);
+        }
     }
 
     //on enter move focus on the next submission box in a given row
     function focusNextOnEnter(table_row, input_index, e = null ){
         var key = window.event ? window.event.keyCode : e.keyCode;
-        if(key !== 13)
+        if(key !== 13){
             return;
+        }
         var input_box  = document.getElementById("bulk_user_id_" + String(table_row) + "[" + String(input_index + 1) + "]" );
-        if(!input_box)
+        if(!input_box){
             return;
+        }
 
         input_box.focus();
     }
@@ -189,13 +251,15 @@
         if(is_team_assignment){
             var user_id = [];
             var tmp_user = document.getElementById("bulk_user_id_" + String(index)).value;
-            if(tmp_user != "")
+            if(tmp_user != ""){
                 user_id.push(tmp_user);
+            }
 
             for (var i = 1; i < max_team_size; i++) {
                 tmp_user = document.getElementById("bulk_user_id_" + String(index) + "[" + String(i) + "]").value;
-                if(tmp_user != "")
+                if(tmp_user != ""){
                     user_id.push(tmp_user);
+                }
             }
         }
         else {
@@ -221,8 +285,9 @@
 
                 //callback function once user actually picks something
                 function getSubmissionOption(option){
-                    if(has_been_called)
+                    if(has_been_called){
                         return;
+                    }
 
                     has_been_called = true;
                     //user closes do nothing
@@ -304,11 +369,12 @@
     }
 
     function submitAll(index){
-        if(index > Object.keys(path_list).length)
+        if(index > Object.keys(path_list).length){
             return;
+        }
 
         var text_area = document.getElementById("bulk_user_id_" + String(index));
-        var expected_count = parseInt(document.getElementById("expected_pages_input").value);
+        var expected_count = parseExpectedPageBox();
 
         var user_id = "";
         if(text_area !== null){
@@ -324,14 +390,16 @@
         }
         //if the expected page count doesn't match skip and let the user decide
         var page_count = document.getElementById("page_count_" + String(index));
-        if(page_count){
-            if(expected_count != NaN && expected_count > 0 && expected_count != parseInt(page_count.innerHTML))
+        if(page_count && expected_count !== [] && !isNaN(expected_count) ){
+            if(expected_count.indexOf(parseInt(page_count.innerHTML) ) === -1 ){
                 return submitAll(index + 1);
+            }
         }
 
         //if theres an invalid submission skip this
-        if(document.getElementById("row-" + String(index)).style.backgroundColor == "pink")
+        if(document.getElementById("row-" + String(index)).style.backgroundColor == "pink"){
             return submitAll(index + 1);
+        }
 
         var path = decodeURIComponent(path_list[index]);
 
