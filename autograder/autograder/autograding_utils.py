@@ -135,18 +135,20 @@ def write_to_log(log_path, message):
 
 def setup_for_validation(working_directory, complete_config, is_vcs, testcases, job_id, log_path, stack_trace_log_path):
     """ Prepare a directory for validation by copying in and permissioning the required files. """
-
-    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
+    
     tmp_submission = os.path.join(working_directory,"TMP_SUBMISSION")
     tmp_work = os.path.join(working_directory,"TMP_WORK")
-    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_results = os.path.join(working_directory,"TMP_RESULTS")
     submission_path = os.path.join(tmp_submission, "submission")
     checkout_subdirectory = complete_config["autograding"].get("use_checkout_subdirectory","")
+    tmp_logs = os.path.join(working_directory,"TMP_SUBMISSION","tmp_logs")
     tmp_work_test_output = os.path.join(tmp_work, "test_output")
+    tmp_work_generated_output = os.path.join(tmp_work, "generated_output")
     tmp_work_instructor_solution = os.path.join(tmp_work, "instructor_solution")
+    tmp_autograding = os.path.join(working_directory,"TMP_AUTOGRADING")
 
     os.mkdir(tmp_work_test_output)
+    os.mkdir(tmp_work_generated_output)
     os.mkdir(tmp_work_instructor_solution)
 
     patterns = complete_config['autograding']
@@ -170,6 +172,8 @@ def setup_for_validation(working_directory, complete_config, is_vcs, testcases, 
     # Copy expected files into the tmp_work_test_output path
     test_output_path = os.path.join(tmp_autograding, 'test_output')
     copy_contents_into(job_id, test_output_path, tmp_work_test_output, tmp_logs, log_path, stack_trace_log_path)
+    generated_output_path = os.path.join(tmp_autograding, 'generated_output')
+    copy_contents_into(job_id, generated_output_path, tmp_work_generated_output, tmp_logs, log_path, stack_trace_log_path)
 
     # Copy in instructor solution code.
     # TODO: Is this necessary?
@@ -297,8 +301,11 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     submission_path = os.path.join(tmp_submission, "submission")
     random_output_path = os.path.join(tmp_work, 'random_output')
 
-    partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
-    item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
+    if "generate_output" not in queue_obj:
+        partial_path = os.path.join(queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
+        item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"submissions",partial_path)
+    elif queue_obj["generate_output"]:
+        item_name = os.path.join(queue_obj["semester"],queue_obj["course"],"generated_output",queue_obj["gradeable"])
     results_public_dir = os.path.join(tmp_results,"results_public")
     results_details_dir = os.path.join(tmp_results, "details")
     patterns = complete_config_obj['autograding']
@@ -313,8 +320,11 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
     if os.path.exists(random_output_path):
         pattern_copy("work_to_random_output", [os.path.join(random_output_path, 'test*', '**', '*.txt'),], tmp_work, tmp_results, tmp_logs)
     # grab the submission time
-    with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
-        submission_string = submission_time_file.read().rstrip()
+    if "generate_output" in queue_obj and queue_obj["generate_output"]:
+        submission_string = ""
+    else:
+        with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
+            submission_string = submission_time_file.read().rstrip()
 
     history_file_tmp = os.path.join(tmp_submission,"history.json")
     history_file = os.path.join(tmp_results,"history.json")
@@ -332,82 +342,83 @@ def archive_autograding_results(working_directory, job_id, which_untrusted, is_b
         add_permissions(history_file, stat.S_IRGRP)
     grading_finished = dateutils.get_current_time()
 
+    if "generate_output" not in queue_obj:
+        try:
+            shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
+        except:
+            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+                print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
+            log_message(log_path, job_id, is_batch_job, which_untrusted, item_name, message="ERROR: grade.txt does not exist")
+            log_stack_trace(stack_trace_log_path, job_id, is_batch_job, which_untrusted, item_name, trace=traceback.format_exc())
 
-    try:
-        shutil.copy(os.path.join(tmp_work, "grade.txt"), tmp_results)
-    except:
+        grade_result = ""
+        try:
+            with open(os.path.join(tmp_work,"grade.txt")) as f:
+                lines = f.readlines()
+                for line in lines:
+                    line = line.rstrip('\n')
+                    if line.startswith("Automatic grading total:"):
+                        grade_result = line
+        except:
+            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+                print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
+                log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
+                log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+
+
+        gradeable_deadline_string = gradeable_config_obj["date_due"]
+        
+        submission_datetime = dateutils.read_submitty_date(submission_string)
+        gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
+        gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
+        submission_longstring = dateutils.write_submitty_date(submission_datetime)
+        seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
+
+        # note: negative = not late
+        grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
+
+        with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
+            grading_began_longstring = f.read()
+        grading_began = dateutils.read_submitty_date(grading_began_longstring)
+
+        gradingtime = (grading_finished - grading_began).total_seconds()
+
+        queue_obj["gradingtime"]=gradingtime
+        queue_obj["grade_result"]=grade_result
+        queue_obj["which_untrusted"]=which_untrusted
+        waittime = queue_obj["waittime"]
+
+        try:
+            shutil.move(os.path.join(tmp_work, "results.json"), os.path.join(tmp_results, "results.json"))
+        except:
+            with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
+                print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
+                log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
+                log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
+
+        just_write_grade_history(history_file,
+                                gradeable_deadline_longstring,
+                                submission_longstring,
+                                seconds_late,
+                                queue_obj["queue_time"],
+                                "BATCH" if is_batch_job else "INTERACTIVE",
+                                grading_began_longstring,
+                                int(waittime),
+                                grading_finished_longstring,
+                                int(gradingtime),
+                                grade_result,
+                                queue_obj.get("revision", None))
+
         with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-            print ("\n\nERROR: Grading incomplete -- Could not copy ",os.path.join(tmp_work,"grade.txt"))
-        log_message(log_path, job_id, is_batch_job, which_untrusted, item_name, message="ERROR: grade.txt does not exist")
-        log_stack_trace(stack_trace_log_path, job_id, is_batch_job, which_untrusted, item_name, trace=traceback.format_exc())
-
-    grade_result = ""
-    try:
-        with open(os.path.join(tmp_work,"grade.txt")) as f:
-            lines = f.readlines()
-            for line in lines:
-                line = line.rstrip('\n')
-                if line.startswith("Automatic grading total:"):
-                    grade_result = line
-    except:
-        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-            print ("\n\nERROR: Grading incomplete -- Could not open ",os.path.join(tmp_work,"grade.txt"))
-            log_message(job_id,is_batch_job,which_untrusted,item_name,message="ERROR: grade.txt does not exist")
-            log_stack_trace(job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
-
-
-    gradeable_deadline_string = gradeable_config_obj["date_due"]
-    
-    submission_datetime = dateutils.read_submitty_date(submission_string)
-    gradeable_deadline_datetime = dateutils.read_submitty_date(gradeable_deadline_string)
-    gradeable_deadline_longstring = dateutils.write_submitty_date(gradeable_deadline_datetime)
-    submission_longstring = dateutils.write_submitty_date(submission_datetime)
-    seconds_late = int((submission_datetime-gradeable_deadline_datetime).total_seconds())
-
-    # note: negative = not late
-    grading_finished_longstring = dateutils.write_submitty_date(grading_finished)
-
-    with open(os.path.join(tmp_submission,".grading_began"), 'r') as f:
-        grading_began_longstring = f.read()
-    grading_began = dateutils.read_submitty_date(grading_began_longstring)
-
-    gradingtime = (grading_finished - grading_began).total_seconds()
-
-    queue_obj["gradingtime"]=gradingtime
-    queue_obj["grade_result"]=grade_result
-    queue_obj["which_untrusted"]=which_untrusted
-    waittime = queue_obj["waittime"]
+            f.write("FINISHED GRADING!\n")
+        
+        log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 
     with open(os.path.join(tmp_results,"queue_file.json"),'w') as outfile:
         json.dump(queue_obj,outfile,sort_keys=True,indent=4,separators=(',', ': '))
 
-    try:
-        shutil.move(os.path.join(tmp_work, "results.json"), os.path.join(tmp_results, "results.json"))
-    except:
-        with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-            print ("\n\nERROR: Grading incomplete -- Could not open/write ",os.path.join(tmp_work,"results.json"))
-            log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,message="ERROR: results.json read/write error")
-            log_stack_trace(stack_trace_log_path, job_id,is_batch_job,which_untrusted,item_name,trace=traceback.format_exc())
-
-    just_write_grade_history(history_file,
-                             gradeable_deadline_longstring,
-                             submission_longstring,
-                             seconds_late,
-                             queue_obj["queue_time"],
-                             "BATCH" if is_batch_job else "INTERACTIVE",
-                             grading_began_longstring,
-                             int(waittime),
-                             grading_finished_longstring,
-                             int(gradingtime),
-                             grade_result,
-                             queue_obj.get("revision", None))
-
-    with open(os.path.join(tmp_logs,"overall.txt"),'a') as f:
-        f.write("FINISHED GRADING!\n")
-
     # save the logs!
     shutil.copytree(tmp_logs,os.path.join(tmp_results,"logs"))
-    log_message(log_path, job_id,is_batch_job,which_untrusted,item_name,"grade:",gradingtime,grade_result)
 
 
 def allow_only_one_part(path, log_path=os.devnull):

@@ -48,167 +48,225 @@ def grade_from_zip(working_directory, which_untrusted, autograding_zip_file, sub
     waittime = queue_obj["waittime"]
     is_batch_job = queue_obj["regrade"]
     job_id = queue_obj["job_id"]
-    
-    item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "submissions", 
-                             queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
-    autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "")
 
     with open(os.path.join(tmp_autograding, "complete_config.json"), 'r') as infile:
         complete_config_obj = json.load(infile)
 
-    with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
-        submission_string = submission_time_file.read().rstrip()
-
-    with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
-        gradeable_config_obj = json.load(infile)
-    is_vcs = gradeable_config_obj["upload_type"] == "repository"
-
-    # Load all testcases. 
-    testcases = list()
-    testcase_num = 1
-    for t in complete_config_obj['testcases']:
-        tmp_test = testcase.Testcase(testcase_num, queue_obj, complete_config_obj, t,
-                                     which_untrusted, is_vcs, is_batch_job, job_id, working_directory, testcases,
-                                     submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, is_test_environment=False)
-        testcases.append( tmp_test )
-        testcase_num += 1
-
-    with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
-        os.chdir(tmp_work)
-
-        # COMPILE THE SUBMITTED CODE
-        print("====================================\nCOMPILATION STARTS", file=overall_log)
-        overall_log.flush()
-        for tc in testcases:
-            if tc.type != 'Execution':
-                tc.execute()
-
-                # Killalll removes any stray processes left over from compilation.
-                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                                       which_untrusted,
-                                                       os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
-                                                       stdout=overall_log)
-                if killall_success != 0:
-                    print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
-                else:
-                    print ("KILLALL COMPLETE RANDOM INPUT GENERATION",file=overall_log)
-                overall_log.flush()
-        overall_log.flush()
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-        overall_log.flush()
-
-        # GENERATE RANDOM INPUT
-        print ("====================================\nRANDOM INPUT GENERATION STARTS", file=overall_log)
-        for tc in testcases:
-            if tc.has_input_generator_commands:
-                tc.generate_random_inputs()
-
-                # Killalll removes any stray processes left over from input generation.
-                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                                       which_untrusted,
-                                                       os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
-                                                       stdout=overall_log)
-                if killall_success != 0:
-                    print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
-                else:
-                    print ("KILLALL COMPLETE RANDOM INPUT GENERATION",file=overall_log)
-                overall_log.flush()
-
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-        overall_log.flush()
-
-        # RUN EXECUTION TESTCASES
-        print ("====================================\nRUNNER STARTS", file=overall_log)
-        overall_log.flush()
-        for tc in testcases:
-            if tc.type == 'Execution':
-                tc.execute()
-                
-                # Killalll removes any stray processes left over from execution.
-                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                                   which_untrusted,
-                                                   os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
-                                                   stdout=overall_log)
-                overall_log.flush()
-      
-                print ("LOGGING END my_runner.out",file=overall_log)
-                if killall_success != 0:
-                    print('RUNNER ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
-                else:
-                    print ("KILLALL COMPLETE my_runner.out",file=overall_log)
-                overall_log.flush()
-
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-        overall_log.flush()
+    if "generate_output" in queue_obj and queue_obj["generate_output"]:
+        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "generated_output", 
+                                queue_obj["gradeable"])
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "Generating Output")
         
-        # RANDOM OUTPUT GENERATION
-        print ("====================================\nRANDOM OUTPUT GENERATION STARTS", file=overall_log)
-        for tc in testcases:
-            if tc.has_solution_commands:
-                tc.generate_random_outputs()
-                
-                # Killalll removes any stray processes left over from output generation.
-                killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
-                                                   which_untrusted,
-                                                   os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
-                                                   stdout=overall_log)
-          
-                if killall_success != 0:
-                    print('INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
-                else:
-                    print ("KILLALL COMPLETE INPUT GENERATION",file=overall_log)
-                overall_log.flush()
-
+        with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
+            gradeable_config_obj = json.load(infile)
+            
+        testcases = list()
+        testcase_num = 1
+        for t in complete_config_obj['testcases']:
+            tmp_test = testcase.Testcase(testcase_num, queue_obj, complete_config_obj, t,
+                                        which_untrusted, False, is_batch_job, job_id, working_directory, testcases,
+                                        '', AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, is_test_environment=False)
+            if tmp_test.has_solution_commands and not tmp_test.has_input_generator_commands:
+                testcases.append( tmp_test )
+            testcase_num += 1
         
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-        overall_log.flush()
+        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
+            os.chdir(tmp_work)
+            print ("====================================\nRANDOM OUTPUT GENERATION STARTS", file=overall_log)
+            for tc in testcases:
+                if tc.has_solution_commands:
+                    tc.generate_random_outputs()
+                    
+                    # Killalll removes any stray processes left over from output generation.
+                    killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                    which_untrusted,
+                                                    os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                    stdout=overall_log)
+            
+                    if killall_success != 0:
+                        print('INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                    else:
+                        print ("KILLALL COMPLETE INPUT GENERATION",file=overall_log)
+                    overall_log.flush()
 
-        # VALIDATE STUDENT OUTPUT
-        print ("====================================\nVALIDATION STARTS", file=overall_log)
-        overall_log.flush()
+            
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+            overall_log.flush()
 
-        # Create a jailed sandbox to run validation inside of.
-        validation_environment = jailed_sandbox.JailedSandbox(job_id, which_untrusted, tmp_work, is_vcs, is_batch_job, complete_config_obj, 
-                                                              dict(), working_directory, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+            print ("====================================\nARCHIVING STARTS", file=overall_log)
+            overall_log.flush()
+            for tc in testcases:
+                # Removes test input files, makes details directory for the testcase.
+                tc.setup_for_archival(overall_log)
 
-        # Copy sensitive expected output files into tmp_work.
-        autograding_utils.setup_for_validation(working_directory, complete_config_obj, is_vcs,
-                                               testcases, job_id, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH)
+            try:
+                # Perform archival.
+                autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
+                                                    gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+            except Exception as e:
+                autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id,trace=traceback.format_exc())
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
 
-        with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
-            arguments = [queue_obj["gradeable"],
-                         queue_obj["who"],
-                         str(queue_obj["version"]),
-                         submission_string]
-            success = validation_environment.execute(which_untrusted, 'my_validator.out', arguments, logfile, cwd=tmp_work)
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "Completed Generation")
 
-            if success == 0:
-                print (socket.gethostname(), which_untrusted,"VALIDATOR OK")
-            else:
-                print (socket.gethostname(), which_untrusted,"VALIDATOR FAILURE")
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-        overall_log.flush()
-
-        os.chdir(working_directory)
-        autograding_utils.untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, tmp_work)
-        autograding_utils.add_all_permissions(tmp_work)
-
-        # ARCHIVE STUDENT RESULTS
-        print ("====================================\nARCHIVING STARTS", file=overall_log)
-        overall_log.flush()
-        for tc in testcases:
-            # Removes test input files, makes details directory for the testcase.
-            tc.setup_for_archival(overall_log)
-
-        try:
-            # Perform archival.
-            autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
-                                                  gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
-        except Exception as e:
-            traceback.print_exc()
-        subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
-
+    else:
+        with open(os.path.join(tmp_submission, 'submission' ,".submit.timestamp"), 'r') as submission_time_file:
+            submission_string = submission_time_file.read().rstrip()
     
+        item_name = os.path.join(queue_obj["semester"], queue_obj["course"], "submissions", 
+                                queue_obj["gradeable"],queue_obj["who"],str(queue_obj["version"]))
+        autograding_utils.log_message(AUTOGRADING_LOG_PATH, job_id, is_batch_job, which_untrusted, item_name, "wait:", waittime, "")
+        
+        with open(os.path.join(tmp_autograding, "form.json"), 'r') as infile:
+            gradeable_config_obj = json.load(infile)
+        is_vcs = gradeable_config_obj["upload_type"] == "repository"
+
+        # Load all testcases. 
+        testcases = list()
+        testcase_num = 1
+        for t in complete_config_obj['testcases']:
+            tmp_test = testcase.Testcase(testcase_num, queue_obj, complete_config_obj, t,
+                                        which_untrusted, is_vcs, is_batch_job, job_id, working_directory, testcases,
+                                        submission_string, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, is_test_environment=False)
+            testcases.append( tmp_test )
+            testcase_num += 1
+
+        with open(os.path.join(tmp_logs, "overall.txt"), 'a') as overall_log:
+            os.chdir(tmp_work)
+
+            # COMPILE THE SUBMITTED CODE
+            print("====================================\nCOMPILATION STARTS", file=overall_log)
+            overall_log.flush()
+            for tc in testcases:
+                if tc.type != 'Execution':
+                    tc.execute()
+
+                    # Killalll removes any stray processes left over from compilation.
+                    killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                        which_untrusted,
+                                                        os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                        stdout=overall_log)
+                    if killall_success != 0:
+                        print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                    else:
+                        print ("KILLALL COMPLETE RANDOM INPUT GENERATION",file=overall_log)
+                    overall_log.flush()
+            overall_log.flush()
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+            overall_log.flush()
+
+            # GENERATE RANDOM INPUT
+            print ("====================================\nRANDOM INPUT GENERATION STARTS", file=overall_log)
+            for tc in testcases:
+                if tc.has_input_generator_commands:
+                    tc.generate_random_inputs()
+
+                    # Killalll removes any stray processes left over from input generation.
+                    killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                        which_untrusted,
+                                                        os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                        stdout=overall_log)
+                    if killall_success != 0:
+                        print('RANDOM INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                    else:
+                        print ("KILLALL COMPLETE RANDOM INPUT GENERATION",file=overall_log)
+                    overall_log.flush()
+
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+            overall_log.flush()
+
+            # RUN EXECUTION TESTCASES
+            print ("====================================\nRUNNER STARTS", file=overall_log)
+            overall_log.flush()
+            for tc in testcases:
+                if tc.type == 'Execution':
+                    tc.execute()
+                    
+                    # Killalll removes any stray processes left over from execution.
+                    killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                    which_untrusted,
+                                                    os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                    stdout=overall_log)
+                    overall_log.flush()
+        
+                    print ("LOGGING END my_runner.out",file=overall_log)
+                    if killall_success != 0:
+                        print('RUNNER ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                    else:
+                        print ("KILLALL COMPLETE my_runner.out",file=overall_log)
+                    overall_log.flush()
+
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+            overall_log.flush()
+            
+            # RANDOM OUTPUT GENERATION
+            print ("====================================\nRANDOM OUTPUT GENERATION STARTS", file=overall_log)
+            for tc in testcases:
+                if tc.has_solution_commands:
+                    tc.generate_random_outputs()
+                    
+                    # Killalll removes any stray processes left over from output generation.
+                    killall_success = subprocess.call([os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "untrusted_execute"),
+                                                    which_untrusted,
+                                                    os.path.join(SUBMITTY_INSTALL_DIR, "sbin", "killall.py")],
+                                                    stdout=overall_log)
+            
+                    if killall_success != 0:
+                        print('INPUT GENERATION ERROR: had to kill {} process(es)'.format(killall_success), file=overall_log)
+                    else:
+                        print ("KILLALL COMPLETE INPUT GENERATION",file=overall_log)
+                    overall_log.flush()
+
+            
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+            overall_log.flush()
+
+            # VALIDATE STUDENT OUTPUT
+            print ("====================================\nVALIDATION STARTS", file=overall_log)
+            overall_log.flush()
+
+            # Create a jailed sandbox to run validation inside of.
+            validation_environment = jailed_sandbox.JailedSandbox(job_id, which_untrusted, tmp_work, is_vcs, is_batch_job, complete_config_obj, 
+                                                                dict(), working_directory, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+
+            # Copy sensitive expected output files into tmp_work.
+            autograding_utils.setup_for_validation(working_directory, complete_config_obj, is_vcs,
+                                                testcases, job_id, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH)
+
+            with open(os.path.join(tmp_logs,"validator_log.txt"), 'w') as logfile:
+                arguments = [queue_obj["gradeable"],
+                            queue_obj["who"],
+                            str(queue_obj["version"]),
+                            submission_string]
+                success = validation_environment.execute(which_untrusted, 'my_validator.out', arguments, logfile, cwd=tmp_work)
+
+                if success == 0:
+                    print (socket.gethostname(), which_untrusted,"VALIDATOR OK")
+                else:
+                    print (socket.gethostname(), which_untrusted,"VALIDATOR FAILURE")
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+            overall_log.flush()
+
+            os.chdir(working_directory)
+            autograding_utils.untrusted_grant_rwx_access(SUBMITTY_INSTALL_DIR, which_untrusted, tmp_work)
+            autograding_utils.add_all_permissions(tmp_work)
+
+            # ARCHIVE STUDENT RESULTS
+            print ("====================================\nARCHIVING STARTS", file=overall_log)
+            overall_log.flush()
+            for tc in testcases:
+                # Removes test input files, makes details directory for the testcase.
+                tc.setup_for_archival(overall_log)
+
+            try:
+                # Perform archival.
+                autograding_utils.archive_autograding_results(working_directory, job_id, which_untrusted, is_batch_job, complete_config_obj,
+                                                    gradeable_config_obj, queue_obj, AUTOGRADING_LOG_PATH, AUTOGRADING_STACKTRACE_PATH, False)
+            except Exception as e:
+                traceback.print_exc()
+            subprocess.call(['ls', '-lR', '.'], stdout=overall_log)
+
+        
     # Zip the results
     filehandle, my_results_zip_file = tempfile.mkstemp()
     autograding_utils.zip_my_directory(tmp_results, my_results_zip_file)

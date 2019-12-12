@@ -656,9 +656,7 @@ class ForumThreadView extends AbstractView {
             $favorite = isset($thread['favorite']) && $thread['favorite'];
 
             $fa_icon = "fa-question";
-            $fa_color = "#ffcc00";
-            $fa_margin_right = "5px";
-            $fa_font_size = "1.8em";
+            $fa_class = "thread-unresolved";
             $tooltip = "Thread Unresolved";
 
             if (!isset($thread['status'])) {
@@ -667,9 +665,7 @@ class ForumThreadView extends AbstractView {
             if ($thread['status'] != 0) {
                 if ($thread['status'] == 1) {
                     $fa_icon = "fa-check";
-                    $fa_color = "#5cb85c";
-                    $fa_margin_right = "0px";
-                    $fa_font_size = "1.5em";
+                    $fa_class = "thread-resolved";
                     $tooltip = "Thread Resolved";
                 }
             }
@@ -700,9 +696,7 @@ class ForumThreadView extends AbstractView {
                 "merged_thread_id" => $thread['merged_thread_id'],
                 "status" => $thread["status"],
                 "fa_icon" => $fa_icon,
-                "fa_color" => $fa_color,
-                "fa_margin_right" => $fa_margin_right,
-                "fa_font_size" => $fa_font_size,
+                "fa_class" => $fa_class,
                 "tooltip" => $tooltip,
                 "is_locked" => $this->core->getQueries()->isThreadLocked($thread['id']),
                 "date" => $date_content,
