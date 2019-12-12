@@ -96,7 +96,7 @@ function addConfetti(){
         colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
 
     }
-
+    return colors[Math.floor(Math.random() * colors.length)];
 	}
 
 	function update () {
