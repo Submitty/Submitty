@@ -5,7 +5,6 @@ namespace tests\app\libraries\database;
 use app\libraries\database\DatabaseFactory;
 use app\libraries\database\DatabaseQueries;
 use app\libraries\database\PostgresqlDatabase;
-use app\libraries\database\PostgresqlDatabaseQueries;
 use app\libraries\database\SqliteDatabase;
 use tests\BaseUnitTest;
 
@@ -26,7 +25,7 @@ class DatabaseFactoryTester extends BaseUnitTest {
         $factory = new DatabaseFactory($driver);
         $this->assertInstanceOf(PostgresqlDatabase::class, $factory->getDatabase(array()));
         /** @noinspection PhpParamsInspection */
-        $this->assertInstanceOf(PostgresqlDatabaseQueries::class, $factory->getQueries($this->createMockCore()));
+        $this->assertInstanceOf(DatabaseQueries::class, $factory->getQueries($this->createMockCore()));
     }
 
     public function testDatabaseFactorySqlite() {

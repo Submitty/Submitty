@@ -31,7 +31,6 @@
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceBeforeStar" />
         <exclude name="Squiz.Commenting.DocCommentAlignment.SpaceAfterStar" />
         <exclude name="Squiz.PHP.DisallowSizeFunctionsInLoops.Found" />
-        <exclude name="Squiz.PHP.NonExecutableCode.Unreachable" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
         <exclude name="Squiz.PHP.NonExecutableCode.ReturnNotRequired" />
 
@@ -52,9 +51,7 @@
         <exclude name="SlevomatCodingStandard.Namespaces.UnusedUses.MismatchingCaseSensitivity" />
         <exclude name="SlevomatCodingStandard.Operators.DisallowEqualOperators.DisallowedEqualOperator" />
         <exclude name="SlevomatCodingStandard.Operators.DisallowEqualOperators.DisallowedNotEqualOperator" />
-        <exclude name="SlevomatCodingStandard.PHP.ShortList.LongListUsed" />
         <exclude name="SlevomatCodingStandard.PHP.UselessSemicolon.UselessSemicolon" />
-        <exclude name="SlevomatCodingStandard.PHP.TypeCast.InvalidCastUsed" />
         <exclude name="SlevomatCodingStandard.TypeHints.ReturnTypeHintSpacing.WhitespaceBeforeColon" />
         <exclude name="SlevomatCodingStandard.Variables.UnusedVariable.UnusedVariable" />
     </rule>

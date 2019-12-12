@@ -93,7 +93,7 @@ def log_stack_trace(log_path, job_id="UNKNOWN", is_batch=False, which_untrusted=
     """ Given a log directory, create or append a stack trace to a dated log file in that directory. """
 
     now = dateutils.get_current_time()
-    datefile = "stack_traces_{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
+    datefile = "{0}.txt".format(datetime.strftime(now, "%Y%m%d"))
     autograding_log_file = os.path.join(log_path, datefile)
     easy_to_read_date = dateutils.write_submitty_date(now, True)
     batch_string = "BATCH" if is_batch else ""
