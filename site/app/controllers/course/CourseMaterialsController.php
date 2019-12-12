@@ -267,23 +267,23 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-     public function ajaxEditCourseMaterialsFiles() {
+    public function ajaxEditCourseMaterialsFiles() {
         $sections = null;
-        if(isset($_POST['sections'])){
+        if (isset($_POST['sections'])) {
             $sections = $_POST['sections'];
         }
         
         $hide_from_students = null;
-        if(isset($_POST['hide_from_students'])){
+        if (isset($_POST['hide_from_students'])) {
             $hide_from_students = $_POST['hide_from_students'];
         }
         
         $order_num = 0.0;
-        if(isset($_POST['order_num'])){
+        if (isset($_POST['order_num'])) {
             $order_num = $_POST['order_num'];
         }
         
-        if(empty($sections) && !is_null($sections)){
+        if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
         
@@ -294,28 +294,28 @@ class CourseMaterialsController extends AbstractController {
         
         $sections_exploded = null;
         
-        if(!(is_null($sections))){
+        if (!(is_null($sections))) {
             $sections_exploded = [];
             $sections_exploded = explode(",", $sections);
         }
         
-        $release_time ="";
-        if(isset($_POST['release_time'])){
+        $release_time = "";
+        if (isset($_POST['release_time'])) {
             $release_time = $_POST['release_time'];
         }
         
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        if($order_num == null){
+        if ($order_num == null) {
             $order_num = 0.0;
         }
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
         $checked = $json[$dst]['checked'];
-        $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'order_num'=>$order_num);
-        FileUtils::writeJsonFile($fp,$json);
+        $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students, 'order_num' => $order_num);
+        FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
-     }
+    }
 
     /**
      * @Route("/{_semester}/{_course}/course_materials/upload", methods={"POST"})
@@ -374,7 +374,7 @@ class CourseMaterialsController extends AbstractController {
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
 
-        if($order_num == null){
+        if ($order_num == null) {
             $order_num = 0.0;
             /*foreach ($json as $json_val){
                 if($order_num < $json_val['order_num']){

@@ -95,8 +95,7 @@ class MiscController extends AbstractController {
                     return false;
                 }
                 
-                if(!$this->core->getUser()->accessGrading() AND !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser()))
-                {
+                if (!$this->core->getUser()->accessGrading() && !CourseMaterial::isSectionAllowed($this->core, $path, $this->core->getUser())) {
                     $this->core->getOutput()->showError("Your section may not access this file.");
                     return false;
                 }

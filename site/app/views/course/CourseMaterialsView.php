@@ -22,29 +22,28 @@ class CourseMaterialsView extends AbstractView {
         $this->core->getOutput()->addBreadcrumb("Course Materials");
         $user_group = $user->getGroup();
         $user_section = $user->getRegistrationSection();
-        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir,$fp, &$file_sections, &$hide_from_students, &$order_nums) {
+        $add_files = function (Core $core, &$files, &$file_datas, &$file_release_dates, $expected_path, $json, $course_materials_array, $start_dir_name, $user_group, &$in_dir, $fp, &$file_sections, &$hide_from_students, &$order_nums) {
             $files[$start_dir_name] = array();
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
             $no_json = array();
-            usort($course_materials_array, function($a, $b) use ($expected_path, $json){
+            usort($course_materials_array, function ($a, $b) use ($expected_path, $json){
                 $order_num_a = 0.0;
                 $order_num_b = 0.0;
                 $expected_file_path_a = FileUtils::joinPaths($expected_path, $a);
                 $expected_file_path_b = FileUtils::joinPaths($expected_path, $b);
-                if (isset($json[$expected_file_path_a]['order_num'])){
+                if (isset($json[$expected_file_path_a]['order_num'])) {
                     $order_num_a = $json[$expected_file_path_a]['order_num'];
                 }
-                if (isset($json[$expected_file_path_b]['order_num'] )){
+                if (isset($json[$expected_file_path_b]['order_num'])) {
                     $order_num_b = $json[$expected_file_path_b]['order_num'];
                 }
-                if($order_num_a == $order_num_b){
+                if ($order_num_a == $order_num_b) {
                     return strcmp($a, $b);
                 }
                 return $order_num_a < $order_num_b;
             });
-            foreach($course_materials_array as $file) {
-
+            foreach ($course_materials_array as $file) {
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
                 array_push($in_dir, $expected_file_path);
@@ -58,15 +57,15 @@ class CourseMaterialsView extends AbstractView {
                     if (isset($json[$expected_file_path])) {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
-                        if ( isset( $json[$expected_file_path]['sections'] ) ){
+                        if (isset($json[$expected_file_path]['sections'])) {
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
                         }
                         $release_date = DateUtils::parseDateTime($json[$expected_file_path]['release_datetime'], $core->getConfig()->getTimezone());
-                        if ( isset( $json[$expected_file_path]['hide_from_students'] ) ){
+                        if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
                         
-                        if ( isset( $json[$expected_file_path]['order_num'] ) ){
+                        if (isset($json[$expected_file_path]['order_num'])) {
                             $order_nums[$expected_file_path] = $json[$expected_file_path]['order_num'];
                         }
 
@@ -81,14 +80,14 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
                         $release_date = $json['release_time'];
-                        if ( isset( $json[$expected_file_path]['hide_from_students'] ) ){
+                        if (isset( $json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
-                        if ( isset( $json[$expected_file_path]['order_num'] ) ){
+                        if (isset($json[$expected_file_path]['order_num'])) {
                             $order_nums[$expected_file_path] = $json[$expected_file_path]['order_num'];
                         }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
-                        if ( isset( $json[$expected_file_path]['sections'] ) ){
+                        if (isset( $json[$expected_file_path]['sections'])) {
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
                         }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
@@ -166,7 +165,7 @@ class CourseMaterialsView extends AbstractView {
 
         $fp = $this->core->getConfig()->getCoursePath() . '/uploads/course_materials_file_data.json';
         $json = FileUtils::readJsonFile($fp);
-        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group,$in_dir,$fp, $file_sections, $hide_from_students, $order_nums);
+        $add_files($this->core, $submissions, $file_shares, $file_release_dates, $expected_path, $json, $course_materials_array, 'course_materials', $user_group, $in_dir, $fp, $file_sections, $hide_from_students, $order_nums);
 
         //Check if user has permissions to access page (not instructor when no course materials available)
         if ($user_group !== 1 && count($course_materials_array) == 0) {
