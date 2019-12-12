@@ -306,8 +306,7 @@ class DiffViewer {
             ) {
                 $this->diff[self::ACTUAL][$i] = $this->correctMbDiff(
                     $this->actual[$i],
-                    $this->diff[self::ACTUAL][$i],
-                    $i
+                    $this->diff[self::ACTUAL][$i]
                 );
             }
         }
