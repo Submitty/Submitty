@@ -768,14 +768,14 @@ def shipper_process(my_name,my_data,full_address,which_untrusted):
             else:
                 if counter == 0 or counter >= 10:
                     autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID,
-                        message="{0} {1}: no available job".format(my_name, which_untrusted))
+                        message=f"{my_name} {which_untrusted}: no available job")
                     counter=0
                 counter+=1
                 time.sleep(1)
 
         except Exception as e:
             autograding_utils.log_stack_trace(AUTOGRADING_STACKTRACE_PATH, job_id=JOB_ID, trace=traceback.format_exc())
-            my_message = "ERROR in get_job {0} {1} {2}. For more details, see traces entry".format(which_machine,which_untrusted,str(e))
+            my_message = f"ERROR in get_job {which_machine} {which_untrusted} {str(e)}. For more details, see traces entry"
             autograding_utils.log_message(AUTOGRADING_LOG_PATH, JOB_ID, message=my_message)
             time.sleep(1)
 
