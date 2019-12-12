@@ -327,7 +327,9 @@ class AdminGradeableController extends AbstractController {
         // Make a new gradeable component with good default values
         $component = $this->newComponent($gradeable);
         if ($gradeable->getType() === GradeableType::ELECTRONIC_FILE) {
+            //Add a new mark (count up)
             $mark0 = $this->newMark($component);
+            $mark0->setTitle('No Credit');
             $component->setMarks([$mark0]);
         }
         elseif ($gradeable->getType() === GradeableType::CHECKPOINTS) {
