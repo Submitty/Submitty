@@ -109,7 +109,7 @@
                         <label>Sections: 
                         {{this_file_section|join(',')}}
                         </label>
-                    {% endif %}
+                {% endif %}
                     
                 {% endif %}
                 
@@ -117,9 +117,10 @@
                     <label>Sections (Hidden): 
                     {{this_file_section|join(',')}}
                     </label>
-                {% else %}
+                {% endif %}
                 
-                <label>Order: 
+                {% if this_order_num != 0.0 %}
+                <label>Relative Position: 
                     {{this_order_num}}
                 </label>
                 
