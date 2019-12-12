@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\models;
 
 use app\exceptions\BadArgumentException;
@@ -20,8 +19,8 @@ use app\libraries\FileUtils;
  *
  * When adding to data to any property, the appropriate setter must be used as they preform additional validation.
  */
-class RainbowCustomizationJSON extends AbstractModel
-{
+class RainbowCustomizationJSON extends AbstractModel {
+
     protected $core;
 
     private $section;                   // Init in constructor
@@ -44,8 +43,8 @@ class RainbowCustomizationJSON extends AbstractModel
 
         // Items that must be initialized as objects
         // This is done so json_encode will properly encode the item when converting to json
-        $this->section = (object)[];
-        $this->benchmark_percent = (object)[];
+        $this->section = (object) [];
+        $this->benchmark_percent = (object) [];
     }
 
     /**
@@ -53,8 +52,7 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @return array
      */
-    public function getGradeables()
-    {
+    public function getGradeables() {
         return $this->gradeables;
     }
 
@@ -63,8 +61,7 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @return array The display benchmarks
      */
-    public function getDisplayBenchmarks()
-    {
+    public function getDisplayBenchmarks() {
         return $this->display_benchmark;
     }
 
@@ -75,15 +72,12 @@ class RainbowCustomizationJSON extends AbstractModel
      * @param string $benchmark The benchmark to add
      * @throws BadArgumentException The passed in argument is not allowed
      */
-    public function addDisplayBenchmarks(string $benchmark)
-    {
-        if(!in_array($benchmark, self::allowed_display_benchmarks))
-        {
+    public function addDisplayBenchmarks(string $benchmark) {
+        if (!in_array($benchmark, self::allowed_display_benchmarks)) {
             throw new BadArgumentException('Passed in benchmark not found in the list of allowed benchmarks');
         }
 
-        if(!in_array($benchmark, $this->display_benchmark))
-        {
+        if (!in_array($benchmark, $this->display_benchmark)) {
             array_push($this->display_benchmark, $benchmark);
         }
     }
@@ -93,8 +87,7 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @return bool Indicates if a custom_customization.json exists
      */
-    public function doesCustomCustomizationExist()
-    {
+    public function doesCustomCustomizationExist() {
         // Get path to custom_customization.json
         $course_path = $this->core->getConfig()->getCoursePath();
         $file_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'custom_customization.json');
@@ -108,60 +101,50 @@ class RainbowCustomizationJSON extends AbstractModel
      * @throws FileReadException Failure to read the contents of the file
      * @throws MalformedDataException Failure to decode the contents of the JSON string
      */
-    public function loadFromJsonFile()
-    {
+    public function loadFromJsonFile() {
         // Get contents of file and decode
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
 
-        if(!file_exists($course_path))
-        {
+        if (!file_exists($course_path)) {
             throw new FileReadException('Unable to locate the file to read');
         }
 
         $file_contents = file_get_contents($course_path);
 
         // Validate file read
-        if($file_contents === False)
-        {
+        if ($file_contents === false) {
             throw new FileReadException('An error occurred trying to read the contents of customization file.');
         }
 
         $json = json_decode($file_contents);
 
         // Validate decode
-        if($json === NULL)
-        {
+        if ($json === null) {
             throw new MalformedDataException('Unable to decode JSON string');
         }
 
-        if(isset($json->display_benchmark))
-        {
+        if (isset($json->display_benchmark)) {
             $this->display_benchmark = $json->display_benchmark;
         }
 
-        if(isset($json->section))
-        {
+        if (isset($json->section)) {
             $this->section = $json->section;
         }
 
-        if(isset($json->messages))
-        {
+        if (isset($json->messages)) {
             $this->messages = $json->messages;
         }
 
-        if(isset($json->display))
-        {
+        if (isset($json->display)) {
             $this->display = $json->display;
         }
 
-        if(isset($json->benchmark_percent))
-        {
+        if (isset($json->benchmark_percent)) {
             $this->benchmark_percent = $json->benchmark_percent;
         }
 
-        if(isset($json->gradeables))
-        {
+        if (isset($json->gradeables)) {
             $this->gradeables = $json->gradeables;
         }
     }
@@ -172,15 +155,12 @@ class RainbowCustomizationJSON extends AbstractModel
      * @param $display The item to add
      * @throws BadArgumentException The passed in argument is not allowed.
      */
-    public function addDisplay($display)
-    {
-        if(!in_array($display, self::allowed_display))
-        {
+    public function addDisplay($display) {
+        if (!in_array($display, self::allowed_display)) {
             throw new BadArgumentException('Passed in display not found in the list of allowed display items');
         }
 
-        if(!in_array($display, $this->display))
-        {
+        if (!in_array($display, $this->display)) {
             $this->display[] = $display;
         }
     }
@@ -192,10 +172,8 @@ class RainbowCustomizationJSON extends AbstractModel
      * @param $label The label you would like to assign to the sectionID
      * @throws BadArgumentException The passed in section label is empty
      */
-    public function addSection($sectionID, $label)
-    {
-        if(empty($label))
-        {
+    public function addSection($sectionID, $label) {
+        if (empty($label)) {
             throw new BadArgumentException('The section label may not be empty.');
         }
 
@@ -207,8 +185,7 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @return object
      */
-    public function getSection()
-    {
+    public function getSection() {
         return $this->section;
     }
 
@@ -217,14 +194,12 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @param object $gradeable
      */
-    public function addGradeable(object $gradeable)
-    {
+    public function addGradeable(object $gradeable) {
         // TODO: Validate gradeable data
         // Validation of this item will be better handled when schema validation is complete, until then just make
         // sure gradeable is not empty
-        $emptyObject = (object)[];
-        if($gradeable == $emptyObject)
-        {
+        $emptyObject = (object) [];
+        if ($gradeable == $emptyObject) {
             throw new BadArgumentException('Gradeable may not be empty.');
         }
 
@@ -236,8 +211,7 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @return array
      */
-    public function getMessages()
-    {
+    public function getMessages() {
         return $this->messages;
     }
 
@@ -247,10 +221,8 @@ class RainbowCustomizationJSON extends AbstractModel
      *
      * @param string $message
      */
-    public function addMessage(string $message)
-    {
-        if(empty($message))
-        {
+    public function addMessage(string $message) {
+        if (empty($message)) {
             throw new BadArgumentException('You may not add an empty message.');
         }
 
@@ -260,28 +232,24 @@ class RainbowCustomizationJSON extends AbstractModel
     /**
      * Save the contents in this objects properties to the customization.json for the current course
      */
-    public function saveToJsonFile()
-    {
+    public function saveToJsonFile() {
         // Get path of where to save file
         $course_path = $this->core->getConfig()->getCoursePath();
         $course_path = FileUtils::joinPaths($course_path, 'rainbow_grades', 'customization.json');
 
         // If display was empty then just add defaults
-        if(empty($this->display))
-        {
+        if (empty($this->display)) {
             $this->addDisplay('grade_summary');
             $this->addDisplay('grade_details');
         }
 
         // Create object that will be written to file after collecting non-empty items
-        $json = (object)[];
+        $json = (object) [];
 
         // Copy each property from $this over to $json
-        foreach($this as $key => $value)
-        {
+        foreach ($this as $key => $value) {
             // Dont include $core or $modified
-            if($key != 'core' AND $key != 'modified')
-            {
+            if ($key != 'core' && $key != 'modified') {
                 $json->$key = $value;
             }
         }

@@ -111,7 +111,8 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                     if(!anyUnresolvedConflicts()) {
                         popup.hide();
                         resolve();
-                    } else {
+                    }
+                    else {
                         showNextConflict();
                     }
                 };
@@ -130,7 +131,8 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                                         // Don't let this error hold up the whole operation
                                         alert('Could not delete mark: ' + err.message);
                                     });
-                            } else {
+                            }
+                            else {
                                 // If the mark was deleted from the server, but we want to keep our changes,
                                 //  we need to re-add the mark
                                 if (isMarkServerDeleted(id)) {
@@ -138,7 +140,8 @@ function openMarkConflictPopup(component_id, conflictMarks) {
                                         .then(function (data) {
                                             mark.id = data.mark_id;
                                         });
-                                } else {
+                                }
+                                else {
                                     return ajaxSaveMark(gradeable_id, component_id, id, mark.title, mark.points, mark.publish);
                                 }
                             }

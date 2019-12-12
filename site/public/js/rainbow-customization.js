@@ -220,12 +220,14 @@ function checkAutoRGStatus()
                 $('#save_status').html('Rainbow grades successfully generated!');
                 showLogButton(response.data);
 
-            } else if (response.status === 'fail') {
+            }
+            else if (response.status === 'fail') {
 
                 $('#save_status').html('A failure occurred generating rainbow grades');
                 showLogButton(response.message);
 
-            } else {
+            }
+            else {
 
                 $('#save_status').html('Internal Server Error');
                 console.log(response);
@@ -258,10 +260,12 @@ function ajaxUpdateJSON(successCallback, errorCallback) {
                     // Call the server to see if auto_rainbow_grades has completed
                     checkAutoRGStatus();
                     //successCallback(response.data);
-                } else if (response.status === 'fail') {
+                }
+                else if (response.status === 'fail') {
                     $('#save_status').html('A failure occurred saving customization data');
                     //errorCallback(response.message, response.data);
-                } else {
+                }
+                else {
                     $('#save_status').html('Internal Server Error');
                     console.error(response.message);
                 }

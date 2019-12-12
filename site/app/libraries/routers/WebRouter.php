@@ -1,6 +1,5 @@
 <?php
 
-
 namespace app\libraries\routers;
 
 use app\libraries\response\RedirectResponse;
@@ -17,7 +16,6 @@ use Symfony\Component\Routing\Loader\AnnotationDirectoryLoader;
 use Doctrine\Common\Annotations\AnnotationReader;
 use app\libraries\Utils;
 use app\libraries\Core;
-
 
 class WebRouter {
     /** @var Core  */
@@ -49,7 +47,6 @@ class WebRouter {
         $loader = new AnnotationDirectoryLoader($fileLocator, $annotationLoader);
         $collection = $loader->load(realpath(__DIR__ . "/../../controllers"));
         $context = new RequestContext();
-
         $matcher = new UrlMatcher($collection, $context->fromRequest($this->request));
         $this->parameters = $matcher->matchRequest($this->request);
     }
@@ -59,7 +56,7 @@ class WebRouter {
      * @param Core $core
      * @return Response|mixed should be of type Response only in the future
      */
-    static public function getApiResponse(Request $request, Core $core) {
+    public static function getApiResponse(Request $request, Core $core) {
         try {
             $router = new self($request, $core);
             $router->loadCourse();
@@ -67,8 +64,10 @@ class WebRouter {
             $logged_in = $core->isApiLoggedIn($request);
 
             // prevent user that is not logged in from going anywhere except AuthenticationController
-            if (!$logged_in &&
-                !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')) {
+            if (
+                !$logged_in
+                && !Utils::endsWith($router->parameters['_controller'], 'AuthenticationController')
+            ) {
                 return new Response(JsonResponse::getFailResponse("Unauthenticated access. Please log in."));
             }
 
@@ -104,7 +103,7 @@ class WebRouter {
      * @return Response|mixed should be of type Response only in the future
      * @throws \ReflectionException|\Exception
      */
-    static public function getWebResponse(Request $request, Core $core) {
+    public static function getWebResponse(Request $request, Core $core) {
         $logged_in = false;
         try {
             $router = new self($request, $core);
@@ -174,8 +173,10 @@ class WebRouter {
      * @throws \Exception
      */
     private function loadCourse() {
-        if (array_key_exists('_semester', $this->parameters) &&
-            array_key_exists('_course', $this->parameters)) {
+        if (
+            array_key_exists('_semester', $this->parameters)
+            && array_key_exists('_course', $this->parameters)
+        ) {
             $semester = $this->parameters['_semester'];
             $course = $this->parameters['_course'];
 
@@ -184,7 +185,7 @@ class WebRouter {
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadGradingQueue();
 
-            if($this->core->getConfig()->isCourseLoaded()){
+            if ($this->core->getConfig()->isCourseLoaded()) {
                 $this->core->getOutput()->addBreadcrumb(
                     $this->core->getDisplayedCourseName(),
                     $this->core->buildCourseUrl(),
@@ -195,7 +196,7 @@ class WebRouter {
             /** @noinspection PhpUnhandledExceptionInspection */
             $this->core->loadCourseDatabase();
 
-            if($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
+            if ($this->core->getConfig()->isCourseLoaded() && $this->core->getConfig()->isForumEnabled()) {
                 /** @noinspection PhpUnhandledExceptionInspection */
                 $this->core->loadForum();
             }
@@ -216,19 +217,23 @@ class WebRouter {
                 )
             );
         }
-        elseif ($this->core->getConfig()->isCourseLoaded()
+        elseif (
+            $this->core->getConfig()->isCourseLoaded()
             && !$this->core->getAccess()->canI("course.view", ["semester" => $this->core->getConfig()->getSemester(), "course" => $this->core->getConfig()->getCourse()])
             && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
-            && $this->parameters['_method'] !== 'noAccess') {
+            && $this->parameters['_method'] !== 'noAccess'
+        ) {
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['no_access']))
             );
         }
 
-        if(!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
-            if ($logged_in){
-                if ($this->parameters['_method'] !== 'logout' &&
-                    !Utils::endsWith($this->parameters['_controller'], 'HomePageController')) {
+        if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
+            if ($logged_in) {
+                if (
+                    $this->parameters['_method'] !== 'logout'
+                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                ) {
                     return Response::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );
@@ -249,9 +254,10 @@ class WebRouter {
      * @return Response|bool
      */
     private function csrfCheck() {
-        if ($this->request->isMethod('POST') &&
-            !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController') &&
-            !$this->core->checkCsrfToken()
+        if (
+            $this->request->isMethod('POST')
+            && !Utils::endsWith($this->parameters['_controller'], 'AuthenticationController')
+            && !$this->core->checkCsrfToken()
         ) {
             $msg = "Invalid CSRF token.";
             $this->core->addErrorMessage($msg);

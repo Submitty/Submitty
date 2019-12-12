@@ -650,10 +650,15 @@
                             {% endif %}
                         {% endif %}
 
-                        {% if core.getConfig().isRegradeEnabled() and not peer %}
+                        {% if regrade_allowed and not peer %}
                             <br/>
                             <br/>
-                            <b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}
+                            <p><b>Number of unresolved grade inquiries:</b> {{ regrade_requests }}</p>
+                            {% if grade_inquiry_per_component_allowed %}
+                                {% for component in component_averages %}
+                                    <p><b>Number of unresolved grade inquiries for {{ component.getTitle() }}:</b> {{ component.getActiveGradeInquiryCount() }} </p>
+                                {% endfor %}
+                            {% endif %}
                         {% endif %}
                         {# LEFT CHUNK #}
                     </div>

@@ -70,7 +70,9 @@ class AutoGradingView extends AbstractView {
 
             if ($gradeable->isTaGradeReleased()) {
                 foreach ($version_instance->getTestcases() as $testcase) {
-                    if (!$testcase->canView()) continue;
+                    if (!$testcase->canView()) {
+                        continue;
+                    }
                     if ($testcase->getTestcase()->isHidden()) {
                         $any_visible_hidden = true;
                         break;
@@ -82,9 +84,8 @@ class AutoGradingView extends AbstractView {
                 ($version_instance->getNonHiddenNonExtraCredit() + $version_instance->getHiddenNonExtraCredit() > $autograding_config->getTotalNonHiddenNonExtraCredit());
         }
         // testcases should only be visible if autograding is complete
-        if(!$incomplete_autograding) {
+        if (!$incomplete_autograding) {
             foreach ($version_instance->getTestcases() as $testcase) {
-
                 if ($testcase->canView()) {
                     $num_visible_testcases++;
                 }
@@ -143,12 +144,13 @@ class AutoGradingView extends AbstractView {
                     "name" => $file_name,
                     "path" => $file_path,
                     "url" => $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
-                        "dir" => $public ? "results_public": "results",
+                        "dir" => $public ? "results_public" : "results",
                         "file" => $file_name,
                         "path" => $file_path
                     ])
                 ];
-            } else {
+            }
+            else {
                 $check = [
                     "messages" => $autocheck->getMessages(),
                     "description" => $description
@@ -168,15 +170,17 @@ class AutoGradingView extends AbstractView {
                         "show_popup" => false,
                         "src" => $this->autoGetImageSrc($actual_image),
                     ];
-                } else if ($diff_viewer->hasDisplayActual()) {
-                    if($autocheck->isDisplayAsSequenceDiagram()){
+                }
+                elseif ($diff_viewer->hasDisplayActual()) {
+                    if ($autocheck->isDisplayAsSequenceDiagram()) {
                         $check["actual"] = [
                             "type" => "sequence_diagram",
                             "title" => $actual_title,
                             "show_popup" => $this->autoShouldDisplayPopup($actual_display),
                             "src" => file_get_contents($diff_viewer->getActualFilename())
                         ];
-                    }else{
+                    }
+                    else {
                         $check["actual"] = [
                             "type" => "text",
                             "title" => $actual_title,
@@ -196,7 +200,8 @@ class AutoGradingView extends AbstractView {
                         "show_popup" => false,
                         "src" => $this->autoGetImageSrc($expected_image)
                     ];
-                } else if ($diff_viewer->hasDisplayExpected()) {
+                }
+                elseif ($diff_viewer->hasDisplayExpected()) {
                     $check["expected"] = [
                         "type" => "text",
                         "title" => $expected_title,
@@ -303,7 +308,8 @@ class AutoGradingView extends AbstractView {
         // Special messages for peer / mentor-only grades
         if ($gradeable->isPeerGrading()) {
             $grader_names = ['Graded by Peer(s)'];
-        } else if (count($grader_names) === 0) {
+        }
+        elseif (count($grader_names) === 0) {
             // Non-peer assignment with only limited access graders
             $grader_names = ['Course Staff'];
         }
@@ -334,7 +340,7 @@ class AutoGradingView extends AbstractView {
         $late_days_url = $this->core->buildCourseUrl(['late_table']);
         $regrade_allowed = $gradeable->isRegradeAllowed();
         $regrade_date = $gradeable->getRegradeRequestDate();
-        $regrade_date=DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
+        $regrade_date = DateUtils::dateTimeToString($gradeable->getRegradeRequestDate());
         // Get the number of decimal places for floats to display nicely
         $num_decimals = 0;
         $precision_parts = explode('.', strval($gradeable->getPrecision()));
@@ -370,13 +376,13 @@ class AutoGradingView extends AbstractView {
         }, $gradeable->getComponents());
 
         $uploaded_pdfs = [];
-        foreach($uploaded_files['submissions'] as $file){
-          if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
+        foreach ($uploaded_files['submissions'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
                 $uploaded_pdfs[] = $file;
             }
         }
-        foreach($uploaded_files['checkout'] as $file){
-          if(array_key_exists('path',$file) && mime_content_type($file['path']) === "application/pdf"){
+        foreach ($uploaded_files['checkout'] as $file) {
+            if (array_key_exists('path', $file) && mime_content_type($file['path']) === "application/pdf") {
                 $uploaded_pdfs[] = $file;
             }
         }
@@ -385,31 +391,41 @@ class AutoGradingView extends AbstractView {
         //trying something
         $gradeable_id = $gradeable->getId();
         $id = $this->core->getUser()->getId();
-        if($gradeable->isTeamAssignment()){
+        if ($gradeable->isTeamAssignment()) {
             $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
         }
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotated_file_names = [];
-        if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
+        if (is_dir($annotation_path) && count(scandir($annotation_path)) > 2) {
             $first_file = scandir($annotation_path)[2];
             $annotation_path = FileUtils::joinPaths($annotation_path, $first_file);
-            if(is_file($annotation_path)) {
+            if (is_file($annotation_path)) {
                 $dir_iter = new \DirectoryIterator(dirname($annotation_path . '/'));
                 foreach ($dir_iter as $fileinfo) {
                     if (!$fileinfo->isDot()) {
                         $no_extension = preg_replace('/\\.[^.\\s]{3,4}$/', '', $fileinfo->getFilename());
                         $pdf_info = explode('_', $no_extension);
-                        $pdf_id = $pdf_info[0];
-                        if(file_get_contents($fileinfo->getPathname())!=""){
-                            $pdf_id=$pdf_id.'.pdf';
-                            $annotated_file_names[]=$pdf_id;
+                        $pdf_id = implode("_", array_slice($pdf_info, 0, -1));
+                        if (file_get_contents($fileinfo->getPathname()) != "") {
+                            $pdf_id = $pdf_id . '.pdf';
+                            $annotated_file_names[] = $pdf_id;
                         }
                     }
                 }
             }
         }
+
+        // for bulk uploads only show PDFs
+        if ($gradeable->isScannedExam()) {
+            $files = $uploaded_pdfs;
+        }
+        else {
+            $files = array_merge($files['submissions'], $files['checkout']);
+        }
+
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'files'=> array_merge($files['submissions'], $files['checkout']),
+            'files' => $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
@@ -432,7 +448,7 @@ class AutoGradingView extends AbstractView {
             'uploaded_pdfs' => $uploaded_pdfs,
             'user_id' => $this->core->getUser()->getId(),
             'gradeable_id' => $gradeable->getId(),
-            'can_download' =>$can_download,
+            'can_download' => $can_download,
             'display_version' => $display_version,
             'student_pdf_view_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'pdf']),
             "annotated_file_names" =>  $annotated_file_names

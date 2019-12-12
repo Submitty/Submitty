@@ -227,9 +227,9 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
         $this->assertEquals(2, count($json));   //2 files
 
         $expected_json2 = [
-            'checked' => "1",
+            'checked' => '1',
             'release_datetime' => $new_date,
-            'hide_from_students' => "off"
+            'hide_from_students' => null
         ];
         $this->assertEquals($expected_json2, $json[$_POST['fn'][1]]);
     }
