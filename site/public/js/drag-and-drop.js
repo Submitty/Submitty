@@ -107,13 +107,12 @@ function progress(e){
     }
 }
 
-function get_part_number(e){
-    if(e.target.id.substring(0, 6) == "upload"){
-        return e.target.id.substring(6);
+function get_part_number(e) {
+    let node = e.target;
+    while (node.id.substring(0, 6) !== 'upload') {
+        node = node.parentNode;
     }
-    else{
-        return e.target.parentNode.id.substring(6);
-    }
+    return node.id.substring(6);
 }
 
 // copy files selected from the file browser
@@ -173,14 +172,18 @@ function isFolder(file){
 function addFile(file, part, check_duplicate_zip=true){
     var i = fileExists(file.name, part);
     if( i[0] == -1 ){    // file does not exist
-        // empty bucket if file is a zip and bucket is not empty
+        // When uploading a zip, we confirm with the user to empty the bucket and then only add the zip
         if(check_duplicate_zip && file.name.substring(file.name.length - 4, file.name.length) == ".zip" && file_array[part-1].length + previous_files[part-1].length > 0 ){
             if(confirm("Note: All files currently in the bucket will be deleted if you try to upload a zip: " + file.name + ". Do you want to continue?")){
                 deleteFiles(part);
+                file_array[part-1].push(file);
+                addLabel(file.name, (file.size/1024).toFixed(2), part, false);
             }
         }
-        file_array[part-1].push(file);
-        addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+        else {
+            file_array[part-1].push(file);
+            addLabel(file.name, (file.size/1024).toFixed(2), part, false);
+        }
     }
     else if(i[0] == 0){    // file already selected
         if(confirm("Note: " + file_array[part-1][i[1]].name + " is already selected. Do you want to replace it?")){
@@ -302,7 +305,6 @@ function removeLabel(filename, part){
 function addLabel(filename, filesize, part, previous){
     // create element
     var uploadRowElement = document.createElement('tr');
-    uploadRowElement.setAttribute("class", "label");
     uploadRowElement.setAttribute("fname", filename);
 
     var fileDataElement = document.createElement('td');
@@ -337,7 +339,7 @@ function addLabel(filename, filesize, part, previous){
         deleteSingleFile(filename, part, previous);
     };
 
-    // adding the file in `table` in the parent div 
+    // adding the file in `table` in the parent div
     var fileTable = document.getElementById("file-upload-table-" + part);
     // Uncomment if want buttons for emptying single bucket
     // var deletebutton = document.getElementById("delete" + part);
