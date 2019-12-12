@@ -1564,7 +1564,7 @@ end of styles used in the admin gradeable page
 }
 
 #confetti_canvas{
-    position: absolute;
+    position: fixed;
     display: none;
     z-index: 99999;
     top:0px;
