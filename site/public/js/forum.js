@@ -220,7 +220,9 @@ function changeThreadStatus(thread_id) {
 }
 
 function editPost(post_id, thread_id, shouldEditThread, render_markdown, csrf_token) {
-    if(!checkAreYouSureForm()) return;
+    if(!checkAreYouSureForm()) {
+        return;
+    }
     var form = $("#thread_form");
     var url = buildCourseUrl(['forum', 'posts', 'get']);
     $.ajax({
