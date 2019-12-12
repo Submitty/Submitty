@@ -170,7 +170,8 @@ class NotificationFactory {
             $details = [
                 'to_user_id' => $recipient,
                 'subject' => $event['subject'],
-                'body' => $event['content']
+                'body' => $event['content'],
+                'relevant_url' => json_decode($event['metadata'], true)['url']
             ];
             $emails[] = new Email($this->core, $details);
         }
