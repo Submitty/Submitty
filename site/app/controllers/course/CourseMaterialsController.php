@@ -268,18 +268,18 @@ class CourseMaterialsController extends AbstractController {
      * @Route("/{_semester}/{_course}/course_materials/edit", methods={"POST"})
      * @AccessControl(role="INSTRUCTOR")
      */
-     public function ajaxEditCourseMaterialsFiles() {
+    public function ajaxEditCourseMaterialsFiles() {
         $sections = null;
-        if(isset($_POST['sections'])){
+        if (isset($_POST['sections'])) {
             $sections = $_POST['sections'];
         }
         
         $hide_from_students = null;
-        if(isset($_POST['hide_from_students'])){
+        if (isset($_POST['hide_from_students'])) {
             $hide_from_students = $_POST['hide_from_students'];
         }
         
-        if(empty($sections) && !is_null($sections)){
+        if (empty($sections) && !is_null($sections)) {
             $sections = [];
         }
         
@@ -290,13 +290,13 @@ class CourseMaterialsController extends AbstractController {
         
         $sections_exploded = null;
         
-        if(!(is_null($sections))){
+        if (!(is_null($sections))) {
             $sections_exploded = [];
             $sections_exploded = explode(",", $sections);
         }
         
-        $release_time ="";
-        if(isset($_POST['release_time'])){
+        $release_time = "";
+        if (isset($_POST['release_time'])) {
             $release_time = $_POST['release_time'];
         }
         
@@ -306,9 +306,9 @@ class CourseMaterialsController extends AbstractController {
         $dst = FileUtils::joinPaths($upload_path, $requested_path);
         $checked = $json[$dst]['checked'];
         $json[$dst] =  array('checked' => $checked, 'release_datetime' => $release_time, 'sections' => $sections_exploded, 'hide_from_students' => $hide_from_students);
-        FileUtils::writeJsonFile($fp,$json);
+        FileUtils::writeJsonFile($fp, $json);
         return $this->core->getOutput()->renderResultMessage("Successfully uploaded!", true);
-     }
+    }
 
     /**
      * @Route("/{_semester}/{_course}/course_materials/upload", methods={"POST"})
