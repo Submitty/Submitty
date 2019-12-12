@@ -167,10 +167,18 @@ class NotificationFactory {
     private function createEmailsArray($event, $recipients) {
         $emails = array();
         foreach ($recipients as $recipient) {
+            //Checks if a url is in metadata and sets $relevant_url null or that url
+            $metadata = json_decode($event['metadata'], true);
+            $relevant_url = null;
+            if (array_key_exists("url", $metadata)) {
+                $relevant_url = $metadata["url"];
+            }
+
             $details = [
                 'to_user_id' => $recipient,
                 'subject' => $event['subject'],
-                'body' => $event['content']
+                'body' => $event['content'],
+                'relevant_url' => $relevant_url
             ];
             $emails[] = new Email($this->core, $details);
         }
