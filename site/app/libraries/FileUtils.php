@@ -518,14 +518,20 @@ class FileUtils {
             $type = mime_content_type($tmp_name);
             
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
-            $errors = [ErrorMessages::uploadErrors($files['error'][$i])];
+            $errors = [];
+            if ($files['error'][$i] !== UPLOAD_ERR_OK) {
+                $errors[] = ErrorMessages::uploadErrors($files['error'][$i]);
+            }
 
             //check if its a zip file
             $is_zip = $type === 'application/zip';
             if ($is_zip) {
                 $zip_status = FileUtils::getZipFileStatus($tmp_name);
                 if ($zip_status !== \ZipArchive::ER_OK) {
-                    $errors[] = ErrorMessages::getZipErrorMessage($zip_status);
+                    $err_tmp = ErrorMessages::getZipErrorMessage($zip_status);
+                    if($err_tmp != "No error."){
+                        $errors[] = $err_tmp;
+                    }
                 }
                 else {
                     $size = FileUtils::getZipSize($tmp_name);
@@ -549,24 +555,15 @@ class FileUtils {
                 $errors[] = "Invalid filename";
             }
 
-            $errors = array_unique($errors);
             $success = true;
-            foreach ($errors as $err) {
-                if ($err !== 'No error.') {
-                    $success = false;
-                }
+            if (count($errors) > 0) {
+                $success = false;
             }
-
-            //something went wrong, remove the 'No error. msg'
-            if (!$success && ($key = array_search('No error.', $errors)) !== false) {
-                unset($errors[$key]);
-            }
-
-
+            
             $ret[] = [
                 'name' => $name,
                 'type' => $type,
-                'error' => implode(" ", $errors),
+                'error' => $success ? "No error." : implode(" ", $errors),
                 'size' => $size,
                 'is_zip' => $is_zip,
                 'success' => $success,
