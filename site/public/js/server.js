@@ -1306,9 +1306,11 @@ $(function() {
         }
     }
 
-    setTimeout(function() {
-        $('.alert-success').fadeOut();
-    }, 5000);
+    for (const elem of document.getElementsByClassName('alert-success')) {
+        setTimeout(() => {
+            $(elem).fadeOut();
+        }, 5000);
+    }
 });
 
 function getFileExtension(filename){
@@ -1325,10 +1327,35 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-function displayError(message){
-    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + message + '</div>';
+let messages = 0;
+
+function displayErrorMessage(message){
+    displayMessage(message, 'error');
+}
+
+function displaySuccessMessage(message) {
+    displayMessage(message, 'success');
+}
+
+/**
+ * Display a toast message after an action.
+ *
+ * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
+ *
+ * @param {string} message
+ * @param {string} type
+ */
+function displayMessage(message, type) {
+    const id = `${type}-js-${messages}`;
+    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
-    $('#messages').fadeIn("slow");
+    $('#messages').fadeIn('slow');
+    if (type === 'success') {
+        setTimeout(() => {
+            $(`#${id}`).fadeOut();
+        }, 5000);
+    }
+    messages++;
 }
 
 /**
