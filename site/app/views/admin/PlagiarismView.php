@@ -437,7 +437,7 @@ HTML;
         $all_files = "checked";
         $regex_matching_files = "";
         $regex = "";
-        $language = ["python" => "selected", "java" => "", "plaintext" => "", "cpp" => ""];
+        $language = ["python" => "selected", "java" => "", "plaintext" => "", "cpp" => "", "mips" => ""];
         $provided_code = "";
         $no_provided_code = "checked";
         $provided_code_filename = "";
@@ -575,6 +575,7 @@ HTML;
                         <option value="cpp" {$language['cpp']}>C++</option>
                         <option value="java" {$language['java']}>Java</option>
                         <option value="plaintext" {$language['plaintext']}>Plain Text</option>
+                        <option value="mips" {$language['mips']}>MIPS Assembly</option>
                     </select>
                 </div>
             </div><br /><br /><br /><br /><br />

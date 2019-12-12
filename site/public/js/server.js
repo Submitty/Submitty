@@ -592,6 +592,9 @@ function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeabl
         else if ($('[name="language"]', form).val() == "plaintext") {
             $('[name="sequence_length"]', form).val('4');
         }
+        else if ($('[name="language"]', form).val() == "mips") {
+            $('[name="sequence_length"]', form).val('5');
+        }
     }
     else if(select_element_name.substring(0, 9) == "prev_sem_") {
         var i = select_element_name.substring(9);
