@@ -61,7 +61,8 @@
     if(document.createEvent){
         colorEvent = document.createEvent("HTMLEvents");
         colorEvent.initEvent('colorchange', true, true);
-    } else {
+    }
+    else {
         colorEvent = document.createEventObject();
         colorEvent.eventType = "colorchange";
     }

@@ -67,7 +67,7 @@ function render(gradeable_id, user_id, grader_id, file_name, page_num, url = "")
                 data: pdfData,
                 cMapUrl: '../../vendor/pdfjs/cmaps/',
                 cMapPacked: true
-            }).then((pdf) => {
+            }).promise.then((pdf) => {
                 window.RENDER_OPTIONS.pdfDocument = pdf;
                 let viewer = document.getElementById('viewer');
                 $(viewer).on('touchstart touchmove', function(e){

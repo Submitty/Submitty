@@ -9,8 +9,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 
-
-class CourseMaterialsView extends AbstractView { 
+class CourseMaterialsView extends AbstractView {
     /**
      * @param User $user
      */
@@ -48,16 +47,15 @@ class CourseMaterialsView extends AbstractView {
 
                 $expected_file_path = FileUtils::joinPaths($expected_path, $file);
 
-                array_push($in_dir,$expected_file_path);
+                array_push($in_dir, $expected_file_path);
 
                 // Check whether the file is shared to student or not
                 // If shared, will add to courseMaterialsArray
 
                 $releaseData = $now_date_time->format("Y-m-d H:i:sO");
                 $isShareToOther = '0';
-                if ($json == true){
-                    if ( isset( $json[$expected_file_path] ) )
-                    {
+                if ($json == true) {
+                    if (isset($json[$expected_file_path])) {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
                         if ( isset( $json[$expected_file_path]['sections'] ) ){
@@ -72,12 +70,13 @@ class CourseMaterialsView extends AbstractView {
                             $order_nums[$expected_file_path] = $json[$expected_file_path]['order_num'];
                         }
 
-                       if ($isShareToOther == '1' && $release_date > $now_date_time)
+                        if ($isShareToOther == '1' && $release_date > $now_date_time) {
                             $isShareToOther = '0';
+                        }
 
                         $releaseData  = $json[$expected_file_path]['release_datetime'];
                     }
-                    else{
+                    else {
                         //fill with upload time for new files add all files to json when uploaded
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
@@ -94,21 +93,18 @@ class CourseMaterialsView extends AbstractView {
                         }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
                     }
-
                 }
-                else{
-
+                else {
                     $ex_file_path = $expected_file_path;
                     $ex_file_path = array();
                     $ex_file_path['checked'] = '1';
                     $isShareToOther = $ex_file_path['checked'];
                     $date = $now_date_time->format("Y-m-d H:i:sO");
-                    $date=substr_replace($date,"9999",0,4);
+                    $date = substr_replace($date, "9999", 0, 4);
                     $ex_file_path['release_datetime'] = $date;
                     $ex_file_path['hide_from_students'] = "on";
                     $releaseData = $ex_file_path['release_datetime'];
                     $no_json[$expected_file_path] = $ex_file_path;
-
                 }
 
                 if ($student_access && $isShareToOther === '0') {
@@ -119,14 +115,13 @@ class CourseMaterialsView extends AbstractView {
                 $working_dir = &$files[$start_dir_name];
                 $filename = array_pop($path);
 
-                foreach($path as $dir) {
+                foreach ($path as $dir) {
                     if (!isset($working_dir[$dir])) {
                         $working_dir[$dir] = array();
                     }
 
 
                     $working_dir = &$working_dir[$dir];
-
                 }
 
                 $working_dir[$filename] = $expected_file_path;
@@ -134,22 +129,22 @@ class CourseMaterialsView extends AbstractView {
 
                 $file_datas[$expected_file_path] = $isShareToOther;
 
-                if( $releaseData == $now_date_time->format("Y-m-d H:i:sO")){
+                if ($releaseData == $now_date_time->format("Y-m-d H:i:sO")) {
                     //for uploaded files that have had no manually set date to be set to never and maintained as never
                     //also permission set to yes
-                    $releaseData=substr_replace($releaseData,"9999",0,4);
-                    $json[$expected_file_path]['checked']='1';
-                    $json[$expected_file_path]['release_datetime']= $releaseData;
+                    $releaseData = substr_replace($releaseData, "9999", 0, 4);
+                    $json[$expected_file_path]['checked'] = '1';
+                    $json[$expected_file_path]['release_datetime'] = $releaseData;
                 }
                 $file_release_dates[$expected_file_path] = $releaseData;
             }
 
-            if($json == false){
-                FileUtils::writeJsonFile($fp,$no_json);
+            if ($json == false) {
+                FileUtils::writeJsonFile($fp, $no_json);
             }
-            $can_write =is_writable($fp);
-            if(!$can_write){
-               $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
+            $can_write = is_writable($fp);
+            if (!$can_write) {
+                $core->addErrorMessage("This json does not have write permissions, and therefore you cannot change the release date. Please change the permissions or contact someone who can.");
             }
         };
 
@@ -163,7 +158,7 @@ class CourseMaterialsView extends AbstractView {
         //Get the expected course materials path and files
         $upload_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads");
         $expected_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "course_materials");
-        $path_length = strlen($expected_path)+1;
+        $path_length = strlen($expected_path) + 1;
         $course_materials_array = FileUtils::getAllFilesTrimSearchPath($expected_path, $path_length);
         $this->core->getOutput()->addInternalJs("drag-and-drop.js");
         //Sort the files/folders in alphabetical order
@@ -182,7 +177,7 @@ class CourseMaterialsView extends AbstractView {
         }
 
         $max_size = Utils::returnBytes(ini_get('upload_max_filesize'));
-        $max_size_string = Utils::formatBytes("MB", $max_size ) . " (" . Utils::formatBytes("KB", $max_size) . ")";
+        $max_size_string = Utils::formatBytes("MB", $max_size) . " (" . Utils::formatBytes("KB", $max_size) . ")";
         $reg_sections = $this->core->getQueries()->getRegistrationSections();
         $server_time = DateUtils::getServerTimeJson($this->core);
 

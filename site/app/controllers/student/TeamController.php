@@ -66,7 +66,7 @@ class TeamController extends AbstractController {
 
         if ($gradeable->isVcs()) {
             $config = $this->core->getConfig();
-            AdminGradeableController::enqueueGenerateRepos($config->getSemester(),$config->getCourse(),$gradeable_id);
+            AdminGradeableController::enqueueGenerateRepos($config->getSemester(), $config->getCourse(), $gradeable_id);
         }
 
         $this->core->redirect($return_url);
@@ -172,7 +172,7 @@ class TeamController extends AbstractController {
             $this->core->redirect($return_url);
         }
 
-        if($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null){
+        if ($this->core->getQueries()->getUserByID($invite_id)->getRegistrationSection() === null) {
             // If a student with this id is in the null section...
             // (make this look the same as a non-existant student so as not to
             // reveal information about dropped students)
@@ -194,15 +194,17 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->sendTeamInvitation($team->getId(), $invite_id);
 
         // send invited user a notification
-        $metadata = json_encode(['url' => $this->core->buildCourseUrl([$gradeable_id,'team'])]);
-        $subject = "New Team Invitation: ".$graded_gradeable->getGradeable()->getTitle();
+        $metadata = json_encode(
+            ['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id,'team'])]
+        );
+        $subject = "New Team Invitation: " . $graded_gradeable->getGradeable()->getTitle();
         $content = "You have received a new invitation to join a team from $user_id";
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_invite', 'sender_id' => $user_id];
-        $this->core->getNotificationFactory()->onTeamEvent($event,[$invite_id]);
+        $this->core->getNotificationFactory()->onTeamEvent($event, [$invite_id]);
 
         $this->core->addSuccessMessage("Invitation sent to {$invite_id}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -263,18 +265,20 @@ class TeamController extends AbstractController {
 
         $this->core->getQueries()->declineAllTeamInvitations($gradeable_id, $user_id);
         $this->core->getQueries()->acceptTeamInvitation($accept_team_id, $user_id);
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $team_members = $accept_team->getMembers();
         // send notification to team members that user joined
-        $metadata =  json_encode(['url' => $this->core->buildCourseUrl([$gradeable_id,'team'])]);
-        $subject = "New Team Member: ".$gradeable->getTitle();
-        $content = "A new team member with the user name, $user_id, joined your team for gradeable, ".$gradeable->getTitle();
+        $metadata =  json_encode(
+            ['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team'])]
+        );
+        $subject = "New Team Member: " . $gradeable->getTitle();
+        $content = "A new team member with the user name, $user_id, joined your team for gradeable, " . $gradeable->getTitle();
         $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_joined', 'sender_id' => $user_id];
         $this->core->getNotificationFactory()->onTeamEvent($event, $team_members);
 
         $this->core->addSuccessMessage("Accepted invitation from {$accept_team->getMemberList()}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $accept_team_id, "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -330,7 +334,7 @@ class TeamController extends AbstractController {
         $this->core->getQueries()->cancelTeamInvitation($team->getId(), $cancel_id);
         $this->core->addSuccessMessage("Cancelled invitation to {$cancel_id}");
 
-        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO")." ".$this->core->getConfig()->getTimezone()->getName();
+        $current_time = $this->core->getDateTimeNow()->format("Y-m-d H:i:sO") . " " . $this->core->getConfig()->getTimezone()->getName();
         $settings_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "submissions", $gradeable_id, $team->getId(), "user_assignment_settings.json");
         $json = FileUtils::readJsonFile($settings_file);
         if ($json === false) {
@@ -364,9 +368,9 @@ class TeamController extends AbstractController {
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
-        $this->core->getQueries()->addToSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->addToSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Added to list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**
@@ -388,9 +392,9 @@ class TeamController extends AbstractController {
 
         $return_url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'team']);
 
-        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id,$user_id);
+        $this->core->getQueries()->removeFromSeekingTeam($gradeable_id, $user_id);
         $this->core->addSuccessMessage("Removed from list of users seeking team/partner");
-        $this->core->redirect($return_url);   
+        $this->core->redirect($return_url);
     }
 
     /**

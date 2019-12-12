@@ -3,7 +3,7 @@
 namespace tests\app\libraries;
 
 use app\libraries\Core;
-use \app\libraries\Utils;
+use app\libraries\Utils;
 use app\models\User;
 
 class UtilsTester extends \PHPUnit\Framework\TestCase {
@@ -133,7 +133,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $cookie
             ->expects($this->once())
             ->willReturnCallback(
-                function($name, $value, $expires, $path, $domain, $secure) {
+                function ($name, $value, $expires, $path, $domain, $secure) {
                     $this->assertEquals('test', $name);
                     $this->assertEquals('data', $value);
                     $this->assertEquals(100, $expires);
@@ -151,7 +151,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
         $cookie
             ->expects($this->once())
             ->willReturnCallback(
-                function($name, $value, $expires, $path, $domain, $secure) {
+                function ($name, $value, $expires, $path, $domain, $secure) {
                     $this->assertEquals('test', $name);
                     $this->assertEquals('{"a":true}', $value);
                     $this->assertEquals(100, $expires);
@@ -171,7 +171,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             $cookie
                 ->expects($this->once())
                 ->willReturnCallback(
-                    function($name, $value, $expires, $path, $domain, $secure) {
+                    function ($name, $value, $expires, $path, $domain, $secure) {
                         $this->assertEquals('test', $name);
                         $this->assertEquals('{"a":true}', $value);
                         $this->assertEquals(100, $expires);
@@ -195,7 +195,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             $cookie
                 ->expects($this->once())
                 ->willReturnCallback(
-                    function($name, $value, $expires, $path, $domain, $secure) {
+                    function ($name, $value, $expires, $path, $domain, $secure) {
                         $this->assertEquals('test', $name);
                         $this->assertEquals('{"a":true}', $value);
                         $this->assertEquals(100, $expires);
@@ -231,9 +231,9 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
 
     public function uploadedImageProvider() {
         return [
-            [__TEST_DATA__.'/images/test_image.png', true],
-            [__TEST_DATA__.'/images/test_image.jpg', true],
-            [__TEST_DATA__.'/.gitkeep', false]
+            [__TEST_DATA__ . '/images/test_image.png', true],
+            [__TEST_DATA__ . '/images/test_image.jpg', true],
+            [__TEST_DATA__ . '/.gitkeep', false]
         ];
     }
     /**
@@ -261,8 +261,8 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     public function testCheckUploadedImageFileImageSizeFalse() {
         try {
             $_FILES['test'] = [
-                'name' => [basename(__TEST_DATA__.'/images/test_image.png')],
-                'tmp_name' => [__TEST_DATA__.'/images/test_image.png'],
+                'name' => [basename(__TEST_DATA__ . '/images/test_image.png')],
+                'tmp_name' => [__TEST_DATA__ . '/images/test_image.png'],
                 'type' => ['image/png'],
                 'error' => [UPLOAD_ERR_OK],
                 'size' => [123]
@@ -332,7 +332,7 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
             $array1[] = $obj;
             $array2[] = $obj;
         }
-        $inferior_func = function($a, $b) {
+        $inferior_func = function ($a, $b) {
             return $a === $b ? -1 : 1;
         };
         $this->assertCount(5, array_udiff($array1, $array2, $inferior_func));
