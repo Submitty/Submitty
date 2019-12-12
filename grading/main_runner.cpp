@@ -84,7 +84,8 @@ void executeSetOfCommands(std::vector<std::string> setOfCommands,
                             config_json.value("resource_limits",nlohmann::json()),
                             config_json,
                             windowed,
-                            display_variable);
+                            display_variable,
+                            testcase.has_timestamped_stdout());
     }
     std::cout << "========================================================" << std::endl;
     std::cout << "FINISHED TEST #" << test_number << std::endl;
