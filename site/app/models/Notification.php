@@ -129,8 +129,7 @@ class Notification extends AbstractModel {
         if (is_null($metadata)) {
             return null;
         }
-        $thread_id = $metadata['thread_id'] ?? -1;
-        return $thread_id;
+        return $metadata['thread_id'] ?? -1;
     }
 
     /**
