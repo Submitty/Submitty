@@ -528,3 +528,15 @@ body {min-width: 925px;}
     background: #fff;
     color: var(--actionable-blue);
 }
+
+.thread-resolved {
+    color: var(--good-green);
+    margin-right: 0px;
+    font-size: 1.5em;
+}
+
+.thread-unresolved {
+    color: var(--standard-tangerine-yellow);
+    margin-right: 5px;
+    font-size: 1.8em;
+}

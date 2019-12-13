@@ -12,6 +12,7 @@ import random
 from datetime import timedelta
 import threading 
 import time
+import html
 
 class submitty_router():
   '''
@@ -71,6 +72,11 @@ class submitty_router():
     sys.stdout.flush()
 
 
+  # All messages will be passed through this function for optional decoding 
+  # to string
+  def sequence_diagram_message_preprocess(self, message):
+    return message
+
   def write_sequence_file(self, obj, status, message_type):
     append_write = 'a' if os.path.exists(self.sequence_diagram_file) else 'w'
 
@@ -80,13 +86,34 @@ class submitty_router():
     else:
       arrow = '-x' #if message_type == 'tcp' else '--x'
 
-    sender = obj['sender'].replace('_Actual', '')
-    recipient = obj['recipient'].replace('_Actual', '')
+    sender        = obj['sender'].replace('_Actual', '')
+    recipient     = obj['recipient'].replace('_Actual', '')
+    message       = self.sequence_diagram_message_preprocess(obj['message'])
+    diagram_label = obj['diagram_label'] if 'diagram_label' in obj else None
 
     with open(self.sequence_diagram_file, append_write) as outfile:
-      outfile.write('{0}{1}{2}: {3}\n'.format(sender, arrow, recipient, str(obj['message'])))
-      if 'diagram_label' in obj and obj['diagram_label'] != None and obj['diagram_label'].strip() != '':
-        outfile.write('Note over {0},{1}: {2}\n'.format(sender, recipient, obj['diagram_label']))
+      start = f'{sender}{arrow}{recipient}'
+      message_lines = []
+
+      # newline every n characters
+      newline_cadence = 24
+      # most_lines_allowed (not including ending ellipsis)
+      max_num_lines = 3
+
+      for i in range(0, len(message), newline_cadence):
+        if i + newline_cadence > newline_cadence*max_num_lines:
+          message_lines.append('  ...  ')
+          break
+        message_lines.append(message[i:i+newline_cadence])
+
+      if len(message_lines) == 1:
+        outfile.write(f'{start}: {str(message)}\n')
+      else:
+        str_lines = [str(x) for x in message_lines ]
+        outfile.write(f'{start}: {"<br>".join(str_lines)}\n')
+
+      if diagram_label is not None and obj['diagram_label'].strip() != '':
+        outfile.write(f'Note over {sender},{recipient}: {diagram_label}\n')
 
 
   """

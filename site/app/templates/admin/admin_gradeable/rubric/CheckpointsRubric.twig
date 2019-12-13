@@ -10,10 +10,10 @@
         <!-- This is a bit of a hack, but it works (^_^) -->
         <tr class="rubric_layout_body multi-field" id="mult-field-0" style="display:none;">
             <td>
-                <input style="width: 200px" name="checkpoint_label_0" type="text" class="checkpoint_label" value="Checkpoint 0"/>
+                <input style="width: 200px" name="checkpoint_label_0" aria-label="checkpoint 0" type="text" class="checkpoint_label" value="Checkpoint 0"/>
             </td>
             <td>
-                <input type="checkbox" name="checkpoint_extra_0" class="checkpoint_extra extra" value="true" />
+                <input type="checkbox" name="checkpoint_extra_0" aria-label="is checkpoint 0 counted as extra credit?" class="checkpoint_extra extra" value="true" />
             </td>
         </tr>
     </table>
@@ -42,8 +42,8 @@
             var wrapper = $('.checkpoints-table');
             ++numCheckpoints;
             $('#mult-field-0', wrapper).clone(true).appendTo(wrapper).attr('id', 'mult-field-' + numCheckpoints).find('.checkpoint_label').val(label).focus();
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints).change(() => saveRubric(false));
-            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints).attr('checked', extra_credit).change(() => saveRubric(false));
+            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_label').attr('name', 'checkpoint_label_' + numCheckpoints).attr('aria-label', 'checkpoint ' + numCheckpoints).change(() => saveRubric(false));
+            $('#mult-field-' + numCheckpoints, wrapper).find('.checkpoint_extra').attr('name', 'checkpoint_extra_' + numCheckpoints).attr('checked', extra_credit).attr('aria-label', 'is checkpoint ' + numCheckpoints + ' counted as extra credit?').change(() => saveRubric(false));
             $('#remove-checkpoint_field').show();
             $('#mult-field-' + numCheckpoints, wrapper).show();
         }
