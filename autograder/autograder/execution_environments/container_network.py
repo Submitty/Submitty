@@ -623,7 +623,6 @@ class ContainerNetwork(secure_execution_environment.SecureExecutionEnvironment):
     # Create a container to generate random input inside of.
     container = Container( container_spec, untrusted_user, self.random_input_directory, False, self.is_test_environment, self.log_message, self.log_container_meta)
     execution_script = os.path.join(container.directory, executable)
-    
     try:
       container.create(execution_script, arguments, False)
       container.start(logfile)

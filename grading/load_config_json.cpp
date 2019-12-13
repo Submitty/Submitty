@@ -300,7 +300,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         nlohmann::json insert_router = nlohmann::json::object();
         insert_router["outgoing_connections"] = nlohmann::json::array();
         insert_router["commands"] = nlohmann::json::array();
-        insert_router["commands"].push_back("python3 submitty_router.py");
+        insert_router["commands"].push_back("python3 -u submitty_router.py");
         insert_router["container_name"] = "router";
         insert_router["import_default_router"] = true;
         insert_router["container_image"] = "submitty/autograding-default:latest";
@@ -568,8 +568,8 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
 
         validate_mouse_button(action);
 
-        validate_integer(action, "end_x",   true,  0, 0);
-        validate_integer(action, "end_y",   true,  0, 0);
+        validate_integer(action, "end_x",   true,  -100000, 0);
+        validate_integer(action, "end_y",   true,  -100000, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
           std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;

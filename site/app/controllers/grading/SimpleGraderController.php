@@ -232,6 +232,9 @@ class SimpleGraderController extends AbstractController {
 
         $ta_graded_gradeable = $graded_gradeable->getOrCreateTaGradedGradeable();
 
+        // Return ids and scores of updated components in success response so frontend can validate
+        $return_data = array();
+
         foreach ($gradeable->getComponents() as $component) {
             $data = $_POST['scores'][$component->getId()] ?? '';
             $original_data = $_POST['old_scores'][$component->getId()] ?? '';
@@ -261,6 +264,7 @@ class SimpleGraderController extends AbstractController {
                     $component_grade->setScore($data);
                 }
                 $component_grade->setGradeTime($this->core->getDateTimeNow());
+                $return_data[$component->getId()] = $data;
             }
         }
 
@@ -268,7 +272,7 @@ class SimpleGraderController extends AbstractController {
         $this->core->getQueries()->saveTaGradedGradeable($ta_graded_gradeable);
 
         return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse()
+            JsonResponse::getSuccessResponse($return_data)
         );
     }
 

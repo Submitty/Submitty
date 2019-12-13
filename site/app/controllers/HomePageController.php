@@ -2,6 +2,7 @@
 
 namespace app\controllers;
 
+use app\authentication\DatabaseAuthentication;
 use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
@@ -93,36 +94,26 @@ class HomePageController extends AbstractController {
             $user_id = $user->getId();
         }
 
-        $unarchived_courses = $this->core->getQueries()->getCoursesById($user_id, true);
-        $archived_courses = $this->core->getQueries()->getCoursesById($user_id, false);
+        $unarchived_courses = $this->core->getQueries()->getCourseForUserId($user_id);
+        $archived_courses = $this->core->getQueries()->getCourseForUserId($user_id, true);
 
         // Callback to filter out any courses a student has dropped so they do not appear on the homepage.
         // Do not filter courses for non-students.
-        $course_filter_callback = function (Course $course) use ($user_id, $as_instructor) {
-            return $as_instructor ?
-                $this->core->getQueries()->checkIsInstructorInCourse($user_id, $course->getTitle(), $course->getSemester())
-                :
-                $this->core->getQueries()->checkStudentActiveInCourse($user_id, $course->getTitle(), $course->getSemester());
-        };
+        foreach (['archived_courses', 'unarchived_courses'] as $var) {
+            $$var = array_filter($$var, function (Course $course) use ($user_id, $as_instructor) {
+                $query = $as_instructor ? 'checkIsInstructorInCourse' : 'checkStudentActiveInCourse';
+                return $this->core->getQueries()->$query($user_id, $course->getTitle(), $course->getSemester());
+            });
+        }
 
-        // Run course filters so students who have dropped do not appear on the homepage.
-        $unarchived_courses = array_filter($unarchived_courses, $course_filter_callback);
-        $archived_courses = array_filter($archived_courses, $course_filter_callback);
+        $callback = function (Course $course) {
+            return $course->getCourseInfo();
+        };
 
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse([
-                "unarchived_courses" => array_map(
-                    function (Course $course) {
-                        return $course->getCourseInfo();
-                    },
-                    $unarchived_courses
-                ),
-                "archived_courses" => array_map(
-                    function (Course $course) {
-                        return $course->getCourseInfo();
-                    },
-                    $archived_courses
-                )
+                "unarchived_courses" => array_map($callback, $unarchived_courses),
+                "archived_courses" => array_map($callback, $archived_courses)
             ])
         );
     }
@@ -141,10 +132,12 @@ class HomePageController extends AbstractController {
             new WebResponse(
                 ['HomePage'],
                 'showHomePage',
-                $user = $this->core->getUser(),
+                $this->core->getUser(),
                 $courses["data"]["unarchived_courses"],
                 $courses["data"]["archived_courses"],
-                $this->core->getConfig()->getUsernameChangeText()
+                $this->core->getConfig()->getUsernameChangeText(),
+                $this->core->getAuthentication() instanceof DatabaseAuthentication,
+                $this->core->getCsrfToken()
             )
         );
     }
@@ -296,7 +289,9 @@ class HomePageController extends AbstractController {
                 'showCourseCreationPage',
                 $faculty ?? null,
                 $this->core->getUser()->getId(),
-                $this->core->getQueries()->getAllUnarchivedSemester()
+                $this->core->getQueries()->getAllUnarchivedSemester(),
+                $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
+                $this->core->getCsrfToken()
             )
         );
     }

@@ -3064,32 +3064,38 @@ SQL;
     }
 
     /**
-     * Retrieves all archived or unarchived courses (and details) that are accessible by $user_id
+     * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id
      *
-     * (WHERE u.user_id=? AND c.status=1) checks if a course is active (unarchived).
-     * (WHERE u.user_id=? AND c.status=2 AND u.user_group=1) checks if $user_id
-     * is an instructor and course is inactive (archived).  Instructors may
-     * access all of their courses.  Inactive courses may only be accessed by
-     * the instructor.  Active courses may be accessed by all users.  Due to
-     * almost all common code, getArchivedCoursesById() has been condensed into
-     * this function.
+     * If the $archived parameter is false, then we run the check:
+     * (u.user_id=? AND c.status=1) checks if a course is active where
+     * an active course may be accessed by all users
      *
-     * @param string $user_id
-     * @param boolean $unarchived true: retrieve unarchived courses, false: retrieve archived courses
-     * @return array (un)archived courses (and their details) accessible by $user_id
+     * If the parameter is true, then we run the check:
+     * (u.user_id=? AND c.status=2 AND u.user_group=1) checks if $user_id is an instructor
+     * Instructors may access all of their courses
+     * Inactive courses may only be accessed by the instructor
+     *
+     * @param  string $user_id
+     * @param  bool   $archived
+     * @return Course[] archived courses (and their details) accessible by $user_id
      */
-    public function getCoursesById($user_id, $unarchived) {
-        $course_status = $unarchived ?
-            "WHERE u.user_id=? AND c.status=1" :
-            "WHERE u.user_id=? AND c.status=2 AND u.user_group=1";
+    public function getCourseForUserId($user_id, bool $archived = false): array {
+        if ($archived) {
+            $extra = "AND c.status=2 AND u.user_group=1";
+        }
+        else {
+            $extra = "AND c.status=1";
+        }
 
-        $this->submitty_db->query("
-    SELECT t.name as term_name, u.semester, u.course
-    FROM courses_users u
-    INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
-    INNER JOIN terms t ON u.semester=t.term_id
-    {$course_status}
-    ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC", array($user_id));
+        $query = <<<SQL
+SELECT t.name AS term_name, u.semester, u.course, u.user_group
+FROM courses_users u
+INNER JOIN courses c ON u.course=c.course AND u.semester=c.semester
+INNER JOIN terms t ON u.semester=t.term_id
+WHERE u.user_id=? ${extra}
+ORDER BY u.user_group ASC, t.start_date DESC, u.course ASC
+SQL;
+        $this->submitty_db->query($query, [$user_id]);
         $return = array();
         foreach ($this->submitty_db->rows() as $row) {
             $course = new Course($this->core, $row);

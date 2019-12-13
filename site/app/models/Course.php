@@ -12,6 +12,7 @@ use app\libraries\FileUtils;
  * @method string getSemesterName()
  * @method string getTitle()
  * @method string getDisplayName()
+ * @method int getUserGroup()
   */
 class Course extends AbstractModel {
 
@@ -23,6 +24,8 @@ class Course extends AbstractModel {
     protected $title;
     /** @property string $display_name the display name of the course */
     protected $display_name;
+    /** @property int $user_group */
+    protected $user_group;
 
     /**
      * Course constructor.
@@ -32,10 +35,11 @@ class Course extends AbstractModel {
     public function __construct(Core $core, $details) {
         parent::__construct($core);
 
-        $this->semester      = $details['semester'];
+        $this->semester = $details['semester'];
         $this->semester_name = $details['term_name'];
-        $this->title         = $details['course'];
-        $this->display_name  = "";
+        $this->title = $details['course'];
+        $this->display_name = "";
+        $this->user_group = $details['user_group'] ?? 3;
     }
 
     public function loadDisplayName() {
@@ -67,10 +71,11 @@ class Course extends AbstractModel {
 
     public function getCourseInfo() {
         return [
-            "semester"         => $this->semester,
-            "title"            => $this->title,
-            "display_name"     => $this->display_name,
+            "semester" => $this->semester,
+            "title" => $this->title,
+            "display_name" => $this->display_name,
             "display_semester" => $this->semester_name
+            "user_group" => $this->user_group
         ];
     }
 }
