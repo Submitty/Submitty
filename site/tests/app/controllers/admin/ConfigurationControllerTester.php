@@ -134,8 +134,8 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
     }
 
-    public function testViewConfigurationWithSeatingCharts(): void {
-        $this->setUpConfig(['test2']);
+    public function testViewConfigurationWithSeatingChartsFirstItem(): void {
+        $this->setUpConfig(['test1']);
         $core = new Core();
         $core->setOutput(new NullOutput($core));
         $config = new Config($core);
@@ -190,8 +190,97 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
                 'g_title' => "--None--"
             ],
             [
+                'g_id' => 'test1',
+                'g_title' => 'Test 1'
+            ]
+        ];
+        $admin_user = [
+            'user_id' => 'submitty-admin',
+            'verified' => true,
+            'in_course' => true
+        ];
+
+        $this->assertNotNull($response->json_response);
+        $json_expected = [
+            'status' => 'success',
+            'data' => [
+                'config' => $expected,
+                'gradeable_seating_options' => $gradeable_seating_options,
+                'email_enabled' => true,
+                'submitty_admin_user' => $admin_user
+            ]
+        ];
+
+        $this->assertNotNull($response->json_response);
+        $this->assertEquals($json_expected, $response->json_response->json);
+        $this->assertEquals(ConfigurationView::class, $response->web_response->view_class);
+        $this->assertEquals('viewConfig', $response->web_response->view_function);
+        $this->assertEquals([$expected, $gradeable_seating_options, true, $admin_user, true, false], $response->web_response->parameters);
+    }
+
+    public function testViewConfigurationWithSeatingChartsNonFirstItem(): void {
+        $this->setUpConfig(['test2', 'test3']);
+        $core = new Core();
+        $core->setOutput(new NullOutput($core));
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getAllGradeablesIdsAndTitles')
+            ->with()
+            ->willReturn([
+                ['g_id' => 'test1', 'g_title' => 'Test 1'],
+                ['g_id' => 'test2', 'g_title' => 'Test 2'],
+                ['g_id' => 'test3', 'g_title' => 'Test 3']
+            ]);
+        $queries
+            ->expects($this->once())
+            ->method('checkIsInstructorInCourse')
+            ->with($this->equalTo('submitty-admin'), $this->equalTo('sample'), $this->equalTo('f19'))
+            ->willReturn(true);
+        $core->setQueries($queries);
+        $controller = new ConfigurationController($core);
+        $core->setSessionManager(new SessionManager($core));
+        $response = $controller->viewConfiguration();
+        $this->assertNull($response->redirect_response);
+        $expected = [
+            'course_name'                    => 'Submitty Sample',
+            'course_home_url'                => '',
+            'default_hw_late_days'           => 0,
+            'default_student_late_days'      => 0,
+            'zero_rubric_grades'             => false,
+            'upload_message'                 => 'Hit Submit',
+            'keep_previous_files'            => false,
+            'display_rainbow_grades_summary' => false,
+            'display_custom_message'         => false,
+            'course_email'                   => 'Please contact your TA or instructor to submit a grade inquiry.',
+            'vcs_base_url'                   => 'http://192.168.56.111/{$vcs_type}/f19/sample/',
+            'vcs_type'                       => 'git',
+            'forum_enabled'                  => true,
+            'regrade_enabled'                => false,
+            'regrade_message'                => 'Regrade Message',
+            'private_repository'             => '',
+            'room_seating_gradeable_id'      => '',
+            'seating_only_for_instructor'    => false,
+            'auto_rainbow_grades'            => false,
+            'queue_enabled'                  => false
+        ];
+
+        $gradeable_seating_options = [
+            [
+                'g_id' => "",
+                'g_title' => "--None--"
+            ],
+            [
                 'g_id' => 'test2',
                 'g_title' => 'Test 2'
+            ],
+            [
+                'g_id' => 'test3',
+                'g_title' => 'Test 3'
             ]
         ];
         $admin_user = [

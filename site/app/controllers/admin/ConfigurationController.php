@@ -223,11 +223,6 @@ class ConfigurationController extends AbstractController {
             return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
         });
 
-        $empty_option = [[
-            'g_id' => "",
-            'g_title' => "--None--"
-        ]];
-
-        return $empty_option + $gradeable_seating_options;
+        return array_merge([['g_id' => '', 'g_title' => '--None--']], $gradeable_seating_options);
     }
 }
