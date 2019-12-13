@@ -218,12 +218,24 @@ function updateCheckpointCells(elems, scores, no_cookie) {
           'old_scores': old_scores,
           'scores': new_scores
         },
-        function() {
-            elems.each(function(idx, elem) {
-                elem = $(elem);
-                elem.animate({"border-right-width": "0px"}, 400); // animate the box
-                elem.attr("data-score", elem.data("score"));      // update the score
-            });
+        function(returned_data) {
+            // Validate that the Simple Grader backend correctly saved components before updating
+            var expected_vals = JSON.stringify(Object.entries(new_scores).map(String));
+            var returned_vals = JSON.stringify(Object.entries(returned_data['data']).map(String));
+            if (expected_vals === returned_vals) {
+                elems.each(function(idx, elem) {
+                    elem = $(elem);
+                    elem.animate({"border-right-width": "0px"}, 400); // animate the box
+                    elem.attr("data-score", elem.data("score"));      // update the score
+                });
+            } else {
+                console.log("Save error: returned data:", returned_vals, "does not match expected new data:", expected_vals);
+                elems.each(function(idx, elem) {
+                    elem = $(elem);
+                    elem.stop(true, true);
+                    elem.css("border-right", "60px solid #DA4F49");
+                });
+            }
         },
         function() {
             elems.each(function(idx, elem) {
