@@ -1023,6 +1023,7 @@ class Course(object):
         if self.code == 'tutorial':
             client = docker.from_env()
             client.images.pull('submitty/tutorial:tutorial_18')
+            client.images.pull('submitty/tutorial:database_client')
 
     def check_rotating(self, users):
         for gradeable in self.gradeables:
