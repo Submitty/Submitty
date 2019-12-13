@@ -40,7 +40,7 @@
             <p>
                 <strong>Choose a time to release the files being uploaded:</strong>
             </p>
-            <input id="edit_picker" class="date_picker" type="text" size="26" value='9998-01-01 00:00:00'/>
+            <input id="edit_picker" class="edit_picker" type="text" size="26"/>
         </label>
         <label>
             <input id="hide-materials-checkbox-edit" type="checkbox"/>
@@ -71,7 +71,7 @@
                 handleEditCourseMaterials("{{ csrf_token }}", hideFromStudents, requestedPath, sectionsEdit, cmTime);
         };
         
-        flatpickr('#edit_picker', {
+        flatpickr('.edit_picker', {
                     plugins: [ShortcutButtonsPlugin(
                         {
                             button: [
@@ -87,7 +87,6 @@
 
                             ],
                             onClick: (index, fp) => {
-                                let date;
                                 switch (index) {
                                     case 0:
                                         updateToServerTime(fp);
@@ -99,7 +98,6 @@
                                         date = new Date("9998-01-01 00:00:00");
                                         fp.setDate(date,true);
                                         break;
-
                                 }
                             }
                         }

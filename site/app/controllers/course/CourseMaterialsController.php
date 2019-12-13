@@ -288,9 +288,9 @@ class CourseMaterialsController extends AbstractController {
             $requested_path = $_POST['requested_path'];
         }
         
-        $sections_exploded = null;
+        $sections_exploded = $sections;
         
-        if (!(is_null($sections))) {
+        if (!(is_null($sections)) && !empty($sections)) {
             $sections_exploded = [];
             $sections_exploded = explode(",", $sections);
         }

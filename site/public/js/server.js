@@ -228,7 +228,11 @@ function newUploadCourseMaterialsForm() {
 function newEditCourseMaterialsForm(dir, this_file_section, this_hide_from_students, release_time) {
 
     var form = $("#edit-course-materials-form");
-    $("#edit_picker", form).prop('value',release_time);
+    //const fp = $("#edit_picker", form);
+    console.log(release_time);
+    var element = document.getElementById("edit_picker");
+    element._flatpickr.setDate(release_time);
+    //$("#edit_picker", form).prop('value', release_time);
     
     if(this_hide_from_students == "on"){
         $("#hide-materials-checkbox-edit", form).prop('checked',true);
