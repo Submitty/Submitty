@@ -11,15 +11,18 @@ use app\libraries\FileUtils;
  * @method string getSemester()
  * @method string getTitle()
  * @method string getDisplayName()
+ * @method int getUserGroup()
   */
 class Course extends AbstractModel {
-     
+
     /** @property @var string the semester in which the course is taking place." */
     protected $semester;
-    /** @property @var the proper title of the course. */
+    /** @property @var string the proper title of the course. */
     protected $title;
-    /** @property @var the display name of the course */
+    /** @property @var string the display name of the course */
     protected $display_name;
+    /** @property @var int */
+    protected $user_group;
 
     /**
      * Course constructor.
@@ -32,6 +35,7 @@ class Course extends AbstractModel {
         $this->semester = $details['semester'];
         $this->title = $details['course'];
         $this->display_name = "";
+        $this->user_group = $details['user_group'] ?? 3;
     }
 
     public function loadDisplayName() {
@@ -77,7 +81,8 @@ class Course extends AbstractModel {
             "semester" => $this->semester,
             "title" => $this->title,
             "display_name" => $this->display_name,
-            "display_semester" => $this->getLongSemester()
+            "display_semester" => $this->getLongSemester(),
+            "user_group" => $this->user_group
         ];
     }
 }

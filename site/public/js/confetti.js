@@ -3,9 +3,10 @@ function addConfetti(){
 	if(!canvas)
 		return;
 	let times_ran = 0;
+	let frame = 0;
 
 	//destroy the canvas animation on click or on enter
-	canvas.addEventListener("click", function(){ 
+	canvas.addEventListener("click", function(){
 		if(canvas.style.display != "none"){
 			canvas.style.display = "none";
 			return;
@@ -22,7 +23,7 @@ function addConfetti(){
 	canvas.width  = window.innerWidth;
 	var body = document.body;
     var html = document.documentElement;
-	canvas.height = Math.max( body.scrollHeight, body.offsetHeight, 
+	canvas.height = Math.max( body.scrollHeight, body.offsetHeight,
                        		  html.clientHeight, html.scrollHeight, html.offsetHeight );
 
 	canvas.style.display = "block";
@@ -47,10 +48,10 @@ function addConfetti(){
 	if(submission_date.length >= 1){
 		month = parseInt(submission_date[0], 10) - 1;
 	}
-	
+
 	function randomColor () {
 		let colors = [];
-		
+
 		//JS month : 0-11
 		switch(month){
 			case 0: //jan
@@ -90,12 +91,12 @@ function addConfetti(){
 			case 11://dec
 				colors = ['#d7cdcc','#f7b11d','#1f5e00','#de1a1a','#ffffff'];
 			break;
-		}
+      //make sure we have a default if parsing goes wrong
+      default:
+        colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
 
-		//make sure we have a default if parsing goes wrong
-		if(colors.length === 0)
-			colors = ['#8FD7FF', '#316498', '#34CA34', '#FFFF40', '#FF2929', '#9c84a4'];
-	    return colors[Math.floor(Math.random() * colors.length)];
+    }
+    return colors[Math.floor(Math.random() * colors.length)];
 	}
 
 	function update () {
@@ -122,22 +123,25 @@ function addConfetti(){
 	    lastUpdateTime = now;
 
 	    times_ran ++;
-	    let done = false;
+
 	    if(times_ran >= max_times * 10){
-	    	done = true;
 	    	ctx.clearRect(0, 0, canvas.width, canvas.height);
 	    	canvas.style.display = "";
 	    	canvas.width = 0;
 	    	canvas.height = 0;
-	    	return;
 	    }
 
-	    if(!done)
-	   		setTimeout(update, 1);
 	}
 
 	function draw () {
-	    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if(canvas.style.display === "none"){
+      cancelAnimationFrame(frame);
+      return;
+    }
+
+    update();
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	    pieces.forEach(function (p) {
 	        ctx.save();
@@ -152,13 +156,13 @@ function addConfetti(){
 	        ctx.restore();
 	    });
 
-	    requestAnimationFrame(draw);
+	    frame = requestAnimationFrame(draw);
 	}
 
 	function Piece (x, y) {
 	    this.x = x;
 	    this.y = y;
-            this.x_vel = (Math.random() - 0.5) * x_const;
+	    this.x_vel = (Math.random() - 0.5) * x_const;
 	    this.size = (Math.random() * 0.5 + 0.75) * size_const;
 	    this.gravity = (Math.random() * 0.5 + 0.75) * gravity_const;
 	    this.rotation = (Math.PI * 2) * Math.random();
@@ -169,6 +173,6 @@ function addConfetti(){
 	while (pieces.length < numberOfPieces) {
 	    pieces.push(new Piece(Math.random() * canvas.width, Math.random() * canvas.height));
 	}
-	update();
+
 	draw();
 }
