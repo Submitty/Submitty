@@ -27,7 +27,7 @@ class CourseMaterialsView extends AbstractView {
             $student_access = ($user_group === 4);
             $now_date_time = $core->getDateTimeNow();
             $no_json = array();
-            usort($course_materials_array, function ($a, $b) use ($expected_path, $json){
+            usort($course_materials_array, function ($a, $b) use ($expected_path, $json) {
                 $order_num_a = 0.0;
                 $order_num_b = 0.0;
                 $expected_file_path_a = FileUtils::joinPaths($expected_path, $a);
@@ -80,14 +80,14 @@ class CourseMaterialsView extends AbstractView {
                         $json[$expected_file_path]['checked'] = '1';
                         $isShareToOther = $json[$expected_file_path]['checked'];
                         $release_date = $json['release_time'];
-                        if (isset( $json[$expected_file_path]['hide_from_students'])) {
+                        if (isset($json[$expected_file_path]['hide_from_students'])) {
                             $hide_from_students[$expected_file_path] = $json[$expected_file_path]['hide_from_students'];
                         }
                         if (isset($json[$expected_file_path]['order_num'])) {
                             $order_nums[$expected_file_path] = $json[$expected_file_path]['order_num'];
                         }
                         $json[$expected_file_path]['release_datetime'] = $release_date;
-                        if (isset( $json[$expected_file_path]['sections'])) {
+                        if (isset($json[$expected_file_path]['sections'])) {
                             $file_sections[$expected_file_path] = $json[$expected_file_path]['sections'];
                         }
                         $releaseData = $json[$expected_file_path]['release_datetime'];
