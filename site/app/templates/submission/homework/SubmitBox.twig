@@ -263,6 +263,8 @@
 
                                 <div id="codebox_{{ num_codeboxes }}"
                                      name="codebox_{{ num_codeboxes }}"
+                                     autocapitalization="off"
+                                     spellcheck="false"
                                      class="codebox"
                                      data-initial_value="{{ cell.initial_value }}"
                                      data-recent_submission="{{ cell.recent_submission }}"
@@ -675,6 +677,8 @@
                 <input
                     type="text"
                     name="short_answer_{{ index }}"
+                    autocapitalization="off"
+                    spellcheck="false"
                     id="short_answer_{{ index }}"
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"

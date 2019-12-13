@@ -53,12 +53,12 @@ function resetForumFileUploadAfterError(displayPostId){
 function checkNumFilesForumUpload(input, post_id){
     var displayPostId = (typeof post_id !== "undefined") ? "_" + escapeSpecialChars(post_id) : "";
     if(input.files.length > 5){
-        displayError('Max file upload size is 5. Please try again.');
+        displayErrorMessage('Max file upload size is 5. Please try again.');
         resetForumFileUploadAfterError(displayPostId);
     }
     else {
         if(!checkForumFileExtensions(input.files)){
-            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             resetForumFileUploadAfterError(displayPostId);
             return;
         }
@@ -92,16 +92,16 @@ function testAndGetAttachments(post_box_id, dynamic_check) {
     }
     if(files.length > 5){
         if(dynamic_check) {
-            displayError('Max file upload size is 5. Please remove attachments accordingly.');
+            displayErrorMessage('Max file upload size is 5. Please remove attachments accordingly.');
         }
         else {
-            displayError('Max file upload size is 5. Please try again.');
+            displayErrorMessage('Max file upload size is 5. Please try again.');
         }
         return false;
     }
     else {
         if(!checkForumFileExtensions(files)){
-            displayError('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
+            displayErrorMessage('Invalid file type. Please upload only image files. (PNG, JPG, GIF, BMP...)');
             return false;
         }
     }
