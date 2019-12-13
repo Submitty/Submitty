@@ -883,10 +883,8 @@ function setRubricDOMElements(elements) {
  */
 function getComponentIdFromDOMElement(me) {
     if ($(me).hasClass('component')) {
-        console.log('element itself has id for comp', parseInt($(me).attr('data-component_id')));
         return parseInt($(me).attr('data-component_id'));
     }
-    console.log('element parent contain id for comp', parseInt($(me).parents('.component').attr('data-component_id')));
     return parseInt($(me).parents('.component').attr('data-component_id'));
 }
 
@@ -1834,20 +1832,30 @@ function onClickComponent(me) {
  * @param me DOM Element of the cancel button
  */
 function onCancelComponent(me) {
-  const componentId = getComponentIdFromDOMElement(me);
-  // If there is some custom message written for the student, prompt the TA before closing.
-  if($('#component-' + componentId).find('.mark-note-custom').val().trim().length > 1 ){
-    // dont do anything if TA chooses to cancel the action
-    if( !confirm("Note: Changes Made to the Student Message will be lost! Do you want to continue ? ")) {
-        return
-    }
-  }
-  // Go with normal flow otherwise
-  toggleComponent(componentId, false)
-        .catch(function (err) {
+  const component_id = getComponentIdFromDOMElement(me);
+  const gradeable_id = getGradeableId();
+  const anon_id = getAnonId();
+  ajaxGetGradedComponent(gradeable_id, component_id, anon_id).then((component)=>{
+    // If there is any changes made in comment of a component , prompt the TA
+    if ( component.comment !== $('#component-' + component_id).find('.mark-note-custom').val().trim()) {
+      if(confirm("Note: Changes made to the Student Message will be lost! Do you want to continue ? ")){
+        toggleComponent(component_id, false)
+          .catch(function (err) {
             console.error(err);
             alert('Error closing component! ' + err.message);
+          });
+      }
+    }
+    // There is no change in comment, i.e it is same as the saved comment (before)
+    else {
+      toggleComponent(component_id, false)
+        .catch(function (err) {
+          console.error(err);
+          alert('Error closing component! ' + err.message);
         });
+    }
+  });
+
 }
 
 /**
@@ -1880,9 +1888,8 @@ function onComponentOrderChange() {
 function onCancelOverallComment(me) {
   // if the overall Comment is changed then prompt the TA for loss in comment
   ajaxGetOverallComment(getGradeableId(), getAnonId()).then((lastSavedOverallComment) => {
-
     if (getOverallCommentFromDOM() !== lastSavedOverallComment) {
-      if(confirm("Note:Changes Made to the Student Message will be lost! Do you want to continue ? ")){
+      if(confirm("Note: Changes made to the Student Message will be lost! Do you want to continue ? ")){
         toggleOverallComment(false)
           .catch(function (err) {
             console.error(err);
