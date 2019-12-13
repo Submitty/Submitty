@@ -21,6 +21,7 @@ class TeamView extends AbstractView {
         $seekers = [];
         $invites_received = [];
         $seeking_partner = false;
+        $this->core->getOutput()->addBreadcrumb("Manage Team For: {$gradeable->getTitle()}");
 
         if ($team !== null) {
             //List team members
