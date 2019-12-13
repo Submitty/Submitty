@@ -22,9 +22,9 @@ class Course extends AbstractModel {
     protected $semester_name;
     /** @property string $title the proper title of the course. */
     protected $title;
-    /** @property string $display_name the display name of the course */
+    /** @property string $display_name the display name of the course. */
     protected $display_name;
-    /** @property int $user_group */
+    /** @property int $user_group used to rank courses in homepage view. */
     protected $user_group;
 
     /**
@@ -74,7 +74,7 @@ class Course extends AbstractModel {
             "semester" => $this->semester,
             "title" => $this->title,
             "display_name" => $this->display_name,
-            "display_semester" => $this->semester_name
+            "display_semester" => $this->semester_name,
             "user_group" => $this->user_group
         ];
     }
