@@ -172,13 +172,13 @@ function build_homework {
         exit 1
     fi
 
-    # generate queue file for generated_output
-    $SUBMITTY_INSTALL_DIR/bin/make_generated_output.py $hw_source $assignment $semester $course
-
-    
     # build (in parallel, 8 threads)
     # quit (don't continue on to build other homeworks) if there is a compile error
     make -j 8  > $hw_build_path/log_make_output.txt 2>&1
+
+    # generate queue file for generated_output
+    $SUBMITTY_INSTALL_DIR/bin/make_generated_output.py $hw_source $assignment $semester $course
+
     # capture exit code of make
     make_res=$?
     chmod -f 660 $hw_build_path/log_make_output.txt
