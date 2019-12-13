@@ -554,11 +554,19 @@ HTML;
         return (microtime(true) - $this->start_time);
     }
 
-    public function buildUrl(string ...$parts): string {
+    /**
+     * Builds a URL
+     * @param string[] $parts
+     */
+    public function buildUrl(array $parts): string {
         return $this->core->buildUrl($parts);
     }
 
-    public function buildCourseUrl(string ...$parts): string {
+    /**
+     * Builds a course URL (starts with /<semester>/<course>)
+     * @param string[] $parts
+     */
+    public function buildCourseUrl(array $parts): string {
         return $this->core->buildCourseUrl($parts);
     }
 }

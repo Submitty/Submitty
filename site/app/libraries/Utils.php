@@ -314,4 +314,20 @@ class Utils {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
         return ($bytes / pow(1024, floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
+
+    /**
+     * Multibyte safe version of {@see str_split}.
+     *
+     * @param string $string
+     * @param int $length
+     * @return string[]
+     */
+    public static function mb_str_split(string $string, int $length = 1): array {
+        $arr = [];
+        $str_length = mb_strlen($string, 'UTF-8');
+        for ($i = 0; $i < $str_length; $i += $length) {
+            $arr[] = mb_substr($string, $i, $length, 'UTF-8');
+        }
+        return $arr;
+    }
 }

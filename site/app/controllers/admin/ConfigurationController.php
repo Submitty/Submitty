@@ -201,7 +201,10 @@ class ConfigurationController extends AbstractController {
             return is_dir(FileUtils::joinPaths($seating_dir, $seating_option['g_id']));
         });
 
-        $empty_option = [[
+        // This needs to be -1 or it will default to 0 and clobber g_id 0
+        // if that gradeable is in $gradeable_seating_options
+        // during the concatenation in return (which is basically array_merge).
+        $empty_option = [-1 => [
             'g_id' => "",
             'g_title' => "--None--"
         ]];

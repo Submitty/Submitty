@@ -106,9 +106,12 @@ std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filen
   struct stat st;
   std::string expectedFolder;
   std::string test_output_path = "test_output/";
+  std::string generated_output_path = "generated_output/" + tc.getPrefix();
   std::string random_output_path = "random_output/" + tc.getPrefix();
   if (stat((test_output_path + filename).c_str(), &st) >= 0) {
     expectedFolder = test_output_path;
+  } else if (stat((generated_output_path + filename).c_str(), &st) >= 0){
+    expectedFolder = generated_output_path;
   } else if (stat((random_output_path + filename).c_str(), &st) >= 0){
     expectedFolder = random_output_path;
   }
@@ -119,7 +122,9 @@ std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std:
   std::string expectedPath = getOutputContainingFolderPath(tc, filename);
   std::string requiredPath ;
   if (expectedPath.substr(0,11) == "test_output"){
-    requiredPath = expectedPath + id + "/"; 
+    requiredPath = expectedPath + id + "/";
+  } else if (expectedPath.substr(0,16) == "generated_output") {
+    requiredPath = expectedPath;
   } else if (expectedPath.substr(0,13) == "random_output") {
     requiredPath = expectedPath;
   }
