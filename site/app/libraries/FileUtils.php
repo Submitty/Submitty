@@ -516,7 +516,7 @@ class FileUtils {
             $name = $files['name'][$i];
             $tmp_name = $files['tmp_name'][$i];
             $type = mime_content_type($tmp_name);
-            
+
             $zip_status = FileUtils::getZipFileStatus($tmp_name);
             $errors = [];
             if ($files['error'][$i] !== UPLOAD_ERR_OK) {
@@ -529,7 +529,7 @@ class FileUtils {
                 $zip_status = FileUtils::getZipFileStatus($tmp_name);
                 if ($zip_status !== \ZipArchive::ER_OK) {
                     $err_tmp = ErrorMessages::getZipErrorMessage($zip_status);
-                    if($err_tmp != "No error."){
+                    if ($err_tmp != "No error.") {
                         $errors[] = $err_tmp;
                     }
                 }
@@ -559,7 +559,7 @@ class FileUtils {
             if (count($errors) > 0) {
                 $success = false;
             }
-            
+
             $ret[] = [
                 'name' => $name,
                 'type' => $type,
