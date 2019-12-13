@@ -1597,21 +1597,24 @@ class Gradeable extends AbstractModel {
         $users = [];
         $teams = [];
 
+        $get_method = $this->isGradeByRegistration() ? 'getRegistrationSection' : 'getRotatingSection';
+
+        if ($this->isTeamAssignment()) {
+            $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
+            foreach ($all_teams as $team) {
+                /** @var Team $team */
+                $teams[$team->$get_method() ?? 'NULL'][] = $team;
+            }
+        }
+        else {
+            $all_users = $this->core->getQueries()->getAllUsers();
+            foreach ($all_users as $user) {
+                /** @var User $user */
+                $users[$user->$get_method() ?? 'NULL'][] = $user;
+            }
+        }
+
         if ($this->isGradeByRegistration()) {
-            if ($this->isTeamAssignment()) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                foreach ($all_teams as $team) {
-                    /** @var Team $team */
-                    $teams[$team->getRegistrationSection()][] = $team;
-                }
-            }
-            else {
-                $all_users = $this->core->getQueries()->getAllUsers();
-                foreach ($all_users as $user) {
-                    /** @var User $user */
-                    $users[$user->getRegistrationSection()][] = $user;
-                }
-            }
             $section_names = $this->core->getQueries()->getRegistrationSections();
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_registration_id'];
@@ -1619,26 +1622,13 @@ class Gradeable extends AbstractModel {
             $graders = $this->core->getQueries()->getGradersForRegistrationSections($section_names);
         }
         else {
-            if ($this->isTeamAssignment()) {
-                $all_teams = $this->core->getQueries()->getTeamsByGradeableId($this->getId());
-                foreach ($all_teams as $team) {
-                    /** @var Team $team */
-                    $teams[$team->getRotatingSection()][] = $team;
-                }
-            }
-            else {
-                $all_users = $this->core->getQueries()->getAllUsers();
-                foreach ($all_users as $user) {
-                    /** @var User $user */
-                    $users[$user->getRotatingSection()][] = $user;
-                }
-            }
             $section_names = $this->core->getQueries()->getRotatingSections();
             foreach ($section_names as $i => $section) {
                 $section_names[$i] = $section['sections_rotating_id'];
             }
             $graders = $this->core->getQueries()->getGradersForRotatingSections($this->getId(), $section_names);
         }
+        $section_names[] = 'NULL';
 
         $sections = [];
         foreach ($section_names as $section_name) {

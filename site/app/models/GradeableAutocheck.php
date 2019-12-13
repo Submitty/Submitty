@@ -91,21 +91,25 @@ class GradeableAutocheck extends AbstractModel {
                 else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }
-            } else if(substr($details["expected_file"],0,16) == "generated_output"){
-                $result_path_array = array_reverse(explode("/",$results_path));
-                $path_array = explode("/",$details["expected_file"]);
+            }
+            elseif (substr($details["expected_file"], 0, 16) == "generated_output") {
+                $result_path_array = array_reverse(explode("/", $results_path));
+                $path_array = explode("/", $details["expected_file"]);
                 $inserted_array = array($result_path_array[2],"random_output");
-                array_splice($path_array,1,0,$inserted_array);
-                if(file_exists($course_path . "/" . implode('/',$path_array))){ 
-                    $expected_file = $course_path. "/" . implode('/',$path_array);
-                } else {
-                    $expected_file = $course_path. "/" . implode('/',$path_array);
+                array_splice($path_array, 1, 0, $inserted_array);
+                if (file_exists($course_path . "/" . implode('/', $path_array))) {
+                    $expected_file = $course_path . "/" . implode('/', $path_array);
+                }
+                else {
+                    $expected_file = $course_path . "/" . implode('/', $path_array);
                     $this->core->addErrorMessage($expected_file);
                 }
-            } else if(substr($details["expected_file"],0,13) == "random_output"){
-                if(file_exists($results_path . "/" . $details["expected_file"])){ 
-                    $expected_file = $results_path. "/" . $details["expected_file"];
-                } else {
+            }
+            elseif (substr($details["expected_file"], 0, 13) == "random_output") {
+                if (file_exists($results_path . "/" . $details["expected_file"])) {
+                    $expected_file = $results_path . "/" . $details["expected_file"];
+                }
+                else {
                     $this->core->addErrorMessage("Expected file not found.");
                 }
             // Try to find the file in the details directory. Do not print an error,

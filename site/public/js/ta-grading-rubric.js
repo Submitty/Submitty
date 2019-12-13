@@ -2534,14 +2534,31 @@ function scrollToComponent(component_id) {
  */
 function closeComponentInstructorEdit(component_id, saveChanges) {
     let sequence = Promise.resolve();
+    let component = getComponentFromDOM(component_id);
     if (saveChanges) {
         sequence = sequence
             .then(function () {
+                if(component.max_value == 0 && component.upper_clamp == 0 && component.lower_clamp < 0){
+                    let mark_title = "No Penalty Points";
+                    component.marks[0].title = mark_title;
+                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Penalty Points";
+
+                }
+                else if(component.max_value == 0 && component.upper_clamp > 0 && component.lower_clamp == 0){
+                    let mark_title = "No Extra Credit Awarded";
+                    component.marks[0].title = mark_title;
+                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Extra Credit Awarded";
+                }
+                else{
+                    let mark_title = "No Credit Awarded";
+                    component.marks[0].title = mark_title;
+                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Credit Awarded";
+
+                }
                 return saveMarkList(component_id);
             })
             .then(function () {
                 // Save the component title and comments
-                let component = getComponentFromDOM(component_id);
                 return ajaxSaveComponent(getGradeableId(), component_id, component.title, component.ta_comment,
                     component.student_comment, component.page, component.lower_clamp,
                     component.default, component.max_value, component.upper_clamp);

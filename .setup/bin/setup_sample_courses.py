@@ -34,6 +34,7 @@ import sys
 import configparser
 import csv
 import pdb
+import docker
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
@@ -1019,6 +1020,10 @@ class Course(object):
                 inner_folder = os.path.join(tmpdir, 'CSCI-1300-01')
                 for f in os.listdir(inner_folder):
                     shutil.move(os.path.join(inner_folder, f), os.path.join(student_image_folder, f))
+        if self.code == 'tutorial':
+            client = docker.from_env()
+            client.images.pull('submitty/tutorial:tutorial_18')
+            client.images.pull('submitty/tutorial:database_client')
 
     def check_rotating(self, users):
         for gradeable in self.gradeables:

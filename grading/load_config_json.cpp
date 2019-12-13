@@ -568,8 +568,8 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
 
         validate_mouse_button(action);
 
-        validate_integer(action, "end_x",   true,  0, 0);
-        validate_integer(action, "end_y",   true,  0, 0);
+        validate_integer(action, "end_x",   true,  -100000, 0);
+        validate_integer(action, "end_y",   true,  -100000, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
           std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;

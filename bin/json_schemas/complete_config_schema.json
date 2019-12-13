@@ -773,6 +773,26 @@
                     "enum" : ["origin"]
                   }
                 }
+              },
+              {
+                "description" : "Moves the mouse to the specified location.",
+                "type": "object",
+                "additionalProperties" : false,
+                "required" : ["action"],
+                "properties" : {
+                  "action" : {
+                    "type" : "string",
+                    "enum" : ["move mouse"]
+                  },
+                  "action" : {
+                    "type" : "integer",
+                    "enum" : ["end_x"]
+                  },
+                  "action" : {
+                    "type" : "integer",
+                    "enum" : ["end_y"]
+                  }
+                }
               }
             ]
           }

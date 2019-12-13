@@ -298,7 +298,95 @@ class DiffViewer {
                 }
             }
         }
+
+        for ($i = 0; $i < count($this->actual); $i++) {
+            if (
+                isset($this->diff[self::ACTUAL][$i])
+                && strlen($this->actual[$i] !== mb_strlen($this->actual[$i]))
+            ) {
+                $this->diff[self::ACTUAL][$i] = $this->correctMbDiff(
+                    $this->actual[$i],
+                    $this->diff[self::ACTUAL][$i]
+                );
+            }
+        }
+
+        for ($i = 0; $i < count($this->expected); $i++) {
+            if (
+                isset($this->diff[self::EXPECTED][$i])
+                && strlen($this->expected[$i] !== mb_strlen($this->expected[$i]))
+            ) {
+                $this->diff[self::EXPECTED][$i] = $this->correctMbDiff(
+                    $this->expected[$i],
+                    $this->diff[self::EXPECTED][$i]
+                );
+            }
+        }
+
         $this->built = true;
+    }
+
+    /**
+     * Given a line that contains multibyte characters and diff for that line,
+     * check if any of the diff ranges split a MB character, and if so, correct
+     * the diff.
+     */
+    private function correctMbDiff(string $line, array $diffs) {
+        $split_str = str_split($line);
+        $mb_split_str = Utils::mb_str_split($line);
+        for ($i = 0, $j = 0; $i < strlen($line); $i++, $j++) {
+            if ($split_str[$i] === $mb_split_str[$j]) {
+                continue;
+            }
+            $combined = $split_str[$i];
+            $start = $i;
+            $has_diff = false;
+            // what entry in the diff array contains the range
+            // that is for this MB character (if any)
+            $diff_idx = null;
+            foreach ($diffs as $idx => $diff) {
+                if ($diff[0] <= $i && $i <= $diff[1]) {
+                    $has_diff = true;
+                    $diff_idx = $idx;
+                    break;
+                }
+            }
+
+            while ($combined !== $mb_split_str[$j]) {
+                $i++;
+                // if we have not yet found our index, we
+                // recheck on each character as the range
+                // may start on any character in the byte
+                // sequence
+                if (!$has_diff) {
+                    foreach ($diffs as $idx => $diff) {
+                        if ($diff[0] <= $i && $i <= $diff[1]) {
+                            $has_diff = true;
+                            $diff_idx = $idx;
+                            break;
+                        }
+                    }
+                }
+                $combined .= $split_str[$i];
+            }
+
+            // given that we have a diff range for this
+            // character, adjust the range such that it contains
+            // the start and end of the multibyte character if it
+            // does not already
+            if ($has_diff) {
+                $diff = $diffs[$diff_idx];
+                if ($start < $diff[0]) {
+                    $diff[0] = $start;
+                }
+                if ($i > $diff[1]) {
+                    $diff[1] = $i;
+                }
+                $diffs[$diff_idx] = $diff;
+            }
+        }
+
+        return $diffs;
     }
 
     /**
