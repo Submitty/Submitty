@@ -902,6 +902,19 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
 
   /*************************************************
   * 
+  * APPLY RLIMITS / SET PROCESS GROUP
+  *
+  **************************************************/
+
+  enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
+
+  // Student's shouldn't be forking & making threads/processes...
+  // but if they do, let's set them in the same process group
+  int pgrp = setpgid(getpid(), 0);
+  assert(pgrp == 0);
+
+  /*************************************************
+  * 
   * REDIRECT STDIN/OUT/ERR
   *
   **************************************************/
@@ -950,19 +963,7 @@ int exec_this_command(const std::string &cmd, std::ofstream &logfile, const nloh
     dup2(new_stderrfd, stderrfd);
   }
 
-  /*************************************************
-  * 
-  * APPLY RLIMITS / SET PROCESS GROUP
-  *
-  **************************************************/
-
-  enable_all_setrlimit(program_name,test_case_limits,assignment_limits);
-
-
-  // Student's shouldn't be forking & making threads/processes...
-  // but if they do, let's set them in the same process group
-  int pgrp = setpgid(getpid(), 0);
-  assert(pgrp == 0);
+  
 
   
 
