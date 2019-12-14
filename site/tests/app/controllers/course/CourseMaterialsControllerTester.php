@@ -181,7 +181,7 @@ class CourseMaterialsControllerTester extends BaseUnitTest {
             $this->upload_path . "/" . $name => [
                 'checked' => "1",
                 'release_datetime' => $_POST['release_time'],
-                'hide_from_students' => "off"
+                'hide_from_students' => null
             ]
         ];
 
