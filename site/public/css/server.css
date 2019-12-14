@@ -1636,7 +1636,7 @@ end of styles used in the admin gradeable page
 }
 
 .danger {
-    background: #f2dede;
+    background: var(--alert-background-danger-red);
     color: var(--alert-danger-red);
 }
 
