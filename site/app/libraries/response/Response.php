@@ -9,13 +9,13 @@ use app\libraries\Core;
  * @package app\libraries\response
  */
 class Response extends AbstractResponse {
-    /** @var null | WebResponse  */
+    /** @var null|WebResponse  */
     public $web_response = null;
 
-    /** @var null | JsonResponse  */
+    /** @var null|JsonResponse  */
     public $json_response = null;
 
-    /** @var null | RedirectResponse */
+    /** @var null|RedirectResponse */
     public $redirect_response = null;
 
     /**
