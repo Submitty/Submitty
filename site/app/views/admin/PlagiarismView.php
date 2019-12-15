@@ -114,11 +114,11 @@ HTML;
                 }
 
                 $return .= <<<HTML
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}"><i class="fas fa-pencil-alt" aria-label="Edit {$title}"></i></a>
             </td>
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}"><i class="fas fa-sync" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}"><i class="fas fa-sync" aria-label="Rerun {$title}"></i></a>
             </td>
-            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-hidden="true"></i></a>
+            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-label="Delete {$title}"></i></a>
             </td>
             <td>
                 Last run: $timestamp

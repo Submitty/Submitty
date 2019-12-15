@@ -55,7 +55,7 @@
                     </div>
                     {% if not notification.isSeen() %}
                         <a class="notification-seen black-btn" href="{{ notifications_url }}/{{ notification.getId() }}/seen" title="Mark as seen">
-                            <i class="far fa-envelope-open" aria-hidden="true"></i>
+                            <i class="far fa-envelope-open" aria-label="Mark as seen"></i>
                         </a>
                     {% endif %}
                 </div>
