@@ -1485,18 +1485,18 @@ class SubmissionController extends AbstractController {
 
         $url = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), $new_version]);
         if ($ta) {
-            $params = $this->core->buildCourseUrl([
+            $url = $this->core->buildCourseUrl([
                 'gradeable',
                 $graded_gradeable->getGradeableId(),
                 'grading',
-                'grade']
-            ) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
+                'grade'
+            ]) . '?' . http_build_query(['who_id' => $who, 'gradeable_version' => $new_version]);
         }
 
         return new Response(
             JsonResponse::getSuccessResponse(['version' => $new_version, 'message' => $msg]),
             null,
-            new RedirectResponse($this->core->buildCourseUrl(['gradeable', $gradeable->getId()]))
+            new RedirectResponse($url)
         );
     }
 
