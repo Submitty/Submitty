@@ -202,7 +202,9 @@ class SimpleGraderControllerTester extends BaseUnitTest {
         $this->assertEquals(
             [
                 'status' => 'success',
-                'data' => null
+                'data' => [
+                    '0' => 5
+                ]
             ],
             $response->json_response->json
         );
