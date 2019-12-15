@@ -81,7 +81,16 @@
     </div>
     <div class="form-group row">
         {% set min_height = (post_textarea_large?"40vmin":"100px") %}
-        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}" ></textarea>
+        <textarea name="thread_post_content" id="thread_post_content" class="fill-available post_content_reply" style="resize:none;min-height:{{ min_height }};max-height:300px" rows="10" cols="30" placeholder="{{ post_content_placeholder }}" required aria-label="Thread Post Textarea" maxlength="{{ post_content_limit }}"
+        onkeydown="
+            if ((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {//ctrl+enter keys pressed
+                var theForm = $(this).closest('form');
+                if(theForm.hasClass('dirty')){
+                    theForm.trigger('reinitialize.areYouSure');
+                    theForm.submit();
+                }
+            }
+        "></textarea>
     </div>
 <br/>
 {% endif %}
