@@ -680,7 +680,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_prev_gradeable">
-                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-label="Add more" ></i>Add more
                     </span>
                 </div>
             </div><br /><br /><br /><br /><br />
@@ -709,7 +709,7 @@ HTML;
                 </div><br />
                 <div style="width:70%;float:right">
                     <span name="add_more_ignore">
-                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
+                        <i class="fas fa-plus-square" aria-label="Add more" ></i>Add more
                     </span>
                 </div>
             </div><br /><br />
