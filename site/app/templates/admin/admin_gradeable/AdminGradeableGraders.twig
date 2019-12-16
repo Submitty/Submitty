@@ -1,5 +1,5 @@
 {% import _self as self %} {# Required to use macros in same template #}
-{# 
+{#
 Macros
 #}
 
@@ -9,10 +9,12 @@ Macros
         <tr class="{{ prefix }}">
             <th>{{ grader[1] ~ " " ~ grader[2] ~ "(" ~ grader[0] ~ ")" }}</th>
             <td><input type="checkbox" name="{{ prefix }}_all_{{ grader[0] }}" id="{{ prefix }}_all_{{ grader[0] }}"
+                       aria-label="all rotating sections"
                        onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", 0)'/></td>
             {% for rs in section_numbers %}
                 <td><input type="checkbox" name="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
                         id="grader_{{ prefix }}_{{ rs }}_{{ grader[0] }}"
+                        aria-label="rotating section {{ rs }}"
                         onclick='updateCheckBoxes("{{ prefix }}", "{{ grader[0] }}", {{ rs }});'
                         {{ (rs in history[grader[0]][g_id]) ? 'checked' : '' }}/></td>
             {% endfor %}
@@ -29,7 +31,7 @@ Variables
 {% set section_numbers = range(1, num_rotating_sections) %}
 {% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader'} %}
 
-{# 
+{#
 Form
 #}
 
@@ -42,8 +44,8 @@ Form
 	</div>
 {% endif %}
 
-What is the lowest privileged user group that can grade this?
-    <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
+<label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
+    <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
     {% for num, role in grading_groups %}
         <option value="{{ num }}" {{ gradeable.getMinGradingGroup() == num ? 'selected' : '' }}>{{ role }}</option>
@@ -54,16 +56,16 @@ What is the lowest privileged user group that can grade this?
 <fieldset>
     <legend>
         How should graders be assigned to grade this item?
-        <a class="fa-question-circle" target=_blank href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
+        <a class="fa-question-circle" target=_blank aria-label="Help for grading by registration or rotating section" href="http://submitty.org/instructor/create_edit_gradeable#grading-by-registration-section-or-rotating-section"></a>
     </legend>
-	<input type="radio" name="grader_assignment_method" value="2" id="all_access"
-        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> All Access Grading
-	
+	<input type="radio" name="grader_assignment_method" id="grader_assignment_method" value="2" id="all_access"
+        {{ (gradeable.getGraderAssignmentMethod() == 2) ? 'checked' : '' }}> <label for="grader_assignment_method">All Access Grading</label>
+
     <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
-        {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> Registration Section
+        {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> <label for="registration_section">Registration Section</label>
 
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
-        {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> Rotating Section
+        {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}

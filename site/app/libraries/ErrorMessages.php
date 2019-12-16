@@ -39,4 +39,34 @@ class ErrorMessages {
                 return "Unknown error code.";
         }
     }
+
+     /**
+     * Given a response code after opening a Zip Archive, check if anything went wrong
+     * @param bool | int $res Error code or status for opening archive
+     *
+     * @return string Message for what went wront with upload
+     */
+    public static function getZipErrorMessage($res) {
+       
+        if ($res === true) {
+            return "No error.";
+        }
+
+        switch ($res) {
+            case \ZipArchive::ER_NOENT:
+                return "File does not exist.";
+            case \ZipArchive::ER_NOZIP:
+                return "File not a zip archive.";
+            case \ZipArchive::ER_COMPNOTSUPP:
+                return "Compression method not supported.";
+            case \ZipArchive::ER_INTERNAL:
+                return "Internel Error.";
+            case \ZipArchive::ER_INCONS:
+                return "Zip archive inconsistent.";
+            case \ZipArchive::ER_CRC:
+                return "Failed to check file integrity (CRC fail).";
+            default:
+                return "Unknown error code: " . $res . ".";
+        }
+    }
 }

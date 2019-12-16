@@ -15,7 +15,7 @@ $(document).ready(function() {
         formData.append("entry", entry);
 
         $.ajax({
-            url: buildCourseUrl(['config', 'update']),
+            url: buildCourseUrl(['config']),
             data: formData,
             type: "POST",
             processData: false,
