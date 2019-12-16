@@ -1636,7 +1636,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->assertNull($return->web_response);
         $this->assertNotNull($return->redirect_response);
-        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertEquals('test/test/gradeable/test/0', $return->redirect_response->url);
         $this->assertNotNull($return->json_response);
         $json_response = $return->json_response->json;
         $this->assertEquals('success', $json_response['status']);
@@ -1665,7 +1665,7 @@ class SubmissionControllerTester extends BaseUnitTest {
 
         $this->assertNull($return->web_response);
         $this->assertNotNull($return->redirect_response);
-        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertEquals('test/test/gradeable/test/4', $return->redirect_response->url);
         $this->assertNotNull($return->json_response);
         $json_response = $return->json_response->json;
         $this->assertEquals('success', $json_response['status']);
