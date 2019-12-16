@@ -641,4 +641,22 @@ class UtilsTester extends \PHPUnit\Framework\TestCase {
     public function testFormatBytes($format, $bytes, $expected) {
         $this->assertEquals($expected, Utils::formatBytes($format, $bytes));
     }
+
+    public function testMbStrSplitRegularString() {
+        $this->assertEquals(str_split('abcdef'), Utils::mb_str_split('abcdef'));
+    }
+
+    public function testMbStrSplitMbString() {
+        $this->assertEquals(
+            ["α", "β", "γ", "δ", "ε", "f"],
+            Utils::mb_str_split("αβγδεf")
+        );
+    }
+
+    public function testMbStrSplitLength() {
+        $this->assertEquals(
+            ["αβ", "γδ", "εf", "g"],
+            Utils::mb_str_split("αβγδεfg", 2)
+        );
+    }
 }

@@ -4,10 +4,8 @@ namespace app\models;
 
 use app\controllers\admin\WrapperController;
 use app\exceptions\ConfigException;
-use app\exceptions\FileNotFoundException;
 use app\libraries\Core;
 use app\libraries\FileUtils;
-use app\libraries\Utils;
 
 /**
  * Class Config
@@ -57,6 +55,7 @@ use app\libraries\Utils;
  * @method array getCourseJson()
  * @method string getSecretSession()
  * @method string getAutoRainbowGrades()
+ * @method string|null getVerifiedSubmittyAdminUser()
  * @method bool isQueueEnabled()
  * @method void setSemester(string $semester)
  * @method void setCourse(string $course)
@@ -214,6 +213,8 @@ class Config extends AbstractModel {
     protected $auto_rainbow_grades;
     /** @property @var string */
     protected $secret_session;
+    /** @prop-read @var string|null */
+    protected $verified_submitty_admin_user = null;
     /** @property @var bool */
     protected $queue_enabled;
 
@@ -360,6 +361,11 @@ class Config extends AbstractModel {
         }
         $this->latest_tag = $version_json['most_recent_git_tag'];
         $this->latest_commit = $version_json['short_installed_commit'];
+
+        $users_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'submitty_users.json'));
+        if ($users_json !== false && isset($users_json['verified_submitty_admin_user'])) {
+            $this->verified_submitty_admin_user = $users_json['verified_submitty_admin_user'];
+        }
     }
 
     public function loadCourseJson($semester, $course, $course_json_path) {
@@ -438,52 +444,9 @@ class Config extends AbstractModel {
         }
     }
 
-    /**
-     * Determine if automatic rainbow grades is fully configured
-     * For some features to be available to the instructors, the submitty-admin user must be configured
-     * at the system level and also must be a member of the course in question.
-     */
-
-    public function getSubmittyAdminUser() {
-        // grab the name of the submitty_admin user (only if 'verified',
-        // that is, password successfully used to grab an API token.
-        $users_file = FileUtils::joinPaths(
-            '/',
-            'usr',
-            'local',
-            'submitty',
-            'config',
-            'submitty_users.json'
-        );
-        if (!is_file($users_file)) {
-            throw new FileNotFoundException('Unable to locate the submity_users.json file');
-        }
-        $users_file_contents = json_decode(file_get_contents($users_file));
-        $submitty_admin_user = "";
-        if (property_exists($users_file_contents, "verified_submitty_admin_user")) {
-            $submitty_admin_user = $users_file_contents->verified_submitty_admin_user;
-        }
-        return $submitty_admin_user;
-    }
-
     public function isSubmittyAdminUserVerified() {
-        return $this->getSubmittyAdminUser() !== "";
+        return !empty($this->verified_submitty_admin_user);
     }
-
-    public function isSubmittyAdminUserInCourse() {
-        $submitty_admin_user = $this->getSubmittyAdminUser();
-        if ($submitty_admin_user === "") {
-            return false;
-        }
-        $course = $this->getCourse();
-        $semester = $this->getSemester();
-        return $this->core->getQueries()->checkIsInstructorInCourse(
-            $submitty_admin_user,
-            $course,
-            $semester
-        );
-    }
-
 
     /**
      * @return boolean

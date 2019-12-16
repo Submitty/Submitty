@@ -1,4 +1,4 @@
-Point precision:
+<label for="point_precision_id">Point precision:</label>
 <input type="text" id="point_precision_id" name="precision" onchange="onPrecisionChange()" value="{{ gradeable.getPrecision() }}" class="ignore" />
 
 <div class="electronic_file ignore" id="gradeable_rubric">
@@ -8,16 +8,16 @@ Point precision:
             And do you expect each specific problem/item/component to appear on a specific page number of the PDF document?
         </legend>
         <input type="radio" id="yes_pdf_page" name="pdf_page" value="true" onchange="updatePdfPageSettings()"
-                {{ is_pdf_page ? 'checked' : '' }} /> Yes
+                {{ is_pdf_page ? 'checked' : '' }} /> <label for="yes_pdf_page">Yes</label>
         <input type="radio" id="no_pdf_page" name="pdf_page" value="false" onchange="updatePdfPageSettings()"
-                {{ not is_pdf_page ? 'checked' : '' }} /> No
+                {{ not is_pdf_page ? 'checked' : '' }} /> <label for="no_pdf_page">No</label>
     </fieldset>
     <fieldset id="pdf_page">
         Who will assign page numbers to problems/item/components?<br>
         <input type="radio" id="no_pdf_page_student" name="pdf_page_student" value="false" onchange="updatePdfPageSettings()"
-                {{ not is_pdf_page_student ? 'checked' : '' }} /> Instructor (specify the starting page number for each problem/item/component below)<br>
+                {{ not is_pdf_page_student ? 'checked' : '' }} /> <label for="no_pdf_page_student">Instructor (specify the starting page number for each problem/item/component below)</label><br>
         <input type="radio" id="yes_pdf_page_student" name="pdf_page_student" value="true" onchange="updatePdfPageSettings()"
-                {{ is_pdf_page_student ? 'checked' : '' }} /> Student (student will be asked for page numbers at submission time)
+                {{ is_pdf_page_student ? 'checked' : '' }} /> <label for="yes_pdf_page_student">Student (student will be asked for page numbers at submission time)</label>
     </fieldset>
     <div>
         <div id="rubric-total-container">
