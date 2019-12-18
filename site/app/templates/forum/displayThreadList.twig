@@ -20,7 +20,7 @@
             {% endif %}
 
             <span class="thread-list-item">{% if thread.current_user_posted %}
-                    <i class="fas fa-comments" title="You have contributed"></i>
+                    <i class="fas fa-comments" title="You have contributed" aria-label="You have contributed"></i>
                 {% endif %}
                 {{ thread.title }}</span>
             <span class="thread-content">{{ thread.content }}</span>
