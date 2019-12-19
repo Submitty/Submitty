@@ -193,16 +193,15 @@
 </div>
 <br>
 </div>
-<script>
+<script type="text/javascript">
     $(function(){
         $("input[name='title']").change(function () {
             $(this).val($.trim($(this).val()));
         });
     });
-</script>
-<script type="text/javascript">
+
     function submitNearestForm(e, textarea){
-        if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey) {//ctrl+enter keys pressed
+        if ((e.keyCode == 10 || e.keyCode == 13) && (e.metaKey || e.ctrlKey)) {//ctrl+enter keys pressed
             var theForm = textarea.closest('form');
             if(theForm.hasClass('dirty')){
                 theForm.trigger('reinitialize.areYouSure');
