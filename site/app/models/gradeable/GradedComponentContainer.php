@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\Utils;
 use app\models\AbstractModel;
 use app\models\User;
+use app\libraries\NumberUtils;
 
 /**
  * Class GradedComponentContainer
@@ -216,7 +217,7 @@ class GradedComponentContainer extends AbstractModel {
         // Note: this is called 'safeCalcPercent', but it does not clamp the output to 1.0
         // Note: clamp count(...) to be at least 1 so safeCalcPercent doesn't return NaN
         $points_earned = Utils::safeCalcPercent($points_earned, max(1, count($this->graded_components)));
-        return $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->roundPointValue($points_earned);
+        return NumberUtils::roundPointValue($points_earned, $this->ta_graded_gradeable->getGradedGradeable()->getGradeable()->getPrecision());
     }
 
     /**
