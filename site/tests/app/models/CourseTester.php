@@ -11,7 +11,7 @@ class CourseTester extends BaseUnitTest {
     public function testCourse() {
         $details = [
             'semester' => 's18',
-            'semester_name' => 'Spring 2018',
+            'term_name' => 'Spring 2018',
             'course' => 'csci1000',
             'user_group' => 1
         ];
