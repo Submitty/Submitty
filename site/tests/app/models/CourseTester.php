@@ -12,7 +12,7 @@ class CourseTester extends BaseUnitTest {
         $details = [
             'semester' => 's18',
             'semester_name' => 'Spring 2018',
-            'course' => 'csci1000'
+            'course' => 'csci1000',
             'user_group' => 1
         ];
         $course = new Course($this->createMockCore(), $details);
