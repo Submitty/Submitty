@@ -41,19 +41,19 @@
         {% if not (isThreadLocked != 1 or userAccessFullGrading) %}
             {# pass #}
         {% elseif not first %}
-            <a class="btn btn-default btn-sm post_button_color text-decoration-none" onClick="replyPost({{ post.id }})"> Reply</a>
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="replyPost({{ post.id }})"> Reply</a>
         {% else %}
-            <a class="btn btn-default btn-sm post_button_color text-decoration-none" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="$('html, #posts_list').animate({ scrollTop: document.getElementById('posts_list').scrollHeight }, 'slow');"> Reply</a>
         {% endif %}
 
         {% if userGroup <= 3 %}
-            <a class="btn btn-default btn-sm post_button_color text-decoration-none" onClick="showHistory({{ post.id }})">Show History</a>
+            <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="showHistory({{ post.id }})">Show History</a>
         {% endif %}
 
     {% endif %}
 
     {% if includeReply and (userGroup <= 3 or post.author_user_id == current_user) and first and thread_resolve_state == -1 %}
-        <a class="btn btn-default btn-sm post_button_color text-decoration-none" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
+        <a class="btn btn-default btn-sm post_button_color text-decoration-none" tabindex = "0" onClick="changeThreadStatus({{ post.thread_id }})" title="Mark thread as resolved">Mark as resolved</a>
     {% endif %}
 
     <span class="post-action-container">
@@ -71,7 +71,7 @@
             {% if not (isThreadLocked != 1 or userAccessFullGrading == true) %}
                 {#pass#}
             {% else %}
-                <a class="post_button delete-post-button" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}" aria-hidden="true"></i></a>
+                <a class="post_button delete-post-button" tabindex = "0" onClick="deletePostToggle({{ post_buttons.delete.ud_toggle_status }}, {{ post.thread_id }}, {{ post.id }}, '{{ post.author_user_id }}', '{{ post_date }}', '{{ csrf_token }}' )" title="{{ post_buttons.delete.ud_button_title }}"><i class="fa {{ post_buttons.delete.ud_button_icon }}" aria-hidden="true"></i></a>
                 <a class="post_button edit-post-button" onClick="editPost({{ post.id }}, {{ post.thread_id }}, {{ post_buttons.edit.shouldEditThread }}, {{ render_markdown?1:0 }}, '{{ csrf_token }}')" title="{{ post_buttons.edit.edit_button_title }}"><i class="fas fa-edit" aria-hidden="true"></i></a>
             {% endif %}
         {% endif %}
@@ -87,7 +87,7 @@
 
     {% if post_attachment.exist == true %}
 
-        <a href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm" type="button">
+        <a tabindex = "0" href="#" id="{{ post_attachment.params.button_id }}" onclick="loadInlineImages('{{ post_attachment.params.encoded_data }}');" class="attachment-btn btn btn-default btn-sm" type="button">
                     Attachments <span class="attachment-badge badge">{{ post_attachment.params.num_files }}</span> </a>
 
 

@@ -290,6 +290,11 @@ body {min-width: 925px;}
     top: 0px;
 }
 
+#forum_bar div div.col-4{
+    padding: 0;
+    top: 0px;
+}
+
 #search_block div div.col-6{
     margin-right:5px;
 }
@@ -305,9 +310,9 @@ body {min-width: 925px;}
 }
 
 .more-dropdown{
-    float:right;
+    position:absolute;
+    right:118px;
     top:3px;
-    margin-right:5px;
 }
 
 #post-hr{
