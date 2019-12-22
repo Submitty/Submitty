@@ -292,7 +292,8 @@ function setButtonStatus() {
 //========================================================================================
 function removeLabel(filename, part){
     var dropzone = document.getElementById("file-upload-table-" + part);
-    var labels = dropzone.getElementsByClassName("label");
+    var labels = dropzone.getElementsByClassName("file-label");
+    debugger;
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
@@ -306,9 +307,11 @@ function addLabel(filename, filesize, part, previous){
     // create element
     var uploadRowElement = document.createElement('tr');
     uploadRowElement.setAttribute("fname", filename);
+    uploadRowElement.setAttribute("class", 'file-label');
 
     var fileDataElement = document.createElement('td');
     var fileTrashElement = document.createElement('td');
+    fileTrashElement.setAttribute('class', 'file-trash');
 
     fileDataElement.innerHTML= filename;
     fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";

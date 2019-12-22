@@ -465,6 +465,27 @@ td>a.active-sort {
     margin-left: 0;
 }
 
+.file-upload-table {
+    border: none;
+    border-collapse: collapse;
+    text-align: left;
+    margin: 5px auto;
+}
+
+.file-upload-table td {
+    border: none;
+    vertical-align: middle;
+    padding: 1px 10px;
+}
+
+.file-upload-table .file-trash{
+    text-align: right;
+}
+
+.file-upload-table tr:hover {
+    background: #d1d1d1;
+}
+
 .green-message {
     font-style: italic;
     font-weight: bold;
@@ -1096,6 +1117,7 @@ div.full_height {
     background-position: center center;
     background-repeat: no-repeat;
     border-radius: 5px;
+    display: table-cell;
     border: 1px solid var(--standard-medium-gray);
 }
 
