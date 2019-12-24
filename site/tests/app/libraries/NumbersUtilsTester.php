@@ -5,14 +5,13 @@ namespace tests\app\libraries;
 use app\libraries\Core;
 use app\libraries\NumberUtils;
 use app\models\Config;
+use PHPUnit\Framework\TestCase;
 
-class NumbersUtilsTester extends \PHPUnit\Framework\TestCase
-{
+class NumbersUtilsTester extends TestCase {
     /**
      * @return array -containing the test cases as { expectedValue, value, precision}
      */
-    public function roundPointValueData()
-    {
+    public function roundPointValueData() {
         return array(
             array(6, 6, 0.05),
             array(1.002, 1, 0.006),
@@ -35,8 +34,7 @@ class NumbersUtilsTester extends \PHPUnit\Framework\TestCase
      *
      * @dataProvider roundPointValueData
      */
-    public function testRoundPointValue($expectedValue, $value, $precision)
-    {
+    public function testRoundPointValue($expectedValue, $value, $precision) {
         $this->assertEquals($expectedValue, NumberUtils::roundPointValue($value, $precision));
     }
 }
