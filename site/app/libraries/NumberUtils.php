@@ -11,33 +11,42 @@ namespace app\libraries;
 class NumberUtils {
 
     /**
-     * @param $x float The number to round
-     * @param $y float The number $x to be rounded with respect to this variable $y
-     * @return float The rounded result to the nearest multiple of $y
+     * NumberUtils constructor.
+     * @param Core $core
      */
-    public static function roundPointValue($x, $y) {
-
-        // No $y, no rounding
-        if ($y === 0.0) {
-            return $x;
-        }
-
-        $x = floatval($x);
-        $q = (int) ($x / $y);
-        $r = self::fmod_round($x, $y);
-
-        // If the remainder is more than half the $y away from zero, then add one
-        //  times the direction from zero to the quotient.  Multiply by $y
-        return ($q + (abs($r) > $y / 2 ? ($r > 0 ? 1 : -1) : 0)) * $y;
+    public function __construct(Core $core) {
+        parent::__construct($core);
     }
 
     /**
-     * @param $x float
-     * @param $y float
-     * @return float|int
+     *  Gives the closest number to the `$value`  with respect to `$precision`
+     * @param $value float The number to round
+     * @param $precision float The precision with calculation to be made
+     * @return float The rounded result to the nearest multiple of $y
      */
-    public static function fmod_round($x, $y) {
-        $i = round($x / $y);
-        return $x - $i * $y;
+    public static function roundPointValue($value, $precision) {
+
+        // No $precision, no rounding
+        if ($precision === 0.0) return $value;
+
+        $value = floatval($value);
+        $qtnt_f = $value / $precision;
+        $qtnt_i = (int) ($value / $precision);
+
+        if ($qtnt_i == $qtnt_f) return $value;
+
+        $mod = $value - $qtnt_i * $precision;
+
+        $shift = null;
+        // difference is to little to be considered , No shifting needed
+        if(abs($mod) < $precision / 2 ) {
+            $shift = 0 ;
+        } else {
+            // shift to one unit in the direction from zero to the quotient
+            $shift = $mod > 0 ? 1 : -1;
+        }
+
+        return ($qtnt_i + $shift) * $precision;
     }
+
 }
