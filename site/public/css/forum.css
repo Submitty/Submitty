@@ -192,7 +192,6 @@ body {min-width: 925px;}
 .delete-post-button, .edit-post-button{
     position: relative;
     display: inline-block;
-    float: right;
 }
 
 .delete-post-button{
