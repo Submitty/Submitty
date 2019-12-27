@@ -2,6 +2,13 @@
 
     "assignment_message" : "Locate the 8 digit iClicker Remote ID near the battery access panel on the back of your iClicker.  \nNote: This number does not begin with 'T24', that's the model number.  \nIf you lost your original remote and purchased a replacement, enter BOTH remote IDs in the box below, separated by a comma.",
 
+    "autograding" : {
+        "submission_to_compilation" : [ "*.txt" ],
+        "submission_to_runner" : [ "*.txt" ],
+        "submission_to_validation" : [ "*.txt" ],
+        "work_to_details" : [ "*.txt" ]
+    },
+
     "notebook" : [
         {
             "type" : "markdown",
@@ -14,10 +21,17 @@
     ],
     "testcases" : [ 
         {
-            "type" : "FileCheck",
             "title" : "iClicker ID",
             "actual_file" : "input_0.txt",
-            "points" : 0
+            "points" : 1,
+            "command" : [],
+            "validation": [
+                {
+                    "method":"custom_validator",
+                    "command" : "python3 grader.py",
+                    "actual_file" : "input_0.txt"
+                }
+            ]
         }
     ]
 }

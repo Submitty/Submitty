@@ -28,10 +28,10 @@ class NotificationFactory extends AbstractModel {
      */
     public function onNewAnnouncement(array $event) {
         $recipients = $this->core->getQueries()->getAllUsersIds();
-        $notifications = $this->createNotificationsArray($event,$recipients);
+        $notifications = $this->createNotificationsArray($event, $recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails =$this->createEmailsArray($event,$recipients);
+            $emails = $this->createEmailsArray($event, $recipients);
             $this->sendEmails($emails);
         }
     }
@@ -43,13 +43,13 @@ class NotificationFactory extends AbstractModel {
         $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads");
         $recipients[] = $this->core->getUser()->getId();
         $recipients = array_unique($recipients);
-        $notifications = $this->createNotificationsArray($event,$recipients);
+        $notifications = $this->createNotificationsArray($event, $recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
             $recipients = $this->core->getQueries()->getAllUsersWithPreference("all_new_threads_email");
             $recipients[] = $this->core->getUser()->getId();
             $recipients = array_unique($recipients);
-            $emails =$this->createEmailsArray($event,$recipients);
+            $emails = $this->createEmailsArray($event, $recipients);
             $this->sendEmails($emails);
         }
     }
@@ -63,22 +63,22 @@ class NotificationFactory extends AbstractModel {
         $post_id = $event["post_id"];
         $thread_id = $event["thread_id"];
 
-        $parent_authors = $this->core->getQueries()->getAllParentAuthors($current_user_id,$post_id);
+        $parent_authors = $this->core->getQueries()->getAllParentAuthors($current_user_id, $post_id);
         $users_with_notification_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts");
-        $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread");
+        $thread_authors_notification_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id, "reply_in_post_thread");
         $notification_recipients = array_merge($parent_authors, $users_with_notification_preference, $thread_authors_notification_preference);
         $notification_recipients[] = $current_user_id;
         $notification_recipients = array_unique($notification_recipients);
-        $notifications = $this->createNotificationsArray($event,$notification_recipients);
+        $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
 
         if ($this->core->getConfig()->isEmailEnabled()) {
             $users_with_email_preference = $this->core->getQueries()->getAllUsersWithPreference("all_new_posts_email");
-            $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id,"reply_in_post_thread_email");
+            $thread_authors_email_preference = $this->core->getQueries()->getAllThreadAuthors($thread_id, "reply_in_post_thread_email");
             $email_recipients = array_merge($parent_authors, $users_with_email_preference, $thread_authors_email_preference);
             $email_recipients[] = $current_user_id;
             $email_recipients = array_unique($email_recipients);
-            $emails =$this->createEmailsArray($event,$email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
     }
@@ -96,11 +96,11 @@ class NotificationFactory extends AbstractModel {
         $this->sendNotifications($notifications);
 
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'].'_email');
+            $email_recipients =  $this->core->getQueries()->getAllUsersWithPreference($event['preference'] . '_email');
             $email_recipients[] = $event['recipient'];
             $email_recipients[] = $this->core->getUser()->getId();
             $email_recipients = array_unique($email_recipients);
-            $emails = $this->createEmailsArray($event,$email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
     }
@@ -117,7 +117,7 @@ class NotificationFactory extends AbstractModel {
         $email_recipients = [$current_user_id];
         $users_settings = $this->core->getQueries()->getUsersNotificationSettings($recipients);
         foreach ($recipients as $recipient) {
-            $user_settings_row = array_values(array_filter($users_settings, function($v) use ($recipient) {
+            $user_settings_row = array_values(array_filter($users_settings, function ($v) use ($recipient) {
                 return $v['user_id'] === $recipient;
             }));
             if (!empty($user_settings_row)) {
@@ -127,17 +127,16 @@ class NotificationFactory extends AbstractModel {
             if ($user_settings[$event['type']]) {
                 $notification_recipients[] = $recipient;
             }
-            if ($user_settings[$event['type'].'_email']) {
+            if ($user_settings[$event['type'] . '_email']) {
                 $email_recipients[] = $recipient;
             }
         }
         $notifications = $this->createNotificationsArray($event, $notification_recipients);
         $this->sendNotifications($notifications);
         if ($this->core->getConfig()->isEmailEnabled()) {
-            $emails = $this->createEmailsArray($event,$email_recipients);
+            $emails = $this->createEmailsArray($event, $email_recipients);
             $this->sendEmails($emails);
         }
-
     }
 
     // ***********************************HELPERS***********************************
@@ -152,7 +151,7 @@ class NotificationFactory extends AbstractModel {
         $notifications = array();
         foreach ($recipients as $recipient) {
             $event['to_user_id'] = $recipient;
-            $notifications[] = Notification::createNotification($this->core,$event);
+            $notifications[] = Notification::createNotification($this->core, $event);
         }
         return $notifications;
     }
@@ -165,12 +164,20 @@ class NotificationFactory extends AbstractModel {
     private function createEmailsArray($event, $recipients) {
         $emails = array();
         foreach ($recipients as $recipient) {
+            //Checks if a url is in metadata and sets $relevant_url null or that url
+            $metadata = json_decode($event['metadata'], true);
+            $relevant_url = null;
+            if (array_key_exists("url", $metadata)) {
+                $relevant_url = $metadata["url"];
+            }
+
             $details = [
                 'to_user_id' => $recipient,
                 'subject' => $event['subject'],
-                'body' => $event['content']
+                'body' => $event['content'],
+                'relevant_url' => $relevant_url
             ];
-            $emails[] = new Email($this->core,$details);
+            $emails[] = new Email($this->core, $details);
         }
         return $emails;
     }
@@ -190,7 +197,7 @@ class NotificationFactory extends AbstractModel {
         $flattened_notifications = [];
         foreach ($notifications as $notification) {
             // check if user is in the null section
-            if (!$this->core->getQueries()->checkStudentActiveInCourse($notification->getNotifyTarget(),$this->core->getConfig()->getCourse(),$this->core->getConfig()->getSemester())) {
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($notification->getNotifyTarget(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
                 continue;
             }
             if ($notification->getNotifyTarget() != $current_user->getId() || $current_user->getNotificationSetting('self_notification')) {
@@ -200,14 +207,12 @@ class NotificationFactory extends AbstractModel {
                 $flattened_notifications[] = $notification->getNotifySource();
                 $flattened_notifications[] = $notification->getNotifyTarget();
             }
-
         }
         if (!empty($flattened_notifications)) {
             // some notifications may not have been added to the flattened notifications
             // so to calculate the number of notifications we must use flattened notifications
-            $this->core->getQueries()->insertNotifications($flattened_notifications,count($flattened_notifications)/5);
+            $this->core->getQueries()->insertNotifications($flattened_notifications, count($flattened_notifications) / 5);
         }
-
     }
 
     /**
@@ -226,7 +231,7 @@ class NotificationFactory extends AbstractModel {
         $flattened_emails = [];
         foreach ($emails as $email) {
             // check if user is in the null section
-            if (!$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(),$this->core->getConfig()->getCourse(),$this->core->getConfig()->getSemester())) {
+            if (!$this->core->getQueries()->checkStudentActiveInCourse($email->getUserId(), $this->core->getConfig()->getCourse(), $this->core->getConfig()->getSemester())) {
                 continue;
             }
             if ($email->getUserId() != $current_user->getId() || $current_user->getNotificationSetting('self_notification_email')) {
@@ -236,8 +241,7 @@ class NotificationFactory extends AbstractModel {
             }
         }
         if (!empty($flattened_emails)) {
-            $this->core->getQueries()->insertEmails($flattened_emails,count($flattened_emails)/3);
+            $this->core->getQueries()->insertEmails($flattened_emails, count($flattened_emails) / 3);
         }
-
     }
 }

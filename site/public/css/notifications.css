@@ -6,9 +6,14 @@
 
 #notifications-caption {
     background: var(--alert-background-blue);
-    margin: 8px -30px;
+    margin: 0 -30px;
     padding: 8px 30px;
     display: table-caption;
+}
+
+#empty-notifications {
+    padding-top: 30px;
+    text-align: center;
 }
 
 #notification-header {

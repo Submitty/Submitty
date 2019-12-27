@@ -6,9 +6,18 @@
     <em>Note: Registered students have not yet been uploaded to the Submitty course databases.  Please check back later.</em>
     -->
     <form action="{{ login_url }}" method="post" id="login">
-        <input type="text" name="user_id" onchange="$(this).val($(this).val().trim())" placeholder="User ID" required autofocus/>
-        <input type="password" name="password" placeholder="Password" required />
-        <label for="stay_logged_in">Stay Logged In <input type="checkbox" name="stay_logged_in" id="stay_logged_in" checked /></label>
+        <label>
+            User ID
+            <input type="text" name="user_id" onchange="$(this).val($(this).val().trim())" required autofocus/>
+        </label>
+        <label>
+            Password
+            <input type="password" name="password" required />
+        </label>
+        <label class="inline-label">
+            Stay Logged In
+            <input type="checkbox" name="stay_logged_in" checked />
+        </label>
         <input type="submit" name="login" value="Login" class="btn btn-primary" />
     </form>
 </div>

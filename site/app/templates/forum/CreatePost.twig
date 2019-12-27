@@ -1,4 +1,5 @@
-<div class="{% for class in classes %} {{ class }} {% endfor %}" id="{{ post_id }}" thread-id="{% if activeThread.id is defined %}{{ activeThread.id }}{% else %}{{ thread_id }}{% endif %}" parent-id="{{ parent_id }}" style="margin-left:{{ offset }}px;" reply-level="{{ reply_level }}">
+<div class="{{ classes|join(" ") }}" id="{{ post_id }}" thread-id="{% if activeThread.id is defined %}{{ activeThread.id }}{% else %}{{ thread_id }}{% endif %}" parent-id="{{ parent_id }}" style="margin-left:{{ offset }}px;" reply-level="{{ reply_level }}">
+
     {% if first == true %}
         <h2 class="create-post-head">
 
@@ -118,4 +119,3 @@
 
     </form>
 {% endif %}
-

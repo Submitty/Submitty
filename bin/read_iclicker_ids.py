@@ -29,6 +29,10 @@ def main():
     """
     args = parse_args()
 
+    # remove trailing slash
+    if (args.submission_directory.endswith("/")):
+        args.submission_directory = args.submission_directory[:-1]
+
     if not os.path.isdir(args.submission_directory):
         raise SystemExit("ERROR: Specified submission_directory is invalid: "+args.submission_directory)
 
@@ -50,18 +54,26 @@ def main():
                         continue
 
                     # GRAB THE ICLICKER FROM THE SUBMISSION
-                    clickerfile = userdir + '/'+str(active) + '/textbox_0.txt'
+                    clickerfile = userdir + '/'+str(active) + '/input_0.txt'
+                    if not os.path.exists(clickerfile):
+                        clickerfile = userdir + '/'+str(active) + '/textbox_0.txt'
+                    if not os.path.exists(clickerfile):
+                        print ("ERROR: file does not exist: " + userdir + '/' + str(active) + '/input_0.txt')
+                        continue
+
                     with open(clickerfile) as f:
                         iclicker_string = f.read()
+                        iclicker_string = iclicker_string.replace('\n', '')
                         iclicker_ids = iclicker_string.split(',')
                         if len(iclicker_ids) > 1:
                             print ("NOTE: user '{0}' has entered '{1}' Remote IDs".format(username,len(iclicker_ids)))
                         for iclicker in iclicker_ids:
                             if len(iclicker) != 8:
                                 print ("WARNING! iclicker id '{0}' for user '{1}' is not 8 characters".format(iclicker,username))
+                                continue
                             if 'T24' in iclicker or 't24' in iclicker:
                                 print ("WARNING! iclicker id '{0}' for user '{1}' is likely incorrect (model # not id #)".format(iclicker,username))
-
+                                continue
                             # WRITE TO EXPECTED FORMAT (matches iclicker.com format)
                             remote_ids.write('#{0},"{1}"\n'.format(iclicker.upper(),username))
 

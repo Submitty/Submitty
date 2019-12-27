@@ -83,7 +83,8 @@ bool ShowHelper(const std::string& when, bool success) {
 
 
 double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohmann::json &autocheck_js,
-                         const std::string &hw_id, std::string &testcase_message, nlohmann::json complete_config) {
+                         const std::string &hw_id, std::string &testcase_message, nlohmann::json complete_config,
+                         const std::string& username) {
 
   std::cout << "\nAUTOCHECK #" << which_autocheck+1 << " / " << my_testcase.numFileGraders() << std::endl;
 
@@ -91,7 +92,7 @@ double ValidateAutoCheck(const TestCase &my_testcase, int which_autocheck, nlohm
   const nlohmann::json& tcg = my_testcase.getGrader(which_autocheck);
 
   // do the work
-  TestResultsFixedSize result = my_testcase.do_the_grading(which_autocheck, complete_config);
+  TestResultsFixedSize result = my_testcase.do_the_grading(which_autocheck, complete_config, username);
 
   // calculations
   float grade = result.getGrade();
@@ -304,7 +305,8 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
                        int &nonhidden_automated_points_awarded,
                        int &nonhidden_automated_points_possible,
                        nlohmann::json &all_testcases,
-                       std::ofstream& gradefile) {
+                       std::ofstream& gradefile,
+                       const std::string& username) {
     //This input to the testcase constructor does nothing unless we attempt to access the 'commands' object.
     std::string container_name = "";
     TestCase my_testcase(config_json,which_testcase,container_name);
@@ -336,7 +338,7 @@ void ValidateATestCase(nlohmann::json config_json, int which_testcase,
       std::cout << "NUM AUTOCHECKS / FILE GRADERS " << my_testcase.numFileGraders() << std::endl;
       assert (my_testcase.numFileGraders() > 0);
       for (int which_autocheck = 0; which_autocheck < my_testcase.numFileGraders(); which_autocheck++) {
-        my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message,config_json);
+        my_score -= ValidateAutoCheck(my_testcase, which_autocheck, autocheck_js, hw_id, testcase_message,config_json, username);
       }
       bool fileExists, fileEmpty;
       std::string execute_logfile = my_testcase.getPrefix() + "execute_logfile.txt";
@@ -425,7 +427,8 @@ int validateTestCases(const std::string &hw_id, const std::string &rcsid, int su
                       nonhidden_automated_points_awarded,
                       nonhidden_automated_points_possible,
                       all_testcases,
-                      gradefile);
+                      gradefile,
+                      rcsid);
   }
 
   nlohmann::json grading_parameters = config_json.value("grading_parameters",nlohmann::json::object());

@@ -34,9 +34,9 @@ class SessionManager {
      *
      * @param $session_id
      *
-     * @return bool
+     * @return bool|string
      */
-    public function getSession($session_id) {
+    public function getSession(string $session_id) {
         $this->core->getQueries()->removeExpiredSessions();
         $this->session = $this->core->getQueries()->getSession($session_id);
         if (empty($this->session)) {
@@ -50,15 +50,18 @@ class SessionManager {
     /**
      * @param $user_id
      *
-     * @return mixed
+     * @return string
      */
-    public function newSession($user_id) {
+    public function newSession(string $user_id): string {
         if (!isset($this->session['session_id'])) {
             $this->session['session_id'] = Utils::generateRandomString();
             $this->session['user_id'] = $user_id;
             $this->session['csrf_token'] = Utils::generateRandomString();
-            $this->core->getQueries()->newSession($this->session['session_id'], $this->session['user_id'],
-                                                  $this->session['csrf_token']);
+            $this->core->getQueries()->newSession(
+                $this->session['session_id'],
+                $this->session['user_id'],
+                $this->session['csrf_token']
+            );
         }
         return $this->session['session_id'];
     }

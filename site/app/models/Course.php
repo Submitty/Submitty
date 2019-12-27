@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 use app\libraries\FileUtils;
 
@@ -10,15 +11,18 @@ use app\libraries\FileUtils;
  * @method string getSemester()
  * @method string getTitle()
  * @method string getDisplayName()
+ * @method int getUserGroup()
   */
 class Course extends AbstractModel {
-     
+
     /** @property @var string the semester in which the course is taking place." */
     protected $semester;
-    /** @property @var the proper title of the course. */
+    /** @property @var string the proper title of the course. */
     protected $title;
-    /** @property @var the display name of the course */
+    /** @property @var string the display name of the course */
     protected $display_name;
+    /** @property @var int */
+    protected $user_group;
 
     /**
      * Course constructor.
@@ -31,9 +35,10 @@ class Course extends AbstractModel {
         $this->semester = $details['semester'];
         $this->title = $details['course'];
         $this->display_name = "";
+        $this->user_group = $details['user_group'] ?? 3;
     }
 
-    public function loadDisplayName(){
+    public function loadDisplayName() {
         $course_json_path = FileUtils::joinPaths(
             $this->core->getConfig()->getSubmittyPath(),
             "courses",
@@ -55,13 +60,13 @@ class Course extends AbstractModel {
     public function getLongSemester() {
         if (strlen($this->semester) == 3) {
             if (strtolower($this->semester[0]) === 'f') {
-                return "Fall 20".substr($this->semester,1,2);
+                return "Fall 20" . substr($this->semester, 1, 2);
             }
             elseif (strtolower($this->semester[0]) === 's') {
-                return "Spring 20".substr($this->semester,1,2);
+                return "Spring 20" . substr($this->semester, 1, 2);
             }
             elseif (strtolower($this->semester[0]) === 'u') {
-                return "Summer 20".substr($this->semester,1,2);
+                return "Summer 20" . substr($this->semester, 1, 2);
             }
         }
         return $this->semester;
@@ -76,8 +81,8 @@ class Course extends AbstractModel {
             "semester" => $this->semester,
             "title" => $this->title,
             "display_name" => $this->display_name,
-            "display_semester" => $this->getLongSemester()
+            "display_semester" => $this->getLongSemester(),
+            "user_group" => $this->user_group
         ];
     }
-
 }

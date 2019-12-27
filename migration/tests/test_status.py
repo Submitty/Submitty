@@ -367,3 +367,46 @@ Could not find migration table for f19.csci1100
         self.assertEqual(expected_args.semester, 'f19')
         self.assertEqual(expected_args.course, 'csci1200')
         self.assertFalse(database_3.open)
+
+    @patch('migrator.main.print_status')
+    def test_status_choose_course(self, mock_method):
+        self.setup_test('course')
+        database_1 = self.create_database('course')
+        self.args.environments = ['course']
+        self.args.choose_course = ['f19', 'csci1100']
+        self.args.config = SimpleNamespace()
+        self.args.config.database = dict()
+        self.args.config.submitty = dict()
+        self.args.config.submitty['submitty_data_dir'] = Path(self.dir)
+        Path(self.dir, 'courses', 'f18', 'csci1100').mkdir(parents=True)
+        Path(self.dir, 'courses', 'f19', 'csci1100').mkdir(parents=True)
+        Path(self.dir, 'courses', 'f19', 'csci1200').mkdir(parents=True)
+        with patch.object(migrator.db, 'Database') as mock_class:
+            mock_class.side_effect = [
+                database_1
+            ]
+            main.status(self.args)
+        self.assertTrue(mock_class.called)
+        self.assertEqual(1, mock_class.call_count)
+        self.assertTrue(
+            ({'dbname': 'submitty_f19_csci1100'}, 'course'),
+            mock_class.call_args_list[0][0]
+        )
+        self.assertTrue(mock_method.called)
+        self.assertEqual(1, mock_method.call_count)
+
+        mock_args = mock_method.call_args_list[0][0]
+        expected_args = deepcopy(self.args)
+        self.assertEqual(database_1, mock_args[0])
+        self.assertEqual('course', mock_args[1])
+        # Test that mutation did not happen
+        self.assertEqual(expected_args.config.database, dict())
+        self.assertNotIn('semester', expected_args)
+        self.assertNotIn('course', expected_args)
+        expected_args.config.database = {'dbname': 'submitty_f19_csci1100'}
+        expected_args.semester = 'f19'
+        expected_args.course = 'csci1100'
+        self.assertEqual(expected_args, mock_args[2])
+        self.assertEqual(expected_args.semester, 'f19')
+        self.assertEqual(expected_args.course, 'csci1100')
+        self.assertFalse(database_1.open)

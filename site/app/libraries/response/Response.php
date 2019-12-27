@@ -1,23 +1,21 @@
 <?php
 
-
 namespace app\libraries\response;
 
 use app\libraries\Core;
-
 
 /**
  * Class Response
  * @package app\libraries\response
  */
 class Response extends AbstractResponse {
-    /** @var null | WebResponse  */
+    /** @var null|WebResponse  */
     public $web_response = null;
 
-    /** @var null | JsonResponse  */
+    /** @var null|JsonResponse  */
     public $json_response = null;
 
-    /** @var null | RedirectResponse */
+    /** @var null|RedirectResponse */
     public $redirect_response = null;
 
     /**
@@ -40,7 +38,7 @@ class Response extends AbstractResponse {
      * @param WebResponse $web_response
      * @return Response
      */
-    static public function WebOnlyResponse(WebResponse $web_response) {
+    public static function WebOnlyResponse(WebResponse $web_response): Response {
         return new self(null, $web_response, null);
     }
 
@@ -48,7 +46,7 @@ class Response extends AbstractResponse {
      * @param JsonResponse $json_response
      * @return Response
      */
-    static public function JsonOnlyResponse(JsonResponse $json_response) {
+    public static function JsonOnlyResponse(JsonResponse $json_response): Response {
         return new self($json_response, null, null);
     }
 
@@ -56,7 +54,7 @@ class Response extends AbstractResponse {
      * @param RedirectResponse $redirect_response
      * @return Response
      */
-    static public function RedirectOnlyResponse(RedirectResponse $redirect_response) {
+    public static function RedirectOnlyResponse(RedirectResponse $redirect_response): Response {
         return new self(null, null, $redirect_response);
     }
 

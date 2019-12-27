@@ -29,7 +29,7 @@ mv /tmp/index.html ${SUBMITTY_INSTALL_DIR}/site/public
 # copy the website from the repo. We don't need the tests directory in production and then
 # we don't want vendor as if it exists, it was generated locally for testing purposes, so
 # we don't want it
-rsync -rtz --exclude 'tests' --exclude '/site/vendor' --exclude 'site/node_modules/' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
+rsync -rtz --exclude 'tests' --exclude '/site/cache' --exclude '/site/vendor' --exclude 'site/node_modules/' --exclude '/site/phpstan.neon' --exclude '/site/phpstan-baseline.neon' ${SUBMITTY_REPOSITORY}/site   ${SUBMITTY_INSTALL_DIR}
 
 # clear old twig cache
 if [ -d "${SUBMITTY_INSTALL_DIR}/site/cache/twig" ]; then
@@ -175,5 +175,15 @@ chmod 550 ${SUBMITTY_INSTALL_DIR}/site/cgi-bin/git-http-backend
 
 # cache needs to be writable
 find ${SUBMITTY_INSTALL_DIR}/site/cache -type d -exec chmod u+w {} \;
+
+# reload PHP-FPM before we re-enable website, but only if PHP-FPM is actually being used
+# as expected (Travis for example will fail here otherwise).
+PHP_VERSION=$(php -r 'print PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')
+set +e
+systemctl is-active --quiet php${PHP_VERSION}-fpm
+if [[ "$?" == "0" ]]; then
+    systemctl reload php${PHP_VERSION}-fpm
+fi
+set -e
 
 rm -f ${SUBMITTY_INSTALL_DIR}/site/public/index.html

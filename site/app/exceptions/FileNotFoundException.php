@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\exceptions;
 
 class FileNotFoundException extends IOException {
@@ -12,6 +14,6 @@ class FileNotFoundException extends IOException {
                 $message = "File '{$path}' could not be found";
             }
         }
-        parent::__construct($message, array('path' => $path), $code, $previous);
+        parent::__construct($message, ['path' => $path], $code, $previous);
     }
 }

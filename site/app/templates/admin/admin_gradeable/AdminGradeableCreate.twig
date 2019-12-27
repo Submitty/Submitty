@@ -4,6 +4,7 @@
 #}
 {% if action == 'new' or action == 'template' %}
     <div>
+    {# temporarily remove the template feature because it is stale / needs refactoring.
         <div class="option row">
             <div class="option-desc col-md-6">
                 <label for="gradeable_template">
@@ -21,6 +22,7 @@
                 </select>
             </div>
         </div>
+    #}
     </div>
 
 {% endif %}
@@ -33,7 +35,8 @@
         <div class="option-desc col-md-6">
             <label for="g_title">
                 <div class="option-title">Title</div>
-                <div class="option-alt">What is the title of this gradable? <p style="color:red">(Required)</p></div>
+                <div class="option-alt">What is the title of this gradable?</div>
+                <p id="required_type">(Required)</p>
             </label>
         </div>
 
@@ -435,7 +438,8 @@
         if($('#vcs_radio_submitty_hosted_set_url').is(':checked')) {
             disableElementChildren('#vcs_submitty_set_url_content', false);
             $('#vcs_submitty_url').prop('required', true);
-        } else {
+        }
+        else {
             $('#vcs_submitty_url').prop('required', false);
         }
     }
@@ -459,7 +463,8 @@
         let lateSubmissionParts = $('.yes-late-submission');
         if($('#yes_late_submission').is(':checked')) {
             lateSubmissionParts.show();
-        } else {
+        }
+        else {
             lateSubmissionParts.hide();
         }
         updateDateDisplay();
@@ -526,12 +531,14 @@
             $('#repository').hide();
             if ($(this).val() === 'scanned_exam') {
                 scannedExam.val('true');
-            } else {
+            }
+            else {
                 scannedExam.val('false');
                 if ($(this).val() === 'vcs') {
                     vcs.val('true');
                     $('#repository').show();
-                } else {
+                }
+                else {
                 }
             }
             vcs.change();

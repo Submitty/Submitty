@@ -1,25 +1,26 @@
 {
-    "assignment_message" : "To better accomodate students for the upcoming exam, please let us know if you are left-handed or right-handed.  \nWe will use this information to make the seating assignments.",
+    "hide_submitted_files" : true,
+    "hide_version_and_test_details" : true,
+
+    "assignment_message" : "To better accomodate students for the tests and final exam, please let us know if you are left-handed or right-handed.  \nWe will use this information to make the seating assignments.",
     "autograding": {
         "submission_to_validation" : [ "left_right.txt" ],
         "work_to_details" : [ "left_right.txt" ]
     },
     "notebook": [
         {
-            "markdown_string": "Write \"left-handed\" or \"right-handed\":",
+            "markdown_string": "Are you left-handed or right-handed?",
             "type": "markdown"
         },
         {
-            "filename": "left_right.txt",
-            "type": "short_answer"
+            "type" : "multiple_choice",
+            "choices" : [
+                {"value":"left-handed", "description":"left-handed" },
+		{"value":"right-handed", "description":"right-handed" }
+            ],
+            "filename": "left_right.txt"
         }
     ],
     "testcases": [
-    	{
-    	    "type" : "FileCheck",
-    	    "title" : "Review",
-    	    "actual_file" : "left_right.txt",
-    	    "points" : 0
-    	}
     ]
 }

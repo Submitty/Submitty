@@ -10,29 +10,31 @@
       "app\\": "app/"
     }
   },
-  "require": {
-    "twig/twig": "^2.9.0",
-    "ramsey/uuid": "^3.8.0",
-    "aptoma/twig-markdown": "^3.1.0",
-    "erusev/parsedown": "^1.7.3",
-    "lcobucci/jwt": "^3.2.5",
-    "symfony/routing": "^4.2",
-    "symfony/config": "^4.2",
-    "symfony/http-foundation": "^4.2",
-    "doctrine/annotations": "^1.6",
-    "doctrine/cache": "^1.8",
-    "cboden/ratchet": "^0.4.1",
-    "textalk/websocket": "1.0.*"
-  },
   "autoload-dev": {
     "psr-4": {
       "tests\\": "tests/"
     }
   },
+  "require": {
+    "twig/twig": "2.12.2",
+    "ramsey/uuid": "3.9.1",
+    "aptoma/twig-markdown": "3.2.0",
+    "erusev/parsedown": "1.7.3",
+    "lcobucci/jwt": "3.3.1",
+    "symfony/routing": "4.4.1",
+    "symfony/config": "4.4.1",
+    "symfony/http-foundation": "4.4.1",
+    "doctrine/annotations": "1.8.0",
+    "doctrine/cache": "1.10.0",
+    "php-ds/php-ds": "1.2.0",
+    "cboden/ratchet": "^0.4.1",
+    "textalk/websocket": "1.0.*"
+  },
   "require-dev": {
-    "phpunit/phpunit": "^8.1.3",
-    "php-coveralls/php-coveralls": "^2.1.0",
-    "submitty/php-codesniffer": "^1.0.1",
-    "dealerdirect/phpcodesniffer-composer-installer": "^0.5.0"
+    "phpunit/phpunit": "8.5.0",
+    "submitty/php-codesniffer": "2.2.3",
+    "dealerdirect/phpcodesniffer-composer-installer": "0.5.0",
+    "php-mock/php-mock-phpunit": "2.5.0",
+    "phpstan/phpstan": "0.11.19"
   }
 }

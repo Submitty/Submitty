@@ -15,6 +15,10 @@
         {% if has_due_date %}
             <h2>Due: {{ formatted_due_date }}</h2>
         {% endif %}
+        <div class="loading-bar-wrapper">
+            <label for="loading-bar">Upload progress: <span id="loading-bar-percentage"></span></label>
+            <progress id="loading-bar" value="0" ></progress>
+        </div>
     </header>
 
     {% if show_no_late_submission_warning %}
@@ -68,8 +72,8 @@
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
                     <div id="expected-num-box">
-                    <label for= "expected_pages_input"> Expected Number of pages per PDF: </label>
-                    <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
+                        <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
+                        <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
                     </div>
                 </div>
             </div>
@@ -88,9 +92,11 @@
                 if(sessionStorage.getItem('radio-bulk')){
                     $('#radio-bulk').prop('checked', true);
                     $('#bulk_progress_box').prop('hidden', false);
-                }else if(sessionStorage.getItem('radio-student')){
+                }
+                else if(sessionStorage.getItem('radio-student')){
                     $('#radio-student').prop('checked',true);
-                }else{
+                }
+                else{
                     $('#radio-normal').prop('checked',true);
                 }
                 //load if bulkupload with qr codes selected or not
@@ -116,7 +122,8 @@
                 if ($("#radio-bulk").is(":checked")) {
                     $('#pdf-submit-button').show();
                     $('#bulk_progress_box').prop('hidden', false);
-                }else{
+                }
+                else{
                      $('#bulk_progress_box').prop('hidden', true);
                 }
                 if($('#use-qr').is(':checked')){
@@ -256,6 +263,8 @@
 
                                 <div id="codebox_{{ num_codeboxes }}"
                                      name="codebox_{{ num_codeboxes }}"
+                                     autocapitalization="off"
+                                     spellcheck="false"
                                      class="codebox"
                                      data-initial_value="{{ cell.initial_value }}"
                                      data-recent_submission="{{ cell.recent_submission }}"
@@ -329,7 +338,7 @@
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                                value="{{ choice.value }}"
-                                               onclick="handle_input_keypress();" 
+                                               onclick="handle_input_keypress();"
                                         />
                                         {{ choice.description | markdown }}
                                     </label>
@@ -345,13 +354,13 @@
 
                                 {{ self.render_testcase_messages(cell, testcase_messages) }}
 
-                                {% for choice in cell.choices %}                                      
+                                {% for choice in cell.choices %}
                                     <label for="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}">
                                         <input type="radio"
                                                name="multiple_choice_{{ num_multiple_choice }}"
                                                id="multiple_choice_{{ num_multiple_choice }}_{{ loop.index0 }}"
                                                value="{{ choice.value }}"
-                                               onclick="handle_input_keypress();" 
+                                               onclick="handle_input_keypress();"
                                         />
                                         {{ choice.description | markdown }}
                                     </label>
@@ -404,7 +413,7 @@
         <div id="upload-boxes">
             {# Submit boxes #}
             {% for part in part_names %}
-                {# uploadIndex and input_fileIndex required for drag-and-drop.js #}
+                {# uploadIndex and input-file + Index required for drag-and-drop.js #}
                 <div tabindex="0"
                      id="upload{{ loop.index }}"
                      class="upload-box"
@@ -419,7 +428,7 @@
                             Drag your file(s) here or click to open file browser
                         {% endif %}
                     </h2>
-                    <input type="file" name="files" id="input_file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
+                    <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
                 </div>
             {% endfor %}
         </div>
@@ -507,7 +516,7 @@
 </div>
 
 {% if core.getUser().accessFullGrading() %}
-    {% include 'submission/homework/PreviousSubmissionForm.twig' %}            
+    {% include 'submission/homework/PreviousSubmissionForm.twig' %}
     {% include 'submission/homework/BulkUploadProgressBox.twig' %}
 {% endif %}
 
@@ -586,7 +595,11 @@
             }
             // bulk upload
             if ($("#radio-bulk").is(":checked")) {
-                handleBulk("{{ gradeable_id }}", num_pages, use_qr, qr_prefix, qr_suffix );
+                handleBulk("{{ gradeable_id }}",
+                            {{ max_post_size }},
+                            {{ max_file_size }},
+                            num_pages, use_qr, qr_prefix, qr_suffix
+                          );
             }
             // no user id entered, upload for whoever is logged in
             else if (user_id == ""){
@@ -596,23 +609,32 @@
             else {
                 validateUserId("{{ csrf_token }}", "{{ gradeable_id }}", user_id)
                 .then(function(response){
-                    if(response['highest_version']){
-                        var option = displayPreviousSubmissionOptions(getSubmissionOption);
-                        function getSubmissionOption(option){
+                    if(response['data']['previous_submission']){
+                        let has_been_called = false;
+                        var option = displayPreviousSubmissionOptions(getSubmissionOptionForStudentOnly);
+
+                        return;
+
+                        function getSubmissionOptionForStudentOnly(option){
+                            if(has_been_called)
+                                return;
+
                             var merge_previous = false;
                             var clobber = false;
 
                             if(option == 2){
                                 merge_previous = true;
-                            } else if(option == 3){
+                            }
+                            else if(option == 3){
                                 merge_previous = true;
                                 clobber = true;
                             }
 
-                            makeSubmission(user_id,response['highest_version'], false, "", "", merge_previous,clobber);
+                            makeSubmission(user_id,response['data']['highest_version'], false, "", "", "", merge_previous,clobber);
                         }
-                    }else{
-                        makeSubmission(user_id, response['highest_version'], false, "", "");
+                    }
+                    else{
+                        makeSubmission(user_id, response['data']['highest_version'], false, "", "", "");
                     }
                 });
             }
@@ -655,6 +677,8 @@
                 <input
                     type="text"
                     name="short_answer_{{ index }}"
+                    autocapitalization="off"
+                    spellcheck="false"
                     id="short_answer_{{ index }}"
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"
@@ -690,8 +714,7 @@
                     data-initial_value="{{ short_answer.initial_value }}"
                     data-recent_submission="{{ short_answer.recent_submission }}"
                     onKeyPress="handle_input_keypress()"
-                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}
-                </textarea>
+                >{% if core.getConfig().keepPreviousFiles() %}{{ short_answer.recent_submission }}{% else %}{{ short_answer.initial_value }}{% endif %}</textarea>
             </label>
             {#
                 Allow tab in the larger text boxes (normally tab moves to the next textbox)

@@ -30,7 +30,18 @@
             <label for="forum-enabled">
                 <div class="option-title">Enable Discussion Forum</div>
                 <div class="option-alt">Choose whether to enable a forum for this course.</div>
-                <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories">Customize categories.</a>
+                {% if categories_empty %}
+                    <h4 id="forum-category-warning" class="red-message" {{ fields['forum_enabled'] ? '': 'hidden' }} >Categories must be created in order to use the Discussion Forum. Click the link below to add categories.</h4>
+                    <a id="forum-enabled-message" href="{{ manage_categories_url }}" alt="Customize Categories" {{ fields['forum_enabled'] ? '': 'hidden' }} >Customize categories.</a>
+                {% endif %}
+            </label>
+        </div>
+
+        <div id="queue-enabled-wrapper" class="config-row checkbox-row">
+            <input type="checkbox" name="queue_enabled" id="queue-enabled" value="true" {{ fields['queue_enabled'] ? 'checked': '' }} />
+            <label for="queue-enabled">
+                <div class="option-title">Enable Office Hours Queue</div>
+                <div class="option-alt">Choose whether to enable an office hours queue for this course.</div>
             </label>
         </div>
 
@@ -162,8 +173,8 @@
         </div>
 
         {# Only show the checkbox if the submitty-admin user is available and in the course as an instructor #}
-        {% if fields['submitty_admin_user_verified'] %}
-            {% if fields['submitty_admin_user_in_course'] %}
+        {% if submitty_admin_user['verified'] %}
+            {% if submitty_admin_user['in_course'] %}
                 <div class="config-row checkbox-row">
                     <input type="checkbox" name="auto_rainbow_grades" value="true" {{ fields['auto_rainbow_grades'] ? 'checked' : '' }} />
                     <label for="auto-rainbow-grades">
@@ -178,7 +189,7 @@
             <div class="option-title">Automatic Nightly Processing for Rainbow Grades Generation</div>
             <div class="option-alt">
                 NOTE:  To facilitate automatic nightly cron processing of Rainbow Grades,<br>
-                you must add the special user '{{ fields['submitty_admin_user'] }}' to your course as an instructor user.<br><br>
+                you must add the special user '{{ submitty_admin_user['user_id'] }}' to your course as an instructor user.<br><br>
             </div>
             {% endif %}
         {% else %}
@@ -202,22 +213,22 @@
             </select>
             <label id="seating-only-label" class="option-alt" for="seating-only-for-instructor">
                 Visible only to Instructors?
-                <input type="checkbox" name="seating-only-for-instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
+                <input type="checkbox" name="seating_only_for_instructor" id="seating-only-for-instructor" value="true"{{ fields['seating_only_for_instructor'] ? 'checked' : '' }} />
             </label>
         </div>
 
         <div id="email-seating-assignment-label" class="option-desc option-title config-row">
             Customize an email to send to each students
+            {% if not email_enabled %}
+                <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
+            {% else %}
+                <button id="email-seating-assignment" class="option-alt bare-button">
+                    <a href="{{ email_room_seating_url }}" class="btn btn-primary">
+                        Email Seating Assignments
+                    </a>
+                </button>
+            {% endif %}
         </div>
-        {% if not email_enabled %}
-            <p class="yellow-message">Emails are disabled: contact your System Admin to enable emails</p>
-        {% else %}
-            <button id="email-seating-assignment" class ="option-alt bare-button"> 
-                <a href="{{ email_room_seating_url }}" class="btn btn-primary">
-                    Email Seating Assignments
-                </a> 
-            </button>
-        {% endif %}
 
         <div class="config-row checkbox-row">
             <input type="checkbox" name="display_custom_message" id="display-custom-message" value="true" {{ fields['display_custom_message'] ? 'checked' : '' }} />

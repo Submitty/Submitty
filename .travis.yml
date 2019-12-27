@@ -61,7 +61,7 @@ jobs:
       language: python
       python: 3.6
       install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings sqlalchemy psycopg2-binary
+        - pip3 install flake8 flake8-bugbear sqlalchemy psycopg2-binary
       script: skip
     - <<: *00-python-cache
       python: 3.7
@@ -71,17 +71,25 @@ jobs:
     - &01-php-lint
       stage: 01 lint
       php: 7.2
+      install:
+        - pushd site
+        - composer install --prefer-dist --no-interaction
+        - popd
       script:
-        - find -L . -path ./site/vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+        - pushd site
+        - find -L . -path ./vendor -prune -o -name '*.php' -print0 | xargs -0 -n 1 -P 4 php -l
+        - vendor/bin/phpcs --standard=tests/ruleset.xml
+        - vendor/bin/phpstan analyze app
+        - popd
     - <<: *01-php-lint
       php: 7.3
       if: branch = master OR type = pull_request
-    
+
     - &01-python-lint
       language: python
       python: 3.6
       install:
-        - pip3 install flake8 flake8-bugbear flake8-docstrings
+        - pip3 install flake8 flake8-bugbear
       script:
         - flake8
     - <<: *01-python-lint
@@ -91,16 +99,23 @@ jobs:
     - &02-php-unit
       stage: 02 unit test
       php: 7.2
-      script:
+      before_install:
+        - phpenv config-rm xdebug.ini
+      install:
+        - pecl install ds
+        - pecl install pcov
         - pushd site
         - travis_retry composer install --prefer-dist --no-interaction
+        - popd
+      script:
+        - pushd site
         - vendor/bin/phpunit --version
-        - vendor/bin/phpunit --configuration tests/phpunit.xml
+        - vendor/bin/phpunit -c tests/phpunit.xml
         - popd
       after_success:
-        - pushd site
-        - travis_retry php vendor/bin/php-coveralls -v -c tests/coveralls.yml
-        - popd
+        # must run from root folder or else coveralls.io shows messed up paths for files
+        #- travis_retry php site/vendor/bin/php-coveralls -v -c site/tests/coveralls.yml
+        - bash <(curl -s https://codecov.io/bash) -cF php -f site/tests/report/clover.xml
     - <<: *02-php-unit
       php: 7.3
       if: branch = master OR type = pull_request
@@ -114,13 +129,26 @@ jobs:
         - pip3 install sqlalchemy
         - pip3 install jsonschema
         - pip3 install jsonref
+        - pip3 install docker
+        - pip3 install coverage
       script:
         - pushd python_submitty_utils
-        - python3 setup.py test
+        - coverage run -m unittest discover
+        - coverage xml
+        - python3 setup.py install
         - popd
         - pushd migration
-        - python3 -m unittest discover
+        - coverage run -m unittest discover
+        - coverage xml
         - popd
+        - pushd autograder
+        - coverage run -m unittest discover
+        - coverage xml
+        - popd
+      after_success:
+        - bash <(curl -s https://codecov.io/bash) -cF autograder -f autograder/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF python_submitty_utils -f python_submitty_utils/coverage.xml
+        - bash <(curl -s https://codecov.io/bash) -cF migrator -f migration/coverage.xml
     - <<: *02-python-unit
       python: 3.7
       if: branch = master OR type = pull_request
@@ -165,11 +193,16 @@ jobs:
             - google-chrome-stable
             - libpam-passwdqc
             - libboost-all-dev
-      before_install: source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+      before_install:
+        - source ${TRAVIS_BUILD_DIR}/.setup/travis/before_install.sh
+        - phpenv config-rm xdebug.ini
       install:
+        - pecl install ds
         - PHP_VERSION=${TRAVIS_PHP_VERSION:0:3}
-        - sudo add-apt-repository -y ppa:ondrej/php; sudo apt-get -qq update;
-        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl; a2enmod php${PHP_VERSION};
+        - sudo add-apt-repository -y ppa:ondrej/php
+        - sudo apt-get -qq update
+        - sudo apt-get -y install libapache2-mod-php${PHP_VERSION} php${PHP_VERSION}-pgsql php${PHP_VERSION}-curl php${PHP_VERSION}-ds
+        - sudo a2enmod php${PHP_VERSION}
         - pip3 install -U pip
         - pip3 install python-pam
         - pip3 install PyYAML

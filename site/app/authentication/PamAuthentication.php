@@ -1,11 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace app\authentication;
 
 use app\exceptions\AuthenticationException;
 use app\exceptions\CurlException;
-use app\libraries\Core;
-use app\libraries\FileUtils;
 
 /**
  * Class PamAuthentication
@@ -20,8 +20,11 @@ use app\libraries\FileUtils;
 class PamAuthentication extends AbstractAuthentication {
     public function authenticate() {
         // Check for $this->user_id and $this->>password to be non empty
-        if (empty($this->user_id) || empty($this->password) ||
-            $this->core->getQueries()->getSubmittyUser($this->user_id) === null) {
+        if (
+            empty($this->user_id)
+            || empty($this->password)
+            || $this->core->getQueries()->getSubmittyUser($this->user_id) === null
+        ) {
             return false;
         }
 
@@ -29,7 +32,7 @@ class PamAuthentication extends AbstractAuthentication {
             // Open a cURL connection so we don't have to do a weird redirect chain to authenticate
             // as that would require some hacky path handling specific to PAM authentication
             $output = $this->core->curlRequest(
-                $this->core->getConfig()->getCgiUrl()."pam_check.cgi",
+                $this->core->getConfig()->getCgiUrl() . "pam_check.cgi",
                 [
                     'username' => $this->user_id,
                     'password' => $this->password,
@@ -38,7 +41,7 @@ class PamAuthentication extends AbstractAuthentication {
 
             $output_after = json_decode($output, true);
             if ($output_after === null) {
-                throw new AuthenticationException("Error JSON response for PAM: ".json_last_error_msg());
+                throw new AuthenticationException("Error JSON response for PAM: " . json_last_error_msg());
             }
             elseif (!isset($output_after['authenticated'])) {
                 throw new AuthenticationException('Missing response in JSON for PAM');
@@ -48,7 +51,7 @@ class PamAuthentication extends AbstractAuthentication {
             }
         }
         catch (CurlException $exc) {
-            throw new AuthenticationException('Error attempting to authenticate against PAM: '.$exc->getMessage());
+            throw new AuthenticationException('Error attempting to authenticate against PAM: ' . $exc->getMessage());
         }
 
         return true;

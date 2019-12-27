@@ -1,7 +1,8 @@
 <?php
 
-
 namespace app\models;
+
+use app\exceptions\PropertyAccessException;
 use app\libraries\Core;
 use app\libraries\Utils;
 
@@ -14,7 +15,7 @@ use app\libraries\Utils;
  */
 abstract class AbstractModel {
 
-    static protected $properties = array();
+    protected static $properties = array();
 
     /** @var Core */
     protected $core;
@@ -52,7 +53,7 @@ abstract class AbstractModel {
      * @param $check_property
      * @return mixed
      */
-    protected function parseObject($object, $check_property=true) {
+    protected function parseObject($object, $check_property = true) {
         if (is_object($object)) {
             if (is_a($object, 'app\Models\AbstractModel') || is_subclass_of($object, 'app\Models\AbstractModel')) {
                 /** @noinspection PhpUndefinedMethodInspection */
@@ -62,7 +63,7 @@ abstract class AbstractModel {
                 $return = get_class($object);
             }
         }
-        else if (is_array($object)) {
+        elseif (is_array($object)) {
             $return = array();
             foreach ($object as $key => $value) {
                 if (is_numeric($key) || (!$check_property || isset(static::$properties[get_class($this)][$key]))) {
@@ -80,13 +81,29 @@ abstract class AbstractModel {
         $class = new \ReflectionClass($this);
         $class_name = get_class($this);
         foreach ($class->getProperties() as $property) {
-            $matches = array();
-            preg_match("/@property/s", $property->getDocComment(), $matches);
-            if (count($matches) > 0) {
-                static::$properties[$class_name][$property->getName()] = null;
-                preg_match("/@var (.*?)[ \n\*]/s", $property->getDocComment(), $matches);
-                if (count($matches) > 0) {
-                    static::$properties[$class_name][$property->getName()] = $matches[1];
+            $doc_comment = $property->getDocComment();
+            $prop_name = $property->getName();
+            if ($doc_comment !== false) {
+                if (preg_match("/ @prop\-write[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [
+                        'write_only' => true,
+                    ];
+                }
+                elseif (preg_match("/ @prop\-read[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [
+                        'read_only' => true,
+                    ];
+                }
+                elseif (preg_match("/ @(prop|property)[\s]/", $doc_comment) === 1) {
+                    static::$properties[$class_name][$prop_name] = [];
+                }
+
+                if (isset(static::$properties[$class_name][$prop_name])) {
+                    $matches = [];
+                    preg_match("/@var (.+?)[ \n\*]/s", $property->getDocComment(), $matches);
+                    if (count($matches) > 0 && $matches[1][0] !== '@') {
+                        static::$properties[$class_name][$prop_name]['type'] = $matches[1];
+                    }
                 }
             }
         }
@@ -112,6 +129,9 @@ abstract class AbstractModel {
             $property_name = $this->convertName($name);
             $value = $arguments[0];
             if (isset(static::$properties[$class_name][$property_name])) {
+                if (isset(static::$properties[$class_name][$property_name]['read_only'])) {
+                    throw new PropertyAccessException("Cannot write to read-only property ${property_name}");
+                }
                 $type = static::$properties[$class_name][$property_name];
                 switch ($type) {
                     case 'int':
@@ -138,14 +158,28 @@ abstract class AbstractModel {
         }
         elseif (Utils::startsWith($name, "get")) {
             $property_name = $this->convertName($name);
+            if (
+                isset(static::$properties[$class_name][$property_name])
+                && isset(static::$properties[$class_name][$property_name]['write_only'])
+            ) {
+                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+            }
+
             return $this->$property_name;
         }
         elseif (Utils::startsWith($name, "is")) {
             $property_name = $this->convertName($name, 2);
+            if (
+                isset(static::$properties[$class_name][$property_name])
+                && isset(static::$properties[$class_name][$property_name]['write_only'])
+            ) {
+                throw new PropertyAccessException("Cannot read write-only property ${property_name}");
+            }
+
             return $this->$property_name === true;
         }
 
-        throw new \BadMethodCallException('Call to undefined method '.__CLASS__.'::'.$name.'()');
+        throw new \BadMethodCallException('Call to undefined method ' . __CLASS__ . '::' . $name . '()');
     }
 
     /**
@@ -158,8 +192,10 @@ abstract class AbstractModel {
      *
      * @return string
      */
-    private function convertName($name, $prefix_length=3) {
-        $regex_func = function($matches) { return "_".strtolower($matches[0]); };
+    private function convertName($name, $prefix_length = 3) {
+        $regex_func = function ($matches) {
+            return "_" . strtolower($matches[0]);
+        };
         $name = preg_replace_callback("/([A-Z])/", $regex_func, lcfirst((substr($name, $prefix_length))));
         return $name;
     }

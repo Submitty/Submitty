@@ -105,6 +105,8 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Programming Languages
     { "swipl",                   "/usr/bin/swipl" },
     { "plt-r5rs",                "/usr/bin/plt-r5rs" },
+    { "ozc",                     "/usr/bin/ozc" },
+    { "ozengine",                "/usr/bin/ozengine" },
 
     // for Program Analysis course
     { "ghc",                     "/usr/bin/ghc" },

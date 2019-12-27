@@ -1,18 +1,22 @@
 <?php
+
 namespace app\views;
+
 use app\libraries\FileUtils;
 
 class PDFView extends AbstractView {
     /**
+     * adds to our buffer a twig output of either student view or grader view.
+     *
      * @param $gradeable_id
      * @param $user_id
      * @param $filename
      * @param $annotation_jsons
      * @param $is_student
      *
-     * @return a twig output of either student view or grader view.
+     * @return void
      */
-    public function showPDFEmbedded($params){
+    public function showPDFEmbedded($params) {
         $this->core->getOutput()->useFooter(false);
         $this->core->getOutput()->useHeader(false);
         $pdf_url = $this->core->buildCourseUrl(['gradeable',  $params["gradeable_id"], 'encode_pdf']);
@@ -21,9 +25,12 @@ class PDFView extends AbstractView {
         $localcss = array();
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdf', 'pdf_embedded.css'), 'css');
         $localcss[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.css'), 'vendor');
-        
+
         $localjs = array();
-        $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
+
+        //This jquery file should not need to be added here as jquery should already be in the header on any page
+        // $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('jquery', 'jquery.min.js'), 'vendor');
+
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.min.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf_viewer.js'), 'vendor');
         $localjs[] = $this->core->getOutput()->timestampResource(FileUtils::joinPaths('pdfjs', 'pdf.worker.min.js'), 'vendor');

@@ -1,6 +1,7 @@
 <?php
 
 namespace app\models;
+
 use app\libraries\Core;
 
 /**
@@ -12,11 +13,12 @@ use app\libraries\Core;
  * @method float getAverageScore()
  * @method float getStandardDeviation()
  * @method int getCount()
+ * @method int getActiveGradeInquiryCount()
  * @method bool getIsPeer()
 
  */
 class SimpleStat extends AbstractModel {
-    /** @ property @var bool is this a component */
+    /** @property @var bool is this a component */
     protected $component = true;
     /** @property @var string Title of gradeable or component */
     protected $title = "";
@@ -30,12 +32,14 @@ class SimpleStat extends AbstractModel {
     protected $standard_deviation = 0;
     /** @property @var int number of people graded(completely graded)*/
     protected $count = 0;
+    /** @property @var number of active grade inquiries for given grading component*/
+    protected $active_grade_inquiry_count = 0;
     /** @property @var bool Does this component use peer grading*/
     protected $is_peer = null;
 
-    public function __construct(Core $core, $details=array()) {
+    public function __construct(Core $core, $details = array()) {
         parent::__construct($core);
-        if(isset($details['gc_id'])) {
+        if (isset($details['gc_id'])) {
             $this->component = true;
             $this->title = $details['gc_title'];
             $this->max_value = $details['gc_max_value'];
@@ -44,6 +48,7 @@ class SimpleStat extends AbstractModel {
             $this->order = $details['gc_order'];
             $this->is_peer = $details['gc_is_peer'];
             $this->count = $details['count'];
+            $this->active_grade_inquiry_count = $details['active_grade_inquiry_count'];
         }
         else {
             $this->component = false;

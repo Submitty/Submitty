@@ -106,9 +106,12 @@ std::string getOutputContainingFolderPath(const TestCase &tc, std::string &filen
   struct stat st;
   std::string expectedFolder;
   std::string test_output_path = "test_output/";
+  std::string generated_output_path = "generated_output/" + tc.getPrefix();
   std::string random_output_path = "random_output/" + tc.getPrefix();
   if (stat((test_output_path + filename).c_str(), &st) >= 0) {
     expectedFolder = test_output_path;
+  } else if (stat((generated_output_path + filename).c_str(), &st) >= 0){
+    expectedFolder = generated_output_path;
   } else if (stat((random_output_path + filename).c_str(), &st) >= 0){
     expectedFolder = random_output_path;
   }
@@ -119,7 +122,9 @@ std::string getPathForOutputFile(const TestCase &tc, std::string &filename, std:
   std::string expectedPath = getOutputContainingFolderPath(tc, filename);
   std::string requiredPath ;
   if (expectedPath.substr(0,11) == "test_output"){
-    requiredPath = expectedPath + id + "/"; 
+    requiredPath = expectedPath + id + "/";
+  } else if (expectedPath.substr(0,16) == "generated_output") {
+    requiredPath = expectedPath;
   } else if (expectedPath.substr(0,13) == "random_output") {
     requiredPath = expectedPath;
   }
@@ -206,27 +211,27 @@ bool openExpectedFile(const TestCase &tc, const nlohmann::json &j, std::string &
 // =================================================================================
 // =================================================================================
 
-TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json whole_config) const {
+TestResults* TestCase::dispatch(const nlohmann::json& grader, int autocheck_number, const nlohmann::json whole_config, const std::string& username) const {
   std::string method = grader.value("method","");
-  if      (method == "")                           { return NULL;                                                     }
-  else if (method == "JUnitTestGrader")            { return dispatch::JUnitTestGrader_doit(*this,grader);             }
-  else if (method == "EmmaInstrumentationGrader")  { return dispatch::EmmaInstrumentationGrader_doit(*this,grader);   }
-  else if (method == "MultipleJUnitTestGrader")    { return dispatch::MultipleJUnitTestGrader_doit(*this,grader);     }
-  else if (method == "EmmaCoverageReportGrader")   { return dispatch::EmmaCoverageReportGrader_doit(*this,grader);    }
-  else if (method == "JaCoCoCoverageReportGrader") { return dispatch::JaCoCoCoverageReportGrader_doit(*this,grader);  }
-  else if (method == "DrMemoryGrader")             { return dispatch::DrMemoryGrader_doit(*this,grader);              }
-  else if (method == "PacmanGrader")               { return dispatch::PacmanGrader_doit(*this,grader);                }
-  else if (method == "searchToken")                { return dispatch::searchToken_doit(*this,grader);                 }
-  else if (method == "intComparison")              { return dispatch::intComparison_doit(*this,grader);               }
-  else if (method == "diff")                       { return dispatch::diff_doit(*this,grader);                        }
-  else if (method == "fileExists")                 { return dispatch::fileExists_doit(*this,grader);                  }
-  else if (method == "warnIfNotEmpty")             { return dispatch::warnIfNotEmpty_doit(*this,grader);              }
-  else if (method == "warnIfEmpty")                { return dispatch::warnIfEmpty_doit(*this,grader);                 }
-  else if (method == "errorIfNotEmpty")            { return dispatch::errorIfNotEmpty_doit(*this,grader);             }
-  else if (method == "errorIfEmpty")               { return dispatch::errorIfEmpty_doit(*this,grader);                }
-  else if (method == "ImageDiff")                  { return dispatch::ImageDiff_doit(*this,grader, autocheck_number); }
-  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config);         }
-  else                                             { return custom_dispatch(grader);                                  }
+  if      (method == "")                           { return NULL;                                                       }
+  else if (method == "JUnitTestGrader")            { return dispatch::JUnitTestGrader_doit(*this,grader);               }
+  else if (method == "EmmaInstrumentationGrader")  { return dispatch::EmmaInstrumentationGrader_doit(*this,grader);     }
+  else if (method == "MultipleJUnitTestGrader")    { return dispatch::MultipleJUnitTestGrader_doit(*this,grader);       }
+  else if (method == "EmmaCoverageReportGrader")   { return dispatch::EmmaCoverageReportGrader_doit(*this,grader);      }
+  else if (method == "JaCoCoCoverageReportGrader") { return dispatch::JaCoCoCoverageReportGrader_doit(*this,grader);    }
+  else if (method == "DrMemoryGrader")             { return dispatch::DrMemoryGrader_doit(*this,grader);                }
+  else if (method == "PacmanGrader")               { return dispatch::PacmanGrader_doit(*this,grader);                  }
+  else if (method == "searchToken")                { return dispatch::searchToken_doit(*this,grader);                   }
+  else if (method == "intComparison")              { return dispatch::intComparison_doit(*this,grader);                 }
+  else if (method == "diff")                       { return dispatch::diff_doit(*this,grader);                          }
+  else if (method == "fileExists")                 { return dispatch::fileExists_doit(*this,grader);                    }
+  else if (method == "warnIfNotEmpty")             { return dispatch::warnIfNotEmpty_doit(*this,grader);                }
+  else if (method == "warnIfEmpty")                { return dispatch::warnIfEmpty_doit(*this,grader);                   }
+  else if (method == "errorIfNotEmpty")            { return dispatch::errorIfNotEmpty_doit(*this,grader);               }
+  else if (method == "errorIfEmpty")               { return dispatch::errorIfEmpty_doit(*this,grader);                  }
+  else if (method == "ImageDiff")                  { return dispatch::ImageDiff_doit(*this,grader, autocheck_number);   }
+  else if (method == "custom_validator")           { return dispatch::custom_doit(*this,grader,whole_config, username); }
+  else                                             { return custom_dispatch(grader);                                    }
 }
 
 // =================================================================================
@@ -419,7 +424,7 @@ bool TestCase::ShowExecuteLogfile(const std::string &execute_logfile) const {
 // =================================================================================
 
 
-TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_config) const {
+TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_config, const std::string& username) const {
 
   // ALLOCATE SHARED MEMORY
   int memid;
@@ -447,7 +452,7 @@ TestResultsFixedSize TestCase::do_the_grading (int j, nlohmann::json complete_co
     // perform the validation (this might hang or crash)
     assert (j >= 0 && j < numFileGraders());
     nlohmann::json tcg = getGrader(j);
-    TestResults* answer_ptr = this->dispatch(tcg, j, complete_config);
+    TestResults* answer_ptr = this->dispatch(tcg, j, complete_config, username);
     assert (answer_ptr != NULL);
 
     // write answer to shared memory and terminate this process

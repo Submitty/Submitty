@@ -2,7 +2,7 @@
 
 namespace tests\app\libraries;
 
-use \app\libraries\CascadingIterator;
+use app\libraries\CascadingIterator;
 
 class CascadingIteratorTester extends \PHPUnit\Framework\TestCase {
     public function testNoIterators() {

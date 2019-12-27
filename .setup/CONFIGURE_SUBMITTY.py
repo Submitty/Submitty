@@ -181,7 +181,7 @@ if os.path.isfile(EMAIL_JSON):
         else:
             loaded_defaults['authentication_method'] = 2
 
-# grab anything not loaded in (useful for backwards compatibility if a new default is added that 
+# grab anything not loaded in (useful for backwards compatibility if a new default is added that
 # is not in an existing config file.)
 for key in defaults.keys():
     if key not in loaded_defaults:
@@ -231,7 +231,7 @@ else:
     INSTITUTION_NAME = get_input('What is the name of your institution? (Leave blank/type "none" if not desired)',
                              defaults['institution_name'])
     print()
-    
+
     if INSTITUTION_NAME == '' or INSTITUTION_NAME.isspace():
         INSTITUTION_HOMEPAGE = ''
     else:
@@ -282,7 +282,7 @@ else:
             except ValueError:
                 EMAIL_SERVER_PORT = defaults['email_server_port']
             break
-            
+
         elif (is_email_enabled.lower() in ['no', 'n']):
             EMAIL_ENABLED = False
             EMAIL_USER = defaults['email_user']
@@ -352,8 +352,8 @@ else:
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['debugging_enabled'] = DEBUGGING_ENABLED
 
-    config['site_log_path'] = TAGRADING_LOG_PATH
-
+# site_log_path is a holdover name. This could more accurately be called the "log_path"
+config['site_log_path'] = TAGRADING_LOG_PATH
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
 
 if args.worker:
@@ -470,9 +470,10 @@ config['submitty_install_dir'] = SUBMITTY_INSTALL_DIR
 config['submitty_repository'] = SUBMITTY_REPOSITORY
 config['submitty_data_dir'] = SUBMITTY_DATA_DIR
 config['autograding_log_path'] = AUTOGRADING_LOG_PATH
+# site_log_path is a holdover name. This could more accurately be called the "log_path"
+config['site_log_path'] = TAGRADING_LOG_PATH
 
 if not args.worker:
-    config['site_log_path'] = TAGRADING_LOG_PATH
     config['submission_url'] = SUBMISSION_URL
     config['vcs_url'] = VCS_URL
     config['cgi_url'] = CGI_URL
@@ -480,6 +481,7 @@ if not args.worker:
     config['username_change_text'] = USERNAME_TEXT
     config['institution_homepage'] = INSTITUTION_HOMEPAGE
     config['timezone'] = TIMEZONE
+    config['duck_special_effects'] = False
 
 config['worker'] = True if args.worker == 1 else False
 
@@ -512,7 +514,8 @@ else:
 
 with open(SUBMITTY_USERS_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMONPHP_GROUP)
+shutil.chown(SUBMITTY_USERS_JSON, 'root', DAEMON_GROUP if args.worker else DAEMONPHP_GROUP)
+
 os.chmod(SUBMITTY_USERS_JSON, 0o440)
 
 ##############################################################################
@@ -530,14 +533,15 @@ if not args.worker:
 ##############################################################################
 # Write submitty_admin json
 
-config = OrderedDict()
-config['submitty_admin_username'] = SUBMITTY_ADMIN_USERNAME
-config['submitty_admin_password'] = SUBMITTY_ADMIN_PASSWORD
+if not args.worker:
+    config = OrderedDict()
+    config['submitty_admin_username'] = SUBMITTY_ADMIN_USERNAME
+    config['submitty_admin_password'] = SUBMITTY_ADMIN_PASSWORD
 
-with open(SUBMITTY_ADMIN_JSON, 'w') as json_file:
-    json.dump(config, json_file, indent=2)
-shutil.chown(SUBMITTY_ADMIN_JSON, 'root', DAEMON_GROUP)
-os.chmod(SUBMITTY_ADMIN_JSON, 0o440)
+    with open(SUBMITTY_ADMIN_JSON, 'w') as json_file:
+        json.dump(config, json_file, indent=2)
+    shutil.chown(SUBMITTY_ADMIN_JSON, 'root', DAEMON_GROUP)
+    os.chmod(SUBMITTY_ADMIN_JSON, 0o440)
 
 ##############################################################################
 # Write email json

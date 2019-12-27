@@ -1,13 +1,12 @@
 <?php
 
-
 namespace tests\app\libraries\routers;
 
+use app\libraries\routers\AccessControl;
 use tests\BaseUnitTest;
 use app\models\User;
 use app\libraries\routers\WebRouter;
 use Symfony\Component\HttpFoundation\Request;
-
 
 class AccessControlTester extends BaseUnitTest {
     private $semester = 'test_semester';
@@ -34,13 +33,13 @@ class AccessControlTester extends BaseUnitTest {
      */
     public function testAccess(
         $endpoint,
-        $method="GET",
-        $params=[],
+        $method = "GET",
+        $params = [],
         $min_role = User::LEVEL_USER,
         $min_permission = ['course.view'],
         $logged_in = true
     ) {
-        for ($role = User::GROUP_STUDENT; $role > $min_role; $role --) {
+        for ($role = User::GROUP_STUDENT; $role > $min_role; $role--) {
             $core = $this->getAccessTestCore($role, $min_permission, $logged_in);
             $request = Request::create(
                 $endpoint,
@@ -116,5 +115,50 @@ class AccessControlTester extends BaseUnitTest {
                 break;
         }
         return $core;
+    }
+
+    public function testInvalidProperty() {
+        $this->expectException(\BadMethodCallException::class);
+        $this->expectExceptionMessage('Unknown property "foo" on annotation "app\libraries\routers\AccessControl"');
+        new AccessControl(['foo' => 1]);
+    }
+
+    public function testInvalidRoleConstructor() {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('');
+        new AccessControl(['role' => 'INVALID_ROLE']);
+    }
+
+    public function testInvalidRoleMethod() {
+        $access = new AccessControl([]);
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('');
+        $access->setRole('INVALID_ROLE');
+    }
+
+    public function accessRoleProvider() {
+        return [["INSTRUCTOR"], ["FULL_ACCESS_GRADER"], ["LIMITED_ACCESS_GRADER"], ["STUDENT"]];
+    }
+
+    /**
+     * @dataProvider accessRoleProvider
+     */
+    public function testAccessControlConstructor($role) {
+        $access = new AccessControl(['role' => $role, 'permission' => 'grading.simple']);
+        $this->assertEquals($role, $access->getRole());
+        $this->assertEquals('grading.simple', $access->getPermission());
+    }
+
+    /**
+     * @dataProvider accessRoleProvider
+     */
+    public function testAccessControlSet($role) {
+        $access = new AccessControl([]);
+        $this->assertNull($access->getRole());
+        $this->assertNull($access->getPermission());
+        $access->setRole($role);
+        $this->assertEquals($role, $access->getRole());
+        $access->setPermission('test');
+        $this->assertEquals('test', $access->getPermission());
     }
 }

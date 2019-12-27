@@ -53,11 +53,13 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         $("#show_char_"+index+"_"+autocheck_cnt).html("Display whitespace/non-printing characters as escape sequences");
         list_white_spaces['newline'] = '&#9166;';
         var option = 'unicode'
-    } else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
+    }
+    else if($("#show_char_"+index+"_"+autocheck_cnt).text() == "Display whitespace/non-printing characters as escape sequences") {
         $("#show_char_"+index+"_"+autocheck_cnt).html("Original View");
         list_white_spaces['newline'] = '\\n';
         var option = 'escape'
-    } else {
+    }
+    else {
         $("#show_char_"+index+"_"+autocheck_cnt).removeClass('btn-primary');
         $("#show_char_"+index+"_"+autocheck_cnt).addClass('btn-default');
         $("#show_char_"+index+"_"+autocheck_cnt).html("Visualize whitespace characters");
@@ -71,7 +73,8 @@ function changeDiffView(div_name, gradeable_id, who_id, version, index, autochec
         if (data.status === 'fail') {
             alert("Error loading diff: " + data.message);
             return false;
-        } else if (data.status === 'error') {
+        }
+        else if (data.status === 'error') {
             alert("Internal server error: " + data.message);
             return false;
         }
@@ -131,7 +134,8 @@ function loadTestcaseOutput(div_name, gradeable_id, who_id, index, version = '')
 
         loadingTools.find("span").hide();
         loadingTools.find(".loading-tools-show").show();
-    }else{
+    }
+    else{
         $("#show_char_"+index).toggle();
         var url = buildCourseUrl(['gradeable', gradeable_id, 'grading', 'student_output']) + `?who_id=${who_id}&index=${index}&version=${version}`;
 
@@ -599,6 +603,9 @@ function configureNewGradeableForPlagiarismFormOptionChanged(prior_term_gradeabl
         else if ($('[name="language"]', form).val() == "plaintext") {
             $('[name="sequence_length"]', form).val('4');
         }
+        else if ($('[name="language"]', form).val() == "mips") {
+            $('[name="sequence_length"]', form).val('5');
+        }
     }
     else if(select_element_name.substring(0, 9) == "prev_sem_") {
         var i = select_element_name.substring(9);
@@ -868,7 +875,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
             }
         }
     }
-    
+
     $(":text",form).change(function() {
         var found = false;
         for (var i = 0; i < student_full.length; i++) {
@@ -1048,7 +1055,8 @@ function check_server(url) {
         function(data) {
             if (data.indexOf("REFRESH_ME") > -1) {
                 location.reload(true);
-            } else {
+            }
+        else {
                 checkRefreshPage(url);
             }
         }
@@ -1067,12 +1075,12 @@ function check_lichen_jobs(url, semester, course) {
     $.get(url,
         function(data) {
             var last_data = localStorage.getItem("last_data");
-            if (data == "REFRESH_ME") {
+            if (data === "REFRESH_ME") {
                 last_data= "REFRESH_ME";
                 localStorage.setItem("last_data", last_data);
                 window.location.href = buildCourseUrl(['plagiarism']);
             }
-            else if(data="NO_REFRESH" && last_data == "REFRESH_ME"){
+            else if(data === "NO_REFRESH" && last_data === "REFRESH_ME"){
                 last_data= "NO_REFRESH";
                 localStorage.setItem("last_data", last_data);
                 window.location.href = buildCourseUrl(['plagiarism']);
@@ -1206,7 +1214,8 @@ function changeName(element, user, visible_username, anon){
         new_element.innerHTML = visible_username;
         icon.className = "fas fa-eye";
         icon.title = "Show full user information";
-    } else {
+    }
+    else {
         if(anon) {
             new_element.style.color = "grey";
             new_element.style.fontStyle = "italic";
@@ -1308,9 +1317,11 @@ $(function() {
         }
     }
 
-    setTimeout(function() {
-        $('.alert-success').fadeOut();
-    }, 5000);
+    for (const elem of document.getElementsByClassName('alert-success')) {
+        setTimeout(() => {
+            $(elem).fadeOut();
+        }, 5000);
+    }
 });
 
 function getFileExtension(filename){
@@ -1327,10 +1338,35 @@ function openPopUp(css, title, count, testcase_num, side) {
     my_window.focus();
 }
 
-function displayError(message){
-    var message ='<div class="inner-message alert alert-error" style="position: fixed;top: 40px;left: 50%;width: 40%;margin-left: -20%;" id="theid"><a class="fas fa-times message-close" onClick="removeMessagePopup(\'theid\');"></a><i class="fas fa-times-circle"></i>' + message + '</div>';
+let messages = 0;
+
+function displayErrorMessage(message){
+    displayMessage(message, 'error');
+}
+
+function displaySuccessMessage(message) {
+    displayMessage(message, 'success');
+}
+
+/**
+ * Display a toast message after an action.
+ *
+ * The styling here should match what's used in GlobalHeader.twig to define the messages coming from PHP
+ *
+ * @param {string} message
+ * @param {string} type
+ */
+function displayMessage(message, type) {
+    const id = `${type}-js-${messages}`;
+    message = `<div id="${id}" class="inner-message alert alert-${type}"><span><i class="fas fa-${type === 'error' ? 'times' : 'check'}-circle"></i>${message.replace(/(?:\r\n|\r|\n)/g, '<br />')}</span><a class="fas fa-times" onClick="removeMessagePopup('${type}-js-${messages}');"></a></div>`;
     $('#messages').append(message);
-    $('#messages').fadeIn("slow");
+    $('#messages').fadeIn('slow');
+    if (type === 'success') {
+        setTimeout(() => {
+            $(`#${id}`).fadeOut();
+        }, 5000);
+    }
+    messages++;
 }
 
 /**
@@ -1358,7 +1394,8 @@ function enableTabsInTextArea(jQuerySelector) {
             var controls = $(":input").filter(":visible");
             controls.eq(controls.index(this) + 1).focus();
             return false;
-        } else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
+        }
+        else if (!t.shiftKey && t.keyCode == 9) { //TAB was pressed without SHIFT, text indent
             var text = this.value;
             var beforeCurse = this.selectionStart;
             var afterCurse = this.selectionEnd;
@@ -1439,7 +1476,8 @@ function refreshOnResponseOverriddenGrades(json) {
     $('#title').replaceWith(title);
     if(json['data']['users'].length === 0){
         $('#my_table').append('<tr><td colspan="5">There are no overridden grades for this homework</td></tr>');
-    } else {
+    }
+    else {
         json['data']['users'].forEach(function(elem){
             var delete_button = "<a onclick=\"deleteOverriddenGrades('" + elem['user_id'] + "', '" + json['data']['gradeable_id'] + "');\"><i class='fas fa-trash'></i></a>"
             var bits = ['<tr><td>' + elem['user_id'], elem['user_firstname'], elem['user_lastname'], elem['marks'], elem['comment'], delete_button + '</td></tr>'];

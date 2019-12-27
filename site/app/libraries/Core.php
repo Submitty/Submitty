@@ -14,8 +14,6 @@ use app\models\User;
 use app\models\NotificationFactory;
 use Symfony\Component\HttpFoundation\Request;
 
-
-
 /**
  * Class Core
  *
@@ -69,6 +67,9 @@ class Core {
     /** @var bool */
     private $redirect = true;
 
+    /** @var bool */
+    private $testing = false;
+
 
     /**
      * Core constructor.
@@ -77,17 +78,17 @@ class Core {
      * need. This should be called first, then loadConfig() and then loadDatabases().
      */
     public function __construct() {
-        $this->output = new Output($this);
+        $this->setOutput(new Output($this));
         $this->access = new Access($this);
 
         // initialize our alert queue if it doesn't exist
-        if(!isset($_SESSION['messages'])) {
+        if (!isset($_SESSION['messages'])) {
             $_SESSION['messages'] = array();
         }
 
         // initialize our alert types if one of them doesn't exist
         foreach (array('error', 'notice', 'success') as $key) {
-            if(!isset($_SESSION['messages'][$key])) {
+            if (!isset($_SESSION['messages'][$key])) {
                 $_SESSION['messages'][$key] = array();
             }
         }
@@ -125,10 +126,10 @@ class Core {
         if (!empty($semester) && !empty($course)) {
             $course_path = FileUtils::joinPaths($this->config->getSubmittyPath(), "courses", $semester, $course);
             $course_json_path = FileUtils::joinPaths($course_path, "config", "config.json");
-            if (file_exists($course_json_path) && is_readable ($course_json_path)) {
+            if (file_exists($course_json_path) && is_readable($course_json_path)) {
                 $this->config->loadCourseJson($semester, $course, $course_json_path);
             }
-            else{
+            else {
                 $message = "Unable to access configuration file " . $course_json_path . " for " .
                   $semester . " " . $course . " please contact your system administrator.\n" .
                   "If this is a new course, the error might be solved by restarting php-fpm:\n" .
@@ -141,17 +142,25 @@ class Core {
     public function loadMasterConfig() {
         $conf_path = FileUtils::joinPaths(__DIR__, '..', '..', '..', 'config');
 
-        $this->config = new Config($this);
+        $this->setConfig(new Config($this));
         $this->config->loadMasterConfigs($conf_path);
     }
 
+    public function setConfig(Config $config): void {
+        $this->config = $config;
+    }
+
     public function loadAuthentication() {
-        $auth_class = "\\app\\authentication\\".$this->config->getAuthentication();
+        $auth_class = "\\app\\authentication\\" . $this->config->getAuthentication();
         if (!is_subclass_of($auth_class, 'app\authentication\AbstractAuthentication')) {
             throw new \Exception("Invalid module specified for Authentication. All modules should implement the AbstractAuthentication interface.");
         }
         $this->authentication = new $auth_class($this);
-        $this->session_manager = new SessionManager($this);
+        $this->setSessionManager(new SessionManager($this));
+    }
+
+    public function setSessionManager(SessionManager $manager) {
+        $this->session_manager = $manager;
     }
 
     /**
@@ -172,7 +181,7 @@ class Core {
         $this->submitty_db = $this->database_factory->getDatabase($this->config->getSubmittyDatabaseParams());
         $this->submitty_db->connect();
 
-        $this->database_queries = $this->database_factory->getQueries($this);
+        $this->setQueries($this->database_factory->getQueries($this));
     }
 
     public function loadCourseDatabase() {
@@ -202,8 +211,11 @@ class Core {
             throw new \Exception("Need to load the config before we can initialize the grading queue");
         }
 
-        $this->grading_queue = new GradingQueue($this->config->getSemester(),
-            $this->config->getCourse(), $this->config->getSubmittyPath());
+        $this->grading_queue = new GradingQueue(
+            $this->config->getSemester(),
+            $this->config->getCourse(),
+            $this->config->getSubmittyPath()
+        );
     }
 
     /**
@@ -266,6 +278,10 @@ class Core {
         return $this->course_db;
     }
 
+    public function setQueries(DatabaseQueries $queries): void {
+        $this->database_queries = $queries;
+    }
+
     /**
      * @return DatabaseQueries
      */
@@ -280,13 +296,14 @@ class Core {
         return $this->forum;
     }
 
-    /**
-     * @param string $user_id
-     */
-    public function loadUser($user_id) {
+    public function loadUser(string $user_id) {
         // attempt to load rcs as both student and user
         $this->user_id = $user_id;
-        $this->user = $this->database_queries->getUserById($user_id);
+        $this->setUser($this->database_queries->getUserById($user_id));
+    }
+
+    public function setUser(User $user): void {
+        $this->user = $user;
     }
 
     /**
@@ -418,12 +435,11 @@ class Core {
         try {
             if ($this->authentication->authenticate()) {
                 $this->database_queries->refreshUserApiKey($user_id);
-                $token = (string) TokenManager::generateApiToken(
+                return (string) TokenManager::generateApiToken(
                     $this->database_queries->getSubmittyUserApiKey($user_id),
                     $this->getConfig()->getBaseUrl(),
                     $this->getConfig()->getSecretSession()
                 );
-                return $token;
             }
         }
         catch (\Exception $e) {
@@ -471,7 +487,7 @@ class Core {
      *
      * @return bool
      */
-    public function checkCsrfToken($csrf_token=null) {
+    public function checkCsrfToken($csrf_token = null) {
         if ($csrf_token === null) {
             return isset($_POST['csrf_token']) && $this->getCsrfToken() === $_POST['csrf_token'];
         }
@@ -487,9 +503,8 @@ class Core {
      *
      * @return string
      */
-    public function buildUrl($parts=array()) {
-        $url = $this->getConfig()->getBaseUrl().implode("/", $parts);
-        return $url;
+    public function buildUrl($parts = array()) {
+        return $this->getConfig()->getBaseUrl() . implode("/", $parts);
     }
 
     /**
@@ -502,7 +517,7 @@ class Core {
      *
      * @return string
      */
-    public function buildCourseUrl($parts=array()) {
+    public function buildCourseUrl($parts = array()) {
         array_unshift($parts, $this->getConfig()->getSemester(), $this->getConfig()->getCourse());
         return $this->buildUrl($parts);
     }
@@ -511,12 +526,14 @@ class Core {
      * @param     $url
      * @param int $status_code
      */
-    public function redirect($url, $status_code = 302) {
+    public function redirect($url, $http_response_code = 302) {
         if (!$this->redirect) {
             return;
         }
-        header('Location: ' . $url, true, $status_code);
-        die();
+        header('Location: ' . $url, true, $http_response_code);
+        if (!$this->testing) {
+            die();
+        }
     }
 
     /**
@@ -538,7 +555,7 @@ class Core {
     public function getFullCourseName() {
         $course_name = strtoupper($this->getConfig()->getCourse());
         if ($this->getConfig()->getCourseName() !== "") {
-            $course_name .= ": ".htmlentities($this->getConfig()->getCourseName());
+            $course_name .= ": " . htmlentities($this->getConfig()->getCourseName());
         }
         return $course_name;
     }
@@ -548,25 +565,31 @@ class Core {
      *
      * @return string
      */
-    public function getDisplayedCourseName(){
+    public function getDisplayedCourseName() {
         if ($this->getConfig()->getCourseName() !== "") {
             return htmlentities($this->getConfig()->getCourseName());
         }
-        else{
+        else {
             return $this->getConfig()->getCourse();
         }
     }
 
-    public function getFullSemester(){
+    public function getFullSemester() {
         $semester = $this->getConfig()->getSemester();
-        if ($this->getConfig()->getSemester() !== ""){
+        if ($this->getConfig()->getSemester() !== "") {
             $arr1 = str_split($semester);
             $semester = "";
-            if($arr1[0] == "f")  $semester .= "Fall ";
-            else if($arr1[0] == "s")  $semester .= "Spring ";
-            else if ($arr1[0] == "u") $semester .= "Summer ";
+            if ($arr1[0] == "f") {
+                $semester .= "Fall ";
+            }
+            elseif ($arr1[0] == "s") {
+                $semester .= "Spring ";
+            }
+            elseif ($arr1[0] == "u") {
+                $semester .= "Summer ";
+            }
 
-            $semester .= "20". $arr1[1]. $arr1[2];
+            $semester .= "20" . $arr1[1] . $arr1[2];
         }
         return $semester;
     }
@@ -574,8 +597,12 @@ class Core {
     /**
      * @return Output
      */
-    public function getOutput() {
+    public function getOutput(): Output {
         return $this->output;
+    }
+
+    public function setOutput(Output $output): void {
+        $this->output = $output;
     }
 
     /**
@@ -640,14 +667,15 @@ class Core {
 
     /**
      * We use this function to allow us to bypass certain "safe" PHP functions that we cannot
-     * bypass via mocking or some other method (like is_uploaded_file). This method, which normally
-     * ALWAYS returns FALSE we can mock to return TRUE for testing. It's probably not "best practices",
-     * and the proper way is using "phpt" files, but
-     *
+     * bypass via mocking or some other method (like is_uploaded_file).
      * @return bool
      */
-    public function isTesting() {
-        return false;
+    public function isTesting(): bool {
+        return $this->testing;
+    }
+
+    public function setTesting(bool $testing): void {
+        $this->testing = $testing;
     }
 
     public function getNotificationFactory() {

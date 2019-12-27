@@ -22,7 +22,7 @@
             {% endif %}
         </h2>
         {% if notifications is empty %}
-            <h3>No notifications.</h3>
+            <p id="empty-notifications">No notifications.</p>
         {% else %}
             <div id="notification-header" class="notification">
                 <div>&NegativeMediumSpace;</div> {# Notification type has empty header #}
@@ -39,7 +39,7 @@
                         <div>&NegativeMediumSpace;</div>
                     {% endif %}
                     {% if hasLink %}
-                        <a class="notification-link" href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() }}">
+                        <a class="notification-link" href="{{ notifications_url }}/{{ notification.getId() }}?seen={{ notification.isSeen() == "1" ? 1 : 0}}">
                     {% endif %}
                     <div class="notification-contents">
                         {{ notification.getNotifyContent() }}

@@ -31,18 +31,19 @@
                     Component double-graded by a full access grader or instructor
                 </li>
             </ul>
-            {% if show_all_sections_button %}
-                <div style="display:flex; flex-direction: column; justify-self: flex-end;flex-wrap: wrap;margin-left: 5px">
-                    <a class="btn btn-default"
-                       href="{{ view_all_toggle_url }}">
-                        {{ view_all ? "View Your Sections" : "View All" }}
-                    </a>
-                    <a style="margin-top: 10px" class="btn btn-default"
-                       href="{{ order_toggle_url }}">
-                        {{ sort == 'random' ? "Default Order" : "Random Order" }}
-                    </a>
-                </div>
-            {% endif %}
+
+            <div style="display:flex; flex-direction: column; justify-self: flex-end;flex-wrap: wrap;margin-left: 5px">
+                {% if show_all_sections_button %}
+                <a class="btn btn-default"
+                   href="{{ view_all_toggle_url }}">
+                    {{ view_all ? "View Your Sections" : "View All" }}
+                </a>
+                {% endif %}
+                <a style="margin-top: 10px" class="btn btn-default"
+                   href="{{ order_toggle_url }}">
+                    {{ sort == 'random' ? "Default Order" : "Random Order" }}
+                </a>
+            </div>
         </div>
     </div>
     {# Import+Export teams buttons #}

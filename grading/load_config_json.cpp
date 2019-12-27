@@ -160,7 +160,7 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   //Fill in the defaults.
   if(!whole_config["container_options"]["container_image"].is_string()){
-    whole_config["container_options"]["container_image"] = "ubuntu:custom";
+    whole_config["container_options"]["container_image"] = "submitty/autograding-default:latest";
   }
 
   if (!whole_config["container_options"]["use_router"].is_boolean()){
@@ -169,6 +169,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
 
   if (!whole_config["container_options"]["single_port_per_container"].is_boolean()){
     whole_config["container_options"]["single_port_per_container"] = false; // connection
+  }
+
+  if (!whole_config["container_options"]["number_of_ports"].is_number_integer()){
+    whole_config["container_options"]["number_of_ports"] = 1; // connection
   }
 
   nlohmann::json::iterator tc = whole_config.find("testcases");
@@ -252,6 +256,10 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
           this_testcase[container_type][container_num]["container_name"] = "container" + std::to_string(container_num);
         }
 
+        if (!this_testcase[container_type][container_num]["number_of_ports"].is_number_integer()){
+          this_testcase[container_type][container_num]["number_of_ports"] = whole_config["container_options"]["number_of_ports"];
+        }
+
         if (this_testcase[container_type][container_num]["container_name"] == "router"){
           assert(router_container == -1);
           router_container = container_num;
@@ -281,14 +289,21 @@ void AddDockerConfiguration(nlohmann::json &whole_config) {
         }
       }
 
-      if(this_testcase["use_router"] && router_container == -1){
+      if(this_testcase[container_type].size() <= 2 && this_testcase["use_router"]){
+        // If there are only two containers specified, make sure that neither is the router.
+        // The router MUST go between at least two containers.
+        assert(router_container == -1);
+      }
+
+      // If we are using the router, and it isn't specified, and this testcase is a valid candidate for a router (2 or more containers specified).
+      if(this_testcase["use_router"] && router_container == -1 && this_testcase[container_type].size() > 1){
         nlohmann::json insert_router = nlohmann::json::object();
         insert_router["outgoing_connections"] = nlohmann::json::array();
         insert_router["commands"] = nlohmann::json::array();
-        insert_router["commands"].push_back("python3 submitty_router.py");
+        insert_router["commands"].push_back("python3 -u submitty_router.py");
         insert_router["container_name"] = "router";
         insert_router["import_default_router"] = true;
-        insert_router["container_image"] = "ubuntu:custom";
+        insert_router["container_image"] = "submitty/autograding-default:latest";
         insert_router["server"] = false;
         this_testcase[container_type].push_back(insert_router);
       }
@@ -553,8 +568,8 @@ void FormatGraphicsActions(nlohmann::json &whole_config) {
 
         validate_mouse_button(action);
 
-        validate_integer(action, "end_x",   true,  0, 0);
-        validate_integer(action, "end_y",   true,  0, 0);
+        validate_integer(action, "end_x",   true,  -100000, 0);
+        validate_integer(action, "end_y",   true,  -100000, 0);
 
         if(action["end_x"] == 0 && action["end_y"] == 0){
           std::cout << "ERROR: some movement must be specified in click and drag" << std::endl;

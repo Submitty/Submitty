@@ -1,0 +1,32 @@
+{
+    "autograding_method" : "docker",
+    "container_options" : {
+      //States that a given testcase uses a router by default. (Default value is true)
+      "use_router" : false
+    },
+    "resource_limits" : {
+        // Allow the submission to run for 5 CPU seconds.
+        "RLIMIT_CPU" : 5
+    },
+    "testcases" : [
+        {
+            "title" : "Test 1",
+            "containers" : [
+                {
+                    "container_name" : "container0",
+                    "container_image": "ubuntu:custom",
+                    "commands" : ["python3 *.py"]
+                }
+            ],
+            "points" : 10,
+            "validation" : [
+                {
+                    "method" : "diff",
+                    "actual_file" : "STDOUT.txt",
+                    "description" : "Program Output",
+                    "expected_file" : "solution.txt"
+                }
+            ]
+        }
+    ]
+}

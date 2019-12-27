@@ -1393,8 +1393,8 @@ end of styles used in the admin gradeable page
     color: var(--standard-vibrant-dark-blue)  /* dark blue */
 }
 
-.grader-invalid{
-   color: var(--standard-light-red);
+.grader-grade-inquiry {
+    color: var(--standard-light-red);
 }
 
 .grader-invalid{
@@ -1449,7 +1449,7 @@ end of styles used in the admin gradeable page
 .required:-ms-input-placeholder { var(--error-alert-dark-red); }
 
 #required_type{
-    var(--error-alert-dark-red);
+    color: var(--error-alert-dark-red);
     display: inline;
 }
 
@@ -1564,7 +1564,7 @@ end of styles used in the admin gradeable page
 }
 
 #confetti_canvas{
-    position: absolute;
+    position: fixed;
     display: none;
     z-index: 99999;
     top:0px;
@@ -1636,7 +1636,7 @@ end of styles used in the admin gradeable page
 }
 
 .danger {
-    background: #f2dede;
+    background: var(--alert-background-danger-red);
     color: var(--alert-danger-red);
 }
 

@@ -2,6 +2,9 @@
 
 namespace app\libraries;
 
+use app\models\User;
+use Ds\Set;
+
 /**
  * Class Utils
  */
@@ -18,7 +21,7 @@ class Utils {
         if (!is_array($haystack) || !is_string($needle)) {
             return null;
         }
-        foreach($haystack as $key => $value) {
+        foreach ($haystack as $key => $value) {
             if (is_array($value)) {
                 $haystack[$key] = Utils::stripStringFromArray($needle, $value);
             }
@@ -56,7 +59,7 @@ class Utils {
      *
      * @return string
      */
-    public static function removeTrailingCommas($json) {
+    public static function removeTrailingCommas(string $json): string {
         $json = preg_replace('/,\s*([\]}])/m', '$1', $json);
         return $json;
     }
@@ -72,11 +75,11 @@ class Utils {
      *
      * @return string
      */
-    public static function generateRandomString($bytes = 16) {
+    public static function generateRandomString(int $bytes = 16): string {
         /** @noinspection PhpUnhandledExceptionInspection */
         return bin2hex(random_bytes($bytes));
     }
-    
+
     /**
      * Given a string, convert all newline characters to "<br />" while also performing htmlentities on all elements
      * that are not for the new lines
@@ -85,7 +88,7 @@ class Utils {
      *
      * @return string
      */
-    public static function prepareHtmlString($string) {
+    public static function prepareHtmlString(string $string): string {
         $string = str_replace("<br>", "<br />", nl2br($string));
         $string = explode("<br />", $string);
         return implode("<br />", array_map("htmlentities", $string));
@@ -100,10 +103,25 @@ class Utils {
      * @param $array
      * @return mixed|null
      */
-    public static function getLastArrayElement($array) {
+    public static function getLastArrayElement(array $array) {
         $temp = array_slice($array, -1);
         return (count($temp) > 0) ? array_pop($temp) : null;
     }
+
+    /**
+     * Gets the first element of an array. This can be used for associate arrays like the above
+     * getLastArrayElement defined above.
+     *
+     * @param $array
+     * @return mixed|null
+     */
+    public static function getFirstArrayElement(array $array) {
+        foreach ($array as $value) {
+            return $value;
+        }
+        return null;
+    }
+
 
 
     /**
@@ -113,7 +131,7 @@ class Utils {
      * @param string $needle
      * @return bool
      */
-    public static function startsWith($haystack, $needle) {
+    public static function startsWith(string $haystack, string $needle): bool {
         return substr($haystack, 0, strlen($needle)) === $needle;
     }
 
@@ -124,17 +142,9 @@ class Utils {
      * @param string $needle
      * @return bool
      */
-    public static function endsWith($haystack, $needle) {
-        return substr($haystack, (-1*strlen($needle)), strlen($needle)) === $needle;
+    public static function endsWith(string $haystack, string $needle): bool {
+        return substr($haystack, (-1 * strlen($needle)), strlen($needle)) === $needle;
     }
-
-    public static function getDisplayNameForum($anonymous, $real_name) {
-        if($anonymous) {
-            return "Anonymous";
-        }
-        return $real_name['first_name'] . substr($real_name['last_name'], 0, 2) . '.';
-    }
-
 
     /**
      * Wrapper around the PHP function setcookie that deals with figuring out if we should be setting this cookie
@@ -148,7 +158,7 @@ class Utils {
      *
      * @return bool true if successfully able to set the cookie, else false
      */
-    public static function setCookie($name, $data, $expire=0) {
+    public static function setCookie(string $name, $data, int $expire = 0): bool {
         if (is_array($data)) {
             $data = json_encode($data);
         }
@@ -165,34 +175,36 @@ class Utils {
      *
      * @return bool true if filename references an image else false
      */
-    public static function isImage($filename) {
-        return (substr($filename,strlen($filename)-4,4) == ".png") ||
-            (substr($filename,strlen($filename)-4,4) == ".jpg") ||
-            (substr($filename,strlen($filename)-4,4) == ".jpeg")||
-            (substr($filename,strlen($filename)-4,4) == ".gif");
+    public static function isImage(string $filename): bool {
+        return (substr($filename, -4) == ".png") ||
+            (substr($filename, -4) == ".jpg") ||
+            (substr($filename, -5) == ".jpeg") ||
+            (substr($filename, -4) == ".gif");
     }
 
-    public static function checkUploadedImageFile($id){
-        if(isset($_FILES[$id])){
-            foreach($_FILES[$id]['tmp_name'] as $file_name){
-                if(file_exists($file_name)){
-                    $mime_type = FileUtils::getMimeType($file_name); 
-                    if(getimagesize($file_name) === false  || substr($mime_type, 0, strrpos($mime_type, "/")) !== "image") {
+    public static function checkUploadedImageFile($id) {
+        if (isset($_FILES[$id])) {
+            foreach ($_FILES[$id]['tmp_name'] as $file_name) {
+                if (file_exists($file_name)) {
+                    $mime_type = mime_content_type($file_name);
+                    if (substr($mime_type, 0, strrpos($mime_type, "/")) !== "image" || getimagesize($file_name) === false) {
                         return false;
                     }
                 }
-            } return true;
-        } return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     /**
      * Compares two potentially null values using greater-than comparison.
-     * @param mixed $gtL Left operand for greater-than comparison
-     * @param mixed $gtR Righ operand for greater-than comparison
+     * @param mixed $gt_left Left operand for greater-than comparison
+     * @param mixed $gt_right Righ operand for greater-than comparison
      * @return bool True if $dtL > $dtR and neither are null, otherwise false
      */
-    public static function compareNullableGt($gtL, $gtR) {
-        return $gtL !== null && $gtR !== null && $gtL > $gtR;
+    public static function compareNullableGt($gt_left, $gt_right) {
+        return $gt_left !== null && $gt_right !== null && $gt_left > $gt_right;
     }
 
     /**
@@ -213,7 +225,8 @@ class Utils {
 
         if ($result > 1.0 && $clamp === true) {
             return 1.0;
-        } else if ($result < 0.0 && $clamp === true) {
+        }
+        elseif ($result < 0.0 && $clamp === true) {
             return 0.0;
         }
         return $result;
@@ -240,79 +253,81 @@ class Utils {
      * students_version is an array of user and their highest submitted version
      */
 
-    public static function getAutoFillData($students, $students_version = null) {
-        $students_full = array();
-        $null_section = array();
+    public static function getAutoFillData($students, $students_version = null): string {
+        $students_full = new Set();
+        $null_students = new Set();
         foreach ($students as $student) {
-            $student_entry = array('value' => $student->getId(),
-                    'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>');
+            $student_entry = [
+                'value' => $student->getId(),
+                'label' => $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'
+            ];
 
-            if($students_version !== null) {
-                if($student->getRegistrationSection() != null && array_key_exists($student->getId(),$students_version)) {
+            if ($students_version !== null) {
+                if ($student->getRegistrationSection() !== null && array_key_exists($student->getId(), $students_version)) {
                     if ($students_version[$student->getId()] !== 0) {
-                        $student_entry['label'] .= ' (' .
-                        $students_version[$student->getId()] . ' Prev Submission)';
+                        $student_entry['label'] .= ' (' . $students_version[$student->getId()] . ' Prev Submission)';
                     }
                 }
-            } 
-            $students_full[] = $student_entry;
-            if($students_version === null){
-                $null_entry = array('value' => $student->getId(),
-                'label' => '[NULL section] ' . $student->getDisplayedFirstName() . ' ' . $student->getDisplayedLastName() . ' <' . $student->getId() . '>'); 
-
-                $in_null_section = false;
-                foreach ($null_section as $null_student) {
-                    if($null_student['value'] === $student->getId()) $in_null_section = true;
+                $students_full->add($student_entry);
+            }
+            elseif ($students_version === null) {
+                if ($student->getRegistrationSection() === null) {
+                    $student_entry['label'] = '[NULL section] ' . $student_entry['label'];
+                    $null_students->add($student_entry);
                 }
-                if(!$in_null_section && $student->getRegistrationSection() == null) {
-                    $null_section[] = $null_entry; 
-                    $students_full = self::removeStudentWithId($students_full, 'value', $student->getId());
-                } 
+                else {
+                    $students_full->add($student_entry);
+                }
             }
         }
-        $students_full = array_unique(array_merge($students_full, $null_section), SORT_REGULAR);
-        return json_encode($students_full);
+        return json_encode(array_merge($students_full->toArray(), $null_students->toArray()));
     }
-    
-    /*
-     * Given a multidimensional array of students, key, and id, removeStudentWithId deletes matching student row(s).
-     */
-
-    public static function removeStudentWithId($students, $key, $id) {
-        foreach($students as $subKey => $student) {
-             if($student[$key] === $id) {
-                  unset($students[$subKey]);
-             }
-        }
-        return $students;
-   }
 
    /**
     * Convert the shorthand byte notation in php.ini to bytes.
     * E.g : php returnBytes(ini_get('post_max_size'))
     * Src : https://www.php.net/manual/en/function.ini-get.php
     * @param string $size_str
-    * @return int 
+    * @return int
     */
-    public static function returnBytes ($size_str){
-        switch (substr ($size_str, -1)){
-            case 'M': case 'm': return (int)$size_str * 1048576;
-            case 'K': case 'k': return (int)$size_str * 1024;
-            case 'G': case 'g': return (int)$size_str * 1073741824;
-            default: return $size_str;
+    public static function returnBytes(string $size_str): int {
+        switch (strtolower(substr($size_str, -1))) {
+            case 'm':
+                return (int) $size_str * 1048576;
+            case 'k':
+                return (int) $size_str * 1024;
+            case 'g':
+                return (int) $size_str * 1073741824;
+            default:
+                return (int) $size_str;
         }
     }
 
     /**
-    * Convert bytes to a specified format thats human readable 
+    * Convert bytes to a specified format thats human readable
     * E.g : MB, 10485760 => 10MB
     * @param string $format
     * @param int $bytes
     * @return string
     */
-    public static function formatBytes($format, $bytes){
+    public static function formatBytes(string $format, int $bytes): string {
         $formats = ['b' => 0, 'kb' => 1, 'mb' => 2];
-        return ($bytes/pow(1024,floor($formats[strtolower($format)]))) . (strtoupper($format));
+        return ($bytes / pow(1024, floor($formats[strtolower($format)]))) . (strtoupper($format));
     }
 
+    /**
+     * Multibyte safe version of {@see str_split}.
+     *
+     * @param string $string
+     * @param int $length
+     * @return string[]
+     */
+    public static function mb_str_split(string $string, int $length = 1): array {
+        $arr = [];
+        $str_length = mb_strlen($string, 'UTF-8');
+        for ($i = 0; $i < $str_length; $i += $length) {
+            $arr[] = mb_substr($string, $i, $length, 'UTF-8');
+        }
+        return $arr;
+    }
 }

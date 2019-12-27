@@ -12,7 +12,7 @@
             {% endif %}
 
             {% if thread.status != 0 %}
-                <i class="fa {{ thread.fa_icon }} thread-status" style="margin-right:{{ thread.fa_margin_right }}; color:{{ thread.fa_color }}; font-size:{{ thread.fa_font_size }};" title="{{ thread.tooltip }}" aria-hidden="true"></i>
+                <i class="fa {{ thread.fa_icon }} {{ thread.fa_class }} thread-status" title="{{ thread.tooltip }}" aria-hidden="true"></i>
             {% endif %}
 
             {% if thread.is_locked %}
