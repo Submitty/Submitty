@@ -25,6 +25,11 @@ Required inputs:
     <div class="container">
         {% set show_ta_comment = component.ta_comment != "" %}
         {% set show_student_comment = component.student_comment != "" %}
+        {% if component.peer %}
+            <span>
+              WIP: This is a peer component.
+            </span>
+        {% endif %}
         {% if show_ta_comment or show_student_comment %}
             <div class="row divider"></div>
         {% endif %}
