@@ -4,25 +4,25 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "58bbc980d065ac5182aaf7200d8e57fe",
+    "content-hash": "556e65263e5c4e24ada3d091a7aad74b",
     "packages": [
         {
             "name": "aptoma/twig-markdown",
-            "version": "3.2.0",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/aptoma/twig-markdown.git",
-                "reference": "496ec52657ead7c7e816a8702da26c3cc2e0990c"
+                "reference": "bbafa0bec60086bf67500515476ce4e8b946a709"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/496ec52657ead7c7e816a8702da26c3cc2e0990c",
-                "reference": "496ec52657ead7c7e816a8702da26c3cc2e0990c",
+                "url": "https://api.github.com/repos/aptoma/twig-markdown/zipball/bbafa0bec60086bf67500515476ce4e8b946a709",
+                "reference": "bbafa0bec60086bf67500515476ce4e8b946a709",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.0",
-                "twig/twig": "^2.7.0"
+                "twig/twig": "^2.7.0|^3.0"
             },
             "require-dev": {
                 "codeclimate/php-test-reporter": "dev-master",
@@ -30,7 +30,7 @@
                 "knplabs/github-api": "~1.4",
                 "league/commonmark": "~0.5",
                 "michelf/php-markdown": "~1",
-                "phpunit/phpunit": "~6.0||~5.0"
+                "phpunit/phpunit": "~6.0|~5.0|~8.0"
             },
             "suggest": {
                 "knplabs/github-api": "Needed for using GitHub's Markdown engine provided through their API.",
@@ -48,12 +48,12 @@
             ],
             "authors": [
                 {
-                    "name": "Joris Berthelot",
-                    "email": "joris@berthelot.tel"
-                },
-                {
                     "name": "Gunnar Lium",
                     "email": "gunnar@aptoma.com"
+                },
+                {
+                    "name": "Joris Berthelot",
+                    "email": "joris@berthelot.tel"
                 }
             ],
             "description": "Twig extension to work with Markdown content",
@@ -61,7 +61,7 @@
                 "markdown",
                 "twig"
             ],
-            "time": "2019-05-24T07:47:05+00:00"
+            "time": "2019-12-16T07:59:11+00:00"
         },
         {
             "name": "doctrine/annotations",
