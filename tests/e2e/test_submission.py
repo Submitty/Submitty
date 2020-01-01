@@ -65,6 +65,11 @@ class TestSubmission(BaseTestCase):
         # get the starting submission count
         submission_count = self.get_submission_count()
 
+        # clear the previous submission files (if any)
+        clearBtn = self.driver.find_element_by_id("startnew")
+        if clearBtn.is_enabled() :
+            clearBtn.click()
+
         # input and submit the files
         self.input_files(file_paths, drag_and_drop, target_id)
         self.driver.find_element_by_id("submit").click()
