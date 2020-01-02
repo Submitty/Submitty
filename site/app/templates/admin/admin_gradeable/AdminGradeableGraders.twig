@@ -44,6 +44,30 @@ Form
 	</div>
 {% endif %}
 
+<script>
+    function uploadPeerResults(gradeable_id, csrf_token){
+        var formData = new FormData();
+        let url = buildCourseUrl(['gradeable', gradeable_id, 'uploadPeerList']);
+        formData.append('csrf_token', csrf_token);
+        console.log(url);
+        $.ajax({
+            url : url,
+            type : 'POST',
+            data: formData,
+            processData: false,
+            dataType: "",
+            contentType: false,
+            success : function(response){
+                console.log("Info Parsed Successfully");
+            },
+            error : function(err){
+                console.log("Error while trying to validate user id" + user_id);
+                reject({'status' : 'failed', 'message' : err});
+            }
+        });
+    }
+</script>
+
 <label for="minimum_grading_group">What is the lowest privileged user group that can grade this?</label>
     <a class="fa-question-circle" target=_blank aria-label="Help for grading user groups" href="http://submitty.org/instructor/create_edit_gradeable#grading-user-groups"></a>
 <select name="min_grading_group" id="minimum_grading_group" class="int_val" style="width:180px;">
@@ -66,6 +90,13 @@ Form
 
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
+</fieldset>
+
+<fieldset>
+    <legend>
+        Please upload a PDF detailing which studentsk will grade each other:
+    </legend>
+    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
 </fieldset>
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
