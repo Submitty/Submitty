@@ -66,9 +66,9 @@ class TestSubmission(BaseTestCase):
         submission_count = self.get_submission_count()
 
         # clear the previous submission files (if any)
-        clearBtn = self.driver.find_element_by_id("startnew")
-        if clearBtn.is_enabled() :
-            clearBtn.click()
+        clear_btn = self.driver.find_element_by_id("startnew")
+        if clear_btn.is_enabled():
+            clear_btn.click()
 
         # input and submit the files
         self.input_files(file_paths, drag_and_drop, target_id)
@@ -77,8 +77,8 @@ class TestSubmission(BaseTestCase):
         # accept submission and late day limit alerts
         self.accept_alerts(2)
 
-        # wait until there are no more files in the submission box before moving on to make sure files are submitted properly
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//table[@id='{}' and count(tr[@class='file-label'])=0]".format('file-upload-table-'+target_id[-1]))))
+        # Making sure that the files are submitted properly by waiting for the submission success popup (inner message)
+        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.XPATH, "//div[@id='success-0']")))
 
         # make sure the submission count has increased
         self.assertEqual(submission_count+1, self.get_submission_count())

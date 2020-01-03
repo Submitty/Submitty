@@ -203,7 +203,7 @@ class Config extends AbstractModel {
     protected $regrade_enabled;
     /** @prop @var string */
     protected $regrade_message;
-    /** @prop @var bool*/
+    /** @prop @var bool */
     protected $seating_only_for_instructor;
     /** @prop @var string|null */
     protected $room_seating_gradeable_id;
