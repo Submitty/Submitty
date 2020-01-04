@@ -1,29 +1,19 @@
 <?php
 
 namespace app\libraries;
-use app\models\AbstractModel;
 
 /**
  * Class NumberUtils
  *
  * Utility functions for interacting with numbers
  */
-
-class NumberUtils extends AbstractModel {
-
-    /**
-     * NumberUtils constructor.
-     * @param Core $core
-     */
-    public function __construct(Core $core) {
-        parent::__construct($core);
-    }
+class NumberUtils {
 
     /**
      *  Gives the closest number to the `value` with respect to `precision`
-     * @param float $value  The     number to round
-     * @param float $precision float The precision with calculation to be made
-     * @return float The rounded result to the nearest multiple of $y
+     * @param float $value The number to round
+     * @param float $precision The precision with calculation to be made
+     * @return float The rounded result to the nearest multiple of precision
      */
     public static function roundPointValue(float $value, float $precision) {
 

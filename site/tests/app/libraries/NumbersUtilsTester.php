@@ -23,7 +23,8 @@ class NumbersUtilsTester extends TestCase {
             array(50.4, 50.2, 0.6),
             array(190, 194, 10),
             array(200, 197, 10),
-            array(0.99, 0.992, 0.06),
+            array(1.02, 0.992, 0.06),
+            array(98, 100, 7),
         );
     }
 
