@@ -937,7 +937,7 @@ function adminTeamForm(new_team, who_id, reg_section, rot_section, user_assignme
         }
     });
     var param = (new_team ? 3 : members.length+2);
-    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+    members_div.append('<span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+param+');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
 }
 
@@ -968,7 +968,7 @@ function addTeamMemberInput(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
@@ -982,7 +982,7 @@ function addCategory(old, i) {
     $('[name="num_users"]', form).val( parseInt($('[name="num_users"]', form).val()) + 1);
     var members_div = $("#admin-team-members");
     members_div.append('<input type="text" name="user_id_' + i + '" /><br /> \
-        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');"><i class="fas fa-plus-square" aria-hidden="true"></i> \
+        <span style="cursor: pointer;" onclick="addTeamMemberInput(this, '+ (i+1) +');" aria-label="Add More Users"><i class="fas fa-plus-square"></i> \
         Add More Users</span>');
     var student_full = JSON.parse($('#student_full_id').val());
     $('[name="user_id_'+i+'"]', form).autocomplete({
