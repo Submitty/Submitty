@@ -1543,12 +1543,30 @@ class SubmissionControllerTester extends BaseUnitTest {
         $this->assertEquals("No gradeable with that id.", $return['message']);
     }
 
+    public function testUpdateInvalidGradeable() {
+        $controller = new SubmissionController($this->core);
+        $return = $controller->updateSubmissionVersion('invalid_gradeable', -1);
+
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Invalid gradeable id.", $json['message']);
+    }
+
     public function testUpdateNegativeVersion() {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', -1);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Cannot set the version below 0.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Cannot set the version below 0.", $json['message']);
     }
 
     /**
@@ -1558,8 +1576,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 2);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Cannot set the version past 1.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Cannot set the version past 1.", $json['message']);
     }
 
     /**
@@ -1569,8 +1592,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 1);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Failed to open settings file.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Failed to open settings file.", $json['message']);
     }
 
     /**
@@ -1587,8 +1615,13 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 1);
 
-        $this->assertTrue($return['status'] == 'fail');
-        $this->assertEquals("Could not write to settings file.", $return['message']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json = $return->json_response->json;
+        $this->assertEquals('fail', $json['status']);
+        $this->assertEquals("Could not write to settings file.", $json['message']);
     }
 
     public function testUpdateCancelSubmission() {
@@ -1601,9 +1634,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 0);
 
-        $this->assertFalse($return['status'] == 'fail');
-        $this->assertEquals("Cancelled submission for gradeable.", $return['data']['message']);
-        $this->assertEquals(0, $return['data']['version']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test/0', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json_response = $return->json_response->json;
+        $this->assertEquals('success', $json_response['status']);
+        $this->assertEquals("Cancelled submission for gradeable.", $json_response['data']['message']);
+        $this->assertEquals(0, $json_response['data']['version']);
         $json = json_decode(file_get_contents($settings), true);
         $this->assertEquals(0, $json['active_version']);
         $this->assertTrue(isset($json['history']));
@@ -1625,9 +1663,14 @@ class SubmissionControllerTester extends BaseUnitTest {
         $controller = new SubmissionController($this->core);
         $return = $controller->updateSubmissionVersion('test', 4);
 
-        $this->assertFalse($return['status'] == 'fail');
-        $this->assertEquals("Updated version of gradeable to version #4.", $return['data']['message']);
-        $this->assertEquals(4, $return['data']['version']);
+        $this->assertNull($return->web_response);
+        $this->assertNotNull($return->redirect_response);
+        $this->assertEquals('test/test/gradeable/test/4', $return->redirect_response->url);
+        $this->assertNotNull($return->json_response);
+        $json_response = $return->json_response->json;
+        $this->assertEquals('success', $json_response['status']);
+        $this->assertEquals("Updated version of gradeable to version #4.", $json_response['data']['message']);
+        $this->assertEquals(4, $json_response['data']['version']);
         $json = json_decode(file_get_contents($settings), true);
         $this->assertEquals(4, $json['active_version']);
         $this->assertTrue(isset($json['history']));
