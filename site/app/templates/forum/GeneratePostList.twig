@@ -55,7 +55,7 @@
         <input type="hidden" name="display_option" value="{{ display_option }}" />
         {% include "forum/ThreadPostForm.twig" with {
             "show_post" : true,
-            "post_content_placeholder" : "Enter your reply to all here...",
+            "post_content_placeholder" : "Enter your reply to all here...\nPress enter for newline or ctrl+enter to post",
             "show_merge_thread_button" : true,
             "post_box_id" : post_box_id,
             "attachment_script" : true,
@@ -79,4 +79,3 @@
         "possibleMerges" : merge_thread_content.possibleMerges
     } %}
 {% endif %}
-
