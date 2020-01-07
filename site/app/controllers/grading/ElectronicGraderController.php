@@ -1633,7 +1633,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        $peer = $peer === 'true'? true: false;
+        $peer = $peer === 'true' ? true : false;
 
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {

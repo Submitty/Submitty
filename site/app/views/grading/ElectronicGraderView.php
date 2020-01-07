@@ -50,7 +50,7 @@ class ElectronicGraderView extends AbstractView {
     ) {
 
         $peer = false;
-        if ($gradeable->isPeerGrading() ){//&& $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
+        if ($gradeable->isPeerGrading()) {//&& $this->core->getUser()->getGroup() == User::GROUP_STUDENT) {
             $peer = true;
         }
         $graded = 0;
@@ -135,12 +135,11 @@ class ElectronicGraderView extends AbstractView {
                 $peer_total = 0;
                 $peer_graded = 0;
                 
-                if($peer_count > 0 && array_key_exists ( "stu_grad" , $sections ) ){
-                  $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
-                  $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
-                  $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
-                } 
-
+                if ($peer_count > 0 && array_key_exists("stu_grad", $sections)) {
+                    $peer_percentage = number_format(($sections['stu_grad']['graded_components'] / $sections['stu_grad']['total_components']) * 100, 1);
+                    $peer_total =  floor($sections['stu_grad']['total_components'] / $peer_count);
+                    $peer_graded =  floor($sections['stu_grad']['graded_components'] / $peer_count);
+                }
             }
             else {
                 foreach ($sections as $key => &$section) {
