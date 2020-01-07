@@ -52,7 +52,7 @@ class ImagesView extends AbstractView {
                     ];
 
                 foreach ($possible_matches as $possible_match) {
-                    if (file_exists($possible_match) and FileUtils::isValidImage($possible_match)) {
+                    if (file_exists($possible_match) && FileUtils::isValidImage($possible_match)) {
                         $mime_subtype = explode('/', mime_content_type($possible_match), 2)[1];
                         $image_data[$student->getId()] =
                             [
