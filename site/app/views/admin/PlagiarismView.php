@@ -114,11 +114,11 @@ HTML;
                 }
 
                 $return .= <<<HTML
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'configuration', 'edit'])}?gradeable_id={$id}" aria-label="Edit {$title}"><i class="fas fa-pencil-alt"></i></a>
             </td>
-            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}"><i class="fas fa-sync" aria-hidden="true"></i></a>
+            <td><a href="{$this->core->buildCourseUrl(['plagiarism', 'gradeable', $id, 'rerun'])}" aria-label="Rerun {$title}"><i class="fas fa-sync"></i></a>
             </td>
-            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');"><i class="fas fa-trash" aria-hidden="true"></i></a>
+            <td><a onclick="deletePlagiarismResultAndConfigForm('{$delete_form_action}', '{$title}');" aria-label="Delete {$title}"><i class="fas fa-trash"></i></a>
             </td>
             <td>
                 Last run: $timestamp
@@ -437,7 +437,7 @@ HTML;
         $all_files = "checked";
         $regex_matching_files = "";
         $regex = "";
-        $language = ["python" => "selected", "java" => "", "plaintext" => "", "cpp" => ""];
+        $language = ["python" => "selected", "java" => "", "plaintext" => "", "cpp" => "", "mips" => ""];
         $provided_code = "";
         $no_provided_code = "checked";
         $provided_code_filename = "";
@@ -575,6 +575,7 @@ HTML;
                         <option value="cpp" {$language['cpp']}>C++</option>
                         <option value="java" {$language['java']}>Java</option>
                         <option value="plaintext" {$language['plaintext']}>Plain Text</option>
+                        <option value="mips" {$language['mips']}>MIPS Assembly</option>
                     </select>
                 </div>
             </div><br /><br /><br /><br /><br />
@@ -678,8 +679,8 @@ HTML;
                     </select>
                 </div><br />
                 <div style="width:70%;float:right">
-                    <span name="add_more_prev_gradeable">
-                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
+                    <span name="add_more_prev_gradeable" aria-label="Add more">
+                        <i class="fas fa-plus-square"></i>Add more
                     </span>
                 </div>
             </div><br /><br /><br /><br /><br />
@@ -707,8 +708,8 @@ HTML;
                     <input type="text" name="ignore_submission_{$count}" />
                 </div><br />
                 <div style="width:70%;float:right">
-                    <span name="add_more_ignore">
-                        <i class="fas fa-plus-square" aria-hidden="true" ></i>Add more
+                    <span name="add_more_ignore" aria-label="Add more">
+                        <i class="fas fa-plus-square"></i>Add more
                     </span>
                 </div>
             </div><br /><br />

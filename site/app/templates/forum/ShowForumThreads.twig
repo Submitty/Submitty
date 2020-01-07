@@ -37,9 +37,9 @@
 
             {% else %}
                 <h4 class="text-center red-message">No categories have been created yet. Please contact your instructor.</h4>
-            
-            {% endif %} 
-        {% else %} 
+
+            {% endif %}
+        {% else %}
             {%  include "forum/ForumBar.twig" with {
                 "current_thread" : button_params.current_thread,
                 "forum_bar_buttons_right" : button_params.forum_bar_buttons_right,
@@ -59,9 +59,9 @@
                 "attachment_all_button" : generate_post_content.attachment_all_button,
                 "total_attachments" : generate_post_content.total_attachments,
                 "show_filter": true
-            } %}   
+            } %}
             <h4 class="text-center">A thread hasn't been created yet. Be the first to do so!</h4>
-        {% endif %} 
+        {% endif %}
 
     {% else %}
 
