@@ -24,7 +24,7 @@ class ImagesView extends AbstractView {
         // or in a common path per term (uploaded manually by sysadmin)
         $course_location = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "uploads", "student_images");
         $term = explode('/', $this->core->getConfig()->getCoursePath());
-        $term = $term[count($term)-2];
+        $term = $term[count($term) - 2];
         $common_location = FileUtils::joinPaths("/var/local/submitty", "student_images", $term);
 
         //Assemble students into sections if they are in grader_sections based on the registration section.
@@ -36,31 +36,31 @@ class ImagesView extends AbstractView {
 
                 // the places we will look for this students photo (in order)
                 $possible_matches =
-                  [ FileUtils::joinPaths($course_location,$student->getId().".jpeg"),
-                    FileUtils::joinPaths($course_location,$student->getId().".jpg"),
-                    FileUtils::joinPaths($course_location,$student->getId().".png"),
-                    FileUtils::joinPaths($course_location,$student->getId().".JPEG"),
-                    FileUtils::joinPaths($course_location,$student->getId().".JPG"),
-                    FileUtils::joinPaths($course_location,$student->getId().".PNG"),
+                  [ FileUtils::joinPaths($course_location, $student->getId() . ".jpeg"),
+                    FileUtils::joinPaths($course_location, $student->getId() . ".jpg"),
+                    FileUtils::joinPaths($course_location, $student->getId() . ".png"),
+                    FileUtils::joinPaths($course_location, $student->getId() . ".JPEG"),
+                    FileUtils::joinPaths($course_location, $student->getId() . ".JPG"),
+                    FileUtils::joinPaths($course_location, $student->getId() . ".PNG"),
 
-                    FileUtils::joinPaths($common_location,$student->getId().".jpeg"),
-                    FileUtils::joinPaths($common_location,$student->getId().".jpg"),
-                    FileUtils::joinPaths($common_location,$student->getId().".png"),
-                    FileUtils::joinPaths($common_location,$student->getId().".JPEG"),
-                    FileUtils::joinPaths($common_location,$student->getId().".JPG"),
-                    FileUtils::joinPaths($common_location,$student->getId().".PNG"),
+                    FileUtils::joinPaths($common_location, $student->getId() . ".jpeg"),
+                    FileUtils::joinPaths($common_location, $student->getId() . ".jpg"),
+                    FileUtils::joinPaths($common_location, $student->getId() . ".png"),
+                    FileUtils::joinPaths($common_location, $student->getId() . ".JPEG"),
+                    FileUtils::joinPaths($common_location, $student->getId() . ".JPG"),
+                    FileUtils::joinPaths($common_location, $student->getId() . ".PNG"),
                     ];
 
                 foreach ($possible_matches as $possible_match) {
-                  if (file_exists($possible_match) and FileUtils::isValidImage($possible_match)) {
-                    $mime_subtype = explode('/', mime_content_type($possible_match), 2)[1];
-                    $image_data[$student->getId()] =
-                      [
-                       'subtype' => $mime_subtype,
-                       'path' => $possible_match
-                       ];
-                    break;
-                  }
+                    if (file_exists($possible_match) and FileUtils::isValidImage($possible_match)) {
+                        $mime_subtype = explode('/', mime_content_type($possible_match), 2)[1];
+                        $image_data[$student->getId()] =
+                            [
+                                'subtype' => $mime_subtype,
+                                'path' => $possible_match
+                             ];
+                        break;
+                    }
                 }
             }
         }
