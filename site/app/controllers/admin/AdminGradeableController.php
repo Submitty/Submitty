@@ -420,7 +420,7 @@ class AdminGradeableController extends AbstractController {
     }
     
     /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/uploadPeerList", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/uploadpeerlist", methods={"POST"})
     */
     public function uploadPeerList() {
         echo("<script>console.log('TEST2');</script>");

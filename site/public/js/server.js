@@ -1914,3 +1914,26 @@ function resizeNoScrollTextareas() {
         auto_grow(this);
     })
 }
+function uploadPeerResults(gradeable_id, csrf_token){
+    console.log("in");
+    var formData = new FormData();
+    let url = buildCourseUrl(['gradeable', gradeable_id, 'uploadpeerlist']);
+    console.log(url);
+    formData.append('csrf_token', csrf_token);
+    console.log(url);
+    $.ajax({
+        url : url,
+        type : 'POST',
+        data: formData,
+        processData: false,
+        dataType: "",
+        contentType: false,
+        success : function(response){
+            console.log("Info Parsed Successfully");
+        },
+        error : function(err){
+            console.log("Error while trying to validate user id" + user_id);
+            reject({'status' : 'failed', 'message' : err});
+        }
+    });
+}
