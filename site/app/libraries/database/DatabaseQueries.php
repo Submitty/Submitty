@@ -811,6 +811,12 @@ VALUES (?,?,?,?,?,?)",
         }
         $params[] = $user->getId();
 
+        // User preferred name tracking: Master DB cannot tell who is logged
+        // into Submitty, so the AUTH token and $logged_in var embedded as a SQL
+        // comment will be noted in Postgresql's logs as who has issued a change
+        // in user's preferred name.
+        $logged_in = $this->core->getUser()->getId();
+
         $this->submitty_db->query(
             "
 UPDATE users
@@ -818,7 +824,7 @@ SET
   user_numeric_id=?, user_firstname=?, user_preferred_firstname=?,
   user_lastname=?, user_preferred_lastname=?,
   user_email=?, user_updated=?, instructor_updated=?{$extra}
-WHERE user_id=?",
+WHERE user_id=? /* AUTH: \"{$logged_in}\" */",
             $params
         );
 
