@@ -1638,6 +1638,11 @@ parameters:
 			path: app/models/gradeable/AutogradingConfig.php
 
 		-
+		    message: "#^PHPDoc tag @property has invalid value \\(@var bool Variable representing if only one of the available parts can be used for submission\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
+		    count: 1
+		    path: app/models/gradeable/AutogradingConfig.php
+
+		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var array Array of notebook objects\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
 			count: 1
 			path: app/models/gradeable/AutogradingConfig.php

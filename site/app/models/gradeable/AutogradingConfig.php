@@ -47,6 +47,8 @@ class AutogradingConfig extends AbstractModel {
 
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
+    /** @property @var bool Variable representing if only one of the available parts can be used for submission */
+    protected $one_part_only;
 
     /** @property @var array Array of notebook objects */
     private $notebook = [];
@@ -163,7 +165,7 @@ class AutogradingConfig extends AbstractModel {
                     unset($notebook_cell['markdown_string']);
                     unset($notebook_cell['markdown_file']);
 
-                    // Readd as data
+                    // Read as data
                     $notebook_cell['markdown_data'] = $markdown;
 
                     // If next entry is an input type, we assign this as a label - otherwise it is plain markdown
@@ -211,8 +213,9 @@ class AutogradingConfig extends AbstractModel {
             }
         }
 
-        // defaults to 1 if no set
+        // defaults num of parts to 1 if value is not set
         $num_parts = count($details['part_names'] ?? [1]);
+        $this->one_part_only = $details['one_part_only'] ?? false;
 
         // Get all of the part names
         for ($i = 1; $i <= $num_parts; $i++) {
@@ -290,6 +293,14 @@ class AutogradingConfig extends AbstractModel {
      */
     public function getNumParts() {
         return count($this->getPartNames());
+    }
+
+    /**
+     * Gets the value of one_part_only
+     * @return boolean
+     */
+    public function getOnePartOnly() {
+        return $this->one_part_only;
     }
 
     /**
