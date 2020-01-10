@@ -13,6 +13,7 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\DateUtils;
+use app\libraries\NumberUtils;
 
 class AutoGradingView extends AbstractView {
 
@@ -334,7 +335,7 @@ class AutoGradingView extends AbstractView {
         $regrade_message = $this->core->getConfig()->getRegradeMessage();
         //Clamp full gradeable score to zero
         $total_score = max($total_score, 0);
-        $total_score = $gradeable->roundPointValue($total_score);
+        $total_score = NumberUtils::roundPointValue($total_score, $gradeable->getPrecision());
 
         $late_days_url = $this->core->buildCourseUrl(['late_table']);
         $regrade_allowed = $gradeable->isRegradeAllowed();

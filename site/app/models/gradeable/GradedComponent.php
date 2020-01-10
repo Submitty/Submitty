@@ -7,6 +7,7 @@ use app\models\AbstractModel;
 use app\libraries\Core;
 use app\libraries\DateUtils;
 use app\models\User;
+use app\libraries\NumberUtils;
 
 /**
  * Class GradedComponent
@@ -200,7 +201,8 @@ class GradedComponent extends AbstractModel {
         }
         $score += $this->getScore();
         $score = min(max($score, $this->component->getLowerClamp()), $this->component->getUpperClamp());
-        return $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->roundPointValue($score);
+        $precision = $this->getTaGradedGradeable()->getGradedGradeable()->getGradeable()->getPrecision();
+        return NumberUtils::roundPointValue($score, $precision);
     }
 
     /**
@@ -308,7 +310,7 @@ class GradedComponent extends AbstractModel {
             //  min(max(a,b),c) will clamp the value 'b' in the range [a,c]
             $this->score = min(max($this->component->getLowerClamp(), $score), $this->component->getUpperClamp());
         }
-        $this->score = $this->getComponent()->getGradeable()->roundPointValue($this->score);
+        $this->score = NumberUtils::roundPointValue($this->score, $this->getComponent()->getGradeable()->getPrecision());
         $this->modified = true;
     }
 
