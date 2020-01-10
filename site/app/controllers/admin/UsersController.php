@@ -828,7 +828,6 @@ class UsersController extends AbstractController {
                 switch ($action) {
                     case 'insert':
                         //User must first exist in Submitty before being enrolled to a course.
-                        //$row[0] = authentication ID.
                         if (is_null($this->core->getQueries()->getSubmittyUser($user->getId()))) {
                             $this->core->getQueries()->insertSubmittyUser($user);
                         }
