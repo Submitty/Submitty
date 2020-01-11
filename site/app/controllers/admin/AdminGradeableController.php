@@ -25,6 +25,9 @@ class AdminGradeableController extends AbstractController {
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
+            if(array_key_exists('UploadPeerList', $_GET)){
+                setUploadPeerList($_GET['UploadPeerList']);
+            }
             $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
         }
         catch (\InvalidArgumentException $e) {
@@ -88,7 +91,6 @@ class AdminGradeableController extends AbstractController {
 
     //view the page with pulled data from the gradeable to be edited
     private function editPage(Gradeable $gradeable, $semester, $course, $nav_tab = 0) {
-        echo("<script>console.log('TEST1');</script>");
         $this->core->getOutput()->addBreadcrumb('Edit Gradeable');
 
         // Serialize the components for numeric/checkpoint rubrics
@@ -254,6 +256,34 @@ class AdminGradeableController extends AbstractController {
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
     }
+    
+    private function setUploadPeerList($csvPath) {
+        $uploaded_data = fopen($csvPath,"r");
+        $existing_users = $this->core->getQueries()->getAllUsers();
+        foreach ($uploaded_data as $row_num => $vals) {
+            if(count($vals) < 3 || !User::validateUserData('user_id', $vals[1]) || User::validateUserData('user_id', $vals[2])) {
+                $bad_rows[] = ($row_num + 1);
+            }
+            foreach ($existing_users as $i => $existing_user) {
+                if ($vals[0] !== $existing_user->getId() || $vals[1] !== $existing_user->getId()) {
+                    $bad_rows[] = ($row_num + 1); 
+                }        
+            }
+        }
+        
+        if (!empty($bad_rows)) {
+            $msg = "Error(s) on row(s) ";
+            array_walk($bad_rows, function ($row_num) use (&$msg) {
+                $msg .= " {$row_num}";
+            });
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($return_url);
+        }
+        
+        foreach ($uploaded_data as $row_num => $vals) {
+            $this->core->getQueries()->insertPeerGradingAssignment($vals[0], $vals[1], $vals[2]);
+        }
+    }
 
     /* Http request methods (i.e. ajax) */
 
@@ -417,40 +447,6 @@ class AdminGradeableController extends AbstractController {
                 }
             }
         );
-    }
-    
-    /**
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/uploadpeerlist", methods={"POST"})
-    */
-    public function uploadPeerList() {
-        echo("<script>console.log('TEST2');</script>");
-        /*$uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
-        $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
-        $existing_users = $this->core->getQueries()->getAllUsers();
-        foreach ($uploaded_data as $row_num => $vals) {
-            if(count($vals) < 3 || !User::validateUserData('user_id', $vals[1]) || User::validateUserData('user_id', $vals[2])) {
-                $bad_rows[] = ($row_num + 1);
-            }
-            foreach ($existing_users as $i => $existing_user) {
-                if ($vals[0] !== $existing_user->getId() || $vals[1] !== $existing_user->getId()) {
-                    $bad_rows[] = ($row_num + 1); 
-                }        
-            }
-        }
-        
-        if (!empty($bad_rows)) {
-            $msg = "Error(s) on row(s) ";
-            array_walk($bad_rows, function ($row_num) use (&$msg) {
-                $msg .= " {$row_num}";
-            });
-            $this->core->addErrorMessage($msg);
-            $this->core->redirect($return_url);
-        }
-        
-        foreach ($uploaded_data as $row_num => $vals) {
-            $this->core->getQueries()->insertPeerGradingAssignment($vals[0], $vals[1], $vals[2]);
-        }*/
-        
     }
 
     private static function parseNumeric(Component $component, $details) {

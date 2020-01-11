@@ -67,13 +67,8 @@ Form
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
         {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
 </fieldset>
+<input type="file" name="UploadPeerList" id ="uploadPeerFile" accept=".xlsx, .csv" aria-label="Choose File">
 
-<fieldset>
-    <legend>
-        Please upload a PDF detailing which studentsk will grade each other:
-    </legend>
-    <input type="file" name="upload" accept=".xlsx, .csv" aria-label="Choose File">
-</fieldset>
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
         <br />

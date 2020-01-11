@@ -133,22 +133,51 @@ $(document).ready(function () {
             || $(this).hasClass('date-related')) {
             $('#gradeable-dates :input,.date-related').each(addDataToRequest);
         }
-        ajaxUpdateGradeableProperty($('#g_id').val(), data,
-            function (response_data) {
-                // Clear errors by setting new values
-                for (let key in response_data) {
-                    if (response_data.hasOwnProperty(key)) {
-                        clearError(key, response_data[key]);
-                    }
+        
+        //If it is peer-grading related...
+        /*if("UploadPeerList" in data){
+            console.log("CHECK");
+            var formData = new FormData();
+            let url = buildCourseUrl(['gradeable', $('#g_id').val(), 'uploadpeerlist']);
+            formData.append('csrf_token', data["csrf_token"]);
+            formData.append('UploadPeerList', data["UploadPeerList"]);
+            console.log(url);
+            $.ajax({
+                url : url,
+                type : 'POST',
+                data: formData,
+                processData: false,
+                dataType: "",
+                contentType: false,
+                success : function(response){
+                    console.log("Info Parsed Successfully");
+                },
+                error : function(err){
+                    console.log("Error while trying to validate user id" + user_id);
+                    reject({'status' : 'failed', 'message' : err});
                 }
-                // Clear errors by just removing red background
-                for (let key in data) {
-                    if (data.hasOwnProperty(key)) {
-                        clearError(key);
+            });
+        }
+        
+        else{*/
+        
+            ajaxUpdateGradeableProperty($('#g_id').val(), data,
+                function (response_data) {
+                    // Clear errors by setting new values
+                    for (let key in response_data) {
+                        if (response_data.hasOwnProperty(key)) {
+                            clearError(key, response_data[key]);
+                        }
                     }
-                }
-                updateErrorMessage();
-            }, updateGradeableErrorCallback);
+                    // Clear errors by just removing red background
+                    for (let key in data) {
+                        if (data.hasOwnProperty(key)) {
+                            clearError(key);
+                        }
+                    }
+                    updateErrorMessage();
+                }, updateGradeableErrorCallback);
+        //}
     });
 });
 

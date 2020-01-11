@@ -1503,6 +1503,54 @@ class Gradeable extends AbstractModel {
         return $total;
     }
 
+    private function setUploadPeerList() {
+        $list_type = "classlist";
+        $set_return_url_action_function = function () use ($list_type) {
+            switch ($list_type) {
+                case "classlist":
+                    return "users";
+                case "graderlist":
+                    return "graders";
+                default:
+                    throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
+            }
+        };
+
+        $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
+        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
+
+        if ($_FILES['upload']['name'] == "") {
+            $this->core->addErrorMessage("No input file specified");
+            $this->core->redirect($return_url);
+        }
+
+        $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
+        $existing_users = $this->core->getQueries()->getAllUsers();
+        foreach ($uploaded_data as $row_num => $vals) {
+            if(count($vals) < 3 || !User::validateUserData('user_id', $vals[1]) || User::validateUserData('user_id', $vals[2])) {
+                $bad_rows[] = ($row_num + 1);
+            }
+            foreach ($existing_users as $i => $existing_user) {
+                if ($vals[0] !== $existing_user->getId() || $vals[1] !== $existing_user->getId()) {
+                    $bad_rows[] = ($row_num + 1); 
+                }        
+            }
+        }
+        
+        if (!empty($bad_rows)) {
+            $msg = "Error(s) on row(s) ";
+            array_walk($bad_rows, function ($row_num) use (&$msg) {
+                $msg .= " {$row_num}";
+            });
+            $this->core->addErrorMessage($msg);
+            $this->core->redirect($return_url);
+        }
+        
+        foreach ($uploaded_data as $row_num => $vals) {
+            $this->core->getQueries()->insertPeerGradingAssignment($vals[0], $vals[1], $vals[2]);
+        }
+    }
+
     /**
      * Get a list of all grading sections assigned to a given user
      * @param User $user

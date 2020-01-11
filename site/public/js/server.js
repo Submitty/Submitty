@@ -1914,6 +1914,30 @@ function resizeNoScrollTextareas() {
         auto_grow(this);
     })
 }
+/*
+function uploadPeerResults(gradeable_id){
+    console.log("in");
+    var formData = new FormData();
+    var url = buildCourseUrl(['gradeable', gradeable_id, 'uploadpeerlist']);
+    console.log(url);
+    formData.append('csrf_token', csrf_token);
+    $.ajax({
+        url : url,
+        type : 'POST',
+        data: formData,
+        processData: false,
+        dataType: "",
+        contentType: false,
+        success : function(response){
+            console.log("Info Parsed Successfully");
+        },
+        error : function(err){
+            console.log("Error while trying to validate user id" + user_id);
+            reject({'status' : 'failed', 'message' : err});
+        }
+    });
+}*/
+/*
 function uploadPeerResults(gradeable_id, csrf_token){
     console.log("in");
     var formData = new FormData();
@@ -1936,4 +1960,4 @@ function uploadPeerResults(gradeable_id, csrf_token){
             reject({'status' : 'failed', 'message' : err});
         }
     });
-}
+}*/
