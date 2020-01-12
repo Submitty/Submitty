@@ -19,15 +19,9 @@ class OfficeHoursQueueViewer extends AbstractModel {
     * OfficeHoursQueueViewer constructor.
     *
     * @param Core  $core
-    * @param array $details
     */
-    public function __construct(Core $core, array $queue_members, array $queue_states, array $queue_codes, $is_in_queue) {
+    public function __construct(Core $core) {
         parent::__construct($core);
-        // $this->can_grade = $this->core->getUser()->accessGrading();
-        // $this->queue_members = $queue_members;
-        // $this->queue_states = $queue_states;
-        // $this->queue_codes = $queue_codes;
-        // $this->is_in_queue = $is_in_queue;
     }
 
 
@@ -40,7 +34,22 @@ class OfficeHoursQueueViewer extends AbstractModel {
         return "default name";
     }
 
+    public function getCurrentQueue(){
+        echo "current queue <br>";
+        return $this->core->getQueries()->getCurrentQueue();
+    }
 
+    public function getPastQueue(){
+        return $this->core->getQueries()->getPastQueue();
+    }
+
+    public function getStateInQueue($status){
+        return $status[1];
+    }
+
+    public function getLeaveReason($status){
+        return $status[2];
+    }
 
     // public function getViewerType() {
     //     return $this->viewer_type;

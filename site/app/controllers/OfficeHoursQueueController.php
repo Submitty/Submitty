@@ -33,12 +33,11 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $queue_viewer = $this->core->getQueries()->getQueueViewerData();
         return Response::WebOnlyResponse(
            new WebResponse(
-               'OfficeHoursQueue',  //Goes to this file OfficeHoursQueueView.php
-               'showTheQueue',      //Runs this functin showTheQueue()
-               $queue_viewer       //Passing in this variable which is a OfficeHoursQueueViewer object
+               'OfficeHoursQueue',                      //Goes to this file OfficeHoursQueueView.php
+               'showTheQueue',                          //Runs this functin showTheQueue()
+               new OfficeHoursQueueViewer($this->core)  //Passing in this variable which is a OfficeHoursQueueViewer object
            )
         );
     }
@@ -105,6 +104,91 @@ class OfficeHoursQueueController extends AbstractController {
 
         $this->core->getQueries()->addToQueue($_POST['code'],$this->core->getUser()->getId(),$_POST['name']);
         $this->core->addSuccessMessage("Added to queue");
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+
+    /**
+    * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/remove", methods={"POST"})
+    * @return Response
+    */
+    public function removePerson() {
+        if (!isset($_POST['user_id'])) {
+            $this->core->addErrorMessage("Missing user ID");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        if (!$this->core->getUser()->accessGrading() && $this->core->getUser()->getId() != $_POST['user_id']) {
+            $this->core->addErrorMessage("Permission denied to remove that person");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $remove_type=3;//Mentor or ta removed you
+        if($this->core->getUser()->getId() == $_POST['user_id']){
+            $remove_type=1;//You removed yourself
+        }
+
+
+        $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $remove_type, $_POST['queue_code']);
+        $this->core->addSuccessMessage("Removed from queue");
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/startHelp", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function startHelpPerson() {
+        if (!isset($_POST['user_id'])) {
+            $this->core->addErrorMessage("Missing user ID");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+        $this->core->getQueries()->startHelpUser($_POST['user_id'], $_POST['queue_code']);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/finishHelp", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function finishHelpPerson() {
+        if (!isset($_POST['user_id'])) {
+            $this->core->addErrorMessage("Missing entry ID");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+        $this->core->getQueries()->finishHelpUser($_POST['user_id'], $_POST['queue_code']);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/empty", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function emptyQueue() {
+        $this->core->getQueries()->emptyQueue($_POST['queue_code']);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
