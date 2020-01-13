@@ -95,7 +95,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        if($this->core->getQueries()->alreadyInQueue($_POST['code'],$this->core->getUser()->getId())){
+        if($this->core->getQueries()->alreadyInAQueue($_POST['code'])){
             $this->core->addErrorMessage("You are already in the queue");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -188,7 +188,61 @@ class OfficeHoursQueueController extends AbstractController {
     * @return Response
     */
     public function emptyQueue() {
+        if (!isset($_POST['queue_code']) and $_POST['queue_code']!="") {
+            $this->core->addErrorMessage("Missing queue code");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
         $this->core->getQueries()->emptyQueue($_POST['queue_code']);
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/toggle", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function toggleQueue() {
+        if (!isset($_POST['queue_code']) and $_POST['queue_code']!="") {
+            $this->core->addErrorMessage("Missing queue code");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+        if (!isset($_POST['queue_state']) and $_POST['queue_state']!="") {
+            $this->core->addErrorMessage("Missing queue state");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->toggleQueue($_POST['queue_code'], $_POST['queue_state']);
+        $this->core->addSuccessMessage('Opened queue: "'.$_POST['queue_code'].'"');
+        return Response::RedirectOnlyResponse(
+            new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+        );
+    }
+
+    /**
+    * @param
+    * @Route("/{_semester}/{_course}/office_hours_queue/deleteQueue", methods={"POST"})
+    * @AccessControl(role="LIMITED_ACCESS_GRADER")
+    * @return Response
+    */
+    public function deleteQueue() {
+        if (!isset($_POST['queue_code'])) {
+            $this->core->addErrorMessage("Missing queue code");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $this->core->getQueries()->deleteQueue($_POST['queue_code']);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );

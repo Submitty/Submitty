@@ -1,24 +1,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 
+<style media="screen">
+    .row_color_1{background: var(--standard-light-yellow)!important;}
+    .row_color_2{background: var(--alert-border-blue)!important;}
+    .row_color_3{background: var(--standard-light-pink)!important;}
+    .row_color_4{background: var(--standard-light-orange)!important;}
+    .row_color_5{background: var(--standard-light-green)!important;}
+</style>
+
+
 <div class="content">
     <h1>
         Office Hours Queue
     </h1>
     <br/>
+    <ul class="list-group">
+    {% for queue in viewer.getAllQueues() %}
+        <form method="post" id="add_to_queue" action="{{base_url}}toggle">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+            <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
+            {% if queue['open'] == 0 %}
+                <input type="submit" value="Open Queue" class="btn btn-primary">
+            {% else %}
+                <input type="submit" value="Close Queue" class="btn btn-primary">
+            {% endif %}
+            <label>{{queue['code']}}</label>
+        </form>
+        <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+            <input type="submit" value="Empty Queue" class="btn btn-primary">
+            <label>{{queue['code']}}</label>
+        </form>
+        <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+            <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+            <input type="submit" value="Delete Queue" class="btn btn-primary">
+            <label>{{queue['code']}}</label>
+        </form>
+        <br>
+    {% endfor %}
+    </ul>
+
+    <br><br><br>
 
     <form method="post" id="open_new_queue" action="{{base_url}}open">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="text" name="code" placeholder="Code">
         <input type="submit" value="Open New Queue" class="btn btn-primary">
     </form>
-
-    <div style="margin-right:2rem; margin-bottom:1rem">
-        <form method="post" id="empty_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}" />
-          <input type="text" name="code" placeholder="Code">
-          <input type="submit" name="empty_queue" value="Empty Queue" class="btn btn-danger">
-        </form>
-    </div>
 
     <br><br><br>
     <form method="post" id="add_to_queue" action="{{base_url}}add">
@@ -46,7 +77,7 @@
         </thead>
         <tbody>
             {% for entry in viewer.getCurrentQueue() %}
-                <tr>
+                <tr class="row_color_1">
                     <th scope="row">{{entry['row_number'] }}</th>
                     <td>{{ entry['name'] }}</td>
 
@@ -71,9 +102,9 @@
                     {% endif %}
 
                     {% if viewer.getStateInQueue(entry['status']) == 1 %}
-                        <td class="help_timer" help_time="entry.getTimeHelpedWithSeconds()"></td>
+                        <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_help_start']) }}"></td>
                     {% else %}
-                        <td>{{ entry['time_in'] }}</td>
+                        <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
                     {% endif %}
 
                     <td>
@@ -109,15 +140,14 @@
             {% for entry in viewer.getPastQueue() %}
                 <tr>
                     <th scope="row">{{entry['row_number']}}</th>
-                    <td>{{ entry['user_id'] }}
-                    </td>
+                    <td>{{ entry['user_id'] }}</td>
                     <td>{{ entry['name'] }}</td>
-                    <td>{{ entry['time_in'] }}</td>
+                    <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
 
-                    <td>entry.getTimeWaitingInQueue()</td>
+                    <td>{{viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'])}}</td>
 
                     {% if viewer.getLeaveReason(entry['status']) == 2 %}
-                        <td>{{ entry.getTimeBeingHelped() }}</td>
+                        <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
                     {% elseif viewer.getLeaveReason(entry['status']) == 3 %}
                         <td>Removed</td>
                     {% elseif viewer.getLeaveReason(entry['status']) == 1 %}
@@ -136,3 +166,27 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <script>
+        //get all the timers on the page
+        times = []
+        $(".help_timer").each(function() {
+            times.push([$(this), new Date($(this).attr("help_time"))]);
+        });
+
+        //update the timers every second
+        updateTimes();
+        setInterval(updateTimes, 1000);
+        function updateTimes(){
+            for(var i=0;i<times.length;i++){
+                timer = (new Date() - times[i][1])/1000
+                var min = Math.floor(timer/60)
+                var sec = Math.floor(timer%60).toString().padStart(2, '0')
+                var timeString = min + ":"+ sec;
+                if(min >= 100){
+                    timeString = "∞";
+                }
+                times[i][0].html(timeString);
+            }
+        }
+    </script>
