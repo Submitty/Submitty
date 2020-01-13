@@ -823,13 +823,12 @@ class UsersController extends AbstractController {
          *
          * @param string $action "insert" or "update"
          */
-        $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$uploaded_data, &$return_url) {
+        $insert_or_update_user_function = function ($action, $user) use (&$semester, &$course, &$return_url) {
             try {
                 switch ($action) {
                     case 'insert':
                         //User must first exist in Submitty before being enrolled to a course.
-                        //$uploaded_data[0] = authentication ID.
-                        if (is_null($this->core->getQueries()->getSubmittyUser($uploaded_data[0]))) {
+                        if (is_null($this->core->getQueries()->getSubmittyUser($user->getId()))) {
                             $this->core->getQueries()->insertSubmittyUser($user);
                         }
                         $this->core->getQueries()->insertCourseUser($user, $semester, $course);
@@ -944,21 +943,21 @@ class UsersController extends AbstractController {
         // Insert new students to database
         $semester = $this->core->getConfig()->getSemester();
         $course = $this->core->getConfig()->getCourse();
-        foreach ($users_to_add as $uploaded_data) {
+        foreach ($users_to_add as $row) {
             $user = new User($this->core);
-            $user->setId($uploaded_data[0]);
-            $user->setLegalFirstName($uploaded_data[1]);
-            $user->setLegalLastName($uploaded_data[2]);
-            $user->setEmail($uploaded_data[3]);
+            $user->setId($row[0]);
+            $user->setLegalFirstName($row[1]);
+            $user->setLegalLastName($row[2]);
+            $user->setEmail($row[3]);
             $set_user_registration_or_group_function($user);
-            if (isset($uploaded_data[$pref_firstname_idx]) && !empty($uploaded_data[$pref_firstname_idx])) {
-                $user->setPreferredFirstName($uploaded_data[$pref_firstname_idx]);
+            if (isset($row[$pref_firstname_idx]) && !empty($row[$pref_firstname_idx])) {
+                $user->setPreferredFirstName($row[$pref_firstname_idx]);
             }
-            if (isset($uploaded_data[$pref_lastname_idx]) && !empty($uploaded_data[$pref_lastname_idx])) {
-                $user->setPreferredLastName($uploaded_data[$pref_lastname_idx]);
+            if (isset($row[$pref_lastname_idx]) && !empty($row[$pref_lastname_idx])) {
+                $user->setPreferredLastName($row[$pref_lastname_idx]);
             }
             if ($use_database) {
-                $user->setPassword($uploaded_data[5]);
+                $user->setPassword($row[5]);
             }
             $insert_or_update_user_function('insert', $user);
         }
