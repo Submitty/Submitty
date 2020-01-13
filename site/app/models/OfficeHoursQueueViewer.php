@@ -35,7 +35,6 @@ class OfficeHoursQueueViewer extends AbstractModel {
     }
 
     public function getCurrentQueue(){
-        echo "current queue <br>";
         return $this->core->getQueries()->getCurrentQueue();
     }
 
@@ -49,6 +48,39 @@ class OfficeHoursQueueViewer extends AbstractModel {
 
     public function getLeaveReason($status){
         return $status[2];
+    }
+
+    public function getAllQueues(){
+        return $this->core->getQueries()->getAllQueues();
+    }
+
+    public function timeToHM($time){
+        return date_format(date_create($time),"g:iA");
+    }
+
+    public function timeToISO($time){
+        return date_format(date_create($time),"c");
+    }
+
+    public function getTimeBeingHelped($time_out,$time_helped) {
+        $diff = strtotime($time_out) - strtotime($time_helped);
+        $h = $diff / 3600 % 24;
+        $m = $diff / 60 % 60;
+        $s = $diff % 60;
+        return $h . "h " . $m . "m " . $s . "s";
+    }
+
+    public function getTimeWaitingInQueue($time_out,$time_helped,$time_in) {
+        if ($this->status  == 2) {
+            $diff = strtotime($time_helped) - strtotime($time_in);
+        }
+        else {
+            $diff = strtotime($time_out) - strtotime($time_in);
+        }
+        $h = $diff / 3600 % 24;
+        $m = $diff / 60 % 60;
+        $s = $diff % 60;
+        return $h . "h " . $m . "m " . $s . "s";
     }
 
     // public function getViewerType() {
