@@ -272,43 +272,105 @@ function ajaxCheckBuildStatus() {
 }
 
 function ajaxUpdateGradeableProperty(gradeable_id, p_values, successCallback, errorCallback) {
-    let container = $('#container-rubric');
-    if (container.length === 0) {
-        alert("UPDATES DISABLED: no 'container-rubric' element!");
-        return;
-    }
-    // Don't process updates until the page is done loading
-    if (!container.is(':visible')) {
-        return;
-    }
-    setGradeableUpdateInProgress();
-    $.getJSON({
-        type: "POST",
-        url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
-        data: p_values,
-        success: function (response) {
-            if (Array.isArray(response['data'])) {
-                if (response['data'].includes('rebuild_queued')) {
-                    ajaxCheckBuildStatus(gradeable_id,'unknown');
+    if('peer_graders_list' in p_values && $('#peer_graders_list').length){
+        var csvFile = $('#peer_graders_list').prop('files')[0];  
+        let reader = new FileReader();
+        reader.readAsText(csvFile);
+        jsonFile = [];
+        reader.onload = function() {
+            var lines=reader.result.split("\n");
+            var headers = lines[0].split(",");
+
+            for(var i=1;i<lines.length;i++){
+
+                var built_line = {};
+                var cells=lines[i].split(",");
+
+                for(var j=0;j<cells.length;j++){
+                    built_line[headers[j].trim()]= cells[j].trim();
                 }
+                jsonFile[i-1] = built_line;
             }
-            setGradeableUpdateComplete();
-            if (response.status === 'success') {
-                successCallback(response.data);
+            let container = $('#container-rubric');
+            if (container.length === 0) {
+                alert("UPDATES DISABLED: no 'container-rubric' element!");
+                return;
             }
-            else if (response.status === 'fail') {
-                errorCallback(response.message, response.data);
+            // Don't process updates until the page is done loading
+            if (!container.is(':visible')) {
+                return;
             }
-            else {
-                alert('Internal server error');
-                console.error(response.message);
-            }
-        },
-        error: function (response) {
-            setGradeableUpdateComplete();
-            console.error('Failed to parse response from server: ' + response);
+            p_values['peer_graders_list'] = jsonFile;
+            setGradeableUpdateInProgress();
+            $.getJSON({
+                type: "POST",
+                url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
+                data: p_values,
+                success: function (response) {
+                    if (Array.isArray(response['data'])) {
+                        if (response['data'].includes('rebuild_queued')) {
+                            ajaxCheckBuildStatus(gradeable_id,'unknown');
+                        }
+                    }
+                    setGradeableUpdateComplete();
+                    if (response.status === 'success') {
+                        successCallback(response.data);
+                    }
+                    else if (response.status === 'fail') {
+                        errorCallback(response.message, response.data);
+                    }
+                    else {
+                        alert('Internal server error');
+                        console.error(response.message);
+                    }
+                },
+                error: function (response) {
+                    setGradeableUpdateComplete();
+                    console.error('Failed to parse response from server: ' + response);
+                }
+            });            
         }
-    });
+    }
+        
+    else{
+        let container = $('#container-rubric');
+        if (container.length === 0) {
+            alert("UPDATES DISABLED: no 'container-rubric' element!");
+            return;
+        }
+        // Don't process updates until the page is done loading
+        if (!container.is(':visible')) {
+            return;
+        }
+        setGradeableUpdateInProgress();
+        $.getJSON({
+            type: "POST",
+            url: buildCourseUrl(['gradeable', gradeable_id, 'update']),
+            data: p_values,
+            success: function (response) {
+                if (Array.isArray(response['data'])) {
+                    if (response['data'].includes('rebuild_queued')) {
+                        ajaxCheckBuildStatus(gradeable_id,'unknown');
+                    }
+                }
+                setGradeableUpdateComplete();
+                if (response.status === 'success') {
+                    successCallback(response.data);
+                }
+                else if (response.status === 'fail') {
+                    errorCallback(response.message, response.data);
+                }
+                else {
+                    alert('Internal server error');
+                    console.error(response.message);
+                }
+            },
+            error: function (response) {
+                setGradeableUpdateComplete();
+                console.error('Failed to parse response from server: ' + response);
+            }
+        });
+    }
 }
 
 function serializeRubric() {

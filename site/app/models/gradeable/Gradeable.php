@@ -209,8 +209,7 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-
-
+    
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -229,6 +228,9 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
+        if(array_key_exists('peer_graders_list', $details)){
+            $this->setPeerGradersList($details['peer_graders_list']);
+        }
 
         if ($this->getType() === GradeableType::ELECTRONIC_FILE) {
             $this->setAutogradingConfigPath($details['autograding_config_path']);
@@ -462,6 +464,59 @@ class Gradeable extends AbstractModel {
         // Assume that if no late days provided that there should be zero of them;
         $parsedDates['late_days'] = intval($dates['late_days'] ?? 0);
         return $parsedDates;
+    }
+    
+    /**
+     * Parse uploaded users data file as either XLSX or CSV, and return its data
+     *
+     * @param string $filename  Original name of uploaded file
+     * @param string $tmp_name  PHP assigned unique name and path of uploaded file
+     * @param string $return_url
+     *
+     * @return array $contents  Data rows and columns read from xlsx or csv file
+     */
+    private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
+        // Data is confidential, and therefore must be deleted immediately after
+        // this process ends, regardless if process completes successfully or not.
+        register_shutdown_function(
+            function () use (&$csv_file, &$xlsx_file) {
+                foreach (array($csv_file, $xlsx_file) as $file) {
+                    if (isset($file) && file_exists($file)) {
+                        unlink($file);
+                    }
+                }
+            }
+        );
+    }
+    
+    public function setPeerGradersList($input) {
+        $existing_users = $this->core->getQueries()->getAllUsers();
+        foreach ($input as $row_num => $vals) {
+            if(!User::validateUserData('user_id', $vals["student"]) || User::validateUserData('user_id', $vals["grader"])) {
+                $bad_rows[] = ($row_num + 1);
+            }
+            $row_num = 0;
+            foreach ($existing_users as $i => $existing_user) {
+                if ($vals["student"] !== $existing_user->getId() || $vals["grader"] !== $existing_user->getId()) {
+                    $bad_rows[] = ($row_num + 1); 
+                }
+                $row_num = $row_num + 1;        
+            }
+        }
+        
+        if (!empty($bad_rows)) {
+            $msg = "Error(s) on row(s) ";
+            array_walk($bad_rows, function ($row_num) use (&$msg) {
+                $msg .= " {$row_num}";
+            });
+            $this->core->addErrorMessage($msg);
+        }
+        $current_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
+        $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
+        foreach ($input as $row_num => $vals) {
+            $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"],$this->getId());
+            $this->modified = true;
+        }
     }
 
     /**
@@ -1501,54 +1556,6 @@ class Gradeable extends AbstractModel {
             $total += $component->getMaxValue();
         }
         return $total;
-    }
-
-    private function setUploadPeerList() {
-        $list_type = "classlist";
-        $set_return_url_action_function = function () use ($list_type) {
-            switch ($list_type) {
-                case "classlist":
-                    return "users";
-                case "graderlist":
-                    return "graders";
-                default:
-                    throw new ValidationException("Unknown classlist", array($list_type, '$set_return_url_action_function'));
-            }
-        };
-
-        $return_url = $this->core->buildCourseUrl([$set_return_url_action_function()]);
-        $use_database = $this->core->getAuthentication() instanceof DatabaseAuthentication;
-
-        if ($_FILES['upload']['name'] == "") {
-            $this->core->addErrorMessage("No input file specified");
-            $this->core->redirect($return_url);
-        }
-
-        $uploaded_data = $this->getUserDataFromUpload($_FILES['upload']['name'], $_FILES['upload']['tmp_name'], $return_url);
-        $existing_users = $this->core->getQueries()->getAllUsers();
-        foreach ($uploaded_data as $row_num => $vals) {
-            if(count($vals) < 3 || !User::validateUserData('user_id', $vals[1]) || User::validateUserData('user_id', $vals[2])) {
-                $bad_rows[] = ($row_num + 1);
-            }
-            foreach ($existing_users as $i => $existing_user) {
-                if ($vals[0] !== $existing_user->getId() || $vals[1] !== $existing_user->getId()) {
-                    $bad_rows[] = ($row_num + 1); 
-                }        
-            }
-        }
-        
-        if (!empty($bad_rows)) {
-            $msg = "Error(s) on row(s) ";
-            array_walk($bad_rows, function ($row_num) use (&$msg) {
-                $msg .= " {$row_num}";
-            });
-            $this->core->addErrorMessage($msg);
-            $this->core->redirect($return_url);
-        }
-        
-        foreach ($uploaded_data as $row_num => $vals) {
-            $this->core->getQueries()->insertPeerGradingAssignment($vals[0], $vals[1], $vals[2]);
-        }
     }
 
     /**

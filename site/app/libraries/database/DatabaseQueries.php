@@ -3068,6 +3068,29 @@ SQL;
     public function insertPeerGradingAssignment($grader, $student, $gradeable_id) {
         $this->course_db->query("INSERT INTO peer_assign(grader_id, user_id, g_id) VALUES (?,?,?)", array($grader, $student, $gradeable_id));
     }
+    
+    /**
+     * Removes all peer grading pairs from a given assignment
+     *
+     * @param string $gradeable_id
+     */
+    public function clearPeerGradingAssignment($gradeable_id) {
+        $this->course_db->query("DELETE FROM peer_assign WHERE g_id = ?", array($gradeable_id));
+    }
+    
+    /**
+     * Adds an assignment for someone to get all the peer grading pairs for a given gradeable
+     *
+     * @param string $gradeable_id
+     */
+    public function getPeerGradingAssignment($gradeable_id) {
+        $this->course_db->query("SELECT grader_id, user_id FROM peer_assign WHERE g_id = ?", array($gradeable_id));
+        $return = [];
+        foreach ($this->course_db->rows() as $id) {
+            $return[$id['grader_id']] = $id['user_id'];
+        }
+        return $return;
+    }
 
     /**
      * Retrieves all unarchived/archived courses (and details) that are accessible by $user_id

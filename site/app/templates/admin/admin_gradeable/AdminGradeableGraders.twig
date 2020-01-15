@@ -63,11 +63,29 @@ Form
 
     <input type="radio" name="grader_assignment_method" value="1" id="registration_section"
         {{ (gradeable.getGraderAssignmentMethod() == 1 or action == "new") ? 'checked' : '' }}> <label for="registration_section">Registration Section</label>
-
     <input type='radio' name="grader_assignment_method" value="0" id="rotating_section"
-        {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
+            {{ (gradeable.getGraderAssignmentMethod() == 0) ? 'checked' : '' }}> <label for="rotating_section">Rotating Section</label>
+    {% if peer %}
+        <legend>
+        Upload a csv file dictating grader-student pairs:<input type="file" name="peer_graders_list" id="peer_graders_list">
+        </br>
+        <div class="table-wrapper">
+            <table class = "peer table">
+                <tr>
+                    <td> grader </td>
+                    <td> student </td>
+                </tr>
+            {% for key,value in peer_grader_pairs %}
+                <tr>
+                    <td>{{key}}</td>
+                    <td>{{value}}</td>
+                </tr>
+            {% endfor %}
+            </table>
+        </div>
+        </legend>
+    {% endif %}
 </fieldset>
-<input type="file" name="UploadPeerList" id ="uploadPeerFile" accept=".xlsx, .csv" aria-label="Choose File">
 
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}

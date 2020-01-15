@@ -25,9 +25,6 @@ class AdminGradeableController extends AbstractController {
     public function editGradeableRequest($gradeable_id, $nav_tab = 0) {
         try {
             $gradeable = $this->core->getQueries()->getGradeableConfig($gradeable_id);
-            if(array_key_exists('UploadPeerList', $_GET)){
-                setUploadPeerList($_GET['UploadPeerList']);
-            }
             $this->editPage($gradeable, $this->core->getConfig()->getSemester(), $this->core->getConfig()->getCourse(), intval($nav_tab));
         }
         catch (\InvalidArgumentException $e) {
@@ -85,7 +82,9 @@ class AdminGradeableController extends AbstractController {
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken(),
-            'gradeable_id' => $gradeable->getId()
+            'gradeable_id' => $gradeable->getId(),
+            'peer' => $gradeable->isPeerGrading(),
+            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
     }
 
@@ -251,38 +250,12 @@ class AdminGradeableController extends AbstractController {
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
-            'gradeable_id' => $gradeable->getId()
+            'gradeable_id' => $gradeable->getId(),
+            'peer' => $gradeable->isPeerGrading(),
+            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupStudents');
         $this->core->getOutput()->renderOutput(array('grading', 'ElectronicGrader'), 'popupMarkConflicts');
-    }
-    
-    private function setUploadPeerList($csvPath) {
-        $uploaded_data = fopen($csvPath,"r");
-        $existing_users = $this->core->getQueries()->getAllUsers();
-        foreach ($uploaded_data as $row_num => $vals) {
-            if(count($vals) < 3 || !User::validateUserData('user_id', $vals[1]) || User::validateUserData('user_id', $vals[2])) {
-                $bad_rows[] = ($row_num + 1);
-            }
-            foreach ($existing_users as $i => $existing_user) {
-                if ($vals[0] !== $existing_user->getId() || $vals[1] !== $existing_user->getId()) {
-                    $bad_rows[] = ($row_num + 1); 
-                }        
-            }
-        }
-        
-        if (!empty($bad_rows)) {
-            $msg = "Error(s) on row(s) ";
-            array_walk($bad_rows, function ($row_num) use (&$msg) {
-                $msg .= " {$row_num}";
-            });
-            $this->core->addErrorMessage($msg);
-            $this->core->redirect($return_url);
-        }
-        
-        foreach ($uploaded_data as $row_num => $vals) {
-            $this->core->getQueries()->insertPeerGradingAssignment($vals[0], $vals[1], $vals[2]);
-        }
     }
 
     /* Http request methods (i.e. ajax) */
@@ -978,7 +951,6 @@ class AdminGradeableController extends AbstractController {
 
     private function updateGradeable(Gradeable $gradeable, $details) {
         $errors = [];
-
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
 
