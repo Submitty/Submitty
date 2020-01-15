@@ -14,6 +14,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
     // private $queue_codes = array();//Map from queue ids to the code for that queue
     // private $is_in_queue;
 
+    private $code_to_index = array();//an array maps queue codes to their index (this is used to give each queue a color)
+
 
     /**
     * OfficeHoursQueueViewer constructor.
@@ -22,6 +24,21 @@ class OfficeHoursQueueViewer extends AbstractModel {
     */
     public function __construct(Core $core) {
         parent::__construct($core);
+
+        $index = 0;
+        foreach($this->core->getQueries()->getAllQueues() as $queue){
+            $code_to_index[$queue['code']] = $index;
+            $index += 1;
+        }
+
+    }
+
+    public function getIndexFromCode($code){
+        return $code_to_index[$code];
+    }
+
+    public function isGrader(){
+        return $this->core->getUser()->accessGrading();
     }
 
 

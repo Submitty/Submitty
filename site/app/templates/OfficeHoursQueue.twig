@@ -1,11 +1,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 
 <style media="screen">
-    .row_color_1{background: var(--standard-light-yellow)!important;}
-    .row_color_2{background: var(--alert-border-blue)!important;}
-    .row_color_3{background: var(--standard-light-pink)!important;}
-    .row_color_4{background: var(--standard-light-orange)!important;}
-    .row_color_5{background: var(--standard-light-green)!important;}
+    .row_color_0{background: var(--standard-light-yellow)!important;}
+    .row_color_1{background: var(--alert-border-blue)!important;}
+    .row_color_2{background: var(--standard-light-pink)!important;}
+    .row_color_3{background: var(--standard-light-orange)!important;}
+    .row_color_4{background: var(--standard-light-green)!important;}
 </style>
 
 
@@ -77,7 +77,7 @@
         </thead>
         <tbody>
             {% for entry in viewer.getCurrentQueue() %}
-                <tr class="row_color_1">
+                <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}}">
                     <th scope="row">{{entry['row_number'] }}</th>
                     <td>{{ entry['name'] }}</td>
 

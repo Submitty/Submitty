@@ -5491,7 +5491,7 @@ AND gc_id IN (
 
 
     public function getAllQueues(){
-        $this->course_db->query("SELECT * FROM queue_settings ORDER BY code");
+        $this->course_db->query("SELECT * FROM queue_settings ORDER BY id");
         return $this->course_db->rows();
     }
 
