@@ -1633,7 +1633,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        if(  gettype($peer) !== "boolean" ){
+        if (gettype($peer) !== "boolean") {
             $this->core->getOutput()->renderJsonFail("The value for 'peer' should be a boolean.");
         }
 

@@ -229,7 +229,7 @@ class Gradeable extends AbstractModel {
         $this->setMinGradingGroup($details['min_grading_group']);
         $this->setSyllabusBucket($details['syllabus_bucket']);
         $this->setTaInstructions($details['ta_instructions']);
-        if(array_key_exists('peer_graders_list', $details)){
+        if (array_key_exists('peer_graders_list', $details)) {
             $this->setPeerGradersList($details['peer_graders_list']);
         }
 
@@ -470,15 +470,15 @@ class Gradeable extends AbstractModel {
     public function setPeerGradersList($input) {
         $existing_users = $this->core->getQueries()->getAllUsers();
         foreach ($input as $row_num => $vals) {
-            if(!User::validateUserData('user_id', $vals["student"]) || User::validateUserData('user_id', $vals["grader"])) {
+            if (!User::validateUserData('user_id', $vals["student"]) || User::validateUserData('user_id', $vals["grader"])) {
                 $bad_rows[] = ($row_num + 1);
             }
             $row_num = 0;
             foreach ($existing_users as $i => $existing_user) {
                 if ($vals["student"] !== $existing_user->getId() || $vals["grader"] !== $existing_user->getId()) {
-                    $bad_rows[] = ($row_num + 1); 
+                    $bad_rows[] = ($row_num + 1);
                 }
-                $row_num = $row_num + 1;        
+                $row_num = $row_num + 1;
             }
         }
         
@@ -492,7 +492,7 @@ class Gradeable extends AbstractModel {
         $current_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         $this->core->getQueries()->clearPeerGradingAssignment($this->getId());
         foreach ($input as $row_num => $vals) {
-            $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"],$this->getId());
+            $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
             $this->modified = true;
         }
     }
