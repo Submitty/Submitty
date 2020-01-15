@@ -769,7 +769,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var array\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
-			count: 5
+			count: 4
 			path: app/models/Config.php
 
 		-
@@ -2381,5 +2381,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
-

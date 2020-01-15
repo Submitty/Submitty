@@ -378,6 +378,5 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         finally {
             chmod($this->course_config, 0600);
         }
-
     }
 }
