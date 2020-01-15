@@ -209,7 +209,8 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-    
+
+
     /**
      * Gradeable constructor.
      * @param Core $core
@@ -465,30 +466,7 @@ class Gradeable extends AbstractModel {
         $parsedDates['late_days'] = intval($dates['late_days'] ?? 0);
         return $parsedDates;
     }
-    
-    /**
-     * Parse uploaded users data file as either XLSX or CSV, and return its data
-     *
-     * @param string $filename  Original name of uploaded file
-     * @param string $tmp_name  PHP assigned unique name and path of uploaded file
-     * @param string $return_url
-     *
-     * @return array $contents  Data rows and columns read from xlsx or csv file
-     */
-    private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
-        // Data is confidential, and therefore must be deleted immediately after
-        // this process ends, regardless if process completes successfully or not.
-        register_shutdown_function(
-            function () use (&$csv_file, &$xlsx_file) {
-                foreach (array($csv_file, $xlsx_file) as $file) {
-                    if (isset($file) && file_exists($file)) {
-                        unlink($file);
-                    }
-                }
-            }
-        );
-    }
-    
+
     public function setPeerGradersList($input) {
         $existing_users = $this->core->getQueries()->getAllUsers();
         foreach ($input as $row_num => $vals) {

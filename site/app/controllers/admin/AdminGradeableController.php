@@ -82,7 +82,6 @@ class AdminGradeableController extends AbstractController {
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
             'csrf_token' => $this->core->getCsrfToken(),
-            'gradeable_id' => $gradeable->getId(),
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
@@ -250,7 +249,6 @@ class AdminGradeableController extends AbstractController {
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken(),
-            'gradeable_id' => $gradeable->getId(),
             'peer' => $gradeable->isPeerGrading(),
             'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
         ]);
@@ -397,29 +395,6 @@ class AdminGradeableController extends AbstractController {
         $component->setText(false);
         $component->setPeer(false);
         $component->setPage(Component::PDF_PAGE_NONE);
-    }
-    
-    /**
-     * Parse uploaded users data file as either XLSX or CSV, and return its data
-     *
-     * @param string $filename  Original name of uploaded file
-     * @param string $tmp_name  PHP assigned unique name and path of uploaded file
-     * @param string $return_url
-     *
-     * @return array $contents  Data rows and columns read from xlsx or csv file
-     */
-    private function getUserDataFromUpload($filename, $tmp_name, $return_url) {
-        // Data is confidential, and therefore must be deleted immediately after
-        // this process ends, regardless if process completes successfully or not.
-        register_shutdown_function(
-            function () use (&$csv_file, &$xlsx_file) {
-                foreach (array($csv_file, $xlsx_file) as $file) {
-                    if (isset($file) && file_exists($file)) {
-                        unlink($file);
-                    }
-                }
-            }
-        );
     }
 
     private static function parseNumeric(Component $component, $details) {
@@ -951,6 +926,7 @@ class AdminGradeableController extends AbstractController {
 
     private function updateGradeable(Gradeable $gradeable, $details) {
         $errors = [];
+
         // Implicitly updated properties to tell the client about
         $updated_properties = [];
 

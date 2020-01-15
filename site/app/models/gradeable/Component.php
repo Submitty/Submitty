@@ -33,7 +33,6 @@ use app\models\AbstractModel;
  * @method void setOrder($order)
  * @method int getPage()
  * @method Mark[] getMarks()
- * @method [] getPeerPairs()
  */
 class Component extends AbstractModel {
     /** @var Gradeable Reference to the gradeable this belongs to */
@@ -65,15 +64,11 @@ class Component extends AbstractModel {
 
     /** @property @var Mark[] All possible common marks that can be assigned to this component */
     protected $marks = [];
-    
-    /** @property @var string[] Array of string detailing which students are assigned to grade each other */
-    protected $peer_pairs = [];
 
     /** @property @var Mark[] Array of marks loaded from the database */
     private $db_marks = [];
     /** @property @var bool If any submitters have grades for this component */
     private $any_grades = false;
-
 
     /** @var int Pass to setPage to indicate student-assigned pdf page */
     const PDF_PAGE_STUDENT = -1;
@@ -513,9 +508,5 @@ class Component extends AbstractModel {
 
     public function getPenaltyPoints() {
         return $this->hasPenalty() ? abs($this->lower_clamp) : 0;
-    }
-    
-    public function setPeerPair($grader, $student){
-        $this->peer_pairs[$grader] = $student;
     }
 }

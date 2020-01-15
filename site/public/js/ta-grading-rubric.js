@@ -621,7 +621,6 @@ function ajaxSaveComponentOrder(gradeable_id, order) {
  * @return {Promise} Rejects except when the response returns status 'success'
  */
 function ajaxAddComponent(gradeable_id, peer) {
-    console.log("peer is " + peer);
     return new Promise(function (resolve, reject) {
         $.getJSON({
             type: "POST",

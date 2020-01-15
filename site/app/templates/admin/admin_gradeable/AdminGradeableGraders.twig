@@ -29,7 +29,7 @@ Variables
 #}
 {# Get array of section numbers #}
 {% set section_numbers = range(1, num_rotating_sections) %}
-{% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader', '4': 'Peer Grading'} %}
+{% set grading_groups = {'1': 'Instructor', '2': 'Full Access Grader', '3': 'Limited Access Grader'} %}
 
 {#
 Form
@@ -86,7 +86,6 @@ Form
         </legend>
     {% endif %}
 </fieldset>
-
 <div id="rotating_data">
     {% if rotating_gradeables|length != 0 and num_rotating_sections > 0 %}
         <br />
@@ -211,8 +210,6 @@ Form
                 // $('.g2').hide();
                 disableElementChildren('.g3', true);
             case '3': // Everyone
-                disableElementChildren('.g4', true);
-            case '4': //Peers
                 break;
             default:
                 alert('Error!  Invalid Minimum Grader!');
