@@ -120,7 +120,7 @@ HTML;
                     'site_uploads'
                 );
             }
-            $this->twig->addFunction(new \Twig\TwigFunction("feature_flag_enabled", function(string $flag): bool {
+            $this->twig->addFunction(new \Twig\TwigFunction("feature_flag_enabled", function (string $flag): bool {
                 return $this->core->getConfig()->checkFeatureFlagEnabled($flag);
             }));
         }
