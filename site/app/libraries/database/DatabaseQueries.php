@@ -3084,10 +3084,13 @@ SQL;
      * @param string $gradeable_id
      */
     public function getPeerGradingAssignment($gradeable_id) {
-        $this->course_db->query("SELECT grader_id, user_id FROM peer_assign WHERE g_id = ?", array($gradeable_id));
+        $this->course_db->query("SELECT grader_id, user_id FROM peer_assign WHERE g_id = ? ORDER BY grader_id", array($gradeable_id));
         $return = [];
         foreach ($this->course_db->rows() as $id) {
-            $return[$id['grader_id']] = $id['user_id'];
+            if(!array_key_exists($id['grader_id'], $return)){
+                $return[$id['grader_id']] = array();
+            }
+            array_push($return[$id['grader_id']],$id['user_id']);
         }
         return $return;
     }

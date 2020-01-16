@@ -81,6 +81,7 @@ use app\controllers\admin\AdminGradeableController;
  * @method void setDiscussionThreadId($discussion_thread_id)
  * @method int getActiveRegradeRequestCount()
  * @method void setHasDueDate($has_due_date)
+ * @method object[] getPeerGradingPairs()
  */
 class Gradeable extends AbstractModel {
     /* Enum range for grader_assignment_method */
@@ -209,7 +210,8 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-
+    /** @property @var object[] pairs for peer grading*/
+    protected $peer_grading_pairs = [];
 
     /**
      * Gradeable constructor.
@@ -494,6 +496,7 @@ class Gradeable extends AbstractModel {
         foreach ($input as $row_num => $vals) {
             $this->core->getQueries()->insertPeerGradingAssignment($vals["grader"], $vals["student"], $this->getId());
             $this->modified = true;
+            $this->peer_grading_pairs = $this->core->getQueries()->getPeerGradingAssignment($this->getId());
         }
     }
 
