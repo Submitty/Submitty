@@ -269,16 +269,14 @@ STRING;
 
     public function testWriteFile() {
         FileUtils::createDir($this->path);
-        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $file = FileUtils::joinPaths($this->path, substr(str_shuffle($permitted_chars), 0, 10));
+        $file = FileUtils::joinPaths($this->path, 'test_file');
         $this->assertTrue(FileUtils::writeFile($file, "test"));
         $this->assertStringEqualsFile($file, "test");
     }
 
     public function testWriteFileNonWritableFile() {
         FileUtils::createDir($this->path);
-        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyz';
-        $file = FileUtils::joinPaths($this->path, substr(str_shuffle($permitted_chars), 0, 10));
+        $file = FileUtils::joinPaths($this->path, 'test_file');
         touch($file);
         try {
             chmod($file, 0400);
