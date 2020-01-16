@@ -270,7 +270,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
                     'room_seating_gradeable_id' => "",
                     'auto_rainbow_grades' => false,
                     'queue_enabled' => true,
-                ]
+                ],
+                'feature_flags' => []
             ],
             'course_loaded' => true,
             'forum_enabled' => true,
@@ -291,7 +292,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
             'verified_submitty_admin_user' => null,
-            'queue_enabled' => true
+            'queue_enabled' => true,
+            'feature_flags' => []
         );
         $actual = $config->toArray();
 
