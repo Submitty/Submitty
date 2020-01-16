@@ -210,7 +210,7 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-    /** @property @var object[] pairs for peer grading*/
+    /** @property @var string[][] pairs for peer grading*/
     protected $peer_grading_pairs = [];
 
     /**
