@@ -3104,10 +3104,10 @@ SQL;
         $this->course_db->query("SELECT g_id, user_id FROM peer_assign WHERE grader_id = ? ORDER BY g_id", array($grader_id));
         $return = [];
         foreach ($this->course_db->rows() as $id) {
-            if(!array_key_exists($id['g_id'], $return)){
+            if (!array_key_exists($id['g_id'], $return)) {
                 $return[$id['g_id']] = array();
             }
-            array_push($return[$id['g_id']],$id['user_id']);
+            array_push($return[$id['g_id']], $id['user_id']);
         }
         return $return;
     }

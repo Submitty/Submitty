@@ -134,6 +134,9 @@ class Gradeable extends AbstractModel {
      * that contains filename, file path, and the file size.
      */
     private $split_pdf_files = null;
+    
+    /** @property @var string[][] pairs for peer grading*/
+    protected $peer_grading_pairs = [];
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
 
@@ -210,8 +213,6 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
-    /** @property @var string[][] pairs for peer grading*/
-    protected $peer_grading_pairs = [];
 
     /**
      * Gradeable constructor.
