@@ -79,12 +79,8 @@ class DatabaseQueries {
 
     /**
      * Gets a user from the submitty database given a user_id.
-     *
-     * @param string $user_id
-     *
-     * @return User
      */
-    public function getSubmittyUser(string $user_id) {
+    public function getSubmittyUser(string $user_id): ?User {
         $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? new User($this->core, $this->submitty_db->row()) : null;
     }
@@ -107,22 +103,16 @@ class DatabaseQueries {
 
     /**
      * Gets some user's api key from the submitty database given a user_id.
-     *
-     * @param string $user_id
-     *
-     * @return string | null
      */
-    public function getSubmittyUserApiKey(string $user_id) {
+    public function getSubmittyUserApiKey(string $user_id): ?string {
         $this->submitty_db->query("SELECT api_key FROM users WHERE user_id=?", array($user_id));
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['api_key'] : null;
     }
 
     /**
      * Refreshes some user's api key from the submitty database given a user_id.
-     *
-     * @param string $user_id
      */
-    public function refreshUserApiKey($user_id) {
+    public function refreshUserApiKey(string $user_id): void {
         $this->submitty_db->query("UPDATE users SET api_key=encode(gen_random_bytes(16), 'hex') WHERE user_id=?", array($user_id));
     }
 
@@ -133,23 +123,19 @@ class DatabaseQueries {
      *
      * @return string | null
      */
-    public function getSubmittyUserByApiKey(string $api_key) {
+    public function getSubmittyUserByApiKey(string $api_key): ?string {
         $this->submitty_db->query("SELECT user_id FROM users WHERE api_key=?", array($api_key));
         return ($this->submitty_db->getRowCount() > 0) ? $this->submitty_db->row()['user_id'] : null;
     }
 
     /**
      * Gets a user from the database given a user_id.
-     *
-     * @param string $user_id
-     *
-     * @return User
      */
-    public function getUserById($user_id) {
+    public function getUserById(string $user_id): ?User {
         return $this->getUser($user_id);
     }
 
-    public function getUserByNumericId($numeric_id) {
+    public function getUserByNumericId($numeric_id): ?User {
         return $this->getUser($numeric_id, true);
     }
 
@@ -5738,9 +5724,7 @@ AND gc_id IN (
             }
 
             $graded_components_by_id = [];
-            /**
- * @var AutoGradedVersion[] $graded_versions
-*/
+            /** @var AutoGradedVersion[] $graded_versions */
             $graded_versions = [];
 
             // Break down the graded component / version / grader data into an array of arrays
@@ -5866,10 +5850,15 @@ AND gc_id IN (
         );
     }
 
-    //given a user_id check the users table for a valid entry, returns a user object if found, null otherwise
-    //if is_numeric is true, the numeric_id key will be used to lookup the user
-    //this should be called through getUserById() or getUserByNumericId()
-    private function getUser($user_id, $is_numeric = false) {
+    /**
+     * Given a user_id check the users table for a valid entry, returns a user object if found,
+     * null otherwise. If is_numeric is true, the numeric_id key will be used to lookup the user.
+     * This should be called through getUserById() or getUserByNumericId().
+     *
+     * @param string|int $user_id
+     * @param bool $is_numeric
+     */
+    private function getUser($user_id, bool $is_numeric = false): ?User {
         if (!$is_numeric) {
             $this->submitty_db->query("SELECT * FROM users WHERE user_id=?", array($user_id));
         }
