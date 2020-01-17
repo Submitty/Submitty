@@ -1412,8 +1412,8 @@ class ElectronicGraderController extends AbstractController {
         $default = $_POST['default'] ?? null;
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
-        // You cannot change the "peer-ness" of a component.
-        //$peer = $_POST['peer'] ?? 'false';
+        $peer = $_POST['peer'] ?? 'false';
+
         // Use 'page_number' since 'page' is used in the router
         $page = $_POST['page_number'] ?? '';
 
@@ -1456,7 +1456,7 @@ class ElectronicGraderController extends AbstractController {
         if (strval(intval($page)) !== $page) {
             $this->core->getOutput()->renderJsonFail('Invalid page parameter');
         }
-        //$peer = $peer === 'true';
+        $peer = $peer === 'true';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1488,7 +1488,7 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
             ]);
             $component->setPage($page);
-            //$component->setPeer($peer);
+            $component->setPeer($peer);
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
         }
@@ -1624,7 +1624,7 @@ class ElectronicGraderController extends AbstractController {
 
     /**
      * Route for adding a new component to a gradeable
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/{peer}/new", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
      */
     public function ajaxAddComponent($gradeable_id, $peer) {
         // Get the gradeable
@@ -1656,7 +1656,7 @@ class ElectronicGraderController extends AbstractController {
                 0,
                 0,
                 false,
-                $peer,
+                false,
                 $page
             );
             $component->addMark('No Credit', 0.0, false);

@@ -135,7 +135,7 @@ class Gradeable extends AbstractModel {
      */
     private $split_pdf_files = null;
     
-    /* idk why, but pylint doesn't like me commenting the type ):*/
+    /** @prop @var array */
     protected $peer_grading_pairs = [];
 
     /* Properties exclusive to numeric-text/checkpoint gradeables */
@@ -213,6 +213,7 @@ class Gradeable extends AbstractModel {
     protected $discussion_based = false;
     /** @property @var string thread id for corresponding to discussion forum thread*/
     protected $discussion_thread_id = '';
+
 
     /**
      * Gradeable constructor.
