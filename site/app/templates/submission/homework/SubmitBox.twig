@@ -22,7 +22,9 @@
     </header>
 
     {% if part_names|length > 1 and one_part_only %}
-        <h4 style="color: red;">Only first non empty part will be graded!</h4>
+        <h4 style="color: red;">
+            Please drag and drop your files into only one area below. Files submitted to additional areas will not be graded.
+        </h4>
     {% endif %}
 
     {% if show_no_late_submission_warning %}
