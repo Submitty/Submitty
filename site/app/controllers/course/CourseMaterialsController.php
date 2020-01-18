@@ -131,6 +131,7 @@ class CourseMaterialsController extends AbstractController {
                 else {
                     // For graders and instructors, download the course-material unconditionally!
                     $relativePath = substr($file_path, strlen($root_path) + 1);
+
                     $zip->addFile($file_path, $relativePath);
                 }
             }
