@@ -107,13 +107,15 @@
                 {# Section heading #}
                 <tbody>
                     <tr class="info">
-                        <td colspan="{{ columns|length }}" style="text-align: center">
-                            {% if gradeable.isGradeByRegistration() %}
-                                Students Enrolled in Registration Section {{ section.title }}
-                            {% else %}
-                                Students Assigned to Rotating Section {{ section.title }}
-                            {% endif %}
-                        </td>
+                        {% if core.getUser().getGroup() < 4 %}
+                            <td colspan="{{ columns|length }}" style="text-align: center">
+                                {% if gradeable.isGradeByRegistration()%}
+                                    Students Enrolled in Registration Section {{ section.title }}
+                                {% else %}
+                                    Students Assigned to Rotating Section {{ section.title }}
+                                {% endif %}
+                            </td>
+                        {% endif %}
                     </tr>
                     <tr class="info">
                         <td colspan="{{ columns|length }}" style="text-align: center">Graders: {{ section.graders }}</td>
@@ -468,20 +470,20 @@
     </td>
 {% endmacro %}
 
-{# Total Point Summary (peer)
+{# Total Point Summary (peer) #}
 {% macro render_column_total_peer(self, context, section, graded_gradeable, index, info, column) %}
-    {# todo: test this (no way to create peer assignments currently)
-    {# todo: this is a lot of math for the view, we should move this into the Gradeable model
+    {# todo: test this (no way to create peer assignments currently) #}
+    {# todo: this is a lot of math for the view, we should move this into the Gradeable model #}
     {% set graded = gradeable.getGradedNonHiddenPoints() %}
     {% set components = gradeable.getComponentsGradedBy(core.getUser().getId()) %}
     {% for component in components %}
-        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score
+        {# getScore is only the custom "mark" need to write a getTotalComponentScore and also make it clear or change name of Score #}
         {% set graded = graded + component.getScore() %}
     {% endfor %}
     {#
         instead of autograding_score it should be total autograding possible
         I don't think total_peer_grading_points ever gets set...it should be set in the gradeable constructor
-
+    #}
     {% set total_possible = gradeable.getGradedNonHiddenPoints() + gradeable.getTotalPeerGradingPoints() %}
     <td>
         {% if gradeable.validateVersions() %}
@@ -489,7 +491,6 @@
         {% endif %}
     </td>
 {% endmacro %}
-#}
 
 {# User ID #}
 {% macro render_column_user_id(self, context, section, graded_gradeable, index, info, column) %}

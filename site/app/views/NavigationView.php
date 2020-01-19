@@ -303,7 +303,7 @@ class NavigationView extends AbstractView {
         $im_a_grader = $this->core->getUser()->accessGrading() && $this->core->getUser()->getGroup() <= $gradeable->getMinGradingGroup();
 
         // students can only view the submissions & grading interface if its a peer grading assignment
-        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading();
+        $im_a_peer_grader = $this->core->getUser()->getGroup() === User::GROUP_STUDENT && $gradeable->isPeerGrading() && $this->core->getQueries()->getPeerGradingAssignmentsForGrader($this->core->getUser()->getId());
 
         // TODO: look through this logic and put into new access system
         return $im_a_peer_grader || $im_a_grader || $im_allowed_to_view_submissions;

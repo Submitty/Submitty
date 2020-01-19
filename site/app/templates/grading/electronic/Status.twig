@@ -574,26 +574,27 @@
                             </ul>
                             <br/>
                         {% endif %}
-
-                        {% if team_assignment %}
+                        {% if core.getUser().getGroup() < 4 %}
+                            {% if team_assignment %}
+                                <br/>
+                                <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
+                                <br/>
+                                <br/>
+                                <b>Number of teams:</b> {{ total_submissions }}
+                                <br/>
+                                <br/>
+                                <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                            {% else %}
+                                <br/>
+                                <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
+                                <br/>
+                                <br/>
+                                <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
+                            {% endif %}
+                        
                             <br/>
-                            <b>Students on a team:</b> {{ team_total }}/{{ total_students }} ({{ team_percentage }}%)
                             <br/>
-                            <br/>
-                            <b>Number of teams:</b> {{ total_submissions }}
-                            <br/>
-                            <br/>
-                            <b>Teams who have submitted:</b> {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                        {% else %}
-                            <br/>
-                            <b>Students who have submitted:</b>  {{ submitted_total }} / {{ total_submissions }} ({{ submitted_percentage }}%)
-                            <br/>
-                            <br/>
-                            <b>Current percentage of grading done:</b> {{ graded_total }} / {{ submitted_total }} ({{ graded_percentage }}%)
                         {% endif %}
-
-                        <br/>
-                        <br/>
                         {% if peer %}
                             <b>Current percentage of students grading done:</b> {{ peer_percentage }}% ({{ peer_graded }}/{{ peer_total }})
                         {% else %}

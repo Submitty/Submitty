@@ -1548,7 +1548,7 @@ class Gradeable extends AbstractModel {
      */
     public function getGradingSectionsForUser(User $user) {
         if ($this->isPeerGrading() && $user->getGroup() === User::GROUP_STUDENT) {
-            $users = $this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId());
+            $users = $this->core->getQueries()->getUsersById($this->core->getQueries()->getPeerAssignment($this->getId(), $user->getId()));
             //TODO: Peer grading team assignments
             return [new GradingSection($this->core, false, "Peer", [$user], $users, [])];
         }
