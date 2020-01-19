@@ -34,6 +34,16 @@ def up(config, database, semester, course):
         );
         """
     )
+    database.execute("DROP TABLE IF EXISTS queue_settings;")
+    database.execute(
+        """
+        CREATE TABLE IF NOT EXISTS queue_settings(
+          id serial PRIMARY KEY,
+          open boolean NOT NULL,
+          code text NOT NULL
+        );
+        """
+    )
     pass
 
 
