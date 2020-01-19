@@ -6,6 +6,10 @@
     .row_color_2{background: var(--standard-light-pink)!important;}
     .row_color_3{background: var(--standard-light-orange)!important;}
     .row_color_4{background: var(--standard-light-green)!important;}
+
+    @media only screen and (max-width: 479px) {
+       .mobile-hide{ display: none !important; }
+    }
 </style>
 
 
@@ -13,7 +17,13 @@
     <h1>
         Office Hours Queue
     </h1>
-    <br/>
+    {% if viewer.getQueueLength() == 1 %}
+      <p>There is currently {{viewer.getQueueLength()}} person in the queue</p>
+    {% else %}
+      <p>There are currently {{viewer.getQueueLength()}} people in the queue</p>
+    {% endif %}
+
+    {% if viewer.isGrader()%}
     <ul class="list-group">
     {% for queue in viewer.getAllQueues() %}
         <form method="post" id="add_to_queue" action="{{base_url}}toggle">
@@ -30,13 +40,13 @@
         <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-            <input type="submit" value="Empty Queue" class="btn btn-primary">
+            <input type="submit" value="Empty Queue" class="btn btn-danger">
             <label>{{queue['code']}}</label>
         </form>
-        <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue">
+        <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
             <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-            <input type="submit" value="Delete Queue" class="btn btn-primary">
+            <input type="submit" value="Delete Queue" class="btn btn-danger">
             <label>{{queue['code']}}</label>
         </form>
         <br>
@@ -50,8 +60,10 @@
         <input type="text" name="code" placeholder="Code">
         <input type="submit" value="Open New Queue" class="btn btn-primary">
     </form>
-
     <br><br><br>
+    {% endif %}
+
+
     <form method="post" id="add_to_queue" action="{{base_url}}add">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <label for="name_box">Your Name:</label>
@@ -64,6 +76,7 @@
     </form>
     <br><br><br>
 
+{% if viewer.isGrader() %}
     <table class="table table-striped" style="width:100%;">
         <thead>
             <tr>
@@ -72,7 +85,8 @@
                 <th scope="col">Status</th>
                 <th scope="col">Time</th>
                 <th scope="col">Remove</th>
-                <th scope="col">ID</th>
+                <th scope="col">Queue</th>
+                <th scope="col" class="mobile-hide">ID</th>
             </tr>
         </thead>
         <tbody>
@@ -87,7 +101,11 @@
                                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                                 <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}" />
-                                <input type="submit" value="Help" class="btn btn-primary">
+                                {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
+                                  <input type="submit" value="Help" class="btn btn-success">
+                                {% else %}
+                                  <input type="submit" value="Help" class="btn btn-primary">
+                                {% endif %}
                             </form>
                         </td>
                     {% elseif viewer.getStateInQueue(entry['status']) == 1 %}
@@ -115,54 +133,59 @@
                             <input type="submit" value="Remove" class="btn btn-default">
                         </form>
                     </td>
-                    <td>{{ entry['user_id'] }}</td>
+                    <td>{{ entry['queue_code'] }}</td>
+                    <td class="mobile-hide">{{ entry['user_id'] }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
-
+{% endif %}
 
     <br><br>
-    <h1>Previously Helped Students</h1>
+    <h1>Queue History</h1>
     <table class="table table-striped" style="width:100%;">
         <thead>
             <tr>
                 <th scope="col">#</th>
-                <th scope="col">ID</th>
+                <th scope="col" class="mobile-hide">ID</th>
                 <th scope="col">Name</th>
+                <th scope="col">Queue</th>
                 <th scope="col">Time Entered</th>
                 <th scope="col">Time In Queue</th>
                 <th scope="col">Time Helped</th>
-                <th scope="col">Removed By</th>
+                <th scope="col" class="mobile-hide">Removed By</th>
             </tr>
         </thead>
         <tbody>
             {% for entry in viewer.getPastQueue() %}
-                <tr>
-                    <th scope="row">{{entry['row_number']}}</th>
-                    <td>{{ entry['user_id'] }}</td>
-                    <td>{{ entry['name'] }}</td>
-                    <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+              {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
+                  <tr>
+                      <th scope="row">{{entry['row_number']}}</th>
+                      <td class="mobile-hide">{{ entry['user_id'] }}</td>
+                      <td>{{ entry['name'] }}</td>
+                      <td>{{ entry['queue_code'] }}</td>
+                      <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
 
-                    <td>{{viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'])}}</td>
+                      <td>{{viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['status'])}}</td>
 
-                    {% if viewer.getLeaveReason(entry['status']) == 2 %}
-                        <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
-                    {% elseif viewer.getLeaveReason(entry['status']) == 3 %}
-                        <td>Removed</td>
-                    {% elseif viewer.getLeaveReason(entry['status']) == 1 %}
-                        <td>Left Queue</td>
-                    {% elseif viewer.getLeaveReason(entry['status']) == 4 %}
-                        <td>Queue Emptyed</td>
-                    {% elseif viewer.getLeaveReason(entry['status']) == 0 %}
-                        <!-- This should never happen but I put this here just in case -->
-                        <td>In queue</td>
-                    {% else %}
-                        <td>Not in queue</td>
-                    {% endif %}
+                      {% if viewer.getLeaveReason(entry['status']) == 2 %}
+                          <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
+                      {% elseif viewer.getLeaveReason(entry['status']) == 3 %}
+                          <td>Removed</td>
+                      {% elseif viewer.getLeaveReason(entry['status']) == 1 %}
+                          <td>Left Queue</td>
+                      {% elseif viewer.getLeaveReason(entry['status']) == 4 %}
+                          <td>Queue Emptyed</td>
+                      {% elseif viewer.getLeaveReason(entry['status']) == 0 %}
+                          <!-- This should never happen but I put this here just in case -->
+                          <td>In queue</td>
+                      {% else %}
+                          <td>Not in queue</td>
+                      {% endif %}
 
-                    <td>{{ entry['removed_by'] }}</td>
-                </tr>
+                      <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+                  </tr>
+                {% endif %}
             {% endfor %}
         </tbody>
     </table>
