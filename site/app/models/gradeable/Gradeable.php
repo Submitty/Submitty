@@ -1001,6 +1001,17 @@ class Gradeable extends AbstractModel {
             'order' => count($this->components)
         ]);
         $this->components[] = $component;
+        if($peer){
+            $this->peer_grading = true;
+        }
+        else{
+            foreach ($component as $this->components) {
+                if($component->isPeer()){
+                    return $component;
+                }
+            }
+        }
+        $this->peer_grading = false;
         return $component;
     }
 

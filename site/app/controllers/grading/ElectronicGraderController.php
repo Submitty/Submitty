@@ -942,7 +942,9 @@ class ElectronicGraderController extends AbstractController {
         $team = $gradeable->isTeamAssignment();
         if ($peer) {
             $section_key = 'registration_section';
+            $sections = $this->core->getUser()->getGradingRegistrationSections();
             $total = $gradeable->getPeerGradeSet();
+            $total_submitted = $gradeable->getPeerGradeSet();
             $graded = $this->core->getQueries()->getNumGradedPeerComponents($gradeable->getId(), $this->core->getUser()->getId()) / count($gradeable->getPeerComponents());
         }
         elseif ($gradeable->isGradeByRegistration()) {
@@ -1457,7 +1459,7 @@ class ElectronicGraderController extends AbstractController {
         if (strval(intval($page)) !== $page) {
             $this->core->getOutput()->renderJsonFail('Invalid page parameter');
         }
-        $peer = $peer === 'true';
+        //$peer = $peer === 'true';
 
         // Get the gradeable
         $gradeable = $this->tryGetGradeable($gradeable_id);
@@ -1623,9 +1625,9 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    /**
+/**
      * Route for adding a new component to a gradeable
-     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/new", methods={"POST"})
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/{peer}/new", methods={"POST"})
      */
     public function ajaxAddComponent($gradeable_id, $peer) {
         // Get the gradeable
@@ -1657,7 +1659,7 @@ class ElectronicGraderController extends AbstractController {
                 0,
                 0,
                 false,
-                false,
+                $peer,
                 $page
             );
             $component->addMark('No Credit', 0.0, false);

@@ -9,7 +9,9 @@
 {% endblock %}
 
 {% block components_block %}
+    CHECK2
     {% for component in gradeable.components %}
+        CHECK
         <div class="component-container">
             {% set graded_component = graded_gradeable.graded_components[component.id] %}
             {% include "GradingComponent.twig" with {

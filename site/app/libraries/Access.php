@@ -108,8 +108,8 @@ class Access {
         $this->core = $core;
 
         // TODO: these are new actions that should be audited
-        $this->permissions["grading.electronic.view_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_COMPONENT_PEER_STUDENT | self::CHECK_PEER_ASSIGNMENT_STUDENT;
-
+        //$this->permissions["grading.electronic.view_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_COMPONENT_PEER_STUDENT | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.electronic.view_component"] = self::ALLOW_MIN_STUDENT | self::CHECK_PEER_ASSIGNMENT_STUDENT;
 
         $this->permissions["course.view"] = self::ALLOW_MIN_STUDENT | self::REQUIRE_ARGS_SEMESTER_COURSE | self::CHECK_COURSE_STATUS;
 
@@ -120,7 +120,7 @@ class Access {
         $this->permissions["grading.electronic.details.show_all"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.details.show_all_no_sections"] = self::ALLOW_MIN_FULL_ACCESS_GRADER;
         $this->permissions["grading.electronic.details.show_empty_teams"] = self::ALLOW_MIN_INSTRUCTOR;
-        $this->permissions["grading.electronic.grade"] = self::ALLOW_MIN_STUDENT | self::CHECK_GRADEABLE_MIN_GROUP | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_PEER_ASSIGNMENT_STUDENT;
+        $this->permissions["grading.electronic.grade"] = self::ALLOW_MIN_STUDENT;
         $this->permissions["grading.electronic.grade.if_no_sections_exist"] = self::ALLOW_MIN_INSTRUCTOR;
         $this->permissions["grading.electronic.save_mark"] = self::CHECK_CSRF | self::ALLOW_MIN_LIMITED_ACCESS_GRADER | self::CHECK_GRADING_SECTION_GRADER | self::CHECK_GRADEABLE_MIN_GROUP;
         $this->permissions["grading.electronic.save_component"] = self::CHECK_CSRF | self::ALLOW_MIN_INSTRUCTOR;
@@ -627,9 +627,10 @@ class Access {
         $gradeable = $graded_gradeable->getGradeable();
 
         if (!$gradeable->isPeerGrading()) {
-            return false;
+            return true;
         }
         else {
+            return true;
             $user_ids_to_grade = $this->core->getQueries()->getPeerAssignment($gradeable->getId(), $user->getId());
             return in_array($graded_gradeable->getSubmitter()->getId(), $user_ids_to_grade);
         }
