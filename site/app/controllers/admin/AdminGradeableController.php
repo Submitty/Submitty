@@ -81,9 +81,7 @@ class AdminGradeableController extends AbstractController {
             'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
             'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
             'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken(),
-            'peer' => $gradeable->isPeerGrading(),
-            'peer_grader_pairs' => $this->core->getQueries()->getPeerGradingAssignment($gradeable->getId())
+            'csrf_token' => $this->core->getCsrfToken()
         ]);
     }
 
