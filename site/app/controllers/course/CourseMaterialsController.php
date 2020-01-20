@@ -133,7 +133,6 @@ class CourseMaterialsController extends AbstractController {
                     $relativePath = substr($file_path, strlen($root_path) + 1);
                     $zip->addFile($file_path, $relativePath);
                 }
-
             }
         }
 
