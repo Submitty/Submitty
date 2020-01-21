@@ -69,11 +69,11 @@
         <thead>
           <tr>
             <th scope="col">Filter</th>
-            <th scope="col" style="width:1%;">Queue Code</th>
+            <th scope="col">Queue Code</th>
             <th scope="col">Open/Close</th>
             <th scope="col">Empty</th>
             <th scope="col">Delete</th>
-            <th scope="col" style="width:100%"></th>
+            <th scope="col"></th>
           </tr>
         </thead>
         <tbody>
@@ -384,6 +384,11 @@
    */
     @media only screen and (max-width: 479px) {
       .mobile-hide {
+        display: none !important;
+      }
+    }
+    @media only screen and (min-width: 480px) {
+      .desktop-hide {
         display: none !important;
       }
     }
