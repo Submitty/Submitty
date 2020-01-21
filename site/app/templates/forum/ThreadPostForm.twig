@@ -121,6 +121,7 @@
                 <label id="file_input_label" class="btn btn-default">Upload Attachment</label>
                 <input type="file" accept="image/*" aria-labelledby="file_input_label" id="input-file{{ post_box_id }}" style="display: none;" onchange="addFilesFromInput({{ post_box_id }});testAndGetAttachments({{ post_box_id }}, true);" multiple />
                 <br>
+                <table class="file-upload-table" id="file-upload-table-{{ post_box_id }}"></table>
             </div>
         </span>
         <br>

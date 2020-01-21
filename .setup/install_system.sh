@@ -341,12 +341,12 @@ chmod -R 751 ${SUBMITTY_INSTALL_DIR}/java_tools
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/JUnit > /dev/null
 rm -rf junit*jar
-wget http://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
+wget https://repo1.maven.org/maven2/junit/junit/${JUNIT_VERSION}/junit-${JUNIT_VERSION}.jar -o /dev/null > /dev/null 2>&1
 popd > /dev/null
 
 pushd ${SUBMITTY_INSTALL_DIR}/java_tools/hamcrest > /dev/null
 rm -rf hamcrest*.jar
-wget http://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
+wget https://repo1.maven.org/maven2/org/hamcrest/hamcrest-core/${HAMCREST_VERSION}/hamcrest-core-${HAMCREST_VERSION}.jar -o /dev/null > /dev/null 2>&1
 popd > /dev/null
 
 # TODO:  Want to Install JUnit 5.0

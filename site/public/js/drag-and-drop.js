@@ -107,13 +107,12 @@ function progress(e){
     }
 }
 
-function get_part_number(e){
-    if(e.target.id.substring(0, 6) == "upload"){
-        return e.target.id.substring(6);
+function get_part_number(e) {
+    let node = e.target;
+    while (node.id.substring(0, 6) !== 'upload') {
+        node = node.parentNode;
     }
-    else{
-        return e.target.parentNode.id.substring(6);
-    }
+    return node.id.substring(6);
 }
 
 // copy files selected from the file browser
@@ -185,7 +184,6 @@ function addFile(file, part, check_duplicate_zip=true){
             file_array[part-1].push(file);
             addLabel(file.name, (file.size/1024).toFixed(2), part, false);
         }
-       
     }
     else if(i[0] == 0){    // file already selected
         if(confirm("Note: " + file_array[part-1][i[1]].name + " is already selected. Do you want to replace it?")){
@@ -217,8 +215,8 @@ function deleteFiles(part) {
     if(previous_files.length != 0){
         previous_files[part-1] = [];
     }
-    var dropzone = document.getElementById("upload" + part);
-    var labels = dropzone.getElementsByClassName("mylabel");
+    var dropzone = document.getElementById("file-upload-table-" + part);
+    var labels = dropzone.getElementsByClassName("label");
     while(labels[0]){
         dropzone.removeChild(labels[0]);
     }
@@ -293,8 +291,9 @@ function setButtonStatus() {
 // LABELS FOR SELECTED FILES
 //========================================================================================
 function removeLabel(filename, part){
-    var dropzone = document.getElementById("upload" + part);
-    var labels = dropzone.getElementsByClassName("mylabel");
+    var dropzone = document.getElementById("file-upload-table-" + part);
+    var labels = dropzone.getElementsByClassName("file-label");
+    debugger;
     for(var i = 0 ; i < labels.length; i++){
         if(labels[i].getAttribute("fname") == filename){
             dropzone.removeChild(labels[i]);
@@ -306,40 +305,49 @@ function removeLabel(filename, part){
 
 function addLabel(filename, filesize, part, previous){
     // create element
-    var tmp = document.createElement('label');
-    tmp.setAttribute("class", "mylabel");
-    tmp.setAttribute("fname", filename);
-    tmp.innerHTML =  filename + " " + filesize + "kb <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i><br />";
+    var uploadRowElement = document.createElement('tr');
+    uploadRowElement.setAttribute("fname", filename);
+    uploadRowElement.setAttribute("class", 'file-label');
+
+    var fileDataElement = document.createElement('td');
+    var fileTrashElement = document.createElement('td');
+    fileTrashElement.setAttribute('class', 'file-trash');
+
+    fileDataElement.innerHTML= filename;
+    fileTrashElement.innerHTML= filesize + "KB  <i role='text' aria-label='Press enter to remove file " + filename + "' tabindex='0' class='fas fa-trash custom-focus'></i>";
+
+    uploadRowElement.appendChild(fileDataElement);
+    uploadRowElement.appendChild(fileTrashElement);
 
     // styling
-    tmp.children[0].onmouseover = function(e){
+    fileTrashElement.onmouseover = function(e){
         e.stopPropagation();
         this.style.color = "#FF3933";
     };
-    tmp.children[0].onmouseout = function(e){
+    fileTrashElement.onmouseout = function(e){
         e.stopPropagation();
         this.style.color = "black";
     };
-    // remove file and label on click
-    tmp.children[0].onclick = function(e){
+    // remove file and label-row in table on click event
+    fileTrashElement.onclick = function(e){
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
 
     // FOR VPAT if trash can has focus and key is pressed it will delete item
-    tmp.children[0].onkeypress = function(e){
+    fileTrashElement.onkeypress = function(e){
         e.stopPropagation();
         this.parentNode.parentNode.removeChild(this.parentNode);
         deleteSingleFile(filename, part, previous);
     };
 
-    // add to parent div
-    var dropzone = document.getElementById("upload" + part);
+    // adding the file in `table` in the parent div
+    var fileTable = document.getElementById("file-upload-table-" + part);
     // Uncomment if want buttons for emptying single bucket
     // var deletebutton = document.getElementById("delete" + part);
-    dropzone.appendChild(tmp);
-    // dropzone.insertBefore(tmp, deletebutton);
+    fileTable.appendChild(uploadRowElement);
+    // fileTable.insertBefore(tmp, deletebutton);
     label_array[part-1].push(filename);
 }
 

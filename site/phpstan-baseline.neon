@@ -2063,11 +2063,6 @@ parameters:
 			path: app/models/gradeable/Gradeable.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$points float\\|string The number to round\\)\\: Unexpected token \"\\$points\", expected TOKEN_IDENTIFIER at offset 100$#"
-			count: 1
-			path: app/models/gradeable/Gradeable.php
-
-		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var User\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
 			count: 1
 			path: app/models/gradeable/GradeableList.php
