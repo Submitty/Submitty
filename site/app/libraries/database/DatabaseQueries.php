@@ -5335,8 +5335,13 @@ AND gc_id IN (
         return $this->course_db->rows();
     }
 
-    public function getQueueLength(){
-        $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_'");
+    public function getQueueNumberAheadOfYou($queue_code=null){
+        if($queue_code){
+          $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
+          $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND time_in <= ?", array($time_in));
+        }else{
+          $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND queue_code = ?", array($queue_code));
+        }
         return $this->course_db->rows()[0]['count'];
     }
 
@@ -5352,6 +5357,11 @@ AND gc_id IN (
           return null;
         }
         return $this->course_db->rows()[0]['name'];
+    }
+
+    public function getCurrentQueueState(){
+      $this->course_db->query("SELECT * FROM queue WHERE user_id = ? AND status SIMILAR TO '_(0|1)_'", array($this->core->getUser()->getId()));
+      return $this->course_db->rows()[0];
     }
 
 
