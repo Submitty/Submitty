@@ -351,11 +351,6 @@ parameters:
 			path: app/controllers/student/SubmissionController.php
 
 		-
-			message: "#^Binary operation \"\\.\" between string and app\\\\models\\\\User results in an error\\.$#"
-			count: 1
-			path: app/controllers/student/SubmissionController.php
-
-		-
 			message: "#^Variable \\$uploaded_file in isset\\(\\) always exists and is not nullable\\.$#"
 			count: 1
 			path: app/controllers/student/SubmissionController.php
@@ -2419,4 +2414,3 @@ parameters:
 			message: "#^PHPDoc tag @param references unknown parameter\\: \\$can_inquirye$#"
 			count: 1
 			path: app/views/submission/HomeworkView.php
-
