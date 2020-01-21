@@ -58,7 +58,8 @@ class OfficeHoursQueueController extends AbstractController {
 
         if ($this->core->getQueries()->openQueue($_POST['code'])) {
             $this->core->addSuccessMessage("New queue added");
-        } else {
+        }
+        else {
             $this->core->addErrorMessage("Unable to add queue. Make sure you have a unique queue code");
         }
 
@@ -81,7 +82,8 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        if (!$this->core->getQueries()->isValidCode($_POST['code'])) {
+        $validated_code = $this->core->getQueries()->isValidCode($_POST['code']);
+        if (!$validated_code) {
             $this->core->addErrorMessage("invalid code");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -102,7 +104,7 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $this->core->getQueries()->addToQueue($_POST['code'], $this->core->getUser()->getId(), $_POST['name']);
+        $this->core->getQueries()->addToQueue($validated_code, $this->core->getUser()->getId(), $_POST['name']);
         $this->core->addSuccessMessage("Added to queue");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -234,7 +236,12 @@ class OfficeHoursQueueController extends AbstractController {
         }
 
         $this->core->getQueries()->toggleQueue($_POST['queue_code'], $_POST['queue_state']);
-        $this->core->addSuccessMessage('Opened queue: "' . $_POST['queue_code'] . '"');
+        if ($_POST['queue_state'] == 0) {
+            $this->core->addSuccessMessage('Opened queue: "' . $_POST['queue_code'] . '"');
+        }else {
+            $this->core->addSuccessMessage('Closed queue: "' . $_POST['queue_code'] . '"');
+        }
+
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );

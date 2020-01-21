@@ -5218,37 +5218,37 @@ AND gc_id IN (
 
 
     public function openQueue($code) {
-        $code = strtoupper($code);
-        $this->course_db->query("SELECT * FROM queue_settings WHERE code = ?", array($code));
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($code));
 
         //cannot have more than one queue with the same code
         if (0 < count($this->course_db->rows())) {
             return false;
         }
 
-        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (TRUE, ?)", array($code));
+        $this->course_db->query("INSERT INTO queue_settings (open,code) VALUES (TRUE, TRIM(?))", array($code));
         return true;
     }
 
     public function toggleQueue($code, $state) {
-        $code = strtoupper($code);
         if ($state == 1) {
             $state = 'false';
-        }else {
+        }
+        else {
             $state = 'true';
         }
-        $this->course_db->query("UPDATE queue_settings SET open = ? where code = ?", array($state, $code));
+        $this->course_db->query("UPDATE queue_settings SET open = ? where UPPER(TRIM(code)) = UPPER(TRIM(?))", array($state, $code));
     }
 
     public function deleteQueue($code) {
-        $code = strtoupper($code);
-        $this->course_db->query("DELETE FROM queue_settings WHERE code=?", array($code));
+        $this->course_db->query("DELETE FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?))", array($code));
     }
 
     public function isValidCode($code) {
-        $code = strtoupper($code);
-        $this->course_db->query("SELECT * FROM queue_settings WHERE code = ? AND open = true", array($code));
-        return 0 < count($this->course_db->rows());
+        $this->course_db->query("SELECT * FROM queue_settings WHERE UPPER(TRIM(code)) = UPPER(TRIM(?)) AND open = true", array($code));
+        if (0 < count($this->course_db->rows())) {
+            return $this->course_db->rows()[0]['code'];
+        }
+        return false;
     }
 
     public function alreadyInAQueue() {
@@ -5257,7 +5257,6 @@ AND gc_id IN (
     }
 
     public function addToQueue($code, $user_id, $name) {
-        $code = strtoupper($code);
         $this->course_db->query("INSERT INTO queue
             (
                 status,
@@ -5272,7 +5271,7 @@ AND gc_id IN (
                 removed_by
             ) VALUES (
                 '000',
-                ?,
+                TRIM(?),
                 ?,
                 ?,
                 current_timestamp,
@@ -5285,17 +5284,19 @@ AND gc_id IN (
     }
 
     public function removeUserFromQueue($user_id, $remove_type, $queue_code) {
-        $queue_code = strtoupper($queue_code);
-
         $status_code = '_(0|1)_';
         if ($remove_type == 1) {//user removeing themselves
             $status_code = '_0_';//dont allow removing yourself if you are being helped
         }
 
-        $this->course_db->query("SELECT * from queue where user_id = ? and queue_code = ? and status SIMILAR TO ?", array($user_id, $queue_code, $status_code));
+        $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO ?", array($user_id, $queue_code, $status_code));
         if (count($this->course_db->rows()) <= 0) {
             if ($remove_type == 1) {
-                $this->core->addErrorMessage("Permission denied. You cannot remove yourself while being helped. Please try clicking the finish being helped button.");
+                //This happens for 1 of 2 reason. They try and remove themself while being helped
+                //In this case they should have refreshed and they can click finish helping
+                //Or they try and remove themself but they are no longer in the queue
+                //In this case when the page refreshes they will see that
+                $this->core->addErrorMessage("Error: Please try again");
             }else {
                 $this->core->addErrorMessage("User no longer in queue");
             }
@@ -5305,13 +5306,12 @@ AND gc_id IN (
         $new_status = $old_status;
         $new_status[1] = 2;
         $new_status[2] = $remove_type;
-        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND queue_code = ? and status SIMILAR TO '_(0|1)_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_(0|1)_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
         $this->core->addSuccessMessage("Removed from queue");
     }
 
     public function startHelpUser($user_id, $queue_code) {
-        $queue_code = strtoupper($queue_code);
-        $this->course_db->query("SELECT * from queue where user_id = ? and queue_code = ? and status SIMILAR TO '_0_'", array($user_id, $queue_code));
+        $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_0_'", array($user_id, $queue_code));
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("User not in queue");
             return false;
@@ -5319,12 +5319,11 @@ AND gc_id IN (
         $old_status = $this->course_db->rows()[0]['status'];
         $new_status = $old_status;
         $new_status[1] = 1;
-        $this->course_db->query("UPDATE queue SET status = ?, time_help_start = current_timestamp, help_started_by = ? WHERE user_id = ? and queue_code = ? and status SIMILAR TO '_0_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
+        $this->course_db->query("UPDATE queue SET status = ?, time_help_start = current_timestamp, help_started_by = ? WHERE user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_0_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
     }
 
     public function finishHelpUser($user_id, $queue_code, $remove_type) {
-        $queue_code = strtoupper($queue_code);
-        $this->course_db->query("SELECT * from queue where user_id = ? and queue_code = ? and status SIMILAR TO '_1_'", array($user_id, $queue_code));
+        $this->course_db->query("SELECT * from queue where user_id = ? and UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_1_'", array($user_id, $queue_code));
         if (count($this->course_db->rows()) <= 0) {
             $this->core->addErrorMessage("User not in queue");
             return false;
@@ -5333,7 +5332,7 @@ AND gc_id IN (
         $new_status = $old_status;
         $new_status[1] = 2;
         $new_status[2] = $remove_type;
-        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND queue_code = ? and status SIMILAR TO '_1_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
+        $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_1_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
     }
 
     public function emptyQueue() {
@@ -5351,14 +5350,13 @@ AND gc_id IN (
             $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
             $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND time_in <= ?", array($time_in));
         }else {
-            $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND queue_code = ?", array($queue_code));
+            $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($queue_code));
         }
         return $this->course_db->rows()[0]['count'];
     }
 
     public function firstTimeInQueue($id, $queue_code) {
-        $queue_code = strtoupper($queue_code);
-        $this->course_db->query("SELECT count(*) FROM queue WHERE user_id = ? AND queue_code = ? AND (status SIMILAR TO '__(2|5)' OR help_started_by IS NOT NULL)", array($id, $queue_code));
+        $this->course_db->query("SELECT count(*) FROM queue WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) AND (status SIMILAR TO '__(2|5)' OR help_started_by IS NOT NULL)", array($id, $queue_code));
         return $this->course_db->rows()[0]['count'] <= 0;
     }
 

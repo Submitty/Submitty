@@ -33,7 +33,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
     public function getIndexFromCode($code) {
         if (array_key_exists($code, $this->code_to_index)) {
             return $this->code_to_index[$code];
-        } else {
+        }
+        else {
             return "";
         }
     }
@@ -126,5 +127,9 @@ class OfficeHoursQueueViewer extends AbstractModel {
 
     public function getCurrentQueueStatus() {
         return $this->core->getQueries()->getCurrentQueueState()['status'];
+    }
+
+    public function upper($str) {
+        return strtoupper($str);
     }
 }

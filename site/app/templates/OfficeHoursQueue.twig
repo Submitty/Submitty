@@ -86,7 +86,7 @@
           {% for queue in viewer.getAllQueues() %}
             <tr>
               <td>
-                <input type="checkbox" id="queue_filter_{{queue['code']}}" class="page_loading" onchange="updateQueueFilter('{{queue['code']}}')"/>
+                <input type="checkbox" id="queue_filter_{{viewer.upper(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.upper(queue['code'])}}')"/>
               </td>
               <td style="text-align: left;">{{queue['code']}}</td>
               <td class="button-padding">
@@ -139,7 +139,7 @@
       </thead>
       <tbody>
         {% for entry in viewer.getCurrentQueue() %}
-          <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{entry['queue_code']}} current_queue_row" style="display:none;">
+          <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.upper(entry['queue_code'])}} current_queue_row" style="display:none;">
             <th scope="row" class="row_number">{{entry['row_number'] }}</th>
             <td>{{ entry['name'] }}</td>
 
@@ -248,16 +248,24 @@
   </table>
 
   <script>
+    //Get the list of queue_codes
     var current_queues = [{% for queue in viewer.getAllQueues() %}
         "{{queue['code']}}",
       {% endfor %}]
     current_queues = Array.from(new Set(current_queues));
+    current_queues = current_queues.map(function(x){ return x.toUpperCase() })
+
+    //checks if the filter settings are in local storage
     if (!localStorage.getItem('office_hour_queue_filters')) {
       localStorage.setItem('office_hour_queue_filters', "{}");
     }
+
+    //Runs the function that gets and fills in the old filter settings
     filterQueues();
+    //Unide the checkboxes now that they have been set
     $(".page_loading").removeClass("page_loading");
 
+    //Run this every time a checkbox has been clicked to update the list of filtered queues
     function updateQueueFilter(queue_code) {
       var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
       filters[queue_code] = document.getElementById('queue_filter_' + queue_code).checked;
@@ -265,6 +273,8 @@
       filterQueues();
     }
 
+    //Goes through the filter settings from local storage
+    //Hides and unhides rows of the queue based on the filter settings
     function filterQueues() {
       var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
       for (var i = 0; i < current_queues.length; i++) {
@@ -389,6 +399,7 @@
       background: var(--standard-focus-cornflowe-blue)!important;
     }
 
+    /* Hides elements on the page before they have been fully loaded */
     .page_loading {
       visibility: hidden;
     }
@@ -403,10 +414,12 @@
       is not normally needed such as a user id
    */
     @media only screen and (max-width: 479px) {
+      /* Put this on elements you dont need on mobile */
       .mobile-hide {
         display: none !important;
       }
     }
+    /* Put this on elements you dont need on desktop */
     @media only screen and (min-width: 480px) {
       .desktop-hide {
         display: none !important;
