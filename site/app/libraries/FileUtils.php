@@ -277,9 +277,29 @@ class FileUtils {
         return json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     }
 
-    public static function writeJsonFile($filename, $data) {
+    /**
+     * Given some data, encode it as pretty printed JSON and write it to a file.
+     *
+     * @param string $filename filename to write data to
+     * @param mixed  $data JSON data to write to the file
+     * @return bool
+     */
+    public static function writeJsonFile(string $filename, $data): bool {
         $data = FileUtils::encodeJson($data);
         if ($data === false) {
+            return false;
+        }
+        return static::writeFile($filename, $data);
+    }
+
+    /**
+     * Given some data, write it to a file.
+     * @param string $filename
+     * @param mixed  $data
+     * @return bool
+     */
+    public static function writeFile(string $filename, $data): bool {
+        if (file_exists($filename) && !is_writable($filename)) {
             return false;
         }
         return file_put_contents($filename, $data) !== false;
