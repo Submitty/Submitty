@@ -98,7 +98,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
     public function getTimeWaitingInQueue($time_out, $time_helped, $time_in, $status_code) {
         if ($status_code[2]  == 2) {
             $diff = strtotime($time_helped) - strtotime($time_in);
-        } else {
+        }
+        else {
             $diff = strtotime($time_out) - strtotime($time_in);
         }
         $h = $diff / 3600 % 24;

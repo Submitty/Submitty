@@ -5297,7 +5297,8 @@ AND gc_id IN (
                 //Or they try and remove themself but they are no longer in the queue
                 //In this case when the page refreshes they will see that
                 $this->core->addErrorMessage("Error: Please try again");
-            }else {
+            }
+            else {
                 $this->core->addErrorMessage("User no longer in queue");
             }
             return false;
@@ -5349,7 +5350,8 @@ AND gc_id IN (
         if ($queue_code) {
             $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
             $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND time_in <= ?", array($time_in));
-        }else {
+        }
+        else {
             $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($queue_code));
         }
         return $this->course_db->rows()[0]['count'];

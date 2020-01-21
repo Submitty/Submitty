@@ -162,7 +162,11 @@
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
-                  <input type="submit" value="Finish Helping" class="btn btn-primary">
+                  {% if entry['help_started_by'] == viewer.getUserId() %}
+                    <input type="submit" value="Finish Helping" class="btn btn-success">
+                  {% else %}
+                    <input type="submit" value="Finish Helping" class="btn btn-primary">
+                  {% endif %}
                 </form>
               </td>
             {% endif %}
@@ -182,7 +186,11 @@
               </form>
             </td>
             <td>{{ entry['queue_code'] }}</td>
-            <td class="mobile-hide">{{ entry['user_id'] }}</td>
+            <td class="mobile-hide">
+              <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
@@ -217,7 +225,11 @@
         {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
           <tr class="queue_history_{{entry['queue_code']}}">
             <th scope="row">{{entry['row_number']}}</th>
-            <td class="mobile-hide">{{ entry['user_id'] }}</td>
+            <td class="mobile-hide">
+              <a class="post-user-info" onclick="unhideId(this, '{{ entry['user_id'] }}')" title="Show user id" aria-label="Show user id">
+                <i class="fas fa-eye"></i>
+              </a>
+            </td>
             <td>{{ entry['name'] }}</td>
             <td>{{ entry['queue_code'] }}</td>
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
@@ -305,6 +317,11 @@
       if (index == 1) {
         $("#queue_empty_msg").show();
       }
+    }
+
+
+    function unhideId(element, id){
+      element.parentElement.innerHTML = id;
     }
 
     //get all the timers on the page

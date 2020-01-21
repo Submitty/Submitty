@@ -238,7 +238,8 @@ class OfficeHoursQueueController extends AbstractController {
         $this->core->getQueries()->toggleQueue($_POST['queue_code'], $_POST['queue_state']);
         if ($_POST['queue_state'] == 0) {
             $this->core->addSuccessMessage('Opened queue: "' . $_POST['queue_code'] . '"');
-        }else {
+        }
+        else {
             $this->core->addSuccessMessage('Closed queue: "' . $_POST['queue_code'] . '"');
         }
 
