@@ -84,9 +84,9 @@
         </thead>
         <tbody>
           {% for queue in viewer.getAllQueues() %}
-            <tr>
+            <tr class="row_color_v2_{{viewer.getIndexFromCode(queue['code'])}}">
               <td>
-                <input type="checkbox" id="queue_filter_{{viewer.upper(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.upper(queue['code'])}}')"/>
+                <input type="checkbox" title="Toggle filter for: {{viewer.upper(queue['code'])}}" id="queue_filter_{{viewer.upper(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.upper(queue['code'])}}')"/>
               </td>
               <td style="text-align: left;">{{queue['code']}}</td>
               <td class="button-padding">
@@ -139,7 +139,7 @@
       </thead>
       <tbody>
         {% for entry in viewer.getCurrentQueue() %}
-          <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.upper(entry['queue_code'])}} current_queue_row" style="display:none;">
+          <tr class="row_color_v2_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.upper(entry['queue_code'])}} current_queue_row" style="display:none;">
             <th scope="row" class="row_number">{{entry['row_number'] }}</th>
             <td>{{ entry['name'] }}</td>
 
@@ -265,7 +265,9 @@
         "{{queue['code']}}",
       {% endfor %}]
     current_queues = Array.from(new Set(current_queues));
-    current_queues = current_queues.map(function(x){ return x.toUpperCase() })
+    current_queues = current_queues.map(function(x) {
+      return x.toUpperCase()
+    })
 
     //checks if the filter settings are in local storage
     if (!localStorage.getItem('office_hour_queue_filters')) {
@@ -319,8 +321,7 @@
       }
     }
 
-
-    function unhideId(element, id){
+    function unhideId(element, id) {
       element.parentElement.innerHTML = id;
     }
 
@@ -414,6 +415,67 @@
     }
     .row_color_20 {
       background: var(--standard-focus-cornflowe-blue)!important;
+    }
+
+    .row_color_v2_0 {
+      background: #c98ee4 !important;
+    }
+    .row_color_v2_1 {
+      background: #c0c246 !important;
+    }
+    .row_color_v2_2 {
+      background: #ea79a1 !important;
+    }
+    .row_color_v2_3 {
+      background: #4ed78e !important;
+    }
+    .row_color_v2_4 {
+      background: #ef7568 !important;
+    }
+    .row_color_v2_5 {
+      background: #38b3eb !important;
+    }
+    .row_color_v2_6 {
+      background: #e09965 !important;
+    }
+    .row_color_v2_7 {
+      background: #8499e3 !important;
+    }
+    .row_color_v2_8 {
+      background: #83cc88 !important;
+    }
+    .row_color_v2_9 {
+      background: #d9ab39 !important;
+    }
+    .row_color_v2_10 {
+      background: #4ddcc0 !important;
+    }
+    .row_color_v2_11 {
+      background: #b9c673 !important;
+    }
+    .row_color_v2_12 {
+      background: #658bfb !important;
+    }
+    .row_color_v2_13 {
+      background: #76cc6c !important;
+    }
+    .row_color_v2_14 {
+      background: #dc8b3d !important;
+    }
+    .row_color_v2_15 {
+      background: #c9bf5d !important;
+    }
+    .row_color_v2_16 {
+      background: #5499f0 !important;
+    }
+    .row_color_v2_17 {
+      background: #9a89f0 !important;
+    }
+    .row_color_v2_18 {
+      background: #9fcc55 !important;
+    }
+    .row_color_v2_19 {
+      background: #e57fcf !important;
     }
 
     /* Hides elements on the page before they have been fully loaded */
