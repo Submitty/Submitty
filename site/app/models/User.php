@@ -58,46 +58,46 @@ class User extends AbstractModel {
     const LEVEL_FACULTY               = 2;
     const LEVEL_USER                  = 3;
 
-    /** @property @var bool Is this user actually loaded (else you cannot access the other member variables) */
+    /** @prop @var bool Is this user actually loaded (else you cannot access the other member variables) */
     protected $loaded = false;
 
-    /** @property @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
+    /** @prop @var string The id of this user which should be a unique identifier (ex: RCS ID at RPI) */
     protected $id;
-    /** @property @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
+    /** @prop @var string Alternate ID for a user, such as a campus assigned ID (ex: RIN at RPI) */
     protected $numeric_id = null;
-    /** @property @var string The anonymous id of this user which should be unique for each course they are in*/
+    /** @prop @var string The anonymous id of this user which should be unique for each course they are in*/
     protected $anon_id;
     /**
-     * @property
+     * @prop
      * @var string The password for the student used for database authentication. This should be hashed and salted.
      * @link http://php.net/manual/en/function.password-hash.php
      */
     protected $password = null;
-    /** @property @var string The first name of the user */
+    /** @prop @var string The first name of the user */
     protected $legal_first_name;
-    /** @property @var string The preferred first name of the user */
+    /** @prop @var string The preferred first name of the user */
     protected $preferred_first_name = "";
-    /** @property @var  string The first name to be displayed by the system (either first name or preferred first name) */
+    /** @prop @var  string The first name to be displayed by the system (either first name or preferred first name) */
     protected $displayed_first_name;
-    /** @property @var string The last name of the user */
+    /** @prop @var string The last name of the user */
     protected $legal_last_name;
-    /** @property @var string The preferred last name of the user */
+    /** @prop @var string The preferred last name of the user */
     protected $preferred_last_name = "";
-    /** @property @var  string The last name to be displayed by the system (either last name or preferred last name) */
+    /** @prop @var  string The last name to be displayed by the system (either last name or preferred last name) */
     protected $displayed_last_name;
-    /** @property @var string The email of the user */
+    /** @prop @var string The email of the user */
     protected $email;
-    /** @property @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
+    /** @prop @var int The group of the user, used for access controls (ex: student, instructor, etc.) */
     protected $group;
-    /** @property @var int The access level of the user (ex: superuser, faculty, user) */
+    /** @prop @var int The access level of the user (ex: superuser, faculty, user) */
     protected $access_level;
-    /** @property @var string What is the registration section that the user was assigned to for the course */
+    /** @prop @var string What is the registration section that the user was assigned to for the course */
     protected $registration_section = null;
-    /** @property @var int What is the assigned rotating section for the user */
+    /** @prop @var int What is the assigned rotating section for the user */
     protected $rotating_section = null;
 
     /**
-     * @property
+     * @prop
      * @var bool Was the user imported via a normal class list or was added manually. This is useful for students
      *           that are doing independent studies in the course, so not actually registered and so wouldn't want
      *           to be shifted to a null registration section or rotating section like a dropped student
@@ -105,7 +105,7 @@ class User extends AbstractModel {
     protected $manual_registration = false;
 
     /**
-     * @property
+     * @prop
      * @var bool This flag is set TRUE when a user edits their own preferred firstname.  When TRUE, preferred firstname
      *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
      *           permitted to change (correct?) a user's legal firstname/lastname and email address.
@@ -113,17 +113,17 @@ class User extends AbstractModel {
     protected $user_updated = false;
 
     /**
-     * @property
+     * @prop
      * @var bool This flag is set TRUE when the instructor edits another user's record.  When TRUE, preferred firstname
      *           is supposed to be locked from changes via student auto feed script.  Note that auto feed is still
      *           permitted to change (correct?) a user's legal firstname/lastname and email address.
      */
     protected $instructor_updated = false;
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $grading_registration_sections = array();
 
-    /** @property @var array */
+    /** @prop @var array */
     protected $notification_settings = array();
 
     /**

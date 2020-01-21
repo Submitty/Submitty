@@ -14,11 +14,11 @@ use app\models\AbstractModel;
  * @method AutoGradedVersion[] getAutoGradedVersions()
  */
 class AutoGradedGradeable extends AbstractModel {
-    /** @property @var GradedGradeable A reference to the graded gradeable this auto grade belongs to */
+    /** @prop @var GradedGradeable A reference to the graded gradeable this auto grade belongs to */
     private $graded_gradeable = null;
-    /** @property @var int The active submission version for electronic gradeables */
+    /** @prop @var int The active submission version for electronic gradeables */
     protected $active_version = 0;
-    /** @property @var AutoGradedVersion[] The graded versions for electronic gradeables */
+    /** @prop @var AutoGradedVersion[] The graded versions for electronic gradeables */
     protected $auto_graded_versions = [];
 
     /**
