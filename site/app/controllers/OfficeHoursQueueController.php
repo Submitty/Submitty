@@ -137,7 +137,6 @@ class OfficeHoursQueueController extends AbstractController {
 
 
         $this->core->getQueries()->removeUserFromQueue($_POST['user_id'], $remove_type, $_POST['queue_code']);
-        $this->core->addSuccessMessage("Removed from queue");
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
@@ -165,7 +164,6 @@ class OfficeHoursQueueController extends AbstractController {
     /**
     * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/finishHelp", methods={"POST"})
-    * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
     */
     public function finishHelpPerson() {
@@ -175,7 +173,21 @@ class OfficeHoursQueueController extends AbstractController {
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        $this->core->getQueries()->finishHelpUser($_POST['user_id'], $_POST['queue_code']);
+
+        if (!$this->core->getUser()->accessGrading() && $this->core->getUser()->getId() != $_POST['user_id']) {
+            $this->core->addErrorMessage("Permission denied to finish helping that person");
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        $remove_type = 2;
+        if ($this->core->getUser()->getId() == $_POST['user_id']) {
+            $remove_type = 5;//You helped yourself
+        }
+
+
+        $this->core->getQueries()->finishHelpUser($_POST['user_id'], $_POST['queue_code'], $remove_type);
         return Response::RedirectOnlyResponse(
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
