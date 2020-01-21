@@ -2,7 +2,6 @@
 
 namespace app\views;
 
-use app\authentication\DatabaseAuthentication;
 use app\models\User;
 
 class HomePageView extends AbstractView {
@@ -12,7 +11,14 @@ class HomePageView extends AbstractView {
      * @param array $archived_courses
      * @param string $change_name_text
      */
-    public function showHomePage(User $user, $unarchived_courses, $archived_courses, $change_name_text) {
+    public function showHomePage(
+        User $user,
+        array $unarchived_courses,
+        array $archived_courses,
+        string $change_name_text,
+        bool $database_authentication,
+        string $csrf_token
+    ) {
         $statuses = array();
         $course_types = [$unarchived_courses, $archived_courses];
         $rank_titles = [
@@ -34,8 +40,7 @@ class HomePageView extends AbstractView {
 
             //Assemble courses into rank lists
             foreach ($course_type as $course) {
-                $rank = $this->core->getQueries()->getGroupForUserInClass($course['semester'], $course['title'], $user->getId());
-                array_push($ranks[$rank]["courses"], $course);
+                array_push($ranks[$course['user_group']]["courses"], $course);
             }
 
             //Filter any ranks with no courses
@@ -46,7 +51,7 @@ class HomePageView extends AbstractView {
         }
 
 
-        $autofill_preferred_name = [$user->getLegalFirstName(),$user->getLegalLastName()];
+        $autofill_preferred_name = [$user->getLegalFirstName(), $user->getLegalLastName()];
         if ($user->getPreferredFirstName() != "") {
             $autofill_preferred_name[0] = $user->getPreferredFirstName();
         }
@@ -59,32 +64,32 @@ class HomePageView extends AbstractView {
             User::LEVEL_FACULTY     => "faculty",
             User::LEVEL_SUPERUSER   => "superuser"
         ];
-        $this->core->getOutput()->addInternalJs('homepage.js');
-        $this->core->getOutput()->addInternalCss('homepage.css');
-        return $this->core->getOutput()->renderTwigTemplate('HomePage.twig', [
+        $this->output->addInternalJs('homepage.js');
+        $this->output->addInternalCss('homepage.css');
+        return $this->output->renderTwigTemplate('HomePage.twig', [
             "user" => $user,
             "user_first" => $autofill_preferred_name[0],
             "user_last" => $autofill_preferred_name[1],
             "statuses" => $statuses,
             "change_name_text" => $change_name_text,
-            "show_change_password" => $this->core->getAuthentication() instanceof DatabaseAuthentication,
-            "csrf_token" => $this->core->getCsrfToken(),
+            "show_change_password" => $database_authentication,
+            "csrf_token" => $csrf_token,
             "access_level" => $access_levels[$user->getAccessLevel()],
             "display_access_level" => $user->accessFaculty(),
-            "change_password_url" => $this->core->buildUrl(['current_user', 'change_password']),
-            "change_username_url" => $this->core->buildUrl(['current_user', 'change_username'])
+            "change_password_url" => $this->output->buildUrl(['current_user', 'change_password']),
+            "change_username_url" => $this->output->buildUrl(['current_user', 'change_username'])
         ]);
     }
 
-    public function showCourseCreationPage($faculty, $head_instructor, $semesters) {
-        $this->core->getOutput()->addBreadcrumb("New Course");
-        return $this->core->getOutput()->renderTwigTemplate('CreateCourseForm.twig', [
-            "csrf_token" => $this->core->getCsrfToken(),
+    public function showCourseCreationPage($faculty, $head_instructor, $semesters, bool $is_superuser, string $csrf_token) {
+        $this->output->addBreadcrumb("New Course");
+        return $this->output->renderTwigTemplate('CreateCourseForm.twig', [
+            "csrf_token" => $csrf_token,
             "head_instructor" => $head_instructor,
             "faculty" => $faculty,
-            "is_superuser" => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
+            "is_superuser" => $is_superuser,
             "semesters" => $semesters,
-            "course_creation_url" => $this->core->buildUrl(['home', 'courses', 'new']),
+            "course_creation_url" => $this->output->buildUrl(['home', 'courses', 'new']),
             "course_code_requirements" => $this->core->getConfig()->getCourseCodeRequirements()
         ]);
     }

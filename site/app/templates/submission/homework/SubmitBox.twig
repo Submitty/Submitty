@@ -43,7 +43,7 @@
                         <input type='radio' id="radio-bulk" name="submission_type">
                         Bulk PDF Upload
                         <a aria-label="Bulk PDF Upload Help" href = "https://submitty.org/instructor/bulk_pdf_upload" target="_none">
-                            <i aria-hidden="true" title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
+                            <i title="Bulk PDF Upload Help" class="far fa-question-circle"></i>
                         </a>
                     </label>
                 {% endif %}
@@ -65,15 +65,15 @@
                     <label id="pages-prompt" for="num_pages"># of page(s) per PDF:</label>
                     <span id="prefix-prompt">QR code prefix/suffix:
                     <a aria-label="Split by QR Code Help" href="https://submitty.org/instructor/bulk_pdf_upload#automatic-association-of-pdfs-using-customized-exams-with-qr-codes" target="_none">
-	                    <i aria-hidden="true" title="Split by QR Code Help" class="far fa-question-circle"></i>
+	                    <i title="Split by QR Code Help" class="far fa-question-circle"></i>
                     </a>
                     </span>
                     <input type="number" id= "num_pages" placeholder="required"/>
                     <input type="text" id="qr_prefix" placeholder="Prefix (optional)" aria-label="QR Prefix (Optional)" />
                     <input type="text" id="qr_suffix" placeholder="Suffix (optional)" aria-label="QR Suffix (Optional)" />
                     <div id="expected-num-box">
-                    <label for= "expected_pages_input"> Expected Number of pages per PDF: </label>
-                    <input type="number" id= "expected_pages_input" placeholder="optional" onchange="highlightPageCount()" />
+                        <label for= "expected-pages-input"> Expected Number of pages per PDF: </label>
+                        <input id= "expected-pages-input" placeholder="e.g. 1-5, 8, 11-13" onchange="highlightPageCount()" />
                     </div>
                 </div>
             </div>
@@ -263,6 +263,8 @@
 
                                 <div id="codebox_{{ num_codeboxes }}"
                                      name="codebox_{{ num_codeboxes }}"
+                                     autocapitalization="off"
+                                     spellcheck="false"
                                      class="codebox"
                                      data-initial_value="{{ cell.initial_value }}"
                                      data-recent_submission="{{ cell.recent_submission }}"
@@ -427,6 +429,8 @@
                         {% endif %}
                     </h2>
                     <input type="file" name="files" id="input-file{{ loop.index }}" class="hide" onchange="addFilesFromInput({{ loop.index }})" multiple aria-label="Select Files to upload" />
+                    <table class="file-upload-table" id="file-upload-table-{{ loop.index }}">
+                    </table>
                 </div>
             {% endfor %}
         </div>
@@ -675,6 +679,8 @@
                 <input
                     type="text"
                     name="short_answer_{{ index }}"
+                    autocapitalization="off"
+                    spellcheck="false"
                     id="short_answer_{{ index }}"
                     class="sa-box"
                     data-initial_value="{{ short_answer.initial_value }}"

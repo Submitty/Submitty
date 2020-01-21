@@ -97,3 +97,5 @@ clone_or_update_repo  AnalysisTools  ${AnalysisTools_Version}
 clone_or_update_repo  Lichen  ${Lichen_Version}
 clone_or_update_repo  RainbowGrades  ${RainbowGrades_Version}
 clone_or_update_repo  Tutorial  ${Tutorial_Version}
+clone_or_update_repo  SysadminTools  ${SysadminTools_Version}
+

@@ -129,7 +129,8 @@ int main(int argc, char *argv[]) {
                       config_json.value("resource_limits",nlohmann::json()),
                       config_json,
                       false,
-                      "");
+                      "",
+                      my_testcase.has_timestamped_stdout());
             }
           }
         }
@@ -165,7 +166,8 @@ int main(int argc, char *argv[]) {
                               config_json.value("resource_limits",nlohmann::json()),
                               config_json,
                               false,
-                              "");
+                              "",
+                              my_testcase.has_timestamped_stdout());
 
         std::cout<< "FINISHED COMMAND, exited with exit_no: "<<exit_no<<std::endl;
       }
