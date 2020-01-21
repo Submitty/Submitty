@@ -22,6 +22,8 @@ class GradingQueue {
      *      Note: These names still have the GRADING_FILE_PREFIX attached to them
      */
     private $grading_files = [];
+    private $grading_path = '';
+    private $grading_remaining = [];
 
     const GRADING_FILE_PREFIX = 'GRADING_';
     const VCS_FILE_PREFIX = 'VCS__';
@@ -32,6 +34,7 @@ class GradingQueue {
 
     public function __construct($semester, $course, $submitty_path) {
         $this->queue_path = FileUtils::joinPaths($submitty_path, 'to_be_graded_queue');
+        $this->grading_path = FileUtils::joinPaths($submitty_path, 'grading');
         $this->queue_file_prefix = implode(self::QUEUE_FILE_SEPARATOR, [$semester, $course]);
     }
 
@@ -40,14 +43,15 @@ class GradingQueue {
      */
     public function reloadQueue() {
         // Get all items in queue dir
-        $all_files = scandir($this->queue_path);
+        $queued_files = scandir($this->queue_path);
+        $grading_dirs = scandir($this->grading_path);
 
         $grading_files = [];
         $queue_files = [];
         $times = [];
 
         // Filter the results so we only get files
-        foreach ($all_files as $file) {
+        foreach ($queued_files as $file) {
             $fqp = FileUtils::joinPaths($this->queue_path, $file);
             if (is_file($fqp)) {
                 if (strpos($file, self::GRADING_FILE_PREFIX) !== false) {
@@ -58,6 +62,21 @@ class GradingQueue {
 
                     // Also, record the last modified of each item
                     $times[] = filemtime($fqp);
+                }
+            }
+        }
+
+        foreach ($grading_dirs as $remote_dir) {
+            $path = FileUtils::joinPaths($this->grading_path, $remote_dir);
+            if ($remote_dir !== "." && $remote_dir !== ".." && is_dir($path)) {
+                $grading_files = scandir($path);
+                foreach ($grading_files as $file) {
+                    $full_path = FileUtils::joinPaths($path, $file);
+                    if (is_file($full_path)) {
+                        if (strpos($file, self::GRADING_FILE_PREFIX) !== false) {
+                            $grading_files[] = $file;
+                        }
+                    }
                 }
             }
         }
