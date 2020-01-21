@@ -287,7 +287,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'auto_rainbow_grades' => false,
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
-            'queue_enabled' => true,
+            'verified_submitty_admin_user' => null,
+            'queue_enabled' => true
         );
         $actual = $config->toArray();
 

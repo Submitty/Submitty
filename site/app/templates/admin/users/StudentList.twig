@@ -41,7 +41,7 @@
                             <td class="align-left">{{ student.getDisplayedLastName() }}</td>
                             <td>{{ student.getRotatingSection() ?? "NULL" }}</td>
                             <td>{{ student.isManualRegistration() ? "TRUE" : "FALSE" }}</td>
-                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{ student.getId() }}"><i class="fas fa-pencil-alt" aria-hidden="true"></i></a></td>
+                            <td><a href="javascript:editUserForm('{{ student.getId() }}');" aria-label="edit user {{grader.getDisplayedFirstName()}} {{grader.getDisplayedLastName()}}"><i class="fas fa-pencil-alt"></i></a></td>
                         </tr>
                     {% endfor %}
                 </tbody>

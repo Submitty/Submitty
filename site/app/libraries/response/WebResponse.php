@@ -9,14 +9,14 @@ use app\libraries\Core;
  * @package app\libraries\response
  */
 class WebResponse extends AbstractResponse {
-    /** @var string | array */
+    /** @var string|array */
     public $view_class;
 
     /** @var string */
     public $view_function;
 
     /** @var array  */
-    protected $parameters;
+    public $parameters;
 
     /**
      * WebResponse constructor.

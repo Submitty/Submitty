@@ -12,6 +12,7 @@
 # Run the send_email.py script every minute
 #* * * * * submitty_daemon   python3 ${SUBMITTY_INSTALL_DIR}/sbin/send_email.py
 * * * * * submitty_daemon   python3 /usr/local/submitty/sbin/send_email.py
-
 # Run auto_rainbow_scheduler.py every day at 2AM
 0 2 * * * submitty_daemon python3 /usr/local/submitty/sbin/auto_rainbow_scheduler.py
+# Run preferred_name_logging.php every day at 2:05AM
+5 2 * * * submitty_daemon   php ${SUBMITTY_INSTALL_DIR}/sbin/preferred_name_logging.php -m prod >/dev/null &2>1

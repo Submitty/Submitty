@@ -2535,6 +2535,7 @@ function scrollToComponent(component_id) {
 function closeComponentInstructorEdit(component_id, saveChanges) {
     let sequence = Promise.resolve();
     let component = getComponentFromDOM(component_id);
+    let countUp = getCountDirection(component_id) !== COUNT_DIRECTION_DOWN;
     if (saveChanges) {
         sequence = sequence
             .then(function () {
@@ -2549,10 +2550,10 @@ function closeComponentInstructorEdit(component_id, saveChanges) {
                     component.marks[0].title = mark_title;
                     $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Extra Credit Awarded";
                 }
-                else{
-                    let mark_title = "No Credit Awarded";
+                else if (countUp) {
+                    let mark_title = "No Credit";
                     component.marks[0].title = mark_title;
-                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Credit Awarded";
+                    $('#mark-'+component.marks[0].id.toString()).find(':input')[1].value = "No Credit";
 
                 }
                 return saveMarkList(component_id);
