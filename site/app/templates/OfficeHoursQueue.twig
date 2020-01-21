@@ -51,45 +51,71 @@
   {% endif %}
 
   {% if viewer.isGrader()%}
-    <ul class="list-group">
-      {% for queue in viewer.getAllQueues() %}
-        <form method="post" id="add_to_queue" action="{{base_url}}toggle">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-          <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-          <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
-          {% if queue['open'] == 0 %}
-            <input type="submit" value="Open Queue" class="btn btn-primary">
-          {% else %}
-            <input type="submit" value="Close Queue" class="btn btn-primary">
-          {% endif %}
-          <label>{{queue['code']}}</label>
-        </form>
-        <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-          <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-          <input type="submit" value="Empty Queue" class="btn btn-danger">
-          <label>{{queue['code']}}</label>
-        </form>
-        <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-          <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-          <input type="submit" value="Delete Queue" class="btn btn-danger">
-          <label>{{queue['code']}}</label>
-        </form>
-        <input type="checkbox" id="queue_filter_{{queue['code']}}" class="page_loading" onchange="updateQueueFilter('{{queue['code']}}')"/>
-        <br>
-        <br>
-      {% endfor %}
-    </ul>
+    <p>
+      <button class="btn btn-primary" type="button" onclick="$('#filgerSettingsCollapse').toggleClass('collapse')">
+        Toggle Filter Settings
+      </button>
+    </p>
+    <div class="collapse" id="filgerSettingsCollapse">
 
+      <br>
+      <form method="post" id="open_new_queue" action="{{base_url}}open">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="text" name="code" placeholder="Code">
+        <input type="submit" value="Open New Queue" class="btn btn-primary">
+      </form>
+
+      <table class="table table-striped" style="width:100%; margin-top:1rem;">
+        <thead>
+          <tr>
+            <th scope="col">Filter</th>
+            <th scope="col" style="width:1%;">Queue Code</th>
+            <th scope="col">Open/Close</th>
+            <th scope="col">Empty</th>
+            <th scope="col">Delete</th>
+            <th scope="col" style="width:100%"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for queue in viewer.getAllQueues() %}
+            <tr>
+              <td>
+                <input type="checkbox" id="queue_filter_{{queue['code']}}" class="page_loading" onchange="updateQueueFilter('{{queue['code']}}')"/>
+              </td>
+              <td style="text-align: left;">{{queue['code']}}</td>
+              <td class="button-padding">
+                <form method="post" id="add_to_queue" action="{{base_url}}toggle">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+                  <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
+                  {% if queue['open'] == 0 %}
+                    <input type="submit" value="Open Queue" class="btn btn-primary">
+                  {% else %}
+                    <input type="submit" value="Close Queue" class="btn btn-primary">
+                  {% endif %}
+                </form>
+              </td>
+              <td class="button-padding">
+                <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+                  <input type="submit" value="Empty Queue" class="btn btn-danger">
+                </form>
+              </td>
+              <td class="button-padding">
+                <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+                  <input type="submit" value="Delete Queue" class="btn btn-danger">
+                </form>
+              </td>
+              <td></td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
     <br>
-
-    <form method="post" id="open_new_queue" action="{{base_url}}open">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-      <input type="text" name="code" placeholder="Code">
-      <input type="submit" value="Open New Queue" class="btn btn-primary">
-    </form>
-    <br><br><br>
   {% endif %}
 
   {% if viewer.isGrader() %}
@@ -107,8 +133,8 @@
       </thead>
       <tbody>
         {% for entry in viewer.getCurrentQueue() %}
-          <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{entry['queue_code']}}" style="display:none;">
-            <th scope="row">{{entry['row_number'] }}</th>
+          <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{entry['queue_code']}} current_queue_row" style="display:none;">
+            <th scope="row" class="row_number">{{entry['row_number'] }}</th>
             <td>{{ entry['name'] }}</td>
 
             {% if viewer.getStateInQueue(entry['status']) == 0 %}
@@ -174,7 +200,7 @@
     </thead>
     <tbody>
       {% for entry in viewer.getPastQueue() %}
-        {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
+        {% if viewer.isGrader()or entry['user_id'] == viewer.getUserId() %}
           <tr class="queue_history_{{entry['queue_code']}}">
             <th scope="row">{{entry['row_number']}}</th>
             <td class="mobile-hide">{{ entry['user_id'] }}</td>
@@ -207,44 +233,49 @@
   </table>
 
   <script>
-      var current_queues = [
-        {% for queue in viewer.getAllQueues() %}
-          "{{queue['code']}}",
-        {% endfor %}
-      ]
-      current_queues = Array.from(new Set(current_queues));
+    var current_queues = [{% for queue in viewer.getAllQueues() %}
+        "{{queue['code']}}",
+      {% endfor %}]
+    current_queues = Array.from(new Set(current_queues));
+    if (!localStorage.getItem('office_hour_queue_filters')) {
+      localStorage.setItem('office_hour_queue_filters', "{}");
+    }
+    filterQueues();
+    $(".page_loading").removeClass("page_loading");
 
-      if(!localStorage.getItem('office_hour_queue_filters')){
-        localStorage.setItem('office_hour_queue_filters', "{}");
-      }
+    function updateQueueFilter(queue_code) {
+      var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+      filters[queue_code] = document.getElementById('queue_filter_' + queue_code).checked;
+      localStorage.setItem('office_hour_queue_filters', JSON.stringify(filters));
+      filterQueues();
+    }
 
+    function filterQueues() {
       var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
-      for(var i=0; i<current_queues.length; i++){
-        if(filter_choices[current_queues[i]]){
-          $("#queue_filter_"+current_queues[i]).prop( "checked", true );
+      for (var i = 0; i < current_queues.length; i++) {
+        if (filter_choices[current_queues[i]]) {
+          $("#queue_filter_" + current_queues[i]).prop("checked", true);
         }
       }
-      $(".page_loading").removeClass("page_loading");
 
-      for(var index in Object.keys(filter_choices)){
+      for (var index in Object.keys(filter_choices)) {
         let key = Object.keys(filter_choices)[index];
-        if(filter_choices[key]){
-          $(".queue_current_"+key).show();
+        if (filter_choices[key]) {
+          $(".queue_current_" + key).show();
+        } else {
+          $(".queue_current_" + key).hide();
         }
       }
 
-
-
-      function updateQueueFilter(queue_code){
-        var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
-        filters[queue_code] = document.getElementById('queue_filter_'+queue_code).checked;
-        localStorage.setItem('office_hour_queue_filters', JSON.stringify(filters));
-        location.reload();
+      var queue_rows = document.getElementsByClassName('current_queue_row');
+      var index = 1;
+      for (var i = 0; i < queue_rows.length; i++) {
+        if ($(queue_rows[i].childNodes[1]).is(":visible")) {
+          queue_rows[i].childNodes[1].innerHTML = index;
+          index++;
+        }
       }
-
-
-
-
+    }
 
     //get all the timers on the page
     times = []
@@ -338,8 +369,13 @@
       background: var(--standard-focus-cornflowe-blue)!important;
     }
 
-    .page_loading{
+    .page_loading {
       visibility: hidden;
+    }
+
+    .button-padding {
+      padding-left: 1rem !important;
+      padding-right: 1rem !important;
     }
 
     /*
