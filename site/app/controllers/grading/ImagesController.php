@@ -20,12 +20,14 @@ class ImagesController extends AbstractController {
         $common_images_path_1 = Fileutils::joinPaths("/var/local/submitty/student_images");
         $term = explode('/', $this->core->getConfig()->getCoursePath());
         $term = $term[count($term) - 2];
-        $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images",$term);
+        $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images", $term);
         // FIXME: consider searching through the common location for matches to my students
         // (but this would be expensive)
-        $any_images_files = array_merge ( FileUtils::getAllFiles($images_path, array(), true),
-                                          FileUtils::getAllFiles($common_images_path_1, array(), true),
-                                          FileUtils::getAllFiles($common_images_path_2, array(), true) );
+        $any_images_files = array_merge(
+            FileUtils::getAllFiles($images_path, array(), true),
+            FileUtils::getAllFiles($common_images_path_1, array(), true),
+            FileUtils::getAllFiles($common_images_path_2, array(), true)
+        );
         if ($user_group === USER::GROUP_STUDENT || (($user_group === USER::GROUP_FULL_ACCESS_GRADER || $user_group === USER::GROUP_LIMITED_ACCESS_GRADER) && count($any_images_files) === 0)) { // student has no permissions to view image page
             $this->core->addErrorMessage("You have no permissions to see images.");
             $this->core->redirect($this->core->buildCourseUrl());

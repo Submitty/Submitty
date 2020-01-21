@@ -208,12 +208,14 @@ class GlobalController extends AbstractController {
                 $common_images_path_1 = Fileutils::joinPaths("/var/local/submitty/student_images");
                 $term = explode('/', $this->core->getConfig()->getCoursePath());
                 $term = $term[count($term) - 2];
-                $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images",$term);
+                $common_images_path_2 = Fileutils::joinPaths("/var/local/submitty/student_images", $term);
                 // FIXME: consider searching through the common location for matches to my students
                 // (but this would be expensive)
-                $any_images_files = array_merge ( FileUtils::getAllFiles($images_path, array(), true),
-                                                  FileUtils::getAllFiles($common_images_path_1, array(), true),
-                                                  FileUtils::getAllFiles($common_images_path_2, array(), true) );
+                $any_images_files = array_merge(
+                    FileUtils::getAllFiles($images_path, array(), true),
+                    FileUtils::getAllFiles($common_images_path_1, array(), true),
+                    FileUtils::getAllFiles($common_images_path_2, array(), true)
+                );
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
