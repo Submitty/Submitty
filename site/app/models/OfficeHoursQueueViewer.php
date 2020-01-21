@@ -11,6 +11,7 @@ class OfficeHoursQueueViewer extends AbstractModel {
     //If you want to see more details on the status codes see DatabaseQueries.php
 
     private $code_to_index = array();//an array maps queue codes to their index (this is used to give each queue a color)
+    private $current_queue;
 
     /**
     * OfficeHoursQueueViewer constructor.
@@ -24,6 +25,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
             $this->code_to_index[$queue['code']] = $index;
             $index += 1;
         }
+
+        $this->current_queue = $this->core->getQueries()->getCurrentQueue();
 
     }
 
@@ -50,12 +53,13 @@ class OfficeHoursQueueViewer extends AbstractModel {
     public function getName(){
         $name = $this->core->getQueries()->getLastUsedQueueName();
         if(is_null($name)){
-          return $this->core->getUser()->getPreferredFirstName()." ".$this->core->getUser()->getPreferredLastName();
+          return $this->core->getUser()->getDisplayedFirstName()." ".$this->core->getUser()->getDisplayedLastName();
         }
+        return $name;
     }
 
     public function getCurrentQueue(){
-        return $this->core->getQueries()->getCurrentQueue();
+        return $this->current_queue;
     }
 
     public function getPastQueue(){
@@ -103,11 +107,25 @@ class OfficeHoursQueueViewer extends AbstractModel {
         return $h . "h " . $m . "m " . $s . "s";
     }
 
-    public function getQueueLength(){
-      return $this->core->getQueries()->getQueueLength();
+    //gets the number of people ahead of you in the queue.
+    //If no queue_code is passed it assumes you want the total number in all queues
+    public function getQueueNumberAheadOfYou($queue_code=null){
+      return $this->core->getQueries()->getQueueNumberAheadOfYou($queue_code);
     }
 
     public function firstTimeInQueue($id, $queue_code){
       return $this->core->getQueries()->firstTimeInQueue($id, $queue_code);
+    }
+
+    public function inQueue(){
+      return $this->core->getQueries()->alreadyInAQueue();
+    }
+
+    public function getCurrentQueueCode(){
+      return $this->core->getQueries()->getCurrentQueueState()['queue_code'];
+    }
+
+    public function getCurrentQueueStatus(){
+      return $this->core->getQueries()->getCurrentQueueState()['status'];
     }
 }

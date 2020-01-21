@@ -1,215 +1,355 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
-
-<style media="screen">
-    .row_color_0{background: var(--standard-light-yellow)!important;}
-    .row_color_1{background: var(--alert-border-blue)!important;}
-    .row_color_2{background: var(--standard-light-pink)!important;}
-    .row_color_3{background: var(--standard-light-orange)!important;}
-    .row_color_4{background: var(--standard-light-green)!important;}
-
-    @media only screen and (max-width: 479px) {
-       .mobile-hide{ display: none !important; }
-    }
-</style>
-
-
 <div class="content">
-    <h1>
-        Office Hours Queue
-    </h1>
-    {% if viewer.getQueueLength() == 1 %}
-      <p>There is currently {{viewer.getQueueLength()}} person in the queue</p>
-    {% else %}
-      <p>There are currently {{viewer.getQueueLength()}} people in the queue</p>
-    {% endif %}
-
-    {% if viewer.isGrader()%}
-    <ul class="list-group">
-    {% for queue in viewer.getAllQueues() %}
-        <form method="post" id="add_to_queue" action="{{base_url}}toggle">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-            <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
-            {% if queue['open'] == 0 %}
-                <input type="submit" value="Open Queue" class="btn btn-primary">
-            {% else %}
-                <input type="submit" value="Close Queue" class="btn btn-primary">
-            {% endif %}
-            <label>{{queue['code']}}</label>
-        </form>
-        <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-            <input type="submit" value="Empty Queue" class="btn btn-danger">
-            <label>{{queue['code']}}</label>
-        </form>
-        <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
-            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-            <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
-            <input type="submit" value="Delete Queue" class="btn btn-danger">
-            <label>{{queue['code']}}</label>
-        </form>
-        <br>
-    {% endfor %}
-    </ul>
-
-    <br><br><br>
-
-    <form method="post" id="open_new_queue" action="{{base_url}}open">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="text" name="code" placeholder="Code">
-        <input type="submit" value="Open New Queue" class="btn btn-primary">
-    </form>
-    <br><br><br>
-    {% endif %}
-
-
-    <form method="post" id="add_to_queue" action="{{base_url}}add">
+  <h1>
+    Office Hours Queue
+  </h1>
+  {% if not viewer.isGrader() %}
+    {% if viewer.inQueue() == 0 %}
+      {% if viewer.getQueueNumberAheadOfYou() == 1 %}
+        <p>There is currently
+          {{viewer.getQueueNumberAheadOfYou()}}
+          person in a queue</p>
+      {% else %}
+        <p>There are currently
+          {{viewer.getQueueNumberAheadOfYou()}}
+          people in a queue</p>
+      {% endif %}
+      <br>
+      <form method="post" id="add_to_queue" action="{{base_url}}add">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <label for="name_box">Your Name:</label>
         <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem">
         <br>
         <label for="code_box">Code:</label>
-        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem">
+        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on">
         <br>
-        <input type="submit" value="Join" class="btn btn-primary" style="margin:.5rem">
+        <input type="submit" value="Join" class="btn btn-primary">
+      </form>
+    {% elseif viewer.getStateInQueue(viewer.getCurrentQueueStatus()) == 0 %}
+      {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
+        <p>There is currently
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode())-1 }}
+          person ahead of you in the queue</p>
+      {% else %}
+        <p>There are currently
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode())-1 }}
+          people ahead of you in the queue</p>
+      {% endif %}
+      <p>You are currently in:
+        <b>{{viewer.getCurrentQueueCode()}}</b>
+      </p>
+      <form method="post" id="remove" action="{{base_url}}remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+        <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
+        <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
+        <input type="submit" value="Remove" class="btn btn-default">
+      </form>
+    {% else %}
+      <p>You are currently being helped</p>
+    {% endif %}
+    <br>
+  {% endif %}
+
+  {% if viewer.isGrader()%}
+    <ul class="list-group">
+      {% for queue in viewer.getAllQueues() %}
+        <form method="post" id="add_to_queue" action="{{base_url}}toggle">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+          <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
+          {% if queue['open'] == 0 %}
+            <input type="submit" value="Open Queue" class="btn btn-primary">
+          {% else %}
+            <input type="submit" value="Close Queue" class="btn btn-primary">
+          {% endif %}
+          <label>{{queue['code']}}</label>
+        </form>
+        <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+          <input type="submit" value="Empty Queue" class="btn btn-danger">
+          <label>{{queue['code']}}</label>
+        </form>
+        <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+          <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
+          <input type="submit" value="Delete Queue" class="btn btn-danger">
+          <label>{{queue['code']}}</label>
+        </form>
+        <input type="checkbox" id="queue_filter_{{queue['code']}}" class="page_loading" onchange="updateQueueFilter('{{queue['code']}}')"/>
+        <br>
+        <br>
+      {% endfor %}
+    </ul>
+
+    <br>
+
+    <form method="post" id="open_new_queue" action="{{base_url}}open">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+      <input type="text" name="code" placeholder="Code">
+      <input type="submit" value="Open New Queue" class="btn btn-primary">
     </form>
     <br><br><br>
+  {% endif %}
 
-{% if viewer.isGrader() %}
+  {% if viewer.isGrader() %}
     <table class="table table-striped" style="width:100%;">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">Name</th>
-                <th scope="col">Status</th>
-                <th scope="col">Time</th>
-                <th scope="col">Remove</th>
-                <th scope="col">Queue</th>
-                <th scope="col" class="mobile-hide">ID</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in viewer.getCurrentQueue() %}
-                <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}}">
-                    <th scope="row">{{entry['row_number'] }}</th>
-                    <td>{{ entry['name'] }}</td>
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">Name</th>
+          <th scope="col">Status</th>
+          <th scope="col">Time</th>
+          <th scope="col">Remove</th>
+          <th scope="col">Queue</th>
+          <th scope="col" class="mobile-hide">ID</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in viewer.getCurrentQueue() %}
+          <tr class="row_color_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{entry['queue_code']}}" style="display:none;">
+            <th scope="row">{{entry['row_number'] }}</th>
+            <td>{{ entry['name'] }}</td>
 
-                    {% if viewer.getStateInQueue(entry['status']) == 0 %}
-                        <td>
-                            <form method="post" id="start_help" action="{{base_url}}startHelp">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                                <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}" />
-                                {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
-                                  <input type="submit" value="Help" class="btn btn-success">
-                                {% else %}
-                                  <input type="submit" value="Help" class="btn btn-primary">
-                                {% endif %}
-                            </form>
-                        </td>
-                    {% elseif viewer.getStateInQueue(entry['status']) == 1 %}
-                        <td>
-                            <form method="post" id="finish_help" action="{{base_url}}finishHelp">
-                                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                                <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                                <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}" />
-                                <input type="submit" value="Finish Helping" class="btn btn-primary">
-                            </form>
-                        </td>
-                    {% endif %}
+            {% if viewer.getStateInQueue(entry['status']) == 0 %}
+              <td>
+                <form method="post" id="start_help" action="{{base_url}}startHelp">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                  <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
+                  {% if viewer.firstTimeInQueue(entry['user_id'], entry['queue_code']) %}
+                    <input type="submit" value="Help" class="btn btn-success">
+                  {% else %}
+                    <input type="submit" value="Help" class="btn btn-primary">
+                  {% endif %}
+                </form>
+              </td>
+            {% elseif viewer.getStateInQueue(entry['status']) == 1 %}
+              <td>
+                <form method="post" id="finish_help" action="{{base_url}}finishHelp">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                  <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                  <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
+                  <input type="submit" value="Finish Helping" class="btn btn-primary">
+                </form>
+              </td>
+            {% endif %}
 
-                    {% if viewer.getStateInQueue(entry['status']) == 1 %}
-                        <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_help_start']) }}"></td>
-                    {% else %}
-                        <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
-                    {% endif %}
+            {% if viewer.getStateInQueue(entry['status']) == 1 %}
+              <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_help_start']) }}"></td>
+            {% else %}
+              <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+            {% endif %}
 
-                    <td>
-                        <form method="post" id="remove" action="{{base_url}}remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
-                            <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-                            <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
-                            <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}" />
-                            <input type="submit" value="Remove" class="btn btn-default">
-                        </form>
-                    </td>
-                    <td>{{ entry['queue_code'] }}</td>
-                    <td class="mobile-hide">{{ entry['user_id'] }}</td>
-                </tr>
-            {% endfor %}
-        </tbody>
+            <td>
+              <form method="post" id="remove" action="{{base_url}}remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
+                <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
+                <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
+                <input type="submit" value="Remove" class="btn btn-default">
+              </form>
+            </td>
+            <td>{{ entry['queue_code'] }}</td>
+            <td class="mobile-hide">{{ entry['user_id'] }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
     </table>
-{% endif %}
+  {% endif %}
 
-    <br><br>
-    <h1>Queue History</h1>
-    <table class="table table-striped" style="width:100%;">
-        <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col" class="mobile-hide">ID</th>
-                <th scope="col">Name</th>
-                <th scope="col">Queue</th>
-                <th scope="col">Time Entered</th>
-                <th scope="col">Time In Queue</th>
-                <th scope="col">Time Helped</th>
-                <th scope="col" class="mobile-hide">Removed By</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for entry in viewer.getPastQueue() %}
-              {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
-                  <tr>
-                      <th scope="row">{{entry['row_number']}}</th>
-                      <td class="mobile-hide">{{ entry['user_id'] }}</td>
-                      <td>{{ entry['name'] }}</td>
-                      <td>{{ entry['queue_code'] }}</td>
-                      <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
+  <br><br>
+  <h1>Queue History</h1>
+  <table class="table table-striped" style="width:100%;">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col" class="mobile-hide">ID</th>
+        <th scope="col">Name</th>
+        <th scope="col">Queue</th>
+        <th scope="col">Time Entered</th>
+        <th scope="col">Time In Queue</th>
+        <th scope="col">Time Helped</th>
+        <th scope="col" class="mobile-hide">Removed By</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in viewer.getPastQueue() %}
+        {% if viewer.isGrader() or entry['user_id'] == viewer.getUserId() %}
+          <tr class="queue_history_{{entry['queue_code']}}">
+            <th scope="row">{{entry['row_number']}}</th>
+            <td class="mobile-hide">{{ entry['user_id'] }}</td>
+            <td>{{ entry['name'] }}</td>
+            <td>{{ entry['queue_code'] }}</td>
+            <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
 
-                      <td>{{viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['status'])}}</td>
+            <td>{{viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['status'])}}</td>
 
-                      {% if viewer.getLeaveReason(entry['status']) == 2 %}
-                          <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
-                      {% elseif viewer.getLeaveReason(entry['status']) == 3 %}
-                          <td>Removed</td>
-                      {% elseif viewer.getLeaveReason(entry['status']) == 1 %}
-                          <td>Left Queue</td>
-                      {% elseif viewer.getLeaveReason(entry['status']) == 4 %}
-                          <td>Queue Emptyed</td>
-                      {% elseif viewer.getLeaveReason(entry['status']) == 0 %}
-                          <!-- This should never happen but I put this here just in case -->
-                          <td>In queue</td>
-                      {% else %}
-                          <td>Not in queue</td>
-                      {% endif %}
+            {% if viewer.getLeaveReason(entry['status']) == 2 %}
+              <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
+            {% elseif viewer.getLeaveReason(entry['status']) == 3 %}
+              <td>Removed</td>
+            {% elseif viewer.getLeaveReason(entry['status']) == 1 %}
+              <td>Left Queue</td>
+            {% elseif viewer.getLeaveReason(entry['status']) == 4 %}
+              <td>Queue Emptyed</td>
+            {% elseif viewer.getLeaveReason(entry['status']) == 0 %}
+              <!-- This should never happen but I put this here just in case -->
+              <td>In queue</td>
+            {% else %}
+              <td>Not in queue</td>
+            {% endif %}
 
-                      <td class="mobile-hide">{{ entry['removed_by'] }}</td>
-                  </tr>
-                {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>
+            <td class="mobile-hide">{{ entry['removed_by'] }}</td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
 
-    <script>
-        //get all the timers on the page
-        times = []
-        $(".help_timer").each(function() {
-            times.push([$(this), new Date($(this).attr("help_time"))]);
-        });
+  <script>
+      var current_queues = [
+        {% for queue in viewer.getAllQueues() %}
+          "{{queue['code']}}",
+        {% endfor %}
+      ]
+      current_queues = Array.from(new Set(current_queues));
 
-        //update the timers every second
-        updateTimes();
-        setInterval(updateTimes, 1000);
-        function updateTimes(){
-            for(var i=0;i<times.length;i++){
-                timer = (new Date() - times[i][1])/1000
-                var min = Math.floor(timer/60)
-                var sec = Math.floor(timer%60).toString().padStart(2, '0')
-                var timeString = min + ":"+ sec;
-                if(min >= 100){
-                    timeString = "∞";
-                }
-                times[i][0].html(timeString);
-            }
+      if(!localStorage.getItem('office_hour_queue_filters')){
+        localStorage.setItem('office_hour_queue_filters', "{}");
+      }
+
+      var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+      for(var i=0; i<current_queues.length; i++){
+        if(filter_choices[current_queues[i]]){
+          $("#queue_filter_"+current_queues[i]).prop( "checked", true );
         }
-    </script>
+      }
+      $(".page_loading").removeClass("page_loading");
+
+      for(var index in Object.keys(filter_choices)){
+        let key = Object.keys(filter_choices)[index];
+        if(filter_choices[key]){
+          $(".queue_current_"+key).show();
+        }
+      }
+
+
+
+      function updateQueueFilter(queue_code){
+        var filters = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
+        filters[queue_code] = document.getElementById('queue_filter_'+queue_code).checked;
+        localStorage.setItem('office_hour_queue_filters', JSON.stringify(filters));
+        location.reload();
+      }
+
+
+
+
+
+    //get all the timers on the page
+    times = []
+    $(".help_timer").each(function() {
+      times.push([
+        $(this),
+        new Date($(this).attr("help_time"))
+      ]);
+    });
+
+    //update the timers every second
+    updateTimes();
+    setInterval(updateTimes, 1000);
+    function updateTimes() {
+      for (var i = 0; i < times.length; i++) {
+        timer = (new Date() - times[i][1]) / 1000
+        var min = Math.floor(timer / 60)
+        var sec = Math.floor(timer % 60).toString().padStart(2, '0')
+        var timeString = min + ":" + sec;
+        if (min >= 100) {
+          timeString = "∞";
+        }
+        times[i][0].html(timeString);
+      }
+    }
+  </script>
+
+  <style media="screen">
+    /*row_color_# is for the background colors for each queue. */
+    .row_color_0 {
+      background: var(--standard-light-yellow)!important;
+    }
+    .row_color_1 {
+      background: var(--alert-border-blue)!important;
+    }
+    .row_color_2 {
+      background: var(--standard-light-pink)!important;
+    }
+    .row_color_3 {
+      background: var(--standard-light-orange)!important;
+    }
+    .row_color_4 {
+      background: var(--standard-light-green)!important;
+    }
+    .row_color_5 {
+      background: var(--standard-light-red)!important;
+    }
+    .row_color_6 {
+      background: var(--standard-light-seafoam)!important;
+    }
+    .row_color_7 {
+      background: var(--standard-light-lime-green)!important;
+    }
+    .row_color_8 {
+      background: var(--standard-light-medium-gray)!important;
+    }
+    .row_color_9 {
+      background: var(--standard-light-blue-gray)!important;
+    }
+    .row_color_10 {
+      background: var(--standard-light-yellow-brown)!important;
+    }
+    .row_color_11 {
+      background: var(--standard-mint-green)!important;
+    }
+    .row_color_12 {
+      background: var(--standard-vibrant-purple)!important;
+    }
+    .row_color_13 {
+      background: var(--standard-pastel-blue)!important;
+    }
+    .row_color_14 {
+      background: var(--standard-vibrant-orange)!important;
+    }
+    .row_color_15 {
+      background: var(--standard-red-orange)!important;
+    }
+    .row_color_16 {
+      background: var(--standard-aqua)!important;
+    }
+    .row_color_17 {
+      background: var(--standard-pale-gray)!important;
+    }
+    .row_color_18 {
+      background: var(--alert-bronze)!important;
+    }
+    .row_color_19 {
+      background: var(--standard-pale-yellow)!important;
+    }
+    .row_color_20 {
+      background: var(--standard-focus-cornflowe-blue)!important;
+    }
+
+    .page_loading{
+      visibility: hidden;
+    }
+
+    /*
+      This will hide elements on phones. This is useful for extra content that
+      is not normally needed such as a user id
+   */
+    @media only screen and (max-width: 479px) {
+      .mobile-hide {
+        display: none !important;
+      }
+    }
+  </style>
+</div>
