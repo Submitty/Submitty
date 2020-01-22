@@ -893,7 +893,7 @@ class UsersController extends AbstractController {
                 case $row4_validation_function():
                     // Database password cannot be blank, no check on format.
                     // Automatically validate if NOT using database authentication (e.g. using PAM authentication).
-                case !$use_database || User::validateUserData('user_password', $row[5]):
+                case !$use_database || User::validateUserData('user_password', $vals[5]):
                     // Preferred first and last name must be alpha characters, white-space, or certain punctuation.
                     // Automatically validate if not set (this field is optional).
                 case !isset($vals[$pref_firstname_idx]) || User::validateUserData('user_preferred_firstname', $vals[$pref_firstname_idx]):

@@ -41,7 +41,7 @@ class WebRouterTester extends BaseUnitTest {
         );
         $response = WebRouter::getWebResponse($request, $core);
         $this->assertEquals(
-            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
+            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath('/s19/sample')),
             $response->redirect_response->url
         );
     }
@@ -74,8 +74,9 @@ class WebRouterTester extends BaseUnitTest {
             ['_controller' => 'app\controllers\OtherController', '_method' => 'otherMethod']
         );
         $response = WebRouter::getWebResponse($request, $core);
+        /* `\' is represented as '%5C' which in turn itself is represented as '%255C' (coz, % encodes to %25) */
         $this->assertEquals(
-            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath($request->getPathInfo())),
+            $core->buildUrl(['authentication', 'login']) . '?old=' . urlencode($request->getUriForPath('/s19/sample') . '?_controller=app%5Ccontrollers%5COtherController&_method=otherMethod'),
             $response->redirect_response->url
         );
     }

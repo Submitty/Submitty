@@ -200,14 +200,19 @@ class ConfigurationController extends AbstractController {
             }
         }
 
-        $config_ini = $this->core->getConfig()->getCourseJson();
-        if (!isset($config_ini['course_details'][$name])) {
+        $config_json = $this->core->getConfig()->getCourseJson();
+        if (!isset($config_json['course_details'][$name])) {
             return Response::JsonOnlyResponse(
                 JsonResponse::getFailResponse('Not a valid config name')
             );
         }
-        $config_ini['course_details'][$name] = $entry;
-        $this->core->getConfig()->saveCourseJson(['course_details' => $config_ini['course_details']]);
+        $config_json['course_details'][$name] = $entry;
+
+        if (!$this->core->getConfig()->saveCourseJson(['course_details' => $config_json['course_details']])) {
+            return Response::JsonOnlyResponse(
+                JsonResponse::getFailResponse('Could not save config file')
+            );
+        }
 
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse(null)
