@@ -90,7 +90,7 @@
               </td>
               <td style="text-align: left;">{{queue['code']}}</td>
               <td class="button-padding">
-                <form method="post" id="add_to_queue" action="{{base_url}}toggle">
+                <form method="post" id="open_close_queue" action="{{base_url}}toggle">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
@@ -102,14 +102,14 @@
                 </form>
               </td>
               <td class="button-padding">
-                <form method="post" id="add_to_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+                <form method="post" id="empty_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="submit" value="Empty Queue" class="btn btn-danger">
                 </form>
               </td>
               <td class="button-padding">
-                <form method="post" id="add_to_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
+                <form method="post" id="delete_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="submit" value="Delete Queue" class="btn btn-danger">
