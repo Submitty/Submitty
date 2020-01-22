@@ -335,9 +335,59 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
     }
 
     public function testUpdateConfigurationEnableForum() {
+        $this->setUpConfig(['test4']);
         $core = new Core();
-        $conroller = new ConfigurationController($core);
+        $controller = new ConfigurationController($core);
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        
         $_POST['name'] = 'forum_enabled';
         $_POST['entry'] = 'true';
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn([]);
+        $queries
+            ->expects($this->exactly(4))
+            ->method('addNewCategory')
+            ->withConsecutive(
+                 [$this->equalTo('General Questions')],
+                 [$this->equalTo('Homework Help')],
+                 [$this->equalTo('Quizzes')],
+                 [$this->equalTo('Tests')],
+             )
+            ->will($this->onConsecutiveCalls(0,1,2,3));
+
+        $core->setQueries($queries);
+        $response = $controller->updateConfiguration();
+        $this->assertNotNull($response->json_response);
+    }
+
+    public function testUpdateConfigurationEnableForumWithCategories() {
+        $this->setUpConfig(['test5']);
+        $core = new Core();
+        $controller = new ConfigurationController($core);
+        $config = new Config($core);
+        $config->loadMasterConfigs($this->master_configs_dir);
+        $config->loadCourseJson('f19', 'sample', $this->course_config);
+        $core->setConfig($config);
+        $_POST['name'] = 'forum_enabled';
+        $_POST['entry'] = 'true';
+        $queries = $this->createMock(DatabaseQueries::class);
+        $queries
+            ->expects($this->once())
+            ->method('getCategories')
+            ->with()
+            ->willReturn(['General Questions', 'Homework Help', 'Quizzes', 'Tests']);
+        $queries
+            ->expects($this->exactly(0))
+            ->method('addNewCategory');
+        $core->setQueries($queries);
+        $response = $controller->updateConfiguration();
+        $this->assertNotNull($response->json_response);
     }
 }
