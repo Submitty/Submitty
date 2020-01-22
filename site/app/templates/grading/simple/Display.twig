@@ -5,9 +5,13 @@
         {{ gradeable.getTitle() }}
     </h1>
     <p>
-        {% if gradeable.getTaInstructions() != "" %}
-            Overall TA Instructions: {{ gradeable.getTaInstructions() }}
-        {% endif %}
+        Overall TA Instructions:
+        {% for url in instruction_urls if url|trim !="" %}
+            <br>
+            <a class="external" href="{{ url }}" target="_blank" aria-label="Instructions for {{ gradeable_name }}">
+                <i>{{ url }}</i>
+            </a>
+        {% endfor %}
     </p>
 
     <div class="column-wrapper" style="margin: 1em 0;">
