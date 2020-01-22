@@ -1623,7 +1623,7 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    /**
+        /**
      * Route for adding a new component to a gradeable
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/components/{peer}/new", methods={"POST"})
      */
@@ -1634,9 +1634,7 @@ class ElectronicGraderController extends AbstractController {
             return;
         }
 
-        if (gettype($peer) !== "boolean") {
-            $this->core->getOutput()->renderJsonFail("The value for 'peer' should be a boolean.");
-        }
+        $peer = $peer === 'true' ? true : false;
 
         // checks if user has permission
         if (!$this->core->getAccess()->canI("grading.electronic.add_component", ["gradeable" => $gradeable])) {
