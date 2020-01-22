@@ -995,13 +995,13 @@ class Gradeable extends AbstractModel {
             'max_value' => $max_value,
             'upper_clamp' => $upper_clamp,
             'text' => $text,
-            'peer' => $peer,
+            'peer' => true,
             'page' => $pdf_page,
             'id' => 0,
             'order' => count($this->components)
         ]);
         $this->components[] = $component;
-        if($peer){
+        if(true){
             $this->peer_grading = true;
         }
         else{

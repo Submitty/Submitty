@@ -999,7 +999,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
 
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->addErrorMessage("ERROR: You do not have access to grade the requested student.");
             $this->core->redirect($this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'status']));
         }
@@ -1016,7 +1016,7 @@ class ElectronicGraderController extends AbstractController {
                 break;
             }
         }
-        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ['graded_gradeable' => $graded_gradeable]);
+        $can_inquiry = $this->core->getAccess()->canI("grading.electronic.grade_inquiry", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable]);
         $can_verify = $this->core->getAccess()->canI("grading.electronic.verify_grader");
         $show_verify_all = $show_verify_all && $can_verify;
 
@@ -1080,14 +1080,17 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable])) {
+        
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
+        
+        /*if (!$this->core->getAccess()->canI("grading.electronic.grade", ["gradeable" => $gradeable, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get gradeable rubric data');
             return;
-        }
+        }*/
 
         try {
             // Once we've parsed the inputs and checked permissions, perform the operation
-            $results = $this->getGradeableRubric($gradeable, $grader);
+            $results = $this->getGradeableRubric($gradeable, $grader, $graded_gradeable);
             $this->core->getOutput()->renderJsonSuccess($results);
         }
         catch (\InvalidArgumentException $e) {
@@ -1098,18 +1101,17 @@ class ElectronicGraderController extends AbstractController {
         }
     }
 
-    public function getGradeableRubric(Gradeable $gradeable, User $grader) {
+    public function getGradeableRubric(Gradeable $gradeable, User $grader, GradedGradeable $graded_gradeable) {
         $return = [
             'id' => $gradeable->getId(),
             'precision' => $gradeable->getPrecision()
         ];
-
         // Filter out the components that we shouldn't see
         //  TODO: instructors see all components, some may not be visible in non-super-edit-mode
         $return['components'] = array_map(function (Component $component) {
             return $component->toArray();
-        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable) {
-            return $this->core->getAccess()->canUser($grader, 'grading.electronic.view_component', ['gradeable' => $gradeable, 'component' => $component]);
+        }, array_filter($gradeable->getComponents(), function (Component $component) use ($grader, $gradeable, $graded_gradeable) {
+            return $this->core->getAccess()->canUser($grader, 'grading.electronic.view_component', ['graded_gradeable' => $graded_gradeable, 'gradeable' => $gradeable, 'component' => $component]);
         }));
         // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
         return $return;
