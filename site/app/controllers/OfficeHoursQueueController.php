@@ -22,7 +22,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue")
     * @return Response
     */
@@ -43,7 +42,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/open", methods={"POST"})
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
@@ -72,7 +70,6 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/add", methods={"POST"})
     * @return Response
     */
@@ -117,7 +114,6 @@ class OfficeHoursQueueController extends AbstractController {
 
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/remove", methods={"POST"})
     * @return Response
     */
@@ -149,7 +145,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/startHelp", methods={"POST"})
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
@@ -168,7 +163,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/finishHelp", methods={"POST"})
     * @return Response
     */
@@ -200,7 +194,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/empty", methods={"POST"})
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
@@ -220,7 +213,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/toggle", methods={"POST"})
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
@@ -253,7 +245,6 @@ class OfficeHoursQueueController extends AbstractController {
     }
 
     /**
-    * @param
     * @Route("/{_semester}/{_course}/office_hours_queue/deleteQueue", methods={"POST"})
     * @AccessControl(role="LIMITED_ACCESS_GRADER")
     * @return Response
