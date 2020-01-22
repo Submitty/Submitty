@@ -185,16 +185,15 @@ class ConfigurationController extends AbstractController {
             $entry = $entry === "true" ? true : false;
         }
 
-        if ($name === 'forum_enabled') {
-            if ($entry == 1) {
-                if ($this->core->getAccess()->canI("forum.modify_category")) {
-                    $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
-                    $rows = $this->core->getQueries()->getCategories();
+        if ($name === 'forum_enabled' && $entry == 1) {
+            $categories = ["General Questions", "Homework Help", "Quizzes" , "Tests"];
+            $rows = $this->core->getQueries()->getCategories();
 
-                    foreach ($categories as $category) {
-                        if (ForumUtils::isValidCategories($rows, -1, array($category))) {
-                            $this->core->getQueries()->addNewCategory($category);
-                        }
+            // Only create default categories when the forum is first enabled
+            if (empty($rows)) {
+                foreach ($categories as $category) {
+                    if (!ForumUtils::isValidCategories($rows, -1, array($category))) {
+                        $this->core->getQueries()->addNewCategory($category);
                     }
                 }
             }

@@ -333,4 +333,11 @@ class ConfigurationControllerTester extends \PHPUnit\Framework\TestCase {
         ];
         $this->assertEquals($expected, $response->json_response->json);
     }
+
+    public function testUpdateConfigurationEnableForum() {
+        $core = new Core();
+        $conroller = new ConfigurationController($core);
+        $_POST['name'] = 'forum_enabled';
+        $_POST['entry'] = 'true';
+    }
 }
