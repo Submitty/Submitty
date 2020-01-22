@@ -13,7 +13,7 @@
     <header id="gradeable-info">
         <h1>
             New submission for: {{ gradeable_name }}
-            {% if gradeable_url %}
+            {% if gradeable_url|trim !== "" %}
                 <a class="external" href="{{ gradeable_url }}" target="_blank" aria-label="Go to instructions for {{ gradeable_name }}">
                     <i class="fas fa-external-link-alt"></i>
                 </a>
