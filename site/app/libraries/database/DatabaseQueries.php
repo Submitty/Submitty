@@ -5336,8 +5336,8 @@ AND gc_id IN (
         $this->course_db->query("UPDATE queue SET status = ?, time_out = current_timestamp, removed_by = ? WHERE user_id = ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?)) and status SIMILAR TO '_1_'", array($new_status,$this->core->getUser()->getId(), $user_id, $queue_code));
     }
 
-    public function emptyQueue() {
-        $this->course_db->query("UPDATE queue SET status = (substring(status FROM 1 for 1) || '24'), removed_by = ?, time_out = current_timestamp where status SIMILAR TO '_(0|1)_'", array($this->core->getUser()->getId()));
+    public function emptyQueue($queue_code) {
+        $this->course_db->query("UPDATE queue SET status = (substring(status FROM 1 for 1) || '24'), removed_by = ?, time_out = current_timestamp where status SIMILAR TO '_(0|1)_' and UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($this->core->getUser()->getId(), $queue_code));
     }
 
 
@@ -5349,10 +5349,10 @@ AND gc_id IN (
     public function getQueueNumberAheadOfYou($queue_code = null) {
         if ($queue_code) {
             $time_in = $this->core->getQueries()->getCurrentQueueState()['time_in'];
-            $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND time_in <= ?", array($time_in));
+            $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND time_in <= ? AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($time_in, $queue_code));
         }
         else {
-            $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_' AND UPPER(TRIM(queue_code)) = UPPER(TRIM(?))", array($queue_code));
+            $this->course_db->query("SELECT count(*) FROM queue WHERE status SIMILAR TO '_0_'");
         }
         return $this->course_db->rows()[0]['count'];
     }

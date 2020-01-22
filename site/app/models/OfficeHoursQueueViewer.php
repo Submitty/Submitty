@@ -130,7 +130,7 @@ class OfficeHoursQueueViewer extends AbstractModel {
         return $this->core->getQueries()->getCurrentQueueState()['status'];
     }
 
-    public function upper($str) {
+    public function cleanForId($str) {
         return strtoupper($str);
     }
 }

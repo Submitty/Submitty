@@ -56,7 +56,9 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        if ($this->core->getQueries()->openQueue($_POST['code'])) {
+        $queue_code = preg_replace('/\s+/', '_', $_POST['code']);
+
+        if ($this->core->getQueries()->openQueue($queue_code)) {
             $this->core->addSuccessMessage("New queue added");
         }
         else {
@@ -82,7 +84,9 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
-        $validated_code = $this->core->getQueries()->isValidCode($_POST['code']);
+        $queue_code = preg_replace('/\s+/', '_', $_POST['code']);
+
+        $validated_code = $this->core->getQueries()->isValidCode($queue_code);
         if (!$validated_code) {
             $this->core->addErrorMessage("invalid code");
             return Response::RedirectOnlyResponse(
@@ -202,7 +206,7 @@ class OfficeHoursQueueController extends AbstractController {
     * @return Response
     */
     public function emptyQueue() {
-        if (!isset($_POST['queue_code']) and $_POST['queue_code'] != "") {
+        if (!isset($_POST['queue_code']) && $_POST['queue_code'] != "") {
             $this->core->addErrorMessage("Missing queue code");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
@@ -222,13 +226,13 @@ class OfficeHoursQueueController extends AbstractController {
     * @return Response
     */
     public function toggleQueue() {
-        if (!isset($_POST['queue_code']) and $_POST['queue_code'] != "") {
+        if (!isset($_POST['queue_code']) && $_POST['queue_code'] != "") {
             $this->core->addErrorMessage("Missing queue code");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
             );
         }
-        if (!isset($_POST['queue_state']) and $_POST['queue_state'] != "") {
+        if (!isset($_POST['queue_state']) && $_POST['queue_state'] != "") {
             $this->core->addErrorMessage("Missing queue state");
             return Response::RedirectOnlyResponse(
                 new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))

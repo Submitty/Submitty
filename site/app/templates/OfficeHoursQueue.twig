@@ -28,11 +28,11 @@
     {% elseif viewer.getStateInQueue(viewer.getCurrentQueueStatus()) == 0 %}
       {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
         <p>There is currently
-          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode())-1 }}
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
           person ahead of you in the queue</p>
       {% else %}
         <p>There are currently
-          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode())-1 }}
+          {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
           people ahead of you in the queue</p>
       {% endif %}
       <p>You are currently in:
@@ -86,7 +86,7 @@
           {% for queue in viewer.getAllQueues() %}
             <tr class="row_color_v2_{{viewer.getIndexFromCode(queue['code'])}}">
               <td>
-                <input type="checkbox" title="Toggle filter for: {{viewer.upper(queue['code'])}}" id="queue_filter_{{viewer.upper(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.upper(queue['code'])}}')"/>
+                <input type="checkbox" title="Toggle filter for: {{viewer.cleanForId(queue['code'])}}" id="queue_filter_{{viewer.cleanForId(queue['code'])}}" class="page_loading" onchange="updateQueueFilter('{{viewer.cleanForId(queue['code'])}}')"/>
               </td>
               <td style="text-align: left;">{{queue['code']}}</td>
               <td class="button-padding">
@@ -139,7 +139,7 @@
       </thead>
       <tbody>
         {% for entry in viewer.getCurrentQueue() %}
-          <tr class="row_color_v2_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.upper(entry['queue_code'])}} current_queue_row" style="display:none;">
+          <tr class="row_color_v2_{{viewer.getIndexFromCode(entry['queue_code'])}} queue_current_{{viewer.cleanForId(entry['queue_code'])}} current_queue_row" style="display:none;">
             <th scope="row" class="row_number">{{entry['row_number'] }}</th>
             <td>{{ entry['name'] }}</td>
 
@@ -268,6 +268,7 @@
     current_queues = current_queues.map(function(x) {
       return x.toUpperCase()
     })
+
 
     //checks if the filter settings are in local storage
     if (!localStorage.getItem('office_hour_queue_filters')) {
