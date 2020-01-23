@@ -32,7 +32,7 @@ abstract class AbstractController {
     /**
      * Gets a gradeable config from its id.
      * @param string $gradeable_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return Gradeable|bool false in the fail/error case
      */
     protected function tryGetGradeable(string $gradeable_id, bool $render_json = true) {
@@ -64,7 +64,7 @@ abstract class AbstractController {
      * Gets a gradeable component from its id and a gradeable
      * @param Gradeable $gradeable
      * @param string $component_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return Component|bool false in the fail/error case
      */
     protected function tryGetComponent(Gradeable $gradeable, string $component_id, bool $render_json = true) {
@@ -96,7 +96,7 @@ abstract class AbstractController {
      * Gets a mark from its id and a component
      * @param Component $component
      * @param string $mark_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return Mark|bool false in the fail/error case
      */
     protected function tryGetMark(Component $component, string $mark_id, bool $render_json = true) {
@@ -127,7 +127,7 @@ abstract class AbstractController {
     /**
      * Gets a submitter id from an anon id
      * @param string $anon_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return string|bool false in the fail/error case
      */
     protected function tryGetSubmitterIdFromAnonId(string $anon_id, bool $render_json = true) {
@@ -160,7 +160,7 @@ abstract class AbstractController {
      * Gets a graded gradeable for a given gradeable and submitter id
      * @param Gradeable $gradeable
      * @param string $submitter_id
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return \app\models\gradeable\GradedGradeable|bool false in the fail/error case
      */
     protected function tryGetGradedGradeable(Gradeable $gradeable, string $submitter_id, bool $render_json = true) {
@@ -192,7 +192,7 @@ abstract class AbstractController {
      * Gets a submission version for a given auto graded gradeable and version number
      * @param AutoGradedGradeable $auto_graded_gradeable
      * @param string $version
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return AutoGradedVersion|bool false in the fail/error case
      */
     protected function tryGetVersion(AutoGradedGradeable $auto_graded_gradeable, string $version, bool $render_json = true) {
@@ -222,7 +222,7 @@ abstract class AbstractController {
      * Gets a testcase for a given version and testcase index
      * @param AutoGradedVersion $version
      * @param string $testcase_index
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return AutoGradedTestcase|bool false in the fail/error case
      */
     protected function tryGetTestcase(AutoGradedVersion $version, string $testcase_index, bool $render_json = true) {
@@ -253,7 +253,7 @@ abstract class AbstractController {
      * Gets an autocheck for a given testcase and autocheck index
      * @param AutoGradedTestcase $testcase
      * @param string $autocheck_index
-     * @param $render_json true to render a JSEND response to the output in the failure/error case
+     * @param bool $render_json true to render a JSEND response to the output in the failure/error case
      * @return \app\models\GradeableAutocheck|bool false in the fail/error case
      */
     protected function tryGetAutocheck(AutoGradedTestcase $testcase, string $autocheck_index, bool $render_json = true) {

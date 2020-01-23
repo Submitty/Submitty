@@ -511,7 +511,7 @@ class SubmissionController extends AbstractController {
                 }
                 catch (\Exception $e) {
                     $this->core->addErrorMessage('Team may not have been properly initialized: ' . $e->getMessage());
-                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . $leader_user, false);
+                    return $this->uploadResult("Failed to form a team from members: " . implode(",", $members) . ", " . ($leader_user !== null ? $leader_user->getId() : ''), false);
                 }
 
                 // Once team is created, load in the graded gradeable
