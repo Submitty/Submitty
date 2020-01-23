@@ -1114,6 +1114,8 @@ class ElectronicGraderController extends AbstractController {
             return $this->core->getAccess()->canUser($grader, 'grading.electronic.view_component', ['graded_gradeable' => $graded_gradeable, 'gradeable' => $gradeable, 'component' => $component]);
         }));
         // return $grader->getGroup() === User::GROUP_INSTRUCTOR || ($component->isPeer() === ($grader->getGroup() === User::GROUP_STUDENT));
+        $return['components']= array_values($return['components']);
+        //var_dump($return['components']);
         return $return;
     }
 
@@ -1127,6 +1129,8 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
+        
+        $graded_gradeable = $this->tryGetGradedGradeable($gradeable, $this->core->getUser()->getId(), false);
 
         // Get the component
         $component = $this->tryGetComponent($gradeable, $component_id);
@@ -1135,7 +1139,7 @@ class ElectronicGraderController extends AbstractController {
         }
 
         // checks if user has permission
-        if (!$this->core->getAccess()->canI("grading.electronic.view_component", ["gradeable" => $gradeable, "component" => $component])) {
+        if (!$this->core->getAccess()->canI("grading.electronic.view_component", ["gradeable" => $gradeable, "component" => $component, "graded_gradeable" => $graded_gradeable])) {
             $this->core->getOutput()->renderJsonFail('Insufficient permissions to get component');
             return;
         }
@@ -1417,7 +1421,7 @@ class ElectronicGraderController extends AbstractController {
         $default = $_POST['default'] ?? null;
         $max_value = $_POST['max_value'] ?? null;
         $upper_clamp = $_POST['upper_clamp'] ?? null;
-        $peer = $_POST['peer'] ?? 'false';
+        //$peer = $_POST['peer'] ?? 'false';
 
         // Use 'page_number' since 'page' is used in the router
         $page = $_POST['page_number'] ?? '';
@@ -1493,7 +1497,7 @@ class ElectronicGraderController extends AbstractController {
                 'upper_clamp' => $upper_clamp
             ]);
             $component->setPage($page);
-            $component->setPeer($peer);
+            //$component->setPeer($peer);
             $this->core->getQueries()->saveComponent($component);
             $this->core->getOutput()->renderJsonSuccess();
         }
@@ -1637,6 +1641,8 @@ class ElectronicGraderController extends AbstractController {
         if ($gradeable === false) {
             return;
         }
+        
+         $peer = $peer === 'true' ? true : false;
 
         if (gettype($peer) !== "boolean") {
             $this->core->getOutput()->renderJsonFail("The value for 'peer' should be a boolean.");

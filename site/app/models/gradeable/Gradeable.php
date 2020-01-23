@@ -995,23 +995,16 @@ class Gradeable extends AbstractModel {
             'max_value' => $max_value,
             'upper_clamp' => $upper_clamp,
             'text' => $text,
-            'peer' => true,
+            'peer' => $peer,
             'page' => $pdf_page,
             'id' => 0,
             'order' => count($this->components)
         ]);
         $this->components[] = $component;
-        if(true){
-            $this->peer_grading = true;
+        // If we added a peer component, we are now guaranteed to be a peer gradeable.
+        if ($component->isPeer()) {
+            $this->setPeerGrading(true);
         }
-        else{
-            foreach ($component as $this->components) {
-                if($component->isPeer()){
-                    return $component;
-                }
-            }
-        }
-        $this->peer_grading = false;
         return $component;
     }
 
@@ -1052,6 +1045,15 @@ class Gradeable extends AbstractModel {
 
         // Finally, set our array to the new one
         $this->components = $new_components;
+        
+        $still_peer = false;
+        foreach ($this->components as $c) {
+            if ($c->isPeer()) {
+                $still_peer = true;
+                break;
+            }
+        }
+        $this->setPeerGrading($still_peer);
     }
 
     /**
