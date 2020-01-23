@@ -59,11 +59,12 @@ class Email extends AbstractModel {
         $anon = (isset($_POST["Anon"]) && $_POST["Anon"] == "Anon") ? 1 : 0;
         if (!($anon)) {
             $body .= "\n\nAuthor: " . $this->core->getUser()->getDisplayedFirstName() . " " . $this->core->getUser()->getDisplayedLastName()[0] . ".";
-        } else {
+        }
+        else {
             $body .= "\n\nAuthor: Anonymous";
         }
         if (!is_null($relevant_url)) {
-           $body .= "\nClick here for more info: " . $relevant_url;
+            $body .= "\nClick here for more info: " . $relevant_url;
         }
         return $body . "\n\n--\nNOTE: This is an automated email notification, which is unable to receive replies.\nPlease refer to the course syllabus for contact information for your teaching staff.";
     }
