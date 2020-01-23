@@ -1036,7 +1036,7 @@ parameters:
 			path: app/models/NotificationFactory.php
 
 		-
-			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected TOKEN_IDENTIFIER at offset 67$#"
+			message: "#^PHPDoc tag @param has invalid value \\(\\$display The item to add\\)\\: Unexpected token \"\\$display\", expected type at offset 67$#"
 			count: 1
 			path: app/models/RainbowCustomizationJSON.php
 
