@@ -27,6 +27,7 @@ use app\models\AbstractModel;
  * @method int getTotalNonHiddenExtraCredit()
  * @method int getTotalHiddenNonExtraCredit()
  * @method int getTotalHiddenExtraCredit()
+ * @method bool getOnePartyOnly()
  */
 class AutogradingConfig extends AbstractModel {
 
