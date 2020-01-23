@@ -47,7 +47,7 @@ class AutogradingConfig extends AbstractModel {
 
     /** @property @var string[] The names of different upload bins on the submission page (1-indexed) */
     protected $part_names = [];
-    /** @property @var bool Variable representing if only one of the available parts can be used for submission */
+    /** @prop @var bool Variable representing if only one of the available parts can be used for submission */
     protected $one_part_only;
 
     /** @property @var array Array of notebook objects */
