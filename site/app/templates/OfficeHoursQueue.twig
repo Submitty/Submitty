@@ -269,7 +269,6 @@
       return x.toUpperCase()
     })
 
-
     //checks if the filter settings are in local storage
     if (!localStorage.getItem('office_hour_queue_filters')) {
       localStorage.setItem('office_hour_queue_filters', "{}");
@@ -288,8 +287,7 @@
       filterQueues();
     }
 
-    //Goes through the filter settings from local storage
-    //Hides and unhides rows of the queue based on the filter settings
+    //Goes through the filter settings from local storage Hides and unhides rows of the queue based on the filter settings
     function filterQueues() {
       var filter_choices = JSON.parse(localStorage.getItem('office_hour_queue_filters'))
       for (var i = 0; i < current_queues.length; i++) {
@@ -353,76 +351,11 @@
   </script>
 
   <style media="screen">
-    /*row_color_# is for the background colors for each queue. */
-    .row_color_0 {
-      background: var(--standard-light-yellow)!important;
-    }
-    .row_color_1 {
-      background: var(--alert-border-blue)!important;
-    }
-    .row_color_2 {
-      background: var(--standard-light-pink)!important;
-    }
-    .row_color_3 {
-      background: var(--standard-light-orange)!important;
-    }
-    .row_color_4 {
-      background: var(--standard-light-green)!important;
-    }
-    .row_color_5 {
-      background: var(--standard-light-red)!important;
-    }
-    .row_color_6 {
-      background: var(--standard-light-seafoam)!important;
-    }
-    .row_color_7 {
-      background: var(--standard-light-lime-green)!important;
-    }
-    .row_color_8 {
-      background: var(--standard-light-medium-gray)!important;
-    }
-    .row_color_9 {
-      background: var(--standard-light-blue-gray)!important;
-    }
-    .row_color_10 {
-      background: var(--standard-light-yellow-brown)!important;
-    }
-    .row_color_11 {
-      background: var(--standard-mint-green)!important;
-    }
-    .row_color_12 {
-      background: var(--standard-vibrant-purple)!important;
-    }
-    .row_color_13 {
-      background: var(--standard-pastel-blue)!important;
-    }
-    .row_color_14 {
-      background: var(--standard-vibrant-orange)!important;
-    }
-    .row_color_15 {
-      background: var(--standard-red-orange)!important;
-    }
-    .row_color_16 {
-      background: var(--standard-aqua)!important;
-    }
-    .row_color_17 {
-      background: var(--standard-pale-gray)!important;
-    }
-    .row_color_18 {
-      background: var(--alert-bronze)!important;
-    }
-    .row_color_19 {
-      background: var(--standard-pale-yellow)!important;
-    }
-    .row_color_20 {
-      background: var(--standard-focus-cornflowe-blue)!important;
-    }
-
     .row_color_v2_0 {
       background: #c98ee4 !important;
     }
     .row_color_v2_1 {
-      background: #c0c246 !important;
+      background: #9fcc55 !important;
     }
     .row_color_v2_2 {
       background: #ea79a1 !important;
@@ -473,10 +406,10 @@
       background: #9a89f0 !important;
     }
     .row_color_v2_18 {
-      background: #9fcc55 !important;
+      background: #e57fcf !important;
     }
     .row_color_v2_19 {
-      background: #e57fcf !important;
+      background: #c0c246 !important;
     }
 
     /* Hides elements on the page before they have been fully loaded */

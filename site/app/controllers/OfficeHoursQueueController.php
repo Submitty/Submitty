@@ -54,7 +54,20 @@ class OfficeHoursQueueController extends AbstractController {
             );
         }
 
+        //Replace whitespace with "_"
         $queue_code = preg_replace('/\s+/', '_', $_POST['code']);
+
+        $re = '/^[a-zA-Z0-9_\-]+$/m';
+        preg_match_all($re, $queue_code, $matches, PREG_SET_ORDER, 0);
+        if (count($matches) != 1) {
+            $this->core->addErrorMessage('Queue Code must only contain letters, numbers, spaces, "_", and "-"');
+            return Response::RedirectOnlyResponse(
+                new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
+            );
+        }
+
+        // Print the entire match result
+        echo count($matches) != 1;
 
         if ($this->core->getQueries()->openQueue($queue_code)) {
             $this->core->addSuccessMessage("New queue added");
