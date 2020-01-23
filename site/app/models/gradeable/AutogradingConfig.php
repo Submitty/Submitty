@@ -297,14 +297,6 @@ class AutogradingConfig extends AbstractModel {
     }
 
     /**
-     * Gets the value of one_part_only
-     * @return boolean
-     */
-    public function getOnePartOnly() {
-        return $this->one_part_only;
-    }
-
-    /**
      * Gets the number of inputs on the submission page
      * @return int
      */
