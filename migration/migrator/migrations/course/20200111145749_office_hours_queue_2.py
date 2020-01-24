@@ -45,12 +45,12 @@ def up(config, database, semester, course):
 
     # maps old codes to their removal type
     status_code_dict =	{
-      0: 4,
-      1: 4,
-      2: 2,
-      3: 3,
-      4: 1,
-      5: 4
+      0: 'emptied',
+      1: 'emptied',
+      2: 'helped',
+      3: 'removed',
+      4: 'self',
+      5: 'emptied'
     }
 
     rows = database.execute("select * from queue;")

@@ -5169,21 +5169,17 @@ AND gc_id IN (
 /////////////////Office Hours Queue queries/////////////////////////////////////
 
   /*
-  Status Code Key: "ABC" where ABC is a string of 3 numbers
-  A: who added you to the queue
-      0:Self
-      1:Mentor/TA/instructor
-  B: Current state in queue (current_state)
-      0:Waiting
-      1:Being helped
-      2:Done/Fully out of the queue
-  C: Who removed you
-      0:Still in queue (null)
-      1:Removed yourself ('self')
-      2:Mentor/TA helped you ('helped')
-      3:Mentor/TA removed you ('removed')
-      4:Kicked out because queue emptied ('emptied')
-      5:You helped you ('self_helped')
+  current_state values
+      ('waiting'):Waiting
+      ('being_helped'):Being helped
+      ('done'):Done/Fully out of the queue
+  removal_type values
+      (null):Still in queue
+      ('self'):Removed yourself
+      ('helped'):Mentor/TA helped you
+      ('removed'):Mentor/TA removed you
+      ('emptied'):Kicked out because queue emptied
+      ('self_helped'):You helped you
   */
 
     public function getCurrentQueue() {

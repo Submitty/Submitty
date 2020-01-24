@@ -9,7 +9,19 @@ use app\models\OfficeHoursQueueViewer;
 class OfficeHoursQueueViewer extends AbstractModel {
 
 
-    //If you want to see more details on the status codes see DatabaseQueries.php
+    /*
+    current_state values
+        ('waiting'):Waiting
+        ('being_helped'):Being helped
+        ('done'):Done/Fully out of the queue
+    removal_type values
+        (null):Still in queue
+        ('self'):Removed yourself
+        ('helped'):Mentor/TA helped you
+        ('removed'):Mentor/TA removed you
+        ('emptied'):Kicked out because queue emptied
+        ('self_helped'):You helped you
+    */
 
     private $code_to_index = array();//an array maps queue codes to their index (this is used to give each queue a color)
     private $current_queue;
