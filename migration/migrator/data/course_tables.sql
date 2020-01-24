@@ -1227,14 +1227,15 @@ ALTER TABLE ONLY regrade_requests ADD CONSTRAINT gradeable_team_gc_id UNIQUE (te
 
 CREATE TABLE IF NOT EXISTS queue(
   entry_id SERIAL PRIMARY KEY,
-  status TEXT NOT NULL,
+  current_state TEXT NOT NULL,
+  removal_type TEXT,
   queue_code TEXT NOT NULL,
   user_id TEXT NOT NULL REFERENCES users(user_id),
   name TEXT NOT NULL,
   time_in TIMESTAMP NOT NULL,
   time_help_start TIMESTAMP,
   time_out TIMESTAMP,
-  added_by TEXT REFERENCES users(user_id),
+  added_by TEXT NOT NULL REFERENCES users(user_id),
   help_started_by TEXT REFERENCES users(user_id),
   removed_by TEXT REFERENCES users(user_id)
 );

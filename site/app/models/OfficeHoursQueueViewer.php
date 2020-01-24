@@ -67,14 +67,6 @@ class OfficeHoursQueueViewer extends AbstractModel {
         return $this->core->getQueries()->getPastQueue();
     }
 
-    public function getStateInQueue($status) {
-        return $status[1];
-    }
-
-    public function getLeaveReason($status) {
-        return $status[2];
-    }
-
     public function getAllQueues() {
         return $this->core->getQueries()->getAllQueues();
     }
@@ -95,8 +87,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
         return $h . "h " . $m . "m " . $s . "s";
     }
 
-    public function getTimeWaitingInQueue($time_out, $time_helped, $time_in, $status_code) {
-        if ($status_code[2]  == 2) {
+    public function getTimeWaitingInQueue($time_out, $time_helped, $time_in, $removal_type) {
+        if (in_array($removal_type, array('helped','self_helped'))) {
             $diff = strtotime($time_helped) - strtotime($time_in);
         }
         else {
@@ -127,7 +119,7 @@ class OfficeHoursQueueViewer extends AbstractModel {
     }
 
     public function getCurrentQueueStatus() {
-        return $this->core->getQueries()->getCurrentQueueState()['status'];
+        return $this->core->getQueries()->getCurrentQueueState()['current_state'];
     }
 
     public function cleanForId($str) {

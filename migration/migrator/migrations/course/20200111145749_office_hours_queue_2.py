@@ -20,14 +20,15 @@ def up(config, database, semester, course):
         """
         CREATE TABLE IF NOT EXISTS queue_new(
         	entry_id SERIAL PRIMARY KEY,
-        	status TEXT NOT NULL,
+            current_state TEXT NOT NULL,
+            removal_type TEXT,
         	queue_code TEXT NOT NULL,
         	user_id TEXT NOT NULL REFERENCES users(user_id),
         	name TEXT NOT NULL,
         	time_in TIMESTAMP NOT NULL,
         	time_help_start TIMESTAMP,
         	time_out TIMESTAMP,
-        	added_by TEXT REFERENCES users(user_id),
+        	added_by TEXT NOT NULL REFERENCES users(user_id),
         	help_started_by TEXT REFERENCES users(user_id),
         	removed_by TEXT REFERENCES users(user_id)
         );
@@ -42,36 +43,18 @@ def up(config, database, semester, course):
     # const STATUS_CODE_REMOVED_THEMSELVES = 4;//student removed themselves from the queue
     # const STATUS_CODE_BULK_REMOVED = 5;//student was removed after the empty queue button was pressed
 
-
-    # New status code meanings
-    # Status Code Key: "ABC" where ABC is a string of 3 numbers
-    #   A: who added you to the queue
-    #       0:Self
-    #       1:Mentor/TA/instructor
-    #   B: Current state in queue
-    #       0:Waiting
-    #       1:Being helped
-    #       2:Done/Fully out of the queue
-    #   C: Who removed you
-    #       0:Still in queue
-    #       1:Removed yourself
-    #       2:Mentor/TA helped you
-    #       3:Mentor/TA removed you
-    #       4:Kicked out because queue emptied
-    #       5:You helped you
+    # maps old codes to their removal type
+    status_code_dict =	{
+      0: 4,
+      1: 4,
+      2: 2,
+      3: 3,
+      4: 1,
+      5: 4
+    }
 
     rows = database.execute("select * from queue;")
     for row in rows:
-        status_code_dict =	{
-          0: "024",#I am going to move anyone that is still in the queue to now no longer be in the queue
-          1: "024",#I am going to move anyone that is still in the queue to now no longer be in the queue
-          2: "022",
-          3: "023",
-          4: "021",
-          5: "024"
-        }
-
-
         # Some values are going to default to null
         # If the value exists they get replaced with the true value, set as a string hence the "'"
         time_in = "null"
@@ -92,7 +75,8 @@ def up(config, database, semester, course):
         """
         INSERT INTO queue_new
             (
-                status,
+                current_state,
+                removal_type,
                 queue_code,
                 user_id,
                 name,
@@ -103,7 +87,8 @@ def up(config, database, semester, course):
                 help_started_by,
                 removed_by
             ) VALUES (
-                '"""+status_code_dict[row[7]]+"""',
+                'done',
+                """+status_code_dict[row[7]]+""",
                 'old_queue',
                 '"""+row[1]+"""',
                 '"""+row[2]+"""',
@@ -118,7 +103,6 @@ def up(config, database, semester, course):
         )
     database.execute("DROP TABLE IF EXISTS queue;")#Remove the old database
     database.execute("ALTER TABLE IF EXISTS queue_new RENAME TO queue;")#rename this database to now be called queue
-
 
 
     # There is no reason to keep the old queue_settings
@@ -151,14 +135,14 @@ def down(config, database, semester, course):
     """
 
     # I left this code in here just in case. This code will recreate the old queue database however it will also destroy all queue data so most likely we never want to run it.
-    
-    # database.execute("DROP TABLE IF EXISTS queue;")
-    # # run the old migration for the old version of the queue
-    # database.execute(
-    #     "CREATE TABLE IF NOT EXISTS queue(entry_id serial PRIMARY KEY, user_id VARCHAR(20) NOT NULL  REFERENCES users(user_id), name VARCHAR (20) NOT NULL, time_in TIMESTAMP NOT NULL, time_helped TIMESTAMP, time_out TIMESTAMP, removed_by VARCHAR (20)  REFERENCES users(user_id), status SMALLINT NOT NULL)"
-    # )
-    #
-    # database.execute("DROP TABLE IF EXISTS queue_settings;")
-    # database.execute("CREATE TABLE IF NOT EXISTS queue_settings(id serial PRIMARY KEY, open boolean NOT NULL, code VARCHAR (20) NOT NULL)")
+
+    database.execute("DROP TABLE IF EXISTS queue;")
+    # run the old migration for the old version of the queue
+    database.execute(
+        "CREATE TABLE IF NOT EXISTS queue(entry_id serial PRIMARY KEY, user_id VARCHAR(20) NOT NULL  REFERENCES users(user_id), name VARCHAR (20) NOT NULL, time_in TIMESTAMP NOT NULL, time_helped TIMESTAMP, time_out TIMESTAMP, removed_by VARCHAR (20)  REFERENCES users(user_id), status SMALLINT NOT NULL)"
+    )
+
+    database.execute("DROP TABLE IF EXISTS queue_settings;")
+    database.execute("CREATE TABLE IF NOT EXISTS queue_settings(id serial PRIMARY KEY, open boolean NOT NULL, code VARCHAR (20) NOT NULL)")
 
     pass

@@ -15,17 +15,17 @@
           people in a queue</p>
       {% endif %}
       <br>
-      <form method="post" id="add_to_queue" action="{{base_url}}add">
+      <form method="post" id="add_to_queue" action="{{base_url}}/no_code_added/add">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <label for="name_box">Your Name:</label>
-        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem">
+        <input type="text" id="name_box" name="name" maxlength="20" placeholder="Name" value="{{viewer.getName()}}" style="margin:.5rem" required>
         <br>
         <label for="code_box">Code:</label>
-        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on">
+        <input type="text" name="code" id="code_box" placeholder="Code" style="margin:.5rem" autocomplete="on" required onchange="document.getElementById('add_to_queue').action = '{{base_url}}/'+this.value+'/add';">
         <br>
         <input type="submit" value="Join" class="btn btn-primary">
       </form>
-    {% elseif viewer.getStateInQueue(viewer.getCurrentQueueStatus()) == 0 %}
+    {% elseif viewer.getCurrentQueueStatus() == 'waiting' %}
       {% if viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 == 1 %}
         <p>There is currently
           {{viewer.getQueueNumberAheadOfYou(viewer.getCurrentQueueCode()) - 1 }}
@@ -38,7 +38,7 @@
       <p>You are currently in:
         <b>{{viewer.getCurrentQueueCode()}}</b>
       </p>
-      <form method="post" id="remove" action="{{base_url}}remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
+      <form method="post" id="remove" action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/remove" onsubmit="return confirm('Are you sure you want to leave the queue? Leaving will reset your position in the queue');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
@@ -46,7 +46,11 @@
       </form>
     {% else %}
       <p>You are currently being helped</p>
-      <form method="post" id="finish_help" action="{{base_url}}finishHelp" onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
+      <form
+        method="post"
+        id="finish_help"
+        action="{{base_url}}/{{ viewer.getCurrentQueueCode() }}/finishHelp"
+        onsubmit="return confirm('WARNING: Do not click this unless the mentor/TA forgot to do it. This button is only a backup so that you dont get stuck if a mentor forgets.');">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
         <input type="hidden" name="user_id" value="{{viewer.getUserId()}}"/>
         <input type="hidden" name="queue_code" value="{{ viewer.getCurrentQueueCode() }}"/>
@@ -65,9 +69,9 @@
     <div class="collapse" id="filgerSettingsCollapse">
 
       <br>
-      <form method="post" id="open_new_queue" action="{{base_url}}open">
+      <form method="post" id="open_new_queue" action="{{base_url}}">
         <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
-        <input type="text" name="code" placeholder="Code">
+        <input type="text" name="code" placeholder="Code" required>
         <input type="submit" value="Open New Queue" class="btn btn-primary">
       </form>
 
@@ -90,7 +94,7 @@
               </td>
               <td style="text-align: left;">{{queue['code']}}</td>
               <td class="button-padding">
-                <form method="post" id="open_close_queue" action="{{base_url}}toggle">
+                <form method="post" id="open_close_queue" action="{{base_url}}/{{queue['code']}}/toggle">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="hidden" name="queue_state" value="{{queue['open']}}"/>
@@ -102,14 +106,18 @@
                 </form>
               </td>
               <td class="button-padding">
-                <form method="post" id="empty_queue" action="{{base_url}}empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
+                <form method="post" id="empty_queue" action="{{base_url}}/{{queue['code']}}/empty" onsubmit="return confirm('Are you sure you want to empty the queue? This will kick everyone out of the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="submit" value="Empty Queue" class="btn btn-danger">
                 </form>
               </td>
               <td class="button-padding">
-                <form method="post" id="delete_queue" action="{{base_url}}deleteQueue" onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
+                <form
+                  method="post"
+                  id="delete_queue"
+                  action="{{base_url}}/{{queue['code']}}/deleteQueue"
+                  onsubmit="return confirm('Are you sure you want to delete the queue? This will stop students from joining the queue but any student still in the queue will stay in the queue.');">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="queue_code" value="{{queue['code']}}"/>
                   <input type="submit" value="Delete Queue" class="btn btn-danger">
@@ -143,9 +151,9 @@
             <th scope="row" class="row_number">{{entry['row_number'] }}</th>
             <td>{{ entry['name'] }}</td>
 
-            {% if viewer.getStateInQueue(entry['status']) == 0 %}
+            {% if entry['current_state'] == 'waiting' %}
               <td>
-                <form method="post" id="start_help" action="{{base_url}}startHelp">
+                <form method="post" id="start_help" action="{{base_url}}/{{entry['queue_code']}}/startHelp">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
@@ -156,9 +164,9 @@
                   {% endif %}
                 </form>
               </td>
-            {% elseif viewer.getStateInQueue(entry['status']) == 1 %}
+            {% elseif entry['current_state'] == 'being_helped' %}
               <td>
-                <form method="post" id="finish_help" action="{{base_url}}finishHelp">
+                <form method="post" id="finish_help" action="{{base_url}}/{{entry['queue_code']}}/finishHelp">
                   <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                   <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                   <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
@@ -171,14 +179,14 @@
               </td>
             {% endif %}
 
-            {% if viewer.getStateInQueue(entry['status']) == 1 %}
+            {% if entry['current_state'] == 'being_helped' %}
               <td class="help_timer" help_time="{{ viewer.timeToISO(entry['time_help_start']) }}"></td>
             {% else %}
               <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
             {% endif %}
 
             <td>
-              <form method="post" id="remove" action="{{base_url}}remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
+              <form method="post" id="remove" action="{{base_url}}/{{entry['queue_code']}}/remove" onsubmit="return confirm('Are you sure you want to remove {{ entry['name'] }} from the queue?');">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}"/>
                 <input type="hidden" name="user_id" value="{{entry['user_id']}}"/>
                 <input type="hidden" name="queue_code" value="{{ entry['queue_code'] }}"/>
@@ -234,19 +242,16 @@
             <td>{{ entry['queue_code'] }}</td>
             <td>{{ viewer.timeToHM(entry['time_in']) }}</td>
 
-            <td>{{viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['status'])}}</td>
+            <td>{{ viewer.getTimeWaitingInQueue(entry['time_out'],entry['time_help_start'],entry['time_in'],entry['removal_type']) }}</td>
 
-            {% if viewer.getLeaveReason(entry['status']) == 2 or viewer.getLeaveReason(entry['status']) == 5 %}
+            {% if entry['removal_type'] == 'helped' or entry['removal_type'] == 'self_helped' %}
               <td>{{viewer.getTimeBeingHelped(entry['time_out'],entry['time_help_start'])}}</td>
-            {% elseif viewer.getLeaveReason(entry['status']) == 3 %}
+            {% elseif entry['removal_type'] == 'removed' %}
               <td>Removed</td>
-            {% elseif viewer.getLeaveReason(entry['status']) == 1 %}
+            {% elseif entry['removal_type'] == 'self' %}
               <td>Left Queue</td>
-            {% elseif viewer.getLeaveReason(entry['status']) == 4 %}
+            {% elseif entry['removal_type'] == 'emptied' %}
               <td>Queue Emptyed</td>
-            {% elseif viewer.getLeaveReason(entry['status']) == 0 %}
-              <!-- This should never happen but I put this here just in case -->
-              <td>In queue</td>
             {% else %}
               <td>Not in queue</td>
             {% endif %}
