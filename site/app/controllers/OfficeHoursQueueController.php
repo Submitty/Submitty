@@ -289,4 +289,14 @@ class OfficeHoursQueueController extends AbstractController {
             new RedirectResponse($this->core->buildCourseUrl(['office_hours_queue']))
         );
     }
+
+    /**
+    * @Route("/{_semester}/{_course}/office_hours_queue/checkUpdates", methods={"GET"})
+    * @return Response
+    */
+    public function checkUpdates() {
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($this->core->getQueries()->getLastQueueUpdate())
+        );
+    }
 }

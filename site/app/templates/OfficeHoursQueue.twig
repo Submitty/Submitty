@@ -353,6 +353,22 @@
         times[i][0].html(timeString);
       }
     }
+
+
+    let lastQueueEdit = {{viewer.getLastQueueUpdate()}};
+    {% if viewer.isGrader() %}
+      let refreshSpeed = 1000 * 30;//Graders check for a refresh every 30s
+    {% else %}
+      let refreshSpeed = 1000 * 150;//Students check for a refresh every 2min 30s
+    {% endif %}
+
+    setInterval(function(){
+      $.get( "http://192.168.56.111/s20/sample/office_hours_queue/checkUpdates", function( data ) {
+          if(lastQueueEdit < JSON.parse(data)['data']){
+            location.reload();
+          }
+      });
+    }, refreshSpeed);
   </script>
 
   <style media="screen">

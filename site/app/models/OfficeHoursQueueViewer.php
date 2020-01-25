@@ -137,4 +137,8 @@ class OfficeHoursQueueViewer extends AbstractModel {
     public function cleanForId($str) {
         return strtoupper($str);
     }
+
+    public function getLastQueueUpdate() {
+        return $this->core->getQueries()->getLastQueueUpdate();
+    }
 }

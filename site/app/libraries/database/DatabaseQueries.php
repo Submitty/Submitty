@@ -5181,6 +5181,10 @@ AND gc_id IN (
       ('emptied'):Kicked out because queue emptied
       ('self_helped'):You helped you
   */
+    public function getLastQueueUpdate() {
+        $this->course_db->query("select n_tup_ins+n_tup_upd as change_count from pg_stat_user_tables  where relname = 'queue'");
+        return $this->course_db->rows()[0]['change_count'];
+    }
 
     public function getCurrentQueue() {
         // $this->course_db->query("SELECT ROW_NUMBER() OVER(order by time_in ASC),* FROM queue where status SIMILAR TO '_(0|1)_' order by ROW_NUMBER");
